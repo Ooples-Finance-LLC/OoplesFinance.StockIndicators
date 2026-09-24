@@ -35,6 +35,24 @@ internal interface IBuiltInMovingAverage
 /// </summary>
 internal static class IndicatorContract
 {
+    internal static double NativePrimary(IIndicator indicator, Streaming.StreamingIndicatorStateResult result)
+    {
+        if (indicator.Outputs.Count == 1 && indicator is IBuiltInIndicator builtIn && builtIn.BatchOutputKey is string key)
+        {
+            if (result.Outputs is not null && result.Outputs.TryGetValue(key, out var value)) return value;
+            throw new InvalidOperationException(indicator.GetType().Name + " native state did not publish its declared output " + key + ".");
+        }
+        return result.Value;
+    }
+
+    internal static IIndicatorOutput PrimaryOutput(IIndicator indicator)
+    {
+        var output = indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0];
+        if (output is null || !ReferenceEquals(output.Indicator, indicator) || output.Slot < 0 || output.Slot >= indicator.Outputs.Count)
+            throw new InvalidOperationException(indicator.GetType().Name + " must name one of its own outputs as primary.");
+        return indicator.Outputs[output.Slot];
+    }
+
     /// <summary>
     /// Every indicator is either its own arithmetic or names a batch indicator. Neither is a mistake that can
     /// be caught later usefully: the run would simply have nothing to compute.

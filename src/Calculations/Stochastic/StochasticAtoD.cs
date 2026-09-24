@@ -24,8 +24,8 @@ public static partial class Calculations
         stockData.RestoreInputSeries(callerSeries);
         var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
         stockData.RestoreInputSeries(callerSeries);
-        var (highest1List, lowest1List) = GetMaxAndMinValuesList(srcList, fastLength);
-        var (highest2List, lowest2List) = GetMaxAndMinValuesList(srcList, slowLength);
+        var (highest1List, lowest1List) = fastLength <= 1 ? (srcList, srcList) : GetMaxAndMinValuesList(srcList, fastLength);
+        var (highest2List, lowest2List) = slowLength <= 1 ? (srcList, srcList) : GetMaxAndMinValuesList(srcList, slowLength);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -154,7 +154,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var max = highestList[i];
             var min = lowestList[i];
-            var fast = max - min != 0 ? MinOrMax((currentValue - min) / (max - min) * 100, 100, 0) : 0;
+            var fast = ClampedRangePosition.Percent(currentValue, min, max);
 
             var prevR = GetLastOrDefault(rList);
             var r = prevR + ((fast - prevR) / length2);
@@ -275,12 +275,25 @@ public static partial class Calculations
             var highestSlowK = highestList[i];
             var lowestSlowK = lowestList[i];
 
-            var doubleK = highestSlowK - lowestSlowK != 0 ? MinOrMax((slowK - lowestSlowK) / (highestSlowK - lowestSlowK) * 100, 100, 0) : 0;
+            var doubleK = ClampedRangePosition.Percent(slowK, lowestSlowK, highestSlowK);
             doubleKList.Add(doubleK);
         }
 
-        var doubleSlowKList = GetMovingAverageList(stockData, maType, smoothLength, doubleKList);
-        var doubleKSignalList = GetMovingAverageList(stockData, maType, smoothLength, doubleSlowKList);
+        List<double> doubleSlowKList;
+        List<double> doubleKSignalList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var first = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength));
+            using var second = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength));
+            doubleSlowKList = doubleKList.Select(value => first.Next(value, true)).ToList();
+            doubleKSignalList = doubleSlowKList.Select(value => second.Next(value, true)).ToList();
+        }
+        else
+        {
+            // Both calls remain explicit for generated component constructor discovery.
+            doubleSlowKList = GetMovingAverageList(stockData, maType, smoothLength, doubleKList);
+            doubleKSignalList = GetMovingAverageList(stockData, maType, smoothLength, doubleSlowKList);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var doubleSlowK = doubleSlowKList[i];

@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -17,23 +17,41 @@ public static partial class Calculations
     public static StockData CalculateCommodityChannelIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double constant = 0.015)
     {
+        length = Math.Max(1, length);
         List<double> cciList = new(stockData.Count);
         List<double> tpDevDiffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
-        var tpSmaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var tpSmaList = maType == MovingAvgType.SimpleMovingAverage
+            ? new List<double>(new double[stockData.Count])
+            : GetMovingAverageList(stockData, maType, length, inputList);
 
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> tpMeanDevList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
         {
-            var currentValue = inputList[i];
-            var tpSma = tpSmaList[i];
-
-            var tpDevDiff = Math.Abs(currentValue - tpSma);
-            tpDevDiffList.Add(tpDevDiff);
+            tpMeanDevList = new List<double>(stockData.Count);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                double deviation = 0;
+                if (i >= length - 1)
+                {
+                    var anchor = inputList[i - length + 1];
+                    double offsetSum = 0;
+                    for (var j = i - length + 1; j <= i; j++) offsetSum += inputList[j] - anchor;
+                    tpSmaList[i] = anchor + offsetSum / length;
+                    for (var j = i - length + 1; j <= i; j++)
+                        deviation += Math.Abs(inputList[j] - tpSmaList[i]);
+                }
+                tpMeanDevList.Add(deviation / length);
+            }
         }
-
-        var tpMeanDevList = GetMovingAverageList(stockData, maType, length, tpDevDiffList);
+        else
+        {
+            for (var i = 0; i < stockData.Count; i++)
+                tpDevDiffList.Add(Math.Abs(inputList[i] - tpSmaList[i]));
+            tpMeanDevList = GetMovingAverageList(stockData, maType, length, tpDevDiffList);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevCci1 = i >= 1 ? cciList[i - 1] : 0;
@@ -157,7 +175,7 @@ public static partial class Calculations
         var count = inputList.Count;
         var ulcerIndexList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var (highestList, _) = GetMaxAndMinValuesList(inputList, length);
+        var highestList = length <= 1 ? inputList : GetMaxAndMinValuesList(inputList, length).Item1;
         var pctDrawdownSquaredSum = new RollingSum();
 
         double prevUlcerIndex1 = 0;
@@ -213,11 +231,18 @@ public static partial class Calculations
             var currentHigh = highList[i];
             var currentLow = lowList[i];
 
-            var balanceOfPower = currentHigh - currentLow != 0 ? (currentClose - currentOpen) / (currentHigh - currentLow) : 0;
+            var balanceOfPower = RoundedBalanceOfPower.Of(currentOpen, currentHigh, currentLow, currentClose);
             balanceOfPowerList.Add(balanceOfPower);
         }
 
-        var bopSignalList = GetMovingAverageList(stockData, maType, length, balanceOfPowerList);
+        var finiteInput = FiniteSignalInput.Create(balanceOfPowerList, out var finiteCount);
+        var bopSignalList = GetMovingAverageList(stockData, maType, length, finiteInput);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < finiteCount; i++) bopSignalList[i] = mean.Next(finiteInput[i], true);
+        }
+        for (var i = finiteCount; i < bopSignalList.Count; i++) bopSignalList[i] = double.NaN;
         for (var i = 0; i < stockData.ClosePrices.Count; i++)
         {
             var bop = balanceOfPowerList[i];
@@ -260,7 +285,7 @@ public static partial class Calculations
             var prevRoc1 = i >= 1 ? rocList[i - 1] : 0;
             var prevRoc2 = i >= 2 ? rocList[i - 2] : 0;
 
-            var roc = prevValue != 0 ? MinPastValues(i, length, currentValue - prevValue) / prevValue * 100 : 0;
+            var roc = i >= length ? RoundedPercentageChange.Of(currentValue, prevValue) : 0;
             rocList.Add(roc);
 
             var signal = GetCompareSignal(roc - prevRoc1, prevRoc1 - prevRoc2);
@@ -351,17 +376,17 @@ public static partial class Calculations
             var lowest3 = senkouLowList[i];
 
             var prevTenkanSen = GetLastOrDefault(tenkanSenList);
-            var tenkanSen = (highest1 + lowest1) / 2;
+            var tenkanSen = PriceMean.Of(highest1, lowest1);
             tenkanSenList.Add(tenkanSen);
 
             var prevKijunSen = GetLastOrDefault(kijunSenList);
-            var kijunSen = (highest2 + lowest2) / 2;
+            var kijunSen = PriceMean.Of(highest2, lowest2);
             kijunSenList.Add(kijunSen);
 
-            var senkouSpanA = (tenkanSen + kijunSen) / 2;
+            var senkouSpanA = PriceMean.Of(tenkanSen, kijunSen);
             senkouSpanAList.Add(senkouSpanA);
 
-            var senkouSpanB = (highest3 + lowest3) / 2;
+            var senkouSpanB = PriceMean.Of(highest3, lowest3);
             senkouSpanBList.Add(senkouSpanB);
 
             var signal = GetCompareSignal(tenkanSen - kijunSen, prevTenkanSen - prevKijunSen);
@@ -516,7 +541,7 @@ public static partial class Calculations
             var currentHigh = highList[i];
             var currentLow = lowList[i];
             var currentClose = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
+            var prevClose = i >= 1 ? inputList[i - 1] : currentClose;
             var minValue = Math.Min(currentLow, prevClose);
             var maxValue = Math.Max(currentHigh, prevClose);
             var prevUo1 = i >= 1 ? uoList[i - 1] : 0;
@@ -581,10 +606,10 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var prevHigh = i >= 1 ? highList[i - 1] : 0;
 
-            var vmPlus = Math.Abs(currentHigh - prevLow);
+            var vmPlus = i == 0 ? 0 : Math.Abs(currentHigh - prevLow);
             vmPlusSumWindow.Add(vmPlus);
 
-            var vmMinus = Math.Abs(currentLow - prevHigh);
+            var vmMinus = i == 0 ? 0 : Math.Abs(currentLow - prevHigh);
             vmMinusSumWindow.Add(vmMinus);
 
             var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
@@ -690,7 +715,7 @@ public static partial class Calculations
             var prevWilliamsR1 = i >= 1 ? williamsRList[i - 1] : 0;
             var prevWilliamsR2 = i >= 2 ? williamsRList[i - 2] : 0;
 
-            var williamsR = highestHigh - lowestLow != 0 ? -100 * (highestHigh - currentClose) / (highestHigh - lowestLow) : -100;
+            var williamsR = WilliamsRangePosition.Percent(currentClose, lowestLow, highestHigh);
             williamsRList.Add(williamsR);
 
             var signal = GetRsiSignal(williamsR - prevWilliamsR1, prevWilliamsR1 - prevWilliamsR2, williamsR, prevWilliamsR1, -20, -80);

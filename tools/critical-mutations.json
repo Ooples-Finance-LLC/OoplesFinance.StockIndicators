@@ -1,0 +1,2034 @@
+[
+  {
+    "id": "missing-formula-guard",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "public bool RequireFormulaReference { get; set; } = true;",
+    "after": "public bool RequireFormulaReference { get; set; } = false;",
+    "filter": "FullyQualifiedName~MissingFormulaFailsByDefaultButSmokeIsExplicitlyAvailable"
+  },
+  {
+    "id": "warmup-blind-spot",
+    "module": "validation",
+    "file": "src/Validation/IndicatorOutputException.cs",
+    "before": "if (double.IsInfinity(value) ||",
+    "after": "if ((index >= indicator.WarmupBars && double.IsInfinity(value)) ||",
+    "filter": "FullyQualifiedName~RuntimeWarmupNeverPermitsInfinity"
+  },
+  {
+    "id": "erased-signed-signal",
+    "module": "validation",
+    "file": "src/Validation/IndicatorNumericalContract.cs",
+    "before": "if (RequireSameSign && Math.Sign(expected) != Math.Sign(actual)) return false;",
+    "after": "if (RequireSameSign && Math.Abs(expected) < 0) return false;",
+    "filter": "FullyQualifiedName~SignedOutputBudgetRejectsErasingATinySignal"
+  },
+  {
+    "id": "sample-instead-of-population",
+    "module": "variance",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void StandardDeviation(",
+    "before": "variance /= length;",
+    "after": "variance /= Math.Max(1, length - 1);",
+    "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
+  },
+  {
+    "id": "wrong-divisor",
+    "module": "sma",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void SimpleMovingAverage(",
+    "before": "sum / length : 0",
+    "after": "sum / (length + 1d) : 0",
+    "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
+  },
+  {
+    "id": "lost-evicted-window",
+    "module": "sma",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void SimpleMovingAverage(",
+    "before": "for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);",
+    "after": "for (var j = i; j <= i; j++) exact.Add(input[j]);",
+    "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
+  },
+  {
+    "id": "wrong-window-lag",
+    "module": "sma",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void SimpleMovingAverage(",
+    "before": "sum -= input[i - length];",
+    "after": "sum -= input[i - length + 1];",
+    "filter": "FullyQualifiedName~ArithmeticMatchesExactBinaryInputReference"
+  },
+  {
+    "id": "future-batch-data",
+    "module": "alignment",
+    "file": "src/Builder/Evaluation/BatchCompute.cs",
+    "before": "if (stockData.Dates[i] != marketData.Dates[i] || stockData.Dates[i].Kind != marketData.Dates[i].Kind)",
+    "after": "if (stockData.ChainedValues.Count < 0)",
+    "filter": "FullyQualifiedName~BatchRejectsAlignmentBeforeTouchingState"
+  },
+  {
+    "id": "benchmark-preview-commit",
+    "module": "lifecycle",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RSMKIndicatorState",
+    "before": "if (isFinal)\n            {\n                _lastMarketValue = bar.Close;",
+    "after": "if (true)\n            {\n                _lastMarketValue = bar.Close;",
+    "filter": "FullyQualifiedName~EveryMultiSeriesConfiguration"
+  },
+  {
+    "id": "future-stream-data",
+    "module": "alignment",
+    "file": "src/Streaming/PairedSeriesAlignment.cs",
+    "before": "if (_market.Value > bar.EndTime)",
+    "after": "if (_market.Value > DateTime.MaxValue)",
+    "filter": "FullyQualifiedName~MissingInvalidDuplicateAndFutureEventsCannotContaminateCommittedState"
+  },
+  {
+    "id": "omitted-reset",
+    "module": "lifecycle",
+    "file": "src/Streaming/PairedSeriesAlignment.cs",
+    "before": "internal void Reset() { _market = _primary = null; }",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~MissingInvalidDuplicateAndFutureEventsCannotContaminateCommittedState"
+  },
+  {
+    "id": "wrong-ema-coefficient",
+    "module": "ema",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "weighted.Add(value, 2);",
+    "after": "weighted.Add(value, 1);",
+    "filter": "FullyQualifiedName~EmaRecurrenceTests"
+  },
+  {
+    "id": "wrong-initialization",
+    "module": "ema",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "sum.Add(value);",
+    "after": "sum.Add(_count == 0 ? 0 : value);",
+    "filter": "FullyQualifiedName~EmaInitializationTests"
+  },
+  {
+    "id": "component-reordering",
+    "module": "composition",
+    "file": "src/Indicators/CustomIndicatorEngine.cs",
+    "before": "var substitutes = needsSubstitution ? indicator.Components.ToList() : new List<IIndicator>();",
+    "after": "var substitutes = needsSubstitution ? indicator.Components.Reverse().ToList() : new List<IIndicator>();",
+    "filter": "FullyQualifiedName~MixedBuiltInAndCustomerAveragesMatchAnIndependentWindowFormula"
+  },
+  {
+    "id": "wrong-output-slot",
+    "module": "outputs",
+    "file": "src/Streaming/StatefulIndicators.Batch29.cs",
+    "scope": "public sealed class SchaffTrendCycleShkState",
+    "before": "[\"Macd\"] = result.Macd",
+    "after": "[\"Macd\"] = result.Stc",
+    "filter": "FullyQualifiedName~SchaffPublishesItsMacdInTheNamedOutputSlot"
+  },
+  {
+    "id": "reversed-signal",
+    "module": "force",
+    "file": "src/Streaming/TrendForceKernel.cs",
+    "before": "Math.Sign(change) * Math.Exp(logForce - maximum)",
+    "after": "-Math.Sign(change) * Math.Exp(logForce - maximum)",
+    "filter": "FullyQualifiedName~ForceIndexDoesNotNormalizeAnExactZeroGapIntoAMaximumSignal"
+  },
+  {
+    "id": "formula-startup-blind-spot",
+    "module": "validation",
+    "file": "src/Validation/BuiltInFormulaReferences.Compatibility.cs",
+    "before": "includeWarmup: true",
+    "after": "includeWarmup: false",
+    "filter": "FullyQualifiedName~BuiltInReferencesCheckStartupEvenWhenWarmupExceedsTheFixture"
+  },
+  {
+    "id": "root-domain-bypass",
+    "module": "input-domain",
+    "file": "src/Indicators/LiveIndicatorRun.cs",
+    "before": "if (indicator.Source is null) Validation.IndicatorInputDomain.For(indicator).Validate(bar);",
+    "after": "if (indicator.Source is null) Validation.IndicatorInputDomain.Finite.Validate(bar);",
+    "filter": "FullyQualifiedName~InvalidRawInputIsRejectedBeforeAnyCustomerStateAdvancesAndCanRecover"
+  },
+  {
+    "id": "derived-domain-bypass",
+    "module": "input-domain",
+    "file": "src/Indicators/LiveIndicatorRun.cs",
+    "before": "Validation.IndicatorInputDomain.For(indicator).Validate(input);",
+    "after": "Validation.IndicatorInputDomain.Finite.Validate(input);",
+    "filter": "FullyQualifiedName~DerivedDomainFailurePublishesNoPartialHistoryAndRequiresFreshReplay"
+  },
+  {
+    "id": "nonfinite-output-published",
+    "module": "output-domain",
+    "file": "src/Validation/IndicatorOutputException.cs",
+    "before": "throw new IndicatorOutputException(indicator, slot, index, value, policy);",
+    "after": "return;",
+    "filter": "FullyQualifiedName~RuntimeOutputContractTests"
+  },
+  {
+    "id": "declared-primary-ignored",
+    "module": "output-mapping",
+    "file": "src/Indicators/SpecimenIndicators.cs",
+    "before": "var output = indicator is IPrimaryOutputIndicator named ? named.PrimaryOutput : indicator.Outputs[0];",
+    "after": "var output = indicator.Outputs[0];",
+    "filter": "FullyQualifiedName~SharedValidationChecksCustomerPrimaryOutputsAutomatically"
+  },
+  {
+    "id": "unavailable-live-output-ready",
+    "module": "output-status",
+    "file": "src/Indicators/LiveIndicatorRun.cs",
+    "before": "&& _series.Values.All(values => values.Count > 0 && !double.IsNaN(values[values.Count - 1]));",
+    "after": "&& _series.Values.All(values => values.Count > 0);",
+    "filter": "FullyQualifiedName~LiveStartupNaNsNeverMarkSnapshotsReady"
+  },
+  {
+    "id": "historical-warmup-ignored",
+    "module": "output-status",
+    "file": "src/Indicators/BarSnapshot.cs",
+    "scope": "internal BarSnapshot(Bar bar, int index, IReadOnlyDictionary<IIndicatorOutput, double[]> series, bool isWarmedUp)",
+    "before": "IsWarmedUp = isWarmedUp;",
+    "after": "IsWarmedUp = true;",
+    "filter": "FullyQualifiedName~HistoricalSnapshotsIncludeDependencyWarmupAndPrimingHistory"
+  },
+  {
+    "id": "streaming-finite-guard-bypass",
+    "module": "input-domain",
+    "file": "src/Streaming/StreamingInputValidation.cs",
+    "before": "throw new ArgumentOutOfRangeException(parameter, value, \"Streaming input must be finite.\");",
+    "after": "return;",
+    "filter": "FullyQualifiedName~StreamingInputContractTests"
+  },
+  {
+    "id": "catalog-input-guard-bypass",
+    "module": "input-domain",
+    "file": "src/Builder/IndicatorRuntime.cs",
+    "before": "Validation.BatchInputValidation.Validate(source);",
+    "after": "_ = source;",
+    "filter": "FullyQualifiedName~CatalogInputContractTests"
+  },
+  {
+    "id": "quote-midpoint-overflow",
+    "module": "input-arithmetic",
+    "file": "src/Streaming/StreamingInputValidation.cs",
+    "before": "return double.IsInfinity(sum) ? left / 2 + right / 2 : sum / 2;",
+    "after": "return sum / 2;",
+    "filter": "FullyQualifiedName~QuoteMidpointsPreserveFiniteExtremeAndSubnormalValues"
+  },
+  {
+    "id": "customer-startup-blind-spot",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidationRule.cs",
+    "before": "=> Reference(outputSlot, reference, new IndicatorErrorBudget(absoluteTolerance, relativeTolerance), true);",
+    "after": "=> Reference(outputSlot, reference, new IndicatorErrorBudget(absoluteTolerance, relativeTolerance), false);",
+    "filter": "FullyQualifiedName~DefaultCustomerReferenceDetectsFiniteStartupFormulaErrors"
+  },
+  {
+    "id": "startup-coverage-gate-bypass",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "if (options.RequireFormulaReference && !formulaCoverage.HasCompleteStartupReferences)",
+    "after": "if (options.RequireFormulaReference && !formulaCoverage.HasCompleteStartupReferences && false)",
+    "filter": "FullyQualifiedName~StrictValidationRejectsExplicitlyMissingStartupFormulaEvidence"
+  },
+  {
+    "id": "customer-reset-check-bypass",
+    "module": "lifecycle",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "if (checkCustomerReset)",
+    "after": "if (checkCustomerReset && false)",
+    "filter": "FullyQualifiedName~CustomerLifecycleValidationTests"
+  },
+  {
+    "id": "sma-overflow-fallback-bypass",
+    "module": "sma",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "output[i] = exact.Mean(length);",
+    "after": "output[i] = sum / length;",
+    "filter": "FullyQualifiedName~SmaExtremeRangeTests"
+  },
+  {
+    "id": "sma-cancellation-fallback-bypass",
+    "module": "sma",
+    "file": "src/Helpers/MeanRoundoff.cs",
+    "before": "return Math.Abs(sum / count) < MinimumNormal || bound > 1e-10 * Math.Abs(sum);",
+    "after": "return Math.Abs(sum / count) < MinimumNormal;",
+    "filter": "FullyQualifiedName~SmaExtremeRangeTests"
+  },
+  {
+    "id": "exact-mean-ties-away-from-even",
+    "module": "sma",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "before": "halfway > 0 || halfway == 0 && !mantissa.IsEven",
+    "after": "halfway >= 0",
+    "filter": "FullyQualifiedName~SmaExtremeRangeTests|FullyQualifiedName~WideWeightedMeansRoundMidpointsToEven",
+    "scope": "internal double Mean(long count)"
+  },
+  {
+    "id": "overshoot-unsmoothed-gain",
+    "module": "overshoot",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "var c = highest != 0 ? bSma / highest : 0;",
+    "after": "var c = highest != 0 ? b / highest : 0;",
+    "filter": "FullyQualifiedName~OvershootFormulaTests"
+  },
+  {
+    "id": "strict-trajectory-gate-bypass",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "if (options.RequireFormulaReference && formulaCoverage.RecurrenceOnlyOutputSlots.Count != 0)",
+    "after": "if (options.RequireFormulaReference && formulaCoverage.RecurrenceOnlyOutputSlots.Count < 0)",
+    "filter": "FullyQualifiedName~StrictValidationRejectsRecurrenceOnlyEvidence"
+  },
+  {
+    "id": "startup-residual-counted-as-independent",
+    "module": "validation",
+    "file": "src/Validation/IndicatorFormulaCoverage.cs",
+    "before": "rules.Where(r => r.ReferenceOutputSlot.HasValue && !r.UsesObservedHistory)\n            .Select(r => r.ReferenceOutputSlot!.Value).ToArray(), rules.Where(r => r.ReferenceOutputSlot.HasValue && !r.UsesObservedHistory",
+    "after": "rules.Where(r => r.ReferenceOutputSlot.HasValue && !r.UsesObservedHistory)\n            .Select(r => r.ReferenceOutputSlot!.Value).ToArray(), rules.Where(r => r.ReferenceOutputSlot.HasValue",
+    "filter": "FullyQualifiedName~StartupResidualCannotFillAnIndependentTrajectoryStartupGap"
+  },
+  {
+    "id": "price-mean-exact-fallback-bypass",
+    "module": "price-inputs",
+    "file": "src/Helpers/PriceMean.cs",
+    "before": "return exact.Mean(count);",
+    "after": "return sum / count;",
+    "filter": "FullyQualifiedName~PriceMeanExtremeTests"
+  },
+  {
+    "id": "declared-field-range-bypass",
+    "module": "validation",
+    "file": "src/Validation/IndicatorInputDomain.cs",
+    "before": "if (range.Field == field && (value < range.Minimum || value > range.Maximum))",
+    "after": "if (range.Field == field && range.Minimum > range.Maximum)",
+    "filter": "FullyQualifiedName~InputRangeContractTests"
+  },
+  {
+    "id": "customer-numerical-fixtures-bypass",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "includeNumericalExtremes = checkCustomerReset ||",
+    "after": "includeNumericalExtremes = false ||",
+    "filter": "FullyQualifiedName~CustomerDiscoveryAutomaticallyDetectsErasedTinyInputs"
+  },
+  {
+    "id": "rational-reference-ties-away-from-even",
+    "module": "reference-arithmetic",
+    "file": "src/Validation/ReferenceFraction.cs",
+    "before": "comparison > 0 || comparison == 0 && !significand.IsEven",
+    "after": "comparison >= 0",
+    "filter": "FullyQualifiedName~RationalReferenceRoundingTests"
+  },
+  {
+    "id": "mean-roundoff-bound-understated",
+    "module": "sma",
+    "file": "src/Helpers/MeanRoundoff.cs",
+    "before": "private const double AdditionFactor = 1.1102230246251568e-16;",
+    "after": "private const double AdditionFactor = 0;",
+    "filter": "FullyQualifiedName~MeanRoundoffTests"
+  },
+  {
+    "id": "ema-seed-divisor",
+    "module": "ema",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "var ema = sum.Mean(_count + 1);",
+    "after": "var ema = sum.Mean(_count + 2);",
+    "filter": "FullyQualifiedName~EmaInitializationTests"
+  },
+  {
+    "id": "ema-seed-preview-commit",
+    "module": "ema",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "            if (commit)\n            {\n                _sum = sum;",
+    "after": "            _sum = sum;\n            if (commit)\n            {",
+    "filter": "FullyQualifiedName~EmaInitializationTests"
+  },
+  {
+    "id": "ema-separate-product-rounding",
+    "module": "ema",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "updated = weighted.Mean((long)_length + 1);",
+    "after": "updated = value * (2d / (_length + 1d)) + _prevEma * (1 - 2d / (_length + 1d));",
+    "filter": "FullyQualifiedName~EmaRecurrenceTests"
+  },
+  {
+    "id": "wma-forgotten-weight-decay",
+    "module": "wma",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class WmaState",
+    "before": "numerator.Subtract(_sum);",
+    "after": "numerator.Subtract(default);",
+    "filter": "FullyQualifiedName~WmaNumericalTests"
+  },
+  {
+    "id": "wma-forgotten-eviction",
+    "module": "wma",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class WmaState",
+    "before": "if (_window.Count == _length) sum.Add(_window[0], -1);",
+    "after": "if (_window.Count < 0) sum.Add(_window[0], -1);",
+    "filter": "FullyQualifiedName~WmaNumericalTests"
+  },
+  {
+    "id": "exact-small-mean-ties-away",
+    "module": "reference-arithmetic",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "before": "remainder > otherHalf || remainder == otherHalf && (mantissa & 1) != 0",
+    "after": "remainder >= otherHalf",
+    "filter": "FullyQualifiedName~SmaExtremeRangeTests"
+  },
+  {
+    "id": "exact-wide-mean-lost-scale",
+    "module": "reference-arithmetic",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "before": "_scale = common + trailing;",
+    "after": "_scale = common;",
+    "filter": "FullyQualifiedName~ExactWeightedAccumulatorTests"
+  },
+  {
+    "id": "native-bar-validation-bypass",
+    "module": "input-rejection",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal readonly struct StreamingInputResolver",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Fault: omit finite input validation.",
+    "filter": "FullyQualifiedName~NativeInputRejectionTests"
+  },
+  {
+    "id": "native-selector-validation-bypass",
+    "module": "input-rejection",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal readonly struct StreamingInputResolver",
+    "before": "StreamingInputValidation.Finite(value, nameof(value));",
+    "after": "// Fault: omit finite input validation.",
+    "filter": "FullyQualifiedName~NativeInputRejectionTests"
+  },
+  {
+    "id": "scalar-ema-validation-bypass",
+    "module": "input-rejection",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class EmaState",
+    "before": "StreamingInputValidation.Finite(value, nameof(value));",
+    "after": "// Fault: omit finite input validation.",
+    "filter": "FullyQualifiedName~NativeInputRejectionTests"
+  },
+  {
+    "id": "population-extreme-wrong-divisor",
+    "module": "population-deviation",
+    "file": "src/Helpers/ExactPopulationDeviation.cs",
+    "before": "var divisor = new BigInteger(_count) << shift;",
+    "after": "var divisor = new BigInteger(Math.Max(1, _count - 1)) << shift;",
+    "filter": "FullyQualifiedName~PopulationDeviationNumericalTests"
+  },
+  {
+    "id": "population-extreme-ties-away",
+    "module": "population-deviation",
+    "file": "src/Helpers/ExactPopulationDeviation.cs",
+    "before": "comparison > 0 || comparison == 0 && !significand.IsEven",
+    "after": "comparison >= 0",
+    "filter": "FullyQualifiedName~PopulationDeviationNumericalTests"
+  },
+  {
+    "id": "population-streaming-omit-extreme-fallback",
+    "module": "population-deviation",
+    "file": "src/Streaming/RollingStandardDeviation.cs",
+    "before": "return exact.Value();",
+    "after": "return Math.Sqrt(variance);",
+    "filter": "FullyQualifiedName~PopulationDeviationNumericalTests"
+  },
+  {
+    "id": "reference-sqrt-ties-away",
+    "module": "reference-arithmetic",
+    "file": "src/Validation/ReferenceFraction.cs",
+    "before": "comparison < 0 || comparison == 0 && (low & 1) == 0",
+    "after": "comparison < 0",
+    "filter": "FullyQualifiedName~RationalReferenceRoundingTests"
+  },
+  {
+    "id": "median-overflowing-midpoint",
+    "module": "order-statistics",
+    "file": "src/Streaming/StatefulIndicators.Batch33.cs",
+    "before": "PriceMean.Of(_sorted[(_length / 2) - 1], _sorted[_length / 2])",
+    "after": "(_sorted[(_length / 2) - 1] + _sorted[_length / 2]) / 2",
+    "filter": "FullyQualifiedName~OrderStatisticNumericalTests"
+  },
+  {
+    "id": "trimean-overflowing-sum",
+    "module": "order-statistics",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "PriceMean.Of(q1, median, median, q3)",
+    "after": "(q1 + 2 * median + q3) / 4",
+    "filter": "FullyQualifiedName~OrderStatisticNumericalTests"
+  },
+  {
+    "id": "percent-rank-extra-rounding",
+    "module": "order-statistics",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "100d * count / length",
+    "after": "(double)count / length * 100",
+    "filter": "FullyQualifiedName~OrderStatisticNumericalTests"
+  },
+  {
+    "id": "simplified-wma-uses-wrong-period",
+    "module": "wma",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class SimplifiedWeightedMovingAverageState",
+    "before": "_weighted = new WmaState(Math.Max(1, length));",
+    "after": "_weighted = new WmaState(Math.Max(1, length - 1));",
+    "filter": "FullyQualifiedName~WmaNumericalTests"
+  },
+  {
+    "id": "native-rejection-after-child-mutation",
+    "module": "input-rejection",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChopZoneState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Fault: reject only after child calculations.",
+    "filter": "FullyQualifiedName~DiscoveredNativeInputRejectionTests"
+  },
+  {
+    "id": "custom-wrapper-missing-raw-validation",
+    "module": "input-rejection",
+    "file": "src/Streaming/CustomInputState.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Fault: transform invalid raw fields before validation.",
+    "filter": "FullyQualifiedName~DiscoveredNativeInputRejectionTests"
+  },
+  {
+    "id": "volume-product-rounded-before-ratio",
+    "module": "volume-numerics",
+    "file": "src/Helpers/ExactVolumeMean.cs",
+    "before": "_weighted.AddProduct(price, volume, taper);",
+    "after": "_weighted.Add(price * volume, taper);",
+    "filter": "FullyQualifiedName~VolumeMeanNumericalTests"
+  },
+  {
+    "id": "vwap-preview-commits",
+    "module": "volume-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumeWeightedAveragePriceState",
+    "before": "if (isFinal) _mean = next;",
+    "after": "_mean = next;",
+    "filter": "FullyQualifiedName~VolumeMeanNumericalTests"
+  },
+  {
+    "id": "vwap-chain-ignored",
+    "module": "volume-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVwapFast",
+    "before": "if (data.ChainedValues.Count > 0)",
+    "after": "if (data.ChainedValues.Count < 0)",
+    "filter": "FullyQualifiedName~ChainedVwapUsesTheSelectedSeriesAndRetainsItAfterReset"
+  },
+  {
+    "id": "rolling-volume-forgets-eviction",
+    "module": "volume-numerics",
+    "file": "src/Helpers/RollingVolumeMean.cs",
+    "before": "if (_prices.Count == _length) next.Add(_prices[0], _volumes[0], -1);",
+    "after": "if (_prices.Count > _length) next.Add(_prices[0], _volumes[0], -1);",
+    "filter": "FullyQualifiedName~VolumeMeanNumericalTests"
+  },
+  {
+    "id": "triangular-first-stage-roundoff",
+    "module": "triangular-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class TriangularMovingAverageState",
+    "before": "_primary = maType == MovingAvgType.SimpleMovingAverage\n            ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);",
+    "after": "_primary = MovingAverageSmootherFactory.Create(maType, resolved);",
+    "filter": "FullyQualifiedName~TriangularNumericalTests"
+  },
+  {
+    "id": "donchian-native-midpoint-overflow",
+    "module": "channel-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DonchianChannelsState",
+    "before": "var middle = PriceMean.Of(upper, lower);",
+    "after": "var middle = (upper + lower) / 2;",
+    "filter": "FullyQualifiedName~DonchianNumericalTests"
+  },
+  {
+    "id": "ichimoku-leading-midpoint-overflow",
+    "module": "channel-numerics",
+    "file": "src/Core/TrendCore.cs",
+    "scope": "internal static void IchimokuSenkouSpanA",
+    "before": "output[i] = PriceMean.Of(tenkan[i], kijun[i]);",
+    "after": "output[i] = (tenkan[i] + kijun[i]) / 2;",
+    "filter": "FullyQualifiedName~IchimokuNumericalTests"
+  },
+  {
+    "id": "wilder-rounded-coefficient-products",
+    "module": "wilder-numerics",
+    "file": "src/Helpers/RoundedWilder.cs",
+    "before": "return sum.Mean(length);",
+    "after": "return (value / length) + previous * (1 - 1d / length);",
+    "filter": "FullyQualifiedName~WilderNumericalTests"
+  },
+  {
+    "id": "volume-ratio-ties-away-from-even",
+    "module": "volume-numerics",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "scope": "internal double Ratio",
+    "before": "halfway > 0 || halfway == 0 && !mantissa.IsEven",
+    "after": "halfway >= 0",
+    "filter": "FullyQualifiedName~WideAndSmallVolumeTotalsRoundSubnormalMidpointsToEven"
+  },
+  {
+    "id": "triangular-custom-average-bypass",
+    "module": "component-averages",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTmaFast",
+    "before": "if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)",
+    "after": "if (maType == MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~TriangularAliasesHonorBothCustomerAverageStages"
+  },
+  {
+    "id": "volume-custom-average-bypass",
+    "module": "component-averages",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast",
+    "before": "if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)",
+    "after": "if (maType == MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~VolumeWeightedMeanHonorsTheCustomerVolumeAverage"
+  },
+  {
+    "id": "slow-mean-omits-third-stage",
+    "module": "composed-averages",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void SlowSmoothedMovingAverage",
+    "before": "output[i] = third.Next(second.Next(first.Next(input[i], true), true), true);",
+    "after": "output[i] = second.Next(first.Next(input[i], true), true);",
+    "filter": "FullyQualifiedName~SlowMeanNumericalTests"
+  },
+  {
+    "id": "slow-mean-custom-stage-bypass",
+    "module": "component-averages",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSlowSmoothedMovingAverageFast",
+    "before": "if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)",
+    "after": "if (maType == MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~SlowMeanPreservesHeterogeneousCustomerStages"
+  },
+  {
+    "id": "symmetric-weight-total-int-overflow",
+    "module": "symmetric-numerics",
+    "file": "src/Helpers/SymmetricWindowMean.cs",
+    "before": "((long)length + 1) * ((long)length + 1) / 4",
+    "after": "(length + 1) * (length + 1) / 4",
+    "filter": "FullyQualifiedName~CoreWeightTotalsDoNotOverflowAtTheLargestPeriod"
+  },
+  {
+    "id": "jsa-lag-off-by-one",
+    "module": "symmetric-numerics",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void JsaMovingAverage",
+    "before": "i >= length ? input[i - length] : 0",
+    "after": "i >= length ? input[i - length + 1] : 0",
+    "filter": "FullyQualifiedName~SymmetricMeanNumericalTests"
+  },
+  {
+    "id": "symmetric-ignores-selected-input",
+    "module": "symmetric-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSymmetricallyWeightedMovingAverageFast",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~SelectedInputFlowsThroughBothTriangularWindowArms"
+  },
+  {
+    "id": "ehlers-triangle-ignores-selected-input",
+    "module": "symmetric-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTriangleMovingAverageFast",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~SelectedInputFlowsThroughBothTriangularWindowArms"
+  },
+  {
+    "id": "midpoint-native-overflow",
+    "module": "midrange-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MidpointState",
+    "before": "var midpoint = PriceMean.Of(highest, lowest);",
+    "after": "var midpoint = (highest + lowest) / 2;",
+    "filter": "FullyQualifiedName~MidrangeNumericalTests"
+  },
+  {
+    "id": "midprice-native-overflow",
+    "module": "midrange-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MidpriceState",
+    "before": "var midprice = PriceMean.Of(highest, lowest);",
+    "after": "var midprice = (highest + lowest) / 2;",
+    "filter": "FullyQualifiedName~MidrangeNumericalTests"
+  },
+  {
+    "id": "midpoint-ignores-selected-input",
+    "module": "midrange-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMidpointFast",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~MidrangeNumericalTests"
+  },
+  {
+    "id": "midpoint-period-one-expanded",
+    "module": "midrange-numerics",
+    "file": "src/Calculations/Inputs/InputsLtoR.cs",
+    "scope": "public static StockData CalculateMidpoint(",
+    "before": "GetMaxAndMinValuesList(inputList, inputList, length)",
+    "after": "GetMaxAndMinValuesList(inputList, length)",
+    "filter": "FullyQualifiedName~MidrangeNumericalTests"
+  },
+  {
+    "id": "power-weight-rounded-to-double",
+    "module": "power-mean-numerics",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "scope": "internal void Add(double value, BigInteger weight)",
+    "before": "AddLarge(new BigInteger(term._small) * weight, term._scale);",
+    "after": "AddProduct(value, (double)weight);",
+    "filter": "FullyQualifiedName~VeryLargePeriodsKeepExactIntegerWeights"
+  },
+  {
+    "id": "power-mean-wrong-normalization",
+    "module": "power-mean-numerics",
+    "file": "src/Helpers/IntegerPowerWindowMean.cs",
+    "scope": "private static ExactMeanAccumulator Denominator(",
+    "before": "n * (n + 1) * (2 * n + 1) / 6",
+    "after": "n * (n + 1) * (2 * n + 1) / 5",
+    "filter": "FullyQualifiedName~PowerMeanNumericalTests"
+  },
+  {
+    "id": "power-mean-preview-commits",
+    "module": "power-mean-numerics",
+    "file": "src/Helpers/IntegerPowerWindowMean.cs",
+    "before": "if (commit) _values.TryAdd(value, out _);",
+    "after": "_values.TryAdd(value, out _);",
+    "filter": "FullyQualifiedName~PowerMeanNumericalTests"
+  },
+  {
+    "id": "quick-period-one-loses-lag",
+    "module": "quick-numerics",
+    "file": "src/Helpers/QuickWindowMean.cs",
+    "before": "if (length == 1) return lag + 1;",
+    "after": "if (length == 1) return lag == 0 ? 3 : 0;",
+    "filter": "FullyQualifiedName~QuickMeanNumericalTests"
+  },
+  {
+    "id": "quick-peak-cap-removed",
+    "module": "quick-numerics",
+    "file": "src/Helpers/QuickWindowMean.cs",
+    "before": "Math.Max(2, Math.Min(530, (length + 2L) / 3))",
+    "after": "Math.Max(2, (length + 2L) / 3)",
+    "filter": "FullyQualifiedName~QuickMeanNumericalTests"
+  },
+  {
+    "id": "fibonacci-weight-sum-off-by-one",
+    "module": "fibonacci-numerics",
+    "file": "src/Helpers/FibonacciWindowMean.cs",
+    "scope": "internal static void Compute(",
+    "before": "pair.Current + pair.Next - 1",
+    "after": "pair.Current + pair.Next",
+    "filter": "FullyQualifiedName~FibonacciMeanNumericalTests"
+  },
+  {
+    "id": "fibonacci-doubling-wrong-odd-term",
+    "module": "fibonacci-numerics",
+    "file": "src/Helpers/FibonacciWindowMean.cs",
+    "before": "(odd, even + odd)",
+    "after": "(odd, even)",
+    "filter": "FullyQualifiedName~FibonacciMeanNumericalTests"
+  },
+  {
+    "id": "fibonacci-ignores-selected-input",
+    "module": "fibonacci-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFibonacciWeightedMovingAverageFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~FibonacciMeanPreservesSelectedInput"
+  },
+  {
+    "id": "symmetric-compositions-not-discovered",
+    "module": "configuration-coverage",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(SymmetricCompositionCases(type));",
+    "after": "result.AddRange(SymmetricCompositionCases(type).Where(_ => false));",
+    "filter": "FullyQualifiedName~SharedDiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "square-root-rounded-product",
+    "module": "square-root-numerics",
+    "file": "src/Helpers/SquareRootWindowMean.cs",
+    "scope": "internal static void Compute(",
+    "before": "sum.AddProduct(input[i - lag], weights[lag]);",
+    "after": "sum.Add(input[i - lag] * weights[lag]);",
+    "filter": "FullyQualifiedName~SquareRootMeanNumericalTests"
+  },
+  {
+    "id": "square-root-coefficient-truncated",
+    "module": "square-root-numerics",
+    "file": "src/Helpers/SquareRootWindowMean.cs",
+    "before": "weights[lag] = Math.Sqrt(length - lag);",
+    "after": "weights[lag] = Math.Floor(Math.Sqrt(length - lag));",
+    "filter": "FullyQualifiedName~SquareRootMeanNumericalTests"
+  },
+  {
+    "id": "square-root-ignores-selected-input",
+    "module": "square-root-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSquareRootWeightedMovingAverageFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~SquareRootMeanPreservesSelectedInput"
+  },
+  {
+    "id": "kaufman-rounded-price-difference",
+    "module": "kaufman-numerics",
+    "file": "src/Helpers/RoundedKaufmanWindow.cs",
+    "scope": "private static double Blend(",
+    "before": "return sum.Mean(1);",
+    "after": "return previous + weight * (current - previous);",
+    "filter": "FullyQualifiedName~KaufmanNumericalTests"
+  },
+  {
+    "id": "kaufman-missing-exact-eviction",
+    "module": "kaufman-numerics",
+    "file": "src/Helpers/RoundedKaufmanWindow.cs",
+    "before": "if (_hasBeforeWindow) AddDistance(ref travel, _values[0], _beforeWindow, -1);",
+    "after": "if (_hasBeforeWindow && _values.Count < 0) AddDistance(ref travel, _values[0], _beforeWindow, -1);",
+    "filter": "FullyQualifiedName~KaufmanNumericalTests"
+  },
+  {
+    "id": "root-mean-rounded-square",
+    "module": "root-mean-square-numerics",
+    "file": "src/Helpers/RollingRootMeanSquare.cs",
+    "scope": "internal static void Compute(",
+    "before": "squares.AddProduct(input[i], input[i]);",
+    "after": "squares.Add(input[i] * input[i]);",
+    "filter": "FullyQualifiedName~RootMeanSquareNumericalTests"
+  },
+  {
+    "id": "root-mean-ties-away",
+    "module": "root-mean-square-numerics",
+    "file": "src/Helpers/ExactMeanAccumulator.cs",
+    "scope": "internal double SqrtMean(",
+    "before": "comparison > 0 || comparison == 0 && !root.IsEven",
+    "after": "comparison >= 0",
+    "filter": "FullyQualifiedName~ExactRootRoundingPreservesSubnormalHalfwayCasesAndFiniteExtremes"
+  },
+  {
+    "id": "root-mean-missing-eviction",
+    "module": "root-mean-square-numerics",
+    "file": "src/Helpers/RollingRootMeanSquare.cs",
+    "scope": "internal double Next(",
+    "before": "if (full) squares.AddProduct(_values[0], _values[0], -1);",
+    "after": "if (full && _values.Count < 0) squares.AddProduct(_values[0], _values[0], -1);",
+    "filter": "FullyQualifiedName~RootMeanSquareNumericalTests"
+  },
+  {
+    "id": "geometric-missing-product-eviction",
+    "module": "geometric-numerics",
+    "file": "src/Helpers/RollingGeometricMean.cs",
+    "before": "product /= old.Mantissa;",
+    "after": "product *= 1;",
+    "filter": "FullyQualifiedName~GeometricMeanNumericalTests"
+  },
+  {
+    "id": "geometric-wrong-root-degree",
+    "module": "geometric-numerics",
+    "file": "src/Helpers/RollingGeometricMean.cs",
+    "before": "var root = IntegerRoot(whole, degree);",
+    "after": "var root = IntegerRoot(whole, Math.Max(1, degree - 1));",
+    "filter": "FullyQualifiedName~GeometricMeanNumericalTests"
+  },
+  {
+    "id": "geometric-floor-changed",
+    "module": "geometric-numerics",
+    "file": "src/Helpers/RollingGeometricMean.cs",
+    "before": "private const double Floor = 0.000001;",
+    "after": "private const double Floor = 0.00001;",
+    "filter": "FullyQualifiedName~GeometricMeanNumericalTests"
+  },
+  {
+    "id": "positive-geometric-wrong-included-count",
+    "module": "geometric-numerics",
+    "file": "src/Helpers/RollingGeometricMean.cs",
+    "before": "RoundRoot(product, power, used)",
+    "after": "RoundRoot(product, power, _values.Capacity)",
+    "filter": "FullyQualifiedName~PositiveGeometricMeanNumericalTests"
+  },
+  {
+    "id": "positive-geometric-startup-zero",
+    "module": "geometric-numerics",
+    "file": "src/Helpers/RollingGeometricMean.cs",
+    "before": ": _positiveOnly ? value : 0;",
+    "after": ": 0;",
+    "filter": "FullyQualifiedName~PositiveGeometricMeanNumericalTests"
+  },
+  {
+    "id": "positive-geometric-ignores-selected-input",
+    "module": "geometric-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeGeometricMeanMovingAverageFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PositiveGeometricMeanPreservesSelectedInput"
+  },
+  {
+    "id": "weighted-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(WeightedCompositionCases(type));",
+    "after": "// Deliberate fault: omit promoted weighted compositions.",
+    "filter": "FullyQualifiedName~WeightedCompositionNumericalTests"
+  },
+  {
+    "id": "polynomial-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(PolynomialCompositionCases(type));",
+    "after": "// Deliberate fault: omit promoted polynomial compositions.",
+    "filter": "FullyQualifiedName~PolynomialCompositionNumericalTests"
+  },
+  {
+    "id": "composed-cubic-uses-square-weights",
+    "module": "composition-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "MovingAvgType.CubedWeightedMovingAverage => new IntegerPowerMovingAverageSmoother(length, 3),",
+    "after": "MovingAvgType.CubedWeightedMovingAverage => new IntegerPowerMovingAverageSmoother(length, 2),",
+    "filter": "FullyQualifiedName~TriangularNumericalTests.RoundedStagesAgreeAcrossAliasesRoutesAndPreviews"
+  },
+  {
+    "id": "composed-quick-preview-commits",
+    "module": "composition-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class QuickMovingAverageSmoother : IMovingAverageSmoother",
+    "before": "public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);",
+    "after": "public double Next(double value, bool isFinal) => _mean.Next(value, true);",
+    "filter": "FullyQualifiedName~TriangularNumericalTests.RoundedStagesAgreeAcrossAliasesRoutesAndPreviews"
+  },
+  {
+    "id": "foundation-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(FoundationCompositionCases(type));",
+    "after": "// Deliberate fault: omit foundation component cases.",
+    "filter": "FullyQualifiedName~FoundationCompositionNumericalTests"
+  },
+  {
+    "id": "wilder-component-selects-ema",
+    "module": "composition-discovery",
+    "file": "src/SourceGeneration/IndicatorTypeGenerator.cs",
+    "before": "? \"WildersSmoothingMethod\" : target.IndicatorName;",
+    "after": "? \"ExponentialMovingAverage\" : target.IndicatorName;",
+    "filter": "FullyQualifiedName~WilderAliasIsAPriceAverageAndSelectsTheWilderEnum"
+  },
+  {
+    "id": "root-lag-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(RootAndLagCompositionCases(type));",
+    "after": "// Deliberate fault: omit root and lag components.",
+    "filter": "FullyQualifiedName~RootAndLagCompositionNumericalTests"
+  },
+  {
+    "id": "composed-jsa-uses-newest-lag",
+    "module": "composition-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class JsaMovingAverageSmoother : IMovingAverageSmoother",
+    "before": "_values[0] : 0;",
+    "after": "_values[_values.Count - 1] : 0;",
+    "filter": "FullyQualifiedName~TriangularNumericalTests|FullyQualifiedName~SlowMeanNumericalTests"
+  },
+  {
+    "id": "composed-rms-preview-commits",
+    "module": "composition-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class RootMeanSquareSmoother : IMovingAverageSmoother",
+    "before": "public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);",
+    "after": "public double Next(double value, bool isFinal) => _mean.Next(value, true);",
+    "filter": "FullyQualifiedName~TriangularNumericalTests|FullyQualifiedName~SlowMeanNumericalTests"
+  },
+  {
+    "id": "wilder-understates-settling-horizon",
+    "module": "composition-discovery",
+    "file": "src/SourceGeneration/IndicatorTypeGenerator.cs",
+    "before": "[\"WellesWilderMovingAverage\"] = \"(int)System.Math.Min(int.MaxValue, System.Math.Max(1L, $) * 18)\",",
+    "after": "[\"WellesWilderMovingAverage\"] = \"$\",",
+    "filter": "FullyQualifiedName~IndicatorInvariantSweepTests.WarmupBarsCoversTheWarmup"
+  },
+  {
+    "id": "kaufman-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(KaufmanCompositionCases(type));",
+    "after": "// Deliberate fault: omit adaptive components.",
+    "filter": "FullyQualifiedName~KaufmanCompositionNumericalTests"
+  },
+  {
+    "id": "composed-kaufman-wrong-output",
+    "module": "composition-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal sealed class KaufmanMovingAverageSmoother : IMovingAverageSmoother",
+    "before": "_mean.Next(value, isFinal).Average;",
+    "after": "_mean.Next(value, isFinal).Efficiency;",
+    "filter": "FullyQualifiedName~TriangularNumericalTests|FullyQualifiedName~SlowMeanNumericalTests"
+  },
+  {
+    "id": "wilder-alias-ignores-selected-input",
+    "module": "wilder-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeModifiedMaFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~WilderAliasesPreserveSelectedInputAcrossPublicChainsAndFastArms"
+  },
+  {
+    "id": "wilder-alias-chain-wrong-period",
+    "module": "wilder-numerics",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "new WellesWilderMovingAverageState(smoothed.Length),",
+    "after": "new WellesWilderMovingAverageState(smoothed.Length + 1),",
+    "filter": "FullyQualifiedName~WilderAliasesPreserveSelectedInputAcrossPublicChainsAndFastArms"
+  },
+  {
+    "id": "wilder-stateful-alias-wrong-period",
+    "module": "wilder-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "SmmaSpecOptions smma => new WellesWilderMovingAverageState(smma.Length),",
+    "after": "SmmaSpecOptions smma => new WellesWilderMovingAverageState(smma.Length + 1),",
+    "filter": "FullyQualifiedName~BothNativeFactoriesHonorEveryWilderAliasPeriodPreviewAndReset"
+  },
+  {
+    "id": "farey-reversed-taps",
+    "module": "farey-numerics",
+    "file": "src/Helpers/FareyWindowMean.cs",
+    "before": "ascending.Reverse();",
+    "after": "// Deliberate fault: leave taps ascending.",
+    "filter": "FullyQualifiedName~FareyMeanNumericalTests"
+  },
+  {
+    "id": "farey-rounds-products-early",
+    "module": "farey-numerics",
+    "file": "src/Helpers/FareyWindowMean.cs",
+    "before": "sum.AddProduct(input[i - lag], weights[lag]);",
+    "after": "sum.Add(input[i - lag] * weights[lag]);",
+    "filter": "FullyQualifiedName~FareyMeanNumericalTests"
+  },
+  {
+    "id": "farey-warmup-assumes-two-windows",
+    "module": "farey-numerics",
+    "file": "src/SourceGeneration/IndicatorTypeGenerator.cs",
+    "before": "[\"FareySequenceWeightedMovingAverage\"] = \"(int)System.Math.Min(int.MaxValue, System.Math.Max(1L, $) * (System.Math.Max(1L, $) + 1) / 2 - 1)\",",
+    "after": "[\"FareySequenceWeightedMovingAverage\"] = \"(2 * $) - 1\",",
+    "filter": "FullyQualifiedName~FareyOrderIsNotTheKernelLengthAndWarmupCoversIt"
+  },
+  {
+    "id": "middle-registry-substitutes-sma",
+    "module": "middle-mean-numerics",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct MhlmaCore : IMovingAverageCore",
+    "before": "MovingAverageCore.MiddleHighLowMovingAverage(input, output, length);",
+    "after": "MovingAverageCore.SimpleMovingAverage(input, output, length);",
+    "filter": "FullyQualifiedName~MiddleMeanNumericalTests.RegistryAndPublicChainsUseTheSelectedScalarSeries"
+  },
+  {
+    "id": "middle-registry-uses-high-instead-of-selected-input",
+    "module": "middle-mean-numerics",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct MhlmaCore : IMovingAverageCore",
+    "before": "MovingAverageCore.MiddleHighLowMovingAverage(close, output, length);",
+    "after": "MovingAverageCore.MiddleHighLowMovingAverage(high, output, length);",
+    "filter": "FullyQualifiedName~MiddleMeanNumericalTests.RegistryAndPublicChainsUseTheSelectedScalarSeries"
+  },
+  {
+    "id": "middle-simple-bypasses-customer",
+    "module": "middle-mean-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMiddleHighLowMovingAverageFast(",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~MiddleMeanNumericalTests.ExactSimpleStagePreservesCustomerOverrides"
+  },
+  {
+    "id": "middle-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(MiddleCompositionCases(type));",
+    "after": "// Deliberate fault: omit midpoint compositions.",
+    "filter": "FullyQualifiedName~MiddleMeanNumericalTests.SharedDiscoveryIncludesEveryPromotedMiddleComposition"
+  },
+  {
+    "id": "distance-mass-flat-window-zero",
+    "module": "distance-mass-numerics",
+    "file": "src/Helpers/DistanceMassWindowMean.cs",
+    "before": "if (mass.IsZero) return current;",
+    "after": "if (mass.IsZero) return 0;",
+    "filter": "FullyQualifiedName~DistanceMassMeanNumericalTests"
+  },
+  {
+    "id": "distance-mass-omits-startup-zeros",
+    "module": "distance-mass-numerics",
+    "file": "src/Helpers/DistanceMassWindowMean.cs",
+    "before": "if (present.Count < length) entries.Add((0d, BigInteger.Zero, (long)length - present.Count));",
+    "after": "// Deliberate fault: omit padded zero entries.",
+    "filter": "FullyQualifiedName~DistanceMassMeanNumericalTests"
+  },
+  {
+    "id": "distance-mass-erases-subnormal-distances",
+    "module": "distance-mass-numerics",
+    "file": "src/Helpers/DistanceMassWindowMean.cs",
+    "before": "return bits < 0 ? -units : units;",
+    "after": "return exponent == 0 ? BigInteger.Zero : bits < 0 ? -units : units;",
+    "filter": "FullyQualifiedName~DistanceMassMeanNumericalTests"
+  },
+  {
+    "id": "reciprocal-distance-uses-distance-mass",
+    "module": "reciprocal-distance-numerics",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void DistanceWeightedMovingAverage(",
+    "before": "=> DistanceMassWindowMean.Compute(input, output, length, reciprocal: true);",
+    "after": "=> DistanceMassWindowMean.Compute(input, output, length);",
+    "filter": "FullyQualifiedName~ReciprocalDistanceMeanNumericalTests"
+  },
+  {
+    "id": "reciprocal-distance-ignores-selected-input",
+    "module": "reciprocal-distance-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDistanceWeightedMovingAverageFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ReciprocalDistanceMeanPreservesSelectedInput"
+  },
+  {
+    "id": "sequential-zero-seed",
+    "module": "sequential-numerics",
+    "file": "src/Helpers/SequentialMeanGate.cs",
+    "before": "? mean : _hasPrevious ? _previousOutput : price;",
+    "after": "? mean : _hasPrevious ? _previousOutput : 0;",
+    "filter": "FullyQualifiedName~SequentialMeanNumericalTests.FullStrictWindowAndFirstPriceSeedAreRequired"
+  },
+  {
+    "id": "sequential-allows-flat-direction",
+    "module": "sequential-numerics",
+    "file": "src/Helpers/SequentialMeanGate.cs",
+    "before": "Math.Abs(sum) == _directions.Capacity",
+    "after": "Math.Abs(sum) >= _directions.Capacity - 1",
+    "filter": "FullyQualifiedName~SequentialMeanNumericalTests.FullStrictWindowAndFirstPriceSeedAreRequired"
+  },
+  {
+    "id": "sequential-preview-commits",
+    "module": "sequential-numerics",
+    "file": "src/Helpers/SequentialMeanGate.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~SequentialMeanNumericalTests.FullStrictWindowAndFirstPriceSeedAreRequired"
+  },
+  {
+    "id": "sequential-bypasses-customer-average",
+    "module": "sequential-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSequentiallyFilteredMovingAverageFast(",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~SequentialMeanNumericalTests.ExactSimpleStageHonorsCustomerOverride"
+  },
+  {
+    "id": "sequential-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(SequentialCompositionCases(type));",
+    "after": "// Deliberate fault: omit sequential component cases.",
+    "filter": "FullyQualifiedName~SequentialMeanNumericalTests.DiscoveryIncludesAllPromotedSequentialComponents"
+  },
+  {
+    "id": "natural-wrong-taps",
+    "module": "natural-numerics",
+    "file": "src/Helpers/NaturalWindowMean.cs",
+    "before": "var tap = Math.Sqrt(lag + 1d) - Math.Sqrt(lag);",
+    "after": "var tap = 1d;",
+    "filter": "FullyQualifiedName~NaturalMeanNumericalTests"
+  },
+  {
+    "id": "natural-preview-commits",
+    "module": "natural-numerics",
+    "file": "src/Helpers/NaturalWindowMean.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~NaturalMeanNumericalTests.ZeroLogTravelAndConvexBlendHaveExplicitContracts"
+  },
+  {
+    "id": "natural-ignores-selected-input",
+    "module": "natural-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNaturalMaFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~NaturalMeanNumericalTests.NaturalMeanPreservesSelectedInput"
+  },
+  {
+    "id": "sine-reverses-rounded-taps",
+    "module": "sine-numerics",
+    "file": "src/Helpers/SineWindowMean.cs",
+    "before": "_weights[lag]);",
+    "after": "_weights[_weights.Length - 1 - lag]);",
+    "scope": "internal double Next(",
+    "filter": "FullyQualifiedName~SineMeanNumericalTests"
+  },
+  {
+    "id": "sine-rounds-products-early",
+    "module": "sine-numerics",
+    "file": "src/Helpers/SineWindowMean.cs",
+    "before": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? value : _values[_values.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~SineMeanNumericalTests"
+  },
+  {
+    "id": "sine-preview-commits",
+    "module": "sine-numerics",
+    "file": "src/Helpers/SineWindowMean.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~SineMeanNumericalTests.ConvexWeightsPreserveExtremesAndPreviewDoesNotCommit"
+  },
+  {
+    "id": "sine-natural-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(SineNaturalCompositionCases(type));",
+    "after": "// Deliberate fault: omit sine/natural component cases.",
+    "filter": "FullyQualifiedName~SineNaturalCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "natural-component-substitutes-sine",
+    "module": "natural-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "MovingAvgType.NaturalMovingAverage => new NaturalMovingAverageSmoother(length),",
+    "after": "MovingAvgType.NaturalMovingAverage => new SineMovingAverageSmoother(length),",
+    "filter": "FullyQualifiedName~SineNaturalCompositionNumericalTests.NativeCompositionsAndLegacyMatchIndependentStages"
+  },
+  {
+    "id": "hann-rounds-products-early",
+    "module": "hann-numerics",
+    "file": "src/Helpers/HannWindowMean.cs",
+    "before": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? value : _values[_values.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~HannMeanNumericalTests"
+  },
+  {
+    "id": "hann-ignores-selected-input",
+    "module": "hann-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersHannMovingAverageFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~HannMeanNumericalTests.HannMeanPreservesSelectedInput"
+  },
+  {
+    "id": "hann-preview-commits",
+    "module": "hann-numerics",
+    "file": "src/Helpers/HannWindowMean.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HannMeanNumericalTests.ConvexWeightsPreserveExtremesAndPreviewDoesNotCommit"
+  },
+  {
+    "id": "hann-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(HannCompositionCases(type));",
+    "after": "// Deliberate fault: omit Hann component cases.",
+    "filter": "FullyQualifiedName~HannCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "chande-rounds-differences-early",
+    "module": "chande-numerics",
+    "file": "src/Helpers/ChandeMomentumWindow.cs",
+    "before": "numerator.Add(to, _numeratorScale * sign);\n        numerator.Add(from, -_numeratorScale * sign);",
+    "after": "numerator.Add(to - from, _numeratorScale * sign);",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.HandVectorsCoverExtremeDifferencesSubnormalsEvictionAndPreview"
+  },
+  {
+    "id": "chande-omits-eviction",
+    "module": "chande-numerics",
+    "file": "src/Helpers/ChandeMomentumWindow.cs",
+    "before": "Apply(ref numerator, ref denominator, old.From, old.To, -1);",
+    "after": "// Deliberate fault: retain expired change.",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.HandVectorsCoverExtremeDifferencesSubnormalsEvictionAndPreview"
+  },
+  {
+    "id": "chande-preview-commits",
+    "module": "chande-numerics",
+    "file": "src/Helpers/ChandeMomentumWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ChandeNumericalTests"
+  },
+  {
+    "id": "chande-bypasses-customer-average",
+    "module": "chande-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeMomentumOscillatorSignalFast(",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.SelectedInputAndCustomerSignalArePreserved"
+  },
+  {
+    "id": "chande-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(ChandeCompositionCases(type));",
+    "after": "// Deliberate fault: omit Chande component cases.",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.DiscoveryIncludesEverySignalComponent"
+  },
+  {
+    "id": "chande-stateful-signal-period-ignored",
+    "module": "chande-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "ChandeMomentumOscillatorSpecOptions chande => new ChandeMomentumOscillatorState(chande.MaType, chande.Length, chande.SignalLength),",
+    "after": "ChandeMomentumOscillatorSpecOptions chande => new ChandeMomentumOscillatorState(chande.MaType, chande.Length, 3),",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.FactoriesPreserveBothAliasPeriodsAndSignalLengths"
+  },
+  {
+    "id": "component-independent-output-refused",
+    "module": "component-substitution",
+    "file": "src/Builder/StockIndicatorBuilder.cs",
+    "before": "if (ComponentAverage.Substitutions != ComponentAverage.Requests)",
+    "after": "if (ComponentAverage.Requests == 0 || ComponentAverage.Substitutions != ComponentAverage.Requests)",
+    "filter": "FullyQualifiedName~ComponentAverageParityTests.ChandeSignalAppliesCustomerAverageToTheOscillator"
+  },
+  {
+    "id": "chande-signal-alias-wrong-slot",
+    "module": "chande-numerics",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "before": "var signalOnly = builtIn.BatchOutputKey == \"Signal\";",
+    "after": "var signalOnly = false;",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.DiscoveredConfigurationsReceiveEveryNumericalClass"
+  },
+  {
+    "id": "rsi-customer-primary-bypassed",
+    "module": "component-substitution",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static void RelativeStrengthIndex(",
+    "before": "maType == MovingAvgType.WildersSmoothingMethod && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.WildersSmoothingMethod",
+    "filter": "FullyQualifiedName~ComponentAverageParityTests.RsiCannotSilentlyApplyItsCustomerAverageOnlyToSignal"
+  },
+  {
+    "id": "vidya-native-momentum-ignored",
+    "module": "chande-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "internal sealed class VariableIndexDynamicAverageEngine",
+    "before": "var cmo = _momentum.Next(value, isFinal);",
+    "after": "var cmo = 0d;",
+    "filter": "FullyQualifiedName~ChandeNumericalTests.VidyaConsumersUseTheSameMomentumIncludingPreviewAndReset"
+  },
+  {
+    "id": "vidya-rounds-price-difference",
+    "module": "vidya-numerics",
+    "file": "src/Helpers/VidyaBlend.cs",
+    "before": "sum.AddProduct(previous, gain, -1);\n        sum.AddProduct(current, gain);",
+    "after": "sum.AddProduct(current - previous, gain);",
+    "filter": "FullyQualifiedName~VidyaNumericalTests.ConvexBlendPreservesExtremesSubnormalsAndExactCancellation"
+  },
+  {
+    "id": "vidya-loses-subnormal-products",
+    "module": "vidya-numerics",
+    "file": "src/Helpers/VidyaBlend.cs",
+    "before": "return sum.Mean(1);",
+    "after": "return previous * (1 - gain) + current * gain;",
+    "filter": "FullyQualifiedName~VidyaNumericalTests.ConvexBlendPreservesExtremesSubnormalsAndExactCancellation"
+  },
+  {
+    "id": "vidya-omits-numerical-enrollment",
+    "module": "vidya-numerics",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "or IndicatorName.JsaMovingAverage or IndicatorName.VariableIndexDynamicAverage",
+    "after": "or IndicatorName.JsaMovingAverage",
+    "filter": "FullyQualifiedName~VidyaNumericalTests.EveryAliasReceivesEveryNumericalClass"
+  },
+  {
+    "id": "vidya-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(VidyaCompositionCases(type));",
+    "after": "// Deliberate fault: omit VIDYA component cases.",
+    "filter": "FullyQualifiedName~VidyaCompositionNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "absolute-chande-startup-gate-omitted",
+    "module": "absolute-chande-numerics",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void ChandeMomentumOscillatorAbsolute(",
+    "before": "i < resolved ? 0 : Math.Abs(output[i])",
+    "after": "Math.Abs(output[i])",
+    "filter": "FullyQualifiedName~AbsoluteChandeNumericalTests.StartupGateAndFirstEvictionPreserveTheDisplacementContract"
+  },
+  {
+    "id": "absolute-chande-preview-advances-startup",
+    "module": "absolute-chande-numerics",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeMomentumOscillatorAbsoluteState",
+    "before": "if (isFinal && _seen < _length) _seen++;",
+    "after": "if (_seen < _length) _seen++;",
+    "filter": "FullyQualifiedName~AbsoluteChandeNumericalTests.AllRoutesMatchDisplacementReferenceAndRespectSelectedInput"
+  },
+  {
+    "id": "filtered-chande-rejects-threshold-equality",
+    "module": "filtered-chande-numerics",
+    "file": "src/Helpers/ChandeMomentumWindow.cs",
+    "before": "Math.Abs(value - from) > limit",
+    "after": "Math.Abs(value - from) >= limit",
+    "filter": "FullyQualifiedName~FilteredChandeNumericalTests.RoundedThresholdDiscardsLargeChangesAndRetainsExactSmallSignals"
+  },
+  {
+    "id": "filtered-chande-customer-signal-bypassed",
+    "module": "filtered-chande-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeMomentumOscillatorFilterSignalFast(",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~FilteredChandeNumericalTests.ChainingAndCustomerSignalUseTheSelectedTrajectory"
+  },
+  {
+    "id": "chande-average-omits-first-price",
+    "module": "chande-average-numerics",
+    "file": "src/Helpers/ChandeMomentumAverageWindow.cs",
+    "before": "_first = new(length1, zeroOrigin: true, unitRatio: true);",
+    "after": "_first = new(length1, zeroOrigin: false, unitRatio: true);",
+    "filter": "FullyQualifiedName~ChandeAverageNumericalTests.ZeroOriginUnitPeriodsAndRejectedInputHaveExplicitContracts"
+  },
+  {
+    "id": "chande-average-third-period-ignored",
+    "module": "chande-average-numerics",
+    "file": "src/Helpers/ChandeMomentumAverageWindow.cs",
+    "before": "_third = new(length3, zeroOrigin: true, unitRatio: true);",
+    "after": "_third = new(length2, zeroOrigin: true, unitRatio: true);",
+    "filter": "FullyQualifiedName~ChandeAverageNumericalTests.EveryDirectRouteMatchesIndependentRoundedRatios"
+  },
+  {
+    "id": "stochastic-range-rounds-differences",
+    "module": "stochastic-numerics",
+    "file": "src/Helpers/ClampedRangePosition.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return (value - lower) / (upper - lower) * 100;",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.ExactRangePreservesOverflowSubnormalReversedAndClampedCases"
+  },
+  {
+    "id": "stochastic-composition-discovery-omitted",
+    "module": "composition-discovery",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "result.AddRange(StochasticCompositionCases(type));",
+    "after": "// Deliberate fault: omit stochastic compositions.",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DiscoveryIncludesEveryPromotedComposition"
+  },
+  {
+    "id": "stochastic-customer-sma-bypassed",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static void StochasticSmooth(",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~ComponentAverageParityTests.StochasticOutputsPreserveTwoDifferentCustomerStages"
+  },
+  {
+    "id": "stochastic-selected-input-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStochasticKFast(",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.LegacySelectedSeriesUsesItsOwnRangeWhenOutsidePriceBars"
+  },
+  {
+    "id": "stochastic-native-slow-period-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "StochasticOscillatorSpecOptions stochastic => new StochasticOscillatorState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, stochastic.SmoothLength2),",
+    "after": "StochasticOscillatorSpecOptions stochastic => new StochasticOscillatorState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, 3),",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.FactoriesAndTypedChainingKeepTheDeclaredOhlcFields"
+  },
+  {
+    "id": "native-alias-missing-output-accepted",
+    "module": "native-alias-selection",
+    "file": "src/Indicators/SpecimenIndicators.cs",
+    "scope": "internal static double NativePrimary(",
+    "before": "indicator.Outputs.Count == 1 && indicator is IBuiltInIndicator builtIn",
+    "after": "indicator.Outputs.Count < 0 && indicator is IBuiltInIndicator builtIn",
+    "filter": "FullyQualifiedName~NativeAliasOutputTests.MissingNamedOutputCannotFallBackToAnUnrelatedPrimary"
+  },
+  {
+    "id": "finite-native-alias-returns-primary",
+    "module": "native-alias-selection",
+    "file": "src/Indicators/CustomIndicatorEngine.cs",
+    "before": "results[0][bar] = IndicatorContract.NativePrimary(indicator, streamed);",
+    "after": "results[0][bar] = streamed.Value;",
+    "filter": "FullyQualifiedName~NativeAliasOutputTests.FiniteChainedAliasesSelectTheirNamedOutput"
+  },
+  {
+    "id": "live-native-alias-returns-primary",
+    "module": "native-alias-selection",
+    "file": "src/Indicators/LiveIndicatorRun.cs",
+    "before": "slots[0] = IndicatorContract.NativePrimary(indicator, result);",
+    "after": "slots[0] = result.Value;",
+    "filter": "FullyQualifiedName~NativeAliasOutputTests.LiveAliasesSelectTheirNamedOutput"
+  },
+  {
+    "id": "stochastic-regular-native-signal-period-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "StochasticRegularSpecOptions regular => new StochasticRegularState(regular.MaType, regular.Length1, regular.Length2),",
+    "after": "StochasticRegularSpecOptions regular => new StochasticRegularState(regular.MaType, regular.Length1, 3),",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.RegularAllRoutesUseTheIndependentStochasticReference"
+  },
+  {
+    "id": "double-stochastic-unit-period-window-collapsed",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DoubleStochasticOscillatorState",
+    "before": "_maxWindow = new RollingWindowMax(Math.Max(2, resolved));\n        _minWindow = new RollingWindowMin(Math.Max(2, resolved));",
+    "after": "_maxWindow = new RollingWindowMax(resolved);\n        _minWindow = new RollingWindowMin(resolved);",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DependentNativeStatesPreserveBatchOutputsAcrossPreviewAndReset"
+  },
+  {
+    "id": "dinapoli-native-range-rounds-early",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DiNapoliPreferredStochasticOscillatorState",
+    "before": "var fast = ClampedRangePosition.Percent(value, lowest, highest);",
+    "after": "var fast = highest != lowest ? MathHelper.MinOrMax((value - lowest) / (highest - lowest) * 100, 100, 0) : 0;",
+    "filter": "FullyQualifiedName~DiNapoliNumericalTests.IndependentRoundedRecurrenceMatchesAllRoutes"
+  },
+  {
+    "id": "dinapoli-native-period-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "DiNapoliPreferredStochasticOscillatorSpecOptions diNapoli => new DiNapoliPreferredStochasticOscillatorState(diNapoli.Length),",
+    "after": "DiNapoliPreferredStochasticOscillatorSpecOptions diNapoli => new DiNapoliPreferredStochasticOscillatorState(),",
+    "filter": "FullyQualifiedName~DiNapoliNumericalTests.IndependentRoundedRecurrenceMatchesAllRoutes"
+  },
+  {
+    "id": "dynamic-momentum-running-range-forgets-history",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DynamicMomentumOscillatorState",
+    "before": "var highest = fastD > prevHighest ? fastD : prevHighest;",
+    "after": "var highest = fastD;",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DynamicMomentumUsesIndependentPrefixExtrema"
+  },
+  {
+    "id": "double-stochastic-second-range-rounds-early",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DoubleStochasticOscillatorState",
+    "before": "var doubleK = ClampedRangePosition.Percent(fastK, lowest, highest);",
+    "after": "var doubleK = highest != lowest ? MathHelper.MinOrMax((fastK - lowest) / (highest - lowest) * 100, 100, 0) : 0;",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DoubleStochasticUsesTwoIndependentRangeWindows"
+  },
+  {
+    "id": "double-stochastic-signal-period-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DoubleStochasticOscillatorState",
+    "before": "_signal = maType == MovingAvgType.SimpleMovingAverage\n            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))",
+    "after": "_signal = maType == MovingAvgType.SimpleMovingAverage\n            ? new RoundedSimpleMovingAverageSmoother(3)",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DoubleStochasticUsesTwoIndependentRangeWindows"
+  },
+  {
+    "id": "double-stochastic-legacy-metadata-selects-input",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDoubleStochasticOscillatorFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "filter": "FullyQualifiedName~StochasticNumericalTests.DoubleStochasticUsesTwoIndependentRangeWindows"
+  },
+  {
+    "id": "overflow-rejection-accepts-finite-substitute",
+    "module": "output-representability",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "Add(fixture.Name, \"OutputOverflow\", \"Accepted an output independently proven to overflow binary64.\");",
+    "after": "outputOverflowRejections++;",
+    "filter": "FullyQualifiedName~OutputRepresentabilityTests.ADeclaredOverflowCannotHideAnImplementationFault"
+  },
+  {
+    "id": "overflow-rejection-ignores-sign",
+    "module": "output-representability",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value)",
+    "after": "value.Slot == ex.OutputSlot && double.IsInfinity(ex.Value)",
+    "filter": "FullyQualifiedName~OutputRepresentabilityTests.ADeclaredOverflowCannotHideAnImplementationFault"
+  },
+  {
+    "id": "overflow-rejection-ignores-slot",
+    "module": "output-representability",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value)",
+    "after": "value.Value.Equals(ex.Value)",
+    "filter": "FullyQualifiedName~OutputRepresentabilityTests.RejectionMustNameTheProvenOutputSlot"
+  },
+  {
+    "id": "williams-rounds-endpoint-differences",
+    "module": "williams-representability",
+    "file": "src/Helpers/WilliamsRangePosition.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return -100 * (upper - value) / (upper - lower);",
+    "filter": "FullyQualifiedName~WilliamsNumericalTests.ExactRatioPreservesRangeOrientationWithoutClamping"
+  },
+  {
+    "id": "williams-ignores-selected-input",
+    "module": "williams-representability",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWilliamsRFast(",
+    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var values = data.ClosePrices;",
+    "filter": "FullyQualifiedName~WilliamsNumericalTests.LegacySelectedInputRetainsItsOwnRange"
+  },
+  {
+    "id": "williams-clamps-outside-range",
+    "module": "williams-representability",
+    "file": "src/Helpers/WilliamsRangePosition.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return Math.Max(-100, Math.Min(0, numerator.Ratio(denominator)));",
+    "filter": "FullyQualifiedName~WilliamsNumericalTests.ExactRatioPreservesRangeOrientationWithoutClamping|FullyQualifiedName~WilliamsNumericalTests.OutOfRangePriceRequiresProvenOverflowRejection"
+  },
+  {
+    "id": "roc-rounds-endpoint-difference-early",
+    "module": "roc-representability",
+    "file": "src/Helpers/RoundedPercentageChange.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return (current - previous) / previous * 100;",
+    "filter": "FullyQualifiedName~RateOfChangeNumericalTests.FinalRatioAvoidsIntermediateOverflowAndPreservesTheZeroDenominatorPolicy"
+  },
+  {
+    "id": "roc-native-alias-ignores-period",
+    "module": "roc-representability",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "RateOfChangeSpecOptions rate => new RateOfChangeState(rate.Length),",
+    "after": "RateOfChangeSpecOptions rate => new RateOfChangeState(),",
+    "filter": "FullyQualifiedName~RateOfChangeNumericalTests.EveryRouteMatchesTheIndependentExactRatio"
+  },
+  {
+    "id": "roc-ignores-selected-input",
+    "module": "roc-representability",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRocFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~RateOfChangeNumericalTests.TypedAliasesAndLegacySelectionUseTheSelectedPrices"
+  },
+  {
+    "id": "williams-overflow-fixtures-omitted",
+    "module": "output-representability",
+    "file": "src/Validation/IndicatorValidation.cs",
+    "before": "if (includeWilliamsOverflowFixtures)",
+    "after": "if (false && includeWilliamsOverflowFixtures)",
+    "filter": "FullyQualifiedName~WilliamsNumericalTests.EveryConfigurationReceivesEveryNumericalClass"
+  },
+  {
+    "id": "overflow-reference-slots-not-reported",
+    "module": "output-representability",
+    "file": "src/Validation/IndicatorFormulaCoverage.cs",
+    "before": "OutputOverflowReferenceSlots = Array.AsReadOnly((overflowReferences ?? Array.Empty<int>()).Distinct().OrderBy(s => s).ToArray());",
+    "after": "OutputOverflowReferenceSlots = Array.AsReadOnly(Array.Empty<int>());",
+    "filter": "FullyQualifiedName~OutputRepresentabilityTests.ProvenSignedOverflowRequiresRejectionAndChecksTheFinitePrefix"
+  },
+  {
+    "id": "volume-roc-uses-close",
+    "module": "roc-representability",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class VolumeRateOfChangeState",
+    "before": "vroc = RoundedPercentageChange.Of(volume, prevVolume);",
+    "after": "vroc = RoundedPercentageChange.Of(bar.Close, prevVolume);",
+    "filter": "FullyQualifiedName~RateOfChangeNumericalTests.VolumeRateUsesVolumeAcrossAllRoutes"
+  },
+  {
+    "id": "volume-roc-reconstructs-stale-tickers",
+    "module": "roc-representability",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVrocFast(",
+    "before": "var volume = SpanCompat.AsReadOnlySpan(data.Volumes);",
+    "after": "var volume = SpanCompat.AsReadOnlySpan(data.TickerDataList.Select(t => (double)t.Volume).ToList());",
+    "filter": "FullyQualifiedName~RateOfChangeNumericalTests.VolumeRatePreservesVolumeWhenCloseIsChainedAndColumnsAreUpdated"
+  },
+  {
+    "id": "fast-stochastic-native-signal-period-ignored",
+    "module": "stochastic-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "StochasticFastOscillatorSpecOptions fastStoch => new StochasticFastOscillatorState(fastStoch.MaType, fastStoch.Length, fastStoch.SmoothLength1, fastStoch.SmoothLength2),",
+    "after": "StochasticFastOscillatorSpecOptions fastStoch => new StochasticFastOscillatorState(fastStoch.MaType, fastStoch.Length, fastStoch.SmoothLength1, 2),",
+    "filter": "FullyQualifiedName~FastStochasticNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "fast-stochastic-native-normalizes-early",
+    "module": "stochastic-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class StochasticFastOscillatorState",
+    "before": "var fastK = ClampedRangePosition.Percent(value, lowest, highest);",
+    "after": "var fastK = highest != lowest ? MathHelper.MinOrMax((value - lowest) / (highest - lowest) * 100, 100, 0) : 0;",
+    "filter": "FullyQualifiedName~FastStochasticNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "momentum-early-ratio-rounding",
+    "module": "momentum-numerics",
+    "file": "src/Helpers/RoundedMomentumRatio.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return current / previous * 100;",
+    "filter": "FullyQualifiedName~MomentumNumericalTests.RatioRoundsOnlyAfterScalingAndKeepsZeroDenominatorPolicy"
+  },
+  {
+    "id": "momentum-native-ignores-average",
+    "module": "momentum-numerics",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "MomentumOscillatorSpecOptions momentum => new MomentumOscillatorState(momentum.MaType, momentum.Length),",
+    "after": "MomentumOscillatorSpecOptions momentum => new MomentumOscillatorState(length: momentum.Length),",
+    "filter": "FullyQualifiedName~MomentumNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "momentum-selected-input-ignored",
+    "module": "momentum-numerics",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMomentumOscillatorFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~MomentumNumericalTests.TypedChainingPreservesOhlcAndConfiguredPeriods"
+  },
+  {
+    "id": "facilitation-intermediate-overflow",
+    "module": "facilitation-numerics",
+    "file": "src/Helpers/RoundedRangeRatio.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return (high - low) / divisor;",
+    "filter": "FullyQualifiedName~MarketFacilitationNumericalTests.FinalRatioHandlesOverflowingRangesAndSignedVolumes"
+  },
+  {
+    "id": "facilitation-native-uses-close",
+    "module": "facilitation-numerics",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "var mfi = RoundedRangeRatio.Of(bar.High, bar.Low, bar.Volume);",
+    "after": "var mfi = RoundedRangeRatio.Of(bar.High, bar.Close, bar.Volume);",
+    "filter": "FullyQualifiedName~MarketFacilitationNumericalTests.EveryRouteMatchesTheIndependentRangeRatioIncludingPreviewAndReset"
+  },
+  {
+    "id": "price-difference-selected-input-ignored",
+    "module": "lagged-difference",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceMomentumFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~LaggedDifferenceNumericalTests.SelectedPricesDoNotChangeVolumeAndUpdatedColumnsAreUsed"
+  },
+  {
+    "id": "volume-difference-starts-late",
+    "module": "lagged-difference",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class VolumeMomentumState",
+    "before": "var volumeMomentum = _window.Count >= _length ? volume - _window[0] : 0;",
+    "after": "var volumeMomentum = _window.Count > _length ? volume - _window[0] : 0;",
+    "filter": "FullyQualifiedName~LaggedDifferenceNumericalTests.EveryRouteMatchesTheIndependentDifference"
+  },
+  {
+    "id": "true-range-selected-close-ignored",
+    "module": "bar-range",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrueRangeFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~BarRangeNumericalTests.SelectedPreviousCloseAndUpdatedOhlcColumnsAreUsed"
+  },
+  {
+    "id": "true-range-native-first-bar-uses-close",
+    "module": "bar-range",
+    "file": "src/Streaming/StatefulIndicators.Batch32.cs",
+    "scope": "public sealed class TrueRangeState",
+    "before": ": bar.High - bar.Low;",
+    "after": ": Math.Abs(bar.High - bar.Low);",
+    "filter": "FullyQualifiedName~BarRangeNumericalTests.EveryRouteMatchesTheIndependentRangeIncludingPreviewAndReset"
+  },
+  {
+    "id": "balance-power-overflowing-intermediates",
+    "module": "balance-power",
+    "file": "src/Helpers/RoundedBalanceOfPower.cs",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return (close - open) / (high - low);",
+    "filter": "FullyQualifiedName~BalanceOfPowerNumericalTests.FinalRatioAvoidsOverflowAndPreservesOrientation"
+  },
+  {
+    "id": "balance-power-selected-input-ignored",
+    "module": "balance-power",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBalanceOfPowerFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~BalanceOfPowerNumericalTests.TypedChainingPreservesOhlcAndConfiguredPeriods"
+  },
+  {
+    "id": "balance-power-native-ignores-period",
+    "module": "balance-power",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "BalanceOfPowerSpecOptions bop => new BalanceOfPowerState(maType: bop.MaType, length: bop.Length),",
+    "after": "BalanceOfPowerSpecOptions bop => new BalanceOfPowerState(maType: bop.MaType, length: 14),",
+    "filter": "FullyQualifiedName~BalanceOfPowerNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "normalized-volume-rounds-mean-first",
+    "module": "volume-normalization",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void NormalizedVolume(",
+    "before": "output[i] = i + 1 < length ? 0 : numerator.Ratio(sum);",
+    "after": "output[i] = i + 1 < length ? 0 : sum.Mean(length) == 0 ? 0 : volume[i] / sum.Mean(length);",
+    "filter": "FullyQualifiedName~VolumeNormalizationNumericalTests.EveryRouteMatchesTheIndependentVolumeContract"
+  },
+  {
+    "id": "normalized-volume-native-forgets-eviction",
+    "module": "volume-normalization",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class NormalizedVolumeState",
+    "before": "if (_values.Count == _length) sum.Add(_values[0], -1);",
+    "after": "if (_values.Count > _length) sum.Add(_values[0], -1);",
+    "filter": "FullyQualifiedName~VolumeNormalizationNumericalTests.EveryRouteMatchesTheIndependentVolumeContract"
+  },
+  {
+    "id": "net-volume-selected-price-ignored",
+    "module": "volume-normalization",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNetVolumeFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~VolumeNormalizationNumericalTests.ChainingUsesSelectedPriceForDirectionAndKeepsVolumeForNormalization"
+  },
+  {
+    "id": "simple-returns-native-intermediate-overflow",
+    "module": "simple-returns",
+    "file": "src/Streaming/StatefulIndicators.Batch32.cs",
+    "scope": "public sealed class SimpleReturnsState",
+    "before": "returns = RoundedRangeRatio.Of(value, prevValue, prevValue);",
+    "after": "returns = prevValue != 0 ? (value - prevValue) / prevValue : 0;",
+    "filter": "FullyQualifiedName~SimpleReturnsNumericalTests.EveryRouteMatchesTheIndependentExactRatio"
+  },
+  {
+    "id": "simple-returns-selected-price-ignored",
+    "module": "simple-returns",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSimpleReturnsFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~SimpleReturnsNumericalTests.TypedSelectionUsesTheSelectedPrices"
+  },
+  {
+    "id": "high-low-native-early-ratio-rounding",
+    "module": "high-low-index",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HighLowIndexState",
+    "before": "100 * advSum / (advSum + loSum)",
+    "after": "advSum / (advSum + loSum) * 100",
+    "filter": "FullyQualifiedName~HighLowIndexNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "high-low-native-ignores-average",
+    "module": "high-low-index",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "HighLowIndexSpecOptions highLow => new HighLowIndexState(highLow.MaType, highLow.Length),",
+    "after": "HighLowIndexSpecOptions highLow => new HighLowIndexState(length: highLow.Length),",
+    "filter": "FullyQualifiedName~HighLowIndexNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "high-low-core-zero-count-neutral",
+    "module": "high-low-index",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void HighLowIndex(",
+    "before": "output[i] = mean.Next(up + down == 0 ? 0 : 100 * up / (up + down), true);",
+    "after": "output[i] = mean.Next(up + down == 0 ? 50 : 100 * up / (up + down), true);",
+    "filter": "FullyQualifiedName~HighLowIndexNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "cumulative-price-rounds-state",
+    "module": "cumulative",
+    "file": "src/Streaming/StatefulIndicators.Batch31.cs",
+    "scope": "public sealed class CumulativeSumState",
+    "before": "var total = _sum;",
+    "after": "var total = new ExactMeanAccumulator();\n        total.Add(_sum.Mean(1));",
+    "filter": "FullyQualifiedName~CumulativeNumericalTests.EveryRouteMatchesTheIndependentCumulativeSum"
+  },
+  {
+    "id": "cumulative-volume-rounds-state",
+    "module": "cumulative",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class CumulativeVolumeIndexState",
+    "before": "var total = _cvi;",
+    "after": "var total = new ExactMeanAccumulator();\n        total.Add(_cvi.Mean(1));",
+    "filter": "FullyQualifiedName~CumulativeNumericalTests.EveryRouteMatchesTheIndependentCumulativeSum"
+  },
+  {
+    "id": "cumulative-volume-selected-price-ignored",
+    "module": "cumulative",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCumulativeVolumeIndexFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~CumulativeNumericalTests.SelectedPricesDoNotChangeVolumeAndUpdatedColumnsAreUsed"
+  },
+  {
+    "id": "volume-zone-equal-price-uses-positive-volume",
+    "module": "volume-zone",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class VolumeZoneOscillatorState",
+    "before": "var signed = _hasPrev ? (value > _prevValue ? bar.Volume : -bar.Volume) : 0;",
+    "after": "var signed = _hasPrev ? (value >= _prevValue ? bar.Volume : -bar.Volume) : 0;",
+    "filter": "FullyQualifiedName~VolumeZoneNumericalTests.EveryRouteMatchesTheIndependentExactRatio"
+  },
+  {
+    "id": "volume-zone-selected-price-ignored",
+    "module": "volume-zone",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeZoneOscillatorFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~VolumeZoneNumericalTests.TypedSelectionUsesTheSelectedPrices"
+  },
+  {
+    "id": "obv-native-ignores-average-and-period",
+    "module": "obv",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "ObvSpecOptions obv => new OnBalanceVolumeState(obv.Length, obv.MaType),",
+    "after": "ObvSpecOptions obv => new OnBalanceVolumeState(),",
+    "filter": "FullyQualifiedName~ObvNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "obv-native-rounds-total",
+    "module": "obv",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class OnBalanceVolumeState",
+    "before": "var total = _obv;",
+    "after": "var total = new ExactMeanAccumulator();\n        total.Add(_obv.Mean(1));",
+    "filter": "FullyQualifiedName~ObvNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "obv-selected-price-ignored",
+    "module": "obv",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeObvFast(",
+    "before": "var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var selected = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ObvNumericalTests.TypedChainingAndBothBuildersUseSelectedPricesAndUpdatedVolume"
+  },
+  {
+    "id": "obv-modified-rounds-total",
+    "module": "obv",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OnBalanceVolumeModifiedState",
+    "before": "var total = _obvTotal;",
+    "after": "var total = new ExactMeanAccumulator();\n        total.Add(_obvTotal.Mean(1));",
+    "filter": "FullyQualifiedName~ObvNumericalTests.ModifiedConsumerRetainsTheSmallCumulativeContribution"
+  },
+  {
+    "id": "average-day-range-rounds-difference-first",
+    "module": "average-day-range",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void AverageDayRange(",
+    "before": "sum.Add(high[i]); sum.Add(low[i], -1);",
+    "after": "sum.Add(high[i] - low[i]);",
+    "filter": "FullyQualifiedName~AverageDayRangeNumericalTests.EveryRouteMatchesTheIndependentMeanIncludingPreviewAndReset"
+  },
+  {
+    "id": "average-day-range-native-forgets-eviction",
+    "module": "average-day-range",
+    "file": "src/Streaming/StatefulIndicators.Batch32.cs",
+    "scope": "public sealed class AverageDayRangeState",
+    "before": "if (_highs.Count == _length) { sum.Add(_highs[0], -1); sum.Add(_lows[0]); }",
+    "after": "if (_highs.Count > _length) { sum.Add(_highs[0], -1); sum.Add(_lows[0]); }",
+    "filter": "FullyQualifiedName~AverageDayRangeNumericalTests.EveryRouteMatchesTheIndependentMeanIncludingPreviewAndReset"
+  },
+  {
+    "module": "money-flow",
+    "file": "src/Streaming/RollingMoneyFlowIndex.cs",
+    "filter": "FullyQualifiedName~MoneyFlowNumericalTests.EveryRouteMatchesTheIndependentFlowIncludingPreviewAndReset",
+    "id": "money-flow-rounds-products",
+    "before": "total.AddProduct(observation.Price, observation.Volume, weight);",
+    "after": "total.Add(observation.Price * observation.Volume, weight);"
+  },
+  {
+    "module": "money-flow",
+    "file": "src/Streaming/RollingMoneyFlowIndex.cs",
+    "filter": "FullyQualifiedName~MoneyFlowNumericalTests.EveryRouteMatchesTheIndependentFlowIncludingPreviewAndReset",
+    "id": "money-flow-classifies-ties-as-negative",
+    "before": "price < _previous ? -1 : 0",
+    "after": "price <= _previous ? -1 : 0"
+  },
+  {
+    "module": "money-flow",
+    "file": "src/Streaming/RollingMoneyFlowIndex.cs",
+    "filter": "FullyQualifiedName~MoneyFlowNumericalTests.EveryRouteMatchesTheIndependentFlowIncludingPreviewAndReset",
+    "id": "money-flow-forgets-expiry",
+    "before": "if (_window.Count == _length)",
+    "after": "if (_window.Count > _length)"
+  },
+  {
+    "id": "money-flow-selected-input-ignored",
+    "module": "money-flow",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMoneyFlowIndexFast(",
+    "before": "var selected = data.ChainedValues;",
+    "after": "var selected = new List<double>();",
+    "filter": "FullyQualifiedName~MoneyFlowNumericalTests.TypedChainingAndBuildersUseSelectedPricesAndCurrentColumns"
+  },
+  {
+    "id": "adr-alias-reads-stale-tickers",
+    "module": "average-day-range",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdrFast(",
+    "before": "=> ComputeAverageDayRangeFast(data, context, length);",
+    "after": "=> ComputeAverageDayRangeFast(new StockData(data.TickerDataList), context, length);",
+    "filter": "FullyQualifiedName~AverageDayRangeNumericalTests.TypedChainingPreservesRangeAndBuilderReadsCurrentColumns"
+  },
+  {
+    "id": "money-flow-rounds-typical-price",
+    "module": "money-flow",
+    "file": "src/Streaming/RollingMoneyFlowIndex.cs",
+    "scope": "internal static double TypicalPrice(",
+    "before": "return sum.Mean(3);",
+    "after": "return PriceMean.Of(high, low, close);",
+    "filter": "FullyQualifiedName~MoneyFlowNumericalTests.EveryRouteMatchesTheIndependentFlowIncludingPreviewAndReset"
+  },
+  {
+    "id": "move-tracker-signal-uses-unrounded-prices",
+    "module": "move-tracker",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceChangeFast(",
+    "before": "buffer.WritableSpan[i] -= buffer.Span[i - 1];",
+    "after": "buffer.WritableSpan[i] = i == 1 ? inputSpan[i] - inputSpan[i - 1] : inputSpan[i] - 2 * inputSpan[i - 1] + inputSpan[i - 2];",
+    "filter": "FullyQualifiedName~MoveTrackerNumericalTests.BothRoundedStagesMatchAcrossRoutesPreviewAndReset"
+  },
+  {
+    "id": "move-tracker-preview-commits",
+    "module": "move-tracker",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MoveTrackerState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MoveTrackerNumericalTests.BothRoundedStagesMatchAcrossRoutesPreviewAndReset"
+  },
+  {
+    "id": "log-returns-direct-ratio",
+    "module": "log-returns",
+    "file": "src/Helpers/StableLogRatio.cs",
+    "scope": "internal static double Of(",
+    "before": "return Math.Log(currentMantissa / previousMantissa)\n            + (currentExponent - previousExponent) * Math.Log(2);",
+    "after": "return Math.Log(current / previous);",
+    "filter": "FullyQualifiedName~LogReturnsNumericalTests.EveryRouteMatchesIndependentLogarithmsIncludingPreviewAndReset"
+  },
+  {
+    "id": "log-returns-subtracts-logs-near-unity",
+    "module": "log-returns",
+    "file": "src/Helpers/StableLogRatio.cs",
+    "scope": "internal static double Of(",
+    "before": "return argument == 1 ? relative : Math.Log(argument) * (relative / (argument - 1));",
+    "after": "return Math.Log(current) - Math.Log(previous);",
+    "filter": "FullyQualifiedName~LogReturnsNumericalTests.IndependentLogarithmMatchesKnownValuesAndPreservesAdjacentPrices"
+  }
+]

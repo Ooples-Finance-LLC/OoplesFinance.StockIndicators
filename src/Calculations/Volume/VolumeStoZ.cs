@@ -1,4 +1,4 @@
-
+﻿
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
@@ -72,7 +72,7 @@ public static partial class Calculations
             if (i >= length)
             {
                 var prevVolume = volumeList[i - length];
-                vroc = prevVolume != 0 ? (volumeList[i] - prevVolume) / prevVolume * 100 : 0;
+                vroc = RoundedPercentageChange.Of(volumeList[i], prevVolume);
             }
 
             vrocList.Add(vroc);
@@ -234,7 +234,7 @@ public static partial class Calculations
         for (var i = 0; i < count; i++)
         {
             var totalVolume = totalBuffer.Span[i];
-            var oscillator = totalVolume != 0 ? signedBuffer.Span[i] / totalVolume * 100 : 0;
+            var oscillator = RoundedMomentumRatio.Of(signedBuffer.Span[i], totalVolume);
             oscillatorList.Add(oscillator);
 
             var prevOscillator1 = i >= 1 ? oscillatorList[i - 1] : 0;
@@ -465,7 +465,7 @@ public static partial class Calculations
             var currentVolume = volumeList[i];
             var medianValue = (currentHigh + currentLow) / 2;
 
-            var vao = currentValue != medianValue ? currentVolume * (currentValue - medianValue) : currentVolume;
+            var vao = currentVolume * (currentValue - medianValue);
             vaoList.Add(vao);
             vaoSumWindow.Add(vao);
 
@@ -524,7 +524,7 @@ public static partial class Calculations
             var tvaSum = tvaSumWindow.Sum(length);
 
             var prevVapc = i >= 1 ? vapcList[i - 1] : 0;
-            var vapc = volumeSum != 0 ? MinOrMax(100 * tvaSum / volumeSum, 100, 0) : 0;
+            var vapc = volumeSum != 0 ? MinOrMax(100 * tvaSum / volumeSum, 100, -100) : 0;
             vapcList.Add(vapc);
 
             var signal = GetCompareSignal(vapc, prevVapc);
@@ -603,7 +603,7 @@ public static partial class Calculations
             var vc = Math.Min(currentVolume, vmax);
             var mf = MinPastValues(i, 1, currentValue - prevValue);
 
-            var vcp = mf > cutoff ? vc : mf < cutoff * -1 ? vc * -1 : mf > 0 ? vc : mf < 0 ? vc * -1 : 0;
+            var vcp = mf > cutoff ? vc : mf < -cutoff ? -vc : 0;
             vcpList.Add(vcp);
             vcpSumWindow.Add(vcp);
 

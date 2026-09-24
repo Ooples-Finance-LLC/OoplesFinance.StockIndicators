@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -211,7 +211,7 @@ public sealed class RollingMinState : IStreamingIndicatorState, IDisposable
 public sealed class CumulativeSumState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
-    private double _sum;
+    private ExactMeanAccumulator _sum;
 
     public CumulativeSumState()
     {
@@ -222,16 +222,18 @@ public sealed class CumulativeSumState : IStreamingIndicatorState
 
     public void Reset()
     {
-        _sum = 0;
+        _sum = default;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var sum = _sum + value;
+        var total = _sum;
+        total.Add(value);
+        var sum = total.Mean(1);
         if (isFinal)
         {
-            _sum = sum;
+            _sum = total;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;

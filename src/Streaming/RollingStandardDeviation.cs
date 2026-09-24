@@ -32,6 +32,7 @@ internal sealed class RollingStandardDeviation : IDisposable
     /// <summary>The standard deviation including <paramref name="value"/>, committed only when final.</summary>
     public double Next(double value, bool isFinal)
     {
+        StreamingInputValidation.Finite(value, nameof(value));
         if (isFinal)
         {
             _window.TryAdd(value, out _);
@@ -49,31 +50,46 @@ internal sealed class RollingStandardDeviation : IDisposable
 
     private double Compute(int first, double value, bool includeValue)
     {
+        var anchor = first < _window.Count ? _window[first] : value;
         double sum = 0;
         for (var i = first; i < _window.Count; i++)
         {
-            sum += _window[i];
+            sum += _window[i] - anchor;
         }
 
         if (includeValue)
         {
-            sum += value;
+            sum += value - anchor;
         }
 
-        var mean = sum / _length;
+        var meanOffset = sum / _length;
         double variance = 0;
+        var lostSquare = false;
         for (var i = first; i < _window.Count; i++)
         {
-            var diff = _window[i] - mean;
-            variance += diff * diff;
+            var diff = (_window[i] - anchor) - meanOffset;
+            var square = diff * diff;
+            lostSquare |= diff != 0 && square < 2.2250738585072014E-308;
+            variance += square;
         }
 
         if (includeValue)
         {
-            var diff = value - mean;
-            variance += diff * diff;
+            var diff = (value - anchor) - meanOffset;
+            var square = diff * diff;
+            lostSquare |= diff != 0 && square < 2.2250738585072014E-308;
+            variance += square;
         }
 
-        return Math.Sqrt(variance / _length);
+        variance /= _length;
+        if (lostSquare || double.IsNaN(variance) || double.IsInfinity(variance)
+            || variance > 0 && variance < 2.2250738585072014E-308)
+        {
+            var exact = new ExactPopulationDeviation();
+            for (var i = first; i < _window.Count; i++) exact.Add(_window[i]);
+            if (includeValue) exact.Add(value);
+            return exact.Value();
+        }
+        return Math.Sqrt(variance);
     }
 }

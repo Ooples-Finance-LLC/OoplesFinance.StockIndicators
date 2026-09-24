@@ -1827,7 +1827,7 @@ public sealed class StreamingStatefulParityTests : GlobalTestData
             {
                 new StatefulIndicatorSpec("EhlersDecyclerOscillatorV1.SlowEdo",
                     () => new EhlersDecyclerOscillatorV1State(),
-                    data => data.CalculateEhlersDecyclerOscillatorV1().OutputValues["SlowEdo"])
+                    data => data.CalculateEhlersDecyclerOscillatorV1().OutputValues["SlowEdo"], "SlowEdo")
             };
             yield return new object[]
             {

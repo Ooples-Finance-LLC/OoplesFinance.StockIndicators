@@ -434,12 +434,14 @@ internal sealed class SeriesEvaluator
             throw new InvalidOperationException("Multi-stock indicator node missing stock input, market input, or spec.");
         }
 
-        var stockData = GetBaseData(node.SeriesKey);
-        var marketPrices = Resolve(node.Right.Value);
-
-        // Create market StockData from the resolved market prices
-        // For multi-stock indicators, we need to create a StockData with the market prices as close prices
-        var marketData = CreateMarketDataFromPrices(stockData, marketPrices);
+        StockData ResolveInput(SeriesHandle handle)
+        {
+            var source = _nodes[handle];
+            var data = GetBaseData(source.SeriesKey);
+            return source.Kind == SeriesNodeKind.Base ? data : CreateMarketDataFromPrices(data, Resolve(handle));
+        }
+        var stockData = ResolveInput(node.Left.Value);
+        var marketData = ResolveInput(node.Right.Value);
 
         // Apply the multi-stock indicator using V2-native implementation
         _standardPathHits++;
@@ -488,7 +490,8 @@ internal sealed class SeriesEvaluator
         var marketKey = new Streaming.SeriesKey("MARKET", BarTimeframe.Days(1));
 
         var state = CreateMultiSeriesIndicatorState(spec.Name, options, primaryKey, marketKey);
-        return BatchCompute.ComputeAllMultiSeries(stockData, marketData, state, primaryKey, marketKey);
+        try { return BatchCompute.ComputeAllMultiSeries(stockData, marketData, state, primaryKey, marketKey, spec.OutputKey); }
+        finally { (state as IDisposable)?.Dispose(); }
     }
 
     /// <summary>

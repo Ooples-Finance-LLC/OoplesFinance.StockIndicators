@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -193,7 +193,7 @@ public static partial class Calculations
         {
             var currentValue = inputList[i];
             var prevValue = i >= length ? inputList[i - length] : 0;
-            var returns = i >= length && prevValue > 0 && currentValue > 0 ? Log(currentValue / prevValue) : 0;
+            var returns = i >= length ? StableLogRatio.Of(currentValue, prevValue) : 0;
             returnsList.Add(returns);
 
             var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
@@ -248,7 +248,7 @@ public static partial class Calculations
                 }
 
                 Array.Sort(window);
-                median = length % 2 == 0 ? (window[(length / 2) - 1] + window[length / 2]) / 2 : window[length / 2];
+                median = length % 2 == 0 ? PriceMean.Of(window[(length / 2) - 1], window[length / 2]) : window[length / 2];
             }
 
             medianList.Add(median);
@@ -304,7 +304,7 @@ public static partial class Calculations
                     }
                 }
 
-                percentRank = (double)below / length * 100;
+                percentRank = 100d * below / length;
             }
 
             percentRankList.Add(percentRank);
@@ -1389,6 +1389,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNarrowBandpassFilter(this StockData stockData, int length = 50)
     {
+        length = Math.Max(2, length);
         List<double> sumList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1663,51 +1664,10 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var ratio = currentValue * length / 100;
-            var convertedValue = (long)Math.Round(currentValue);
-            var sqrtValue = currentValue >= 0 ? (long)Math.Round(Sqrt(currentValue)) : 0;
-            var maxValue = (long)Math.Round(currentValue + ratio);
-            var minValue = (long)Math.Round(currentValue - ratio);
-
-            double pno1 = 0, pno2 = 0;
-            for (var j = convertedValue; j <= maxValue; j++)
-            {
-                pno1 = j;
-                for (var k = 2; k <= sqrtValue; k++)
-                {
-                    pno1 = j % k == 0 ? 0 : j;
-                    if (pno1 == 0)
-                    {
-                        break;
-                    }
-                }
-
-                if (pno1 > 0)
-                {
-                    break;
-                }
-            }
-            pno1 = pno1 == 0 ? GetLastOrDefault(pno1List) : pno1;
+            var primes = PrimeNumberSearch.Find(currentValue, length);
+            var pno1 = primes.Upper == 0 ? GetLastOrDefault(pno1List) : primes.Upper;
+            var pno2 = primes.Lower == 0 ? GetLastOrDefault(pno2List) : primes.Lower;
             pno1List.Add(pno1);
-
-            for (var l = convertedValue; l >= minValue; l--)
-            {
-                pno2 = l;
-                for (var m = 2; m <= sqrtValue; m++)
-                {
-                    pno2 = l % m == 0 ? 0 : l;
-                    if (pno2 == 0)
-                    {
-                        break;
-                    }
-                }
-
-                if (pno2 > 0)
-                {
-                    break;
-                }
-            }
-            pno2 = pno2 == 0 ? GetLastOrDefault(pno2List) : pno2;
             pno2List.Add(pno2);
 
             var prevPno = GetLastOrDefault(pnoList);
@@ -1943,6 +1903,8 @@ public static partial class Calculations
     public static StockData CalculatePolarizedFractalEfficiency(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 9, int smoothLength = 5)
     {
+        length = Math.Max(1, length);
+        smoothLength = Math.Max(1, smoothLength);
         List<double> fracEffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1953,7 +1915,8 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var priorValue = i >= length ? inputList[i - length] : 0;
-            var pfe = Sqrt(Pow(MinPastValues(i, length, currentValue - priorValue), 2) + 100);
+            var displacement = MinPastValues(i, length, currentValue - priorValue);
+            var pfe = Sqrt(Pow(displacement, 2) + ((double)length * length));
 
             var c2c = Sqrt(Pow(MinPastValues(i, 1, currentValue - prevValue), 2) + 1);
             c2cSumWindow.Add(c2c);
@@ -1961,7 +1924,7 @@ public static partial class Calculations
             var c2cSum = c2cSumWindow.Sum(length);
             var efRatio = c2cSum != 0 ? pfe / c2cSum * 100 : 0;
 
-            var fracEff = i >= length && currentValue - priorValue > 0 ? efRatio : -efRatio;
+            var fracEff = i >= length ? Math.Sign(displacement) * efRatio : 0;
             fracEffList.Add(fracEff);
         }
 
@@ -2094,6 +2057,7 @@ public static partial class Calculations
     public static StockData CalculatePhaseChangeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 35, int smoothLength = 3)
     {
+        length = Math.Max(2, length);
         List<double> pciList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -2241,11 +2205,11 @@ public static partial class Calculations
             var prevPsy1 = i >= 1 ? psyList[i - 1] : 0;
             var prevPsy2 = i >= 2 ? psyList[i - 2] : 0;
 
-            double cond = currentValue > prevValue ? 1 : 0;
+            double cond = i > 0 && currentValue > prevValue ? 1 : 0;
             condSumWindow.Add(cond);
 
             var condSum = condSumWindow.Sum(length);
-            var psy = length != 0 ? condSum / length * 100 : 0;
+            var psy = length != 0 ? 100d * condSum / length : 0;
             psyList.Add(psy);
 
             var signal = GetCompareSignal(psy - prevPsy1, prevPsy1 - prevPsy2);
@@ -2544,7 +2508,7 @@ public static partial class Calculations
         var rsiMaList = GetMovingAverageList(stockData, maType, smoothLength, rsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var rsi = rsiMaList[i];
+            var rsi = rsiList[i];
             var prevRsiMa = i >= 1 ? rsiMaList[i - 1] : 0;
             var prevRsi = i >= 1 ? rsiList[i - 1] : 0;
             var rsiMa = rsiMaList[i];
@@ -2720,25 +2684,11 @@ public static partial class Calculations
     public static StockData CalculateRelativeSpreadStrength(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5)
     {
-        List<double> spreadList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var fastEma = fastEmaList[i];
-            var slowEma = slowEmaList[i];
-
-            var spread = fastEma - slowEma;
-            spreadList.Add(spread);
-        }
-
-        stockData.SetCustomValues(spreadList);
-        var rsList = CalculateRelativeStrengthIndex(stockData, length: length).ChainedValues;
-        var rssList = GetMovingAverageList(stockData, maType, smoothLength, rsList);
+        using var kernel = new Streaming.RelativeSpreadKernel(maType, fastLength, slowLength, length, smoothLength);
+        var rssList = inputList.Select(value => kernel.Next(value, true)).ToList();
         for (var i = 0; i < stockData.Count; i++)
         {
             var rss = rssList[i];
@@ -2807,10 +2757,10 @@ public static partial class Calculations
                 var medMa = medMaList[i];
                 var slowMa = slowMaList[i];
                 var vSlowMa = vSlowMaList[i];
-                double t1 = fastMa >= medMa && medMa >= slowMa && slowMa >= vSlowMa ? 10 : 0;
-                double t2 = fastMa >= medMa && medMa >= slowMa && slowMa < vSlowMa ? 9 : 0;
-                double t3 = fastMa < medMa && medMa >= slowMa && slowMa >= vSlowMa ? 9 : 0;
-                double t4 = fastMa < medMa && medMa >= slowMa && slowMa < vSlowMa ? 5 : 0;
+                double t1 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 10 : 0;
+                double t2 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 9 : 0;
+                double t3 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 9 : 0;
+                double t4 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 5 : 0;
 
                 var rs2 = t1 + t2 + t3 + t4;
                 rs2List.Add(rs2);
@@ -2827,7 +2777,7 @@ public static partial class Calculations
                 double x = rs2 >= 5 ? 1 : 0;
                 xSumWindow.Add(x);
 
-                var rs3 = rs2 >= 5 || rs2 > rs2Ma ? xSumWindow.Sum(length4) / length4 * 100 : 0;
+                var rs3 = rs2 >= 5 || TechnicalRatingComparison.Compare(rs2, rs2Ma) > 0 ? xSumWindow.Sum(length4) / length4 * 100 : 0;
                 rs3List.Add(rs3);
 
                 var signal = GetCompareSignal(rs3 - prevRs3_1, prevRs3_1 - prevRs3_2);
@@ -2873,20 +2823,23 @@ public static partial class Calculations
             var prevOpen1 = i >= 1 ? openList[i - 1] : 0;
             var prevClose1 = i >= 1 ? inputList[i - 1] : 0;
             var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
+            var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
             var prevOpen2 = i >= 2 ? openList[i - 2] : 0;
             var prevClose2 = i >= 2 ? inputList[i - 2] : 0;
             var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
+            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
             var prevOpen3 = i >= 3 ? openList[i - 3] : 0;
             var prevClose3 = i >= 3 ? inputList[i - 3] : 0;
             var prevHigh3 = i >= 3 ? highList[i - 3] : 0;
+            var prevLow3 = i >= 3 ? lowList[i - 3] : 0;
             var a = currentClose - currentOpen;
             var b = prevClose1 - prevOpen1;
             var c = prevClose2 - prevOpen2;
             var d = prevClose3 - prevOpen3;
             var e = currentHigh - currentLow;
-            var f = prevHigh1 - prevOpen1;
-            var g = prevHigh2 - prevOpen2;
-            var h = prevHigh3 - prevOpen3;
+            var f = prevHigh1 - prevLow1;
+            var g = prevHigh2 - prevLow2;
+            var h = prevHigh3 - prevLow3;
 
             var numerator = (a + (2 * b) + (2 * c) + d) / 6;
             numeratorList.Add(numerator);
@@ -3271,12 +3224,25 @@ public static partial class Calculations
     public static StockData CalculateRSMKIndicator(this StockData stockData, StockData marketData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 90, int smoothLength = 3)
     {
+        if (stockData.Count != marketData.Count)
+            throw new ArgumentException("Primary and benchmark batches must have equal counts.", nameof(marketData));
+        length = Math.Max(1, length);
+        smoothLength = Math.Max(1, smoothLength);
         List<double> rsmkList = new(stockData.Count);
         List<double> logRatioList = new(stockData.Count);
         List<double> logDiffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var (spInputList, _, _, _, _) = GetInputValuesList(marketData);
+
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            if (stockData.Dates[i] != marketData.Dates[i] || stockData.Dates[i].Kind != marketData.Dates[i].Kind
+                || i > 0 && (stockData.Dates[i] <= stockData.Dates[i - 1] || stockData.Dates[i].Kind != stockData.Dates[i - 1].Kind))
+                throw new ArgumentException("RSMK requires aligned, strictly increasing timestamps with a consistent kind.", nameof(marketData));
+            if (!(inputList[i] > 0) || double.IsInfinity(inputList[i]) || !(spInputList[i] > 0) || double.IsInfinity(spInputList[i]))
+                throw new ArgumentOutOfRangeException(nameof(stockData), "RSMK requires positive finite primary and benchmark inputs.");
+        }
 
         if (stockData.Count == marketData.Count)
         {
@@ -3286,10 +3252,10 @@ public static partial class Calculations
                 var spValue = spInputList[i];
                 var prevLogRatio = i >= length ? logRatioList[i - length] : 0;
 
-                var logRatio = spValue != 0 ? currentValue / spValue : 0;
+                var logRatio = Math.Log(currentValue)-Math.Log(spValue);
                 logRatioList.Add(logRatio);
 
-                var logDiff = logRatio - prevLogRatio;
+                var logDiff = i < length ? 0 : logRatio - prevLogRatio;
                 logDiffList.Add(logDiff);
             }
 
@@ -3669,7 +3635,7 @@ public static partial class Calculations
             var prevZ1 = i >= 1 ? zList[i - 1] : 0;
             var prevZ2 = i >= 2 ? zList[i - 2] : 0;
 
-            var z = (currentClose - currentOpen - (currentClose - prevOpen)) * factor;
+            var z = (prevOpen - currentOpen) * factor;
             zList.Add(z);
 
             var signal = GetRsiSignal(z - prevZ1, prevZ1 - prevZ2, z, prevZ1, 5, -5);
@@ -3783,7 +3749,7 @@ public static partial class Calculations
             var len2Sum = tempSumWindow.Sum(slowLength - 1);
 
             var prevCp2 = GetLastOrDefault(cp2List);
-            var cp2 = ((fastLength * len2Sum) - (slowLength * len1Sum)) / (slowLength - fastLength);
+            var cp2 = slowLength == fastLength ? 0 : ((fastLength * len2Sum) - (slowLength * len1Sum)) / (slowLength - fastLength);
             cp2List.Add(cp2);
 
             var prevMdi = GetLastOrDefault(mdiList);
@@ -3821,80 +3787,45 @@ public static partial class Calculations
         List<double> moList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length2);
-
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
+        var masses = new double[length1];
         for (var i = 0; i < stockData.Count; i++)
         {
-            var hMax = highestList[i];
-            var lMin = lowestList[i];
-            var prevC = i >= length2 ? inputList[i - length2] : 0;
-            var rx = length1 != 0 ? (hMax - lMin) / length1 : 0;
-
-            var imx = 1;
-            double pdfmx = 0, pdfc = 0, rx1, bu, bl, bu1, bl1, pdf;
-            for (var j = 1; j <= length1; j++)
+            var countAvailable = Math.Min(length2, i+1);
+            var maximum = highList[i - 0]; var minimum = lowList[i - 0];
+            for (var k = 1; k < countAvailable; k++)
             {
-                bu = lMin + (j * rx);
-                bl = bu - rx;
-
-                var currHigh = i >= j ? highList[i - j] : 0;
-                var currLow = i >= j ? lowList[i - j] : 0;
-                double hMax1 = currHigh, lMin1 = currLow;
-                for (var k = 2; k < length2; k++)
-                {
-                    var high = i >= j + k ? highList[i - (j + k)] : 0;
-                    var low = i >= j + k ? lowList[i - (j + k)] : 0;
-                    hMax1 = Math.Max(high, hMax1);
-                    lMin1 = Math.Min(low, lMin1);
-                }
-
-                rx1 = length1 != 0 ? (hMax1 - lMin1) / length1 : 0; //-V3022
-                bl1 = lMin1 + ((j - 1) * rx1);
-                bu1 = lMin1 + (j * rx1);
-
-                pdf = 0;
-                for (var k = 1; k <= length2; k++)
-                {
-                    var high = i >= j + k ? highList[i - (j + k)] : 0;
-                    var low = i >= j + k ? lowList[i - (j + k)] : 0;
-
-                    if (high <= bu1)
-                    {
-                        pdf += 1;
-                    }
-                    if (high <= bu1 || low >= bu1)
-                    {
-                        if (high <= bl1)
-                        {
-                            pdf -= 1;
-                        }
-                        if (high <= bl || low >= bl1)
-                        {
-                            continue;
-                        }
-                        else
-                        {
-                            pdf -= high - low != 0 ? (bl1 - low) / (high - low) : 0;
-                        }
-                    }
-                    else
-                    {
-                        pdf += high - low != 0 ? (bu1 - low) / (high - low) : 0;
-                    }
-                }
-
-                pdf = length2 != 0 ? pdf / length2 : 0;
-                pdfmx = j == 1 ? pdf : pdfmx;
-                imx = j == 1 ? j : imx;
-                pdfmx = Math.Max(pdf, pdfmx);
-                pdfc = j == 1 ? pdf : pdfc;
-                pdfc = prevC > bl && prevC <= bu ? pdf : pdfc;
+                maximum = Math.Max(maximum, highList[i - k]);
+                minimum = Math.Min(minimum, lowList[i - k]);
             }
-
-            var pmo = lMin + ((imx - 0.5) * rx);
-            var mo = pdfmx != 0 ? 100 * (1 - (pdfc / pdfmx)) : 0;
-            mo = prevC < pmo ? -mo : mo;
-            moList.Add(-mo);
+            var width = (maximum-minimum)/length1;
+            var rawValue = 0d;
+            if (i >= length2 && width > 0)
+            {
+                var comparison = inputList[i-length2];
+                var mode = 0; var largestMass = -1d; var priceMass = 0d;
+                for (var bin = 0; bin < length1; bin++)
+                {
+                    var lower = minimum+bin*width;
+                    var upper = bin+1 == length1 ? maximum : minimum+(bin+1)*width;
+                    double mass = 0;
+                    for (var k = 0; k < countAvailable; k++)
+                    {
+                        var h = highList[i - k]; var l = lowList[i - k];
+                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0)
+                            : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
+                    }
+                    masses[bin] = mass; largestMass = Math.Max(largestMass, mass);
+                    if (comparison >= lower && (comparison < upper || bin+1 == length1 && comparison <= upper)) priceMass = mass;
+                }
+                // Choose the first bin tied with the global maximum.
+                while (mode+1 < length1 && largestMass-masses[mode] > 1e-12*countAvailable) mode++;
+                largestMass = masses[mode];
+                var modePrice = minimum+(mode+0.5)*width;
+                if (largestMass > 0)
+                    rawValue = (comparison < modePrice ? 1 : -1)*100*Math.Max(0, 1-priceMass/largestMass);
+            }
+            moList.Add(rawValue);
         }
 
         var moWmaList = GetMovingAverageList(stockData, maType, signalLength, moList);

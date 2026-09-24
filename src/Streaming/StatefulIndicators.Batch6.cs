@@ -8,6 +8,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 
 public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorState
 {
+    private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
     private readonly PriceMomentumOscillatorEngine _primaryEngine;
@@ -28,6 +29,7 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
 
     public void Reset()
     {
+        _alignment.Reset();
         _primaryEngine.Reset();
         _marketEngine.Reset();
         _lastMarket = 0;
@@ -37,12 +39,16 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
         bool isFinal, bool includeOutputs)
     {
+        if (!_alignment.CanUpdate(context, _primarySeries, _marketSeries, series, bar, isFinal))
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
+
         if (series.Equals(_primarySeries))
         {
             var primaryPmo = _primaryEngine.Next(bar.Close, isFinal);
             if (!_hasMarket)
             {
-                return new MultiSeriesIndicatorStateResult(false, 0d, null);
+                _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
             }
 
             var cpmo = primaryPmo - _lastMarket;
@@ -55,17 +61,22 @@ public sealed class ComparePriceMomentumOscillatorState : IMultiSeriesIndicatorS
                 };
             }
 
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(true, cpmo, outputs);
         }
 
         if (series.Equals(_marketSeries))
         {
             var marketPmo = _marketEngine.Next(bar.Close, isFinal);
-            _lastMarket = marketPmo;
-            _hasMarket = true;
+            if (isFinal)
+            {
+                _lastMarket = marketPmo;
+                _hasMarket = true;
+            }
         }
 
-        return new MultiSeriesIndicatorStateResult(false, 0d, null);
+        _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
     }
 }
 
@@ -121,15 +132,17 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         _iLength = _itl - 1;
         _lLength = _ltl - 1;
 
-        _hAvg = MovingAverageSmootherFactory.Create(maType, _length);
-        _sAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _stl));
-        _iAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _itl));
-        _lAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _ltl));
-        _h2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _hLength));
-        _s2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _sLength));
-        _i2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _iLength));
-        _l2Avg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _lLength));
-        _ftpAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, _lLength));
+        IMovingAverageSmoother Average(int period) => maType == MovingAvgType.WeightedMovingAverage
+            ? new PreciseWeightedAverage(period) : MovingAverageSmootherFactory.Create(maType, period);
+        _hAvg = Average(_length);
+        _sAvg = Average(Math.Max(1, _stl));
+        _iAvg = Average(Math.Max(1, _itl));
+        _lAvg = Average(Math.Max(1, _ltl));
+        _h2Avg = Average(Math.Max(1, _hLength));
+        _s2Avg = Average(Math.Max(1, _sLength));
+        _i2Avg = Average(Math.Max(1, _iLength));
+        _l2Avg = Average(Math.Max(1, _lLength));
+        _ftpAvg = Average(Math.Max(1, _lLength));
         _input = new StreamingInputResolver(InputName.FullTypicalPrice, null);
 
         var maxOffset = Math.Max(Math.Max(_hoff, _soff), _ioff);
@@ -144,6 +157,14 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         _sumValues = new PooledRingBuffer<double>(capacity);
         _errSumWindow = new RollingWindowSum(Math.Max(1, _soff));
         _value70Window = new RollingWindowSum(Math.Max(1, _length));
+    }
+
+    private sealed class PreciseWeightedAverage(int period) : IMovingAverageSmoother
+    {
+        private readonly SpreadAverage _average = new(MovingAvgType.WeightedMovingAverage, period);
+        public double Next(double value, bool isFinal) => _average.Next(new(value), isFinal).Value;
+        public void Reset() => _average.Reset();
+        public void Dispose() => _average.Dispose();
     }
 
     public IndicatorName Name => IndicatorName.ConfluenceIndicator;
@@ -192,14 +213,10 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         var l2 = _l2Avg.Next(close, isFinal);
         var ftpAvg = _ftpAvg.Next(inputValue, isFinal);
 
-        var priorSAvg = GetOffsetValue(_sAvgValues, _soff);
-        var priorHAvg = GetOffsetValue(_hAvgValues, _hoff);
-        var priorIAvg = GetOffsetValue(_iAvgValues, _ioff);
-        var priorValue5 = GetOffsetValue(_value5Values, _hoff);
-        var priorValue6 = GetOffsetValue(_value6Values, _soff);
-        var priorValue7 = GetOffsetValue(_value7Values, _ioff);
-        var priorSum = GetOffsetValue(_sumValues, _soff);
-        var priorHAvg2 = GetOffsetValue(_hAvgValues, _soff);
+        var priorSAvg = _soff == 0 ? sAvg : GetOffsetValue(_sAvgValues, _soff);
+        var priorHAvg = _hoff == 0 ? hAvg : GetOffsetValue(_hAvgValues, _hoff);
+        var priorIAvg = _ioff == 0 ? iAvg : GetOffsetValue(_iAvgValues, _ioff);
+        var priorHAvg2 = _soff == 0 ? hAvg : GetOffsetValue(_hAvgValues, _soff);
 
         var prevSAvg = _sAvgValues.Count > 0 ? _sAvgValues[_sAvgValues.Count - 1] : 0;
         var prevHAvg = _hAvgValues.Count > 0 ? _hAvgValues[_hAvgValues.Count - 1] : 0;
@@ -214,27 +231,13 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         var derivS = (sAvg * 2) - prevSAvg;
         var derivI = (iAvg * 2) - prevIAvg;
         var derivL = (lAvg * 2) - prevLAvg;
-        var sumDH = _length * derivH;
-        var sumDS = _stl * derivS;
-        var sumDI = _itl * derivI;
-        var sumDL = _ltl * derivL;
-        var n1h = h2 * _hLength;
-        var n1s = s2 * _sLength;
-        var n1i = i2 * _iLength;
-        var n1l = l2 * _lLength;
-        var drh = sumDH - n1h;
-        var drs = sumDS - n1s;
-        var dri = sumDI - n1i;
-        var drl = sumDL - n1l;
-        var hSum = h2 * (_length - 1);
-        var sSum = s2 * (_stl - 1);
-        var iSum = i2 * (_itl - 1);
-        var lSum = ftpAvg * (_ltl - 1);
-
-        var value5 = _length != 0 ? (hSum + drh) / _length : 0;
-        var value6 = _stl != 0 ? (sSum + drs) / _stl : 0;
-        var value7 = _itl != 0 ? (iSum + dri) / _itl : 0;
-        var value13 = _ltl != 0 ? (lSum + drl) / _ltl : 0;
+        var value5 = derivH + (_length - 1d - _hLength) / _length * h2;
+        var value6 = derivS;
+        var value7 = derivI;
+        var value13 = derivL + (_ltl - 1d) / _ltl * (ftpAvg - l2);
+        var priorValue5 = _hoff == 0 ? value5 : GetOffsetValue(_value5Values, _hoff);
+        var priorValue6 = _soff == 0 ? value6 : GetOffsetValue(_value6Values, _soff);
+        var priorValue7 = _ioff == 0 ? value7 : GetOffsetValue(_value7Values, _ioff);
         var value9 = value6 - priorValue5;
         var value10 = value7 - priorValue6;
         var value14 = value13 - priorValue7;
@@ -248,8 +251,9 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
         var ita = Math.Sin(iAvg * 2 * Math.PI / 360) + Math.Cos(iAvg * 2 * Math.PI / 360);
 
         var sum = ht + st + it;
+        var priorSum = _soff == 0 ? sum : GetOffsetValue(_sumValues, _soff);
         var err = hta + sta + ita;
-        double cond2 = (sum > priorSum && hAvg < priorHAvg2) || (sum < priorSum && hAvg > priorHAvg2) ? 1 : 0;
+        double cond2 = ConfluenceVotes.Compare(sum, priorSum) * ConfluenceVotes.Compare(hAvg, priorHAvg2) < 0 ? 1 : 0;
         double phase = cond2 == 1 ? -1 : 1;
 
         var errSumValue = (sum - err) * phase;
@@ -264,38 +268,15 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
             : _value70Window.Preview(value70, out value70Count);
         var value71 = value70Count > 0 ? value70Total / value70Count : 0;
 
-        double errNum = errSumValue > 0 && errSumValue < _prevErrSum && errSumValue < errSig ? 1 :
-            errSumValue > 0 && errSumValue < _prevErrSum && errSumValue > errSig ? 2 :
-            errSumValue > 0 && errSumValue > _prevErrSum && errSumValue < errSig ? 2 :
-            errSumValue > 0 && errSumValue > _prevErrSum && errSumValue > errSig ? 3 :
-            errSumValue < 0 && errSumValue > _prevErrSum && errSumValue > errSig ? -1 :
-            errSumValue < 0 && errSumValue < _prevErrSum && errSumValue > errSig ? -2 :
-            errSumValue < 0 && errSumValue > _prevErrSum && errSumValue < errSig ? -2 :
-            errSumValue < 0 && errSumValue < _prevErrSum && errSumValue < errSig ? -3 : 0;
+        double errNum = ConfluenceVotes.Score(errSumValue, _prevErrSum, errSig);
 
-        double momNum = mom > 0 && mom < _prevMom && mom < momSig ? 1 :
-            mom > 0 && mom < _prevMom && mom > momSig ? 2 :
-            mom > 0 && mom > _prevMom && mom < momSig ? 2 :
-            mom > 0 && mom > _prevMom && mom > momSig ? 3 :
-            mom < 0 && mom > _prevMom && mom > momSig ? -1 :
-            mom < 0 && mom < _prevMom && mom > momSig ? -2 :
-            mom < 0 && mom > _prevMom && mom < momSig ? -2 :
-            mom < 0 && mom < _prevMom && mom < momSig ? -3 : 0;
+        double momNum = ConfluenceVotes.Score(mom, _prevMom, momSig);
 
-        double tcNum = value70 > 0 && value70 < _prevValue70 && value70 < value71 ? 1 :
-            value70 > 0 && value70 < _prevValue70 && value70 > value71 ? 2 :
-            value70 > 0 && value70 > _prevValue70 && value70 < value71 ? 2 :
-            value70 > 0 && value70 > _prevValue70 && value70 > value71 ? 3 :
-            value70 < 0 && value70 > _prevValue70 && value70 > value71 ? -1 :
-            value70 < 0 && value70 < _prevValue70 && value70 > value71 ? -2 :
-            value70 < 0 && value70 > _prevValue70 && value70 < value71 ? -2 :
-            value70 < 0 && value70 < _prevValue70 && value70 < value71 ? -3 : 0;
+        double tcNum = ConfluenceVotes.Score(value70, _prevValue70, value71);
 
         var value42 = errNum + momNum + tcNum;
 
-        var confluence = value42 > 0 && value70 > 0 ? value42 :
-            value42 < 0 && value70 < 0 ? value42 :
-            (value42 > 0 && value70 < 0) || (value42 < 0 && value70 > 0) ? value42 / 10 : 0;
+        var confluence = ConfluenceVotes.Publish(value42, value70);
 
         if (isFinal)
         {
@@ -369,12 +350,12 @@ public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState
 
     public DampedSineWaveWeightedFilterState(int length = 50)
     {
-        _length = Math.Max(1, length);
+        _length = Math.Max(3, length);
         _weights = new double[_length];
         double sum = 0;
         for (var j = 1; j <= _length; j++)
         {
-            var w = Math.Sin(MathHelper.MinOrMax(2 * Math.PI * ((double)j / _length), 0.99, 0.01)) / j;
+            var w = Math.Sin(2 * Math.PI * j / _length) / j;
             _weights[j - 1] = w;
             sum += w;
         }
@@ -887,17 +868,7 @@ public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDispo
         var stdDev = _stdDevState.Next(value, isFinal);
         var asd = _stdDevSmoother.Next(stdDev, isFinal);
 
-        int dTime;
-        try
-        {
-            dTime = asd != 0 ? Math.Min(_upLimit, (int)Math.Ceiling(_length3 / asd)) : 0;
-        }
-        catch
-        {
-            dTime = _upLimit;
-        }
-
-        var dmiLength = Math.Max(Math.Min(dTime, _upLimit), _dnLimit);
+        var dmiLength = DynamicMomentumPeriod.Calculate(stdDev, asd, _length3, _dnLimit, _upLimit);
 
         var loss = _hasPrev && priceChg < 0 ? Math.Abs(priceChg) : 0;
         var gain = _hasPrev && priceChg > 0 ? priceChg : 0;
@@ -965,8 +936,12 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
         var resolved = Math.Max(1, length1);
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _fastSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length1))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
+        _slowSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -988,8 +963,7 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
         var value = _input.GetValue(bar);
         var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? MathHelper.MinOrMax((value - lowestLow) / range * 100, 100, 0) : 0;
+        var fastK = ClampedRangePosition.Percent(value, lowestLow, highestHigh);
 
         var fastD = _fastSmoother.Next(fastK, isFinal);
         var slowD = _slowSmoother.Next(fastD, isFinal);
@@ -1033,51 +1007,22 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Pivot")]
 public sealed class DynamicPivotPointsState : IStreamingIndicatorState
 {
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevClose;
-    private bool _hasPrev;
-
+    private readonly DailyPivotLevels _daily = new(false);
+    public DynamicPivotPointsState() { }
     public IndicatorName Name => IndicatorName.DynamicPivotPoints;
-
-    public void Reset()
-    {
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _daily.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
-
-        var pivot = (prevHigh + prevLow + prevClose) / 3;
-        var support = pivot - (prevHigh - pivot);
-        var resistance = pivot + (pivot - prevLow);
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
+        StreamingInputValidation.Validate(bar);
+        var levels = _daily.Next(bar.StartTime, bar.Open, bar.High, bar.Low, bar.Close, isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Pivot", pivot },
-                { "S1", support },
-                { "R1", resistance }
-            };
+            var values = new Dictionary<string, double>(levels.Length);
+            for (var i = 0; i < levels.Length; i++) values[_daily.Keys[i]] = levels[i];
+            outputs = values;
         }
-
-        return new StreamingIndicatorStateResult(pivot, outputs);
+        return new StreamingIndicatorStateResult(levels[0], outputs);
     }
 }
 
@@ -1195,7 +1140,8 @@ public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDispo
 
         var prevH = _hasPrev ? _prevH : 0;
         var h = highest != 0 ? p / highest : 0;
-        double cnd = h == 1 && prevH != 1 ? 1 : 0;
+        // A numerically flat regression peak must not create new reset edges.
+        double cnd = Math.Abs(h - 1) <= 1e-12 && Math.Abs(prevH - 1) > 1e-12 ? 1 : 0;
         double sign = cnd == 1 && os < 0 ? 1 : cnd == 1 && os > 0 ? -1 : 0;
         var condition = sign != 0;
 
@@ -1450,9 +1396,9 @@ public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorSta
 
     public Ehlers2PoleButterworthFilterV1State(int length = 10)
     {
-        var resolved = Math.Max(1, length);
-        var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * 1.25 * Math.PI / resolved, 0.99, 0.01));
+        var resolved = Math.Max(2, length);
+        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * 1.25 * Math.PI / resolved);
         _c2 = b;
         _c3 = -a * a;
         _c1 = 1 - _c2 - _c3;
@@ -1509,14 +1455,14 @@ public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorSta
 
     public Ehlers2PoleButterworthFilterV2State(int length = 15)
     {
-        var resolved = Math.Max(1, length);
-        var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved, 0.99, 0.01));
+        var resolved = Math.Max(2, length);
+        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
         _c2 = b;
         _c3 = -a * a;
         _c1 = (1 - b + (a * a)) / 4;
         _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(3);
+        _values = new PooledRingBuffer<double>(2);
     }
 
     public IndicatorName Name => IndicatorName.Ehlers2PoleButterworthFilterV2;
@@ -1535,11 +1481,11 @@ public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorSta
         var prevFilter1 = _prevFilter1;
         var prevFilter2 = _prevFilter2;
         var prevValue1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
-        var prevValue3 = _values.Count >= 3 ? _values[_values.Count - 3] : 0;
+        var prevValue2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
 
         var filt = _index < 3
             ? value
-            : (_c1 * (value + (2 * prevValue1) + prevValue3)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
+            : (_c1 * (value + (2 * prevValue1) + prevValue2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
 
         if (isFinal)
         {
@@ -1580,9 +1526,9 @@ public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorS
 
     public Ehlers2PoleSuperSmootherFilterV1State(int length = 15)
     {
-        var resolved = Math.Max(1, length);
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved, 0.99, 0.01));
+        var resolved = Math.Max(2, length);
+        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
         _coef2 = b1;
         _coef3 = -a1 * a1;
         _coef1 = 1 - _coef2 - _coef3;
@@ -1640,9 +1586,9 @@ public sealed class Ehlers2PoleSuperSmootherFilterV2State : IStreamingIndicatorS
 
     public Ehlers2PoleSuperSmootherFilterV2State(int length = 10)
     {
-        var resolved = Math.Max(1, length);
-        var a = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved, 0.99, 0.01));
+        var resolved = Math.Max(2, length);
+        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
         _c2 = b;
         _c3 = -a * a;
         _c1 = 1 - _c2 - _c3;

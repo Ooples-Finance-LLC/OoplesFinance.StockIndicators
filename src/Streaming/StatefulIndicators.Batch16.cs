@@ -14,11 +14,13 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
     private readonly KaufmanAdaptiveCorrelationOscillatorState _kaco;
     private readonly StreamingInputResolver _input;
     private int _index;
+    private readonly KaufmanRegressionMoments? _moments;
 
     public KaufmanAdaptiveLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.KaufmanAdaptiveMovingAverage,
         int length = 100)
     {
         var resolved = Math.Max(1, length);
+        if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage) _moments = new KaufmanRegressionMoments(resolved);
         _kaco = new KaufmanAdaptiveCorrelationOscillatorState(maType, resolved);
         if (maType == MovingAvgType.KaufmanAdaptiveMovingAverage)
         {
@@ -41,6 +43,7 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
         _indexMa.Reset();
         _kaco.Reset();
         _index = 0;
+        _moments?.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -57,7 +60,8 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
         var indexMa = _indexMa.Next(index, isFinal);
         var alpha = indexSt != 0 ? srcSt / indexSt * r : 0;
         var beta = srcMa - (alpha * indexMa);
-        var kalsma = (alpha * index) + beta;
+        var kalsma = _moments is null ? (alpha * index) + beta
+            : _moments.Next(value, isFinal, out _, out _, out _);
 
         if (isFinal)
         {
@@ -78,6 +82,7 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
 
     public void Dispose()
     {
+        _moments?.Dispose();
         _srcMa.Dispose();
         _indexMa.Dispose();
         _kaco.Dispose();
@@ -87,67 +92,27 @@ public sealed class KaufmanAdaptiveLeastSquaresMovingAverageState : IStreamingIn
 [PrimaryOutput("Kama")]
 public sealed class KaufmanAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
+    private readonly RoundedKaufmanWindow _mean;
     private readonly StreamingInputResolver _input;
-    private readonly int _length;
-    private double _prevKama;
-    private int _count;
 
     public KaufmanAdaptiveMovingAverageState(int length = 10, int fastLength = 2, int slowLength = 30)
     {
-        var resolved = Math.Max(1, length);
-        _length = resolved;
-        _er = new EfficiencyRatioState(resolved);
-        _fastAlpha = 2d / (Math.Max(1, fastLength) + 1);
-        _slowAlpha = 2d / (Math.Max(1, slowLength) + 1);
+        _mean = new RoundedKaufmanWindow(length, fastLength, slowLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.KaufmanAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevKama = 0;
-        _count = 0;
-    }
+    public void Reset() => _mean.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var sc = MathHelper.Pow((er * (_fastAlpha - _slowAlpha)) + _slowAlpha, 2);
-        // The price until the efficiency window is full, then the recursion from it, as the batch seeds it.
-        var kama = _count < _length ? value : _prevKama + (sc * (value - _prevKama));
-
-        if (isFinal)
-        {
-            _prevKama = kama;
-            if (_count < _length)
-            {
-                _count++;
-            }
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Er", er },
-                { "Kama", kama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kama, outputs);
+        var result = _mean.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(2) { { "Kama", result.Average }, { "Er", result.Efficiency } } : null;
+        return new StreamingIndicatorStateResult(result.Average, outputs);
     }
 
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 [PrimaryOutput("Kbw")]
@@ -236,6 +201,7 @@ public sealed class KaufmanBinaryWaveState : IStreamingIndicatorState, IDisposab
 
 public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, IDisposable
 {
+    private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
     private readonly RollingWindowMax _primaryHighWindow;
@@ -266,6 +232,7 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
 
     public void Reset()
     {
+        _alignment.Reset();
         _primaryHighWindow.Reset();
         _primaryLowWindow.Reset();
         _marketHighWindow.Reset();
@@ -281,6 +248,9 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
         bool isFinal, bool includeOutputs)
     {
+        if (!_alignment.CanUpdate(context, _primarySeries, _marketSeries, series, bar, isFinal))
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
+
         if (series.Equals(_marketSeries))
         {
             var marketHigh = isFinal
@@ -298,11 +268,13 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
                 _hasMarket = true;
             }
 
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
         if (!series.Equals(_primarySeries))
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
@@ -330,14 +302,15 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
         }
         else
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
         var r1 = primaryHigh - primaryLow;
         var r2 = marketHighValue - marketLowValue;
-        var s1 = r1 != 0 ? (bar.Close - primaryLow) / r1 : 50;
-        var s2 = r2 != 0 ? (marketCloseValue - marketLowValue) / r2 : 50;
-        var d = s1 - s2;
+        var s1 = r1 != 0 ? (bar.Close - primaryLow) / r1 : 0.5;
+        var s2 = r2 != 0 ? (marketCloseValue - marketLowValue) / r2 : 0.5;
+        var d = Math.Abs(s1-s2) <= 1.4210854715202004e-14 ? 0 : s1-s2;
         var dMax = isFinal ? _dMaxWindow.Add(d, out _) : _dMaxWindow.Preview(d, out _);
         var dMin = isFinal ? _dMinWindow.Add(d, out _) : _dMinWindow.Preview(d, out _);
         var range = dMax - dMin;
@@ -352,7 +325,8 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
             };
         }
 
-        return new MultiSeriesIndicatorStateResult(true, sv, outputs);
+        _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
+            return new MultiSeriesIndicatorStateResult(true, sv, outputs);
     }
 
     public void Dispose()
@@ -521,6 +495,7 @@ public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDi
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private readonly KlingerEmaDifference? _difference;
     private double _prevValue;
     private double _prevTrend;
     private double _prevDm;
@@ -534,12 +509,14 @@ public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDi
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
+        _difference = maType == MovingAvgType.ExponentialMovingAverage ? new KlingerEmaDifference(fastLength, slowLength) : null;
     }
 
     public IndicatorName Name => IndicatorName.KlingerVolumeOscillator;
 
     public void Reset()
     {
+        _difference?.Reset();
         _fastSmoother.Reset();
         _slowSmoother.Reset();
         _signalSmoother.Reset();
@@ -552,18 +529,18 @@ public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
+        StreamingInputValidation.Validate(bar);
+        var value = bar.High + bar.Low + _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var mom = _hasPrev ? value - prevValue : 0;
         var trend = mom > 0 ? 1 : mom < 0 ? -1 : _prevTrend;
         var dm = bar.High - bar.Low;
         var cm = trend == _prevTrend ? _prevCm + dm : _prevDm + dm;
-        var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : -1;
+        var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : 0;
         var vf = bar.Volume * temp * trend * 100;
 
-        var fast = _fastSmoother.Next(vf, isFinal);
-        var slow = _slowSmoother.Next(vf, isFinal);
-        var kvo = fast - slow;
+        var kvo = _difference is not null ? _difference.Next(vf, isFinal)
+            : _fastSmoother.Next(vf, isFinal) - _slowSmoother.Next(vf, isFinal);
         var signal = _signalSmoother.Next(kvo, isFinal);
         var histogram = kvo - signal;
 
@@ -652,6 +629,7 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roc1 = _roc1.Update(bar, isFinal, includeOutputs: false).Value;
         var roc2 = _roc2.Update(bar, isFinal, includeOutputs: false).Value;
         var roc3 = _roc3.Update(bar, isFinal, includeOutputs: false).Value;
@@ -878,6 +856,7 @@ public sealed class LBRPaintBarsState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         // For TrueRange on first bar, use current close to avoid inflated TR
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
@@ -1248,6 +1227,7 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
         var quadReg = _quadReg.Next(bar, isFinal);
         var lqcd = quadReg - linReg;
@@ -1402,7 +1382,7 @@ public sealed class LinearTrailingStopState : IStreamingIndicatorState
         var dn = a - (Math.Abs(a - prevA) * _mult);
         var upper = up == a ? _prevUpper : up;
         var lower = dn == a ? _prevLower : dn;
-        var os = value > upper ? 1 : value > lower ? 0 : _prevOs;
+        var os = value > upper ? 1 : value < lower ? 0 : _prevOs;
         var ts = (os * lower) + ((1 - os) * upper);
 
         if (isFinal)
@@ -1450,6 +1430,7 @@ public sealed class LinearWeightedMovingAverageState : IStreamingIndicatorState,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var lwma = _wma.GetNext(_input.GetValue(bar), isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1844,13 +1825,7 @@ public sealed class MarketDirectionIndicatorState : IStreamingIndicatorState
 internal sealed class QuadraticRegressionEngine : IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _ySum;
-    private readonly RollingWindowSum _x1Sum;
-    private readonly RollingWindowSum _x2Sum;
-    private readonly RollingWindowSum _x1x2Sum;
-    private readonly RollingWindowSum _yx1Sum;
-    private readonly RollingWindowSum _yx2Sum;
-    private readonly RollingWindowSum _x2PowSum;
+    private readonly QuadraticRegressionWindow _window;
     private readonly IMovingAverageSmoother _x1Ma;
     private readonly IMovingAverageSmoother _x2Ma;
     private readonly IMovingAverageSmoother _yMa;
@@ -1860,13 +1835,7 @@ internal sealed class QuadraticRegressionEngine : IDisposable
     public QuadraticRegressionEngine(MovingAvgType maType, int length, InputName inputName)
     {
         _length = Math.Max(1, length);
-        _ySum = new RollingWindowSum(_length);
-        _x1Sum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
-        _x1x2Sum = new RollingWindowSum(_length);
-        _yx1Sum = new RollingWindowSum(_length);
-        _yx2Sum = new RollingWindowSum(_length);
-        _x2PowSum = new RollingWindowSum(_length);
+        _window = new QuadraticRegressionWindow(_length);
         _x1Ma = MovingAverageSmootherFactory.Create(maType, _length);
         _x2Ma = MovingAverageSmootherFactory.Create(maType, _length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
@@ -1881,13 +1850,7 @@ internal sealed class QuadraticRegressionEngine : IDisposable
         }
 
         _length = Math.Max(1, length);
-        _ySum = new RollingWindowSum(_length);
-        _x1Sum = new RollingWindowSum(_length);
-        _x2Sum = new RollingWindowSum(_length);
-        _x1x2Sum = new RollingWindowSum(_length);
-        _yx1Sum = new RollingWindowSum(_length);
-        _yx2Sum = new RollingWindowSum(_length);
-        _x2PowSum = new RollingWindowSum(_length);
+        _window = new QuadraticRegressionWindow(_length);
         _x1Ma = MovingAverageSmootherFactory.Create(maType, _length);
         _x2Ma = MovingAverageSmootherFactory.Create(maType, _length);
         _yMa = MovingAverageSmootherFactory.Create(maType, _length);
@@ -1899,33 +1862,11 @@ internal sealed class QuadraticRegressionEngine : IDisposable
         var y = _input.GetValue(bar);
         var x1 = (double)_index;
         var x2 = x1 * x1;
-        var x1x2 = x1 * x2;
-        var yx1 = y * x1;
-        var yx2 = y * x2;
-        var x2Pow = x2 * x2;
-
-        var ySum = isFinal ? _ySum.Add(y, out _) : _ySum.Preview(y, out _);
-        var x1Sum = isFinal ? _x1Sum.Add(x1, out _) : _x1Sum.Preview(x1, out _);
-        var x2Sum = isFinal ? _x2Sum.Add(x2, out _) : _x2Sum.Preview(x2, out _);
-        var x1x2Sum = isFinal ? _x1x2Sum.Add(x1x2, out _) : _x1x2Sum.Preview(x1x2, out _);
-        var yx1Sum = isFinal ? _yx1Sum.Add(yx1, out _) : _yx1Sum.Preview(yx1, out _);
-        var yx2Sum = isFinal ? _yx2Sum.Add(yx2, out _) : _yx2Sum.Preview(yx2, out _);
-        var x2PowSum = isFinal ? _x2PowSum.Add(x2Pow, out _) : _x2PowSum.Preview(x2Pow, out _);
-
         var max1 = _x1Ma.Next(x1, isFinal);
         var max2 = _x2Ma.Next(x2, isFinal);
         var may = _yMa.Next(y, isFinal);
 
-        var s11 = x2Sum - ((x1Sum * x1Sum) / _length);
-        var s12 = x1x2Sum - ((x1Sum * x2Sum) / _length);
-        var s22 = x2PowSum - ((x2Sum * x2Sum) / _length);
-        var sy1 = yx1Sum - ((ySum * x1Sum) / _length);
-        var sy2 = yx2Sum - ((ySum * x2Sum) / _length);
-        var bot = (s22 * s11) - (s12 * s12);
-        var b2 = bot != 0 ? ((sy1 * s22) - (sy2 * s12)) / bot : 0;
-        var b3 = bot != 0 ? ((sy2 * s11) - (sy1 * s12)) / bot : 0;
-        var b1 = may - (b2 * max1) - (b3 * max2);
-        var result = b1 + (b2 * x1) + (b3 * x2);
+        var result = QuadraticRegressionWindow.Evaluate(_window.Next(y, isFinal), _index, max1, max2, may);
 
         if (isFinal)
         {
@@ -1937,13 +1878,7 @@ internal sealed class QuadraticRegressionEngine : IDisposable
 
     public void Reset()
     {
-        _ySum.Reset();
-        _x1Sum.Reset();
-        _x2Sum.Reset();
-        _x1x2Sum.Reset();
-        _yx1Sum.Reset();
-        _yx2Sum.Reset();
-        _x2PowSum.Reset();
+        _window.Reset();
         _x1Ma.Reset();
         _x2Ma.Reset();
         _yMa.Reset();
@@ -1952,13 +1887,7 @@ internal sealed class QuadraticRegressionEngine : IDisposable
 
     public void Dispose()
     {
-        _ySum.Dispose();
-        _x1Sum.Dispose();
-        _x2Sum.Dispose();
-        _x1x2Sum.Dispose();
-        _yx1Sum.Dispose();
-        _yx2Sum.Dispose();
-        _x2PowSum.Dispose();
+        _window.Dispose();
         _x1Ma.Dispose();
         _x2Ma.Dispose();
         _yMa.Dispose();

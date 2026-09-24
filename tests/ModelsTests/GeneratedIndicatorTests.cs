@@ -272,6 +272,33 @@ public sealed class GeneratedIndicatorTests
     }
 
     [Fact]
+    public void WilderAliasIsAPriceAverageAndSelectsTheWilderEnum()
+    {
+        IMovingAverage average = new Wwma(7);
+        ((IBuiltInMovingAverage)average).AvgType.Should().Be(MovingAvgType.WildersSmoothingMethod);
+        var composed = new Tma(3, average);
+        ((IBuiltInIndicator)composed).CreateOptions().GetType().GetProperty("MaType")!
+            .GetValue(((IBuiltInIndicator)composed).CreateOptions()).Should().Be(MovingAvgType.WildersSmoothingMethod);
+        composed.Components.Should().Contain(average);
+    }
+
+    [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [InlineData(14)]
+    [InlineData(65)]
+    [InlineData(int.MaxValue)]
+    public void WilderAliasesDeclareSaturatingSettlingHorizon(int length)
+    {
+        var expected = (int)Math.Min(int.MaxValue, 18L * length);
+        foreach (var average in new IMovingAverage[] { new Wwma(length), new Smma(length), new ModifiedMa(length) })
+        {
+            ((IBuiltInMovingAverage)average).AvgType.Should().Be(MovingAvgType.WildersSmoothingMethod);
+            average.WarmupBars.Should().Be(expected);
+        }
+    }
+
+    [Fact]
     public void ACallersOwnAverageStaysAComponentAndTheOptionsKeepTheirDefault()
     {
         var mine = new MyOwnAverage();

@@ -35,21 +35,21 @@ public static partial class Calculations
         for (var i = 0; i < inputList.Count; i++)
         {
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var currentClose = i >= 1 ? prevClose : inputList[i];
+            var currentClose = prevClose;
             var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var currentHigh = i >= 1 ? prevHigh : highList[i];
+            var currentHigh = prevHigh;
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var currentLow = i >= 1 ? prevLow : lowList[i];
+            var currentLow = prevLow;
             var range = currentHigh - currentLow;
 
             var pivot = (prevHigh + prevLow + prevClose) / 3;
             pivotList.Add(pivot);
 
             var prevSupportLevel1 = GetLastOrDefault(supportLevel1List);
-            var supportLevel1 = currentClose - (0.0916 * range);
+            var supportLevel1 = currentClose - ((1.1 / 12) * range);
             supportLevel1List.Add(supportLevel1);
 
-            var supportLevel2 = currentClose - (0.183 * range);
+            var supportLevel2 = currentClose - ((1.1 / 6) * range);
             supportLevel2List.Add(supportLevel2);
 
             var supportLevel3 = currentClose - (0.275 * range);
@@ -59,10 +59,10 @@ public static partial class Calculations
             supportLevel4List.Add(supportLevel4);
 
             var prevResistanceLevel1 = GetLastOrDefault(resistanceLevel1List);
-            var resistanceLevel1 = currentClose + (0.0916 * range);
+            var resistanceLevel1 = currentClose + ((1.1 / 12) * range);
             resistanceLevel1List.Add(resistanceLevel1);
 
-            var resistanceLevel2 = currentClose + (0.183 * range);
+            var resistanceLevel2 = currentClose + ((1.1 / 6) * range);
             resistanceLevel2List.Add(resistanceLevel2);
 
             var resistanceLevel3 = currentClose + (0.275 * range);

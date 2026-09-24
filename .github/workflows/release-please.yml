@@ -64,18 +64,23 @@ jobs:
           config-file: release-please-config.json
           manifest-file: .release-please-manifest.json
 
-  publish:
-    name: Build, pack, publish NuGet
+  critical-correctness:
+    needs: release-please
+    if: needs.release-please.outputs.release_created == 'true'
+    uses: ./.github/workflows/critical-correctness.yml
+    permissions:
+      contents: read
+    with:
+      source-ref: ${{ needs.release-please.outputs.tag_name }}
+
+  build-package:
+    name: Build and pack release candidate
     runs-on: windows-latest # net461 needs the .NET Framework reference assemblies
     needs: release-please
     if: needs.release-please.outputs.release_created == 'true'
     timeout-minutes: 30
-    # id-token lets the runner mint a GitHub OIDC token, which NuGet/login exchanges for a
-    # short-lived publish key. A job-level block overrides the workflow default, so contents:write
-    # is re-declared here for the `gh release upload` step at the end.
     permissions:
-      id-token: write
-      contents: write
+      contents: read
     steps:
       - name: Checkout the release tag
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
@@ -97,16 +102,6 @@ jobs:
           restore-keys: |
             nuget-${{ runner.os }}-
 
-      - name: Authenticate to NuGet via trusted publishing
-        id: nuget-login
-        # Trusted publishing: there is no long-lived NUGET_API_KEY secret to leak or rotate. The
-        # action swaps this workflow's GitHub OIDC token for a key that lives minutes, and
-        # nuget.org only honours it because a trusted-publishing policy on the package names this
-        # exact repository and workflow file.
-        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
-        with:
-          user: ${{ vars.NUGET_USER || 'ooples' }}
-
       - name: Restore and build
         run: |
           dotnet restore src/OoplesFinance.StockIndicators.csproj
@@ -116,6 +111,16 @@ jobs:
         run: >
           dotnet pack src/OoplesFinance.StockIndicators.csproj -c Release -o out --no-build
           /p:PackageVersion=${{ needs.release-please.outputs.version }}
+
+      - name: Require regression and independent numerical tests
+        run: dotnet test tests/OoplesFinance.StockIndicators.Tests.Unit.csproj -c Release -f net10.0 --logger trx --results-directory release-test-results
+
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: release-test-results
+          path: release-test-results
+          if-no-files-found: error
 
       - name: Verify the package ships every target framework
         shell: pwsh
@@ -151,6 +156,124 @@ jobs:
               Write-Host "Found lib/$tfm in $($pkg.Name)"
             }
           }
+
+      - name: Upload the immutable release candidate
+        uses: actions/upload-artifact@v7
+        with:
+          name: release-candidate
+          path: out/*.nupkg
+          if-no-files-found: error
+
+  verify-package:
+    name: Verify package (${{ matrix.os }}, ${{ matrix.framework }})
+    needs: [release-please, build-package]
+    runs-on: ${{ matrix.os }}
+    timeout-minutes: 30
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            framework: net461
+          - os: windows-latest
+            framework: net8.0
+          - os: windows-latest
+            framework: net10.0
+          - os: ubuntu-latest
+            framework: net8.0
+          - os: ubuntu-latest
+            framework: net10.0
+          - os: macos-latest
+            framework: net8.0
+          - os: macos-latest
+            framework: net10.0
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-candidate
+          path: out
+      - name: Test the packaged DLL and verify its identity
+        shell: pwsh
+        run: |
+          $packages = @(Get-ChildItem out/*.nupkg)
+          if ($packages.Count -ne 1) { throw 'Expected one release package.' }
+          ./tools/Verify-CorrectnessPackage.ps1 -PackagePath $packages[0].FullName -TargetFramework '${{ matrix.framework }}' -EvidencePath correctness-evidence.xml
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: package-evidence-${{ matrix.os }}-${{ matrix.framework }}
+          path: correctness-evidence.xml
+          if-no-files-found: error
+
+  publish:
+    name: Publish verified NuGet package
+    needs: [release-please, build-package, verify-package, critical-correctness]
+    runs-on: windows-latest
+    permissions:
+      id-token: write
+      contents: write
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ needs.release-please.outputs.tag_name }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.x
+      - uses: actions/download-artifact@v8
+        with:
+          name: release-candidate
+          path: out
+      - uses: actions/download-artifact@v8
+        with:
+          pattern: package-evidence-*
+          path: evidence
+      - name: Require evidence for this exact package on every matrix entry
+        shell: pwsh
+        run: |
+          $packages = @(Get-ChildItem out/*.nupkg)
+          if ($packages.Count -ne 1) { throw 'Expected one release package.' }
+          $hash = (Get-FileHash $packages[0].FullName -Algorithm SHA256).Hash
+          $reports = @(Get-ChildItem evidence -Recurse -Filter correctness-evidence.xml)
+          if ($reports.Count -ne 7) { throw 'Missing platform evidence.' }
+          $expected = @('windows-latest-net461', 'windows-latest-net8.0', 'windows-latest-net10.0',
+            'ubuntu-latest-net8.0', 'ubuntu-latest-net10.0', 'macos-latest-net8.0', 'macos-latest-net10.0')
+          foreach ($entry in $expected) {
+            if (-not (Test-Path -LiteralPath "evidence/package-evidence-$entry/correctness-evidence.xml")) {
+              throw "Missing evidence for $entry."
+            }
+          }
+          foreach ($report in $reports) {
+            [xml]$proof = Get-Content $report.FullName -Raw
+            if ($proof.correctnessEvidence.scope -ne 'all-discovered-configurations') { throw 'Filtered evidence cannot authorize publication.' }
+            if ($report.Directory.Name -notlike "*-$($proof.correctnessEvidence.targetFramework)") { throw 'Framework evidence identity mismatch.' }
+            if ($proof.correctnessEvidence.packageSha256 -ne $hash) { throw 'Package identity changed after verification.' }
+            $cases = @($proof.correctnessEvidence.case)
+            if ($cases.Count -eq 0 -or @($cases | Where-Object { $_.passed -ne 'True' }).Count -gt 0) { throw 'Incomplete or failing correctness evidence.' }
+            ./tools/Assert-CorrectnessFormulaEvidence.ps1 -Evidence $proof
+            ./tools/Assert-CorrectnessNumericalEvidence.ps1 -Evidence $proof
+          }
+
+      - name: Authenticate to NuGet via trusted publishing
+        id: nuget-login
+        # Trusted publishing: there is no long-lived NUGET_API_KEY secret to leak or rotate. The
+        # action swaps this workflow's GitHub OIDC token for a key that lives minutes, and
+        # nuget.org only honours it because a trusted-publishing policy on the package names this
+        # exact repository and workflow file.
+        uses: NuGet/login@8d196754b4036150537f80ac539e15c2f1028841 # v1.2.0
+        with:
+          user: ${{ vars.NUGET_USER || 'ooples' }}
 
       - name: Push to NuGet
         shell: bash

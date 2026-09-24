@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -83,11 +83,18 @@ public static partial class Calculations
             var currentPrice = inputList[i];
             var prevPrice = i >= length ? inputList[i - length] : 0;
 
-            var momentumOscillator = prevPrice != 0 ? currentPrice / prevPrice * 100 : 0;
+            var momentumOscillator = RoundedMomentumRatio.Of(currentPrice, prevPrice);
             momentumOscillatorList.Add(momentumOscillator);
         }
 
-        var emaList = GetMovingAverageList(stockData, maType, length, momentumOscillatorList);
+        var finiteInput = FiniteSignalInput.Create(momentumOscillatorList, out var finiteCount);
+        var emaList = GetMovingAverageList(stockData, maType, length, finiteInput);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < finiteCount; i++) emaList[i] = mean.Next(finiteInput[i], true);
+        }
+        for (var i = finiteCount; i < emaList.Count; i++) emaList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var momentum = emaList[i];

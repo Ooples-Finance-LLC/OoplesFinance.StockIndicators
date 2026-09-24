@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -291,112 +292,25 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersSpectrumDerivedFilterBank(this StockData stockData, int minLength = 8, int maxLength = 50, 
+    public static StockData CalculateEhlersSpectrumDerivedFilterBank(this StockData stockData, int minLength = 8, int maxLength = 50,
         int length1 = 40, int length2 = 10)
     {
-        minLength = Math.Max(minLength, 1);
-        maxLength = Math.Max(maxLength, minLength);
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> dcList = new(stockData.Count);
-        List<double> domCycList = new(stockData.Count);
-        List<double> hpList = new(stockData.Count);
-        List<double> smoothHpList = new(stockData.Count);
-        using var domCycMedian = new RollingMedian(length2);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var twoPiPer = MinOrMax(2 * Math.PI / length1, 0.99, 0.01);
-        var alpha1 = (1 - Math.Sin(twoPiPer)) / Math.Cos(twoPiPer);
-
-        // One bandpass per period in the bank, each with its own two-sample recursion. These used to be
-        // read out of a single list holding one value per bar - the last period's - so every period was
-        // fed another period's output, and the bank never settled on a market that never moved.
-        var realPrev1 = new double[maxLength + 1];
-        var realPrev2 = new double[maxLength + 1];
-        var imagPrev1 = new double[maxLength + 1];
-        var imagPrev2 = new double[maxLength + 1];
-        var q1Prev = new double[maxLength + 1];
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> cycles = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        using var bank = new EhlersSpectrumDerivedFilterBankEngine(minLength, maxLength, length1, length2);
+        foreach (var price in inputList)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var delta = Math.Max((-0.015 * i) + 0.5, 0.15);
-            var prevHp1 = i >= 1 ? hpList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
-            var prevHp3 = i >= 3 ? hpList[i - 3] : 0;
-            var prevHp4 = i >= 4 ? hpList[i - 4] : 0;
-            var prevHp5 = i >= 5 ? hpList[i - 5] : 0;
-
-            var hp = i < 7 ? currentValue : (0.5 * (1 + alpha1) * (currentValue - prevValue)) + (alpha1 * prevHp1);
-            hpList.Add(hp);
-
-            var prevSmoothHp = GetLastOrDefault(smoothHpList);
-            var smoothHp = i < 7 ? currentValue - prevValue : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
-            smoothHpList.Add(smoothHp);
-
-            double num = 0, denom = 0, dc = 0, real = 0, imag = 0, q1 = 0, maxAmpl = 0;
-            for (var j = minLength; j <= maxLength; j++)
-            {
-                var beta = Math.Cos(MinOrMax(2 * Math.PI / j, 0.99, 0.01));
-                var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * delta / j, 0.99, 0.01));
-                var alpha = gamma - Sqrt((gamma * gamma) - 1);
-                var priorSmoothHp = i >= j ? smoothHpList[i - j] : 0;
-                var prevReal = realPrev1[j];
-                var priorReal = realPrev2[j];
-                var prevImag = imagPrev1[j];
-                var priorImag = imagPrev2[j];
-                var prevQ1 = q1Prev[j];
-
-                q1 = j / Math.PI * 2 * (smoothHp - prevSmoothHp);
-                real = (0.5 * (1 - alpha) * (smoothHp - priorSmoothHp)) + (beta * (1 + alpha) * prevReal) - (alpha * priorReal);
-                imag = (0.5 * (1 - alpha) * (q1 - prevQ1)) + (beta * (1 + alpha) * prevImag) - (alpha * priorImag);
-                realPrev2[j] = realPrev1[j];
-                realPrev1[j] = real;
-                imagPrev2[j] = imagPrev1[j];
-                imagPrev1[j] = imag;
-                q1Prev[j] = q1;
-
-                var ampl = (real * real) + (imag * imag);
-                maxAmpl = ampl > maxAmpl ? ampl : maxAmpl;
-
-                // An amplitude cannot exceed the running maximum, so this attenuation is 0.01 at its
-                // smallest and db is bounded by [0, 20]. Left as the raw expression it still reaches zero:
-                // once the amplitudes decay into the denormal range there are too few mantissa bits left
-                // for 0.99 * ampl to differ from ampl, so the ratio rounds to exactly one, 0.01/0 makes db
-                // negative infinity, and -infinity passes the db <= 3 test - putting an infinity into both
-                // sums so that the dominant cycle comes out as infinity/infinity. Measured on a market that
-                // never moved at bar 3152, where ampl = maxAmpl = 1.1363509854348671E-322.
-                var ratio = maxAmpl != 0 ? ampl / maxAmpl : 0;
-                var db = ratio > 0 ? -length2 * Math.Log(0.01 / Math.Max(1 - (0.99 * ratio), 0.01)) / Math.Log(length2) : 0;
-                db = db > maxLength ? maxLength : db;
-                num += db <= 3 ? j * (maxLength - db) : 0;
-                denom += db <= 3 ? maxLength - db : 0;
-                // The dominant cycle is a period inside the band that was scanned. Anything else is not
-                // a cycle this bank can see, and a zero propagates as 2*pi/0 into everything downstream.
-                dc = denom != 0 ? MinOrMax(num / denom, maxLength, minLength) : minLength;
-            }
-            dcList.Add(dc);
-            domCycMedian.Add(dc);
-
-            var domCyc = domCycMedian.Median;
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(smoothHp, prevSmoothHp);
-            signalsList?.Add(signal);
+            var previous = bank.SmoothedHighPass;
+            cycles.Add(bank.Next(price, true));
+            signals?.Add(GetCompareSignal(bank.SmoothedHighPass, previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Esdfb", domCycList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(domCycList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Esdfb", cycles } });
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(cycles);
         stockData.IndicatorName = IndicatorName.EhlersSpectrumDerivedFilterBank;
-
         return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Trendflex Indicator
@@ -867,46 +781,17 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var prices = new double[length];
+        var positions = new double[length];
         for (var i = 0; i < stockData.Count; i++)
         {
-            var priceArray = new double[length + 1];
-            var rankArray = new double[length + 1];
-            for (var j = 1; j <= length; j++)
+            for (var j = 0; j < length; j++)
             {
-                var prevPrice = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                priceArray[j] = prevPrice;
-                rankArray[j] = j;
+                var index = i - length + 1 + j;
+                prices[j] = index < 0 ? 0 : inputList[index];
             }
-
-            for (var j = 1; j <= length; j++)
-            {
-                var count = length + 1 - j;
-
-                for (var k = 1; k <= length - count; k++)
-                {
-                    var array1 = priceArray[k + 1];
-
-                    if (array1 < priceArray[k])
-                    {
-                        var tempPrice = priceArray[k];
-                        var tempRank = rankArray[k];
-
-                        priceArray[k] = array1;
-                        rankArray[k] = rankArray[k + 1];
-                        priceArray[k + 1] = tempPrice;
-                        rankArray[k + 1] = tempRank;
-                    }
-                }
-            }
-
-            double sum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                sum += Pow(j - rankArray[j], 2);
-            }
-
             var prevSri = GetLastOrDefault(sriList);
-            var sri = 2 * (0.5 - (1 - (6 * sum / (length * (Pow(length, 2) - 1)))));
+            var sri = ChronologicalSpearman.Compute(prices, positions);
             sriList.Add(sri);
 
             var signal = GetCompareSignal(sri, prevSri);
@@ -1514,7 +1399,7 @@ public static partial class Calculations
             filtList.Add(filt);
 
             var prevPk = GetLastOrDefault(pkList);
-            var pk = Math.Abs(filt) > prevPk ? Math.Abs(filt) : 0.991 * prevPk;
+            var pk = Math.Max(Math.Abs(filt), 0.991 * prevPk);
             pkList.Add(pk);
 
             var denom = pk == 0 ? -1 : pk;
@@ -1802,14 +1687,18 @@ public static partial class Calculations
             var sp = spList[i];
             var dcPeriod = (int)Math.Ceiling(sp + 0.5);
 
-            double realPart = 0, imagPart = 0;
+            double realPart = 0, imagPart = 0, projectionScale = 0;
             for (var j = 0; j <= dcPeriod - 1; j++)
             {
                 var prevSmooth = i >= j ? smoothList[i - j] : 0;
-                realPart += Math.Sin(MinOrMax(2 * Math.PI * ((double)j / dcPeriod), 0.99, 0.01)) * prevSmooth;
-                imagPart += Math.Cos(MinOrMax(2 * Math.PI * ((double)j / dcPeriod), 0.99, 0.01)) * prevSmooth;
+                projectionScale += Math.Abs(prevSmooth);
+                realPart += Math.Sin(2 * Math.PI * ((double)j / dcPeriod)) * prevSmooth;
+                imagPart += Math.Cos(2 * Math.PI * ((double)j / dcPeriod)) * prevSmooth;
             }
 
+            var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
+            if (Math.Abs(realPart) <= resolution) realPart = 0;
+            if (Math.Abs(imagPart) <= resolution) imagPart = 0;
             var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
             dcPhase += 90;
             dcPhase += sp != 0 ? 360 / sp : 0;
@@ -1870,14 +1759,18 @@ public static partial class Calculations
             var period = periodList[i];
             var dcPeriod = MathHelper.CeilingCycle(period);
 
-            double realPart = 0, imagPart = 0;
+            double realPart = 0, imagPart = 0, projectionScale = 0;
             for (var j = 0; j <= dcPeriod - 1; j++)
             {
                 var prevCycle = i >= j ? cycleList[i - j] : 0;
-                realPart += Math.Sin(MinOrMax(2 * Math.PI * ((double)j / dcPeriod), 0.99, 0.01)) * prevCycle;
-                imagPart += Math.Cos(MinOrMax(2 * Math.PI * ((double)j / dcPeriod), 0.99, 0.01)) * prevCycle;
+                projectionScale += Math.Abs(prevCycle);
+                realPart += Math.Sin(2 * Math.PI * ((double)j / dcPeriod)) * prevCycle;
+                imagPart += Math.Cos(2 * Math.PI * ((double)j / dcPeriod)) * prevCycle;
             }
 
+            var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
+            if (Math.Abs(realPart) <= resolution) realPart = 0;
+            if (Math.Abs(imagPart) <= resolution) imagPart = 0;
             var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
             dcPhase += 90;
             dcPhase += imagPart < 0 ? 180 : 0;

@@ -27,12 +27,25 @@ public static partial class Calculations
             var highestHigh = highestList[i];
             var lowestLow = lowestList[i];
 
-            var fastK = highestHigh - lowestLow != 0 ? MinOrMax((currentValue - lowestLow) / (highestHigh - lowestLow) * 100, 100, 0) : 0;
+            var fastK = ClampedRangePosition.Percent(currentValue, lowestLow, highestHigh);
             fastKList.Add(fastK);
         }
 
-        var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, fastKList);
-        var slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        List<double> fastDList;
+        List<double> slowDList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var first = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength1));
+            using var second = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength2));
+            fastDList = fastKList.Select(value => first.Next(value, true)).ToList();
+            slowDList = fastDList.Select(value => second.Next(value, true)).ToList();
+        }
+        else
+        {
+            // Keep both stages explicit: generated component constructors derive their arity here.
+            fastDList = GetMovingAverageList(stockData, maType, smoothLength1, fastKList);
+            slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var slowK = fastDList[i];
@@ -117,8 +130,6 @@ public static partial class Calculations
     public static StockData CalculateTurboStochasticsSlow(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
-        List<double> tssDList = new(stockData.Count);
-        List<double> tssKList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
@@ -131,12 +142,12 @@ public static partial class Calculations
         stockData.SetCustomValues(slowDList);
         var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
 
-        for (var i = 0; i < tssDList.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            var tssD = tssDList[i];
-            var tssK = tssKList[i];
-            var prevTssk = i >= 1 ? tssKList[i - 1] : 0;
-            var prevTssd = i >= 1 ? tssDList[i - 1] : 0;
+            var tssD = tsfDList[i];
+            var tssK = tsfKList[i];
+            var prevTssk = i >= 1 ? tsfKList[i - 1] : 0;
+            var prevTssd = i >= 1 ? tsfDList[i - 1] : 0;
 
             var signal = GetRsiSignal(tssK - tssD, prevTssk - prevTssd, tssK, prevTssk, 70, 30);
             signalsList?.Add(signal);
@@ -173,7 +184,7 @@ public static partial class Calculations
         List<double> smiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
+        var (highestList, lowestList) = length1 == 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length1);
 
         for (var i = 0; i < stockData.Count; i++)
         {

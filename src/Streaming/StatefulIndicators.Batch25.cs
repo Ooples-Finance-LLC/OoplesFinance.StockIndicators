@@ -25,7 +25,7 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
 
     public TrendForceHistogramState(int length = 14)
     {
-        _length = Math.Max(1, length);
+        _length = Math.Max(2, length);
         _maxWindow = new RollingWindowMax(_length);
         _minWindow = new RollingWindowMin(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -59,7 +59,7 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
         var d = b == 1d ? _prevD + 1 : a - _prevA == 1d ? 0 : _prevD;
         var avg = (c + d) / 2;
         var avgSum = _avgSum + avg;
-        var rmean = _index != 0 ? avgSum / _index : 0;
+        var rmean = avgSum / (_index + 1);
         var osc = avg - rmean;
 
         if (isFinal)
@@ -109,8 +109,8 @@ public sealed class TrendImpulseFilterState : IStreamingIndicatorState, IDisposa
     public TrendImpulseFilterState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 100, int length2 = 10)
     {
-        _maxWindow = new RollingWindowMax(Math.Max(1, length1));
-        _minWindow = new RollingWindowMin(Math.Max(1, length1));
+        _maxWindow = new RollingWindowMax(Math.Max(2, length1));
+        _minWindow = new RollingWindowMin(Math.Max(2, length1));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -633,6 +633,7 @@ public sealed class TrigonometricOscillatorState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var s = _sRegression.Update(bar, isFinal, includeOutputs: false).Value;
         var prevS = _hasPrev ? _prevS : 0;
         var wa = Math.Asin(Math.Sign(s - prevS)) * 2;
@@ -700,7 +701,7 @@ public sealed class TrimeanState : IStreamingIndicatorState, IDisposable
         var q1 = isFinal ? _order.PercentileNearestRank(25) : _order.PercentileNearestRank(25, value);
         var median = isFinal ? _order.PercentileNearestRank(50) : _order.PercentileNearestRank(50, value);
         var q3 = isFinal ? _order.PercentileNearestRank(75) : _order.PercentileNearestRank(75, value);
-        var trimean = (q1 + (2 * median) + q3) / 4;
+        var trimean = PriceMean.Of(q1, median, median, q3);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1067,6 +1068,7 @@ public sealed class TurboStochasticsFastState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = _input.GetValue(bar);
@@ -1149,6 +1151,7 @@ public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = _input.GetValue(bar);
@@ -1234,6 +1237,7 @@ public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var close = _closeSmoother.Next(_input.GetValue(bar), isFinal);
         var open = _openSmoother.Next(bar.Open, isFinal);
         var high = _highSmoother.Next(bar.High, isFinal);
@@ -1502,24 +1506,24 @@ public sealed class UhlMaCrossoverSystemState : IStreamingIndicatorState, IDispo
 public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly McClellanOscillatorState _mo;
-    private readonly BollingerBandsPercentBState _bbPct;
+    private double _previousBlend;
+    private bool _hasBlend;
+    private readonly UltimateMomentumBand _bbPct;
     private readonly MoneyFlowIndexState _mfi1;
     private readonly MoneyFlowIndexState _mfi2;
     private readonly MoneyFlowIndexState _mfi3;
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _utmSmoother;
+    private readonly UltimateMomentumStrength _strength;
 
     public UltimateMomentumIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 13, int length2 = 19,
         int length3 = 21, int length4 = 39, int length5 = 50, int length6 = 200, double stdDevMult = 1.5)
     {
         _ = length6;
         _mo = new McClellanOscillatorState(maType, length2, length4, 9, 1000);
-        _bbPct = new BollingerBandsPercentBState(stdDevMult, maType, length5);
+        _bbPct = new UltimateMomentumBand(maType, length5, stdDevMult);
         _mfi1 = new MoneyFlowIndexState(length2);
         _mfi2 = new MoneyFlowIndexState(length3);
         _mfi3 = new MoneyFlowIndexState(length4);
-        _rsi = new RsiState(maType, Math.Max(1, length1));
-        _utmSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
+        _strength = new(maType, length1);
     }
 
     public IndicatorName Name => IndicatorName.UltimateMomentumIndicator;
@@ -1535,30 +1539,33 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
 
     public void Reset()
     {
+        _previousBlend = 0; _hasBlend = false;
         _mo.Reset();
         _bbPct.Reset();
         _mfi1.Reset();
         _mfi2.Reset();
         _mfi3.Reset();
-        _rsi.Reset();
-        _utmSmoother.Reset();
+        _strength.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var moResult = _mo.Update(bar, isFinal, includeOutputs: true);
         var moOutputs = moResult.Outputs!;
         var advSum = moOutputs["AdvSum"];
         var decSum = moOutputs["DecSum"];
         var mo = moResult.Value;
-        var bbPct = _bbPct.Update(bar, isFinal, includeOutputs: false).Value;
+        var bbPct = _bbPct.Next(bar.Close, isFinal);
         var mfi1 = _mfi1.Update(bar, isFinal, includeOutputs: false).Value;
         var mfi2 = _mfi2.Update(bar, isFinal, includeOutputs: false).Value;
         var mfi3 = _mfi3.Update(bar, isFinal, includeOutputs: false).Value;
         var ratio = decSum != 0 ? advSum / decSum : 0;
         var utm = (200 * bbPct) + (100 * ratio) + (2 * mo) + (1.5 * mfi3) + (3 * mfi2) + (3 * mfi1);
-        var utmRsi = _rsi.Next(utm, isFinal);
-        var utmi = _utmSmoother.Next(utmRsi, isFinal);
+        if (_hasBlend && Math.Abs(utm-_previousBlend) <= 1.4210854715202004e-14*Math.Max(Math.Abs(utm), Math.Abs(_previousBlend)))
+            utm = _previousBlend;
+        if (isFinal) { _previousBlend = utm; _hasBlend = true; }
+        var utmi = _strength.Next(utm, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1579,8 +1586,7 @@ public sealed class UltimateMomentumIndicatorState : IStreamingIndicatorState, I
         _mfi1.Dispose();
         _mfi2.Dispose();
         _mfi3.Dispose();
-        _rsi.Dispose();
-        _utmSmoother.Dispose();
+        _strength.Dispose();
     }
 }
 
@@ -1737,6 +1743,7 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var uma = _uma.Update(bar, isFinal, includeOutputs: false).Value;
         var stdDev = _stdDev.Next(_input.GetValue(bar), isFinal);
         var upper = uma + (_stdDevMult * stdDev);
@@ -1809,7 +1816,7 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
         var close = _input.GetValue(bar);
         var high = bar.High;
         var low = bar.Low;
-        var prevClose = _hasPrev ? _prevClose : 0;
+        var prevClose = _hasPrev ? _prevClose : close;
         var minValue = Math.Min(low, prevClose);
         var maxValue = Math.Max(high, prevClose);
         var bp = close - minValue;
@@ -1858,18 +1865,6 @@ public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Uto")]
 public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    /// <summary>GetMaxAndMinValuesList clamps its window to a minimum of two.</summary>
-    private const int EnvelopeLength = 2;
-
-    // The batch side feeds each of these series through GetInputValuesList, which has no high or low
-    // for a synthetic series and substitutes a two-bar envelope of the series itself. The stochastic's
-    // own lookback is then applied on top of that, so its effective window is one bar longer than the
-    // lookback asked for. These pairs reproduce that envelope; without them this state used a plain
-    // lookback window and drifted from the batch from bar 15 onward. See issue #167.
-    private readonly RollingWindowMax _trEnvelopeMax;
-    private readonly RollingWindowMin _trEnvelopeMin;
-    private readonly RollingWindowMax _volEnvelopeMax;
-    private readonly RollingWindowMin _volEnvelopeMin;
     private readonly RollingWindowMax _trMax;
     private readonly RollingWindowMin _trMin;
     private readonly RollingWindowMax _volMax;
@@ -1892,23 +1887,12 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
     /// <summary>
     /// The one place the windows and smoothers are built.
     /// </summary>
-    /// <remarks>
-    /// The two public constructors differ only in how the input is selected - by name, or by a
-    /// caller-supplied delegate - so everything else was written out twice. Adding the envelope
-    /// windows for issue #167 made that second copy large enough for SonarCloud to fail the
-    /// duplication gate, which is a fair reading: two copies of a construction sequence are two
-    /// places to forget a field the next time one is added.
-    /// </remarks>
     private UltimateTraderOscillatorState(MovingAvgType maType, int length, int lbLength, int smoothLength,
         int rangeLength, InputName inputName, Func<OhlcvBar, double>? selector)
     {
         var resolvedLb = Math.Max(1, lbLength);
         var resolvedRange = Math.Max(1, rangeLength);
         _ = length;
-        _trEnvelopeMax = new RollingWindowMax(EnvelopeLength);
-        _trEnvelopeMin = new RollingWindowMin(EnvelopeLength);
-        _volEnvelopeMax = new RollingWindowMax(EnvelopeLength);
-        _volEnvelopeMin = new RollingWindowMin(EnvelopeLength);
         _trMax = new RollingWindowMax(resolvedLb);
         _trMin = new RollingWindowMin(resolvedLb);
         _volMax = new RollingWindowMax(resolvedLb);
@@ -1925,10 +1909,6 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
 
     public void Reset()
     {
-        _trEnvelopeMax.Reset();
-        _trEnvelopeMin.Reset();
-        _volEnvelopeMax.Reset();
-        _volEnvelopeMin.Reset();
         _trMax.Reset();
         _trMin.Reset();
         _volMax.Reset();
@@ -1952,18 +1932,14 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         // The first bar's true range uses the bar's own close, as the batch does, so it is High - Low rather
         // than the whole high. The momentum term c below keeps the batch's zero.
         var tr = CalculationsHelper.CalculateTrueRange(high, low, _hasPrev ? _prevClose : close);
-        var trEnvelopeHigh = isFinal ? _trEnvelopeMax.Add(tr, out _) : _trEnvelopeMax.Preview(tr, out _);
-        var trEnvelopeLow = isFinal ? _trEnvelopeMin.Add(tr, out _) : _trEnvelopeMin.Preview(tr, out _);
-        var trHigh = isFinal ? _trMax.Add(trEnvelopeHigh, out _) : _trMax.Preview(trEnvelopeHigh, out _);
-        var trLow = isFinal ? _trMin.Add(trEnvelopeLow, out _) : _trMin.Preview(trEnvelopeLow, out _);
+        var trHigh = isFinal ? _trMax.Add(tr, out _) : _trMax.Preview(tr, out _);
+        var trLow = isFinal ? _trMin.Add(tr, out _) : _trMin.Preview(tr, out _);
         var trRange = trHigh - trLow;
         var trSto = trRange != 0 ? MathHelper.MinOrMax((tr - trLow) / trRange * 100, 100, 0) : 0;
 
         var volume = bar.Volume;
-        var volEnvelopeHigh = isFinal ? _volEnvelopeMax.Add(volume, out _) : _volEnvelopeMax.Preview(volume, out _);
-        var volEnvelopeLow = isFinal ? _volEnvelopeMin.Add(volume, out _) : _volEnvelopeMin.Preview(volume, out _);
-        var volHigh = isFinal ? _volMax.Add(volEnvelopeHigh, out _) : _volMax.Preview(volEnvelopeHigh, out _);
-        var volLow = isFinal ? _volMin.Add(volEnvelopeLow, out _) : _volMin.Preview(volEnvelopeLow, out _);
+        var volHigh = isFinal ? _volMax.Add(volume, out _) : _volMax.Preview(volume, out _);
+        var volLow = isFinal ? _volMin.Add(volume, out _) : _volMin.Preview(volume, out _);
         var volRange = volHigh - volLow;
         var vSto = volRange != 0 ? MathHelper.MinOrMax((volume - volLow) / volRange * 100, 100, 0) : 0;
 
@@ -1981,8 +1957,8 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
         var k6 = sign * vSto;
         var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5) + Math.Max(0, k6);
         var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4) + Math.Min(0, k5) + Math.Min(0, k6));
-        var dx = bearScore != 0 ? bullScore / bearScore : 0;
-        var dxi = (2 * (100 - (100 / (1 + dx)))) - 100;
+        var totalScore = bullScore + bearScore;
+        var dxi = totalScore == 0 ? 0 : 100 * (bullScore - bearScore) / totalScore;
         var dxiAvg = _dxiAvgSmoother.Next(dxi, isFinal);
         var dxis = _dxisSmoother.Next(dxiAvg, isFinal);
         var dxiss = _dxissSmoother.Next(dxis, isFinal);
@@ -2008,10 +1984,6 @@ public sealed class UltimateTraderOscillatorState : IStreamingIndicatorState, ID
 
     public void Dispose()
     {
-        _trEnvelopeMax.Dispose();
-        _trEnvelopeMin.Dispose();
-        _volEnvelopeMax.Dispose();
-        _volEnvelopeMin.Dispose();
         _trMax.Dispose();
         _trMin.Dispose();
         _volMax.Dispose();

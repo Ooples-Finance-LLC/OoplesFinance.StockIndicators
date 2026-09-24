@@ -37,7 +37,7 @@ public sealed class EhlersCorrelationTrendIndicatorState : IStreamingIndicatorSt
         double sxy = 0;
         for (var j = 0; j <= _length - 1; j++)
         {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
+            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j) - value;
             var y = -j;
             sx += x;
             sxx += x * x;
@@ -147,7 +147,7 @@ public sealed class EhlersCenterofGravityOscillatorState : IStreamingIndicatorSt
     }
 }
 
-[PrimaryOutput("SlowEdo")]
+[PrimaryOutput("FastEdo")]
 public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
 {
     private readonly double _fastMult;
@@ -203,7 +203,7 @@ public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
             };
         }
 
-        return new StreamingIndicatorStateResult(slowOsc, outputs);
+        return new StreamingIndicatorStateResult(fastOsc, outputs);
     }
 }
 
@@ -268,9 +268,7 @@ public sealed class EhlersDecyclerState : IStreamingIndicatorState
     public EhlersDecyclerState(int length = 60)
     {
         var resolved = Math.Max(1, length);
-        var alphaArg = Math.Min(2 * Math.PI / resolved, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        _alpha1 = EhlersFirstOrderCoefficient.Alpha(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -352,7 +350,7 @@ public sealed class EhlersCorrelationCycleIndicatorState : IStreamingIndicatorSt
         double nsxy = 0;
         for (var j = 1; j <= _length; j++)
         {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
+            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1) - value;
             var y = _cosValues[j - 1];
             var ny = _negSinValues[j - 1];
             sx += x;
@@ -404,9 +402,9 @@ public sealed class EhlersCorrelationCycleIndicatorState : IStreamingIndicatorSt
         double nsyy = 0;
         for (var j = 1; j <= length; j++)
         {
-            var v = MathHelper.MinOrMax(2 * Math.PI * ((double)(j - 1) / length), 0.99, 0.01);
+            var v = 2 * Math.PI * ((double)(j - 1) / length);
             var cos = Math.Cos(v);
-            var negSin = -Math.Sin(v);
+            var negSin = length <= 2 ? 0 : -Math.Sin(v);
             cosValues[j - 1] = cos;
             negSinValues[j - 1] = negSin;
             sy += cos;
@@ -442,11 +440,11 @@ public sealed class EhlersCorrelationAngleIndicatorState : IStreamingIndicatorSt
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var real = _cycle.Update(bar, isFinal, includeOutputs: false).Value;
         var imag = _cycle.LastImag;
         var prevAngle = _hasPrev ? _prevAngle : 0;
-        var angle = imag != 0 ? 90 + Math.Atan(real / imag).ToDegrees() : 900;
-        angle = imag > 0 ? angle - 180 : angle;
+        var angle = EhlersCorrelationPhase.Angle(real, imag);
         angle = prevAngle - angle < 270 && angle < prevAngle ? prevAngle : angle;
 
         if (isFinal)
@@ -488,6 +486,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     private readonly double[] _bpPrev2;
     private readonly double[,] _bpHistory;
     private readonly double[] _bpCurrent;
+    private readonly double[] _powers;
     private readonly int _ring;
     private double _prevRoofingFilter1;
     private double _prevRoofingFilter2;
@@ -504,6 +503,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
         _bpPrev2 = new double[_length1 + 1];
         _bpHistory = new double[_length1 + 1, _ring];
         _bpCurrent = new double[_length1 + 1];
+        _powers = new double[_length1 + 1];
     }
 
     public IndicatorName Name => IndicatorName.EhlersCombFilterSpectralEstimate;
@@ -522,6 +522,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var prevRoofingFilter2 = _prevRoofingFilter2;
 
@@ -547,8 +548,13 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
                 pwr += MathHelper.Pow(prevBp / j, 2);
             }
 
+            _powers[j] = pwr;
             maxPwr = Math.Max(pwr, maxPwr);
-            pwr = maxPwr != 0 ? pwr / maxPwr : 0;
+        }
+
+        for (var j = _length2; j <= _length1; j++)
+        {
+            var pwr = maxPwr != 0 ? _powers[j] / maxPwr : 0;
             if (pwr >= 0.5)
             {
                 spx += j * pwr;
@@ -602,7 +608,7 @@ public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorSta
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
         _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(length3, 0);
+        _length3 = Math.Max(length3, 1);
         _autoCorrelation = new EhlersAutoCorrelationIndicatorState(_length1, Math.Max(1, length2));
         _corrValues = new PooledRingBuffer<double>(_length1);
     }
@@ -617,12 +623,9 @@ public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorSta
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var corr = _autoCorrelation.Update(bar, isFinal, includeOutputs: false).Value;
         var start = _length3;
-        if (start < 0)
-        {
-            start = 0;
-        }
 
         double delta = 0;
         for (var j = start; j <= _length1; j++)
@@ -685,6 +688,7 @@ public sealed class EhlersClassicHilbertTransformerState : IStreamingIndicatorSt
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
         var real = peak != 0 ? roofingFilter / peak : 0;
@@ -980,6 +984,7 @@ public sealed class EhlersCycleAmplitudeState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var bp = _bpState.Update(bar, isFinal, includeOutputs: false).Value;
         var bpCount = _bpBuffer.Count;
 
@@ -1105,6 +1110,8 @@ public sealed class EhlersCyberCycleState : IStreamingIndicatorState
 public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
 {
     private readonly int _length3;
+    private readonly double[] _xWindow;
+    private readonly double[] _yWindow;
     private readonly double _alpha;
     private readonly double _c1;
     private readonly double _c2;
@@ -1122,8 +1129,9 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
     public EhlersConvolutionIndicatorState(int length1 = 80, int length2 = 40, int length3 = 48)
     {
         _length3 = Math.Max(1, length3);
-        var piPrd = MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1);
-        _alpha = (Math.Cos(piPrd) + Math.Sin(piPrd) - 1) / Math.Cos(piPrd);
+        _xWindow = new double[_length3]; _yWindow = new double[_length3];
+        var piPrd = Math.Min(.99, MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1));
+        _alpha = 1-Math.Cos(piPrd)/(1+Math.Sin(piPrd));
         var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
         var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
         _c2 = b1;
@@ -1164,30 +1172,18 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
         var roofingFilter = (_c1 * ((highPass + prevHp1) / 2)) + (_c2 * prevRoofingFilter1) + (_c3 * prevRoofingFilter2);
 
         var n = Math.Min(_index + 1, _length3);
-        double sx = 0;
-        double sy = 0;
-        double sxx = 0;
-        double syy = 0;
-        double sxy = 0;
-        for (var j = 1; j <= _length3; j++)
+        for (var lag = 0; lag < n; lag++)
         {
-            var x = GetRoofingOffsetValue(roofingFilter, j - 1);
-            var y = GetRoofingOffsetValue(roofingFilter, j);
-            sx += x;
-            sy += y;
-            sxx += x * x;
-            sxy += x * y;
-            syy += y * y;
+            _xWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag);
+            _yWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag+1);
         }
-
-        var denom = ((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy));
-        var corr = denom > 0 ? (((n * sxy) - (sx * sy)) / MathHelper.Sqrt(denom)) : 0;
+        var corr = WindowCorrelation.Pearson(_xWindow.AsSpan(0, n), _yWindow.AsSpan(0, n));
         var expValue = MathHelper.Exp(3 * corr);
-        var conv = (1 + (expValue - 1)) / (expValue + 1) / 2;
+        var conv = expValue / (expValue + 1) / 2;
 
         var filtLength = (int)Math.Ceiling(0.5 * n);
         var prevFilt = GetRoofingOffsetValue(roofingFilter, filtLength);
-        var slope = prevFilt < roofingFilter ? -1 : 1;
+        var slope = roofingFilter-prevFilt > 1e-12*Math.Max(1, Math.Max(Math.Abs(roofingFilter), Math.Abs(prevFilt))) ? -1 : 1;
 
         if (isFinal)
         {
@@ -1256,6 +1252,7 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var cci = _cciState.Update(bar, isFinal, includeOutputs: false).Value;
         var v1 = 0.1 * (cci - 50);
         var v2 = _signalSmoother.Next(v1, isFinal);
@@ -1455,47 +1452,47 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
         var prevValue1 = _index >= 1 ? _prevValue1 : 0;
         var prevValue2 = _index >= 2 ? _prevValue2 : 0;
 
-        var v1Neg2 = (0.080778 * (value + (1.907 * prevValue1) + prevValue2)) +
+        var v1Neg2 = (EhlersChebyshevGains.Minus2 * (value + (1.907 * prevValue1) + prevValue2)) +
                      (0.293 * _prevV1Neg2_1) - (0.063 * _prevV1Neg2_2);
         var waveNeg2 = v1Neg2 + (0.513 * _prevV1Neg2_1) + _prevV1Neg2_2 +
                        (0.451 * _prevWaveNeg2_1) - (0.481 * _prevWaveNeg2_2);
 
-        var v1Neg1 = (0.021394 * (value + (1.777 * prevValue1) + prevValue2)) +
+        var v1Neg1 = (EhlersChebyshevGains.Minus1 * (value + (1.777 * prevValue1) + prevValue2)) +
                      (0.731 * _prevV1Neg1_1) - (0.166 * _prevV1Neg1_2);
         var waveNeg1 = v1Neg1 + (0.977 * _prevV1Neg1_1) + _prevV1Neg1_2 +
                        (1.008 * _prevWaveNeg1_1) - (0.561 * _prevWaveNeg1_2);
 
-        var v10 = (0.0095822 * (value + (1.572 * prevValue1) + prevValue2)) +
+        var v10 = (EhlersChebyshevGains.Zero * (value + (1.572 * prevValue1) + prevValue2)) +
                   (1.026 * _prevV10_1) - (0.282 * _prevV10_2);
         var wave0 = v10 + (0.356 * _prevV10_1) + _prevV10_2 +
                     (1.329 * _prevWave0_1) - (0.644 * _prevWave0_2);
 
-        var v11 = (0.00461 * (value + (1.192 * prevValue1) + prevValue2)) +
+        var v11 = (EhlersChebyshevGains.One * (value + (1.192 * prevValue1) + prevValue2)) +
                   (1.281 * _prevV11_1) - (0.426 * _prevV11_2);
         var wave1 = v11 - (0.384 * _prevV11_1) + _prevV11_2 +
                     (1.565 * _prevWave1_1) - (0.729 * _prevWave1_2);
 
-        var v12 = (0.0026947 * (value + (0.681 * prevValue1) + prevValue2)) +
+        var v12 = (EhlersChebyshevGains.Two * (value + (0.681 * prevValue1) + prevValue2)) +
                   (1.46 * _prevV12_1) - (0.543 * _prevV12_2);
         var wave2 = v12 - (0.966 * _prevV12_1) + _prevV12_2 +
                     (1.703 * _prevWave2_1) - (0.793 * _prevWave2_2);
 
-        var v13 = (0.0017362 * (value + (0.012 * prevValue1) + prevValue2)) +
+        var v13 = (EhlersChebyshevGains.Three * (value + (0.012 * prevValue1) + prevValue2)) +
                   (1.606 * _prevV13_1) - (0.65 * _prevV13_2);
         var wave3 = v13 - (1.408 * _prevV13_1) + _prevV13_2 +
                     (1.801 * _prevWave3_1) - (0.848 * _prevWave3_2);
 
-        var v14 = (0.0013738 * (value - (0.669 * prevValue1) + prevValue2)) +
+        var v14 = (EhlersChebyshevGains.Four * (value - (0.669 * prevValue1) + prevValue2)) +
                   (1.716 * _prevV14_1) - (0.74 * _prevV14_2);
         var wave4 = v14 - (1.685 * _prevV14_1) + _prevV14_2 +
                     (1.866 * _prevWave4_1) - (0.89 * _prevWave4_2);
 
-        var v15 = (0.0010794 * (value - (1.226 * prevValue1) + prevValue2)) +
+        var v15 = (EhlersChebyshevGains.Five * (value - (1.226 * prevValue1) + prevValue2)) +
                   (1.8 * _prevV15_1) - (0.811 * _prevV15_2);
         var wave5 = v15 - (1.842 * _prevV15_1) + _prevV15_2 +
                     (1.91 * _prevWave5_1) - (0.922 * _prevWave5_2);
 
-        var v16 = (0.001705 * (value - (1.659 * prevValue1) + prevValue2)) +
+        var v16 = (EhlersChebyshevGains.Six * (value - (1.659 * prevValue1) + prevValue2)) +
                   (1.873 * _prevV16_1) - (0.878 * _prevV16_2);
         var wave6 = v16 - (1.957 * _prevV16_1) + _prevV16_2 +
                     (1.946 * _prevWave6_1) - (0.951 * _prevWave6_2);
@@ -1642,9 +1639,7 @@ internal sealed class HighPassFilterV1Engine
     public HighPassFilterV1Engine(int length, double mult)
     {
         var resolved = Math.Max(1, length);
-        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / (mult * resolved * MathHelper.Sqrt2), 0.99, 0.01);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        _alpha = EhlersFirstOrderCoefficient.Alpha(mult * resolved * Math.Sqrt(2));
         _pow1 = MathHelper.Pow(1 - (_alpha / 2), 2);
         _pow2 = MathHelper.Pow(1 - _alpha, 2);
     }

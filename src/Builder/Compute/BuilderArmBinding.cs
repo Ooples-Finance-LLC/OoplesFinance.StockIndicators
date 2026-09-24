@@ -98,7 +98,19 @@ internal static class BuilderArmBinding
 
         // The key the caller named, else the one this arm stands for. A spec naming neither wants the
         // indicator's own series, which is where a single-output indicator publishes it.
-        var key = spec.OutputKey ?? target.OutputKey;
+        var key = spec.OutputKey ?? target.OutputKey
+            ?? OoplesFinance.StockIndicators.Indicators.GeneratedExpandedPrimary.KeyFor(spec.Options.GetType());
+        // These legacy calculations intentionally publish only named outputs. A
+        // typed streaming spec still has a default value; preserve that selection
+        // without turning the generated multi-output facade into a scalar alias.
+        if (key is null && result.CustomValuesList.Count == 0)
+            key = target.Name switch
+            {
+                IndicatorName.EhlersDominantCycleTunedBypassFilter => "V2",
+                IndicatorName.EhlersFourierSeriesAnalysis => "Wave",
+                IndicatorName.VervoortModifiedBollingerBandIndicator => "PercentB",
+                _ => null
+            };
         if (key is null)
         {
             return result.CustomValuesList;

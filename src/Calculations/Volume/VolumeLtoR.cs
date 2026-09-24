@@ -73,13 +73,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
         var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
-        var smaBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.SimpleMovingAverage(volumeSpan, smaBuffer.Span, length);
+        var normalizedBuffer = SpanCompat.CreateOutputBuffer(count);
+        VolumeCore.NormalizedVolume(volumeSpan, normalizedBuffer.Span, length);
 
         for (var i = 0; i < count; i++)
         {
-            var averageVolume = smaBuffer.Span[i];
-            var normalizedVolume = averageVolume != 0 ? volumeList[i] / averageVolume : 0;
+            var normalizedVolume = normalizedBuffer.Span[i];
             normalizedVolumeList.Add(normalizedVolume);
 
             var prevNormalized1 = i >= 1 ? normalizedVolumeList[i - 1] : 0;
@@ -108,35 +107,18 @@ public static partial class Calculations
     public static StockData CalculateMoneyFlowIndex(this StockData stockData, int length = 14)
     {
         List<double> mfiList = new(stockData.Count);
-        List<double> posMoneyFlowList = new(stockData.Count);
-        List<double> negMoneyFlowList = new(stockData.Count);
-        var posMoneyFlowSumWindow = new RollingSum();
-        var negMoneyFlowSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        var inputList = stockData.ChainedValues;
+        var volumeList = stockData.Volumes;
 
+        using var flow = new OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex(Math.Min(Math.Max(1, length), Math.Max(1, stockData.Count)));
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var typicalPrice = inputList[i];
-            var prevTypicalPrice = i >= 1 ? inputList[i - 1] : 0;
             var prevMfi1 = i >= 1 ? mfiList[i - 1] : 0;
             var prevMfi2 = i >= 2 ? mfiList[i - 2] : 0;
-            var rawMoneyFlow = typicalPrice * currentVolume;
-
-            var posMoneyFlow = i >= 1 && typicalPrice > prevTypicalPrice ? rawMoneyFlow : 0;
-            posMoneyFlowList.Add(posMoneyFlow);
-            posMoneyFlowSumWindow.Add(posMoneyFlow);
-
-            var negMoneyFlow = i >= 1 && typicalPrice < prevTypicalPrice ? rawMoneyFlow : 0;
-            negMoneyFlowList.Add(negMoneyFlow);
-            negMoneyFlowSumWindow.Add(negMoneyFlow);
-
-            var posMoneyFlowTotal = posMoneyFlowSumWindow.Sum(length);
-            var negMoneyFlowTotal = negMoneyFlowSumWindow.Sum(length);
-            var mfiRatio = negMoneyFlowTotal != 0 ? posMoneyFlowTotal / negMoneyFlowTotal : 0;
-
-            var mfi = negMoneyFlowTotal == 0 ? 100 : posMoneyFlowTotal == 0 ? 0 : MinOrMax(100 - (100 / (1 + mfiRatio)), 100, 0);
+            var price = inputList.Count > 0 ? inputList[i] : OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex.TypicalPrice(
+                stockData.HighPrices[i], stockData.LowPrices[i], stockData.ClosePrices[i]);
+            var mfi = flow.Next(price, volumeList[i], true);
             mfiList.Add(mfi);
 
             var signal = GetRsiSignal(mfi - prevMfi1, prevMfi1 - prevMfi2, mfi, prevMfi1, 80, 20);
@@ -169,18 +151,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);   
 
+        var total = new ExactMeanAccumulator();
         for (var i = 0; i < count; i++)
         {
             var currentValue = inputList[i];
             var currentVolume = volumeList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var prevObv = i >= 1 ? obvList[i - 1] : 0;
-            var obv = currentValue > prevValue ? prevObv + currentVolume : currentValue < prevValue ? prevObv - currentVolume : prevObv;
+            if (currentValue > prevValue) total.Add(currentVolume);
+            else if (currentValue < prevValue) total.Add(currentVolume, -1);
+            var obv = total.Mean(1);
             obvList.Add(obv);
         }
 
-        var obvSignalList = GetMovingAverageList(stockData, maType, length, obvList);
+        var finiteInput = FiniteSignalInput.Create(obvList, out var finiteCount);
+        var obvSignalList = GetMovingAverageList(stockData, maType, length, finiteInput);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < finiteCount; i++) obvSignalList[i] = mean.Next(finiteInput[i], true);
+        }
+        for (var i = finiteCount; i < obvSignalList.Count; i++) obvSignalList[i] = double.NaN;
         for (var i = 0; i < count; i++)
         {
             var obv = obvList[i];
@@ -454,11 +445,11 @@ public static partial class Calculations
             var obvSma = obvSmaList[i];
             var obvStdDev = obvStdDevList[i];
             var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = currentValue + (2 * stdDev) - (sma - (2 * stdDev));
+            var aBot = 4 * stdDev;
             var obv = obvList[i];
             var a = aBot != 0 ? aTop / aBot : 0;
             var bTop = obv - (obvSma - (2 * obvStdDev));
-            var bBot = obvSma + (2 * obvStdDev) - (obvSma - (2 * obvStdDev));
+            var bBot = 4 * obvStdDev;
             var b = bBot != 0 ? bTop / bBot : 0;
 
             var obvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
@@ -533,11 +524,11 @@ public static partial class Calculations
             var nviSma = nviSmaList[i];
             var nviStdDev = nviStdDevList[i];
             var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = (currentValue + (2 * stdDev)) - (sma - (2 * stdDev));
+            var aBot = 4 * stdDev;
             var nvi = nviList[i];
             var a = aBot != 0 ? aTop / aBot : 0;
             var bTop = nvi - (nviSma - (2 * nviStdDev));
-            var bBot = (nviSma + (2 * nviStdDev)) - (nviSma - (2 * nviStdDev));
+            var bBot = 4 * nviStdDev;
             var b = bBot != 0 ? bTop / bBot : 0;
 
             var nvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
@@ -770,7 +761,7 @@ public static partial class Calculations
             var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
 
             var prevMfi = i >= 1 ? mfiList[i - 1] : 0;
-            var mfi = currentVolume != 0 ? (currentHigh - currentLow) / currentVolume : 0;
+            var mfi = RoundedRangeRatio.Of(currentHigh, currentLow, currentVolume);
             mfiList.Add(mfi);
 
             var mfiDiff = mfi - prevMfi;

@@ -344,7 +344,7 @@ public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingI
 
         var prevBeta3_2 = _index >= 2 ? _beta3_2 : 0;
         var prevBeta3_3 = _index >= 3 ? _beta3_3 : 0;
-        var beta3 = ((_b3 + _c) * prevBeta3_2) - ((_c + (_b3 * _c)) * prevBeta3_2) +
+        var beta3 = ((_b3 + _c) * (_index >= 1 ? _beta3_1 : 0)) - ((_c + (_b3 * _c)) * prevBeta3_2) +
             (_c * _c * prevBeta3_3) + ((1 - _b3 + _c) * (1 - _c) * detrend3);
 
         var mda1 = alpha1 + beta1;
@@ -408,10 +408,11 @@ public sealed class MultiLevelIndicatorState : IStreamingIndicatorState, IDispos
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentOpen = bar.Open;
         var currentClose = _input.GetValue(bar);
         var prevOpen = EhlersStreamingWindow.GetOffsetValue(_openValues, currentOpen, _length);
-        var z = (currentClose - currentOpen - (currentClose - prevOpen)) * _factor;
+        var z = (prevOpen - currentOpen) * _factor;
 
         if (isFinal)
         {
@@ -467,6 +468,7 @@ public sealed class MultiVoteOnBalanceVolumeState : IStreamingIndicatorState, ID
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentHigh = bar.High;
         var currentLow = bar.Low;
         var currentClose = _input.GetValue(bar);
@@ -520,7 +522,7 @@ public sealed class NarrowBandpassFilterState : IStreamingIndicatorState, IDispo
 
     public NarrowBandpassFilterState(int length = 50)
     {
-        _length = Math.Max(1, length);
+        _length = Math.Max(2, length);
         _weights = BuildWeights(_length);
         _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -602,6 +604,7 @@ public sealed class NaturalDirectionalComboState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var ndx = _ndx.Update(bar, isFinal, includeOutputs: false).Value;
         var nst = _nst.Update(bar, isFinal, includeOutputs: false).Value;
         var v3 = Math.Sign(ndx) != Math.Sign(nst)
@@ -725,6 +728,7 @@ public sealed class NaturalMarketComboState : IStreamingIndicatorState, IDisposa
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var nmr = _nmr.Update(bar, isFinal, includeOutputs: false).Value;
         var nmm = _nmm.Update(bar, isFinal, includeOutputs: false).Value;
         var v3 = Math.Sign(nmm) != Math.Sign(nmr)
@@ -939,70 +943,22 @@ public sealed class NaturalMarketSlopeState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Nma")]
 public sealed class NaturalMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _lnValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
+    private readonly NaturalWindowMean _mean;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
 
-    public NaturalMovingAverageState(int length = 40)
-    {
-        _length = Math.Max(1, length);
-        _lnValues = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public NaturalMovingAverageState(int length = 40) => _mean = new NaturalWindowMean(length);
     public IndicatorName Name => IndicatorName.NaturalMovingAverage;
-
-    public void Reset()
-    {
-        _lnValues.Clear();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
+    public void Reset() => _mean.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var ln = value > 0 ? Math.Log(value) * 1000 : 0;
-        double num = 0;
-        double denom = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var currentLn = EhlersStreamingWindow.GetOffsetValue(_lnValues, ln, j);
-            var prevLn = EhlersStreamingWindow.GetOffsetValue(_lnValues, ln, j + 1);
-            var oi = Math.Abs(currentLn - prevLn);
-            num += oi * (MathHelper.Sqrt(j + 1) - MathHelper.Sqrt(j));
-            denom += oi;
-        }
-
-        var ratio = denom != 0 ? num / denom : 0;
-        var nma = (value * ratio) + (prevValue * (1 - ratio));
-
-        if (isFinal)
-        {
-            _lnValues.TryAdd(ln, out _);
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Nma", nma }
-            };
-        }
-
+        var nma = _mean.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Nma", nma } } : null;
         return new StreamingIndicatorStateResult(nma, outputs);
     }
 
-    public void Dispose()
-    {
-        _lnValues.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 [PrimaryOutput("Nst")]
@@ -1210,10 +1166,10 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
         var nviStdDev = _nviStdDev.Next(nvi, isFinal);
 
         var aTop = value - (inputSma - (2 * stdDev));
-        var aBot = (value + (2 * stdDev)) - (inputSma - (2 * stdDev));
+        var aBot = 4 * stdDev;
         var a = aBot != 0 ? aTop / aBot : 0;
         var bTop = nvi - (nviSma - (2 * nviStdDev));
-        var bBot = (nviSma + (2 * nviStdDev)) - (nviSma - (2 * nviStdDev));
+        var bBot = 4 * nviStdDev;
         var b = bBot != 0 ? bTop / bBot : 0;
         var nvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
         var signal = _signalSmoother.Next(nvdi, isFinal);
@@ -1365,7 +1321,7 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
         var prevLp = _hasPrev ? _lp : 0;
         // Batch initializes trend=0, hp=0, lp=0 each iteration
         double nrtr;
-        double trend = 0;
+        double trend = prevTrend;
         double hp = 0;
         double lp = 0;
 
@@ -1373,7 +1329,7 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
         {
             hp = value > prevHp ? value : prevHp;
             nrtr = hp * (1 - _pct);
-            // Only set trend=-1 when value <= nrtr; otherwise trend stays 0
+            // Only set trend=-1 when value <= nrtr; otherwise preserve the current trend
             if (value <= nrtr)
             {
                 trend = -1;
@@ -1386,7 +1342,7 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
         {
             lp = value < prevLp ? value : prevLp;
             nrtr = lp * (1 + _pct);
-            // Only set trend=1 when value > nrtr; otherwise trend stays 0
+            // Only set trend=1 when value > nrtr; otherwise preserve the current trend
             if (value > nrtr)
             {
                 trend = 1;
@@ -1736,7 +1692,7 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
     private readonly double _top;
     private readonly double _bottom;
     private double _prevClose;
-    private double _prevObv;
+    private ExactMeanAccumulator _obvTotal;
     private double _prevObvdi;
     private double _prevBsc;
     private bool _hasPrev;
@@ -1766,7 +1722,7 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
         _inputStdDev.Reset();
         _obvStdDev.Reset();
         _prevClose = 0;
-        _prevObv = 0;
+        _obvTotal = default;
         _prevObvdi = 0;
         _prevBsc = 0;
         _hasPrev = false;
@@ -1776,10 +1732,10 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
     {
         var value = _input.GetValue(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
-        var prevObv = _hasPrev ? _prevObv : 0;
-        var obv = value > prevClose ? prevObv + bar.Volume
-            : value < prevClose ? prevObv - bar.Volume
-            : prevObv;
+        var total = _obvTotal;
+        if (value > prevClose) total.Add(bar.Volume);
+        else if (value < prevClose) total.Add(bar.Volume, -1);
+        var obv = total.Mean(1);
 
         var inputSma = _inputSma.Next(value, isFinal);
         var obvSma = _obvSma.Next(obv, isFinal);
@@ -1788,10 +1744,10 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
         var obvStdDev = _obvStdDev.Next(obv, isFinal);
 
         var aTop = value - (inputSma - (2 * stdDev));
-        var aBot = value + (2 * stdDev) - (inputSma - (2 * stdDev));
+        var aBot = 4 * stdDev;
         var a = aBot != 0 ? aTop / aBot : 0;
         var bTop = obv - (obvSma - (2 * obvStdDev));
-        var bBot = obvSma + (2 * obvStdDev) - (obvSma - (2 * obvStdDev));
+        var bBot = 4 * obvStdDev;
         var b = bBot != 0 ? bTop / bBot : 0;
         var obvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
         var signal = _signalSmoother.Next(obvdi, isFinal);
@@ -1807,7 +1763,7 @@ public sealed class OnBalanceVolumeDisparityIndicatorState : IStreamingIndicator
         if (isFinal)
         {
             _prevClose = value;
-            _prevObv = obv;
+            _obvTotal = total;
             _prevObvdi = obvdi;
             _prevBsc = bsc;
             _hasPrev = true;

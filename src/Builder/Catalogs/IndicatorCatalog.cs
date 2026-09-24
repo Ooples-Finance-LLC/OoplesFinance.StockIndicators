@@ -379,7 +379,7 @@ public sealed partial class IndicatorCatalog
     public SeriesHandle Sar(double accelerationStart = 0.02, double accelerationMax = 0.2, SeriesHandle? input = null, IndicatorKey? key = null)
     {
         var series = input ?? Price();
-        var spec = IndicatorSpecs.Create(IndicatorName.ParabolicSAR, new GenericIndicatorOptions(new object[] { accelerationStart, accelerationMax }));
+        var spec = IndicatorSpecs.Create(IndicatorName.ParabolicSAR, new ParabolicSarSpecOptions(start: accelerationStart, increment: accelerationStart, maximum: accelerationMax));
         return _builder.AddIndicator(spec, series, _builder.ResolveSeriesKey(series), key);
     }
 
@@ -650,6 +650,17 @@ public sealed partial class IndicatorCatalog
         var spec = IndicatorSpecs.CreateMultiStock(
             IndicatorName.SectorRotationModel,
             new MultiStockIndicatorOptions(length1, length2, MovingAvgType.ExponentialMovingAverage));
+        return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
+    }
+
+    /// <summary>Computes a named Sector Rotation output ("Srm" or "Signal") against an explicit benchmark.</summary>
+    public SeriesHandle SectorRotationModel(SeriesHandle marketPrice, string outputKey, int length1 = 25, int length2 = 75,
+        SeriesHandle? input = null, IndicatorKey? key = null)
+    {
+        if (outputKey is not ("Srm" or "Signal")) throw new ArgumentException("Expected Srm or Signal.", nameof(outputKey));
+        var stockPrice = input ?? Price();
+        var spec = new IndicatorSpec(IndicatorName.SectorRotationModel,
+            new MultiStockIndicatorOptions(length1, length2, MovingAvgType.ExponentialMovingAverage), outputKey);
         return _builder.AddMultiStockIndicator(spec, stockPrice, marketPrice, _builder.ResolveSeriesKey(stockPrice), key);
     }
 

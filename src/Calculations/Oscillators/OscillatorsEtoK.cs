@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -201,6 +201,7 @@ public static partial class Calculations
             f90_List.Add(f90_);
 
             double f88 = prevF90_ == 0 && length - 1 >= 5 ? length - 1 : 5;
+            f88List.Add(f88);
             double f0 = f88 >= f90_ && f8 != f10 ? 1 : 0;
             var f90 = f88 == f90_ && f0 == 0 ? 0 : f90_;
             var v4_ = f88 < f90 && v20 > 0 ? MinOrMax(((v14 / v20) + 1) * 50, 100, 0) : 50;
@@ -245,7 +246,7 @@ public static partial class Calculations
         var wind2 = MinOrMax(length2 * length1);
         var nLog = Math.Log(length2);
 
-        var (highest1List, lowest1List) = GetMaxAndMinValuesList(highList, lowList, length1);
+        var (highest1List, lowest1List) = length1 == 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length1);
         var (highest2List, lowest2List) = GetMaxAndMinValuesList(highList, lowList, wind2);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -262,7 +263,7 @@ public static partial class Calculations
             var smallRange = Math.Max(prevValue1, highest1) - Math.Min(prevValue1, lowest1);
             smallRangeList.Add(smallRange);
 
-            var prevSmallSum = i >= 1 ? GetLastOrDefault(smallSumList) : smallRange;
+            var prevSmallSum = GetLastOrDefault(smallSumList);
             var smallSum = prevSmallSum + smallRange - prevSmallRange;
             smallSumList.Add(smallSum);
 
@@ -569,8 +570,8 @@ public static partial class Calculations
             var stochK = stochKList[i];
             var prevIidx1 = i >= 1 ? iidxList[i - 1] : 0;
             var prevIidx2 = i >= 2 ? iidxList[i - 2] : 0;
-            double bolinsll = bolins2 < 0.05 ? -5 : bolins2 > 0.95 ? 5 : 0;
-            double cciins = cci > 100 ? 5 : cci < -100 ? -5 : 0;
+            double bolinsll = InsyncVotes.Band(bolins2, 5, 95);
+            double cciins = InsyncVotes.Band(cci, -100, 100);
 
             var emo = emvList[i];
             emoList.Add(emo);
@@ -580,7 +581,7 @@ public static partial class Calculations
             emoSmaList.Add(emoSma);
 
             var emvins2 = emo - emoSma;
-            double emvinsb = emvins2 < 0 ? emoSma < 0 ? -5 : 0 : emoSma > 0 ? 5 : 0;
+            double emvinsb = InsyncVotes.Direction(emo, emoSma);
 
             var macd = macdList[i];
             tempMacdList.Add(macd);
@@ -588,8 +589,8 @@ public static partial class Calculations
             macdSumWindow.Add(macd);
             var macdSma = macdSumWindow.Average(smaLength);
             var macdins2 = macd - macdSma;
-            double macdinsb = macdins2 < 0 ? macdSma < 0 ? -5 : 0 : macdSma > 0 ? 5 : 0;
-            double mfiins = mfi > 80 ? 5 : mfi < 20 ? -5 : 0;
+            double macdinsb = InsyncVotes.Direction(macd, macdSma);
+            double mfiins = InsyncVotes.Band(mfi, 20, 80);
 
             var dpo = dpoList[i];
             tempDpoList.Add(dpo);
@@ -597,10 +598,10 @@ public static partial class Calculations
             dpoSumWindow.Add(dpo);
             var dpoSma = dpoSumWindow.Average(smaLength);
             var pdoins2 = dpo - dpoSma;
-            double pdoinsb = pdoins2 < 0 ? dpoSma < 0 ? -5 : 0 : dpoSma > 0 ? 5 : 0;
+            double pdoinsb = InsyncVotes.Direction(dpo, dpoSma);
             pdoinsbList.Add(pdoinsb);
 
-            double pdoinss = pdoins2 > 0 ? dpoSma > 0 ? 5 : 0 : dpoSma < 0 ? -5 : 0;
+            double pdoinss = InsyncVotes.InverseDirection(dpo, dpoSma);
             pdoinssList.Add(pdoinss);
 
             var roc = rocList[i];
@@ -609,10 +610,10 @@ public static partial class Calculations
             rocSumWindow.Add(roc);
             var rocSma = rocSumWindow.Average(smaLength);
             var rocins2 = roc - rocSma;
-            double rocinsb = rocins2 < 0 ? rocSma < 0 ? -5 : 0 : rocSma > 0 ? 5 : 0;
-            double rsiins = rsi > 70 ? 5 : rsi < 30 ? -5 : 0;
-            double stopdins = stochD > 80 ? 5 : stochD < 20 ? -5 : 0;
-            double stopkins = stochK > 80 ? 5 : stochK < 20 ? -5 : 0;
+            double rocinsb = InsyncVotes.Direction(roc, rocSma);
+            double rsiins = InsyncVotes.Band(rsi, 30, 70);
+            double stopdins = InsyncVotes.Band(stochD, 20, 80);
+            double stopkins = InsyncVotes.Band(stochK, 20, 80);
 
             var iidx = 50 + cciins + bolinsll + rsiins + stopkins + stopdins + mfiins + emvinsb + rocinsb + prevPdoinss10 + prevPdoinsb10 + macdinsb;
             iidxList.Add(iidx);
@@ -840,49 +841,35 @@ public static partial class Calculations
         List<double> cblList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
+        length = Math.Max(1, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hh = highestList[i];
-            var ll = lowestList[i];
-
             var prevCbl = GetLastOrDefault(cblList);
-            int hCount = 0, lCount = 0;
             var cbl = currentValue;
-            for (var j = 0; j <= length; j++)
+            int highPivot = 0, lowPivot = 0;
+            var highest = highList[i - 0];
+            var lowest = lowList[i - 0];
+            for (var offset = 1; offset < length && offset <= i; offset++)
             {
-                var currentLow = i >= j ? lowList[i - j] : 0;
-                var currentHigh = i >= j ? highList[i - j] : 0;
-
-                if (currentLow == ll)
+                var h = highList[i - offset]; var l = lowList[i - offset];
+                if (h > highest) { highest = h; highPivot = offset; }
+                if (l < lowest) { lowest = l; lowPivot = offset; }
+            }
+            // The latest extreme determines direction; an outside-bar tie uses its high.
+            var rising = highPivot <= lowPivot;
+            var pivot = rising ? highPivot : lowPivot;
+            var level = rising ? lowList[i - pivot] : highList[i - pivot];
+            var count = 0;
+            for (var offset = pivot + 1; offset <= pivot + length && offset <= i; offset++)
+            {
+                var candidate = rising ? lowList[i - offset] : highList[i - offset];
+                if (rising ? candidate < level : candidate > level)
                 {
-                    for (var k = j + 1; k <= j + length; k++)
-                    {
-                        var prevHigh = i >= k ? highList[i - k] : 0;
-                        lCount += prevHigh > currentHigh ? 1 : 0;
-                        if (lCount == 2)
-                        {
-                            cbl = prevHigh;
-                            break;
-                        }
-                    }
-                }
-
-                if (currentHigh == hh)
-                {
-                    for (var k = j + 1; k <= j + length; k++)
-                    {
-                        var prevLow = i >= k ? lowList[i - k] : 0;
-                        hCount += prevLow > currentLow ? 1 : 0;
-                        if (hCount == 2)
-                        {
-                            cbl = prevLow;
-                            break;
-                        }
-                    }
+                    level = candidate;
+                    if (++count == 2) { cbl = level; break; }
                 }
             }
             cblList.Add(cbl);
@@ -1277,11 +1264,16 @@ public static partial class Calculations
             var advSum = advSumWindow.Sum(length);
             var loSum = loSumWindow.Sum(length);
 
-            var advDiff = advSum + loSum != 0 ? MinOrMax(advSum / (advSum + loSum) * 100, 100, 0) : 0;
+            var advDiff = advSum + loSum != 0 ? 100 * advSum / (advSum + loSum) : 0;
             advDiffList.Add(advDiff);
         }
 
         var zmbtiList = GetMovingAverageList(stockData, maType, length, advDiffList);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < zmbtiList.Count; i++) zmbtiList[i] = mean.Next(advDiffList[i], true);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var zmbti = zmbtiList[i];
@@ -1683,7 +1675,7 @@ public static partial class Calculations
         List<double> lretList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length2);
+        var (highestList, lowestList) = length2 <= 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length2);
 
         var wmaList = GetMovingAverageList(stockData, maType, length1, inputList);
 
@@ -2112,7 +2104,8 @@ public static partial class Calculations
             ccDevList[i] = 0;
         }
 
-        var ccDevAvgList = GetMovingAverageList(stockData, maType, length2, ccDevList);
+        // A finite volatility window must return exactly to zero after a spike leaves.
+        var ccDevAvgList = Streaming.SpreadAverage.Calculate(ccDevList, maType, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
             var avg = ccDevAvgList[i];
@@ -2429,6 +2422,8 @@ public static partial class Calculations
         var indexSrcMaList = GetMovingAverageList(stockData, maType, length, indexSrcList);
         var index2MaList = GetMovingAverageList(stockData, maType, length, index2List);
         var src2MaList = GetMovingAverageList(stockData, maType, length, src2List);
+        using var moments = maType == MovingAvgType.KaufmanAdaptiveMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides
+            ? new Streaming.KaufmanRegressionMoments(length) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
             var srcMa = kamaList[i];
@@ -2441,16 +2436,20 @@ public static partial class Calculations
 
             var indexSqrt = index2Ma - Pow(indexMa, 2);
             var indexSt = indexSqrt >= 0 ? Sqrt(indexSqrt) : 0;
-            indexStList.Add(indexSt);
+
 
             var srcSqrt = src2Ma - Pow(srcMa, 2);
             var srcSt = srcSqrt >= 0 ? Sqrt(srcSqrt) : 0;
-            srcStList.Add(srcSt);
+
 
             var a = indexSrcMa - (indexMa * srcMa);
             var b = indexSt * srcSt;
 
             var r = b != 0 ? a / b : 0;
+            if (moments is not null)
+                moments.Next(inputList[i], true, out indexSt, out srcSt, out r);
+            indexStList.Add(indexSt);
+            srcStList.Add(srcSt);
             rList.Add(r);
 
             var signal = GetRsiSignal(r - prevR1, prevR1 - prevR2, r, prevR1, 0.5, -0.5);
@@ -2643,7 +2642,7 @@ public static partial class Calculations
                 }
             }
 
-            var kendallCorrelation = numerator / totalPairs;
+            var kendallCorrelation = totalPairs == 0 ? 0 : numerator / totalPairs;
             kendallCorrelationList.Add(kendallCorrelation);
 
             var signal = GetCompareSignal(kendallCorrelation - prevKendall1, prevKendall1 - prevKendall2);
@@ -2753,10 +2752,10 @@ public static partial class Calculations
                 var prevSv2 = i >= 2 ? svList[i - 2] : 0;
                 var r1 = highestHigh1 - lowestLow1;
                 var r2 = highestHigh2 - lowestLow2;
-                var s1 = r1 != 0 ? (currentValue1 - lowestLow1) / r1 : 50;
-                var s2 = r2 != 0 ? (currentValue2 - lowestLow2) / r2 : 50;
+                var s1 = r1 != 0 ? (currentValue1 - lowestLow1) / r1 : 0.5;
+                var s2 = r2 != 0 ? (currentValue2 - lowestLow2) / r2 : 0.5;
 
-                var d = s1 - s2;
+                var d = Math.Abs(s1-s2) <= 1.4210854715202004e-14 ? 0 : s1-s2;
                 dWindow.Add(d);
                 var highestD = dWindow.Max;
                 var lowestD = dWindow.Min;

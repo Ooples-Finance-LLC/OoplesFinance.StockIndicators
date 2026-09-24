@@ -492,6 +492,7 @@ public sealed class EhlersHilbertTransformerState : IStreamingIndicatorState, ID
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _engine.Next(bar, isFinal, out var real, out var imag);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -555,6 +556,7 @@ public sealed class EhlersHilbertTransformerIndicatorState : IStreamingIndicator
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
         var real = peak != 0 ? roofingFilter / peak : 0;
@@ -636,12 +638,14 @@ public sealed class EhlersHomodyneDominantCycleState : IStreamingIndicatorState,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _engine.Next(bar, isFinal, out var real, out var imag);
 
         var re = (real * _prevReal1) + (imag * _prevImag1);
         var im = (_prevReal1 * imag) - (real * _prevImag1);
 
-        var period = im != 0 && re != 0 ? 2 * Math.PI / Math.Abs(im / re) : 0;
+        var advance = Math.Abs(Math.Atan2(im, re));
+        var period = advance != 0 ? 2 * Math.PI / advance : 0;
         period = MathHelper.MinOrMax(period, _length1, _length3);
 
         var domCyc = (_c1 * ((period + _prevPeriod) / 2)) + (_c2 * _prevDomCyc1) + (_c3 * _prevDomCyc2);
@@ -1376,7 +1380,7 @@ internal sealed class EhlersHammingMovingAverageSmoother : IMovingAverageSmoothe
         double sum = 0;
         for (var j = 0; j < _length; j++)
         {
-            var weight = Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (_length - 1))));
+            var weight = _length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (_length - 1))));
             _weights[j] = weight;
             sum += weight;
         }

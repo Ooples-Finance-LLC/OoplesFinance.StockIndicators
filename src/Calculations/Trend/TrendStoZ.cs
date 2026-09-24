@@ -1,4 +1,4 @@
-﻿
+
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -31,60 +31,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
         var zigZag = new double[count];
-        if (count > 0)
-        {
-            var lastPivotIndex = 0;
-            var lastPivotValue = (highList[0] + lowList[0]) / 2;
-            var lastPivotIsHigh = true;
-            var deviationPercent = deviation / 100;
-
-            for (var i = 0; i < count; i++)
-            {
-                zigZag[i] = lastPivotValue;
-            }
-
-            for (var i = 1; i < count; i++)
-            {
-                if (lastPivotIsHigh)
-                {
-                    if (lowList[i] < lastPivotValue * (1 - deviationPercent))
-                    {
-                        for (var j = lastPivotIndex; j <= i; j++)
-                        {
-                            zigZag[j] = lastPivotValue + ((lowList[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
-                        }
-
-                        lastPivotIndex = i;
-                        lastPivotValue = lowList[i];
-                        lastPivotIsHigh = false;
-                    }
-                    else if (highList[i] > lastPivotValue)
-                    {
-                        lastPivotValue = highList[i];
-                        lastPivotIndex = i;
-                    }
-                }
-                else
-                {
-                    if (highList[i] > lastPivotValue * (1 + deviationPercent))
-                    {
-                        for (var j = lastPivotIndex; j <= i; j++)
-                        {
-                            zigZag[j] = lastPivotValue + ((highList[i] - lastPivotValue) * (j - lastPivotIndex) / (i - lastPivotIndex));
-                        }
-
-                        lastPivotIndex = i;
-                        lastPivotValue = highList[i];
-                        lastPivotIsHigh = true;
-                    }
-                    else if (lowList[i] < lastPivotValue)
-                    {
-                        lastPivotValue = lowList[i];
-                        lastPivotIndex = i;
-                    }
-                }
-            }
-        }
+        ZigZagPath.Compute(Compatibility.SpanCompat.AsReadOnlySpan(highList), Compatibility.SpanCompat.AsReadOnlySpan(lowList), zigZag, deviation);
 
         for (var i = 0; i < count; i++)
         {
@@ -404,7 +351,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(smaList, length2);
+        var (highestList, lowestList) = length2 <= 1 ? (smaList, smaList) : GetMaxAndMinValuesList(smaList, length2);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -530,7 +477,10 @@ public static partial class Calculations
             adList.Add(ad);
         }
 
-        var admList = GetMovingAverageList(stockData, maType, length, adList);
+        // A residual left by rolling weighted sums can fabricate a crossing after a spike expires.
+        var admList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(adList, maType, length)
+            : GetMovingAverageList(stockData, maType, length, adList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -584,54 +534,67 @@ public static partial class Calculations
     public static StockData CalculateTrendDirectionForceIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 10, int length2 = 30)
     {
-        List<double> srcList = new(stockData.Count);
-        List<double> absTdfList = new(stockData.Count);
         List<double> tdfiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax absTdfWindow = new(length2);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var halfLength = MinOrMax((int)Math.Ceiling((double)length1 / 2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i] * 1000;
-            srcList.Add(currentValue);
+            using var kernel = new Streaming.TrendForceKernel(maType, length1, length2);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var value = kernel.Next(inputList[i], true);
+                var previous = i > 0 ? tdfiList[i - 1] : 0;
+                tdfiList.Add(value); signalsList?.Add(GetCompareSignal(value, previous));
+            }
         }
-
-        var ema1List = GetMovingAverageList(stockData, maType, halfLength, srcList);
-        var ema2List = GetMovingAverageList(stockData, maType, halfLength, ema1List);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var ema1 = ema1List[i];
-            var ema2 = ema2List[i];
-            var prevEma1 = i >= 1 ? ema1List[i - 1] : 0;
-            var prevEma2 = i >= 1 ? ema2List[i - 1] : 0;
-            var ema1Diff = ema1 - prevEma1;
-            var ema2Diff = ema2 - prevEma2;
-            var emaDiffAvg = (ema1Diff + ema2Diff) / 2;
-
-            double tdf;
-            try
+            RollingMinMax absTdfWindow = new(length2);
+            List<double> absTdfList = new(stockData.Count);
+            List<double> srcList = new(stockData.Count);
+            var halfLength = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)length1 / 2)));
+    
+            for (var i = 0; i < stockData.Count; i++)
             {
-                tdf = Math.Abs(ema1 - ema2) * Pow(emaDiffAvg, 3);
+                var currentValue = inputList[i] * 1000;
+                srcList.Add(currentValue);
             }
-            catch (OverflowException)
+    
+            var ema1List = GetMovingAverageList(stockData, maType, halfLength, srcList);
+            var ema2List = GetMovingAverageList(stockData, maType, halfLength, ema1List);
+            for (var i = 0; i < stockData.Count; i++)
             {
-                tdf = double.MaxValue;
+                var ema1 = ema1List[i];
+                var ema2 = ema2List[i];
+                var prevEma1 = i >= 1 ? ema1List[i - 1] : 0;
+                var prevEma2 = i >= 1 ? ema2List[i - 1] : 0;
+                var ema1Diff = ema1 - prevEma1;
+                var ema2Diff = ema2 - prevEma2;
+                var emaDiffAvg = (ema1Diff + ema2Diff) / 2;
+    
+                double tdf;
+                try
+                {
+                    tdf = Math.Abs(ema1 - ema2) * Pow(emaDiffAvg, 3);
+                }
+                catch (OverflowException)
+                {
+                    tdf = double.MaxValue;
+                }
+    
+                var absTdf = Math.Abs(tdf);
+                absTdfList.Add(absTdf);
+                absTdfWindow.Add(absTdf);
+    
+                var tdfh = absTdfWindow.Max;
+                var prevTdfi = i >= 1 ? tdfiList[i - 1] : 0;
+                var tdfi = tdfh != 0 ? tdf / tdfh : 0;
+                tdfiList.Add(tdfi);
+    
+                var signal = GetCompareSignal(tdfi, prevTdfi);
+                signalsList?.Add(signal);
             }
-
-            var absTdf = Math.Abs(tdf);
-            absTdfList.Add(absTdf);
-            absTdfWindow.Add(absTdf);
-
-            var tdfh = absTdfWindow.Max;
-            var prevTdfi = i >= 1 ? tdfiList[i - 1] : 0;
-            var tdfi = tdfh != 0 ? tdf / tdfh : 0;
-            tdfiList.Add(tdfi);
-
-            var signal = GetCompareSignal(tdfi, prevTdfi);
-            signalsList?.Add(signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -753,7 +716,7 @@ public static partial class Calculations
             avgList.Add(avg);
 
             avgSum += avg;
-            var rmean = i != 0 ? avgSum / i : 0;
+            var rmean = avgSum / (i + 1);
             var osc = avg - rmean;
             oscList.Add(osc);
 
@@ -991,12 +954,13 @@ public static partial class Calculations
 
         // The stochastic of the MACD over the MACD's own range. Chained into the stochastic indicator, the MACD
         // was measured against the bars' highs and lows - an oscillator set against a price range.
-        var (macdHighestList, macdLowestList) = GetMaxAndMinValuesList(macdList, cycleLength);
+        var (macdHighestList, macdLowestList) = cycleLength == 1 ? (macdList, macdList) : GetMaxAndMinValuesList(macdList, cycleLength);
+        var scaleWindow = new RollingMinMax(Math.Max(1, cycleLength));
         var stcList = new List<double>(stockData.Count);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var macdRange = macdHighestList[i] - macdLowestList[i];
-            stcList.Add(macdRange != 0 ? MinOrMax((macdList[i] - macdLowestList[i]) / macdRange * 100, 100, 0) : 0);
+            scaleWindow.Add(Math.Abs(ema23List[i]) + Math.Abs(ema50List[i]));
+            stcList.Add(SchaffRange.Normalize(macdList[i], macdLowestList[i], macdHighestList[i], scaleWindow.Max));
         }
 
         for (var i = 0; i < stockData.Count; i++)
@@ -1050,53 +1014,72 @@ public static partial class Calculations
         int cycleLength = 10, int d1Length = 3, int d2Length = 3)
     {
         List<double> macdList = new(stockData.Count);
-        List<double> fastKList = new(stockData.Count);
-        List<double> fastDList = new(stockData.Count);
-        List<double> slowKList = new(stockData.Count);
         List<double> stcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
         {
-            macdList.Add(fastEmaList[i] - slowEmaList[i]);
+            using var kernel = new Streaming.SchaffCycleKernel(maType, fastLength, slowLength, cycleLength, d1Length, d2Length);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var result = kernel.Next(inputList[i], true);
+                macdList.Add(result.Macd); stcList.Add(result.Stc);
+                var previous = i > 0 ? stcList[i - 1] : 0;
+                var beforePrevious = i > 1 ? stcList[i - 2] : 0;
+                signalsList?.Add(GetRsiSignal(result.Stc - previous, previous - beforePrevious, result.Stc, previous, 75, 25));
+            }
         }
-
-        // First stochastic pass, over the MACD line.
-        var (macdHighestList, macdLowestList) = GetMaxAndMinValuesList(macdList, cycleLength);
-        var d1Alpha = (double)2 / (d1Length + 1);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var range = macdHighestList[i] - macdLowestList[i];
-            var prevFastK = i >= 1 ? fastKList[i - 1] : 0;
-            var fastK = range > 0 ? MinOrMax((macdList[i] - macdLowestList[i]) / range * 100, 100, 0) : prevFastK;
-            fastKList.Add(fastK);
-
-            var prevFastD = i >= 1 ? fastDList[i - 1] : fastK;
-            fastDList.Add(prevFastD + (d1Alpha * (fastK - prevFastD)));
-        }
-
-        // Second stochastic pass, over the smoothed result of the first.
-        var (fastDHighestList, fastDLowestList) = GetMaxAndMinValuesList(fastDList, cycleLength);
-        var d2Alpha = (double)2 / (d2Length + 1);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var range = fastDHighestList[i] - fastDLowestList[i];
-            var prevSlowK = i >= 1 ? slowKList[i - 1] : 0;
-            var slowK = range > 0 ? MinOrMax((fastDList[i] - fastDLowestList[i]) / range * 100, 100, 0) : prevSlowK;
-            slowKList.Add(slowK);
-
-            var prevStc = i >= 1 ? stcList[i - 1] : slowK;
-            var stc = MinOrMax(prevStc + (d2Alpha * (slowK - prevStc)), 100, 0);
-            stcList.Add(stc);
-
-            var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
-            var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
-            var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
-            signalsList?.Add(signal);
+            List<double> slowKList = new(stockData.Count);
+            List<double> fastDList = new(stockData.Count);
+            List<double> fastKList = new(stockData.Count);
+            var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
+            var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+    
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                macdList.Add(fastEmaList[i] - slowEmaList[i]);
+            }
+    
+            var scaleList = fastEmaList.Select((v, i) => Math.Abs(v)+Math.Abs(slowEmaList[i])).ToList();
+            var scaleMax = cycleLength == 1 ? scaleList : GetMaxAndMinValuesList(scaleList, cycleLength).Item1;
+            // First stochastic pass, over the MACD line.
+            var (macdHighestList, macdLowestList) = cycleLength == 1 ? (macdList, macdList)
+                : GetMaxAndMinValuesList(macdList, cycleLength);
+            var d1Alpha = (double)2 / (d1Length + 1);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var range = macdHighestList[i] - macdLowestList[i];
+                var prevFastK = i >= 1 ? fastKList[i - 1] : 0;
+                var fastK = SchaffRange.Normalize(macdList[i], macdLowestList[i], macdHighestList[i], scaleMax[i], prevFastK);
+                fastKList.Add(fastK);
+    
+                var prevFastD = i >= 1 ? fastDList[i - 1] : fastK;
+                fastDList.Add(prevFastD + (d1Alpha * (fastK - prevFastD)));
+            }
+    
+            // Second stochastic pass, over the smoothed result of the first.
+            var (fastDHighestList, fastDLowestList) = cycleLength == 1 ? (fastDList, fastDList)
+                : GetMaxAndMinValuesList(fastDList, cycleLength);
+            var d2Alpha = (double)2 / (d2Length + 1);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var range = fastDHighestList[i] - fastDLowestList[i];
+                var prevSlowK = i >= 1 ? slowKList[i - 1] : 0;
+                var slowK = SchaffRange.Normalize(fastDList[i], fastDLowestList[i], fastDHighestList[i], Math.Max(Math.Abs(fastDLowestList[i]), Math.Abs(fastDHighestList[i])), prevSlowK);
+                slowKList.Add(slowK);
+    
+                var prevStc = i >= 1 ? stcList[i - 1] : slowK;
+                var stc = MinOrMax(prevStc + (d2Alpha * (slowK - prevStc)), 100, 0);
+                stcList.Add(stc);
+    
+                var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
+                var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
+                var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
+                signalsList?.Add(signal);
+            }
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -1202,13 +1185,17 @@ public static partial class Calculations
         var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
+        var residuals = new double[inputList.Count];
+        var stableResidual = new SeededEmaResidual(length1);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var ap = inputList[i];
             var esa = emaList[i];
 
-            var absApEsa = Math.Abs(ap - esa);
+            residuals[i] = maType == MovingAvgType.ExponentialMovingAverage
+                ? stableResidual.Next(ap, true) : ap - esa;
+            var absApEsa = Math.Abs(residuals[i]);
             absApEsaList.Add(absApEsa);
         }
 
@@ -1219,7 +1206,7 @@ public static partial class Calculations
             var esa = emaList[i];
             var d = dList[i];
 
-            var ci = d != 0 ? (ap - esa) / (0.015 * d) : 0;
+            var ci = d != 0 ? residuals[i] / (0.015 * d) : 0;
             ciList.Add(ci);
         }
 

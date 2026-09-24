@@ -121,13 +121,11 @@ public static partial class Calculations
             var prevImi1 = i >= 1 ? imiUnfilteredList[i - 1] : 0;
             var prevImi2 = i >= 2 ? imiUnfilteredList[i - 2] : 0;
 
-            var prevGains = GetLastOrDefault(gainsList);
-            var gains = currentClose > currentOpen ? prevGains + (currentClose - currentOpen) : 0;
+            var gains = currentClose > currentOpen ? currentClose - currentOpen : 0;
             gainsList.Add(gains);
             gainsSumWindow.Add(gains);
 
-            var prevLosses = GetLastOrDefault(lossesList);
-            var losses = currentClose < currentOpen ? prevLosses + (currentOpen - currentClose) : 0;
+            var losses = currentClose < currentOpen ? currentOpen - currentClose : 0;
             lossesList.Add(losses);
             lossesSumWindow.Add(losses);
 

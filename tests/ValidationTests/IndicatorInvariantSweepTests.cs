@@ -70,10 +70,10 @@ public sealed class IndicatorInvariantSweepTests
 
     /// <summary>Every bar identical, so anything derived from price is constant and anything derived from
     /// range is zero. The answer is fixed by arithmetic rather than by a chart someone read.</summary>
-    private static IReadOnlyList<Bar> Flat(double price)
+    private static IReadOnlyList<Bar> Flat(double price, int count = FlatBars_)
     {
         var start = new DateTime(2021, 1, 4, 14, 30, 0, DateTimeKind.Utc);
-        return [.. Enumerable.Range(0, FlatBars_).Select(i =>
+        return [.. Enumerable.Range(0, count).Select(i =>
             new Bar(start.AddMinutes(i), price, price, price, price, 1000))];
     }
 
@@ -107,10 +107,9 @@ public sealed class IndicatorInvariantSweepTests
 
             return run[indicator].ToArray();
         }
-        catch (Exception)
+        catch (Exception ex)
         {
-            // An indicator that refuses this fixture is not what these invariants are about. The reachability
-            // floor below is what stops that becoming a silent pass.
+            broke.Add(name + " threw " + ex.GetType().Name + ": " + ex.Message);
             return null;
         }
     }
@@ -269,7 +268,6 @@ public sealed class IndicatorInvariantSweepTests
     public void WarmupBarsCoversTheWarmup()
     {
         const double price = 50;
-        var bars = Flat(price);
         var wrong = new List<string>();
         var broke = new List<string>();
         var reached = 0;
@@ -282,6 +280,7 @@ public sealed class IndicatorInvariantSweepTests
                 continue;
             }
 
+            var bars = Flat(price, Math.Max(FlatBars_, indicator.WarmupBars + FlatTail_));
             var values = Run(indicator, bars, type.Name, broke);
             if (values is null)
             {

@@ -124,23 +124,36 @@ internal static class VolatilityCore
             }
 
             // Calculate mean
+            var anchor = input[i - length + 1];
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                sum += input[j];
+                sum += input[j] - anchor;
             }
-            var mean = sum / length;
+            var meanOffset = sum / length;
 
             // Calculate variance
             double variance = 0;
+            var lostSquare = false;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var diff = input[j] - mean;
-                variance += diff * diff;
+                // Keep the mean in translated coordinates: adding a large anchor rounds
+                // away the fractional mean of a tiny spread before variance is evaluated.
+                var diff = (input[j] - anchor) - meanOffset;
+                var square = diff * diff;
+                lostSquare |= diff != 0 && square < 2.2250738585072014E-308;
+                variance += square;
             }
             variance /= length;
 
-            output[i] = Math.Sqrt(variance);
+            if (lostSquare || double.IsNaN(variance) || double.IsInfinity(variance)
+                || variance > 0 && variance < 2.2250738585072014E-308)
+            {
+                var exact = new ExactPopulationDeviation();
+                for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);
+                output[i] = exact.Value();
+            }
+            else output[i] = Math.Sqrt(variance);
         }
     }
 
@@ -427,12 +440,13 @@ internal static class VolatilityCore
             }
 
             // Calculate mean
+            var anchor = input[i - length + 1];
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                sum += input[j];
+                sum += input[j] - anchor;
             }
-            var mean = sum / length;
+            var mean = anchor + sum / length;
 
             // Calculate variance
             double variance = 0;
@@ -732,6 +746,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (close.Length == 0) return;
+
         var pool = ArrayPool<double>.Shared;
         var returnsArray = pool.Rent(close.Length);
 
@@ -804,12 +820,12 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        length = Math.Max(1, length);
         var sqrtFactor = Math.Sqrt(252);
 
         for (var i = 0; i < close.Length; i++)
         {
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-            // nothing, so the run-in shortens the window instead of blanking it.
+            if (i < length - 1) { output[i] = 0; continue; }
 
             double sum = 0;
             for (var j = Math.Max(0, i - length + 1); j <= i; j++)
@@ -1028,27 +1044,14 @@ internal static class VolatilityCore
     internal static void AverageDayRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
         if (output.Length < high.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-
-        try
+        length = Math.Max(1, length);
+        var sum = new ExactMeanAccumulator();
+        for (var i = 0; i < high.Length; i++)
         {
-            var range = rangeArray.AsSpan(0, high.Length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(range, output, length);
-        }
-        finally
-        {
-            pool.Return(rangeArray);
+            sum.Add(high[i]); sum.Add(low[i], -1);
+            if (i >= length) { sum.Add(high[i - length], -1); sum.Add(low[i - length]); }
+            output[i] = i + 1 < length ? 0 : sum.Mean(length);
         }
     }
 

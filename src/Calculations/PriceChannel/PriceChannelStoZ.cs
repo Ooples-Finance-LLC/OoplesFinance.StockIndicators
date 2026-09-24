@@ -357,7 +357,7 @@ public static partial class Calculations
         {
             var diffMa = diffMaList[i];
             var basis = basisList[i];
-            var dev = 2 * diffMa;
+            var dev = 2 * Math.Max(0, diffMa);
 
             var upper = basis + dev;
             upperList.Add(upper);
@@ -698,6 +698,7 @@ public static partial class Calculations
             yomSquaredList.Add(yomSquared);
         }
 
+        var deviations = maType == MovingAvgType.SimpleMovingAverage ? GetStandardDeviationList(yomList, length2) : null;
         var avyomList = GetMovingAverageList(stockData, maType, length2, yomList);
         var yomSquaredSmaList = GetMovingAverageList(stockData, maType, length2, yomSquaredList);
         for (var i = 0; i < stockData.Count; i++)
@@ -706,7 +707,7 @@ public static partial class Calculations
             var avyom = avyomList[i];
             var yomSquaredSma = yomSquaredSmaList[i];
 
-            var varyom = yomSquaredSma - (avyom * avyom);
+            var varyom = deviations is not null ? deviations[i] * deviations[i] : yomSquaredSma - (avyom * avyom);
             varyomList.Add(varyom);
 
             var som = prevVaryom >= 0 ? Sqrt(prevVaryom) : 0;
@@ -865,7 +866,7 @@ public static partial class Calculations
             absDiffList.Add(absDiff);
 
             absDiffSum += absDiff;
-            var e = i != 0 ? absDiffSum / i : 0;
+            var e = absDiffSum / (i + 1);
             var prevA = GetLastOrDefault(aList);
             var a = ts + e;
             aList.Add(a);

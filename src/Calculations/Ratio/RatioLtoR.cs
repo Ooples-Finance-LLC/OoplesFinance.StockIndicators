@@ -34,12 +34,12 @@ public static partial class Calculations
             var bench = Pow(1 + bmk, length / barsPerYr) - 1;
             benchList.Add(bench);
 
-            var ret = prevValue != 0 ? (100 * (currentValue / prevValue)) - 1 - (bench * 100) : 0;
+            var ret = prevValue != 0 ? 100 * ((currentValue / prevValue) - 1 - bench) : 0;
             retList.Add(ret);
         }
 
         var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
-        stockData.SetCustomValues(retList);
+        stockData.SetCustomValues(inputList);
         var ulcerIndexList = CalculateUlcerIndex(stockData, length).ChainedValues;
         for (var i = 0; i < stockData.Count; i++)
         {

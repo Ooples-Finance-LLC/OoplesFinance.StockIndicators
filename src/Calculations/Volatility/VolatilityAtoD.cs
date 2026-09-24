@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -24,16 +24,11 @@ public static partial class Calculations
         List<double> adrList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double sum = 0;
+        var values = SpanCompat.CreateOutputBuffer(count);
+        VolatilityCore.AverageDayRange(SpanCompat.AsReadOnlySpan(highList), SpanCompat.AsReadOnlySpan(lowList), values.Span, length);
         for (var i = 0; i < count; i++)
         {
-            sum += highList[i] - lowList[i];
-            if (i >= length)
-            {
-                sum -= highList[i - length] - lowList[i - length];
-            }
-
-            var adr = i >= length - 1 ? sum / length : 0;
+            var adr = values.Span[i];
             adrList.Add(adr);
 
             var prevAdr1 = i >= 1 ? adrList[i - 1] : 0;
@@ -303,6 +298,7 @@ public static partial class Calculations
     public static StockData CalculateChoppinessIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
+        length = Math.Max(2, length);
         List<double> ciList = new(stockData.Count);
         List<double> trList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

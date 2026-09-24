@@ -360,7 +360,7 @@ public sealed class PercentRankState : IStreamingIndicatorState, IDisposable
                 }
             }
 
-            percentRank = (double)below / _length * 100;
+            percentRank = 100d * below / _length;
         }
 
         if (isFinal)
@@ -432,7 +432,7 @@ public sealed class MedianValueState : IStreamingIndicatorState, IDisposable
 
             _sorted[_length - 1] = value;
             Array.Sort(_sorted);
-            median = _length % 2 == 0 ? (_sorted[(_length / 2) - 1] + _sorted[_length / 2]) / 2 : _sorted[_length / 2];
+            median = _length % 2 == 0 ? PriceMean.Of(_sorted[(_length / 2) - 1], _sorted[_length / 2]) : _sorted[_length / 2];
         }
 
         if (isFinal)

@@ -131,6 +131,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        if (inputList.Any(value => !(value > 0) || double.IsInfinity(value)))
+            throw new ArgumentOutOfRangeException(nameof(stockData), "Absolute Strength Index requires strictly positive finite effective prices.");
+
         var alp = (double)2 / (signalLength + 1);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -460,18 +463,15 @@ public static partial class Calculations
             var probDownBbBasis = probBbBasisUp + probBbBasisDown != 0 ? probBbBasisDown / (probBbBasisUp + probBbBasisDown) : 0;
 
             var prevSigmaProbsDown = GetLastOrDefault(sigmaProbsDownList);
-            var sigmaProbsDown = probUpBbUpper != 0 && probUpBbBasis != 0 ? ((probUpBbUpper * probUpBbBasis) / (probUpBbUpper * probUpBbBasis)) +
-                                                                            ((1 - probUpBbUpper) * (1 - probUpBbBasis)) : 0;
+            var sigmaProbsDown = BayesianProbability.Combine(probUpBbUpper, probUpBbBasis);
             sigmaProbsDownList.Add(sigmaProbsDown);
 
             var prevSigmaProbsUp = GetLastOrDefault(sigmaProbsUpList);
-            var sigmaProbsUp = probDownBbUpper != 0 && probDownBbBasis != 0 ? ((probDownBbUpper * probDownBbBasis) / (probDownBbUpper * probDownBbBasis)) +
-                                                                              ((1 - probDownBbUpper) * (1 - probDownBbBasis)) : 0;
+            var sigmaProbsUp = BayesianProbability.Combine(probDownBbUpper, probDownBbBasis);
             sigmaProbsUpList.Add(sigmaProbsUp);
 
             var prevProbPrime = GetLastOrDefault(probPrimeList);
-            var probPrime = sigmaProbsDown != 0 && sigmaProbsUp != 0 ? ((sigmaProbsDown * sigmaProbsUp) / (sigmaProbsDown * sigmaProbsUp)) +
-                                                                       ((1 - sigmaProbsDown) * (1 - sigmaProbsUp)) : 0;
+            var probPrime = BayesianProbability.Combine(sigmaProbsDown, sigmaProbsUp);
             probPrimeList.Add(probPrime);
 
             var longUsingProbPrime = probPrime > lowerThreshold / 100 && prevProbPrime == 0;
@@ -1055,15 +1055,33 @@ public static partial class Calculations
         var iLength = itl - 1;
         var lLength = ltl - 1;
 
-        var hAvgList = GetMovingAverageList(stockData, maType, length, closeList);
-        var sAvgList = GetMovingAverageList(stockData, maType, stl, closeList);
-        var iAvgList = GetMovingAverageList(stockData, maType, itl, closeList);
-        var lAvgList = GetMovingAverageList(stockData, maType, ltl, closeList);
-        var h2AvgList = GetMovingAverageList(stockData, maType, hLength, closeList);
-        var s2AvgList = GetMovingAverageList(stockData, maType, sLength, closeList);
-        var i2AvgList = GetMovingAverageList(stockData, maType, iLength, closeList);
-        var l2AvgList = GetMovingAverageList(stockData, maType, lLength, closeList);
-        var ftpAvgList = GetMovingAverageList(stockData, maType, lLength, inputList);
+        var hAvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, length))
+            : GetMovingAverageList(stockData, maType, length, closeList);
+        var sAvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, stl))
+            : GetMovingAverageList(stockData, maType, stl, closeList);
+        var iAvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, itl))
+            : GetMovingAverageList(stockData, maType, itl, closeList);
+        var lAvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, ltl))
+            : GetMovingAverageList(stockData, maType, ltl, closeList);
+        var h2AvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, hLength))
+            : GetMovingAverageList(stockData, maType, hLength, closeList);
+        var s2AvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, sLength))
+            : GetMovingAverageList(stockData, maType, Math.Max(1, sLength), closeList);
+        var i2AvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, iLength))
+            : GetMovingAverageList(stockData, maType, Math.Max(1, iLength), closeList);
+        var l2AvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(closeList, maType, Math.Max(1, lLength))
+            : GetMovingAverageList(stockData, maType, Math.Max(1, lLength), closeList);
+        var ftpAvgList = maType == MovingAvgType.WeightedMovingAverage
+            ? Streaming.SpreadAverage.Calculate(inputList, maType, Math.Max(1, lLength))
+            : GetMovingAverageList(stockData, maType, Math.Max(1, lLength), inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1083,10 +1101,6 @@ public static partial class Calculations
             var i2 = i2AvgList[i];
             var l2 = l2AvgList[i];
             var ftpAvg = ftpAvgList[i];
-            var priorValue5 = i >= hoff ? value5List[i - hoff] : 0;
-            var priorValue6 = i >= soff ? value6List[i - soff] : 0;
-            var priorValue7 = i >= ioff ? value7List[i - ioff] : 0;
-            var priorSum = i >= soff ? sumList[i - soff] : 0;
             var priorHAvg2 = i >= soff ? hAvgList[i - soff] : 0;
             var prevErrSum = i >= 1 ? errSumList[i - 1] : 0;
             var prevMom = i >= 1 ? momList[i - 1] : 0;
@@ -1101,33 +1115,19 @@ public static partial class Calculations
             var derivS = (sAvg * 2) - prevSAvg;
             var derivI = (iAvg * 2) - prevIAvg;
             var derivL = (lAvg * 2) - prevLAvg;
-            var sumDH = length * derivH;
-            var sumDS = stl * derivS;
-            var sumDI = itl * derivI;
-            var sumDL = ltl * derivL;
-            var n1h = h2 * hLength;
-            var n1s = s2 * sLength;
-            var n1i = i2 * iLength;
-            var n1l = l2 * lLength;
-            var drh = sumDH - n1h;
-            var drs = sumDS - n1s;
-            var dri = sumDI - n1i;
-            var drl = sumDL - n1l;
-            var hSum = h2 * (length - 1);
-            var sSum = s2 * (stl - 1);
-            var iSum = i2 * (itl - 1);
-            var lSum = ftpAvg * (ltl - 1);
-
-            var value5 = (hSum + drh) / length;
+            var value5 = derivH + (length - 1d - hLength) / length * h2;
             value5List.Add(value5);
 
-            var value6 = (sSum + drs) / stl;
+            var value6 = derivS;
             value6List.Add(value6);
 
-            var value7 = (iSum + dri) / itl;
+            var value7 = derivI;
             value7List.Add(value7);
 
-            var value13 = (lSum + drl) / ltl;
+            var value13 = derivL + (ltl - 1d) / ltl * (ftpAvg - l2);
+            var priorValue5 = i >= hoff ? value5List[i - hoff] : 0;
+            var priorValue6 = i >= soff ? value6List[i - soff] : 0;
+            var priorValue7 = i >= ioff ? value7List[i - ioff] : 0;
             var value9 = value6 - priorValue5;
             var value10 = value7 - priorValue6;
             var value14 = value13 - priorValue7;
@@ -1144,9 +1144,10 @@ public static partial class Calculations
 
             var sum = ht + st + it;
             sumList.Add(sum);
+            var priorSum = i >= soff ? sumList[i - soff] : 0;
 
             var err = hta + sta + ita;
-            double cond2 = (sum > priorSum && hAvg < priorHAvg2) || (sum < priorSum && hAvg > priorHAvg2) ? 1 : 0;
+            double cond2 = ConfluenceVotes.Compare(sum, priorSum) * ConfluenceVotes.Compare(hAvg, priorHAvg2) < 0 ? 1 : 0;
             double phase = cond2 == 1 ? -1 : 1;
 
             var errSum = (sum - err) * phase;
@@ -1159,22 +1160,12 @@ public static partial class Calculations
 
             var errSig = errSumWindow.Average(soff);
             var value71 = value70SumWindow.Average(length);
-            double errNum = errSum > 0 && errSum < prevErrSum && errSum < errSig ? 1 : errSum > 0 && errSum < prevErrSum && errSum > errSig ? 2 :
-                errSum > 0 && errSum > prevErrSum && errSum < errSig ? 2 : errSum > 0 && errSum > prevErrSum && errSum > errSig ? 3 :
-                errSum < 0 && errSum > prevErrSum && errSum > errSig ? -1 : errSum < 0 && errSum < prevErrSum && errSum > errSig ? -2 :
-                errSum < 0 && errSum > prevErrSum && errSum < errSig ? -2 : errSum < 0 && errSum < prevErrSum && errSum < errSig ? -3 : 0;
-            double momNum = mom > 0 && mom < prevMom && mom < momSig ? 1 : mom > 0 && mom < prevMom && mom > momSig ? 2 :
-                mom > 0 && mom > prevMom && mom < momSig ? 2 : mom > 0 && mom > prevMom && mom > momSig ? 3 :
-                mom < 0 && mom > prevMom && mom > momSig ? -1 : mom < 0 && mom < prevMom && mom > momSig ? -2 :
-                mom < 0 && mom > prevMom && mom < momSig ? -2 : mom < 0 && mom < prevMom && mom < momSig ? -3 : 0;
-            double tcNum = value70 > 0 && value70 < prevValue70 && value70 < value71 ? 1 : value70 > 0 && value70 < prevValue70 && value70 > value71 ? 2 :
-                value70 > 0 && value70 > prevValue70 && value70 < value71 ? 2 : value70 > 0 && value70 > prevValue70 && value70 > value71 ? 3 :
-                value70 < 0 && value70 > prevValue70 && value70 > value71 ? -1 : value70 < 0 && value70 < prevValue70 && value70 > value71 ? -2 :
-                value70 < 0 && value70 > prevValue70 && value70 < value71 ? -2 : value70 < 0 && value70 < prevValue70 && value70 < value71 ? -3 : 0;
+            double errNum = ConfluenceVotes.Score(errSum, prevErrSum, errSig);
+            double momNum = ConfluenceVotes.Score(mom, prevMom, momSig);
+            double tcNum = ConfluenceVotes.Score(value70, prevValue70, value71);
             var value42 = errNum + momNum + tcNum;
 
-            var confluence = value42 > 0 && value70 > 0 ? value42 : value42 < 0 && value70 < 0 ? value42 :
-                (value42 > 0 && value70 < 0) || (value42 < 0 && value70 > 0) ? value42 / 10 : 0;
+            var confluence = ConfluenceVotes.Publish(value42, value70);
             confluenceList.Add(confluence);
 
             var res1 = confluence >= 1 ? confluence : 0;
@@ -1282,7 +1273,7 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsiSma = rsiSmaList[i];
-            var rsiDelta = i >= length2 ? rsi1List[i - length2] : 0;
+            var rsiDelta = i >= length2 ? rsi1List[i] - rsi1List[i - length2] : 0;
 
             var s = rsiDelta + rsiSma;
             sList.Add(s);
@@ -1745,6 +1736,7 @@ public static partial class Calculations
         int length3 = 20)
     {
         List<double> curtaList = new(stockData.Count);
+        List<double> mediaList = new(stockData.Count);
         List<double> longaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -1762,6 +1754,7 @@ public static partial class Calculations
             var prevCurta = GetLastOrDefault(curtaList);
             var curta = mediumSma != 0 ? shortSma / mediumSma : 0;
             curtaList.Add(curta);
+            mediaList.Add(mediumSma == 0 ? 0 : 1);
 
             var prevLonga = GetLastOrDefault(longaList);
             var longa = mediumSma != 0 ? longSma / mediumSma : 0;
@@ -1773,8 +1766,8 @@ public static partial class Calculations
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Curta", curtaList },
-            { "Media", mediumSmaList },
-            { "Longa", longSmaList }
+            { "Media", mediaList },
+            { "Longa", longaList }
         });
         stockData.SetSignals(signalsList);
         stockData.SetCustomValues(new List<double>());
@@ -2035,6 +2028,10 @@ public static partial class Calculations
     public static StockData CalculateDTOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length1 = 13, 
         int length2 = 8, int length3 = 5, int length4 = 3)
     {
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
+        length4 = Math.Max(1, length4);
         List<double> stoRsiList = new(stockData.Count);
         List<double> skList = new(stockData.Count);
         List<double> sdList = new(stockData.Count);
@@ -2043,7 +2040,7 @@ public static partial class Calculations
         var stoRsiSumWindow = new RollingSum();
         var skSumWindow = new RollingSum();
 
-        var wilderMovingAvgList = GetMovingAverageList(stockData, maType, length1, inputList);
+        var wilderMovingAvgList = CalculateRelativeStrengthIndex(stockData, maType, length1).ChainedValues;
         var (highestList, lowestList) = GetMaxAndMinValuesList(wilderMovingAvgList, length2);
 
         for (var i = 0; i < stockData.Count; i++)

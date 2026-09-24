@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -8,21 +8,23 @@ namespace OoplesFinance.StockIndicators.Streaming;
 /// The average of the last few daily ranges, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateAverageDayRange</c>. Its window sums the way
-/// <c>MovingAverageCore.SimpleMovingAverage</c> sums, so the two engines agree to the last bit, and it
-/// publishes zero until the window fills.
+/// The streaming twin of <c>Calculations.CalculateAverageDayRange</c>. It sums high-minus-low
+/// differences exactly, rounds only the final mean, and publishes zero until the window fills.
 /// </remarks>
 [PrimaryOutput("Adr")]
 public sealed class AverageDayRangeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _sum;
+    private ExactMeanAccumulator _sum;
+    private readonly PooledRingBuffer<double> _highs;
+    private readonly PooledRingBuffer<double> _lows;
     private readonly StreamingInputResolver _input;
 
     public AverageDayRangeState(int length = 14)
     {
         _length = Math.Max(1, length);
-        _sum = new RollingWindowSum(_length);
+        _highs = new PooledRingBuffer<double>(_length);
+        _lows = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -30,15 +32,24 @@ public sealed class AverageDayRangeState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _sum.Reset();
+        _sum = default;
+        _highs.Clear();
+        _lows.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         _ = _input.GetValue(bar);
-        var range = bar.High - bar.Low;
-        var total = isFinal ? _sum.Add(range, out var countAfter) : _sum.Preview(range, out countAfter);
-        var adr = countAfter >= _length ? total / _length : 0;
+        var sum = _sum;
+        sum.Add(bar.High); sum.Add(bar.Low, -1);
+        if (_highs.Count == _length) { sum.Add(_highs[0], -1); sum.Add(_lows[0]); }
+        var adr = _highs.Count + 1 < _length ? 0 : sum.Mean(_length);
+        if (isFinal)
+        {
+            _sum = sum;
+            _highs.TryAdd(bar.High, out _);
+            _lows.TryAdd(bar.Low, out _);
+        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -54,7 +65,8 @@ public sealed class AverageDayRangeState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
-        _sum.Dispose();
+        _highs.Dispose();
+        _lows.Dispose();
     }
 }
 
@@ -187,7 +199,7 @@ public sealed class SimpleReturnsState : IStreamingIndicatorState, IDisposable
         if (_window.Count >= _length)
         {
             var prevValue = _window[0];
-            returns = prevValue != 0 ? (value - prevValue) / prevValue : 0;
+            returns = RoundedRangeRatio.Of(value, prevValue, prevValue);
         }
 
         if (isFinal)
@@ -248,7 +260,7 @@ public sealed class LogReturnsState : IStreamingIndicatorState, IDisposable
         if (_window.Count >= _length)
         {
             var prevValue = _window[0];
-            returns = prevValue > 0 && value > 0 ? Log(value / prevValue) : 0;
+            returns = StableLogRatio.Of(value, prevValue);
         }
 
         if (isFinal)

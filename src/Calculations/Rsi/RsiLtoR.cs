@@ -50,6 +50,9 @@ public static partial class Calculations
                 var avgLoss = avgLossBuffer.Span[i];
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
+                if (i > 0 && length > 1 && inputList[i] == inputList[i - 1])
+                { rsiSpan[i] = rsiSpan[i - 1]; continue; }
+
                 rsiSpan[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
             }
 
@@ -86,6 +89,8 @@ public static partial class Calculations
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
                 var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+                if (movingAvgType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && inputList[i] == inputList[i - 1])
+                    rsi = rsiList[i - 1];
                 rsiList.Add(rsi);
             }
 
@@ -340,7 +345,7 @@ public static partial class Calculations
         List<double> hcSrcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length1);
+        var (highestList, lowestList) = length1 <= 1 ? (inputList, inputList) : GetMaxAndMinValuesList(inputList, length1);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -361,9 +366,7 @@ public static partial class Calculations
         {
             var top = topList[i];
             var bot = botList[i];
-            var rs = bot != 0 ? MinOrMax(top / bot, 1, 0) : 0;
-
-            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 * top / (top + bot), 100, 0);
             rsiList.Add(rsi);
         }
 

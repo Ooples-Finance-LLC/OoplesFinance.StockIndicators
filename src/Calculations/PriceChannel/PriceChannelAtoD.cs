@@ -31,7 +31,7 @@ public static partial class Calculations
             lowerChannelList.Add(lowerChannel);
 
             var prevMiddleChannel = GetLastOrDefault(middleChannelList);
-            var middleChannel = (upperChannel + lowerChannel) / 2;
+            var middleChannel = PriceMean.Of(upperChannel, lowerChannel);
             middleChannelList.Add(middleChannel);
 
             var signal = GetCompareSignal(currentValue - middleChannel, prevValue - prevMiddleChannel);
@@ -174,7 +174,7 @@ public static partial class Calculations
         List<double> middleList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
+        var (highestList, lowestList) = length <= 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length);
 
         var mult = Sqrt(length);
 
@@ -275,6 +275,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDEnvelope(this StockData stockData, int length = 20, double devFactor = 2)
     {
+        length = Math.Max(1, length);
         List<double> mtList = new(stockData.Count);
         List<double> utList = new(stockData.Count);
         List<double> dtList = new(stockData.Count);
@@ -309,7 +310,7 @@ public static partial class Calculations
             // centre line came out as 0 rather than the price. A de-lagged average has to reproduce a
             // constant, and this one could not. On the AAPL fixture it published a middle band of -13.86
             // for a stock trading at 145.
-            var dt = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 0;
+            var dt = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 2 * currentValue - prevValue;
             dtList.Add(dt);
 
             var prevMt2 = GetLastOrDefault(mt2List);
@@ -324,7 +325,7 @@ public static partial class Calculations
             // grouping drove this to zero as well, and it is what set the width of both bands - so the
             // width went negative whenever the deviation was falling, inverting the bands on 112 of the
             // 251 fixture bars.
-            var dt2 = 1 - alp != 0 ? (((2 - alp) * mt2) - ut2) / (1 - alp) : 0;
+            var dt2 = Math.Max(0, 1 - alp != 0 ? (((2 - alp) * mt2) - ut2) / (1 - alp) : 2 * Math.Abs(currentValue - dt) - prevMt2);
             var prevBut = GetLastOrDefault(butList);
             var but = dt + (devFactor * dt2);
             butList.Add(but);

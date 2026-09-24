@@ -102,7 +102,7 @@ public static partial class Calculations
             bpList.Add(bp);
             bpSumWindow.Add(bp);
 
-            var sp = gapdown > 0.15 ? (prevClose - currentLow + currentHigh - currentClose) * currentVolume :
+            var sp = gapdown > 0.15 ? -(prevClose - currentLow + currentHigh - currentClose) * currentVolume :
                 currentClose < currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
             spList.Add(sp);
             spSumWindow.Add(sp);

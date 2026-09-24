@@ -55,9 +55,9 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
     // Keys are IndicatorName members, not type names: a key naming no indicator is a silent no-op, and
     // WarmupBarsCoversTheWarmup is what catches the gap it leaves.
     //
-    // The three exact rules are compositions of finite windows, so they are arithmetic, not estimates: a
-    // triangular average is an average of an average, a Farey-weighted average spans the same two windows,
-    // and a Hull average runs a length window and then a sqrt(length) one over it.
+    // Finite-window rules are arithmetic bounds: triangular averages compose two windows,
+    // Farey taps are bounded by the count of all positive fractions with denominator <= length,
+    // and Hull averages compose a length window with a sqrt(length) window.
     //
     // The rest are recursions, which only approach their input. Each multiple is the bar the filter first
     // stays within 1e-6 of a constant series over 4000 bars, divided by the length it declares and rounded
@@ -68,13 +68,26 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
     {
         // Exact.
         ["TriangularMovingAverage"] = "(2 * $) - 2",
-        ["FareySequenceWeightedMovingAverage"] = "(2 * $) - 1",
+        ["FareySequenceWeightedMovingAverage"] = "(int)System.Math.Min(int.MaxValue, System.Math.Max(1L, $) * (System.Math.Max(1L, $) + 1) / 2 - 1)",
         ["HullMovingAverage"] = "$ + (int)System.Math.Ceiling(System.Math.Sqrt($))",
 
+        // Pole-filter decay: exp(-sqrt(2)*pi*n/period) for two poles and exp(-pi*n/period)
+        // for three. Five/eight periods give a conservative tail after removing coefficient clamps.
+        ["Ehlers2PoleButterworthFilterV1"] = "$ * 5",
+        ["Ehlers2PoleButterworthFilterV2"] = "$ * 5",
+        ["Ehlers2PoleSuperSmootherFilterV1"] = "$ * 5",
+        ["Ehlers2PoleSuperSmootherFilterV2"] = "$ * 5",
+        ["Ehlers3PoleButterworthFilterV1"] = "$ * 8",
+        ["Ehlers3PoleButterworthFilterV2"] = "$ * 8",
+        ["Ehlers3PoleSuperSmootherFilter"] = "$ * 8",
+
         // Measured. 1763 / 20 = 88.2, 988 / 14 = 70.6, 784 / 20 = 39.2, and so on down.
+        // Zero-seeded Wilder residual is (1 - 1/length)^n <= exp(-n/length).
+        // Eighteen periods meet the existing price-50, 1e-6 settling convention.
+        ["WellesWilderMovingAverage"] = "(int)System.Math.Min(int.MaxValue, System.Math.Max(1L, $) * 18)",
         ["EhlersDeviationScaledMovingAverage"] = "$ * 89",
         ["AdaptiveMovingAverage"] = "$ * 71",
-        ["EhlersKaufmanAdaptiveMovingAverage"] = "$ * 40",
+        ["EhlersKaufmanAdaptiveMovingAverage"] = "System.Math.Max(4500, $ * 40)",
         ["HoltExponentialMovingAverage"] = "$ * 20",
         ["AhrensMovingAverage"] = "$ * 17",
         ["ZeroLowLagMovingAverage"] = "$ * 15",
@@ -87,12 +100,9 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         ["RegularizedExponentialMovingAverage"] = "$ * 9",
         ["EhlersMedianAverageAdaptiveFilter"] = "$ * 8",
         ["EhlersRecursiveMedianFilter"] = "$ * 7",
-        ["Ehlers3PoleButterworthFilterV1"] = "$ * 6",
         ["EhlersSimpleDecycler"] = "$ * 5",
         ["FallingRisingFilter"] = "$ * 5",
         ["JurikMovingAverage"] = "$ * 5",
-        ["Ehlers2PoleButterworthFilterV1"] = "$ * 4",
-        ["Ehlers2PoleSuperSmootherFilterV2"] = "$ * 4",
         ["EhlersSuperSmootherFilter"] = "$ * 4",
         ["EhlersBetterExponentialMovingAverage"] = "$ * 4",
         ["BryantAdaptiveMovingAverage"] = "$ * 4",
@@ -113,6 +123,126 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
     private static readonly HashSet<string> HandWritten = new(StringComparer.Ordinal)
     {
         "Sma", "Ema", "BollingerBands"
+    };
+
+    // Preserve the existing Value series when a former single-output type exposes its remaining series.
+    // These batch methods publish no CustomValues primary, so it cannot be inferred from their bodies.
+    private static readonly Dictionary<string, string> ExpandedPrimary = new(StringComparer.Ordinal)
+    {
+        ["PrimeNumberBands"] = "UpperBand",
+        ["EhlersSwissArmyKnife"] = "SmaFilter",
+        ["EhlersVossPredictiveFilter"] = "Voss",
+        ["EhlersAdaptiveRelativeStrengthIndexV1"] = "Earsi",
+        ["EhlersAdaptiveStochasticIndicatorV1"] = "Easi",
+        ["EhlersAdaptiveCommodityChannelIndexV1"] = "Eacci",
+        ["EhlersEnhancedSignalToNoiseRatio"] = "Esnr",
+        ["EhlersInstantaneousTrendlineV1"] = "Eit",
+        ["UltimateMovingAverageBands"] = "MiddleBand",
+        ["VariableMovingAverageBands"] = "MiddleBand",
+        ["ChandeVolatilityIndexDynamicAverageIndicator"] = "Cvida1",
+        ["VolatilityIndexDynamicAverageIndicator"] = "Vida1",
+        ["UhlMaCrossoverSystem"] = "Cts",
+        ["EhlersHilbertOscillator"] = "IQ",
+        ["LBRPaintBars"] = "Aatr",
+        ["PseudoPolynomialChannel"] = "MiddleBand",
+        ["VervoortVolatilityBands"] = "MiddleBand",
+        ["TurboTrigger"] = "BullLine",
+        ["HistoricalVolatilityPercentile"] = "Hvp",
+        ["QuantitativeQualitativeEstimation"] = "FastAtrRsi",
+        ["PeriodicChannel"] = "K",
+        ["EhlersAdaptiveCyberCycle"] = "Eacc",
+        ["EhlersEmpiricalModeDecomposition"] = "Trend",
+        ["RateOfChangeBands"] = "Roc",
+        ["ScalpersChannel"] = "Scalper",
+        ["StationaryExtrapolatedLevels"] = "Deviation",
+        ["PriceLineChannel"] = "MiddleBand",
+        ["PriceCurveChannel"] = "MiddleBand",
+        ["RandomWalkIndex"] = "RwiHigh",
+        ["EhlersModifiedRelativeStrengthIndex"] = "Emrsi",
+        ["EhlersReverseEmaIndicatorV2"] = "EremaCycle",
+        ["KaseSerialDependencyIndex"] = "KsdiUp",
+        ["KaseDevStopV1"] = "Dev1",
+        ["KaseDevStopV2"] = "Dev1",
+        ["KaseIndicator"] = "KaseUp",
+        ["MeanAbsoluteDeviationBands"] = "MiddleBand",
+        ["MeanAbsoluteErrorBands"] = "MiddleBand",
+        ["RootMovingAverageSquaredErrorBands"] = "MiddleBand",
+        ["InterquartileRangeBands"] = "MiddleBand",
+        ["TimeSeriesForecast"] = "MiddleBand",
+        ["TironeLevels"] = "Am",
+        ["ProjectedSupportAndResistance"] = "MiddleBand",
+        ["TimePriceIndicator"] = "UpperBand",
+        ["FractalChaosBands"] = "MiddleBand",
+        ["ExtendedRecursiveBands"] = "MiddleBand",
+        ["FlaggingBands"] = "MiddleBand",
+        ["HawkeyeVolumeIndicator"] = "Up",
+        ["PriceVolumeOscillator"] = "Po",
+        ["PercentageTrailingStops"] = "LongStop",
+        ["KaufmanAdaptiveBands"] = "MiddleBand",
+        ["EfficientTrendStepChannel"] = "MiddleBand",
+        ["LinearChannels"] = "UpperBand",
+        ["MotionToAttractionChannels"] = "MiddleBand",
+        ["EhlersHilbertTransformIndicator"] = "Quad",
+        ["EhlersHilbertTransformer"] = "Real",
+        ["EhlersHilbertTransformerIndicator"] = "Real",
+        ["EhlersClassicHilbertTransformer"] = "Real",
+        ["EhlersCorrelationCycleIndicator"] = "Real",
+        ["ValueChartIndicator"] = "vClose",
+        ["WilsonRelativePriceChannel"] = "S1",
+        ["TimeAndMoneyChannel"] = "Median",
+        ["HighLowMovingAverage"] = "MiddleBand",
+        ["HurstCycleChannel"] = "FastMiddleBand",
+        ["HurstBands"] = "MiddleBand",
+        ["HirashimaSugitaRS"] = "MiddleBand",
+        ["VortexBands"] = "UpperBand",
+        ["_4MovingAverageConvergenceDivergence"] = "Macd1",
+        ["_4PercentagePriceOscillator"] = "Ppo1",
+        ["WaddahAttarExplosion"] = "T1",
+        ["DrunkardWalk"] = "UpWalk",
+        ["VolumeAdaptiveBands"] = "MiddleBand",
+        ["DEnvelope"] = "MiddleBand",
+        ["GChannels"] = "MiddleBand",
+        ["EhlersDecyclerOscillatorV1"] = "FastEdo",
+        ["SmartEnvelope"] = "MiddleBand",
+        ["RangeBands"] = "MiddleBand",
+        ["RangeIdentifier"] = "MiddleBand",
+        ["MovingAverageDisplacedEnvelope"] = "MiddleBand",
+        ["EmaWaveIndicator"] = "Wa",
+        ["FunctionToCandles"] = "Close",
+        ["ProjectionBands"] = "MiddleBand",
+        ["DidiIndex"] = "Curta",
+        ["AutoDispersionBands"] = "MiddleBand",
+        ["BollingerBandsWithAtrPct"] = "MiddleBand",
+        ["AbsoluteStrengthMTFIndicator"] = "Bulls",
+        ["GatorOscillator"] = "Top",
+        ["GuppyDistanceIndicator"] = "FastDistance",
+        ["AdaptivePriceZoneIndicator"] = "MiddleBand",
+        ["NarrowSidewaysChannel"] = "MiddleBand",
+        ["TrendTraderBands"] = "MiddleBand",
+        ["MovingAverageEnvelope"] = "MiddleBand",
+        ["UniChannel"] = "MiddleBand",
+        ["KeltnerChannels"] = "MiddleBand",
+        ["MovingAverageSupportResistance"] = "MiddleBand",
+        ["PriceHeadleyAccelerationBands"] = "MiddleBand",
+        ["SmoothedVolatilityBands"] = "MiddleBand",
+        ["SupportResistance"] = "Support",
+        ["AverageTrueRangeChannel"] = "UpperBand",
+        ["BollingerBandsFibonacciRatios"] = "MiddleBand",
+        ["MovingAverageChannel"] = "MiddleBand",
+        ["StandardDeviationChannel"] = "MiddleBand",
+        ["StollerAverageRangeChannels"] = "MiddleBand",
+        ["HighLowBands"] = "MiddleBand",
+        ["KirshenbaumBands"] = "MiddleBand",
+        ["BayesianOscillator"] = "SigmaProbsDown",
+        ["BuffAverage"] = "FastBuff",
+        ["ChartmillValueIndicator"] = "Cmvc",
+        ["Dema2Lines"] = "Dema1",
+        ["DailyAveragePriceDelta"] = "UpperBand",
+        ["FibonacciRetrace"] = "UpperBand",
+        ["DynamicSupportAndResistance"] = "MiddleBand",
+        ["MovingAverageBands"] = "UpperBand",
+        ["TrendContinuationFactor"] = "TcfPlus",
+        ["WoodieCommodityChannelIndex"] = "FastCci"
     };
 
     /// <inheritdoc/>
@@ -152,12 +282,22 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
         // Reuses the reader the output map is built from, so the typed members cannot describe outputs the
         // indicator does not publish - the two would otherwise drift the moment a calculation changed.
-        var publishedOutputs = context.SyntaxProvider
+        var directOutputs = context.SyntaxProvider
             .CreateSyntaxProvider(
                 predicate: static (node, _) => IndicatorOutputMapGenerator.IsCalculationMethod(node),
                 transform: static (ctx, _) => IndicatorOutputMapGenerator.ReadPublishedOutputs(ctx.Node))
             .Where(static x => x is not null)
             .Collect();
+
+        // Resolve shared-helper publications just as the output map does, including expression-bodied aliases.
+        var helperOutputs = context.SyntaxProvider
+            .CreateSyntaxProvider(
+                predicate: static (node, _) => HelperRoutedOutputs.IsCandidate(node),
+                transform: static (ctx, _) => HelperRoutedOutputs.Read(ctx))
+            .Where(static x => x is not null)
+            .Collect();
+        var publishedOutputs = directOutputs.Combine(helperOutputs)
+            .Select(static (source, _) => source.Left.AddRange(HelperRoutedOutputs.Resolve(source.Right)));
 
         // Every member of MovingAvgType is an average the batch calculations already know how to run, so a
         // generated type whose indicator shares that name is one of them and can be handed to a component
@@ -240,6 +380,15 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 + System.Text.RegularExpressions.Regex.Escape(averageParameter.Identifier.Text)
                 + @"\b").Count;
 
+        // The precision kernel owns the three built-in averages; the builder still exposes each
+        // stage for callers supplying independent/custom components.
+        if (name.Groups[1].Value is "RelativeSpreadStrength" or "KaseDevStopV1" or "EhlersEmpiricalModeDecomposition") asks = 3;
+        if (name.Groups[1].Value == "KasePeakOscillatorV2") asks = 1;
+        if (name.Groups[1].Value == "VariableMovingAverageBands") asks = 2;
+        if (name.Groups[1].Value == "QuantitativeQualitativeEstimation") asks = 5;
+        // These wrappers consume two averages inside the oscillator and one after it.
+        if (name.Groups[1].Value is "EhlersRelativeStrengthIndexInverseFisherTransform"
+            or "EhlersCommodityChannelIndexInverseFisherTransform") asks = 3;
         return new AverageCountReading(name.Groups[1].Value, asks);
     }
 
@@ -580,6 +729,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         builder.AppendLine();
         builder.AppendLine("namespace OoplesFinance.StockIndicators.Indicators;");
 
+        var primaryBindings = new List<string>();
         var emitted = 0;
         var multi = 0;
         var collided = 0;
@@ -604,7 +754,9 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             // handed to anything asking for an average, and IBuiltInMovingAverage.AvgType would then
             // silently substitute the regression line for the slope. Only the indicator's primary series -
             // no output key, or the first key it publishes - is the average itself.
-            var isAverage = movingAverages.Contains(target.IndicatorName)
+            var averageName = target.IndicatorName == "WellesWilderMovingAverage"
+                ? "WildersSmoothingMethod" : target.IndicatorName;
+            var isAverage = movingAverages.Contains(averageName)
                 && (target.OutputKey is null
                     || (outputsOf.TryGetValue(target.IndicatorName, out var ownKeys)
                         && ownKeys.Count > 0
@@ -641,13 +793,21 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             // batch says which series it stands for with SetCustomValues, so use that where it is known and
             // keep the name match for the rest.
             primaryOf.TryGetValue(target.IndicatorName, out var primaryKey);
+            if (ExpandedPrimary.TryGetValue(typeName, out var preservedPrimary)) primaryKey = preservedPrimary;
+            if (ExpandedPrimary.TryGetValue(typeName, out var bindingPrimary))
+                primaryBindings.Add("        typeof(" + options.Name + ") == optionsType ? \"" + bindingPrimary + "\" :");
             for (var i = 0; i < memberNames.Count; i++)
             {
                 var isPrimary = primaryKey is { Length: > 0 }
                     ? string.Equals(outputKeys[i], primaryKey, StringComparison.Ordinal)
                     : string.Equals(memberNames[i], typeName, StringComparison.Ordinal);
 
-                if (isPrimary)
+                // These types already exposed StochRsi before the calculation's intermediate
+                // SetCustomValues call was removed. Preserve that public name as primary
+                // inference improves; slot zero remains their PrimaryOutput.
+                var preserveStochRsiName = target.IndicatorName == "StochasticRelativeStrengthIndex"
+                    && memberNames[i] == "StochRsi" && typeName != "StochRsi";
+                if (isPrimary && !preserveStochRsiName)
                 {
                     memberNames[i] = "Value";
                 }
@@ -663,15 +823,22 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 reserved.Add(Capitalise(parameter.Name));
             }
 
-            // A key that collides with a parameter property, or with something the base already declares,
-            // would not compile. Emitting the type as single-output loses the named members but keeps the
-            // indicator usable, which is the better of the two failures.
-            if (memberNames.Count != memberNames.Distinct(StringComparer.Ordinal).Count()
-                || memberNames.Any(reserved.Contains))
+            // Keep every output. Resolve punctuation/parameter collisions instead of silently discarding
+            // the entire multi-output contract (for example Eclpf-2/Eclpf2 and the Length parameter).
+            var primarySlot = primaryKey is null ? memberNames.IndexOf("Value") : outputKeys.IndexOf(primaryKey);
+            var originalNames = memberNames.ToArray();
+            var occupied = new HashSet<string>(reserved, StringComparer.Ordinal) { "Output" };
+            for (var i = 0; i < memberNames.Count; i++)
             {
-                outputKeys = new List<string>();
-                memberNames = new List<string>();
-                collided++;
+                var candidate = memberNames[i];
+                if (originalNames.Count(name => name == candidate) > 1 && outputKeys[i].Contains("-"))
+                    candidate = Identifier(outputKeys[i].Replace("-", "Minus"));
+                var stem = candidate;
+                var suffix = 0;
+                while (!occupied.Add(candidate))
+                    candidate = stem + "Output" + (suffix++ == 0 ? "" : suffix.ToString());
+                if (candidate != memberNames[i]) collided++;
+                memberNames[i] = candidate;
             }
 
             var isMulti = outputKeys.Count > 1;
@@ -734,6 +901,18 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
                 builder.AppendLine("        " + Capitalise(extra) + " = " + extra + ";");
             }
 
+            if (extraAverages.Count > 0)
+            {
+                var previous = Capitalise(options.Parameters[Array.FindIndex(asComponent, value => value)].Name);
+                foreach (var extra in extraAverages)
+                {
+                    var current = Capitalise(extra);
+                    builder.AppendLine("        if (" + current + " is not null && " + previous + " is null)");
+                    builder.AppendLine("            throw new System.ArgumentException(\"Supply the preceding average before " + extra + ".\", nameof(" + extra + "));");
+                    previous = current;
+                }
+            }
+
             if (componentCount > 0)
             {
                 // Explicit rather than a collection expression plus LINQ: generated code with no target type
@@ -785,11 +964,11 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
             // The batch's key order decides Outputs, and it does not always publish the indicator's own
             // value first, so name the member that stands for the indicator instead of taking Outputs[0].
-            if (memberNames.IndexOf("Value") > 0)
+            if (primarySlot > 0)
             {
                 builder.AppendLine();
                 builder.AppendLine("    /// <inheritdoc/>");
-                builder.AppendLine("    public override IIndicatorOutput PrimaryOutput => Value;");
+                builder.AppendLine("    public override IIndicatorOutput PrimaryOutput => " + memberNames[primarySlot] + ";");
             }
 
             // One enum per indicator rather than one enum for the library. The containing type is what makes
@@ -854,7 +1033,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
             {
                 builder.AppendLine();
                 builder.AppendLine("    MovingAvgType IBuiltInMovingAverage.AvgType => MovingAvgType."
-                    + target.IndicatorName + ";");
+                    + averageName + ";");
             }
 
             builder.AppendLine();
@@ -886,6 +1065,12 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
 
         builder.AppendLine();
         builder.AppendLine("// emitted=" + emitted + " multiOutput=" + multi + " nameCollisions=" + collided);
+        builder.AppendLine("internal static class GeneratedExpandedPrimary");
+        builder.AppendLine("{");
+        builder.AppendLine("    internal static string? KeyFor(System.Type optionsType) =>");
+        foreach (var binding in primaryBindings) builder.AppendLine(binding);
+        builder.AppendLine("        null;");
+        builder.AppendLine("}");
 
         context.AddSource("Indicators.g.cs", SourceText.From(builder.ToString(), Encoding.UTF8));
     }

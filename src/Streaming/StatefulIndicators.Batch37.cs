@@ -5,154 +5,69 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 /// <summary>
-/// The geometric mean of the window, taken through logarithms, bar by bar.
+/// The correctly rounded geometric mean of the clamped window, bar by bar.
 /// </summary>
 /// <remarks>
 /// The streaming twin of <c>Calculations.CalculateGeometricMovingAverage</c>. Each value is floored at a
-/// millionth before its logarithm is taken, as the batch engine floors it, and the window is summed oldest
-/// first with this bar last so the two agree to the last bit.
+/// millionth. Exact products and one final root rounding preserve finite means at extreme magnitudes.
 /// </remarks>
 [PrimaryOutput("Gma")]
 public sealed class GeometricMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly RollingGeometricMean _mean;
     private readonly StreamingInputResolver _input;
 
     public GeometricMovingAverageState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _mean = new RollingGeometricMean(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.GeometricMovingAverage;
-
-    public void Reset()
-    {
-        _window.Clear();
-    }
+    public void Reset() => _mean.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double gma = 0;
-        if (_window.Count + 1 >= _length)
-        {
-            var start = _window.Count - (_length - 1);
-            double logSum = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                logSum += Math.Log(Math.Max(_window[i], 0.000001));
-            }
-
-            logSum += Math.Log(Math.Max(value, 0.000001));
-            gma = Math.Exp(logSum / _length);
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Gma", gma } };
-        }
-
-        return new StreamingIndicatorStateResult(gma, outputs);
+        var value = _mean.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Gma", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 /// <summary>
 /// The geometric mean of the window's positive values, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateGeometricMeanMovingAverage</c>. The batch engine walks the
-/// window from the newest value back, and this multiplies in that same order, because the product of
-/// floating point values depends on the order they are taken in.
+/// The streaming twin of <c>Calculations.CalculateGeometricMeanMovingAverage</c>. Products are exact;
+/// nonpositive observations are omitted, and startup copies the source value until the window fills.
 /// </remarks>
 [PrimaryOutput("Gmma")]
 public sealed class GeometricMeanMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly RollingGeometricMean _mean;
     private readonly StreamingInputResolver _input;
 
     public GeometricMeanMovingAverageState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
+        _mean = new RollingGeometricMean(length, positiveOnly: true);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.GeometricMeanMovingAverage;
-
-    public void Reset()
-    {
-        _window.Clear();
-    }
+    public void Reset() => _mean.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double gmma;
-        if (_window.Count + 1 < _length)
-        {
-            gmma = value;
-        }
-        else
-        {
-            // Summed as logarithms rather than multiplied, as the batch engine and the arm now do: the
-            // product of a long window overflows a double once length * log10(price) passes about 308.
-            var start = _window.Count - (_length - 1);
-            double logSum = 0;
-            var used = 0;
-            if (value > 0)
-            {
-                logSum += Math.Log(value);
-                used++;
-            }
-
-            for (var i = _window.Count - 1; i >= start; i--)
-            {
-                var windowValue = _window[i];
-                if (windowValue > 0)
-                {
-                    logSum += Math.Log(windowValue);
-                    used++;
-                }
-            }
-
-            gmma = used > 0 ? Math.Exp(logSum / used) : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Gmma", gmma } };
-        }
-
-        return new StreamingIndicatorStateResult(gmma, outputs);
+        var value = _mean.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Gmma", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 /// <summary>

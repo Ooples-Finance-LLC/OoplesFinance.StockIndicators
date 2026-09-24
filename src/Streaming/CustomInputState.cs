@@ -106,7 +106,9 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
             throw new ArgumentNullException(nameof(bar));
         }
 
+        StreamingInputValidation.Validate(bar);
         var value = _series.Next(bar, isFinal);
+        StreamingInputValidation.Finite(value, nameof(value));
 
         double high;
         double low;

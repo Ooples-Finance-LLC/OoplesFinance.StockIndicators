@@ -11,6 +11,27 @@ public sealed class RollingOrderStatisticTests
     private const int Length = RollingWindowSettings.SmallWindowThreshold + 8;
 
     [Theory]
+    [InlineData(1)]
+    [InlineData(3)]
+    [InlineData(Length)]
+    public void PendingStrictRankMatchesInsertionWithoutMutating(int length)
+    {
+        using var order = new RollingOrderStatistic(length);
+        var history = new List<double>();
+        for (var i = 0; i < length * 2 + 5; i++)
+        {
+            var pending = (double)(i % 7);
+            var kept = history.Skip(Math.Max(0, history.Count - length + 1)).ToArray();
+            var before = order.CountLessThan(pending);
+            Assert.Equal(kept.Count(v => v < pending), order.PreviewCountLessThan(pending));
+            Assert.Equal(before, order.CountLessThan(pending));
+            order.Add(pending);
+            history.Add(pending);
+            Assert.Equal(kept.Count(v => v < pending), order.CountLessThan(pending));
+        }
+    }
+
+    [Theory]
     [InlineData(double.NaN)]
     [InlineData(double.PositiveInfinity)]
     [InlineData(double.NegativeInfinity)]

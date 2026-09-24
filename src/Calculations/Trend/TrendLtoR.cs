@@ -262,33 +262,20 @@ public static partial class Calculations
     public static StockData CalculateOptimizedTrendTracker(this StockData stockData, MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage,
         int length = 2, double percent = 1.4)
     {
-        List<double> longStopList = new(stockData.Count);
-        List<double> shortStopList = new(stockData.Count);
         List<double> ottList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
 
+        var stops = new OptimizedTrendStops();
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var ma = maList[i];
-            var fark = ma * percent * 0.01;
-
-            var prevLongStop = i >= 1 ? longStopList[i - 1] : 0;
-            var longStop = ma - fark;
-            longStop = ma > prevLongStop ? Math.Max(longStop, prevLongStop) : longStop;
-            longStopList.Add(longStop);
-
-            var prevShortStop = i >= 1 ? shortStopList[i - 1] : 0;
-            var shortStop = ma + fark;
-            shortStopList.Add(shortStop);
-
             var prevOtt = i >= 1 ? ottList[i - 1] : 0;
-            var mt = ma > prevShortStop ? longStop : ma < prevLongStop ? shortStop : 0;
-            var ott = ma > mt ? mt * (200 + percent) / 200 : mt * (200 - percent) / 200;
+            var ott = stops.Next(ma, percent);
             ottList.Add(ott);
 
             var signal = GetCompareSignal(currentValue - ott, prevValue - prevOtt);

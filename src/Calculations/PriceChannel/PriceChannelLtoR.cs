@@ -877,7 +877,7 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(smaList, length);
+        var (highestList, lowestList) = length <= 1 ? (smaList, smaList) : GetMaxAndMinValuesList(smaList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1254,11 +1254,11 @@ public static partial class Calculations
             bList.Add(b);
 
             var prevC = GetLastOrDefault(cList);
-            var c = b - prevB != 0 ? prevC + alpha : a - prevA != 0 ? 0 : prevC;
+            var c = b - prevB != 0 ? Math.Min(1, prevC + alpha) : a - prevA != 0 ? 0 : prevC;
             cList.Add(c);
 
             var prevD = GetLastOrDefault(dList);
-            var d = a - prevA != 0 ? prevD + alpha : b - prevB != 0 ? 0 : prevD;
+            var d = a - prevA != 0 ? Math.Min(1, prevD + alpha) : b - prevB != 0 ? 0 : prevD;
             dList.Add(d);
 
             var avg = (a + b) / 2;
@@ -1321,7 +1321,7 @@ public static partial class Calculations
             devList.Add(dev);
 
             devSum += dev;
-            var maeDev = i != 0 ? devSum / i : 0;
+            var maeDev = devSum / (i + 1);
             var prevUpperBand = GetLastOrDefault(upperBandList);
             var upperBand = middleBand + (maeDev * stdDevFactor);
             upperBandList.Add(upperBand);
@@ -1366,7 +1366,19 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = GetStandardDeviationList(inputList, length);
+        var devList = new List<double>(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++)
+        {
+            var start = Math.Max(0, i - Math.Max(1, length) + 1);
+            var count = i - start + 1;
+            var origin = inputList[i];
+            double offsetSum = 0;
+            for (var j = start; j <= i; j++) offsetSum += inputList[j] - origin;
+            var meanOffset = offsetSum / count;
+            double deviationSum = 0;
+            for (var j = start; j <= i; j++) deviationSum += Math.Abs((inputList[j] - origin) - meanOffset);
+            devList.Add(deviationSum / count);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -24,60 +24,8 @@ internal static class TrendCore
             return;
         }
 
-        var isLong = true;
-        var af = afStart;
-        var ep = high[0];
-        var sar = low[0];
-
-        output[0] = sar;
-
-        for (var i = 1; i < high.Length; i++)
-        {
-            sar = sar + af * (ep - sar);
-
-            if (isLong)
-            {
-                if (high[i] > ep)
-                {
-                    ep = high[i];
-                    af = Math.Min(af + afStep, afMax);
-                }
-
-                if (low[i] < sar)
-                {
-                    isLong = false;
-                    sar = ep;
-                    ep = low[i];
-                    af = afStart;
-                }
-                else
-                {
-                    sar = Math.Min(sar, Math.Min(low[i], i > 0 ? low[i - 1] : low[i]));
-                }
-            }
-            else
-            {
-                if (low[i] < ep)
-                {
-                    ep = low[i];
-                    af = Math.Min(af + afStep, afMax);
-                }
-
-                if (high[i] > sar)
-                {
-                    isLong = true;
-                    sar = ep;
-                    ep = high[i];
-                    af = afStart;
-                }
-                else
-                {
-                    sar = Math.Max(sar, Math.Max(high[i], i > 0 ? high[i - 1] : high[i]));
-                }
-            }
-
-            output[i] = sar;
-        }
+        var kernel = new Streaming.ParabolicSarKernel(afStart, afStep, afMax);
+        for (var i = 0; i < high.Length; i++) output[i] = kernel.Next(high[i], low[i], true);
     }
 
     /// <summary>
@@ -178,7 +126,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -238,31 +186,8 @@ internal static class TrendCore
     /// Computes Average Day Range.
     /// </summary>
     internal static void AverageDayRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
-    {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        => VolatilityCore.AverageDayRange(high, low, output, length);
 
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(range, output, length);
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-        }
-    }
 
     /// <summary>
     /// Computes Typical Price.
@@ -276,7 +201,7 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (high[i] + low[i] + close[i]) / 3;
+            output[i] = PriceMean.Of(high[i], low[i], close[i]);
         }
     }
 
@@ -292,7 +217,7 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            output[i] = (high[i] + low[i]) / 2;
+            output[i] = PriceMean.Of(high[i], low[i]);
         }
     }
 
@@ -308,7 +233,7 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (high[i] + low[i] + (2 * close[i])) / 4;
+            output[i] = PriceMean.Of(high[i], low[i], close[i], close[i]);
         }
     }
 
@@ -741,7 +666,7 @@ internal static class TrendCore
         // different series the library already has a name for: FullTypicalPrice, and DerivedSeriesKind.Ohlc4.
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + close[i]) / 2;
+            output[i] = PriceMean.Of(open[i], close[i]);
         }
     }
 
@@ -823,7 +748,7 @@ internal static class TrendCore
                 if (close[j] < lowest) lowest = close[j];
             }
 
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -850,7 +775,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -1010,9 +935,7 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
-            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
-            // full window, and it measures the first bar against a previous low and high of zero, so bar
-            // zero carries its own high and low instead of nothing.
+            // Sum the available window; the first bar has no preceding vortex movement.
             for (var i = 0; i < close.Length; i++)
             {
                 double vmPlus = 0;
@@ -1020,7 +943,7 @@ internal static class TrendCore
 
                 for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmPlus += Math.Abs(high[j] - (j > 0 ? low[j - 1] : 0));
+                    vmPlus += j == 0 ? 0 : Math.Abs(high[j] - low[j - 1]);
                     sumTr += tr[j];
                 }
 
@@ -1051,9 +974,7 @@ internal static class TrendCore
             var tr = trArray.AsSpan(0, close.Length);
             VolatilityCore.TrueRange(high, low, close, tr);
 
-            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
-            // full window, and it measures the first bar against a previous low and high of zero, so bar
-            // zero carries its own high and low instead of nothing.
+            // Sum the available window; the first bar has no preceding vortex movement.
             for (var i = 0; i < close.Length; i++)
             {
                 double vmMinus = 0;
@@ -1061,7 +982,7 @@ internal static class TrendCore
 
                 for (var j = Math.Max(0, i - length + 1); j <= i; j++)
                 {
-                    vmMinus += Math.Abs(low[j] - (j > 0 ? high[j - 1] : 0));
+                    vmMinus += j == 0 ? 0 : Math.Abs(low[j] - high[j - 1]);
                     sumTr += tr[j];
                 }
 
@@ -1153,7 +1074,7 @@ internal static class TrendCore
                 {
                     output[i] = 1; // Bullish
                 }
-                else if (!emaRising && !histRising)
+                else if (ema[i] < ema[i - 1] && macdHist[i] < macdHist[i - 1])
                 {
                     output[i] = -1; // Bearish
                 }
@@ -1194,7 +1115,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -1636,7 +1557,7 @@ internal static class TrendCore
             // Senkou Span A = (Tenkan + Kijun) / 2
             for (var i = 0; i < high.Length; i++)
             {
-                output[i] = (tenkan[i] + kijun[i]) / 2;
+                output[i] = PriceMean.Of(tenkan[i], kijun[i]);
             }
         }
         finally
@@ -1669,7 +1590,7 @@ internal static class TrendCore
                 if (low[j] < lowest) lowest = low[j];
             }
 
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 

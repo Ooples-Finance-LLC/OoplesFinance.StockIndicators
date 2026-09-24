@@ -772,6 +772,7 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
 
 public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorState, IDisposable
 {
+    private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
     private readonly RollingStandardDeviation _primaryStdDev;
@@ -801,6 +802,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
 
     public void Reset()
     {
+        _alignment.Reset();
         _primaryStdDev.Reset();
         _marketStdDev.Reset();
         _primaryAbsSma.Reset();
@@ -816,6 +818,9 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
         bool isFinal, bool includeOutputs)
     {
+        if (!_alignment.CanUpdate(context, _primarySeries, _marketSeries, series, bar, isFinal))
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
+
         if (series.Equals(_marketSeries))
         {
             var stdDev = _marketStdDev.Next(bar.Close, isFinal);
@@ -832,11 +837,13 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
                 _hasMarketAbsSma = true;
             }
 
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
         if (!series.Equals(_primarySeries))
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
@@ -861,6 +868,7 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
         }
         else
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
@@ -881,7 +889,8 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
             };
         }
 
-        return new MultiSeriesIndicatorStateResult(true, rnv, outputs);
+        _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
+            return new MultiSeriesIndicatorStateResult(true, rnv, outputs);
     }
 
     public void Dispose()
@@ -896,83 +905,24 @@ public sealed class RelativeNormalizedVolatilityState : IMultiSeriesIndicatorSta
 [PrimaryOutput("Rss")]
 public sealed class RelativeSpreadStrengthState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastMa;
-    private readonly IMovingAverageSmoother _slowMa;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
-    private readonly StreamingInputResolver _input;
-    private double _prevSpread;
-    private bool _hasPrevSpread;
-
+    private readonly RelativeSpreadKernel _kernel;
     public RelativeSpreadStrengthState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 10, int slowLength = 40, int length = 14, int smoothLength = 5)
-    {
-        _fastMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _avgGain = new WilderState(Math.Max(1, length));
-        _avgLoss = new WilderState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _kernel = new(maType, fastLength, slowLength, length, smoothLength); }
     public IndicatorName Name => IndicatorName.RelativeSpreadStrength;
-
-    public void Reset()
-    {
-        _fastMa.Reset();
-        _slowMa.Reset();
-        _signal.Reset();
-        _avgGain.Reset();
-        _avgLoss.Reset();
-        _prevSpread = 0;
-        _hasPrevSpread = false;
-    }
-
+    public void Reset() => _kernel.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fast = _fastMa.Next(value, isFinal);
-        var slow = _slowMa.Next(value, isFinal);
-        var spread = fast - slow;
-        var prevSpread = _hasPrevSpread ? _prevSpread : 0;
-        var priceChg = _hasPrevSpread ? spread - prevSpread : 0;
-        var gain = priceChg > 0 ? priceChg : 0;
-        var loss = priceChg < 0 ? Math.Abs(priceChg) : 0;
-        var avgGain = _avgGain.GetNext(gain, isFinal);
-        var avgLoss = _avgLoss.GetNext(loss, isFinal);
-        var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-        var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        var rss = _signal.Next(rsi, isFinal);
-
-        if (isFinal)
-        {
-            _prevSpread = spread;
-            _hasPrevSpread = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rss", rss }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rss, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _kernel.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rss", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastMa.Dispose();
-        _slowMa.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _kernel.Dispose();
 }
 
 public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorState, IDisposable
 {
+    private readonly PairedSeriesAlignment _alignment = new();
     private readonly SeriesKey _primarySeries;
     private readonly SeriesKey _marketSeries;
     private readonly int _length4;
@@ -1006,6 +956,7 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
 
     public void Reset()
     {
+        _alignment.Reset();
         _fastMa.Reset();
         _medMa.Reset();
         _slowMa.Reset();
@@ -1021,15 +972,23 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
     public MultiSeriesIndicatorStateResult Update(MultiSeriesContext context, SeriesKey series, OhlcvBar bar,
         bool isFinal, bool includeOutputs)
     {
+        if (!_alignment.CanUpdate(context, _primarySeries, _marketSeries, series, bar, isFinal))
+            return new MultiSeriesIndicatorStateResult(false, 0d, null);
+
         if (series.Equals(_marketSeries))
         {
-            _lastMarketValue = bar.Close;
-            _hasMarket = true;
+            if (isFinal)
+            {
+                _lastMarketValue = bar.Close;
+                _hasMarket = true;
+            }
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
         if (!series.Equals(_primarySeries))
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
@@ -1044,6 +1003,7 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
         }
         else
         {
+            _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
             return new MultiSeriesIndicatorStateResult(false, 0d, null);
         }
 
@@ -1052,15 +1012,15 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
         var medMa = _medMa.Next(fastMa, isFinal);
         var slowMa = _slowMa.Next(fastMa, isFinal);
         var vSlowMa = _vSlowMa.Next(slowMa, isFinal);
-        double t1 = fastMa >= medMa && medMa >= slowMa && slowMa >= vSlowMa ? 10 : 0;
-        double t2 = fastMa >= medMa && medMa >= slowMa && slowMa < vSlowMa ? 9 : 0;
-        double t3 = fastMa < medMa && medMa >= slowMa && slowMa >= vSlowMa ? 9 : 0;
-        double t4 = fastMa < medMa && medMa >= slowMa && slowMa < vSlowMa ? 5 : 0;
+        double t1 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 10 : 0;
+        double t2 = TechnicalRatingComparison.Compare(fastMa, medMa) >= 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 9 : 0;
+        double t3 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) >= 0 ? 9 : 0;
+        double t4 = TechnicalRatingComparison.Compare(fastMa, medMa) < 0 && TechnicalRatingComparison.Compare(medMa, slowMa) >= 0 && TechnicalRatingComparison.Compare(slowMa, vSlowMa) < 0 ? 5 : 0;
         var rs2 = t1 + t2 + t3 + t4;
         var rs2Ma = _rs2Ma.Next(rs2, isFinal);
         var x = rs2 >= 5 ? 1 : 0;
         var xSum = isFinal ? _xSum.Add(x, out _) : _xSum.Preview(x, out _);
-        var rs3 = rs2 >= 5 || rs2 > rs2Ma ? xSum / _length4 * 100 : 0;
+        var rs3 = rs2 >= 5 || TechnicalRatingComparison.Compare(rs2, rs2Ma) > 0 ? xSum / _length4 * 100 : 0;
 
         if (isFinal)
         {
@@ -1077,7 +1037,8 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
             };
         }
 
-        return new MultiSeriesIndicatorStateResult(true, rs3, outputs);
+        _alignment.Commit(_primarySeries, _marketSeries, series, bar, isFinal);
+            return new MultiSeriesIndicatorStateResult(true, rs3, outputs);
     }
 
     public void Dispose()
@@ -1098,7 +1059,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
     private readonly IMovingAverageSmoother _denominatorMa;
     private readonly PooledRingBuffer<double> _openValues;
     private readonly PooledRingBuffer<double> _closeValues;
-    private readonly PooledRingBuffer<double> _highValues;
+    private readonly PooledRingBuffer<double> _rangeValues;
     private readonly StreamingInputResolver _input;
     private double _prevRvi1;
     private double _prevRvi2;
@@ -1111,7 +1072,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         _denominatorMa = MovingAverageSmootherFactory.Create(maType, resolved);
         _openValues = new PooledRingBuffer<double>(3);
         _closeValues = new PooledRingBuffer<double>(3);
-        _highValues = new PooledRingBuffer<double>(3);
+        _rangeValues = new PooledRingBuffer<double>(3);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1123,7 +1084,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         _denominatorMa.Reset();
         _openValues.Clear();
         _closeValues.Clear();
-        _highValues.Clear();
+        _rangeValues.Clear();
         _prevRvi1 = 0;
         _prevRvi2 = 0;
         _prevRvi3 = 0;
@@ -1141,18 +1102,18 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         var prevClose1 = _closeValues.Count >= 1 ? _closeValues[_closeValues.Count - 1] : 0;
         var prevClose2 = _closeValues.Count >= 2 ? _closeValues[_closeValues.Count - 2] : 0;
         var prevClose3 = _closeValues.Count >= 3 ? _closeValues[_closeValues.Count - 3] : 0;
-        var prevHigh1 = _highValues.Count >= 1 ? _highValues[_highValues.Count - 1] : 0;
-        var prevHigh2 = _highValues.Count >= 2 ? _highValues[_highValues.Count - 2] : 0;
-        var prevHigh3 = _highValues.Count >= 3 ? _highValues[_highValues.Count - 3] : 0;
+        var prevRange1 = _rangeValues.Count >= 1 ? _rangeValues[_rangeValues.Count - 1] : 0;
+        var prevRange2 = _rangeValues.Count >= 2 ? _rangeValues[_rangeValues.Count - 2] : 0;
+        var prevRange3 = _rangeValues.Count >= 3 ? _rangeValues[_rangeValues.Count - 3] : 0;
 
         var a = close - open;
         var b = prevClose1 - prevOpen1;
         var c = prevClose2 - prevOpen2;
         var d = prevClose3 - prevOpen3;
         var e = high - low;
-        var f = prevHigh1 - prevOpen1;
-        var g = prevHigh2 - prevOpen2;
-        var h = prevHigh3 - prevOpen3;
+        var f = prevRange1;
+        var g = prevRange2;
+        var h = prevRange3;
 
         var numerator = (a + (2 * b) + (2 * c) + d) / 6;
         var denominator = (e + (2 * f) + (2 * g) + h) / 6;
@@ -1165,7 +1126,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         {
             _openValues.TryAdd(open, out _);
             _closeValues.TryAdd(close, out _);
-            _highValues.TryAdd(high, out _);
+            _rangeValues.TryAdd(high - low, out _);
             _prevRvi3 = _prevRvi2;
             _prevRvi2 = _prevRvi1;
             _prevRvi1 = rvi;
@@ -1190,7 +1151,7 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
         _denominatorMa.Dispose();
         _openValues.Dispose();
         _closeValues.Dispose();
-        _highValues.Dispose();
+        _rangeValues.Dispose();
     }
 }
 
@@ -1299,6 +1260,7 @@ public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, I
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var rviHigh = _rviHigh.Update(bar, isFinal, includeOutputs: false).Value;
         var rviLow = _rviLow.Update(bar, isFinal, includeOutputs: false).Value;
         var rvi = (rviHigh + rviLow) / 2;
@@ -1861,10 +1823,11 @@ public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingI
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var diffAlpha = _fastAlpha - _slowAlpha;
         var prevFast = _hasPrev ? _prevFastMa : 0;
         var prevSlow = _hasPrev ? _prevSlowMa : 0;
-        var pMacdEq = diffAlpha != 0 ? ((prevFast * _fastAlpha) - (prevSlow * _slowAlpha)) / diffAlpha : 0;
+        var pMacdEq = diffAlpha != 0 ? ((prevFast * _fastAlpha) - (prevSlow * _slowAlpha)) / diffAlpha : prevFast;
         var signal = _signalMa.Next(pMacdEq, isFinal);
         var histogram = pMacdEq - signal;
 

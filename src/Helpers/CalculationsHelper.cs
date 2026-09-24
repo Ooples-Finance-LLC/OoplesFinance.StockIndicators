@@ -332,7 +332,7 @@ public static class CalculationsHelper
                 volumeSum += volumes[j];
             }
 
-            output.Add(volumeSum != 0 ? volumePriceSum / volumeSum : 0);
+            output.Add(volumeSum != 0 ? length == 1 ? input[i] : volumePriceSum / volumeSum : 0);
         }
 
         return output;
@@ -414,31 +414,31 @@ public static class CalculationsHelper
             case DerivedSeriesKind.Hl2:
                 for (var i = 0; i < count; i++)
                 {
-                    list.Add((highs[i] + lows[i]) / 2);
+                    list.Add(PriceMean.Of(highs[i], lows[i]));
                 }
                 break;
             case DerivedSeriesKind.Hlc3:
                 for (var i = 0; i < count; i++)
                 {
-                    list.Add((highs[i] + lows[i] + closes[i]) / 3);
+                    list.Add(PriceMean.Of(highs[i], lows[i], closes[i]));
                 }
                 break;
             case DerivedSeriesKind.Ohlc4:
                 for (var i = 0; i < count; i++)
                 {
-                    list.Add((opens[i] + highs[i] + lows[i] + closes[i]) / 4);
+                    list.Add(PriceMean.Of(opens[i], highs[i], lows[i], closes[i]));
                 }
                 break;
             case DerivedSeriesKind.WeightedClose:
                 for (var i = 0; i < count; i++)
                 {
-                    list.Add((highs[i] + lows[i] + (closes[i] * 2)) / 4);
+                    list.Add(PriceMean.Of(highs[i], lows[i], closes[i], closes[i]));
                 }
                 break;
             case DerivedSeriesKind.AveragePrice:
                 for (var i = 0; i < count; i++)
                 {
-                    list.Add((opens[i] + closes[i]) / 2);
+                    list.Add(PriceMean.Of(opens[i], closes[i]));
                 }
                 break;
             case DerivedSeriesKind.TrueRange:
@@ -1189,7 +1189,7 @@ public static class CalculationsHelper
                     MovingAverageCore.VolumeWeightedMovingAverage(inputSpan, volumeSpan, outputSpan, length);
                     break;
                 case MovingAvgType.MiddleHighLowMovingAverage:
-                    MovingAverageCore.MiddleHighLowMovingAverage(highSpan, lowSpan, outputSpan, slowLength ?? length, fastLength ?? 10);
+                    MovingAverageCore.MiddleHighLowMovingAverage(inputSpan, outputSpan, slowLength ?? length, fastLength ?? 10);
                     break;
                 case MovingAvgType.EquityMovingAverage:
                     MovingAverageCore.EquityMovingAverage(inputSpan, volumeSpan, outputSpan, length);
@@ -1862,6 +1862,16 @@ public static class CalculationsHelper
         return (inputList, highList, lowList, openList, volumeList);
     }
 
+    internal static DateTime InputPeriodStart(DateTime time, InputLength length) => length switch
+    {
+        InputLength.Minute => new DateTime(time.Year, time.Month, time.Day, time.Hour, time.Minute, 0, time.Kind),
+        InputLength.Hour => new DateTime(time.Year, time.Month, time.Day, time.Hour, 0, 0, time.Kind),
+        InputLength.Week => time.Date.AddDays(-(((int)time.DayOfWeek + 6) % 7)),
+        InputLength.Month => new DateTime(time.Year, time.Month, 1, 0, 0, 0, time.Kind),
+        InputLength.Year => new DateTime(time.Year, 1, 1, 0, 0, 0, time.Kind),
+        _ => time.Date
+    };
+
     /// <summary>
     /// The period ordinal each BAR belongs to, using the same grouping
     /// <see cref="GetInputValuesList(StockData, InputLength)"/> applies.
@@ -1886,17 +1896,8 @@ public static class CalculationsHelper
         for (var i = 0; i < tickerDataList.Count; i++)
         {
             var ticker = tickerDataList[i];
-            var parentKey = ticker.Date.Date;
-            var childKey = inputLength switch
-            {
-                InputLength.Minute => ticker.Date.Minute,
-                InputLength.Hour => ticker.Date.Hour,
-                InputLength.Day => ticker.Date.Day,
-                InputLength.Week => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(ticker.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
-                InputLength.Month => ticker.Date.Month,
-                InputLength.Year => ticker.Date.Year,
-                _ => ticker.Date.Day,
-            };
+            var parentKey = InputPeriodStart(ticker.Date, inputLength);
+            const int childKey = 0;
 
             var key = (parentKey, childKey);
             if (!seen.TryGetValue(key, out var ordinal))
@@ -1993,7 +1994,7 @@ public static class CalculationsHelper
         for (var i = 0; i < tickerDataList.Count; i++)
         {
             var ticker = tickerDataList[i];
-            var parentKey = ticker.Date.Date;
+            var parentKey = InputPeriodStart(ticker.Date, inputLength);
 
             if (!parentGroups.TryGetValue(parentKey, out var parentGroup))
             {
@@ -2002,16 +2003,7 @@ public static class CalculationsHelper
                 parentOrder.Add(parentKey);
             }
 
-            var childKey = inputLength switch
-            {
-                InputLength.Minute => ticker.Date.Minute,
-                InputLength.Hour => ticker.Date.Hour,
-                InputLength.Day => ticker.Date.Day,
-                InputLength.Week => CultureInfo.InvariantCulture.Calendar.GetWeekOfYear(ticker.Date, CalendarWeekRule.FirstFourDayWeek, DayOfWeek.Monday),
-                InputLength.Month => ticker.Date.Month,
-                InputLength.Year => ticker.Date.Year,
-                _ => ticker.Date.Day,
-            };
+            const int childKey = 0;
 
             if (!parentGroup.Children.TryGetValue(childKey, out var childGroup))
             {

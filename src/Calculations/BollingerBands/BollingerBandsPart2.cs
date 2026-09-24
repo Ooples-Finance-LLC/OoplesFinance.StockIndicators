@@ -231,6 +231,8 @@ public static partial class Calculations
         // divisor, so a value about 55% high moved the band and shrank the result at once. See #190.
         var zlhaTemaStdDevList = GetStandardDeviationList(zlhaTemaList, length1);
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
+        using var precise = Builder.Compute.ComponentAverage.HasOverrides ? null
+            : new Streaming.VervoortModifiedBandPosition(maType, length1, smoothLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var zihaTema = zlhaTemaList[i];
@@ -238,6 +240,7 @@ public static partial class Calculations
             var wmaZihaTema = wmaZlhaTemaList[i];
 
             var percb = zihaTemaStdDev != 0 ? (zihaTema + (2 * zihaTemaStdDev) - wmaZihaTema) / (4 * zihaTemaStdDev) * 100 : 0;
+            if (precise is not null) percb = precise.Next(inputList[i], highList[i], lowList[i], true);
             percbList.Add(percb);
         }
 

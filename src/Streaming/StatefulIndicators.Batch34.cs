@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -201,7 +201,7 @@ public sealed class NetVolumeState : IStreamingIndicatorState
 public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
-    private double _cvi;
+    private ExactMeanAccumulator _cvi;
     private double _prevValue;
     private bool _hasPrev;
 
@@ -214,7 +214,7 @@ public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
 
     public void Reset()
     {
-        _cvi = 0;
+        _cvi = default;
         _prevValue = 0;
         _hasPrev = false;
     }
@@ -222,26 +222,27 @@ public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var cvi = _cvi;
+        var total = _cvi;
         if (_hasPrev)
         {
             if (value > _prevValue)
             {
-                cvi += bar.Volume;
+                total.Add(bar.Volume);
             }
             else if (value < _prevValue)
             {
-                cvi -= bar.Volume;
+                total.Add(bar.Volume, -1);
             }
         }
 
         if (isFinal)
         {
-            _cvi = cvi;
+            _cvi = total;
             _prevValue = value;
             _hasPrev = true;
         }
 
+        var cvi = total.Mean(1);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
@@ -256,20 +257,21 @@ public sealed class CumulativeVolumeIndexState : IStreamingIndicatorState
 /// The bar's volume as a multiple of its recent average, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateNormalizedVolume</c>. Its window sums the way
-/// <c>MovingAverageCore.SimpleMovingAverage</c> sums, so the average the two engines divide by is the same.
+/// The streaming twin of <c>Calculations.CalculateNormalizedVolume</c>. It retains the exact window
+/// sum and rounds only the final volume-to-average ratio, without rounding an intermediate mean.
 /// </remarks>
 [PrimaryOutput("NormalizedVolume")]
 public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _sum;
+    private ExactMeanAccumulator _sum;
+    private readonly PooledRingBuffer<double> _values;
     private readonly StreamingInputResolver _input;
 
     public NormalizedVolumeState(int length = 20)
     {
         _length = Math.Max(1, length);
-        _sum = new RollingWindowSum(_length);
+        _values = new PooledRingBuffer<double>(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -277,16 +279,25 @@ public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposabl
 
     public void Reset()
     {
-        _sum.Reset();
+        _sum = default;
+        _values.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         _ = _input.GetValue(bar);
         var volume = bar.Volume;
-        var total = isFinal ? _sum.Add(volume, out var countAfter) : _sum.Preview(volume, out countAfter);
-        var averageVolume = countAfter >= _length ? total / _length : 0;
-        var normalizedVolume = averageVolume != 0 ? volume / averageVolume : 0;
+        var sum = _sum;
+        sum.Add(volume);
+        if (_values.Count == _length) sum.Add(_values[0], -1);
+        var numerator = new ExactMeanAccumulator();
+        numerator.Add(volume, _length);
+        var normalizedVolume = _values.Count + 1 < _length ? 0 : numerator.Ratio(sum);
+        if (isFinal)
+        {
+            _sum = sum;
+            _values.TryAdd(volume, out _);
+        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -299,7 +310,7 @@ public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposabl
 
     public void Dispose()
     {
-        _sum.Dispose();
+        _values.Dispose();
     }
 }
 
@@ -452,7 +463,7 @@ public sealed class VolumeRateOfChangeState : IStreamingIndicatorState, IDisposa
         if (_window.Count >= _length)
         {
             var prevVolume = _window[0];
-            vroc = prevVolume != 0 ? (volume - prevVolume) / prevVolume * 100 : 0;
+            vroc = RoundedPercentageChange.Of(volume, prevVolume);
         }
 
         if (isFinal)

@@ -186,8 +186,9 @@ public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
+        StreamingInputValidation.Validate(bar);
+        var prevHigh = _hasPrev ? _prevHigh : bar.High;
+        var prevLow = _hasPrev ? _prevLow : bar.Low;
 
         var dMax = bar.High > prevHigh ? bar.High - prevHigh : 0;
         var dMin = bar.Low < prevLow ? prevLow - bar.Low : 0;
@@ -246,6 +247,7 @@ public sealed class DemarkPivotPointsState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
         var prevOpen = _hasPrev ? _prevOpen : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
@@ -312,6 +314,7 @@ public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
         var gapup = prevClose != 0 ? (bar.Open - prevClose) / prevClose : 0;
         var gapdown = bar.Open != 0 ? (prevClose - bar.Open) / bar.Open : 0;
@@ -321,7 +324,7 @@ public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisp
             : bar.Close > bar.Open ? (bar.Close - bar.Open) * bar.Volume : 0;
 
         var sp = gapdown > 0.15
-            ? (prevClose - bar.Low + bar.High - bar.Close) * bar.Volume
+            ? -(prevClose - bar.Low + bar.High - bar.Close) * bar.Volume
             : bar.Close < bar.Open ? (bar.Close - bar.Open) * bar.Volume : 0;
 
         var bpSum = isFinal ? _bpSum.Add(bp, out _) : _bpSum.Preview(bp, out _);
@@ -378,6 +381,7 @@ public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var delta = bar.Close - bar.Open;
         var trueRange = bar.High - bar.Low;
         var ratio = trueRange != 0 ? delta / trueRange : 0;
@@ -440,6 +444,7 @@ public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, I
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = bar.Close;
@@ -776,8 +781,7 @@ public sealed class DiNapoliPreferredStochasticOscillatorState : IStreamingIndic
         var value = _input.GetValue(bar);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var fast = range != 0 ? MathHelper.MinOrMax((value - lowest) / range * 100, 100, 0) : 0;
+        var fast = ClampedRangePosition.Percent(value, lowest, highest);
         var r = _r + ((fast - _r) / _length2);
         var s = _s + ((r - _s) / _length3);
 
@@ -810,14 +814,12 @@ public sealed class DiNapoliPreferredStochasticOscillatorState : IStreamingIndic
 [PrimaryOutput("Dwma")]
 public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly DistanceMassWindowMean _mean;
     private readonly StreamingInputResolver _input;
 
     public DistanceWeightedMovingAverageState(int length = 14)
     {
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(_length);
+        _mean = new DistanceMassWindowMean(length, reciprocal: true);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -825,36 +827,13 @@ public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorStat
 
     public void Reset()
     {
-        _values.Clear();
+        _mean.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        double sum = 0;
-        double weightedSum = 0;
-
-        for (var j = 0; j < _length; j++)
-        {
-            var prevValue = StreamingWindowHelper.GetRecentValue(_values, j, value);
-            double distanceSum = 0;
-            for (var k = 0; k < _length; k++)
-            {
-                var prevValue2 = StreamingWindowHelper.GetRecentValue(_values, k, value);
-                distanceSum += Math.Abs(prevValue - prevValue2);
-            }
-
-            var weight = distanceSum != 0 ? 1 / distanceSum : 0;
-            sum += prevValue * weight;
-            weightedSum += weight;
-        }
-
-        var dwma = weightedSum != 0 ? sum / weightedSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
+        var dwma = _mean.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -870,7 +849,7 @@ public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorStat
 
     public void Dispose()
     {
-        _values.Dispose();
+        _mean.Dispose();
     }
 }
 
@@ -922,8 +901,9 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
+        StreamingInputValidation.Validate(bar);
+        var prevHigh = _hasPrev ? _prevHigh : bar.High;
+        var prevLow = _hasPrev ? _prevLow : bar.Low;
         // For TrueRange on first bar, use current close to avoid inflated TR
         var prevClose = _hasPrev ? _prevClose : bar.Close;
 
@@ -1096,7 +1076,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
     public DoubleSmoothedRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 2, int length2 = 5, int length3 = 25)
     {
-        var resolved1 = Math.Max(1, length1);
+        var resolved1 = Math.Max(2, length1);
         var resolved2 = Math.Max(1, length2);
         var resolved3 = Math.Max(1, length3);
         _maxWindow = new RollingWindowMax(resolved1);
@@ -1134,8 +1114,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
         var top2 = _topSmoother2.Next(top1, isFinal);
         var bot1 = _botSmoother1.Next(hcSrc, isFinal);
         var bot2 = _botSmoother2.Next(bot1, isFinal);
-        var rs = bot2 != 0 ? MathHelper.MinOrMax(top2 / bot2, 1, 0) : 0;
-        var rsi = bot2 == 0 ? 100 : top2 == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        var rsi = bot2 == 0 ? 100 : top2 == 0 ? 0 : MathHelper.MinOrMax(100 * top2 / (top2 + bot2), 100, 0);
         var signal = _signalSmoother.Next(rsi, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1255,10 +1234,14 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
         int smoothLength = 3)
     {
         var resolved = Math.Max(1, length);
-        _maxWindow = new RollingWindowMax(resolved);
-        _minWindow = new RollingWindowMin(resolved);
-        _slowK = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _maxWindow = new RollingWindowMax(Math.Max(2, resolved));
+        _minWindow = new RollingWindowMin(Math.Max(2, resolved));
+        _slowK = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _signal = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _stochastic = new StochasticOscillatorState(maType, resolved, 3, 3);
     }
 
@@ -1275,11 +1258,11 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var fastK = _stochastic.Update(bar, isFinal, includeOutputs: false).Value;
         var highest = isFinal ? _maxWindow.Add(fastK, out _) : _maxWindow.Preview(fastK, out _);
         var lowest = isFinal ? _minWindow.Add(fastK, out _) : _minWindow.Preview(fastK, out _);
-        var range = highest - lowest;
-        var doubleK = range != 0 ? MathHelper.MinOrMax((fastK - lowest) / range * 100, 100, 0) : 0;
+        var doubleK = ClampedRangePosition.Percent(fastK, lowest, highest);
         var doubleSlowK = _slowK.Next(doubleK, isFinal);
         var doubleSignal = _signal.Next(doubleSlowK, isFinal);
 
@@ -1310,8 +1293,7 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
 public sealed class EaseOfMovementState : IStreamingIndicatorState
 {
     private readonly double _divisor;
-    private double _prevHalfRange;
-    private double _prevMidpointMove;
+    private double _prevMidpoint;
     private bool _hasPrev;
 
     public EaseOfMovementState(double divisor = 1000000)
@@ -1323,24 +1305,21 @@ public sealed class EaseOfMovementState : IStreamingIndicatorState
 
     public void Reset()
     {
-        _prevHalfRange = 0;
-        _prevMidpointMove = 0;
+        _prevMidpoint = 0;
         _hasPrev = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var halfRange = (bar.High - bar.Low) * 0.5;
-        var prevHalfRange = _hasPrev ? _prevHalfRange : 0;
-        var midpointMove = halfRange - prevHalfRange;
-        var prevMidpointMove = _hasPrev ? _prevMidpointMove : 0;
-        var boxRatio = bar.High - bar.Low != 0 ? bar.Volume / (bar.High - bar.Low) : 0;
-        var emv = boxRatio != 0 ? _divisor * ((midpointMove - prevMidpointMove) / boxRatio) : 0;
+        StreamingInputValidation.Validate(bar);
+        var midpoint = (bar.High + bar.Low) / 2;
+        var midpointMove = _hasPrev ? midpoint - _prevMidpoint : 0;
+        var boxRatio = bar.High != bar.Low ? bar.Volume / (bar.High - bar.Low) : 0;
+        var emv = boxRatio == 0 ? 0 : _divisor * midpointMove / boxRatio;
 
         if (isFinal)
         {
-            _prevHalfRange = halfRange;
-            _prevMidpointMove = midpointMove;
+            _prevMidpoint = midpoint;
             _hasPrev = true;
         }
 

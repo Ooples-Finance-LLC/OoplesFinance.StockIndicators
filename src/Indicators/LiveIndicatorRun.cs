@@ -1,4 +1,4 @@
-//     Ooples Finance Stock Indicator Library
+﻿//     Ooples Finance Stock Indicator Library
 //     https://ooples.github.io/OoplesFinance.StockIndicators/
 //
 //     Copyright © Franklin Moormann, 2020-2022
@@ -41,6 +41,7 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     private Bar _latestBar;
     private int _barCount;
     private bool _isComplete;
+    private Exception? _stateFailure;
 
     // Inputs seen across warm-up and live bars, against the largest WarmupBars any configured indicator
     // declares. The builder feeds whatever ReadWarmupAsync returns without checking it was enough, so an
@@ -85,7 +86,7 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         get
         {
             if (indicator is null) throw new ArgumentNullException(nameof(indicator));
-            return this[indicator.Outputs[0]];
+            return this[IndicatorContract.PrimaryOutput(indicator)];
         }
     }
 
@@ -128,7 +129,7 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
 
     /// <inheritdoc/>
     public IBarSnapshot Latest => _barCount > 0
-        ? Snapshot(_latestBar, _barCount - 1, _inputsSeen >= _warmupRequired)
+        ? Snapshot(_latestBar, _barCount - 1, OutputsAreReady())
         : throw new InvalidOperationException("No bars have arrived yet.");
 
     /// <summary>Feeds the warm-up bars through without publishing a snapshot for any of them.</summary>
@@ -144,13 +145,15 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
     public async IAsyncEnumerator<IBarSnapshot> GetAsyncEnumerator(
         CancellationToken cancellationToken = default)
     {
+        if (_stateFailure is not null)
+            throw new InvalidOperationException("This run faulted during a state update. Create a fresh run and replay accepted observations.", _stateFailure);
         await foreach (var bar in _source.ReadAsync(cancellationToken).ConfigureAwait(false))
         {
             Advance(bar, record: true);
 
             // A bar computed over too little history is arithmetic, not information. It is suppressed
             // unless the caller asked to see it, and when it is shown IsWarmedUp says what it is.
-            var warmedUp = _inputsSeen >= _warmupRequired;
+            var warmedUp = OutputsAreReady();
             if (warmedUp || PublishBeforeWarmup)
             {
                 yield return Snapshot(bar, _barCount - 1, warmedUp);
@@ -187,11 +190,25 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         return new BarSnapshot(bar, index, values, warmedUp);
     }
 
+    private bool OutputsAreReady() => _inputsSeen >= _warmupRequired
+        && _series.Values.All(values => values.Count > 0 && !double.IsNaN(values[values.Count - 1]));
+
     /// <summary>Drives every indicator one bar, in dependency order.</summary>
     private void Advance(Bar bar, bool record)
     {
-        _latestBar = bar;
-        _inputsSeen++;
+        if (_stateFailure is not null)
+            throw new InvalidOperationException("This run faulted during a state update. Create a fresh run and replay accepted observations.", _stateFailure);
+        // Reject raw/root input before any node advances. A failure after a dependency
+        // advances cannot be rolled back by arbitrary customer states; fault the run.
+        Validation.IndicatorInputDomain.Finite.Validate(bar);
+        foreach (var indicator in _ordered)
+            if (indicator.Source is null) Validation.IndicatorInputDomain.For(indicator).Validate(bar);
+        try { AdvanceStates(bar, record); }
+        catch (Exception ex) { _stateFailure = ex; throw; }
+    }
+
+    private void AdvanceStates(Bar bar, bool record)
+    {
 
         foreach (var indicator in _ordered)
         {
@@ -199,7 +216,9 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
             // means - and its source has already been advanced, because the order is dependency first.
             var input = indicator.Source is null
                 ? bar
-                : new Bar(bar.Time, bar.Open, bar.High, bar.Low, _current[indicator.Source][0], bar.Volume);
+                : new Bar(bar.Time, bar.Open, bar.High, bar.Low,
+                    _current[indicator.Source][IndicatorContract.PrimaryOutput(indicator.Source).Slot], bar.Volume);
+            Validation.IndicatorInputDomain.For(indicator).Validate(input);
 
             var slots = _current[indicator];
 
@@ -207,8 +226,9 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
             {
                 case IStreamingIndicatorState streaming:
                     {
+                        if (indicator.Source is not null && streaming is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
                         var result = streaming.Update(ToOhlcv(input), isFinal: true, includeOutputs: true);
-                        slots[0] = result.Value;
+                        slots[0] = IndicatorContract.NativePrimary(indicator, result);
 
                         if (slots.Length > 1 && result.Outputs is not null
                             && _outputKeys.TryGetValue(indicator, out var keys))
@@ -246,21 +266,28 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
                     throw new InvalidOperationException(
                         indicator.GetType().Name + " has no state this run can drive.");
             }
+            for (var slot = 0; slot < slots.Length; slot++)
+                Validation.IndicatorOutputPolicy.Validate(indicator, slot, _inputsSeen, slots[slot]);
 
-            if (!record)
+        }
+        // Publish histories only after the complete graph accepted this observation.
+        if (record)
+        {
+            foreach (var indicator in _ordered)
             {
-                continue;
-            }
-
-            for (var i = 0; i < indicator.Outputs.Count; i++)
-            {
-                if (_series.TryGetValue(indicator.Outputs[i], out var values))
+                var slots = _current[indicator];
+                for (var i = 0; i < indicator.Outputs.Count; i++)
                 {
-                    values.Add(slots[i]);
+                    if (_series.TryGetValue(indicator.Outputs[i], out var values))
+                    {
+                        values.Add(slots[i]);
+                    }
                 }
             }
         }
 
+        _latestBar = bar;
+        _inputsSeen++;
         if (record)
         {
             _barCount++;
@@ -272,7 +299,7 @@ internal sealed class LiveIndicatorRun : IIndicatorRun
         var values = new double[indicator.Components.Count];
         for (var i = 0; i < values.Length; i++)
         {
-            values[i] = _current[indicator.Components[i]][0];
+            values[i] = _current[indicator.Components[i]][IndicatorContract.PrimaryOutput(indicator.Components[i]).Slot];
         }
 
         return values;

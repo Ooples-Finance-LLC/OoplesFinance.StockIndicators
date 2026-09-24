@@ -196,13 +196,13 @@ public static partial class Calculations
         {
             var ret = retList[i];
             var retSma = retSmaList[i];
-            var currentDeviation = Math.Min(ret - retSma, 0);
+            var currentDeviation = Math.Min(ret, 0);
 
             var deviationSquared = Pow(currentDeviation, 2);
             deviationSquaredList.Add(deviationSquared);
         }
 
-        // The downside deviation is exactly 0 when no return in the window falls below the mean. A running
+        // The downside deviation is exactly 0 when no return in the window falls below the target. A running
         // SMA left a residue near 1e-19 there, and the ratio divided by its root came out near 1e7.
         var divisionOfSumList = maType == MovingAvgType.SimpleMovingAverage
             ? GetExactWindowAverageList(deviationSquaredList, length)

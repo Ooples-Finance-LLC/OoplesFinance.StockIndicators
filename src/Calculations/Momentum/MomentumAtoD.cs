@@ -254,10 +254,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The smoothed deviation is divided into length3 to choose the momentum period, so a deviation
-        // that reads about 55% high - which is what CalculateStandardDeviationVolatility is on a typical price
-        // series - shortens that period by the same factor. See #190.
+        // Normalize the window deviation by its own smoothed value before choosing the RSI period.
         var standardDeviationList = GetStandardDeviationList(inputList, length1);
         var stdDeviationSmaList = GetMovingAverageList(stockData, maType, length2, standardDeviationList);
 
@@ -267,17 +264,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            int dTime;
-            try
-            {
-                dTime = asd != 0 ? Math.Min(upLimit, (int)Math.Ceiling(length3 / asd)) : 0;
-            }
-            catch
-            {
-                dTime = upLimit;
-            }
-
-            var dmiLength = Math.Max(Math.Min(dTime, upLimit), dnLimit);
+            var dmiLength = DynamicMomentumPeriod.Calculate(standardDeviationList[i], asd, length3, dnLimit, upLimit);
             var priceChg = MinPastValues(i, 1, currentValue - prevValue);
 
             var loss = i >= 1 && priceChg < 0 ? Math.Abs(priceChg) : 0;

@@ -241,6 +241,23 @@ public sealed class CommonSubexpressionEliminationTests : GlobalTestData
         secondKey?.GetHashCode().Should().Be(firstKey?.GetHashCode());
     }
 
+    [Fact]
+    public void NumericKeysPreserveIntegralDecimalAndFloatingPrecision()
+    {
+        var input = new SeriesHandle(7);
+        var series = new SeriesKey(SymbolId.From("AAPL"), BarTimeframe.Minutes(1));
+        var values = new object[] { int.MaxValue, long.MaxValue, 1.0000000000000000000000000001m, 1.0000000000000002d };
+        var key = KeyFor(series, input, values);
+        key.Should().NotBeNull();
+        KeyFor(series, input, values.ToArray()).Should().Be(key);
+        foreach (var index in Enumerable.Range(0, values.Length))
+        {
+            var changed = values.ToArray();
+            changed[index] = index switch { 0 => int.MaxValue - 1, 1 => long.MaxValue - 1, 2 => 1m, _ => (object)1d };
+            KeyFor(series, input, changed).Should().NotBe(key);
+        }
+    }
+
     private static IndicatorNodeKey? KeyFor(SeriesKey seriesKey, SeriesHandle input, object[] parameters) =>
         IndicatorNodeKey.TryCreate(seriesKey, input,
             new IndicatorSpec(IndicatorName.SimpleMovingAverage, new GenericIndicatorOptions(parameters)));

@@ -139,6 +139,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateGChannels(this StockData stockData, int length = 100)
     {
+        length = Math.Max(2, length);
         List<double> aList = new(stockData.Count);
         List<double> bList = new(stockData.Count);
         List<double> midList = new(stockData.Count);
@@ -410,13 +411,12 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevCma1 = i >= 1 ? cmaList[i - 1] : 0;
-            var prevCma2 = i >= 2 ? cmaList[i - 2] : 0;
 
             var dPrice = i >= displacement ? inputList[i - displacement] : 0;
             dPriceList.Add(dPrice);
             dPriceSum.Add(dPrice);
 
-            var cma = dPrice == 0 ? prevCma1 + (prevCma1 - prevCma2) : dPriceSum.Average(length);
+            var cma = dPriceSum.Average(length);
             cmaList.Add(cma);
 
             var extremeBand = cma * extremeMult / 100;
@@ -881,6 +881,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateExtendedRecursiveBands(this StockData stockData, int length = 100)
     {
+        length = Math.Max(3, length);
         List<double> aClassicList = new(stockData.Count);
         List<double> bClassicList = new(stockData.Count);
         List<double> cClassicList = new(stockData.Count);

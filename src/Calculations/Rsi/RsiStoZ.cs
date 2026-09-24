@@ -149,10 +149,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var connorsRsiList = CalculateConnorsRelativeStrengthIndex(stockData, maType, length1, length2, length3).ChainedValues;
-        stockData.SetCustomValues(connorsRsiList);
-        var stochasticList = CalculateStochasticOscillator(stockData, maType, length2, smoothLength1, smoothLength2);
-        var fastDList = stochasticList.ChainedOutputs["FastD"];
-        var slowDList = stochasticList.ChainedOutputs["SlowD"];
+        // Range the oscillator itself; price OHLC and synthesized two-bar candles are unrelated units.
+        var raw = new List<double>(connorsRsiList.Count);
+        var extrema = new RollingMinMax(Math.Max(1, length2));
+        foreach (var value in connorsRsiList)
+        {
+            extrema.Add(value);
+            raw.Add(extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min));
+        }
+        var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+        var slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -197,10 +203,21 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
-        stockData.SetCustomValues(rsiList);
-        var stoRsiList = CalculateStochasticOscillator(stockData, maType, Math.Max(1, stochLength ?? length), smoothLength1, smoothLength2);
-        var stochRsiList = stoRsiList.ChainedOutputs["FastD"];
-        var stochRsiSignalList = stoRsiList.ChainedOutputs["SlowD"];
+        var lookback = Math.Max(1, stochLength ?? length);
+        var raw = new List<double>(rsiList.Count);
+        for (var i = 0; i < rsiList.Count; i++)
+        {
+            var low = rsiList[i];
+            var high = low;
+            for (var j = Math.Max(0, i - lookback + 1); j < i; j++)
+            {
+                low = Math.Min(low, rsiList[j]);
+                high = Math.Max(high, rsiList[j]);
+            }
+            raw.Add(high == low ? 0 : 100 * (rsiList[i] - low) / (high - low));
+        }
+        var stochRsiList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+        var stochRsiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, stochRsiList);
 
         for (var i = 0; i < stockData.Count; i++)
         {

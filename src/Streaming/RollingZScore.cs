@@ -39,7 +39,7 @@ internal sealed class RollingVolumeWeightedMean : IDisposable
             _volumes.TryAdd(volume, out _);
         }
 
-        return volumeSum != 0 ? volumePriceSum / volumeSum : 0;
+        return volumeSum != 0 ? _length == 1 ? value : volumePriceSum / volumeSum : 0;
     }
 
     public void Reset()

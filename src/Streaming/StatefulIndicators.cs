@@ -1,4 +1,4 @@
-#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
+﻿#pragma warning disable CS0618 // Suppress obsolete warnings for internal Calculate* method calls
 using System;
 using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Attributes;
@@ -20,7 +20,10 @@ internal readonly struct StreamingInputResolver
 
     public double GetValue(OhlcvBar bar)
     {
-        return _selector != null ? _selector(bar) : StreamingInputSelector.GetValue(bar, _inputName);
+        StreamingInputValidation.Validate(bar);
+        var value = _selector != null ? _selector(bar) : StreamingInputSelector.GetValue(bar, _inputName);
+        StreamingInputValidation.Finite(value, nameof(value));
+        return value;
     }
 }
 
@@ -34,7 +37,7 @@ public sealed class SimpleMovingAverageState : IStreamingIndicatorState, IDispos
     public SimpleMovingAverageState(int length = 14)
     {
         _length = Math.Max(1, length);
-        _window = new RollingWindowSum(_length);
+        _window = new RollingWindowSum(_length, trackMeanRoundoff: true);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -49,8 +52,8 @@ public sealed class SimpleMovingAverageState : IStreamingIndicatorState, IDispos
     {
         var value = _input.GetValue(bar);
         int countAfter;
-        var sum = isFinal ? _window.Add(value, out countAfter) : _window.Preview(value, out countAfter);
-        var sma = countAfter >= _length ? sum / _length : 0;
+        var mean = _window.Average(value, isFinal, out countAfter);
+        var sma = countAfter >= _length ? mean : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -91,6 +94,7 @@ public sealed class ExponentialMovingAverageState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var ema = _ema.GetNext(_input.GetValue(bar), isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -126,6 +130,7 @@ public sealed class WeightedMovingAverageState : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var wma = _wma.GetNext(_input.GetValue(bar), isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -166,6 +171,7 @@ public sealed class WellesWilderMovingAverageState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var wwma = _wilder.GetNext(_input.GetValue(bar), isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -190,8 +196,10 @@ public sealed class TriangularMovingAverageState : IStreamingIndicatorState, IDi
     public TriangularMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
         var resolved = Math.Max(1, length);
-        _primary = MovingAverageSmootherFactory.Create(maType, resolved);
-        _secondary = MovingAverageSmootherFactory.Create(maType, resolved);
+        _primary = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _secondary = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -238,8 +246,8 @@ public sealed class HullMovingAverageState : IStreamingIndicatorState, IDisposab
     public HullMovingAverageState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20)
     {
         var resolved = Math.Max(1, length);
-        var length2 = MathHelper.MinOrMax((int)Math.Round((double)resolved / 2));
-        var sqrtLength = MathHelper.MinOrMax((int)Math.Round(MathHelper.Sqrt(resolved)));
+        var length2 = Math.Max(1, Math.Min(530, (int)Math.Round((double)resolved / 2)));
+        var sqrtLength = Math.Max(1, Math.Min(530, (int)Math.Round(MathHelper.Sqrt(resolved))));
         _longSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _shortSmoother = MovingAverageSmootherFactory.Create(maType, length2);
         _finalSmoother = MovingAverageSmootherFactory.Create(maType, sqrtLength);
@@ -474,7 +482,7 @@ public sealed class MidpointState : IStreamingIndicatorState, IDisposable
         int minCount;
         var highest = isFinal ? _maxWindow.Add(value, out maxCount) : _maxWindow.Preview(value, out maxCount);
         var lowest = isFinal ? _minWindow.Add(value, out minCount) : _minWindow.Preview(value, out minCount);
-        var midpoint = (highest + lowest) / 2;
+        var midpoint = PriceMean.Of(highest, lowest);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -518,11 +526,12 @@ public sealed class MidpriceState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         int highCount;
         int lowCount;
         var highest = isFinal ? _highWindow.Add(bar.High, out highCount) : _highWindow.Preview(bar.High, out highCount);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out lowCount) : _lowWindow.Preview(bar.Low, out lowCount);
-        var midprice = (highest + lowest) / 2;
+        var midprice = PriceMean.Of(highest, lowest);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1234,8 +1243,8 @@ public sealed class MotionToAttractionChannelsState : IStreamingIndicatorState
 
         var a = value > prevAMa ? value : prevA;
         var b = value < prevBMa ? value : prevB;
-        var c = b - prevB != 0 ? prevC + _alpha : a - prevA != 0 ? 0 : prevC;
-        var d = a - prevA != 0 ? prevD + _alpha : b - prevB != 0 ? 0 : prevD;
+        var c = b - prevB != 0 ? Math.Min(1, prevC + _alpha) : a - prevA != 0 ? 0 : prevC;
+        var d = a - prevA != 0 ? Math.Min(1, prevD + _alpha) : b - prevB != 0 ? 0 : prevD;
 
         var avg = (a + b) / 2;
         var aMa = (c * avg) + ((1 - c) * a);
@@ -1301,7 +1310,7 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
         var middle = _meanSmoother.Next(value, isFinal);
         var dev = Math.Abs(value - middle);
         var sum = _devSum + dev;
-        var maeDev = _count != 0 ? sum / _count : 0;
+        var maeDev = sum / (_count + 1);
         var upper = middle + (maeDev * _stdDevFactor);
         var lower = middle - (maeDev * _stdDevFactor);
 
@@ -1335,7 +1344,8 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
 public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, IDisposable
 {
     private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly RollingStandardDeviation _stdDevCalc;
+    private readonly PooledRingBuffer<double> _prices;
+    private readonly int _length;
     private readonly StreamingInputResolver _input;
     private readonly double _stdDevFactor;
 
@@ -1344,7 +1354,8 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     {
         var resolved = Math.Max(1, length);
         _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDevCalc = new RollingStandardDeviation(resolved);
+        _length = resolved;
+        _prices = new PooledRingBuffer<double>(resolved);
         _stdDevFactor = stdDevFactor;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1354,14 +1365,22 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Reset()
     {
         _meanSmoother.Reset();
-        _stdDevCalc.Reset();
+        _prices.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var middle = _meanSmoother.Next(value, isFinal);
-        var stdDev = _stdDevCalc.Next(value, isFinal);
+        var start = _prices.Count == _length ? 1 : 0;
+        var count = _prices.Count - start + 1;
+        double offsetSum = 0;
+        for (var j = start; j < _prices.Count; j++) offsetSum += _prices[j] - value;
+        var meanOffset = offsetSum / count;
+        var absoluteSum = Math.Abs(meanOffset);
+        for (var j = start; j < _prices.Count; j++) absoluteSum += Math.Abs((_prices[j] - value) - meanOffset);
+        var stdDev = absoluteSum / count;
+        if (isFinal) _prices.TryAdd(value, out _);
         var upper = middle + (stdDev * _stdDevFactor);
         var lower = middle - (stdDev * _stdDevFactor);
 
@@ -1382,7 +1401,7 @@ public sealed class MeanAbsoluteDeviationBandsState : IStreamingIndicatorState, 
     public void Dispose()
     {
         _meanSmoother.Dispose();
-        _stdDevCalc.Dispose();
+        _prices.Dispose();
     }
 }
 
@@ -1750,7 +1769,7 @@ public sealed class ExtendedRecursiveBandsState : IStreamingIndicatorState
 
     public ExtendedRecursiveBandsState(int length = 100)
     {
-        var resolved = Math.Max(1, length);
+        var resolved = Math.Max(3, length);
         _sc = (double)2 / (resolved + 1);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -2027,6 +2046,7 @@ public sealed class DailyAveragePriceDeltaState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var highSma = _highSmoother.Next(bar.High, isFinal);
         var lowSma = _lowSmoother.Next(bar.Low, isFinal);
         var dapd = highSma - lowSma;
@@ -2419,7 +2439,7 @@ public sealed class RangeBandsState : IStreamingIndicatorState, IDisposable
         _length = Math.Max(1, length);
         _stdDevFactor = stdDevFactor;
         _middleSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        var windowLength = Math.Max(2, _length);
+        var windowLength = _length;
         _maxWindow = new RollingWindowMax(windowLength);
         _minWindow = new RollingWindowMin(windowLength);
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -2613,6 +2633,7 @@ public sealed class StandardDeviationChannelState : IStreamingIndicatorState, ID
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var stdDev = _stdDevState.Next(bar.Close, isFinal);
         var middle = _regressionState.Update(bar, isFinal, includeOutputs: false).Value;
         var upper = middle + (stdDev * _stdDevMult);
@@ -2668,7 +2689,7 @@ public sealed class TimeSeriesForecastState : IStreamingIndicatorState, IDisposa
         var middle = _regressionState.Update(bar, isFinal, includeOutputs: false).Value;
         var absDiff = Math.Abs(value - middle);
         var absDiffSum = _absDiffSum + absDiff;
-        var e = _index != 0 ? absDiffSum / _index : 0;
+        var e = absDiffSum / (_index + 1);
         var upper = middle + e;
         var lower = middle - e;
 
@@ -2866,8 +2887,8 @@ public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState
     {
         _length = Math.Max(1, length);
         _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _extMax1 = new RollingWindowMax(_length);
-        _extMin1 = new RollingWindowMin(_length);
+        _extMax1 = new RollingWindowMax(Math.Max(2, _length));
+        _extMin1 = new RollingWindowMin(Math.Max(2, _length));
         _extMax2 = new RollingWindowMax(_length);
         _extMin2 = new RollingWindowMin(_length);
         _yBuffer = new PooledRingBuffer<double>(_length * 2 + 1);
@@ -3302,6 +3323,7 @@ public sealed class RateOfChangeBandsState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roc = _roc.Update(bar, isFinal, includeOutputs: false).Value;
         var middle = _middleSmoother.Next(roc, isFinal);
         var rocSquared = roc * roc;
@@ -3348,7 +3370,7 @@ public sealed class GChannelsState : IStreamingIndicatorState
 
     public GChannelsState(int length = 100)
     {
-        _length = Math.Max(1, length);
+        _length = Math.Max(2, length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -3623,10 +3645,10 @@ public sealed class DEnvelopeState : IStreamingIndicatorState
         var mt = (_alpha * value) + (oneMinus * _mt);
         var ut = (_alpha * mt) + (oneMinus * _ut);
         // McNicholl's zero-lag form; see the batch calculation for why the grouping matters.
-        var dt = oneMinus != 0 ? (((2 - _alpha) * mt) - ut) / oneMinus : 0;
+        var dt = oneMinus != 0 ? (((2 - _alpha) * mt) - ut) / oneMinus : 2 * value - _mt;
         var mt2 = (_alpha * Math.Abs(value - dt)) + (oneMinus * _mt2);
         var ut2 = (_alpha * mt2) + (oneMinus * _ut2);
-        var dt2 = oneMinus != 0 ? (((2 - _alpha) * mt2) - ut2) / oneMinus : 0;
+        var dt2 = Math.Max(0, oneMinus != 0 ? (((2 - _alpha) * mt2) - ut2) / oneMinus : 2 * Math.Abs(value - dt) - _mt2);
         var upper = dt + (_devFactor * dt2);
         var lower = dt - (_devFactor * dt2);
 
@@ -3767,12 +3789,15 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
     private readonly StreamingInputResolver _input;
     private double _prevClose;
     private bool _hasPrev;
+    private readonly bool _preserveFlatRatio;
+    private double _previousRsi;
 
     // Wilder's smoothing of the gains and losses, as he defined the index and as the batch indicator defaults to.
     public RelativeStrengthIndexState(int length = 14, int signalLength = 3,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var resolved = Math.Max(1, length);
+        _preserveFlatRatio = resolved > 1 && (maType == MovingAvgType.WildersSmoothingMethod || maType == MovingAvgType.ExponentialMovingAverage);
         _avgGain = MovingAverageSmootherFactory.Create(maType, resolved);
         _avgLoss = MovingAverageSmootherFactory.Create(maType, resolved);
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
@@ -3788,6 +3813,7 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
         _signal.Reset();
         _prevClose = 0;
         _hasPrev = false;
+        _previousRsi = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -3802,12 +3828,14 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
         var avgLoss = _avgLoss.Next(loss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        if (_preserveFlatRatio && _hasPrev && priceChg == 0) rsi = _previousRsi;
         var signal = _signal.Next(rsi, isFinal);
         var histogram = rsi - signal;
 
         if (isFinal)
         {
             _prevClose = currentValue;
+            _previousRsi = rsi;
             _hasPrev = true;
         }
 
@@ -3849,8 +3877,12 @@ public sealed class StochasticOscillatorState : IStreamingIndicatorState, IDispo
         _length = Math.Max(1, length);
         _highWindow = new RollingWindowMax(_length);
         _lowWindow = new RollingWindowMin(_length);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength2));
+        _fastSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength1))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
+        _slowSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength2))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength2));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -3866,14 +3898,14 @@ public sealed class StochasticOscillatorState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = _input.GetValue(bar);
 
         var highestHigh = isFinal ? _highWindow.Add(high, out _) : _highWindow.Preview(high, out _);
         var lowestLow = isFinal ? _lowWindow.Add(low, out _) : _lowWindow.Preview(low, out _);
-        var range = highestHigh - lowestLow;
-        var fastK = range != 0 ? MathHelper.MinOrMax((close - lowestLow) / range * 100, 100, 0) : 0;
+        var fastK = ClampedRangePosition.Percent(close, lowestLow, highestHigh);
 
         var fastD = _fastSmoother.Next(fastK, isFinal);
         var slowD = _slowSmoother.Next(fastD, isFinal);
@@ -3927,14 +3959,14 @@ public sealed class WilliamsRState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = _input.GetValue(bar);
 
         var highestHigh = isFinal ? _highWindow.Add(high, out _) : _highWindow.Preview(high, out _);
         var lowestLow = isFinal ? _lowWindow.Add(low, out _) : _lowWindow.Preview(low, out _);
-        var range = highestHigh - lowestLow;
-        var williamsR = range != 0 ? -100 * (highestHigh - close) / range : -100;
+        var williamsR = WilliamsRangePosition.Percent(close, lowestLow, highestHigh);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -3962,6 +3994,8 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
     private readonly IMovingAverageSmoother _meanDevSmoother;
     private StreamingInputResolver _input;
     private readonly double _constant;
+    private readonly int _length;
+    private readonly PooledRingBuffer<double>? _standardWindow;
 
     public CommodityChannelIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double constant = 0.015)
     {
@@ -3969,6 +4003,8 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
         _meanDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.TypicalPrice, null);
         _constant = constant;
+        _length = Math.Max(1, length);
+        if (maType == MovingAvgType.SimpleMovingAverage) _standardWindow = new PooledRingBuffer<double>(_length);
     }
 
     public IndicatorName Name => IndicatorName.CommodityChannelIndex;
@@ -3980,13 +4016,35 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
     {
         _priceSmoother.Reset();
         _meanDevSmoother.Reset();
+        _standardWindow?.Clear();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var sma = _priceSmoother.Next(value, isFinal);
-        var meanDev = _meanDevSmoother.Next(Math.Abs(value - sma), isFinal);
+        var sma = _standardWindow is null ? _priceSmoother.Next(value, isFinal) : 0;
+        double meanDev;
+        if (_standardWindow is null)
+            meanDev = _meanDevSmoother.Next(Math.Abs(value - sma), isFinal);
+        else
+        {
+            double deviation = 0;
+            var nextCount = Math.Min(_length, _standardWindow.Count + 1);
+            if (isFinal) _standardWindow.TryAdd(value, out _);
+            if (nextCount == _length)
+            {
+                var start = !isFinal && _standardWindow.Count == _length ? 1 : 0;
+                var anchor = start < _standardWindow.Count ? _standardWindow[start] : value;
+                double offsetSum = 0;
+                for (var j = start; j < _standardWindow.Count; j++) offsetSum += _standardWindow[j] - anchor;
+                if (!isFinal) offsetSum += value - anchor;
+                sma = anchor + offsetSum / _length;
+                for (var j = start; j < _standardWindow.Count; j++)
+                    deviation += Math.Abs(_standardWindow[j] - sma);
+                if (!isFinal) deviation += Math.Abs(value - sma);
+            }
+            meanDev = deviation / _length;
+        }
         var cci = meanDev != 0 ? (value - sma) / (_constant * meanDev) : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -4005,6 +4063,7 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
     {
         _priceSmoother.Dispose();
         _meanDevSmoother.Dispose();
+        _standardWindow?.Dispose();
     }
 }
 
@@ -4013,8 +4072,6 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
 {
     private readonly int _length;
     private readonly RsiState _rsi;
-    private readonly RollingWindowMax _inputHighWindow;
-    private readonly RollingWindowMin _inputLowWindow;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -4028,8 +4085,6 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
         // The stochastic's own lookback over the RSI, as the batch method's stochLength: the RSI's length unless set.
         var stochWindow = Math.Max(1, stochLength ?? length);
         _rsi = new RsiState(maType, _length);
-        _inputHighWindow = new RollingWindowMax(2);
-        _inputLowWindow = new RollingWindowMin(2);
         _maxWindow = new RollingWindowMax(stochWindow);
         _minWindow = new RollingWindowMin(stochWindow);
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
@@ -4042,8 +4097,6 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
     public void Reset()
     {
         _rsi.Reset();
-        _inputHighWindow.Reset();
-        _inputLowWindow.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _fastSmoother.Reset();
@@ -4054,10 +4107,8 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        var inputHigh = isFinal ? _inputHighWindow.Add(rsi, out _) : _inputHighWindow.Preview(rsi, out _);
-        var inputLow = isFinal ? _inputLowWindow.Add(rsi, out _) : _inputLowWindow.Preview(rsi, out _);
-        var highest = isFinal ? _maxWindow.Add(inputHigh, out _) : _maxWindow.Preview(inputHigh, out _);
-        var lowest = isFinal ? _minWindow.Add(inputLow, out _) : _minWindow.Preview(inputLow, out _);
+        var highest = isFinal ? _maxWindow.Add(rsi, out _) : _maxWindow.Preview(rsi, out _);
+        var lowest = isFinal ? _minWindow.Add(rsi, out _) : _minWindow.Preview(rsi, out _);
         var range = highest - lowest;
         var fastK = range != 0 ? MathHelper.MinOrMax((rsi - lowest) / range * 100, 100, 0) : 0;
 
@@ -4080,8 +4131,6 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
     public void Dispose()
     {
         _rsi.Dispose();
-        _inputHighWindow.Dispose();
-        _inputLowWindow.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _fastSmoother.Dispose();
@@ -4094,7 +4143,8 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
 {
     private readonly RsiState _rsi;
     private readonly RsiState _streakRsi;
-    private readonly RollingPercentRank _rocRank;
+    private RollingOrderStatistic _rocRank;
+    private readonly int _rankLength;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
     private double _streak;
@@ -4105,7 +4155,8 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
     {
         _rsi = new RsiState(maType, Math.Max(1, length2));
         _streakRsi = new RsiState(maType, Math.Max(1, length1));
-        _rocRank = new RollingPercentRank(Math.Max(1, length3));
+        _rankLength = Math.Max(1, length3);
+        _rocRank = new RollingOrderStatistic(_rankLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -4115,7 +4166,8 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
     {
         _rsi.Reset();
         _streakRsi.Reset();
-        _rocRank.Reset();
+        _rocRank.Dispose();
+        _rocRank = new RollingOrderStatistic(_rankLength);
         _prevValue = 0;
         _streak = 0;
         _hasPrev = false;
@@ -4130,10 +4182,11 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
         // Connors ranks the one-bar rate of change of the price; this used to rank a length3-bar rate of change
         // of the RSI, copying the batch.
         var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
-        var pctRank = isFinal ? _rocRank.Add(roc) : _rocRank.Preview(roc);
+        var pctRank = 100d * _rocRank.CountLessThan(roc) / _rankLength;
+        if (isFinal) _rocRank.Add(roc);
 
         var prevStreak = _streak;
-        var streak = currentValue > prevValue
+        var streak = !_hasPrev ? 0 : currentValue > prevValue
             ? prevStreak >= 0 ? prevStreak + 1 : 1
             : currentValue < prevValue
                 ? prevStreak <= 0 ? prevStreak - 1 : -1
@@ -4177,8 +4230,6 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 {
     private readonly int _length;
     private readonly ConnorsRelativeStrengthIndexState _connors;
-    private readonly RollingWindowMax _inputHighWindow;
-    private readonly RollingWindowMin _inputLowWindow;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _fastSmoother;
@@ -4189,8 +4240,6 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
     {
         _length = Math.Max(1, length2);
         _connors = new ConnorsRelativeStrengthIndexState(maType, length1, length2, length3);
-        _inputHighWindow = new RollingWindowMax(2);
-        _inputLowWindow = new RollingWindowMin(2);
         _maxWindow = new RollingWindowMax(_length);
         _minWindow = new RollingWindowMin(_length);
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
@@ -4202,8 +4251,6 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
     public void Reset()
     {
         _connors.Reset();
-        _inputHighWindow.Reset();
-        _inputLowWindow.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _fastSmoother.Reset();
@@ -4212,11 +4259,10 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var connors = _connors.Update(bar, isFinal, includeOutputs: false).Value;
-        var inputHigh = isFinal ? _inputHighWindow.Add(connors, out _) : _inputHighWindow.Preview(connors, out _);
-        var inputLow = isFinal ? _inputLowWindow.Add(connors, out _) : _inputLowWindow.Preview(connors, out _);
-        var highest = isFinal ? _maxWindow.Add(inputHigh, out _) : _maxWindow.Preview(inputHigh, out _);
-        var lowest = isFinal ? _minWindow.Add(inputLow, out _) : _minWindow.Preview(inputLow, out _);
+        var highest = isFinal ? _maxWindow.Add(connors, out _) : _maxWindow.Preview(connors, out _);
+        var lowest = isFinal ? _minWindow.Add(connors, out _) : _minWindow.Preview(connors, out _);
         var range = highest - lowest;
         var fastK = range != 0 ? MathHelper.MinOrMax((connors - lowest) / range * 100, 100, 0) : 0;
         var fastD = _fastSmoother.Next(fastK, isFinal);
@@ -4238,8 +4284,6 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
     public void Dispose()
     {
         _connors.Dispose();
-        _inputHighWindow.Dispose();
-        _inputLowWindow.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _fastSmoother.Dispose();
@@ -4575,7 +4619,7 @@ public sealed class DonchianChannelsState : IStreamingIndicatorState, IDisposabl
         _ = _input.GetValue(bar);
         var upper = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lower = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var middle = (upper + lower) / 2;
+        var middle = PriceMean.Of(upper, lower);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -4790,17 +4834,16 @@ public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDispo
 public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _logSum;
+    private readonly PooledRingBuffer<double> _terms;
     private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
     private readonly double _logCoeff;
-    private int _index;
 
     public GarmanKlassVolatilityState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14,
         int signalLength = 7)
     {
         _length = Math.Max(1, length);
-        _logSum = new RollingWindowSum(_length);
+        _terms = new PooledRingBuffer<double>(_length);
         _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
         _logCoeff = (2 * Math.Log(2)) - 1;
@@ -4810,9 +4853,8 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
-        _logSum.Reset();
+        _terms.Clear();
         _signal.Reset();
-        _index = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -4822,15 +4864,17 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
         var logCo = bar.Open != 0 ? Math.Log(currentClose / bar.Open) : 0;
         var log = (0.5 * MathHelper.Pow(logHl, 2)) - (_logCoeff * MathHelper.Pow(logCo, 2));
 
-        var currentIndex = _index;
-        var logSum = isFinal ? _logSum.Add(log, out _) : _logSum.Preview(log, out _);
-        var gcv = logSum != 0 ? MathHelper.Sqrt((double)currentIndex / _length * logSum) : 0;
-        var signal = _signal.Next(gcv, isFinal);
-
-        if (isFinal)
+        var nextCount = Math.Min(_length, _terms.Count + 1);
+        if (isFinal) _terms.TryAdd(log, out _);
+        double logSum = 0;
+        if (nextCount == _length)
         {
-            _index++;
+            var start = !isFinal && _terms.Count == _length ? 1 : 0;
+            for (var j = start; j < _terms.Count; j++) logSum += _terms[j];
+            if (!isFinal) logSum += log;
         }
+        var gcv = MathHelper.Sqrt(logSum / _length) * Math.Sqrt(252);
+        var signal = _signal.Next(gcv, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -4847,7 +4891,7 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
-        _logSum.Dispose();
+        _terms.Dispose();
         _signal.Dispose();
     }
 }
@@ -4863,7 +4907,7 @@ public sealed class GopalakrishnanRangeIndexState : IStreamingIndicatorState, ID
 
     public GopalakrishnanRangeIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 5)
     {
-        var resolved = Math.Max(1, length);
+        var resolved = Math.Max(2, length);
         _logLength = Math.Log(resolved);
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
@@ -4964,7 +5008,7 @@ public sealed class HistoricalVolatilityPercentileState : IStreamingIndicatorSta
 
         var devLogSq = MathHelper.Pow(tempLog - avgLog, 2);
         var devSum = isFinal ? _devLogSqSum.Add(devLogSq, out _) : _devLogSqSum.Preview(devLogSq, out _);
-        var devLogSqAvg = devSum / (_length - 1);
+        var devLogSqAvg = _length > 1 ? devSum / (_length - 1) : 0;
         var stdDevLog = devLogSqAvg >= 0 ? MathHelper.Sqrt(devLogSqAvg) : 0;
         var hv = stdDevLog * _annualSqrt;
 
@@ -4973,7 +5017,8 @@ public sealed class HistoricalVolatilityPercentileState : IStreamingIndicatorSta
             _hvOrder.Add(hv);
         }
 
-        var count = (double)_hvOrder.CountLessThan(hv);
+        var boundary = VolatilityRank.StrictBoundary(hv);
+        var count = (double)(isFinal ? _hvOrder.CountLessThan(boundary) : _hvOrder.PreviewCountLessThan(boundary, hv));
         var hvp = count / _annualLength * 100;
         var signal = _signal.Next(hvp, isFinal);
 
@@ -5082,7 +5127,7 @@ public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable
 
     public ChoppinessIndexState(int length = 14)
     {
-        _length = Math.Max(1, length);
+        _length = Math.Max(2, length);
         _trSum = new RollingWindowSum(_length);
         _highWindow = new RollingWindowMax(_length);
         _lowWindow = new RollingWindowMin(_length);
@@ -5146,75 +5191,32 @@ public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Cmo")]
 public sealed class ChandeMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _posSum;
-    private readonly RollingWindowSum _negSum;
+    private readonly ChandeMomentumWindow _window;
     private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
 
     public ChandeMomentumOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14, int signalLength = 3)
     {
-        _posSum = new RollingWindowSum(Math.Max(1, length));
-        _negSum = new RollingWindowSum(Math.Max(1, length));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _window = new ChandeMomentumWindow(length);
+        _signal = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
     public IndicatorName Name => IndicatorName.ChandeMomentumOscillator;
-
-    public void Reset()
-    {
-        _posSum.Reset();
-        _negSum.Reset();
-        _signal.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
+    public void Reset() { _window.Reset(); _signal.Reset(); }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var currentValue = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? currentValue - prevValue : 0;
-        var negChg = diff < 0 ? Math.Abs(diff) : 0;
-        var posChg = diff > 0 ? diff : 0;
-
-        int posCount;
-        int negCount;
-        var posSum = isFinal ? _posSum.Add(posChg, out posCount) : _posSum.Preview(posChg, out posCount);
-        var negSum = isFinal ? _negSum.Add(negChg, out negCount) : _negSum.Preview(negChg, out negCount);
-
-        var denom = posSum + negSum;
-        var cmo = denom != 0 ? MathHelper.MinOrMax((posSum - negSum) / denom * 100, 100, -100) : 0;
+        var cmo = _window.Next(_input.GetValue(bar), isFinal);
         var signal = _signal.Next(cmo, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = currentValue;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Cmo", cmo },
-                { "Signal", signal }
-            };
-        }
-
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(2) { { "Cmo", cmo }, { "Signal", signal } } : null;
         return new StreamingIndicatorStateResult(cmo, outputs);
     }
 
-    public void Dispose()
-    {
-        _posSum.Dispose();
-        _negSum.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); _signal.Dispose(); }
 }
 
 [IndicatorBounds(0, double.PositiveInfinity, CanBeNegative = false)]
@@ -5245,6 +5247,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         // For first bar, use current close (TR = High - Low)
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
@@ -5312,8 +5315,9 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
+        StreamingInputValidation.Validate(bar);
+        var prevHigh = _hasPrev ? _prevHigh : bar.High;
+        var prevLow = _hasPrev ? _prevLow : bar.Low;
         // For TrueRange on first bar, use current close
         var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
 
@@ -5508,23 +5512,16 @@ public sealed class StandardDeviationVolatilityState : IStreamingIndicatorState,
 public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _sumWindow;
-    private readonly IMovingAverageSmoother _powMa;
     private readonly IMovingAverageSmoother _signalMa;
     private readonly StreamingInputResolver _input;
 
-    // The two-pass population deviation, for the simple average only - the batch calculation takes the
-    // same branch and for the same reason. See there for why the one-pass form below cannot be trusted
-    // when the price is large next to its spread.
-    private readonly RollingStandardDeviation? _population;
+    private readonly RollingStandardDeviation _population;
 
     public StandardDeviationState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         _length = Math.Max(1, length);
-        _sumWindow = new RollingWindowSum(_length);
-        _powMa = MovingAverageSmootherFactory.Create(maType, _length);
         _signalMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _population = maType == MovingAvgType.SimpleMovingAverage ? new RollingStandardDeviation(_length) : null;
+        _population = new RollingStandardDeviation(_length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -5532,30 +5529,14 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
-        _sumWindow.Reset();
-        _powMa.Reset();
         _signalMa.Reset();
-        _population?.Reset();
+        _population.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        double std;
-        if (_population is not null)
-        {
-            std = _population.Next(value, isFinal);
-        }
-        else
-        {
-            int sumCount;
-            var sum = isFinal ? _sumWindow.Add(value, out sumCount) : _sumWindow.Preview(value, out sumCount);
-            var powMean = _powMa.Next(value * value, isFinal);
-            var denom = (double)_length * _length;
-            var b = denom != 0 ? (sum * sum) / denom : 0;
-            var diff = powMean - b;
-            std = diff >= 0 ? MathHelper.Sqrt(diff) : 0;
-        }
+        var std = _population.Next(value, isFinal);
 
         var signal = _signalMa.Next(std, isFinal);
 
@@ -5574,10 +5555,8 @@ public sealed class StandardDeviationState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
-        _sumWindow.Dispose();
-        _powMa.Dispose();
         _signalMa.Dispose();
-        _population?.Dispose();
+        _population.Dispose();
     }
 }
 
@@ -5775,17 +5754,20 @@ public sealed class VolatilityQualityIndexState : IStreamingIndicatorState, IDis
     }
 }
 [PrimaryOutput("Obv")]
-public sealed class OnBalanceVolumeState : IStreamingIndicatorState
+public sealed class OnBalanceVolumeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EmaState _signal;
+    private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
     private double _prevClose;
-    private double _obv;
+    private ExactMeanAccumulator _obv;
     private bool _hasPrev;
 
-    public OnBalanceVolumeState(int length = 20)
+    public OnBalanceVolumeState(int length = 20) : this(length, MovingAvgType.ExponentialMovingAverage) { }
+
+    public OnBalanceVolumeState(int length, MovingAvgType maType)
     {
-        _signal = new EmaState(length);
+        _signal = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -5795,7 +5777,7 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState
     {
         _signal.Reset();
         _prevClose = 0;
-        _obv = 0;
+        _obv = default;
         _hasPrev = false;
     }
 
@@ -5803,17 +5785,17 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState
     {
         var currentValue = _input.GetValue(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
-        var prevObv = _obv;
-        var obv = currentValue > prevClose ? prevObv + bar.Volume
-            : currentValue < prevClose ? prevObv - bar.Volume
-            : prevObv;
+        var total = _obv;
+        if (currentValue > prevClose) total.Add(bar.Volume);
+        else if (currentValue < prevClose) total.Add(bar.Volume, -1);
+        var obv = total.Mean(1);
 
-        var signal = _signal.GetNext(obv, isFinal);
+        var signal = double.IsInfinity(obv) ? double.NaN : _signal.Next(obv, isFinal);
 
         if (isFinal)
         {
             _prevClose = currentValue;
-            _obv = obv;
+            _obv = total;
             _hasPrev = true;
         }
 
@@ -5829,6 +5811,8 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState
 
         return new StreamingIndicatorStateResult(obv, outputs);
     }
+
+    public void Dispose() => _signal.Dispose();
 }
 
 [PrimaryOutput("Cmf")]
@@ -5854,6 +5838,7 @@ public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = bar.Close;
@@ -5889,70 +5874,30 @@ public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Mfi")]
 public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly RollingWindowSum _posSum;
-    private readonly RollingWindowSum _negSum;
-    private StreamingInputResolver _input;
-    private double _prevTypical;
-    private bool _hasPrev;
+    private readonly RollingMoneyFlowIndex _flow;
+    private bool _selectedClose;
 
     public MoneyFlowIndexState(int length = 14)
     {
-        var resolved = Math.Max(1, length);
-        _posSum = new RollingWindowSum(resolved);
-        _negSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
+        _flow = new RollingMoneyFlowIndex(length);
     }
 
     public IndicatorName Name => IndicatorName.MoneyFlowIndex;
 
     void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _selectedClose = true;
 
-    public void Reset()
-    {
-        _posSum.Reset();
-        _negSum.Reset();
-        _prevTypical = 0;
-        _hasPrev = false;
-    }
+    public void Reset() => _flow.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var typical = _input.GetValue(bar);
-        var rawFlow = typical * bar.Volume;
-        var posFlow = _hasPrev && typical > _prevTypical ? rawFlow : 0;
-        var negFlow = _hasPrev && typical < _prevTypical ? rawFlow : 0;
-
-        int _;
-        var posSum = isFinal ? _posSum.Add(posFlow, out _) : _posSum.Preview(posFlow, out _);
-        var negSum = isFinal ? _negSum.Add(negFlow, out _) : _negSum.Preview(negFlow, out _);
-
-        var ratio = negSum != 0 ? posSum / negSum : 0;
-        var mfi = negSum == 0 ? 100 : posSum == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ratio)), 100, 0);
-
-        if (isFinal)
-        {
-            _prevTypical = typical;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mfi", mfi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mfi, outputs);
+        var value = _flow.Next(_selectedClose ? bar.Close : RollingMoneyFlowIndex.TypicalPrice(bar.High, bar.Low, bar.Close), bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Mfi", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 
-    public void Dispose()
-    {
-        _posSum.Dispose();
-        _negSum.Dispose();
-    }
+    public void Dispose() => _flow.Dispose();
 }
 
 [PrimaryOutput("Adl")]
@@ -5976,6 +5921,7 @@ public sealed class AccumulationDistributionLineState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = bar.Close;
@@ -6036,6 +5982,7 @@ public sealed class ChaikinOscillatorState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var high = bar.High;
         var low = bar.Low;
         var close = bar.Close;
@@ -6238,6 +6185,10 @@ public sealed class AbsoluteStrengthIndexState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (bar is null) throw new ArgumentNullException(nameof(bar));
+        Validation.IndicatorInputDomain.PositiveClose.Validate(new Indicators.Bar(bar.StartTime,
+            bar.Open, bar.High, bar.Low, bar.Close, bar.Volume));
         var value = bar.Close;
         var prevValue = _hasPrev ? _prevValue : 0;
 
@@ -6311,6 +6262,7 @@ public sealed class AccumulativeSwingIndexState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         // Wilder's swing index needs yesterday's bar; the first bar has none.
         var swingIndex = _hasPrev
             ? WilderSwingIndex.Compute(bar.Open, bar.High, bar.Low, bar.Close, _prevOpen, _prevClose, _limitMove)
@@ -6352,7 +6304,8 @@ public sealed class BalanceOfPowerState : IStreamingIndicatorState, IDisposable
 
     public BalanceOfPowerState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _signal = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
 
     public IndicatorName Name => IndicatorName.BalanceOfPower;
@@ -6364,9 +6317,9 @@ public sealed class BalanceOfPowerState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var range = bar.High - bar.Low;
-        var bop = range != 0 ? (bar.Close - bar.Open) / range : 0;
-        var bopSignal = _signal.Next(bop, isFinal);
+        StreamingInputValidation.Validate(bar);
+        var bop = RoundedBalanceOfPower.Of(bar.Open, bar.High, bar.Low, bar.Close);
+        var bopSignal = double.IsInfinity(bop) ? double.NaN : _signal.Next(bop, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -6415,6 +6368,7 @@ public sealed class BelkhayateTimingState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentValue = bar.Close;
         var currentHigh = bar.High;
         var currentLow = bar.Low;
@@ -6555,6 +6509,7 @@ public sealed class ConditionalAccumulatorState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         // Strict, as on the batch side: a gap means this bar's low is above the previous high, not
@@ -6708,6 +6663,7 @@ public sealed class AdaptiveErgodicCandlestickOscillatorState : IStreamingIndica
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var stoch = _stoch.Update(bar, isFinal, includeOutputs: false).Value;
         var vrb = Math.Abs(stoch - 50) / 50;
         var currentHigh = bar.High;
@@ -6944,6 +6900,7 @@ public sealed class BearPowerIndicatorState : IStreamingIndicatorState, IDisposa
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var close = bar.Close;
         var prevClose = _hasPrev ? _prevClose : 0;
         var open = bar.Open;
@@ -7005,6 +6962,7 @@ public sealed class BullPowerIndicatorState : IStreamingIndicatorState, IDisposa
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var close = bar.Close;
         var prevClose = _hasPrev ? _prevClose : 0;
         var open = bar.Open;
@@ -7061,6 +7019,7 @@ public sealed class ContractHighLowState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var conHi = _hasPrev ? Math.Max(_conHi, bar.High) : bar.High;
         var conLow = _hasPrev ? Math.Min(_conLow, bar.Low) : bar.Low;
 
@@ -7120,6 +7079,7 @@ public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICust
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
         var ema = _ema.Next(bar.Close, isFinal);
@@ -7247,6 +7207,7 @@ public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposab
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var highLow = bar.High - bar.Low;
         var highLowEma = _ema.Next(highLow, isFinal);
         var prevHighLowEma = _window.Count >= _length2 ? _window[0] : 0;
@@ -7302,6 +7263,7 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         // CalculateCoppockCurve sums two rates of change of the price. This took the slow one of the fast
         // rate of change instead, because the batch indicator used to hand its second component the first
         // one's output through the chained series.
@@ -7376,6 +7338,7 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentHigh = bar.High;
         var currentLow = bar.Low;
         var currentClose = bar.Close;
@@ -7386,9 +7349,9 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
         var atr = _atr.Next(trRaw, isFinal);
 
         // Calculate ADX from raw OHLC prices (matching batch CalculateAverageDirectionalIndex)
-        // Use 0 for prevHigh/prevLow on first bar (matching batch behavior)
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
+        // The first bar has no prior directional movement.
+        var prevHigh = _hasPrev ? _prevHigh : currentHigh;
+        var prevLow = _hasPrev ? _prevLow : currentLow;
         var highDiff = currentHigh - prevHigh;
         var lowDiff = prevLow - currentLow;
         var dmPlusRaw = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
@@ -7529,6 +7492,7 @@ public sealed class DetrendedSyntheticPriceState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         var high = Math.Max(bar.High, prevHigh);
@@ -7662,6 +7626,7 @@ public sealed class DemandOscillatorState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
         var range = highest - lowest;
@@ -7825,8 +7790,8 @@ public sealed class DidiIndexState : IStreamingIndicatorState, IDisposable
             outputs = new Dictionary<string, double>(3)
             {
                 { "Curta", curta },
-                { "Media", mediumSma },
-                { "Longa", longSma }
+                { "Media", mediumSma == 0 ? 0 : 1 },
+                { "Longa", longa }
             };
         }
 
@@ -7907,6 +7872,7 @@ public sealed class DampingIndexState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var range = bar.High - bar.Low;
         var rangeSma = _rangeSmoother.Next(range, isFinal);
         var prevSma1 = _rangeWindow.Count >= 1 ? _rangeWindow[_rangeWindow.Count - 1] : 0;
@@ -7977,6 +7943,7 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         var hmu = bar.High - prevHigh > 0 ? bar.High - prevHigh : 0;
@@ -8025,7 +7992,7 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Dto")]
 public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _wima;
+    private readonly RsiState _rsi;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly RollingWindowSum _stoSum;
@@ -8035,7 +8002,7 @@ public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
     public DTOscillatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length1 = 13, int length2 = 8,
         int length3 = 5, int length4 = 3)
     {
-        _wima = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
+        _rsi = new RsiState(maType, Math.Max(1, length1));
         _maxWindow = new RollingWindowMax(Math.Max(1, length2));
         _minWindow = new RollingWindowMin(Math.Max(1, length2));
         _stoSum = new RollingWindowSum(Math.Max(1, length3));
@@ -8047,7 +8014,7 @@ public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _wima.Reset();
+        _rsi.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _stoSum.Reset();
@@ -8057,7 +8024,7 @@ public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var wima = _wima.Next(value, isFinal);
+        var wima = _rsi.Next(value, isFinal);
         var highest = isFinal ? _maxWindow.Add(wima, out _) : _maxWindow.Preview(wima, out _);
         var lowest = isFinal ? _minWindow.Add(wima, out _) : _minWindow.Preview(wima, out _);
         var stoRsi = highest - lowest != 0 ? MathHelper.MinOrMax(100 * (wima - lowest) / (highest - lowest), 100, 0) : 0;
@@ -8081,7 +8048,7 @@ public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
-        _wima.Dispose();
+        _rsi.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _stoSum.Dispose();
@@ -8119,7 +8086,7 @@ public sealed class RateOfChangeState : IStreamingIndicatorState, IDisposable
             prevValue = _window[0];
         }
 
-        var roc = prevValue != 0 ? (current - prevValue) / prevValue * 100 : 0;
+        var roc = RoundedPercentageChange.Of(current, prevValue);
         if (isFinal)
         {
             _window.TryAdd(current, out _);
@@ -8247,13 +8214,14 @@ public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
         // For TrueRange on first bar, use current close
         var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
 
-        var vmPlus = Math.Abs(bar.High - prevLow);
-        var vmMinus = Math.Abs(bar.Low - prevHigh);
+        var vmPlus = _hasPrev ? Math.Abs(bar.High - prevLow) : 0;
+        var vmMinus = _hasPrev ? Math.Abs(bar.Low - prevHigh) : 0;
         var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
 
         int _;
@@ -8548,9 +8516,9 @@ public sealed class _3HMAState : IStreamingIndicatorState, IDisposable
 
     public _3HMAState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 50)
     {
-        var p = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        var p1 = MathHelper.MinOrMax((int)Math.Ceiling((double)p / 3));
-        var p2 = MathHelper.MinOrMax((int)Math.Ceiling((double)p / 2));
+        var p = (int)Math.Max(1, Math.Ceiling((double)length / 2));
+        var p1 = (int)Math.Max(1, Math.Ceiling((double)p / 3));
+        var p2 = (int)Math.Max(1, Math.Ceiling((double)p / 2));
 
         _wma1 = MovingAverageSmootherFactory.Create(maType, p1);
         _wma2 = MovingAverageSmootherFactory.Create(maType, p2);
@@ -9019,124 +8987,46 @@ public sealed class AdaptiveAutonomousRecursiveMovingAverageState : IStreamingIn
 [PrimaryOutput("Als")]
 public sealed class AdaptiveLeastSquaresState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
     private readonly double _smooth;
     private readonly RollingWindowMax _trWindow;
     private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevX;
-    private double _prevY;
-    private double _prevMx;
-    private double _prevMy;
-    private double _prevMxx;
-    private double _prevMyy;
-    private double _prevMxy;
-    private int _index;
-    private bool _hasPrev;
+    private AdaptiveLeastSquaresMoments _regression;
+    private double _previousPrice;
+    private bool _hasPrevious;
 
     public AdaptiveLeastSquaresState(int length = 500, double smooth = 1.5)
     {
-        _length = Math.Max(1, length);
         _smooth = smooth;
-        _trWindow = new RollingWindowMax(_length);
+        _trWindow = new RollingWindowMax(Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
-
     public IndicatorName Name => IndicatorName.AdaptiveLeastSquares;
-
     public void Reset()
     {
         _trWindow.Reset();
-        _prevValue = 0;
-        _prevX = 0;
-        _prevY = 0;
-        _prevMx = 0;
-        _prevMy = 0;
-        _prevMxx = 0;
-        _prevMyy = 0;
-        _prevMxy = 0;
-        _index = 0;
-        _hasPrev = false;
+        _regression = default;
+        _previousPrice = 0;
+        _hasPrevious = false;
     }
-
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var index = (double)_index;
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
+        var price = _input.GetValue(bar);
+        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, _hasPrevious ? _previousPrice : price);
         var highest = isFinal ? _trWindow.Add(tr, out _) : _trWindow.Preview(tr, out _);
-        var alpha = highest != 0 ? MathHelper.MinOrMax(MathHelper.Pow(tr / highest, _smooth), 0.99, 0.01) : 0.01;
-        var xx = index * index;
-        var yy = value * value;
-        var xy = index * value;
-
-        var prevX = _hasPrev ? _prevX : index;
-        var x = (alpha * index) + ((1 - alpha) * prevX);
-
-        var prevY = _hasPrev ? _prevY : value;
-        var y = (alpha * value) + ((1 - alpha) * prevY);
-
-        var dx = Math.Abs(index - x);
-        var dy = Math.Abs(value - y);
-
-        var prevMx = _hasPrev ? _prevMx : dx;
-        var mx = (alpha * dx) + ((1 - alpha) * prevMx);
-
-        var prevMy = _hasPrev ? _prevMy : dy;
-        var my = (alpha * dy) + ((1 - alpha) * prevMy);
-
-        var prevMxx = _hasPrev ? _prevMxx : xx;
-        var mxx = (alpha * xx) + ((1 - alpha) * prevMxx);
-
-        var prevMyy = _hasPrev ? _prevMyy : yy;
-        var myy = (alpha * yy) + ((1 - alpha) * prevMyy);
-
-        var prevMxy = _hasPrev ? _prevMxy : xy;
-        var mxy = (alpha * xy) + ((1 - alpha) * prevMxy);
-
-        var alphaVal = (2 / alpha) + 1;
-        var a1 = alpha != 0 ? (MathHelper.Pow(alphaVal, 2) * mxy) - (alphaVal * mx * alphaVal * my) : 0;
-        var tempVal = ((MathHelper.Pow(alphaVal, 2) * mxx) - MathHelper.Pow(alphaVal * mx, 2)) *
-            ((MathHelper.Pow(alphaVal, 2) * myy) - MathHelper.Pow(alphaVal * my, 2));
-        var b1 = tempVal >= 0 ? MathHelper.Sqrt(tempVal) : 0;
-        var r = b1 != 0 ? a1 / b1 : 0;
-        var a = mx != 0 ? r * (my / mx) : 0;
-        var b = y - (a * x);
-        var reg = (x * a) + b;
-
+        var gain = highest == 0 ? .01 : MathHelper.MinOrMax(MathHelper.Pow(tr / highest, _smooth), .99, .01);
+        var regression = _regression;
+        var estimate = regression.Next(price, gain);
         if (isFinal)
         {
-            _prevValue = value;
-            _prevX = x;
-            _prevY = y;
-            _prevMx = mx;
-            _prevMy = my;
-            _prevMxx = mxx;
-            _prevMyy = myy;
-            _prevMxy = mxy;
-            _index++;
-            _hasPrev = true;
+            _regression = regression;
+            _previousPrice = price;
+            _hasPrevious = true;
         }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Als", reg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(reg, outputs);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Als", estimate } } : null;
+        return new StreamingIndicatorStateResult(estimate, outputs);
     }
-
-    public void Dispose()
-    {
-        _trWindow.Dispose();
-    }
+    public void Dispose() => _trWindow.Dispose();
 }
 
 [PrimaryOutput("Ema")]
@@ -9820,10 +9710,16 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
     private readonly IMovingAverageSmoother _gain;
     private readonly IMovingAverageSmoother _loss;
     private readonly StreamingInputResolver _input;
+    private readonly bool _stableWilder;
+    private readonly double _retention;
+    private double _residual;
+    private double _previousPrice;
 
     public ApirineSlowRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14,
         int smoothLength = 6)
     {
+        _stableWilder = maType == MovingAvgType.WildersSmoothingMethod;
+        _retention = 1 - 1d / Math.Max(1, smoothLength);
         _smooth = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _gain = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _loss = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
@@ -9834,6 +9730,8 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
 
     public void Reset()
     {
+        _residual = 0;
+        _previousPrice = 0;
         _smooth.Reset();
         _gain.Reset();
         _loss.Reset();
@@ -9843,8 +9741,14 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
     {
         var value = _input.GetValue(bar);
         var r1 = _smooth.Next(value, isFinal);
-        var r2 = value > r1 ? value - r1 : 0;
-        var r3 = value < r1 ? r1 - value : 0;
+        var residual = _stableWilder ? _retention * (_residual + (value - _previousPrice)) : value - r1;
+        if (isFinal)
+        {
+            _residual = residual;
+            _previousPrice = value;
+        }
+        var r2 = Math.Max(residual, 0);
+        var r3 = Math.Max(-residual, 0);
         var r4 = _gain.Next(r2, isFinal);
         var r5 = _loss.Next(r3, isFinal);
         var rs = r5 != 0 ? r4 / r5 : 0;
@@ -9948,6 +9852,7 @@ public sealed class AsymmetricalRelativeStrengthIndexState : IStreamingIndicator
 [PrimaryOutput("Afp")]
 public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RollingStandardDeviation? _stableDeviation;
     private readonly int _length;
     private readonly int _stdDevLength;
     private readonly IMovingAverageSmoother _atrSmoother;
@@ -9967,6 +9872,7 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
         _stdDevLength = Math.Max(1, stdDevLength);
         if (maType == MovingAvgType.SimpleMovingAverage)
         {
+            _stableDeviation = new RollingStandardDeviation(_stdDevLength);
             _atrSmoother = new ExactSimpleMovingAverageSmoother(Math.Max(1, atrLength));
             _stdDevASmoother = new ExactSimpleMovingAverageSmoother(_stdDevLength);
         }
@@ -9985,6 +9891,7 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
 
     public void Reset()
     {
+        _stableDeviation?.Reset();
         _atrSmoother.Reset();
         _stdDevASmoother.Reset();
         _atrValSum.Reset();
@@ -10010,7 +9917,7 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
             ? MathHelper.Pow(atrValSum, 2) / MathHelper.Pow(_stdDevLength, 2)
             : 0;
         var diff = stdDevA - stdDevB;
-        var stdDev = diff >= 0 ? MathHelper.Sqrt(diff) : 0;
+        var stdDev = _stableDeviation?.Next(atrVal, isFinal) ?? (diff >= 0 ? MathHelper.Sqrt(diff) : 0);
         var stdDevLow = isFinal ? _stdDevMin.Add(stdDev, out _) : _stdDevMin.Preview(stdDev, out _);
         // stdDevLow is the lowest stdDev in the window, so a stdDev of zero makes both zero and the ratio
         // 0/0 - two equal deviations, which is 1. Reading it as 0 kills the smoothing factor entirely.
@@ -10042,6 +9949,7 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
 
     public void Dispose()
     {
+        _stableDeviation?.Dispose();
         _atrSmoother.Dispose();
         _stdDevASmoother.Dispose();
         _stdDevMin.Dispose();
@@ -10412,7 +10320,7 @@ public sealed class AutonomousRecursiveMovingAverageState : IStreamingIndicatorS
     {
         var value = _input.GetValue(bar);
         var prevMad = _hasPrev ? _prevMad : value;
-        var priorValue = _index >= _length && _values.Count >= _momLength ? _values[_values.Count - _momLength] : 0;
+        var priorValue = _index >= _momLength && _values.Count >= _momLength ? _values[_values.Count - _momLength] : 0;
         var absDiff = Math.Abs(priorValue - prevMad);
         var absDiffSum = _absDiffSum + absDiff;
         var d = _index != 0 ? absDiffSum / _index * _gamma : 0;
@@ -10747,15 +10655,9 @@ public sealed class BayesianOscillatorState : IStreamingIndicatorState, IDisposa
         var probUpBbBasis = probBasisUp + probBasisDown != 0 ? probBasisUp / (probBasisUp + probBasisDown) : 0;
         var probDownBbBasis = probBasisUp + probBasisDown != 0 ? probBasisDown / (probBasisUp + probBasisDown) : 0;
 
-        var sigmaProbsDown = probUpBbUpper != 0 && probUpBbBasis != 0
-            ? 1 + ((1 - probUpBbUpper) * (1 - probUpBbBasis))
-            : 0;
-        var sigmaProbsUp = probDownBbUpper != 0 && probDownBbBasis != 0
-            ? 1 + ((1 - probDownBbUpper) * (1 - probDownBbBasis))
-            : 0;
-        var probPrime = sigmaProbsDown != 0 && sigmaProbsUp != 0
-            ? 1 + ((1 - sigmaProbsDown) * (1 - sigmaProbsUp))
-            : 0;
+        var sigmaProbsDown = BayesianProbability.Combine(probUpBbUpper, probUpBbBasis);
+        var sigmaProbsUp = BayesianProbability.Combine(probDownBbUpper, probDownBbBasis);
+        var probPrime = BayesianProbability.Combine(sigmaProbsDown, sigmaProbsUp);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -10804,6 +10706,7 @@ public sealed class BetterVolumeIndicatorState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentHigh = bar.High;
         var currentLow = bar.Low;
         var currentOpen = bar.Open;
@@ -11347,7 +11250,7 @@ public sealed class BryantAdaptiveMovingAverageState : IStreamingIndicatorState,
         var er = _er.Next(value, isFinal);
         var ver = MathHelper.Pow(er - (((2 * er) - 1) / 2 * (1 - _trend)) + 0.5, 2);
         var vLength = ver != 0 ? (_length - ver + 1) / ver : 0;
-        vLength = Math.Min(vLength, _maxLength);
+        vLength = Math.Max(1, Math.Min(vLength, _maxLength));
         var vAlpha = 2 / (vLength + 1);
         var prevBama = _hasPrev ? _prevBama : 0;
         var bama = (vAlpha * value) + ((1 - vAlpha) * prevBama);
@@ -11536,21 +11439,22 @@ public sealed class CamarillaPivotPointsState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
-        var currentClose = _hasPrev ? prevClose : bar.Close;
-        var currentHigh = _hasPrev ? prevHigh : bar.High;
-        var currentLow = _hasPrev ? prevLow : bar.Low;
+        var currentClose = prevClose;
+        var currentHigh = prevHigh;
+        var currentLow = prevLow;
         var range = currentHigh - currentLow;
 
         var pivot = (prevHigh + prevLow + prevClose) / 3;
-        var support1 = currentClose - (0.0916 * range);
-        var support2 = currentClose - (0.183 * range);
+        var support1 = currentClose - ((1.1 / 12) * range);
+        var support2 = currentClose - ((1.1 / 6) * range);
         var support3 = currentClose - (0.275 * range);
         var support4 = currentClose - (0.55 * range);
-        var resistance1 = currentClose + (0.0916 * range);
-        var resistance2 = currentClose + (0.183 * range);
+        var resistance1 = currentClose + ((1.1 / 12) * range);
+        var resistance2 = currentClose + ((1.1 / 6) * range);
         var resistance3 = currentClose + (0.275 * range);
         var resistance4 = currentClose + (0.55 * range);
         var resistance5 = currentLow != 0 ? currentHigh / currentLow * currentClose : 0;
@@ -11992,8 +11896,6 @@ public sealed class ChandeIntradayMomentumIndexState : IStreamingIndicatorState,
 {
     private readonly RollingWindowSum _gainsSum;
     private readonly RollingWindowSum _lossesSum;
-    private double _prevGains;
-    private double _prevLosses;
 
     public ChandeIntradayMomentumIndexState(int length = 14)
     {
@@ -12008,26 +11910,19 @@ public sealed class ChandeIntradayMomentumIndexState : IStreamingIndicatorState,
     {
         _gainsSum.Reset();
         _lossesSum.Reset();
-        _prevGains = 0;
-        _prevLosses = 0;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentClose = bar.Close;
         var currentOpen = bar.Open;
-        var gains = currentClose > currentOpen ? _prevGains + (currentClose - currentOpen) : 0;
-        var losses = currentClose < currentOpen ? _prevLosses + (currentOpen - currentClose) : 0;
+        var gains = currentClose > currentOpen ? currentClose - currentOpen : 0;
+        var losses = currentClose < currentOpen ? currentOpen - currentClose : 0;
         var gainsSum = isFinal ? _gainsSum.Add(gains, out _) : _gainsSum.Preview(gains, out _);
         var lossesSum = isFinal ? _lossesSum.Add(losses, out _) : _lossesSum.Preview(losses, out _);
         var total = gainsSum + lossesSum;
         var imi = total != 0 ? MathHelper.MinOrMax(100 * gainsSum / total, 100, 0) : 0;
-
-        if (isFinal)
-        {
-            _prevGains = gains;
-            _prevLosses = losses;
-        }
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -12139,6 +12034,7 @@ public sealed class ChandelierExitState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         // For TrueRange on first bar, use current close
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
@@ -12179,243 +12075,68 @@ public sealed class ChandelierExitState : IStreamingIndicatorState, IDisposable
 public sealed class ChandeMomentumOscillatorAbsoluteState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowSum _absDiffSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
+    private readonly ChandeMomentumWindow _momentum;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    private int _seen;
 
     public ChandeMomentumOscillatorAbsoluteState(int length = 9)
     {
         _length = Math.Max(1, length);
-        _absDiffSum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _momentum = new ChandeMomentumWindow(_length);
     }
 
     public IndicatorName Name => IndicatorName.ChandeMomentumOscillatorAbsolute;
-
-    public void Reset()
-    {
-        _absDiffSum.Reset();
-        _values.Clear();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
+    public void Reset() { _momentum.Reset(); _seen = 0; }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priorValue = _values.Count >= _length ? _values[0] : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var absDiff = Math.Abs(diff);
-        var absSum = isFinal ? _absDiffSum.Add(absDiff, out _) : _absDiffSum.Preview(absDiff, out _);
-        var num = _values.Count >= _length ? Math.Abs(100 * (value - priorValue)) : 0;
-        var cmoAbs = absSum != 0 ? MathHelper.MinOrMax(num / absSum, 100, 0) : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cmoa", cmoAbs }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmoAbs, outputs);
+        var momentum = _momentum.Next(_input.GetValue(bar), isFinal);
+        var value = _seen < _length ? 0 : Math.Abs(momentum);
+        if (isFinal && _seen < _length) _seen++;
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Cmoa", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 
-    public void Dispose()
-    {
-        _absDiffSum.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _momentum.Dispose();
 }
 
 [PrimaryOutput("Cmoa")]
 public sealed class ChandeMomentumOscillatorAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _diffSum1;
-    private readonly RollingWindowSum _diffSum2;
-    private readonly RollingWindowSum _diffSum3;
-    private readonly RollingWindowSum _absDiffSum1;
-    private readonly RollingWindowSum _absDiffSum2;
-    private readonly RollingWindowSum _absDiffSum3;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
+    private readonly ChandeMomentumAverageWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public ChandeMomentumOscillatorAverageState(int length1 = 5, int length2 = 10, int length3 = 20)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        _diffSum1 = new RollingWindowSum(resolved1);
-        _diffSum2 = new RollingWindowSum(resolved2);
-        _diffSum3 = new RollingWindowSum(resolved3);
-        _absDiffSum1 = new RollingWindowSum(resolved1);
-        _absDiffSum2 = new RollingWindowSum(resolved2);
-        _absDiffSum3 = new RollingWindowSum(resolved3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.ChandeMomentumOscillatorAverage;
-
-    public void Reset()
-    {
-        _diffSum1.Reset();
-        _diffSum2.Reset();
-        _diffSum3.Reset();
-        _absDiffSum1.Reset();
-        _absDiffSum2.Reset();
-        _absDiffSum3.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = value - prevValue;
-        var absDiff = Math.Abs(diff);
-
-        var diffSum1 = isFinal ? _diffSum1.Add(diff, out _) : _diffSum1.Preview(diff, out _);
-        var absSum1 = isFinal ? _absDiffSum1.Add(absDiff, out _) : _absDiffSum1.Preview(absDiff, out _);
-        var diffSum2 = isFinal ? _diffSum2.Add(diff, out _) : _diffSum2.Preview(diff, out _);
-        var absSum2 = isFinal ? _absDiffSum2.Add(absDiff, out _) : _absDiffSum2.Preview(absDiff, out _);
-        var diffSum3 = isFinal ? _diffSum3.Add(diff, out _) : _diffSum3.Preview(diff, out _);
-        var absSum3 = isFinal ? _absDiffSum3.Add(absDiff, out _) : _absDiffSum3.Preview(absDiff, out _);
-
-        var temp1 = absSum1 != 0 ? MathHelper.MinOrMax(diffSum1 / absSum1, 1, -1) : 0;
-        var temp2 = absSum2 != 0 ? MathHelper.MinOrMax(diffSum2 / absSum2, 1, -1) : 0;
-        var temp3 = absSum3 != 0 ? MathHelper.MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
-        var cmoAvg = 100 * ((temp1 + temp2 + temp3) / 3);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cmoa", cmoAvg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmoAvg, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Cmoa", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _diffSum1.Dispose();
-        _diffSum2.Dispose();
-        _diffSum3.Dispose();
-        _absDiffSum1.Dispose();
-        _absDiffSum2.Dispose();
-        _absDiffSum3.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Cmoaa")]
 public sealed class ChandeMomentumOscillatorAbsoluteAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _diffSum1;
-    private readonly RollingWindowSum _diffSum2;
-    private readonly RollingWindowSum _diffSum3;
-    private readonly RollingWindowSum _absDiffSum1;
-    private readonly RollingWindowSum _absDiffSum2;
-    private readonly RollingWindowSum _absDiffSum3;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
+    private readonly ChandeMomentumAverageWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public ChandeMomentumOscillatorAbsoluteAverageState(int length1 = 5, int length2 = 10, int length3 = 20)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        _diffSum1 = new RollingWindowSum(resolved1);
-        _diffSum2 = new RollingWindowSum(resolved2);
-        _diffSum3 = new RollingWindowSum(resolved3);
-        _absDiffSum1 = new RollingWindowSum(resolved1);
-        _absDiffSum2 = new RollingWindowSum(resolved2);
-        _absDiffSum3 = new RollingWindowSum(resolved3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.ChandeMomentumOscillatorAbsoluteAverage;
-
-    public void Reset()
-    {
-        _diffSum1.Reset();
-        _diffSum2.Reset();
-        _diffSum3.Reset();
-        _absDiffSum1.Reset();
-        _absDiffSum2.Reset();
-        _absDiffSum3.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = value - prevValue;
-        var absDiff = Math.Abs(diff);
-
-        var diffSum1 = isFinal ? _diffSum1.Add(diff, out _) : _diffSum1.Preview(diff, out _);
-        var absSum1 = isFinal ? _absDiffSum1.Add(absDiff, out _) : _absDiffSum1.Preview(absDiff, out _);
-        var diffSum2 = isFinal ? _diffSum2.Add(diff, out _) : _diffSum2.Preview(diff, out _);
-        var absSum2 = isFinal ? _absDiffSum2.Add(absDiff, out _) : _absDiffSum2.Preview(absDiff, out _);
-        var diffSum3 = isFinal ? _diffSum3.Add(diff, out _) : _diffSum3.Preview(diff, out _);
-        var absSum3 = isFinal ? _absDiffSum3.Add(absDiff, out _) : _absDiffSum3.Preview(absDiff, out _);
-
-        var temp1 = absSum1 != 0 ? MathHelper.MinOrMax(diffSum1 / absSum1, 1, -1) : 0;
-        var temp2 = absSum2 != 0 ? MathHelper.MinOrMax(diffSum2 / absSum2, 1, -1) : 0;
-        var temp3 = absSum3 != 0 ? MathHelper.MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
-        var cmoAbsAvg = Math.Abs(100 * ((temp1 + temp2 + temp3) / 3));
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cmoaa", cmoAbsAvg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmoAbsAvg, outputs);
+        var value = Math.Abs(_window.Next(_input.GetValue(bar), isFinal));
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Cmoaa", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _diffSum1.Dispose();
-        _diffSum2.Dispose();
-        _diffSum3.Dispose();
-        _absDiffSum1.Dispose();
-        _absDiffSum2.Dispose();
-        _absDiffSum3.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Cmoadi")]
@@ -12478,78 +12199,30 @@ public sealed class ChandeMomentumOscillatorAverageDisparityIndexState : IStream
 [PrimaryOutput("Cmof")]
 public sealed class ChandeMomentumOscillatorFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _filter;
-    private readonly RollingWindowSum _diffSum;
-    private readonly RollingWindowSum _absDiffSum;
+    private readonly ChandeMomentumWindow _window;
     private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
 
     public ChandeMomentumOscillatorFilterState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 9, double filter = 3)
     {
-        var resolved = Math.Max(1, length);
-        _filter = filter;
-        _diffSum = new RollingWindowSum(resolved);
-        _absDiffSum = new RollingWindowSum(resolved);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _window = new ChandeMomentumWindow(length, filter);
+        _signal = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
 
     public IndicatorName Name => IndicatorName.ChandeMomentumOscillatorFilter;
-
-    public void Reset()
-    {
-        _diffSum.Reset();
-        _absDiffSum.Reset();
-        _signal.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset(); _signal.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var absDiff = Math.Abs(diff);
-        if (absDiff > _filter)
-        {
-            diff = 0;
-            absDiff = 0;
-        }
-
-        var diffSum = isFinal ? _diffSum.Add(diff, out _) : _diffSum.Preview(diff, out _);
-        var absSum = isFinal ? _absDiffSum.Add(absDiff, out _) : _absDiffSum.Preview(absDiff, out _);
-        var cmo = absSum != 0 ? MathHelper.MinOrMax(100 * diffSum / absSum, 100, -100) : 0;
-        var signal = _signal.Next(cmo, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Cmof", cmo },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmo, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        var signal = _signal.Next(value, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(2) { { "Cmof", value }, { "Signal", signal } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _diffSum.Dispose();
-        _absDiffSum.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); _signal.Dispose(); }
 }
 
 [PrimaryOutput("Cqs")]
@@ -12571,6 +12244,7 @@ public sealed class ChandeQuickStickState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var openClose = bar.Close - bar.Open;
         var cqs = _smoother.Next(openClose, isFinal);
 
@@ -12863,7 +12537,7 @@ public sealed class ConstanceBrownCompositeIndexState : IStreamingIndicatorState
         var rsi1 = _rsi1.Next(value, isFinal);
         var rsi2 = _rsi2.Next(value, isFinal);
         var rsiSma = _rsiSmoother.Next(rsi2, isFinal);
-        var rsiDelta = _rsi1Window.Count >= _length2 ? _rsi1Window[_rsi1Window.Count - _length2] : 0;
+        var rsiDelta = _rsi1Window.Count >= _length2 ? rsi1 - _rsi1Window[_rsi1Window.Count - _length2] : 0;
         var s = rsiDelta + rsiSma;
         var fast = _fastSmoother.Next(s, isFinal);
         var slow = _slowSmoother.Next(s, isFinal);
@@ -12944,18 +12618,9 @@ public sealed class CorrectedMovingAverageState : IStreamingIndicatorState, IDis
         else
         {
             var v2 = MathHelper.Pow(_prevCma - sma, 2);
-            var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
-
-            var tolerance = MathHelper.Pow(10, -5);
-            var err = 1d;
-            var kPrev = 1d;
-            var k = 1d;
-            for (var j = 0; j <= 5000 && err > tolerance; j++)
-            {
-                k = v3 * kPrev * (2 - kPrev);
-                err = kPrev - k;
-                kPrev = k;
-            }
+            // Exact attracting fixed point; truncating the iteration leaves a spurious gain
+            // when the variance is at or above the squared displacement.
+            var k = v1 == 0 ? 1 : v2 <= v1 ? 0 : 1 - v1 / v2;
 
             cma = _prevCma + (k * (sma - _prevCma));
         }
@@ -12991,68 +12656,27 @@ public sealed class CorrectedMovingAverageState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Cwma")]
 public sealed class CubedWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly IntegerPowerWindowMean _mean;
     private readonly StreamingInputResolver _input;
 
     public CubedWeightedMovingAverageState(int length = 14)
     {
-        var resolved = Math.Max(1, length);
-        _weights = new double[resolved];
-        double weightSum = 0;
-        for (var i = 0; i < resolved; i++)
-        {
-            var weight = MathHelper.Pow(resolved - i, 3);
-            _weights[i] = weight;
-            weightSum += weight;
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(resolved);
+        _mean = new IntegerPowerWindowMean(length, 3);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.CubedWeightedMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
+    public void Reset() => _mean.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sum = value * _weights[0];
-        for (var j = 1; j < _weights.Length; j++)
-        {
-            var prevValue = _values.Count >= j ? _values[_values.Count - j] : 0;
-            sum += prevValue * _weights[j];
-        }
-
-        var cwma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cwma", cwma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cwma, outputs);
+        var value = _mean.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Cwma", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 internal readonly struct RollingWindowSnapshot
@@ -13216,10 +12840,36 @@ internal sealed class RollingWindowSum : IDisposable
     private readonly PooledRingBuffer<double> _window;
     private double _sum;
     private int _sinceRebuild;
+    private readonly bool _trackMeanRoundoff;
+    private double _meanRoundoff, _lastMeanRoundoff;
+    private bool _averageRequiresExact, _lastAverageRequiresExact;
 
-    public RollingWindowSum(int length)
+    public RollingWindowSum(int length, bool trackMeanRoundoff = false)
     {
+        _trackMeanRoundoff = trackMeanRoundoff;
         _window = new PooledRingBuffer<double>(length);
+    }
+
+    internal double Average(double value, bool isFinal, out int countAfter)
+    {
+        if (!_trackMeanRoundoff) throw new InvalidOperationException("Mean evaluation requires roundoff tracking.");
+        var added = _sum + value;
+        var previewRoundoff = MeanRoundoff.AfterAddition(_meanRoundoff, added);
+        if (_window.Count == _window.Capacity)
+            previewRoundoff = MeanRoundoff.AfterAddition(previewRoundoff, added - _window[0]);
+        var previewRequiresExact = _averageRequiresExact || ExactMeanAccumulator.SevereCancellation(_sum, value, added)
+            || _window.Count == _window.Capacity && ExactMeanAccumulator.SevereCancellation(added, -_window[0], added - _window[0]);
+        previewRequiresExact |= _window.Count == _window.Capacity
+            && Math.Abs(added - _window[0]) <= 1e-4 * Math.Max(Math.Abs(_window[0]), Math.Abs(value));
+        var sum = isFinal ? Add(value, out countAfter) : Preview(value, out countAfter);
+        var requiresExact = isFinal ? _lastAverageRequiresExact : previewRequiresExact;
+        var roundoff = isFinal ? _lastMeanRoundoff : previewRoundoff;
+        if (!requiresExact && !MeanRoundoff.RequiresExact(sum, countAfter, roundoff)) return sum / countAfter;
+        var exact = new ExactMeanAccumulator();
+        var start = !isFinal && _window.Count == _window.Capacity ? 1 : 0;
+        for (var i = start; i < _window.Count; i++) exact.Add(_window[i]);
+        if (!isFinal) exact.Add(value);
+        return exact.Mean(countAfter);
     }
 
     public double Preview(double value, out int countAfter)
@@ -13231,20 +12881,46 @@ internal sealed class RollingWindowSum : IDisposable
         }
 
         countAfter = _window.Capacity;
-        return _sum + value - _window[0];
+        var sum = _sum + value - _window[0];
+        if (Math.Abs(sum) <= 1e-4 * Math.Max(Math.Abs(_window[0]), Math.Abs(value)))
+        {
+            sum = 0;
+            for (var i = 1; i < _window.Count; i++) sum += _window[i];
+            sum += value;
+        }
+        return sum;
     }
 
     public double Add(double value, out int countAfter)
     {
         // Grouped as MovingAverageCore.SimpleMovingAverage groups it, and as Preview does.
+        var previousSum = _sum;
         _sum += value;
+        if (_trackMeanRoundoff) _meanRoundoff = MeanRoundoff.AfterAddition(_meanRoundoff, _sum);
+        _averageRequiresExact |= ExactMeanAccumulator.SevereCancellation(previousSum, value, _sum);
         if (_window.TryAdd(value, out var removed))
         {
+            previousSum = _sum;
             _sum -= removed;
+            if (_trackMeanRoundoff) _meanRoundoff = MeanRoundoff.AfterAddition(_meanRoundoff, _sum);
+            _averageRequiresExact |= ExactMeanAccumulator.SevereCancellation(previousSum, -removed, _sum);
+            if (Math.Abs(_sum) <= 1e-4 * Math.Max(Math.Abs(removed), Math.Abs(value)))
+            {
+                _sum = 0;
+                _meanRoundoff = 0;
+                _averageRequiresExact = true;
+                for (var i = 0; i < _window.Count; i++)
+                {
+                    _sum += _window[i];
+                    if (_trackMeanRoundoff) _meanRoundoff = MeanRoundoff.AfterAddition(_meanRoundoff, _sum);
+                }
+            }
         }
 
         countAfter = _window.Count;
         var sum = _sum;
+        _lastAverageRequiresExact = _averageRequiresExact;
+        _lastMeanRoundoff = _meanRoundoff;
 
         // Rebuilt from the window every Capacity values, on the bars MovingAverageCore.SimpleMovingAverage
         // rebuilds on, and after the running sum is reported so a preview still equals its final bar. A running
@@ -13253,9 +12929,14 @@ internal sealed class RollingWindowSum : IDisposable
         {
             _sinceRebuild = 0;
             _sum = 0;
+            _averageRequiresExact = false;
+            _meanRoundoff = 0;
             for (var i = 0; i < _window.Count; i++)
             {
+                previousSum = _sum;
                 _sum += _window[i];
+                if (_trackMeanRoundoff) _meanRoundoff = MeanRoundoff.AfterAddition(_meanRoundoff, _sum);
+                _averageRequiresExact |= ExactMeanAccumulator.SevereCancellation(previousSum, _window[i], _sum);
             }
         }
 
@@ -13267,6 +12948,8 @@ internal sealed class RollingWindowSum : IDisposable
         _window.Clear();
         _sum = 0;
         _sinceRebuild = 0;
+        _meanRoundoff = _lastMeanRoundoff = 0;
+        _averageRequiresExact = _lastAverageRequiresExact = false;
     }
 
     public void Dispose()
@@ -13571,87 +13254,68 @@ internal sealed class RollingWindowStats : IDisposable
 internal sealed class WmaState : IDisposable
 {
     private readonly int _length;
-    private readonly double _denominator;
+    private readonly long _denominator;
     private readonly PooledRingBuffer<double> _window;
-    private double _sum;
-    private double _numerator;
-    private int _sinceRebuild;
+    private ExactMeanAccumulator _sum;
+    private ExactMeanAccumulator _numerator;
 
     public WmaState(int length)
     {
         _length = Math.Max(1, length);
-        _denominator = (double)_length * (_length + 1) / 2;
+        _denominator = (long)_length * (_length + 1L) / 2;
         _window = new PooledRingBuffer<double>(_length);
     }
 
     public double GetNext(double value, bool commit)
     {
-        // The arithmetic of MovingAverageCore.WeightedMovingAverage, grouped the same way, so the two engines
-        // round alike: grouping it as (numerator + L*value) - sum, and folding the removal into one step, left
-        // them trillionths apart on an ordinary price series.
-        var numerator = _numerator + ((_length * value) - _sum);
+        // Each retained observation loses one unit of weight; the new one gets N.
+        // Missing startup observations have zero weight contributions, as in the batch formula.
+        var numerator = _numerator;
+        numerator.Subtract(_sum);
+        numerator.Add(value, _length);
+        var result = numerator.Mean(_denominator);
         if (commit)
         {
+            var sum = _sum;
+            sum.Add(value);
+            if (_window.Count == _length) sum.Add(_window[0], -1);
+            _window.TryAdd(value, out _);
+            _sum = sum;
             _numerator = numerator;
-            _sum += value;
-            if (_window.TryAdd(value, out var removed))
-            {
-                _sum -= removed;
-            }
-
-            // Rebuilt from the window every length bars, on the bars the batch core rebuilds on and after this
-            // bar's value is taken, so neither engine carries rounding from values that have left the window.
-            if (++_sinceRebuild == _length)
-            {
-                _sinceRebuild = 0;
-                _numerator = 0;
-                _sum = 0;
-                for (var j = 0; j < _window.Count; j++)
-                {
-                    var windowValue = _window[j];
-                    _numerator += (j + 1) * windowValue;
-                    _sum += windowValue;
-                }
-            }
         }
-
-        return numerator / _denominator;
+        return result;
     }
 
     public void Reset()
     {
         _window.Clear();
-        _sum = 0;
-        _numerator = 0;
-        _sinceRebuild = 0;
+        _sum = default;
+        _numerator = default;
     }
 
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class EmaState
 {
     private readonly int _length;
-    private readonly double _k;
     private int _count;
-    private double _sum;
+    private ExactMeanAccumulator _sum;
     private double _prevEma;
 
     public EmaState(int length)
     {
         _length = Math.Max(1, length);
-        _k = Math.Min(Math.Max((double)2 / (_length + 1), 0.01), 0.99);
     }
 
     public double GetNext(double value, bool commit)
     {
+        StreamingInputValidation.Finite(value, nameof(value));
         if (_count < _length)
         {
-            var sum = _sum + value;
-            var ema = sum / (_count + 1);
+            var sum = _sum;
+            sum.Add(value);
+            var ema = sum.Mean(_count + 1);
             if (commit)
             {
                 _sum = sum;
@@ -13662,11 +13326,20 @@ internal sealed class EmaState
             return ema;
         }
 
-        var updated = (value * _k) + (_prevEma * (1 - _k));
+        // Round the complete convex combination once. Separate products can erase
+        // subnormals and cancellation residues even when the final value is representable.
+        var updated = value;
+        if (_length != 1 && value != _prevEma)
+        {
+            var weighted = new ExactMeanAccumulator();
+            weighted.Add(value, 2);
+            weighted.Add(_prevEma, _length - 1);
+            updated = weighted.Mean((long)_length + 1);
+        }
         if (commit)
         {
             _prevEma = updated;
-            _count++;
+            // The count is only needed during initialization; saturate to avoid overflow.
         }
 
         return updated;
@@ -13675,25 +13348,25 @@ internal sealed class EmaState
     public void Reset()
     {
         _count = 0;
-        _sum = 0;
+        _sum = default;
         _prevEma = 0;
     }
 }
 
 internal sealed class WilderState
 {
-    private readonly double _k;
+    private readonly int _length;
     private double _prev;
 
     public WilderState(int length)
     {
-        var resolved = Math.Max(1, length);
-        _k = (double)1 / resolved;
+        _length = Math.Max(1, length);
     }
 
     public double GetNext(double value, bool commit)
     {
-        var wwma = (value * _k) + (_prev * (1 - _k));
+        StreamingInputValidation.Finite(value, nameof(value));
+        var wwma = RoundedWilder.Next(value, _prev, _length);
         if (commit)
         {
             _prev = wwma;
@@ -13722,14 +13395,15 @@ internal sealed class SimpleMovingAverageSmoother : IMovingAverageSmoother
     public SimpleMovingAverageSmoother(int length)
     {
         _length = Math.Max(1, length);
-        _window = new RollingWindowSum(_length);
+        _window = new RollingWindowSum(_length, trackMeanRoundoff: true);
     }
 
     public double Next(double value, bool isFinal)
     {
+        if (_length == 1) return value;
         int countAfter;
-        var sum = isFinal ? _window.Add(value, out countAfter) : _window.Preview(value, out countAfter);
-        return countAfter >= _length ? sum / _length : 0;
+        var mean = _window.Average(value, isFinal, out countAfter);
+        return countAfter >= _length ? mean : 0;
     }
 
     public void Reset()
@@ -13757,6 +13431,7 @@ internal sealed class ExactSimpleMovingAverageSmoother : IMovingAverageSmoother
 
     public double Next(double value, bool isFinal)
     {
+        if (_length == 1) return value;
         int countAfter;
         var sum = isFinal ? Add(value, out countAfter) : Preview(value, out countAfter);
         return countAfter >= _length ? sum / _length : 0;
@@ -13954,7 +13629,7 @@ internal sealed class McNichollMovingAverageSmoother : IMovingAverageSmoother
 
     public McNichollMovingAverageSmoother(int length)
     {
-        var resolved = Math.Max(1, length);
+        var resolved = Math.Max(2, length);
         _alpha = 2d / (resolved + 1);
         _ema1 = new EmaState(resolved);
         _ema2 = new EmaState(resolved);
@@ -14030,122 +13705,20 @@ internal sealed class WilderMovingAverageSmoother : IMovingAverageSmoother
 
 internal sealed class EhlersHannMovingAverageSmoother : IMovingAverageSmoother, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersHannMovingAverageSmoother(int length)
-    {
-        _length = Math.Max(1, length);
-        _weights = new double[_length];
-        double sum = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var weight = 1 - Math.Cos(2 * Math.PI * ((double)j / (_length + 1)));
-            _weights[j - 1] = weight;
-            sum += weight;
-        }
-
-        _weightSum = sum;
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var count = _values.Count;
-        double sum = _weights[0] * value;
-
-        for (var j = 2; j <= _length; j++)
-        {
-            var offset = j - 1;
-            var prevValue = offset <= count ? _values[count - offset] : 0;
-            sum += _weights[j - 1] * prevValue;
-        }
-
-        var result = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        return result;
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    private readonly HannWindowMean _mean;
+    public EhlersHannMovingAverageSmoother(int length) => _mean = new HannWindowMean(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
 }
 
 internal sealed class SymmetricallyWeightedMovingAverageSmoother : IMovingAverageSmoother
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-
-    public SymmetricallyWeightedMovingAverageSmoother(int length)
-    {
-        _length = Math.Max(1, length);
-        _weights = new double[_length];
-        var floorLength = (int)Math.Floor((double)_length / 2);
-        var roundLength = (int)Math.Round((double)_length / 2);
-        double sum = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            double weight;
-            if (floorLength == roundLength)
-            {
-                weight = j < floorLength ? (j + 1) * _length : (_length - j) * _length;
-            }
-            else
-            {
-                weight = j <= floorLength ? (j + 1) * _length : (_length - j) * _length;
-            }
-
-            _weights[j] = weight;
-            sum += weight;
-        }
-
-        _weightSum = sum;
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        double sum = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * _weights[j];
-        }
-
-        var swma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        return swma;
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    private readonly SymmetricWindowMean _mean;
+    public SymmetricallyWeightedMovingAverageSmoother(int length) => _mean = new SymmetricWindowMean(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
 }
 
 /// <summary>
@@ -14167,6 +13740,75 @@ internal sealed class LinearRegressionCoreSmoother : IMovingAverageSmoother
     public void Reset() => _regression.Reset();
 
     public void Dispose() => _regression.Dispose();
+}
+
+internal sealed class FibonacciWeightedMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly FibonacciWindowMean _mean;
+    public FibonacciWeightedMovingAverageSmoother(int length) => _mean = new FibonacciWindowMean(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
+}
+
+internal sealed class SquareRootWeightedMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly SquareRootWindowMean _mean;
+    public SquareRootWeightedMovingAverageSmoother(int length) => _mean = new SquareRootWindowMean(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
+}
+
+internal sealed class IntegerPowerMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly IntegerPowerWindowMean _mean;
+    public IntegerPowerMovingAverageSmoother(int length, int power) => _mean = new IntegerPowerWindowMean(length, power);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
+}
+
+internal sealed class QuickMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly QuickWindowMean _mean;
+    public QuickMovingAverageSmoother(int length) => _mean = new QuickWindowMean(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
+}
+
+internal sealed class JsaMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly PooledRingBuffer<double> _values;
+    public JsaMovingAverageSmoother(int length) => _values = new PooledRingBuffer<double>(Math.Max(1, length));
+    public double Next(double value, bool isFinal)
+    {
+        var prior = _values.Count == _values.Capacity ? _values[0] : 0;
+        var result = PriceMean.Of(value, prior);
+        if (isFinal) _values.TryAdd(value, out _);
+        return result;
+    }
+    public void Reset() => _values.Clear();
+    public void Dispose() => _values.Dispose();
+}
+
+internal sealed class RootMeanSquareSmoother : IMovingAverageSmoother
+{
+    private readonly RollingRootMeanSquare _mean;
+    public RootMeanSquareSmoother(int length) => _mean = new RollingRootMeanSquare(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
+}
+
+internal sealed class KaufmanMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly RoundedKaufmanWindow _mean;
+    public KaufmanMovingAverageSmoother(int length) => _mean = new RoundedKaufmanWindow(length);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal).Average;
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
 }
 
 internal static class MovingAverageSmootherFactory
@@ -14192,6 +13834,17 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.EhlersModifiedOptimumEllipticFilter => new EhlersModifiedOptimumEllipticFilterSmoother(length),
             MovingAvgType.SymmetricallyWeightedMovingAverage => new SymmetricallyWeightedMovingAverageSmoother(length),
             MovingAvgType.LinearRegression => new LinearRegressionCoreSmoother(length),
+            MovingAvgType.FibonacciWeightedMovingAverage => new FibonacciWeightedMovingAverageSmoother(length),
+            MovingAvgType.SquareRootWeightedMovingAverage => new SquareRootWeightedMovingAverageSmoother(length),
+            MovingAvgType.ParabolicWeightedMovingAverage => new IntegerPowerMovingAverageSmoother(length, 2),
+            MovingAvgType.CubedWeightedMovingAverage => new IntegerPowerMovingAverageSmoother(length, 3),
+            MovingAvgType.QuickMovingAverage => new QuickMovingAverageSmoother(length),
+            MovingAvgType.JsaMovingAverage => new JsaMovingAverageSmoother(length),
+            MovingAvgType.QuadraticMovingAverage => new RootMeanSquareSmoother(length),
+            MovingAvgType.KaufmanAdaptiveMovingAverage => new KaufmanMovingAverageSmoother(length),
+            MovingAvgType.SineWeightedMovingAverage => new SineMovingAverageSmoother(length),
+            MovingAvgType.NaturalMovingAverage => new NaturalMovingAverageSmoother(length),
+            MovingAvgType.VariableIndexDynamicAverage => new VariableIndexDynamicAverageEngine(length),
             _ => throw new NotSupportedException($"MovingAvgType {maType} is not supported in streaming stateful indicators.")
         };
     }
@@ -14308,10 +13961,13 @@ internal sealed class RsiState : IDisposable
     private readonly IMovingAverageSmoother _avgLoss;
     private double _prevValue;
     private bool _hasPrev;
+    private readonly bool _preserveFlatRatio;
+    private double _previousRsi;
 
     public RsiState(MovingAvgType maType, int length)
     {
         var resolved = Math.Max(1, length);
+        _preserveFlatRatio = resolved > 1 && (maType == MovingAvgType.WildersSmoothingMethod || maType == MovingAvgType.ExponentialMovingAverage);
         _avgGain = MovingAverageSmootherFactory.Create(maType, resolved);
         _avgLoss = MovingAverageSmootherFactory.Create(maType, resolved);
     }
@@ -14327,10 +13983,12 @@ internal sealed class RsiState : IDisposable
         var avgLoss = _avgLoss.Next(loss, isFinal);
         var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
         var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+        if (_preserveFlatRatio && _hasPrev && priceChg == 0) rsi = _previousRsi;
 
         if (isFinal)
         {
             _prevValue = value;
+            _previousRsi = rsi;
             _hasPrev = true;
         }
 
@@ -14343,6 +14001,7 @@ internal sealed class RsiState : IDisposable
         _avgLoss.Reset();
         _prevValue = 0;
         _hasPrev = false;
+        _previousRsi = 0;
     }
 
     public void Dispose()
@@ -14455,6 +14114,3 @@ internal sealed class RollingPercentRank : IDisposable
         return _tree.CountLessThanOrEqual(value);
     }
 }
-
-
-

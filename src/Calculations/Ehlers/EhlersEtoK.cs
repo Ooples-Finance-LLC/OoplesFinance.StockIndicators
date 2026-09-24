@@ -18,9 +18,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var alphaArg = MinOrMax(2 * Math.PI / (mult * length * Sqrt(2)), 0.99, 0.01);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
+        var alpha = EhlersFirstOrderCoefficient.Alpha(mult * length * Math.Sqrt(2));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -810,7 +808,8 @@ public static partial class Calculations
             var im = (prevReal1 * imag) - (real * prevImag1);
 
             var prevPeriod = GetLastOrDefault(periodList);
-            var period = im != 0 && re != 0 ? 2 * Math.PI / Math.Abs(im / re) : 0;
+            var advance = Math.Abs(Math.Atan2(im, re));
+            var period = advance != 0 ? 2 * Math.PI / advance : 0;
             period = MinOrMax(period, length1, length3);
             periodList.Add(period);
 
@@ -1091,14 +1090,11 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var l1 = Math.Cos(2 * Math.PI / length);
-        var g1 = Math.Cos(bw * 2 * Math.PI / length);
-        var s1 = (1 / g1) - Sqrt((1 / (g1 * g1)) - 1);
+        var s1 = FourierHarmonicPole.For((double)length/1, bw);
         var l2 = Math.Cos(2 * Math.PI / ((double)length / 2));
-        var g2 = Math.Cos(bw * 2 * Math.PI / ((double)length / 2));
-        var s2 = (1 / g2) - Sqrt((1 / (g2 * g2)) - 1);
+        var s2 = FourierHarmonicPole.For((double)length/2, bw);
         var l3 = Math.Cos(2 * Math.PI / ((double)length / 3));
-        var g3 = Math.Cos(bw * 2 * Math.PI / ((double)length / 3));
-        var s3 = (1 / g3) - Sqrt((1 / (g3 * g3)) - 1);
+        var s3 = FourierHarmonicPole.For((double)length/3, bw);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1115,19 +1111,19 @@ public static partial class Calculations
             var bp1 = i <= 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1_1) - (s1 * prevBp1_2);
             bp1List.Add(bp1);
 
-            var q1 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp1 - prevBp1_1);
+            var q1 = i <= 4 ? 0 : length / (2 * Math.PI) * (bp1 - prevBp1_1);
             q1List.Add(q1);
 
             var bp2 = i <= 3 ? 0 : (0.5 * (1 - s2) * (currentValue - prevValue)) + (l2 * (1 + s2) * prevBp2_1) - (s2 * prevBp2_2);
             bp2List.Add(bp2);
 
-            var q2 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp2 - prevBp2_1);
+            var q2 = i <= 4 ? 0 : length / (4 * Math.PI) * (bp2 - prevBp2_1);
             q2List.Add(q2);
 
             var bp3 = i <= 3 ? 0 : (0.5 * (1 - s3) * (currentValue - prevValue)) + (l3 * (1 + s3) * prevBp3_1) - (s3 * prevBp3_2);
             bp3List.Add(bp3);
 
-            var q3 = i <= 4 ? 0 : length / 2.0 * Math.PI * (bp3 - prevBp3_1);
+            var q3 = i <= 4 ? 0 : length / (6 * Math.PI) * (bp3 - prevBp3_1);
             q3List.Add(q3);
 
             double p1 = 0, p2 = 0, p3 = 0;
@@ -1149,7 +1145,7 @@ public static partial class Calculations
             var wave = p1 != 0 ? bp1 + (Sqrt(p2 / p1) * bp2) + (Sqrt(p3 / p1) * bp3) : 0;
             waveList.Add(wave);
 
-            var roc = length / Math.PI * 4 * (wave - prevWave2);
+            var roc = length / (4 * Math.PI) * (wave - prevWave2);
             rocList.Add(roc);
 
             var signal = GetCompareSignal(wave, prevWave);
@@ -1228,44 +1224,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersEvenBetterSineWaveIndicator(this StockData stockData, int length1 = 40, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> hpList = new(stockData.Count);
-        List<double> filtList = new(stockData.Count);
         List<double> ebsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var piHp = MinOrMax(2 * Math.PI / length1, 0.99, 0.01);
-        var a1 = (1 - Math.Sin(piHp)) / Math.Cos(piHp);
-        var a2 = Exp(MinOrMax(-1.414 * Math.PI / length2, -0.01, -0.99));
-        var b = 2 * a2 * Math.Cos(MinOrMax(1.414 * Math.PI / length2, 0.99, 0.01));
-        var c2 = b;
-        var c3 = -a2 * a2;
-        var c1 = 1 - c2 - c3;
-
+        var kernel = new Streaming.EvenBetterSineWaveKernel(length1, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var prevHp = GetLastOrDefault(hpList);
-            var hp = ((0.5 * (1 + a1)) * MinPastValues(i, 1, currentValue - prevValue)) + (a1 * prevHp);
-            hpList.Add(hp);
-
-            var filt = (c1 * ((hp + prevHp) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
-            filtList.Add(filt);
-
-            var wave = (filt + prevFilt1 + prevFilt2) / 3;
-            var pwr = (Pow(filt, 2) + Pow(prevFilt1, 2) + Pow(prevFilt2, 2)) / 3;
-            var prevEbsi = GetLastOrDefault(ebsiList);
-            var ebsi = pwr > 0 ? wave / Sqrt(pwr) : 0;
-            ebsiList.Add(ebsi);
-
-            var signal = GetCompareSignal(ebsi, prevEbsi);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? 0 : ebsiList[i - 1];
+            var value = kernel.Next(inputList[i], true);
+            ebsiList.Add(value);
+            signalsList?.Add(GetCompareSignal(value, previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -1293,14 +1261,14 @@ public static partial class Calculations
         List<double> nValueList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (maxList, minList) = GetMaxAndMinValuesList(inputList, length);
+        var (maxList, minList) = GetMaxAndMinValuesList(inputList, inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var maxH = maxList[i];
             var minL = minList[i];
-            var ratio = maxH - minL != 0 ? (currentValue - minL) / (maxH - minL) : 0;
+            var ratio = maxH - minL != 0 ? (currentValue - minL) / (maxH - minL) : .5;
             var prevFisherTransform1 = i >= 1 ? fisherTransformList[i - 1] : 0;
             var prevFisherTransform2 = i >= 2 ? fisherTransformList[i - 2] : 0;
 

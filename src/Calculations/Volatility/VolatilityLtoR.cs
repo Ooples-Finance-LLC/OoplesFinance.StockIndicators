@@ -570,7 +570,7 @@ public static partial class Calculations
                 }
             }
 
-            double mmi = length != 1 ? 100 * (nl + nh) / (length - 1) : 0;
+            double mmi = length != 1 ? 100d * (nl + nh) / (length - 1) : 0;
             mmiList.Add(mmi);
         }
 

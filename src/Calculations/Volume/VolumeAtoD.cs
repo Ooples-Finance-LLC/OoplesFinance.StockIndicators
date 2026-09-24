@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -74,7 +74,7 @@ public static partial class Calculations
         List<double> cviList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double cvi = 0;
+        var total = new ExactMeanAccumulator();
         for (var i = 0; i < count; i++)
         {
             if (i >= 1)
@@ -83,14 +83,15 @@ public static partial class Calculations
                 var prevValue = inputList[i - 1];
                 if (currentValue > prevValue)
                 {
-                    cvi += volumeList[i];
+                    total.Add(volumeList[i]);
                 }
                 else if (currentValue < prevValue)
                 {
-                    cvi -= volumeList[i];
+                    total.Add(volumeList[i], -1);
                 }
             }
 
+            var cvi = total.Mean(1);
             cviList.Add(cvi);
 
             var prevCvi1 = i >= 1 ? cviList[i - 1] : 0;

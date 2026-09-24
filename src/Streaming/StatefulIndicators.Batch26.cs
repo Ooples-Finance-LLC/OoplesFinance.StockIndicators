@@ -360,7 +360,7 @@ public sealed class VaradiOscillatorState : IStreamingIndicatorState, IDisposabl
         var median = (bar.High + bar.Low) / 2d;
         var ratio = median != 0 ? value / median : 0;
         var a = _ratioMa.Next(ratio, isFinal);
-        var countLe = _order.CountLessThanOrEqual(a);
+        var countLe = _order.CountLessThanOrEqual(VaradiRank.InclusiveBoundary(a));
         var dvo = MathHelper.MinOrMax(countLe / (double)_length * 100, 100, 0);
 
         if (isFinal)
@@ -470,7 +470,7 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
 
     public VariableIndexDynamicAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        _alpha = (double)2 / (Math.Max(1, length) + 1);
+        _alpha = 2d / (Math.Max(1, length) + 1d);
         _cmo = new ChandeMomentumOscillatorState(maType, Math.Max(1, length), 3);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -492,7 +492,7 @@ public sealed class VariableIndexDynamicAverageState : IStreamingIndicatorState,
         // Seeded at the first price, as the batch is: alpha * |CMO| is legitimately zero on a series with
         // no momentum, and a recursion multiplied by zero never leaves its seed.
         var prevVidya = _hasPrev ? _prevVidya : value;
-        var vidya = (value * _alpha * currentCmo) + (prevVidya * (1 - (_alpha * currentCmo)));
+        var vidya = VidyaBlend.Compute(prevVidya, value, _alpha * currentCmo);
 
         if (isFinal)
         {
@@ -1103,6 +1103,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
     private readonly RollingStandardDeviation _percbStdDev;
     private StreamingInputResolver _input;
     private readonly double _stdDevMult;
+    private readonly VervoortModifiedBandPosition _precise;
     private double _prevInput;
     private double _prevHao;
     private bool _hasPrev;
@@ -1111,6 +1112,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         int smoothLength = 8, double stdDevMult = 1.6)
     {
         _stdDevMult = stdDevMult;
+        _precise = new VervoortModifiedBandPosition(maType, length1, smoothLength);
         _hacMa1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _hacMa2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _zlhaMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
@@ -1128,6 +1130,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 
     public void Reset()
     {
+        _precise.Reset();
         _hacMa1.Reset();
         _hacMa2.Reset();
         _zlhaMa.Reset();
@@ -1158,6 +1161,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
         var percb = zlhaStdDev != 0
             ? (zlhaTema + (2 * zlhaStdDev) - wma) / (4 * zlhaStdDev) * 100
             : 0;
+        percb = _precise.Next(inputValue, bar.High, bar.Low, isFinal);
         // Fed the percent-b series, over its own window rather than the one above.
         var percbStdDev = _percbStdDev.Next(percb, isFinal);
         var upper = 50 + (_stdDevMult * percbStdDev);
@@ -1189,6 +1193,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 
     public void Dispose()
     {
+        _precise.Dispose();
         _hacMa1.Dispose();
         _hacMa2.Dispose();
         _zlhaMa.Dispose();
@@ -1202,6 +1207,7 @@ public sealed class VervoortModifiedBollingerBandIndicatorState : IStreamingIndi
 public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly double _stdDevMult;
+    private readonly VervoortBandPosition _bandPosition;
     private readonly IMovingAverageSmoother _r1Sma;
     private readonly IMovingAverageSmoother _r2Sma;
     private readonly IMovingAverageSmoother _r3Sma;
@@ -1232,6 +1238,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         var resolvedLength3 = Math.Max(1, length3);
         var resolvedSmoothLength = Math.Max(1, smoothLength);
         _stdDevMult = stdDevMult;
+        _bandPosition = new VervoortBandPosition(length1, length3, smoothLength, stdDevMult);
         _r1Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
         _r2Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
         _r3Sma = MovingAverageSmootherFactory.Create(MovingAvgType.SimpleMovingAverage, resolvedLength3);
@@ -1262,6 +1269,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
 
     public void Reset()
     {
+        _bandPosition.Reset();
         _r1Sma.Reset();
         _r2Sma.Reset();
         _r3Sma.Reset();
@@ -1307,9 +1315,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
         // to Next directly, so the series being measured is visible at the call rather than held in a field.
         var hwidth = _stdDev.Next(tz, isFinal);
         var wmatz = _wma.Next(tz, isFinal);
-        var zlrbpercb = hwidth != 0
-            ? (tz + (_stdDevMult * hwidth) - wmatz) / (2 * _stdDevMult * hwidth * 100)
-            : 0;
+        var zlrbpercb = _bandPosition.Next(close, isFinal);
 
         var rbc = (rainbow + inputValue) / 2;
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
@@ -1337,6 +1343,7 @@ public sealed class VervoortSmoothedOscillatorState : IStreamingIndicatorState, 
 
     public void Dispose()
     {
+        _bandPosition.Dispose();
         _r1Sma.Dispose();
         _r2Sma.Dispose();
         _r3Sma.Dispose();
@@ -1888,7 +1895,7 @@ public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState
     {
         var value = _input.GetValue(bar);
         var medianValue = (bar.High + bar.Low) / 2d;
-        var vao = value != medianValue ? bar.Volume * (value - medianValue) : bar.Volume;
+        var vao = bar.Volume * (value - medianValue);
         int countAfter;
         var vaoSum = isFinal ? _vaoSum.Add(vao, out countAfter) : _vaoSum.Preview(vao, out countAfter);
         var vaoAvg = countAfter > 0 ? vaoSum / countAfter : 0;
@@ -1940,7 +1947,7 @@ public sealed class VolumeAccumulationPercentState : IStreamingIndicatorState, I
         var tva = bar.Volume * xt;
         var volumeSum = isFinal ? _volumeSum.Add(bar.Volume, out _) : _volumeSum.Preview(bar.Volume, out _);
         var tvaSum = isFinal ? _tvaSum.Add(tva, out _) : _tvaSum.Preview(tva, out _);
-        var vapc = volumeSum != 0 ? MathHelper.MinOrMax(100 * tvaSum / volumeSum, 100, 0) : 0;
+        var vapc = volumeSum != 0 ? MathHelper.MinOrMax(100 * tvaSum / volumeSum, 100, -100) : 0;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -2098,88 +2105,51 @@ public sealed class VolumeAdjustedMovingAverageState : IStreamingIndicatorState,
 
 internal sealed class VariableMovingAverageEngine : IDisposable
 {
-    private readonly double _k;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private double _prevValue;
-    private double _prevPdms;
-    private double _prevMdms;
-    private double _prevPdis;
-    private double _prevMdis;
-    private double _prevIs;
-    private double _prevVma;
-    private bool _hasPrev;
+    private readonly VariableAverageNumber _gain;
+    private readonly VariableAverageExtrema _high, _low;
+    private VariableAverageNumber _up, _down, _positive, _negative, _index;
+    private double _previousValue, _average;
+    private long _count;
 
     public VariableMovingAverageEngine(int length)
     {
-        var resolved = Math.Max(1, length);
-        _k = 1d / resolved;
-        _maxWindow = new RollingWindowMax(resolved);
-        _minWindow = new RollingWindowMin(resolved);
+        length = Math.Max(1, length);
+        _gain = (VariableAverageNumber)1 / length;
+        _high = new VariableAverageExtrema(length, true);
+        _low = new VariableAverageExtrema(length, false);
     }
-
     public double Next(double value, bool isFinal)
     {
-        var pdm = _hasPrev ? Math.Max(value - _prevValue, 0) : 0;
-        var mdm = _hasPrev ? Math.Max(_prevValue - value, 0) : 0;
-
-        var pdmS = ((1 - _k) * _prevPdms) + (_k * pdm);
-        var mdmS = ((1 - _k) * _prevMdms) + (_k * mdm);
-
-        var s = pdmS + mdmS;
-        var pdi = s != 0 ? pdmS / s : 0;
-        var mdi = s != 0 ? mdmS / s : 0;
-
-        var pdiS = ((1 - _k) * _prevPdis) + (_k * pdi);
-        var mdiS = ((1 - _k) * _prevMdis) + (_k * mdi);
-
-        var d = Math.Abs(pdiS - mdiS);
-        var s1 = pdiS + mdiS;
-        var dS1 = s1 != 0 ? d / s1 : 0;
-
-        var iS = ((1 - _k) * _prevIs) + (_k * dS1);
-        var hhv = isFinal ? _maxWindow.Add(iS, out _) : _maxWindow.Preview(iS, out _);
-        var llv = isFinal ? _minWindow.Add(iS, out _) : _minWindow.Preview(iS, out _);
-        var d1 = hhv - llv;
-        var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-        // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. Seeded at the
-        // first price, as the batch is: vI is legitimately zero when the index has not moved across the
-        // window, and a recursion multiplied by zero never leaves its seed.
-        var prevVma = _hasPrev ? _prevVma : value;
-        var vma = ((1 - (_k * vI)) * prevVma) + (_k * vI * value);
-
+        var change = _count == 0 ? 0 : value - _previousValue;
+        var up = _up + _gain * ((VariableAverageNumber)Math.Max(0, change) - _up);
+        var down = _down + _gain * ((VariableAverageNumber)Math.Max(0, -change) - _down);
+        var total = up + down;
+        var positive = _positive + _gain * ((total.CompareTo(0) == 0 ? (VariableAverageNumber)0 : up / total) - _positive);
+        var negative = _negative + _gain * ((total.CompareTo(0) == 0 ? (VariableAverageNumber)0 : down / total) - _negative);
+        var strengthSum = positive + negative;
+        var strength = strengthSum.CompareTo(0) == 0 ? (VariableAverageNumber)0 : VariableAverageNumber.Abs(positive - negative) / strengthSum;
+        var index = _index + _gain * (strength - _index);
+        var high = _high.Next(index, _count, isFinal);
+        var low = _low.Next(index, _count, isFinal);
+        var spread = high - low;
+        // Binary64-scale ties are not new directional information. The extra arithmetic precision
+        // above makes resolvable narrow ranges accurate before this boundary is reached.
+        var uncertainty = 32 * 2.2204460492503131e-16 * Math.Max(Math.Abs(high.Value), Math.Abs(low.Value));
+        var position = spread.Value <= uncertainty || (index - low).Value <= uncertainty ? 0
+            : (high - index).Value <= uncertainty ? 1 : ((index - low) / spread).Value;
+        var previous = _count == 0 ? value : _average;
+        var average = previous + _gain.Value * position * (value - previous);
         if (isFinal)
         {
-            _prevValue = value;
-            _prevPdms = pdmS;
-            _prevMdms = mdmS;
-            _prevPdis = pdiS;
-            _prevMdis = mdiS;
-            _prevIs = iS;
-            _prevVma = vma;
-            _hasPrev = true;
+            _up = up; _down = down; _positive = positive; _negative = negative; _index = index;
+            _previousValue = value; _average = average; _count++;
         }
-
-        return vma;
+        return average;
     }
-
     public void Reset()
     {
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _prevValue = 0;
-        _prevPdms = 0;
-        _prevMdms = 0;
-        _prevPdis = 0;
-        _prevMdis = 0;
-        _prevIs = 0;
-        _prevVma = 0;
-        _hasPrev = false;
+        _up = _down = _positive = _negative = _index = 0;
+        _previousValue = _average = 0; _count = 0; _high.Reset(); _low.Reset();
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-    }
+    public void Dispose() { }
 }

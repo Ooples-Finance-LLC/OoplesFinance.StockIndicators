@@ -37,7 +37,7 @@ public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndica
         var avgVolume = _volumeSmoother.Next(bar.Volume, isFinal);
         var n = avgVolume * _mult;
         var prevEvwma = _hasPrev ? _prevEvwma : value;
-        var evwma = n > 0 ? (((n - bar.Volume) * prevEvwma) + (bar.Volume * value)) / n : 0;
+        var evwma = n > 0 ? prevEvwma + bar.Volume / n * (value - prevEvwma) : prevEvwma;
 
         if (isFinal)
         {
@@ -91,8 +91,8 @@ public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndica
         var value = _input.GetValue(bar);
         var volume = bar.Volume;
         var volumeSum = isFinal ? _volumeSum.Add(volume, out _) : _volumeSum.Preview(volume, out _);
-        var prevEvwma = _hasPrev ? _prevEvwma : 0;
-        var evwma = volumeSum != 0 ? (((volumeSum - volume) * prevEvwma) + (volume * value)) / volumeSum : 0;
+        var prevEvwma = _hasPrev ? _prevEvwma : value;
+        var evwma = volumeSum > 0 ? prevEvwma + volume / volumeSum * (value - prevEvwma) : prevEvwma;
 
         if (isFinal)
         {
@@ -143,6 +143,7 @@ public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDis
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var prevHigh = _hasPrev ? _prevHigh : 0;
         var prevLow = _hasPrev ? _prevLow : 0;
 
@@ -839,8 +840,8 @@ public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorSta
     {
         var value = _input.GetValue(bar);
         // Use 0 for prevHigh/prevLow on first bar to match batch ADX behavior
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
+        var prevHigh = _hasPrev ? _prevHigh : bar.High;
+        var prevLow = _hasPrev ? _prevLow : bar.Low;
         // For TrueRange, use current value on first bar to avoid inflated TR
         var prevValue = _hasPrev ? _prevValue : value;
         var prevAdx = _hasPrev ? _prevAdx : 0;
@@ -1300,7 +1301,7 @@ public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDispos
 
     public FallingRisingFilterState(int length = 14)
     {
-        var resolved = Math.Max(1, length);
+        var resolved = Math.Max(2, length);
         _alpha = (double)2 / (resolved + 1);
         _tempMax = new RollingWindowMax(resolved);
         _tempMin = new RollingWindowMin(resolved);
@@ -1361,43 +1362,12 @@ public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Fswma")]
 public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly FareyWindowMean _mean;
     private readonly StreamingInputResolver _input;
 
     public FareySequenceWeightedMovingAverageState(int length = 5)
     {
-        var resolved = Math.Max(1, length);
-        var array = new double[4] { 0, 1, 1, resolved };
-        List<double> resList = new();
-
-        while (array[2] <= resolved)
-        {
-            var a = array[0];
-            var b = array[1];
-            var c = array[2];
-            var d = array[3];
-            var k = Math.Floor((resolved + b) / array[3]);
-
-            array[0] = c;
-            array[1] = d;
-            array[2] = (k * c) - a;
-            array[3] = (k * d) - b;
-
-            var res = array[1] != 0 ? Math.Round(array[0] / array[1], 3) : 0;
-            resList.Insert(0, res);
-        }
-
-        _weights = resList.ToArray();
-        double weightSum = 0;
-        for (var i = 0; i < _weights.Length; i++)
-        {
-            weightSum += _weights[i];
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(_weights.Length);
+        _mean = new FareyWindowMean(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1405,25 +1375,13 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
 
     public void Reset()
     {
-        _values.Clear();
+        _mean.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < _weights.Length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * _weights[j];
-        }
-
-        var fswma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
+        var fswma = _mean.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1439,7 +1397,7 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
 
     public void Dispose()
     {
-        _values.Dispose();
+        _mean.Dispose();
     }
 }
 

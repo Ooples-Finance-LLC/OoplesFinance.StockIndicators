@@ -20,7 +20,7 @@ public static partial class Calculations
             medianPriceList = new List<double>(seriesList.Count);
             for (var i = 0; i < seriesList.Count; i++)
             {
-                medianPriceList.Add((seriesHighList[i] + seriesLowList[i]) / 2);
+                medianPriceList.Add(PriceMean.Of(seriesHighList[i], seriesLowList[i]));
             }
         }
         else
@@ -63,7 +63,7 @@ public static partial class Calculations
         List<double> midpointList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
+        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, inputList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -73,7 +73,7 @@ public static partial class Calculations
             var lowest = lowestList[i];
 
             var prevMidPoint = GetLastOrDefault(midpointList);
-            var midpoint = (highest + lowest) / 2;
+            var midpoint = PriceMean.Of(highest, lowest);
             midpointList.Add(midpoint);
 
             var signal = GetCompareSignal(currentValue - midpoint, prevValue - prevMidPoint);
@@ -113,7 +113,7 @@ public static partial class Calculations
             var lowest = lowestList[i];
 
             var prevMidPrice = GetLastOrDefault(midpriceList);
-            var midPrice = (highest + lowest) / 2;
+            var midPrice = PriceMean.Of(highest, lowest);
             midpriceList.Add(midPrice);
 
             var signal = GetCompareSignal(currentValue - midPrice, prevValue - prevMidPrice);

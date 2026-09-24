@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -213,7 +213,7 @@ public static partial class Calculations
         for (var i = 0; i < count; i++)
         {
             var prevValue = i >= length ? inputList[i - length] : 0;
-            var returns = i >= length && prevValue != 0 ? (inputList[i] - prevValue) / prevValue : 0;
+            var returns = i >= length ? RoundedRangeRatio.Of(inputList[i], prevValue, prevValue) : 0;
             returnsList.Add(returns);
 
             var prevReturns1 = i >= 1 ? returnsList[i - 1] : 0;
@@ -632,7 +632,6 @@ public static partial class Calculations
     public static StockData CalculateUltimateTraderOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 10, int lbLength = 5, int smoothLength = 4, int rangeLength = 2)
     {
-        List<double> dxList = new(stockData.Count);
         List<double> dxiList = new(stockData.Count);
         List<double> trList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -650,10 +649,20 @@ public static partial class Calculations
             trList.Add(tr);
         }
 
-        stockData.SetCustomValues(trList);
-        var trStoList = CalculateStochasticOscillator(stockData, maType, length: lbLength).ChainedValues;
-        stockData.SetCustomValues(volumeList);
-        var vStoList = CalculateStochasticOscillator(stockData, maType, length: lbLength).ChainedValues;
+        List<double> NormalizeSeries(List<double> values)
+        {
+            var result = new List<double>(values.Count);
+            var window = new RollingMinMax(Math.Max(1, lbLength));
+            foreach (var value in values)
+            {
+                window.Add(value);
+                var range = window.Max - window.Min;
+                result.Add(range == 0 ? 0 : 100 * (value - window.Min) / range);
+            }
+            return result;
+        }
+        var trStoList = NormalizeSeries(trList);
+        var vStoList = NormalizeSeries(volumeList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var close = inputList[i];
@@ -677,10 +686,8 @@ public static partial class Calculations
             var bullScore = Math.Max(0, k1) + Math.Max(0, k2) + Math.Max(0, k3) + Math.Max(0, k4) + Math.Max(0, k5) + Math.Max(0, k6);
             var bearScore = -1 * (Math.Min(0, k1) + Math.Min(0, k2) + Math.Min(0, k3) + Math.Min(0, k4) + Math.Min(0, k5) + Math.Min(0, k6));
 
-            var dx = bearScore != 0 ? bullScore / bearScore : 0;
-            dxList.Add(dx);
-
-            var dxi = (2 * (100 - (100 / (1 + dx)))) - 100;
+            var totalScore = bullScore + bearScore;
+            var dxi = totalScore == 0 ? 0 : 100 * (bullScore - bearScore) / totalScore;
             dxiList.Add(dxi);
         }
 
@@ -828,54 +835,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWilliamsFractals(this StockData stockData, int length = 2)
     {
-        List<double> upFractalList = new(stockData.Count);
-        List<double> dnFractalList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
+        var up = new double[stockData.Count];
+        var down = new double[stockData.Count];
+        OscillatorCore.WilliamsFractals(SpanCompat.AsReadOnlySpan(highList), SpanCompat.AsReadOnlySpan(lowList), up, down, length);
+        var upFractalList = up.ToList();
+        var dnFractalList = down.ToList();
+        var signalsList = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevHigh = i >= length - 2 ? highList[i - (length - 2)] : 0;
-            var prevHigh1 = i >= length - 1 ? highList[i - (length - 1)] : 0;
-            var prevHigh2 = i >= length ? highList[i - length] : 0;
-            var prevHigh3 = i >= length + 1 ? highList[i - (length + 1)] : 0;
-            var prevHigh4 = i >= length + 2 ? highList[i - (length + 2)] : 0;
-            var prevHigh5 = i >= length + 3 ? highList[i - (length + 3)] : 0;
-            var prevHigh6 = i >= length + 4 ? highList[i - (length + 4)] : 0;
-            var prevHigh7 = i >= length + 5 ? highList[i - (length + 5)] : 0;
-            var prevHigh8 = i >= length + 8 ? highList[i - (length + 6)] : 0;
-            var prevLow = i >= length - 2 ? lowList[i - (length - 2)] : 0;
-            var prevLow1 = i >= length - 1 ? lowList[i - (length - 1)] : 0;
-            var prevLow2 = i >= length ? lowList[i - length] : 0;
-            var prevLow3 = i >= length + 1 ? lowList[i - (length + 1)] : 0;
-            var prevLow4 = i >= length + 2 ? lowList[i - (length + 2)] : 0;
-            var prevLow5 = i >= length + 3 ? lowList[i - (length + 3)] : 0;
-            var prevLow6 = i >= length + 4 ? lowList[i - (length + 4)] : 0;
-            var prevLow7 = i >= length + 5 ? lowList[i - (length + 5)] : 0;
-            var prevLow8 = i >= length + 8 ? lowList[i - (length + 6)] : 0;
-
-            var prevUpFractal = GetLastOrDefault(upFractalList);
-            double upFractal = (prevHigh4 < prevHigh2 && prevHigh3 < prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) ||
-                (prevHigh5 < prevHigh2 && prevHigh4 < prevHigh2 && prevHigh3 == prevHigh2 && prevHigh1 < prevHigh2) ||
-                (prevHigh6 < prevHigh2 && prevHigh5 < prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
-                prevHigh < prevHigh2) || (prevHigh7 < prevHigh2 && prevHigh6 < prevHigh2 && prevHigh5 == prevHigh2 && prevHigh4 == prevHigh2 &&
-                prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 && prevHigh < prevHigh2) || (prevHigh8 < prevHigh2 && prevHigh7 < prevHigh2 &&
-                prevHigh6 == prevHigh2 && prevHigh5 <= prevHigh2 && prevHigh4 == prevHigh2 && prevHigh3 <= prevHigh2 && prevHigh1 < prevHigh2 &&
-                prevHigh < prevHigh2) ? 1 : 0;
-            upFractalList.Add(upFractal);
-
-            var prevDnFractal = GetLastOrDefault(dnFractalList);
-            double dnFractal = (prevLow4 > prevLow2 && prevLow3 > prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow5 > prevLow2 &&
-                prevLow4 > prevLow2 && prevLow3 == prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow6 > prevLow2 &&
-                prevLow5 > prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ||
-                (prevLow7 > prevLow2 && prevLow6 > prevLow2 && prevLow5 == prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 &&
-                prevLow1 > prevLow2 && prevLow > prevLow2) || (prevLow8 > prevLow2 && prevLow7 > prevLow2 && prevLow6 == prevLow2 &&
-                prevLow5 >= prevLow2 && prevLow4 == prevLow2 && prevLow3 >= prevLow2 && prevLow1 > prevLow2 && prevLow > prevLow2) ? 1 : 0;
-            dnFractalList.Add(dnFractal);
-
-            var signal = GetCompareSignal(upFractal - dnFractal, prevUpFractal - prevDnFractal);
-            signalsList?.Add(signal);
-        }
+            signalsList?.Add(GetCompareSignal(up[i] - down[i], i == 0 ? 0 : up[i - 1] - down[i - 1]));
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "UpFractal", upFractalList },
@@ -1013,13 +981,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var callerSeries = stockData.CaptureInputSeries();
+        var deviations = GetStandardDeviationList(inputList, fastLength);
         var macd1List = CalculateMovingAverageConvergenceDivergence(stockData, fastLength: fastLength, slowLength: slowLength).ChainedValues;
-        // The explosion line is the Bollinger width of the prices, not of the MACD just published.
-        stockData.RestoreInputSeries(callerSeries);
-        var bbList = CalculateBollingerBands(stockData, length: fastLength);
-        var upperBollingerBandList = bbList.ChainedOutputs["UpperBand"];
-        var lowerBollingerBandList = bbList.ChainedOutputs["LowerBand"];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1045,8 +1008,6 @@ public static partial class Calculations
             var currentMacd2 = macd2List[i];
             var currentMacd3 = macd3List[i];
             var currentMacd4 = macd4List[i];
-            var currentUpperBB = upperBollingerBandList[i];
-            var currentLowerBB = lowerBollingerBandList[i];
 
             var t1 = (currentMacd1 - currentMacd2) * sensitivity;
             t1List.Add(t1);
@@ -1055,7 +1016,7 @@ public static partial class Calculations
             t2List.Add(t2);
 
             var prevE1 = GetLastOrDefault(e1List);
-            var e1 = currentUpperBB - currentLowerBB;
+            var e1 = 4 * deviations[i];
             e1List.Add(e1);
 
             var prevTrendUp = GetLastOrDefault(trendUpList);
@@ -1265,6 +1226,7 @@ public static partial class Calculations
     public static StockData CalculateVervoortSmoothedOscillator(this StockData stockData,
         int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
     {
+        using var bandPosition = !Builder.Compute.ComponentAverage.HasOverrides ? new Streaming.VervoortBandPosition(length1, length3, smoothLength, stdDevMult) : null;
         List<double> rainbowList = new(stockData.Count);
         List<double> zlrbList = new(stockData.Count);
         List<double> zlrbpercbList = new(stockData.Count);
@@ -1337,7 +1299,8 @@ public static partial class Calculations
             var lowest = lowestList[i];
 
             var prevZlrbpercb = GetLastOrDefault(zlrbpercbList);
-            var zlrbpercb = hwidth != 0 ? (tz + (stdDevMult * hwidth) - wmatz) / (2 * stdDevMult * hwidth * 100) : 0;
+            var zlrbpercb = bandPosition is not null ? bandPosition.Next(closeList[i], true)
+                : stdDevMult * hwidth != 0 ? 100 * (tz + stdDevMult * hwidth - wmatz) / (2 * stdDevMult * hwidth) : 0;
             zlrbpercbList.Add(zlrbpercb);
 
             var rbc = (rainbow + currentTypicalPrice) / 2;
@@ -1632,7 +1595,7 @@ public static partial class Calculations
                 countLe = 0;
                 for (var j = 0; j < aRingCount; j++)
                 {
-                    if (aRing[j] <= a)
+                    if (aRing[j] <= VaradiRank.InclusiveBoundary(a))
                     {
                         countLe++;
                     }
@@ -1641,7 +1604,7 @@ public static partial class Calculations
             else
             {
                 aWindow!.Add(prevA);
-                countLe = aWindow.CountLessThanOrEqual(a);
+                countLe = aWindow.CountLessThanOrEqual(VaradiRank.InclusiveBoundary(a));
             }
 
             var dvo = MinOrMax(countLe / (double)length * 100, 100, 0);
@@ -2105,9 +2068,9 @@ public static partial class Calculations
             var prevTr1 = i >= 1 ? trList[i - 1] : 0;
             var prevTr2 = i >= 2 ? trList[i - 2] : 0;
             var ltMa = currentEma200 != 0 ? 0.3 * 100 * (currentPrice - currentEma200) / currentEma200 : 0;
-            var ltRoc = 0.3 * 100 * currentRoc125;
+            var ltRoc = 0.3 * currentRoc125;
             var mtMa = currentEma50 != 0 ? 0.15 * 100 * (currentPrice - currentEma50) / currentEma50 : 0;
-            var mtRoc = 0.15 * 100 * currentRoc20;
+            var mtRoc = 0.15 * currentRoc20;
             var currentValue = currentPpoHistogram;
             var prevValue = i >= length8 ? ppoHistList[i - length8] : 0;
             var slope = length8 != 0 ? MinPastValues(i, length8, currentValue - prevValue) / length8 : 0;
@@ -2618,8 +2581,8 @@ public static partial class Calculations
             var prevKStoRsi = i >= 1 ? stoRsiKList[i - 1] : 0;
             var dStoRsi = stoRsiDList[i];
             var prevDStoRsi = i >= 1 ? stoRsiDList[i - 1] : 0;
-            var upTrend = currentValue > ma50;
-            var dnTrend = currentValue < ma50;
+            var upTrend = TechnicalRatingComparison.Compare(currentValue, ma50) > 0;
+            var dnTrend = TechnicalRatingComparison.Compare(currentValue, ma50) < 0;
             var wr = williamsPctList[i];
             var prevWr = i >= 1 ? williamsPctList[i - 1] : 0;
             var bullPower = bullPowerList[i];
@@ -2629,36 +2592,36 @@ public static partial class Calculations
             var uo = uoList[i];
 
             double maRating = 0;
-            maRating += currentValue > ma10 ? 1 : currentValue < ma10 ? -1 : 0;
-            maRating += currentValue > ma20 ? 1 : currentValue < ma20 ? -1 : 0;
-            maRating += currentValue > ma30 ? 1 : currentValue < ma30 ? -1 : 0;
-            maRating += currentValue > ma50 ? 1 : currentValue < ma50 ? -1 : 0;
-            maRating += currentValue > ma100 ? 1 : currentValue < ma100 ? -1 : 0;
-            maRating += currentValue > ma200 ? 1 : currentValue < ma200 ? -1 : 0;
-            maRating += currentValue > hullMa ? 1 : currentValue < hullMa ? -1 : 0;
-            maRating += currentValue > vwma ? 1 : currentValue < vwma ? -1 : 0;
-            maRating += leadLine1 > leadLine2 && currentValue > leadLine1 && currentValue < baseLine && prevValue < conLine && 
-                currentValue > conLine ? 1 : leadLine2 > leadLine1 &&
-                currentValue < leadLine2 && currentValue > baseLine && prevValue > conLine && currentValue < conLine ? -1 : 0;
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma10);
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma20);
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma30);
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma50);
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma100);
+            maRating += TechnicalRatingComparison.Compare(currentValue, ma200);
+            maRating += TechnicalRatingComparison.Compare(currentValue, hullMa);
+            maRating += TechnicalRatingComparison.Compare(currentValue, vwma);
+            maRating += TechnicalRatingComparison.Compare(leadLine1, leadLine2) > 0 && TechnicalRatingComparison.Compare(currentValue, leadLine1) > 0 && TechnicalRatingComparison.Compare(currentValue, baseLine) < 0 && TechnicalRatingComparison.Compare(prevValue, conLine) < 0 &&
+                TechnicalRatingComparison.Compare(currentValue, conLine) > 0 ? 1 : TechnicalRatingComparison.Compare(leadLine2, leadLine1) > 0 &&
+                TechnicalRatingComparison.Compare(currentValue, leadLine2) < 0 && TechnicalRatingComparison.Compare(currentValue, baseLine) > 0 && TechnicalRatingComparison.Compare(prevValue, conLine) > 0 && TechnicalRatingComparison.Compare(currentValue, conLine) < 0 ? -1 : 0;
             maRating /= 9;
             maRatingList.Add(maRating);
 
             double oscRating = 0;
-            oscRating += rsi < 30 && prevRsi < rsi ? 1 : rsi > 70 && prevRsi > rsi ? -1 : 0;
-            oscRating += kSto < 20 && dSto < 20 && kSto > dSto && prevKSto < prevDSto ? 1 : kSto > 80 && dSto > 80 && kSto < dSto && 
-                prevKSto > prevDSto ? -1 : 0;
-            oscRating += cci < -100 && cci > prevCci ? 1 : cci > 100 && cci < prevCci ? -1 : 0;
-            oscRating += adx > 20 && prevAdxPlus < prevAdxMinus && adxPlus > adxMinus ? 1 : adx > 20 && prevAdxPlus > prevAdxMinus && 
-                adxPlus < adxMinus ? -1 : 0;
-            oscRating += (ao > 0 && prevAo1 < 0) || (ao > 0 && prevAo1 > 0 && ao > prevAo1 && prevAo2 > prevAo1) ? 1 : 
-                (ao < 0 && prevAo1 > 0) || (ao < 0 && prevAo1 < 0 && ao < prevAo1 && prevAo2 < prevAo1) ? -1 : 0;
-            oscRating += mom > prevMom ? 1 : mom < prevMom ? -1 : 0;
-            oscRating += macd > macdSig ? 1 : macd < macdSig ? -1 : 0;
-            oscRating += dnTrend && kStoRsi < 20 && dStoRsi < 20 && kStoRsi > dStoRsi && prevKStoRsi < prevDStoRsi ? 1 : upTrend && 
-                kStoRsi > 80 && dStoRsi > 80 && kStoRsi < dStoRsi && prevKStoRsi > prevDStoRsi ? -1 : 0;
-            oscRating += wr < -80 && wr > prevWr ? 1 : wr > -20 && wr < prevWr ? -1 : 0;
-            oscRating += upTrend && bearPower < 0 && bearPower > prevBearPower ? 1 : dnTrend && bullPower > 0 && bullPower < prevBullPower ? -1 : 0;
-            oscRating += uo > 70 ? 1 : uo < 30 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(rsi, 30) < 0 && TechnicalRatingComparison.Compare(prevRsi, rsi) < 0 ? 1 : TechnicalRatingComparison.Compare(rsi, 70) > 0 && TechnicalRatingComparison.Compare(prevRsi, rsi) > 0 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(kSto, 20) < 0 && TechnicalRatingComparison.Compare(dSto, 20) < 0 && TechnicalRatingComparison.Compare(kSto, dSto) > 0 && TechnicalRatingComparison.Compare(prevKSto, prevDSto) < 0 ? 1 : TechnicalRatingComparison.Compare(kSto, 80) > 0 && TechnicalRatingComparison.Compare(dSto, 80) > 0 && TechnicalRatingComparison.Compare(kSto, dSto) < 0 &&
+                TechnicalRatingComparison.Compare(prevKSto, prevDSto) > 0 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(cci, -100) < 0 && TechnicalRatingComparison.Compare(cci, prevCci) > 0 ? 1 : TechnicalRatingComparison.Compare(cci, 100) > 0 && TechnicalRatingComparison.Compare(cci, prevCci) < 0 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(adx, 20) > 0 && TechnicalRatingComparison.Compare(prevAdxPlus, prevAdxMinus) < 0 && TechnicalRatingComparison.Compare(adxPlus, adxMinus) > 0 ? 1 : TechnicalRatingComparison.Compare(adx, 20) > 0 && TechnicalRatingComparison.Compare(prevAdxPlus, prevAdxMinus) > 0 &&
+                TechnicalRatingComparison.Compare(adxPlus, adxMinus) < 0 ? -1 : 0;
+            oscRating += (TechnicalRatingComparison.Compare(ao, 0) > 0 && TechnicalRatingComparison.Compare(prevAo1, 0) < 0) || (TechnicalRatingComparison.Compare(ao, 0) > 0 && TechnicalRatingComparison.Compare(prevAo1, 0) > 0 && TechnicalRatingComparison.Compare(ao, prevAo1) > 0 && TechnicalRatingComparison.Compare(prevAo2, prevAo1) > 0) ? 1 :
+                (TechnicalRatingComparison.Compare(ao, 0) < 0 && TechnicalRatingComparison.Compare(prevAo1, 0) > 0) || (TechnicalRatingComparison.Compare(ao, 0) < 0 && TechnicalRatingComparison.Compare(prevAo1, 0) < 0 && TechnicalRatingComparison.Compare(ao, prevAo1) < 0 && TechnicalRatingComparison.Compare(prevAo2, prevAo1) < 0) ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(mom, prevMom);
+            oscRating += TechnicalRatingComparison.Compare(macd, macdSig);
+            oscRating += dnTrend && TechnicalRatingComparison.Compare(kStoRsi, 20) < 0 && TechnicalRatingComparison.Compare(dStoRsi, 20) < 0 && TechnicalRatingComparison.Compare(kStoRsi, dStoRsi) > 0 && TechnicalRatingComparison.Compare(prevKStoRsi, prevDStoRsi) < 0 ? 1 : upTrend &&
+                TechnicalRatingComparison.Compare(kStoRsi, 80) > 0 && TechnicalRatingComparison.Compare(dStoRsi, 80) > 0 && TechnicalRatingComparison.Compare(kStoRsi, dStoRsi) < 0 && TechnicalRatingComparison.Compare(prevKStoRsi, prevDStoRsi) > 0 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(wr, -80) < 0 && TechnicalRatingComparison.Compare(wr, prevWr) > 0 ? 1 : TechnicalRatingComparison.Compare(wr, -20) > 0 && TechnicalRatingComparison.Compare(wr, prevWr) < 0 ? -1 : 0;
+            oscRating += upTrend && TechnicalRatingComparison.Compare(bearPower, 0) < 0 && TechnicalRatingComparison.Compare(bearPower, prevBearPower) > 0 ? 1 : dnTrend && TechnicalRatingComparison.Compare(bullPower, 0) > 0 && TechnicalRatingComparison.Compare(bullPower, prevBullPower) < 0 ? -1 : 0;
+            oscRating += TechnicalRatingComparison.Compare(uo, 70) > 0 ? 1 : TechnicalRatingComparison.Compare(uo, 30) < 0 ? -1 : 0;
             oscRating /= 11;
             oscRatingList.Add(oscRating);
 
@@ -3121,7 +3084,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= length2 - 1 ? inputList[i - (length2 - 1)] : 0;
             var moveSe = MinPastValues(i, length2 - 1, currentValue - prevValue);
-            var avgMoveSe = moveSe / (length2 - 1);
+            var avgMoveSe = length2 > 1 ? moveSe / (length2 - 1) : 0;
 
             var aaSe = prevValue != 0 ? avgMoveSe / prevValue : 0;
             aaSeList.Add(aaSe);
@@ -3720,17 +3683,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var s = 0.01 * 100 * ((double)1 / length);
+        var kernel = new Streaming.SimpleLinesKernel(length, mult);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevA = i >= 1 ? aList[i - 1] : currentValue;
             var prevA2 = i >= 2 ? aList[i - 2] : currentValue;
-            var x = currentValue + ((prevA - prevA2) * mult);
-
-            prevA = i >= 1 ? aList[i - 1] : x;
-            var a = x > prevA + s ? prevA + s : x < prevA - s ? prevA - s : prevA;
+            var a = kernel.Next(currentValue, true);
             aList.Add(a);
 
             var signal = GetCompareSignal(a - prevA, prevA - prevA2);

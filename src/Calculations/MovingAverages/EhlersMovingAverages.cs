@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -158,7 +158,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var halfP = MinOrMax((int)Math.Ceiling((double)length / 2));
+        length = Math.Max(2, length);
+        length = checked(length + (length & 1));
+        var halfP = length / 2;
+        double dimension = 0;
 
         var (highestList1, lowestList1) = GetMaxAndMinValuesList(highList, lowList, length);
         var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList, lowList, halfP);
@@ -178,10 +181,11 @@ public static partial class Calculations
             var n3 = (highestHigh1 - lowestLow1) / length;
             var n1 = (highestHigh2 - lowestLow2) / halfP;
             var n2 = (highestHigh3 - lowestLow3) / halfP;
-            var dm = n1 > 0 && n2 > 0 && n3 > 0 ? (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2) : 0;
+            if (i >= length - 1 && n1 > 0 && n2 > 0 && n3 > 0)
+                dimension = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
 
-            var alpha = MinOrMax(Exp(-4.6 * (dm - 1)), 1, 0.01);
-            var filter = (alpha * currentValue) + ((1 - alpha) * prevFilter);
+            var alpha = MinOrMax(Exp(-4.6 * (dimension - 1)), 1, 0.01);
+            var filter = i < length ? currentValue : (alpha * currentValue) + ((1 - alpha) * prevFilter);
             filterList.Add(filter);
 
             var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter);
@@ -259,20 +263,20 @@ public static partial class Calculations
                 alpha = (double)2 / (len + 1);
                 var value1 = GetMedian(windowTree, Math.Min(len, available));
                 value2 = (alpha * smth) + ((1 - alpha) * prevV2);
-                value3 = value1 != 0 ? Math.Abs(value1 - value2) / value1 : value3;
+                value3 = value1 != 0 ? Math.Abs(value1 - value2) / Math.Abs(value1) : value3;
                 len -= 2;
 
-                if (value3 > threshold && len > 0 && len < available)
+                if (value3 > threshold && len > 0)
                 {
-                    var firstIndex = windowStart + removedOffset;
-                    var secondIndex = firstIndex + 1;
-                    var firstValue = smthList[firstIndex];
-                    var secondValue = smthList[secondIndex];
-                    windowTree.Remove(firstValue);
-                    windowTree.Remove(secondValue);
-                    removedValues.Add(firstValue);
-                    removedValues.Add(secondValue);
-                    removedOffset += 2;
+                    // Startup can cross from an even available count to an odd requested count.
+                    // Remove only the actual excess, so the median ranks describe the retained window.
+                    var excess = available - removedOffset - Math.Min(len, available);
+                    for (var drop = 0; drop < excess; drop++)
+                    {
+                        var expired = smthList[windowStart + removedOffset++];
+                        windowTree.Remove(expired);
+                        removedValues.Add(expired);
+                    }
                 }
             }
             foreach (var removedValue in removedValues)
@@ -311,12 +315,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV2(this StockData stockData, int length = 10)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
+        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
         var c2 = b;
         var c3 = -a * a;
         var c1 = 1 - c2 - c3;
@@ -354,32 +359,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleSuperSmootherFilter(this StockData stockData, int length = 20)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var arg = MinOrMax(Math.PI / length, 0.99, 0.01);
-        var a1 = Exp(-arg);
-        var b1 = 2 * a1 * Math.Cos(1.738 * arg);
-        var c1 = a1 * a1;
-        var coef2 = b1 + c1;
-        var coef3 = -(c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = 1 - coef2 - coef3 - coef4;
-
+        var kernel = new Streaming.ButterworthThreePoleKernel(length, smoothInput: false);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? filtList[i - 3] : 0;
-
-            var filt = i < 4 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2) + (coef4 * prevFilter3);
+            var filt = kernel.Next(currentValue, true);
             filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetCompareSignal(currentValue - filt, prevValue - prevFilter1));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -401,12 +394,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MinOrMax(MathHelper.Sqrt2 * 1.25 * Math.PI / length, 0.99, 0.01));
+        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * 1.25 * Math.PI / length);
         var c2 = b;
         var c3 = -a * a;
         var c1 = 1 - c2 - c3;
@@ -444,12 +438,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
+        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
+        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
         var c2 = b;
         var c3 = -a * a;
         var c1 = (1 - b + Pow(a, 2)) / 4;
@@ -460,9 +455,9 @@ public static partial class Calculations
             var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
             var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
             var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
+            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
 
-            var filt = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue3)) + (c2 * prevFilter1) + (c3 * prevFilter2);
+            var filt = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
             filtList.Add(filt);
 
             var signal = GetCompareSignal(currentValue - filt, prevValue1 - prevFilter1);
@@ -488,12 +483,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a = Exp(MinOrMax(-Math.PI / length, -0.01, -0.99));
-        var b = 2 * a * Math.Cos(MinOrMax(1.738 * Math.PI / length, 0.99, 0.01));
+        var a = Exp(-Math.PI / length);
+        var b = 2 * a * Math.Cos(1.738 * Math.PI / length);
         var c = a * a;
         var d2 = b + c;
         var d3 = -(c + (b * c));
@@ -534,30 +530,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(MinOrMax(-Math.PI / length, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MinOrMax(1.738 * Math.PI / length, 0.99, 0.01));
-        var c1 = a1 * a1;
-        var coef2 = b1 + c1;
-        var coef3 = -(c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = (1 - b1 + c1) * (1 - c1) / 8;
+        var kernel = new Streaming.ButterworthThreePoleKernel(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
             var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? filtList[i - 3] : 0;
-
-            var filt = i < 4 ? currentValue : (coef1 * (currentValue + (3 * prevValue1) + (3 * prevValue2) + prevValue3)) + (coef2 * prevFilter1) +
-                                              (coef3 * prevFilter2) + (coef4 * prevFilter3);
+            var filt = kernel.Next(currentValue, true);
             filtList.Add(filt);
 
             var signal = GetCompareSignal(currentValue - filt, prevValue1 - prevFilter1);
@@ -595,15 +580,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var cosVal = MinOrMax(2 * Math.PI / length, 0.99, 0.01);
-        var beta1 = (1 - Math.Cos(cosVal)) / (Pow(2, (double)1 / 1) - 1);
-        var beta2 = (1 - Math.Cos(cosVal)) / (Pow(2, (double)1 / 2) - 1);
-        var beta3 = (1 - Math.Cos(cosVal)) / (Pow(2, (double)1 / 3) - 1);
-        var beta4 = (1 - Math.Cos(cosVal)) / (Pow(2, (double)1 / 4) - 1);
-        var alpha1 = -beta1 + Sqrt(Pow(beta1, 2) + (2 * beta1));
-        var alpha2 = -beta2 + Sqrt(Pow(beta2, 2) + (2 * beta2));
-        var alpha3 = -beta3 + Sqrt(Pow(beta3, 2) + (2 * beta3));
-        var alpha4 = -beta4 + Sqrt(Pow(beta4, 2) + (2 * beta4));
+        var alpha1 = EhlersGaussian.Gain(length, 1);
+        var alpha2 = EhlersGaussian.Gain(length, 2);
+        var alpha3 = EhlersGaussian.Gain(length, 3);
+        var alpha4 = EhlersGaussian.Gain(length, 4);
+        var stages1 = new double[1];
+        var stages2 = new double[2];
+        var stages3 = new double[3];
+        var stages4 = new double[4];
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -611,27 +595,15 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevGf1 = i >= 1 ? gf1List[i - 1] : 0;
             var prevGf2_1 = i >= 1 ? gf2List[i - 1] : 0;
-            var prevGf2_2 = i >= 2 ? gf2List[i - 2] : 0;
             var prevGf3_1 = i >= 1 ? gf3List[i - 1] : 0;
             var prevGf4_1 = i >= 1 ? gf4List[i - 1] : 0;
-            var prevGf3_2 = i >= 2 ? gf3List[i - 2] : 0;
-            var prevGf4_2 = i >= 2 ? gf4List[i - 2] : 0;
-            var prevGf3_3 = i >= 3 ? gf3List[i - 3] : 0;
-            var prevGf4_3 = i >= 3 ? gf4List[i - 3] : 0;
-            var prevGf4_4 = i >= 4 ? gf4List[i - 4] : 0;
-
-            var gf1 = (alpha1 * currentValue) + ((1 - alpha1) * prevGf1);
+            var gf1 = EhlersGaussian.Next(currentValue, alpha1, stages1, true);
+            var gf2 = EhlersGaussian.Next(currentValue, alpha2, stages2, true);
+            var gf3 = EhlersGaussian.Next(currentValue, alpha3, stages3, true);
+            var gf4 = EhlersGaussian.Next(currentValue, alpha4, stages4, true);
             gf1List.Add(gf1);
-
-            var gf2 = (Pow(alpha2, 2) * currentValue) + (2 * (1 - alpha2) * prevGf2_1) - (Pow(1 - alpha2, 2) * prevGf2_2);
             gf2List.Add(gf2);
-
-            var gf3 = (Pow(alpha3, 3) * currentValue) + (3 * (1 - alpha3) * prevGf3_1) - (3 * Pow(1 - alpha3, 2) * prevGf3_2) +
-                      (Pow(1 - alpha3, 3) * prevGf3_3);
             gf3List.Add(gf3);
-
-            var gf4 = (Pow(alpha4, 4) * currentValue) + (4 * (1 - alpha4) * prevGf4_1) - (6 * Pow(1 - alpha4, 2) * prevGf4_2) +
-                (4 * Pow(1 - alpha4, 3) * prevGf4_3) - (Pow(1 - alpha4, 4) * prevGf4_4);
             gf4List.Add(gf4);
 
             var gf = resolvedPoles switch { 1 => gf1, 2 => gf2, 3 => gf3, _ => gf4 };
@@ -752,12 +724,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV1(this StockData stockData, int length = 15)
     {
+        length = Math.Max(2, length);
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
+        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length);
+        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
         var coef2 = b1;
         var coef3 = -a1 * a1;
         var coef1 = 1 - coef2 - coef3;
@@ -943,7 +916,7 @@ public static partial class Calculations
             var highestHigh = diffWindow.Max;
             var lowestLow = diffWindow.Min;
 
-            var mid = highestHigh - lowestLow != 0 ? (diff - lowestLow) / (highestHigh - lowestLow) : 0;
+            var mid = AdaptiveLaguerreRank.Calculate(diff, lowestLow, highestHigh, currentValue, prevFilter);
             midList.Add(mid);
             midMedian.Add(mid);
 
@@ -1380,34 +1353,15 @@ public static partial class Calculations
         List<double> filtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The Hann window weights (1 - cos(2π·j/(length+1))) and their sum are constant across bars — precompute.
-        var cosWeights = new double[Math.Max(length, 0) + 1];
-        double coefSum = 0;
-        for (var j = 1; j <= length; j++)
-        {
-            cosWeights[j] = 1 - Math.Cos(2 * Math.PI * ((double)j / (length + 1)));
-            coefSum += cosWeights[j];
-        }
-
+        using var mean = new HannWindowMean(stockData.Count == 0 ? 1 : length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var prevFilt = i >= 1 ? filtList[i - 1] : 0;
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double filtSum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevV = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                filtSum += cosWeights[j] * prevV;
-            }
-
-            var filt = coefSum != 0 ? filtSum / coefSum : 0;
+            var prevFilt = GetLastOrDefault(filtList);
+            var filt = mean.Next(currentValue, true);
             filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilt);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetCompareSignal(currentValue - filt, prevValue - prevFilt));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -1533,7 +1487,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var lag = MinOrMax((int)Math.Floor((double)(length - 1) / 2));
+        var lag = Math.Max(0, (length - 1) / 2);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1611,8 +1565,8 @@ public static partial class Calculations
             var longRms = longMa > 0 ? Sqrt(longMa) : 0;
             var kk = longRms != 0 ? MinOrMax(0.2 * shortRms / longRms, 0.99, 0.01) : 0;
 
-            var prevVidya = GetLastOrDefault(vidyaList);
-            var vidya = (kk * currentValue) + ((1 - kk) * prevVidya);
+            var prevVidya = i > 0 ? vidyaList[i - 1] : currentValue;
+            var vidya = prevVidya + (kk * (currentValue - prevVidya));
             vidyaList.Add(vidya);
 
             var signal = GetCompareSignal(currentValue - vidya, prevValue - prevVidya);
@@ -1792,55 +1746,55 @@ public static partial class Calculations
             var prevWave6_1 = i >= 1 ? wave6List[i - 1] : 0;
             var prevWave6_2 = i >= 2 ? wave6List[i - 2] : 0;
 
-            var v1Neg2 = (0.080778 * (currentValue + (1.907 * prevValue1) + prevValue2)) + (0.293 * prevV1Neg2_1) - (0.063 * prevV1Neg2_2);
+            var v1Neg2 = (EhlersChebyshevGains.Minus2 * (currentValue + (1.907 * prevValue1) + prevValue2)) + (0.293 * prevV1Neg2_1) - (0.063 * prevV1Neg2_2);
             v1Neg2List.Add(v1Neg2);
 
             var waveNeg2 = v1Neg2 + (0.513 * prevV1Neg2_1) + prevV1Neg2_2 + (0.451 * prevWaveNeg2_1) - (0.481 * prevWaveNeg2_2);
             waveNeg2List.Add(waveNeg2);
 
-            var v1Neg1 = (0.021394 * (currentValue + (1.777 * prevValue1) + prevValue2)) + (0.731 * prevV1Neg1_1) - (0.166 * prevV1Neg1_2);
+            var v1Neg1 = (EhlersChebyshevGains.Minus1 * (currentValue + (1.777 * prevValue1) + prevValue2)) + (0.731 * prevV1Neg1_1) - (0.166 * prevV1Neg1_2);
             v1Neg1List.Add(v1Neg1);
 
             var waveNeg1 = v1Neg1 + (0.977 * prevV1Neg1_1) + prevV1Neg1_2 + (1.008 * prevWaveNeg1_1) - (0.561 * prevWaveNeg1_2);
             waveNeg1List.Add(waveNeg1);
 
-            var v10 = (0.0095822 * (currentValue + (1.572 * prevValue1) + prevValue2)) + (1.026 * prevV10_1) - (0.282 * prevV10_2);
+            var v10 = (EhlersChebyshevGains.Zero * (currentValue + (1.572 * prevValue1) + prevValue2)) + (1.026 * prevV10_1) - (0.282 * prevV10_2);
             v10List.Add(v10);
 
             var wave0 = v10 + (0.356 * prevV10_1) + prevV10_2 + (1.329 * prevWave0_1) - (0.644 * prevWave0_2);
             wave0List.Add(wave0);
 
-            var v11 = (0.00461 * (currentValue + (1.192 * prevValue1) + prevValue2)) + (1.281 * prevV11_1) - (0.426 * prevV11_2);
+            var v11 = (EhlersChebyshevGains.One * (currentValue + (1.192 * prevValue1) + prevValue2)) + (1.281 * prevV11_1) - (0.426 * prevV11_2);
             v11List.Add(v11);
 
             var wave1 = v11 - (0.384 * prevV11_1) + prevV11_2 + (1.565 * prevWave1_1) - (0.729 * prevWave1_2);
             wave1List.Add(wave1);
 
-            var v12 = (0.0026947 * (currentValue + (0.681 * prevValue1) + prevValue2)) + (1.46 * prevV12_1) - (0.543 * prevV12_2);
+            var v12 = (EhlersChebyshevGains.Two * (currentValue + (0.681 * prevValue1) + prevValue2)) + (1.46 * prevV12_1) - (0.543 * prevV12_2);
             v12List.Add(v12);
 
             var wave2 = v12 - (0.966 * prevV12_1) + prevV12_2 + (1.703 * prevWave2_1) - (0.793 * prevWave2_2);
             wave2List.Add(wave2);
 
-            var v13 = (0.0017362 * (currentValue + (0.012 * prevValue1) + prevValue2)) + (1.606 * prevV13_1) - (0.65 * prevV13_2);
+            var v13 = (EhlersChebyshevGains.Three * (currentValue + (0.012 * prevValue1) + prevValue2)) + (1.606 * prevV13_1) - (0.65 * prevV13_2);
             v13List.Add(v13);
 
             var wave3 = v13 - (1.408 * prevV13_1) + prevV13_2 + (1.801 * prevWave3_1) - (0.848 * prevWave3_2);
             wave3List.Add(wave3);
 
-            var v14 = (0.0013738 * (currentValue - (0.669 * prevValue1) + prevValue2)) + (1.716 * prevV14_1) - (0.74 * prevV14_2);
+            var v14 = (EhlersChebyshevGains.Four * (currentValue - (0.669 * prevValue1) + prevValue2)) + (1.716 * prevV14_1) - (0.74 * prevV14_2);
             v14List.Add(v14);
 
             var wave4 = v14 - (1.685 * prevV14_1) + prevV14_2 + (1.866 * prevWave4_1) - (0.89 * prevWave4_2);
             wave4List.Add(wave4);
 
-            var v15 = (0.0010794 * (currentValue - (1.226 * prevValue1) + prevValue2)) + (1.8 * prevV15_1) - (0.811 * prevV15_2);
+            var v15 = (EhlersChebyshevGains.Five * (currentValue - (1.226 * prevValue1) + prevValue2)) + (1.8 * prevV15_1) - (0.811 * prevV15_2);
             v15List.Add(v15);
 
             var wave5 = v15 - (1.842 * prevV15_1) + prevV15_2 + (1.91 * prevWave5_1) - (0.922 * prevWave5_2);
             wave5List.Add(wave5);
 
-            var v16 = (0.001705 * (currentValue - (1.659 * prevValue1) + prevValue2)) + (1.873 * prevV16_1) - (0.878 * prevV16_2);
+            var v16 = (EhlersChebyshevGains.Six * (currentValue - (1.659 * prevValue1) + prevValue2)) + (1.873 * prevV16_1) - (0.878 * prevV16_2);
             v16List.Add(v16);
 
             var wave6 = v16 - (1.957 * prevV16_1) + prevV16_2 + (1.946 * prevWave6_1) - (0.951 * prevWave6_2);
@@ -1936,7 +1890,7 @@ public static partial class Calculations
             for (var j = 0; j < length; j++)
             {
                 var prevV = i >= j ? inputList[i - j] : 0;
-                var sine = Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
+                var sine = length == 1 ? 1 : Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
                 filtSum += sine * prevV;
                 coefSum += sine;
             }
@@ -1967,41 +1921,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersTriangleMovingAverage(this StockData stockData, int length = 20)
     {
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var l2 = (double)length / 2;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevFilt = i >= 1 ? filtList[i - 1] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double filtSum = 0, coefSum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevV = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                var c = j < l2 ? j : j > l2 ? length + 1 - j : l2;
-                filtSum += c * prevV;
-                coefSum += c;
-            }
-
-            var filt = coefSum != 0 ? filtSum / coefSum : 0;
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilt);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Etma", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        var values = new double[inputList.Count];
+        Core.MovingAverageCore.EhlersTriangleMovingAverage(inputList.ToArray(), values, length);
+        var result = values.ToList();
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Length; i++)
+            signals?.Add(GetCompareSignal(inputList[i] - values[i], i == 0 ? 0 : inputList[i - 1] - values[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Etma", result } });
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(result);
         stockData.IndicatorName = IndicatorName.EhlersTriangleMovingAverage;
-
         return stockData;
     }
 }

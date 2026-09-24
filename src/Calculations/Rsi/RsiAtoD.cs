@@ -18,6 +18,9 @@ public static partial class Calculations
     public static StockData CalculateConnorsRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 2, int length2 = 3, int length3 = 100)
     {
+        length1 = Math.Max(1, length1);
+        length2 = Math.Max(1, length2);
+        length3 = Math.Max(1, length3);
         List<double> streakList = new(stockData.Count);
         List<double> tempList = new(stockData.Count);
         List<double> pctRankList = new(stockData.Count);
@@ -37,14 +40,14 @@ public static partial class Calculations
             // length3-bar rate of change of the RSI, read back from the RSI just published.
             var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
             tempList.Add(roc);
+            // Rank strictly against the preceding window before adding the current observation.
+            var count = rocOrder.CountLessThan(roc);
             rocOrder.Add(roc);
-
-            var count = Math.Max(0, rocOrder.CountLessThanOrEqual(roc) - 1);
             var pctRank = MinOrMax((double)count / length3 * 100, 100, 0);
             pctRankList.Add(pctRank);
 
             var prevStreak = GetLastOrDefault(streakList);
-            var streak = currentValue > prevValue ? prevStreak >= 0 ? prevStreak + 1 : 1 : currentValue < prevValue ? prevStreak <= 0 ?
+            var streak = i == 0 ? 0 : currentValue > prevValue ? prevStreak >= 0 ? prevStreak + 1 : 1 : currentValue < prevValue ? prevStreak <= 0 ?
                 prevStreak - 1 : -1 : 0;
             streakList.Add(streak);
         }
@@ -264,15 +267,19 @@ public static partial class Calculations
 
         var emaList = GetMovingAverageList(stockData, maType, smoothLength, inputList);
 
+        double residual = 0, previousPrice = 0;
+        var retention = 1 - 1d / Math.Max(1, smoothLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var r1 = emaList[i];
+            residual = maType == MovingAvgType.WildersSmoothingMethod
+                ? retention * (residual + (currentValue - previousPrice)) : currentValue - emaList[i];
+            previousPrice = currentValue;
 
-            var r2 = currentValue > r1 ? currentValue - r1 : 0;
+            var r2 = Math.Max(residual, 0);
             r2List.Add(r2);
 
-            var r3 = currentValue < r1 ? r1 - currentValue : 0;
+            var r3 = Math.Max(-residual, 0);
             r3List.Add(r3);
         }
 
@@ -418,9 +425,7 @@ public static partial class Calculations
         {
             var top = topEma2List[i];
             var bot = botEma2List[i];
-            var rs = bot != 0 ? MinOrMax(top / bot, 1, 0) : 0;
-
-            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
+            var rsi = bot == 0 ? 100 : top == 0 ? 0 : MinOrMax(100 * top / (top + bot), 100, 0);
             rsiList.Add(rsi);
         }
 

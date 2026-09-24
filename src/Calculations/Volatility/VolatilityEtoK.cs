@@ -140,7 +140,7 @@ public static partial class Calculations
         List<double> gcvList = new(stockData.Count);
         List<double> logList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum logSumWindow = new();
+        length = Math.Max(1, length);
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
 
         var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
@@ -156,10 +156,10 @@ public static partial class Calculations
 
             var log = (0.5 * Pow(logHl, 2)) - (((2 * Math.Log(2)) - 1) * Pow(logCo, 2));
             logList.Add(log);
-            logSumWindow.Add(log);
-
-            var logSum = logSumWindow.Sum(length);
-            var gcv = length != 0 && logSum != 0 ? Sqrt((double)i / length * logSum) : 0;
+            double logSum = 0;
+            if (i >= length - 1)
+                for (var j = i - length + 1; j <= i; j++) logSum += logList[j];
+            var gcv = Sqrt(logSum / length) * Sqrt(252);
             gcvList.Add(gcv);
         }
 
@@ -200,6 +200,8 @@ public static partial class Calculations
     public static StockData CalculateGopalakrishnanRangeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 5)
     {
+        // A logarithm base of one is undefined; use the smallest valid period.
+        length = Math.Max(2, length);
         List<double> gapoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
@@ -287,14 +289,15 @@ public static partial class Calculations
             devLogSqList.Add(devLogSq);
             devLogSqSumWindow.Add(devLogSq);
 
-            var devLogSqAvg = devLogSqSumWindow.Sum(length) / (length - 1);
+            // A single observation has no estimable sample variance; define its volatility as zero.
+            var devLogSqAvg = length > 1 ? devLogSqSumWindow.Sum(length) / (length - 1) : 0;
             var stdDevLog = devLogSqAvg >= 0 ? Sqrt(devLogSqAvg) : 0;
 
             var hv = stdDevLog * Sqrt(annualLength);
             hvList.Add(hv);
             hvOrder.Add(hv);
 
-            double count = hvOrder.CountLessThan(hv);
+            double count = hvOrder.CountLessThan(VolatilityRank.StrictBoundary(hv));
             var hvp = count / annualLength * 100;
             hvpList.Add(hvp);
         }

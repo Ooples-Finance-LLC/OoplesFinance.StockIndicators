@@ -1,4 +1,4 @@
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Helpers;
 
@@ -115,7 +115,8 @@ public sealed class ElderImpulseSystemState : IStreamingIndicatorState
         {
             var emaRising = trendEma > _prevTrendEma;
             var histogramRising = histogram > _prevHistogram;
-            impulse = emaRising && histogramRising ? 1 : !emaRising && !histogramRising ? -1 : 0;
+            impulse = emaRising && histogramRising ? 1
+                : trendEma < _prevTrendEma && histogram < _prevHistogram ? -1 : 0;
         }
 
         if (isFinal)
@@ -474,7 +475,7 @@ public sealed class VolumeZoneOscillatorState : IStreamingIndicatorState
 
         var signedEma = _signedVolume.GetNext(signed, isFinal);
         var totalEma = _totalVolume.GetNext(bar.Volume, isFinal);
-        var oscillator = totalEma != 0 ? signedEma / totalEma * 100 : 0;
+        var oscillator = RoundedMomentumRatio.Of(signedEma, totalEma);
 
         if (isFinal)
         {

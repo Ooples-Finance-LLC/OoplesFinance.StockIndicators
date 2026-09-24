@@ -2351,12 +2351,12 @@ public readonly struct McGinleyCore : IMovingAverageCore
 
 public readonly struct MhlmaCore : IMovingAverageCore
 {
-    public bool RequiresOhlc => true;
+    public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.SimpleMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(input, output, length);
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
-    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(high, low, output, length);
+    public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => MovingAverageCore.MiddleHighLowMovingAverage(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => ComputeOhlc(high, low, close, output, length);
     public void ComputeWithVolume(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length) => Compute(input, output, length);
 }

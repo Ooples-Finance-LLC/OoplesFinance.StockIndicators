@@ -1,0 +1,40 @@
+name: Critical correctness mutations
+
+on:
+  workflow_call:
+    inputs:
+      source-ref:
+        type: string
+        required: false
+        default: ''
+
+permissions:
+  contents: read
+
+jobs:
+  critical-mutations:
+    runs-on: windows-latest
+    timeout-minutes: 90
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          ref: ${{ inputs.source-ref }}
+          persist-credentials: false
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: |
+            8.x
+            10.x
+      - uses: actions/setup-python@v6
+        with:
+          python-version: '3.12'
+      - name: Verify mutation evidence accounting
+        run: python -m unittest discover -s tools/tests -v
+      - name: Require every critical fault to be detected
+        run: python tools/run_critical_mutations.py --output artifacts/correctness/mutations
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: critical-mutation-evidence
+          path: artifacts/correctness/mutations
+          if-no-files-found: error
