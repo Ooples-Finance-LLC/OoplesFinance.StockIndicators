@@ -1655,7 +1655,11 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { 1d, 2, 4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new MeanAbsoluteDeviationBands(3, 1), new[] { 0d, .5, 31d / 9 }, new[] { 0d, 0, 7d / 3 }, new[] { 0d, -.5, 11d / 9 });
-        Check(new MeanAbsoluteErrorBands(3), new[] { 1d, 1.5, 35d / 9 }, new[] { 0d, 0, 7d / 3 }, new[] { -1d, -1.5, 7d / 9 });
+        // The center is a published binary64 mean; accumulate errors against that rounded center.
+        var maeCenter = ReferenceFraction.FromDouble(7d / 3);
+        var maeWidth = (new ReferenceFraction(7) - maeCenter) / new ReferenceFraction(3);
+        Check(new MeanAbsoluteErrorBands(3), new[] { 1d, 1.5, (maeCenter + maeWidth).ToDouble() },
+            new[] { 0d, 0, 7d / 3 }, new[] { -1d, -1.5, (maeCenter - maeWidth).ToDouble() });
         var rms = Math.Sqrt(.625);
         Check(new RootMovingAverageSquaredErrorBands(2), new[] { 0d, 1.5 + rms, 3 + rms }, new[] { 0d, 1.5, 3 }, new[] { 0d, 1.5 - rms, 3 - rms });
         Check(new InterquartileRangeBands(3, 1), new[] { 1d, 3, 7 }, new[] { 1d, 1.5, 2.5 }, new[] { 1d, 0, -2 });

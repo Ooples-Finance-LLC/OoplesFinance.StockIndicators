@@ -1282,16 +1282,15 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
 {
     private readonly IMovingAverageSmoother _meanSmoother;
     private readonly StreamingInputResolver _input;
-    private readonly double _stdDevFactor;
-    private double _devSum;
-    private int _count;
+    private readonly ExactCumulativeErrorBands _errors;
 
     public MeanAbsoluteErrorBandsState(double stdDevFactor = 1,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
         var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDevFactor = stdDevFactor;
+        _errors = new ExactCumulativeErrorBands(stdDevFactor);
+        _meanSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1300,25 +1299,14 @@ public sealed class MeanAbsoluteErrorBandsState : IStreamingIndicatorState, IDis
     public void Reset()
     {
         _meanSmoother.Reset();
-        _devSum = 0;
-        _count = 0;
+        _errors.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
         var middle = _meanSmoother.Next(value, isFinal);
-        var dev = Math.Abs(value - middle);
-        var sum = _devSum + dev;
-        var maeDev = sum / (_count + 1);
-        var upper = middle + (maeDev * _stdDevFactor);
-        var lower = middle - (maeDev * _stdDevFactor);
-
-        if (isFinal)
-        {
-            _devSum = sum;
-            _count++;
-        }
+        var (upper, lower) = _errors.Next(value, middle, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

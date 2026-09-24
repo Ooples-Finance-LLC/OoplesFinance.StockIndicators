@@ -1313,12 +1313,12 @@ public static partial class Calculations
     {
         List<double> upperBandList = new(stockData.Count);
         List<double> lowerBandList = new(stockData.Count);
-        List<double> devList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double devSum = 0;
+        var errors = new ExactCumulativeErrorBands(stdDevFactor);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1327,17 +1327,13 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
-            var dev = Math.Abs(currentValue - middleBand);
-            devList.Add(dev);
-
-            devSum += dev;
-            var maeDev = devSum / (i + 1);
+            var bands = errors.Next(currentValue, middleBand, true);
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (maeDev * stdDevFactor);
+            var upperBand = bands.Upper;
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (maeDev * stdDevFactor);
+            var lowerBand = bands.Lower;
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
