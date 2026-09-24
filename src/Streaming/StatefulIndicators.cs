@@ -6113,7 +6113,9 @@ public sealed class ElderRayIndexState : IStreamingIndicatorState, IDisposable
     public ElderRayIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 13)
     {
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _ema = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(length)
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 

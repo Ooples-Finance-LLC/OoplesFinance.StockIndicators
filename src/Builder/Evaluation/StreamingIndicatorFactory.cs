@@ -122,6 +122,12 @@ internal static class StreamingIndicatorFactory
                 => new TripleExponentialMovingAverageState(length: tema.Length),
             IndicatorName.ZeroLagExponentialMovingAverage when spec.Options is ZlemaSpecOptions zlema
                 => new ZeroLagExponentialMovingAverageState(length: zlema.Length),
+            IndicatorName.ElderRayIndex when spec.Options is ElderRayIndexSpecOptions elder
+                => new ElderRayIndexState(elder.MaType, elder.Length),
+            IndicatorName.ElderRayIndex when spec.Options is ElderRayBullPowerSpecOptions elderBull
+                => new ElderRayIndexState(length: elderBull.Length),
+            IndicatorName.ElderRayIndex when spec.Options is ElderRayBearPowerSpecOptions elderBear
+                => new ElderRayIndexState(length: elderBear.Length),
             IndicatorName.AbsolutePriceOscillator when spec.Options is ApoSpecOptions apo
                 => new AbsolutePriceOscillatorState(apo.MaType, apo.FastLength, apo.SlowLength),
             IndicatorName.AbsolutePriceOscillator when spec.Options is AbsolutePriceOscillatorSpecOptions absolute

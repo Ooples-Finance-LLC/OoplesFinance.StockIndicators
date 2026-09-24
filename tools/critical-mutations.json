@@ -2371,5 +2371,32 @@
     "before": "? ((length - 1d) / 2 - lag) / length * sigma",
     "after": "? ((length - 1d - lag) / length - offset * ((length - 1d) / length)) * sigma",
     "filter": "FullyQualifiedName~SymmetricKernelNumericalTests"
+  },
+  {
+    "id": "elder-ray-reverses-difference",
+    "module": "elder-ray",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ElderRayIndexState",
+    "before": "var bearPower = bar.Low - ema;",
+    "after": "var bearPower = ema - bar.Low;",
+    "filter": "FullyQualifiedName~ElderRayNumericalTests.BothNativeOutputsAndLegacyMatchIndependentReferences"
+  },
+  {
+    "id": "elder-ray-ignores-selected-input",
+    "module": "elder-ray",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeElderRayPowerFast(",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ElderRayNumericalTests.LegacySelectedInputUsesSyntheticRangeForBothPowers"
+  },
+  {
+    "id": "elder-ray-uses-original-range",
+    "module": "elder-ray",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeElderRayPowerFast(",
+    "before": "var range = bull ? highRange.Span : lowRange.Span;",
+    "after": "var range = bull ? SpanCompat.AsReadOnlySpan(data.HighPrices) : SpanCompat.AsReadOnlySpan(data.LowPrices);",
+    "filter": "FullyQualifiedName~ElderRayNumericalTests.LegacySelectedInputUsesSyntheticRangeForBothPowers"
   }
 ]

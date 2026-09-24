@@ -259,6 +259,20 @@ internal static partial class BuiltInFormulaReferences
                 bars => RoundedExponentialExtrapolation(bars, period, triple), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (HasRoundedElderRay(builtIn))
+        {
+            var elderOptions = builtIn.CreateOptions();
+            var elderKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "BullPower" }
+                : new[] { "BullPower", "BearPower" };
+            for (var slot = 0; slot < elderKeys.Length; slot++)
+            {
+                var bull = elderKeys[slot] == "BullPower";
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedElderRay(bars, Integer(elderOptions, "Length", 13), BoundedMeanKind(elderOptions, 3), bull),
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (HasRoundedApo(builtIn))
         {
             var apoOptions = builtIn.CreateOptions();

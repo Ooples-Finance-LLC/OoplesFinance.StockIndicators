@@ -815,7 +815,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
+        List<double> emaList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            emaList = inputList.Select(value => mean.Next(value, true)).ToList();
+        }
+        else emaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {

@@ -1792,6 +1792,7 @@ internal static partial class IndicatorCompute
             ElderRayIndexSpecOptions eri => spec.OutputKey switch
             {
                 null or "BullPower" => ComputeElderRayBullPowerFast(data, context, eri.Length, eri.MaType),
+                "BearPower" => ComputeElderRayBearPowerFast(data, context, eri.Length, eri.MaType),
                 _ => null
             },
 
@@ -6843,37 +6844,32 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeElderRayBullPowerFast(StockData data, ComputeContext context, int length = 13,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        => ComputeElderRayPowerFast(data, context, length, maType, true);
+
+    /// <summary>Computes the low minus the selected input's moving average.</summary>
+    internal static ComputeBuffer ComputeElderRayBearPowerFast(StockData data, ComputeContext context, int length = 13,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        => ComputeElderRayPowerFast(data, context, length, maType, false);
+
+    private static ComputeBuffer ComputeElderRayPowerFast(StockData data, ComputeContext context, int length,
+        MovingAvgType maType, bool bull)
     {
-        // CalculateElderRayIndex measures the high against a moving average of the CHAINED series, with
-        // whichever average the spec names. VolumeCore.ElderRayBullPower averaged the close and could not be
-        // given a type.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var count = inputList.Count;
-
+        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var count = input.Length;
+        using var highRange = context.Rent(count);
+        using var lowRange = context.Rent(count);
+        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
         using var average = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), average.WritableSpan);
-        var ma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
         {
-            output[i] = highs[i] - ma[i];
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < count; i++) average.WritableSpan[i] = mean.Next(input[i], true);
         }
-
-        return buffer;
-    }
-
-    /// <summary>
-    /// Computes Elder Ray Bear Power using zero-allocation fast path.
-    /// </summary>
-    internal static ComputeBuffer ComputeElderRayBearPowerFast(StockData data, ComputeContext context, int length = 13)
-    {
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.ElderRayBearPower(low, close, buffer.WritableSpan, length);
+        else MovingAverage(data, maType, length, input, average.WritableSpan);
+        var range = bull ? highRange.Span : lowRange.Span;
+        var buffer = context.Rent(count);
+        for (var i = 0; i < count; i++) buffer.WritableSpan[i] = range[i] - average.Span[i];
         return buffer;
     }
 
