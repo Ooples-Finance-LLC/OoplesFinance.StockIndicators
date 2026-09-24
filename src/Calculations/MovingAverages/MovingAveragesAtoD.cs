@@ -20,26 +20,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var m = offset * (length - 1);
-        var s = (double)length / sigma;
+        using var mean = new AlmaWindowMean(length, offset, sigma);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = s != 0 ? Exp(-1 * Pow(j - m, 2) / (2 * Pow(s, 2))) : 0;
-                var prevValue = i >= length - 1 - j ? inputList[i - (length - 1 - j)] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
             var prevAlma = GetLastOrDefault(almaList);
-            var alma = weightedSum != 0 ? sum / weightedSum : 0;
+            var alma = mean.Next(currentValue, true);
             almaList.Add(alma);
 
             var signal = GetCompareSignal(currentValue - alma, prevVal - prevAlma);

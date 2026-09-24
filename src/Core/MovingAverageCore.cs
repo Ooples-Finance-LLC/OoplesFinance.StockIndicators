@@ -556,54 +556,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ArnaudLegouxMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 9, double offset = 0.85, double sigma = 6)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var m = offset * (length - 1);
-        var s = length / sigma;
-
-        var pool = ArrayPool<double>.Shared;
-        var weightsArray = pool.Rent(length);
-
-        try
-        {
-            var weights = weightsArray.AsSpan(0, length);
-
-            // Pre-calculate weights
-            double weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = Math.Exp(-Math.Pow(j - m, 2) / (2 * s * s));
-                weights[j] = weight;
-                weightSum += weight;
-            }
-
-            // Normalize weights
-            for (var j = 0; j < length; j++)
-            {
-                weights[j] /= weightSum;
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Bars before the series starts count as zero and the divisor stays the full weight sum,
-                // which is what CalculateArnaudLegouxMovingAverage does, so the run-in is damped rather
-                // than blank. The weights above are already normalised, so no divisor appears here.
-                double alma = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var index = i - length + 1 + j;
-                    alma += index >= 0 ? weights[j] * input[index] : 0;
-                }
-                output[i] = alma;
-            }
-        }
-        finally
-        {
-            pool.Return(weightsArray);
-        }
+        AlmaWindowMean.Compute(input, output, length, offset, sigma);
     }
 
     /// <summary>

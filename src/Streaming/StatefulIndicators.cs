@@ -9477,30 +9477,12 @@ public sealed class AhrensMovingAverageState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Alma")]
 public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly AlmaWindowMean _mean;
     private readonly StreamingInputResolver _input;
 
     public ArnaudLegouxMovingAverageState(int length = 9, double offset = 0.85, int sigma = 6)
     {
-        _length = Math.Max(1, length);
-        var m = offset * (_length - 1);
-        var s = (double)_length / sigma;
-        _weights = new double[_length];
-        double weightSum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var weight = s != 0
-                ? MathHelper.Exp(-1 * MathHelper.Pow(j - m, 2) / (2 * MathHelper.Pow(s, 2)))
-                : 0;
-            _weights[j] = weight;
-            weightSum += weight;
-        }
-
-        _weightSum = weightSum;
-        _window = new PooledRingBuffer<double>(_length);
+        _mean = new AlmaWindowMean(length, offset, sigma);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -9508,33 +9490,13 @@ public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, I
 
     public void Reset()
     {
-        _window.Clear();
+        _mean.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
-
-        // A forming bar is the newest value of the window it would make, so a preview weights it too; the
-        // window without it made a preview of the first bar 0.
-        var pending = isFinal ? 0 : 1;
-        var count = Math.Min(_window.Count + pending, _length);
-        var committed = count - pending;
-        var first = _window.Count - committed;
-        var missing = _length - count;
-        double sum = 0;
-        for (var j = missing; j < _length; j++)
-        {
-            var index = j - missing;
-            var val = index < committed ? _window[first + index] : value;
-            sum += val * _weights[j];
-        }
-
-        var alma = _weightSum != 0 ? sum / _weightSum : 0;
+        var alma = _mean.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -9550,7 +9512,7 @@ public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, I
 
     public void Dispose()
     {
-        _window.Dispose();
+        _mean.Dispose();
     }
 }
 

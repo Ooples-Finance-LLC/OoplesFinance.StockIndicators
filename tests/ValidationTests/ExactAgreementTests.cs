@@ -58,7 +58,6 @@ public sealed class ExactAgreementTests
         "StandardErrorCore.Sem",
         "Variance.Variance",
 
-        "Alma.Alma",
         "BollingerBandsPercentB.PctB",
         "BollingerBandsWidth.BbWidth",
         "ChandeForecastOscillator.Cfo",

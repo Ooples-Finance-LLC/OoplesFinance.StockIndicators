@@ -2193,5 +2193,32 @@
     "before": "prevClose1 < close && (prevClose2 < prevClose1 || prevClose3 < prevClose1)",
     "after": "prevClose1 < close",
     "filter": "FullyQualifiedName~ScalperNumericalTests.PublishesOnlyConfirmedAlternatingEvents"
+  },
+  {
+    "id": "alma-rounds-weighted-products",
+    "module": "alma",
+    "file": "src/Helpers/AlmaWindowMean.cs",
+    "scope": "internal sealed class AlmaWindowMean",
+    "before": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? value : _values[_values.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~AlmaNumericalTests"
+  },
+  {
+    "id": "alma-reverses-gaussian-weights",
+    "module": "alma",
+    "file": "src/Helpers/AlmaWindowMean.cs",
+    "scope": "internal sealed class AlmaWindowMean",
+    "before": "var distance = ((length - 1d - lag) / length",
+    "after": "var distance = (lag / (double)length",
+    "filter": "FullyQualifiedName~AlmaNumericalTests"
+  },
+  {
+    "id": "alma-commits-preview",
+    "module": "alma",
+    "file": "src/Helpers/AlmaWindowMean.cs",
+    "scope": "internal sealed class AlmaWindowMean",
+    "before": "if (commit) _values.TryAdd(value, out _);",
+    "after": "_values.TryAdd(value, out _);",
+    "filter": "FullyQualifiedName~AlmaNumericalTests"
   }
 ]
