@@ -211,7 +211,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var increments = bars.Select((b, i) => name == IndicatorName.OnBalanceVolume
                         ? Math.Sign(b.Close - (i == 0 ? 0 : bars[i - 1].Close)) * (double)b.Volume
-                        : b.High == b.Low ? 0 : (2 * b.Close - b.High - b.Low) / (b.High - b.Low) * (double)b.Volume).ToArray();
+                        : b.High == b.Low ? 0 : (2 * b.Close - b.High - b.Low) / (b.High - b.Low) * (double)b.Volume).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     var line = Cumulative(increments);
                     return Outputs((volumeKey, line), (volumeKey + "Signal", Smooth(line)));
                 });

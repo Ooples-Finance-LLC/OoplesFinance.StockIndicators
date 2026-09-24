@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Indicators;
+﻿using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
 
@@ -78,7 +78,7 @@ internal static partial class BuiltInFormulaReferences
                         if (i <= length) return 0d;
                         var recent = residuals[i - length];
                         var older = i < 2 * length ? 0 : residuals[i - 2 * length];
-                        if (recent == older) return 0;
+                        if (recent == older) return 0; // NOSONAR: S1244 - Exact endpoint ties select the defined zero-output branch.
                         return i < 2 * length ? recent * i / (2d * (i - length)) : recent - older / 2;
                     }).ToArray();
                     // Two trailing extrema filters compose into one window of summed lengths minus one.
@@ -165,8 +165,8 @@ internal static partial class BuiltInFormulaReferences
                         var olderUpper = i < 2 ? price : upper[i - 2];
                         var olderLower = i < 2 ? price : lower[i - 2];
                         var decay = Math.Sqrt(variance[i]) / length;
-                        upper[i] = Math.Max(price, previousUpper - (previousUpper == olderUpper ? decay : 0));
-                        lower[i] = Math.Min(price, previousLower + (previousLower == olderLower ? decay : 0));
+                        upper[i] = Math.Max(price, previousUpper - (previousUpper == olderUpper ? decay : 0)); // NOSONAR: S1244 - Decay applies only to an unchanged upper bound.
+                        lower[i] = Math.Min(price, previousLower + (previousLower == olderLower ? decay : 0)); // NOSONAR: S1244 - Decay applies only to an unchanged lower bound.
                         if (price > olderUpper) uptrend = true;
                         else if (price < olderLower) uptrend = false;
                         var upperWeight = uptrend ? .75 : .25;
@@ -390,7 +390,7 @@ internal static partial class BuiltInFormulaReferences
                         return Outputs(("UpperBand", upper), ("LowerBand", lower),
                             ("MiddleBand", upper.Zip(lower, (u, l) => (u + l) / 2).ToArray()));
                     var line = bars.Select((b, i) => name == IndicatorName.ProjectionOscillator
-                        ? upper[i] == lower[i] ? 0 : 100 * (b.Close - lower[i]) / (upper[i] - lower[i])
+                        ? upper[i] == lower[i] ? 0 : 100 * (b.Close - lower[i]) / (upper[i] - lower[i]) // NOSONAR: S1244 - Equal bounds define an exactly zero range; nearby distinct bounds must still be evaluated.
                         : upper[i] + lower[i] == 0 ? 0 : 200 * (upper[i] - lower[i]) / (upper[i] + lower[i])).ToArray();
                     return Outputs((projectionKey, line), ("Signal", Average(line,
                         name == IndicatorName.ProjectionOscillator ? Integer(options, "SmoothLength", 4) : length, kind)));
@@ -527,8 +527,8 @@ internal static partial class BuiltInFormulaReferences
                         var lowGap = Math.Abs(b.Low - previous);
                         var range = b.High - b.Low;
                         var largest = Math.Max(range, Math.Max(highGap, lowGap));
-                        var denominator = largest == highGap ? previous + highGap / 2
-                            : largest == lowGap ? b.Low + lowGap / 2 : (b.High + b.Low) / 2;
+                        var denominator = largest == highGap ? previous + highGap / 2 // NOSONAR: S1244 - Select the operand returned by Max, preserving tie order.
+                            : largest == lowGap ? b.Low + lowGap / 2 : (b.High + b.Low) / 2; // NOSONAR: S1244 - Select the operand returned by Max, preserving tie order.
                         return denominator == 0 ? 0 : largest / denominator;
                     }).ToArray();
                     var gain = 2d / (length + 1);

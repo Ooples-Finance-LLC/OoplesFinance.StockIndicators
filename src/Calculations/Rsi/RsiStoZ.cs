@@ -155,7 +155,7 @@ public static partial class Calculations
         foreach (var value in connorsRsiList)
         {
             extrema.Add(value);
-            raw.Add(extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min));
+            raw.Add(extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
         var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
         var slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
@@ -214,7 +214,7 @@ public static partial class Calculations
                 low = Math.Min(low, rsiList[j]);
                 high = Math.Max(high, rsiList[j]);
             }
-            raw.Add(high == low ? 0 : 100 * (rsiList[i] - low) / (high - low));
+            raw.Add(high == low ? 0 : 100 * (rsiList[i] - low) / (high - low)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
         var stochRsiList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
         var stochRsiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, stochRsiList);

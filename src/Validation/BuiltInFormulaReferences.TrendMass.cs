@@ -35,7 +35,7 @@ internal static partial class BuiltInFormulaReferences
             }
             else if (name == IndicatorName.SellGravitationIndex)
             {
-                var bodies = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray();
+                var bodies = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                 line = Average(bodies, length, kind);
             }
             else

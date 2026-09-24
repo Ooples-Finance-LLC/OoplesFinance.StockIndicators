@@ -37,7 +37,7 @@ internal static partial class BuiltInFormulaReferences
                             return shapes.Any(shape => center >= shape.Length && shape.Select((relation, offset) =>
                             {
                                 var older = values[center - offset - 1];
-                                return relation == -1 ? older < values[center] : relation == 0 ? older == values[center] : older <= values[center];
+                                return relation == -1 ? older < values[center] : relation == 0 ? older == values[center] : older <= values[center]; // NOSONAR: S1244 - The plateau pattern requires exact price equality.
                             }).All(matches => matches)) ? 1d : 0;
                         }).ToArray();
                     }
@@ -94,7 +94,7 @@ internal static partial class BuiltInFormulaReferences
                             var window = Window(bars, i, 9).ToArray();
                             var low = window.Min(v => v.Low);
                             var high = window.Max(v => v.High);
-                            return high == low ? 0 : 100 * (b.Close - low) / (high - low);
+                            return high == low ? 0 : 100 * (b.Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         }).ToArray();
                         level = Average(raw, 9, 2);
                     }

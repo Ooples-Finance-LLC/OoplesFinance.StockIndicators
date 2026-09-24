@@ -564,7 +564,7 @@ public static partial class IndicatorValidationDiscovery
         if (IsPeriod(p))
         {
             var baseline = declaredDefault is not null ? (int)declaredDefault.DefaultValue! : 7 + 6 * index;
-            return scale == 1 ? baseline : Math.Max(1, (int)Math.Round(baseline * scale));
+            return scale == 1 ? baseline : Math.Max(1, (int)Math.Round(baseline * scale)); // NOSONAR: S1244 - One is an exact discrete configuration selector, not a measured value.
         }
         if (p.ParameterType == typeof(IMovingAverage) && (weighted || !p.IsOptional))
         {

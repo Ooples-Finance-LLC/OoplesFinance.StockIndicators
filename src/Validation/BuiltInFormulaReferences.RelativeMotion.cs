@@ -162,8 +162,8 @@ internal static partial class BuiltInFormulaReferences
                         return high == 0 ? 0 : v / high;
                     }).ToArray();
                     double[] Signs(Func<int, bool> condition) => offset.Select((v, i) => condition(i) ? -(double)Math.Sign(v) : 0).ToArray();
-                    return Outputs(("Sign1", Signs(i => ratios[i] == 1 && (i == 0 || ratios[i - 1] != 1))),
-                        ("Sign2", Signs(i => ratios[i] < .8)), ("Sign3", Signs(i => i > 0 && ratios[i - 1] == 1 && ratios[i] < 1)));
+                    return Outputs(("Sign1", Signs(i => ratios[i] == 1 && (i == 0 || ratios[i - 1] != 1))), // NOSONAR: S1244 - The signal contract detects exact visits to the normalized maximum.
+                        ("Sign2", Signs(i => ratios[i] < .8)), ("Sign3", Signs(i => i > 0 && ratios[i - 1] == 1 && ratios[i] < 1))); // NOSONAR: S1244 - The signal contract detects departure from the normalized maximum.
                 });
             case IndicatorName.StationaryExtrapolatedLevelsOscillator:
                 return new("Selo", new[] { "Selo" }, bars =>
@@ -184,7 +184,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Selo", extrapolated.Select((v, i) =>
                     {
                         var sample = Window(bounds, i, 2 * length).ToArray(); var low = sample.Min(b => b.Low); var high = sample.Max(b => b.High);
-                        return high == low ? 0 : Clamp(100 * (v - low) / (high - low), 0, 100);
+                        return high == low ? 0 : Clamp(100 * (v - low) / (high - low), 0, 100); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray()));
                 });
             case IndicatorName.FreedomOfMovement:
@@ -202,7 +202,7 @@ internal static partial class BuiltInFormulaReferences
                     double Rank(double[] values, int i)
                     {
                         var sample = Window(values, i, length).ToArray(); var low = sample.Min(); var high = sample.Max();
-                        return high == low ? 0 : 1 + 9 * ((values[i] - low) / (high - low));
+                        return high == low ? 0 : 1 + 9 * ((values[i] - low) / (high - low)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }
                     var ratios = movement.Select((_, i) => Rank(movement, i) == 0 ? 0 : Rank(relative, i) / Rank(movement, i)).ToArray();
                     var scores = ratios.Select((v, i) => Deviation(ratios, i) == 0 ? 0 : (v - Window(ratios, i, length).Average()) / Deviation(ratios, i)).ToArray();
@@ -276,8 +276,8 @@ internal static partial class BuiltInFormulaReferences
                         }).ToArray();
                     }
                     var up = Ratio(true); var down = Ratio(false);
-                    return Outputs(("Tabf", level.Select((_, i) => i == 0 ? 0d : up[i - 1] == 1 && up[i] != 1 ? 1
-                        : down[i - 1] == 1 && down[i] != 1 ? -1 : 0).ToArray()));
+                    return Outputs(("Tabf", level.Select((_, i) => i == 0 ? 0d : up[i - 1] == 1 && up[i] != 1 ? 1 // NOSONAR: S1244 - The event contract detects departure from the exact endpoint.
+                        : down[i - 1] == 1 && down[i] != 1 ? -1 : 0).ToArray())); // NOSONAR: S1244 - The event contract detects departure from the exact endpoint.
                 });
             case IndicatorName.TTMScalperIndicator:
                 return new("Sbs", new[] { "Sbs" }, bars =>
@@ -733,7 +733,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var sample = Window(bars, i, length).ToArray();
                         var low = sample.Min(v => v.Low); var high = sample.Max(v => v.High);
-                        return high == low ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / (high - low)));
+                        return high == low ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / (high - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     return Outputs(("Oscar", positions.Select((_, i) => Enumerable.Range(0, i + 1)
                         .Sum(j => positions[j] * Math.Pow(1d / 6, i - j) / 3)).ToArray()));
@@ -803,7 +803,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, period).ToArray();
                         var low = window.Min(v => v.Low);
                         var high = window.Max(v => v.High);
-                        return high == low ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / (high - low)));
+                        return high == low ? 0 : Math.Max(0, Math.Min(100, 100 * (b.Close - low) / (high - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray(), 3, 2);
                     var fast = Stochastic(8);
                     var slow = Stochastic(length);
@@ -830,7 +830,7 @@ internal static partial class BuiltInFormulaReferences
                     var weights = changes.Select((v, i) =>
                     {
                         var sample = Window(changes, i, length).ToArray();
-                        return sample.Max() == sample.Min() ? 0 : (v - sample.Min()) / (sample.Max() - sample.Min());
+                        return sample.Max() == sample.Min() ? 0 : (v - sample.Min()) / (sample.Max() - sample.Min()); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var closes = ExpandedGainTrajectory(prices, weights);
                     var result = bars.Select((b, i) => i == 0 ? (b.Open + b.High + b.Low + b.Close) / 4
@@ -1058,7 +1058,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var sample = Window(bars, i, length).ToArray();
                         var low = sample.Min(b => b.Low); var high = sample.Max(b => b.High);
-                        return high == low ? 0 : Clamp(100 * (bar.Close - low) / (high - low), 0, 100);
+                        return high == low ? 0 : Clamp(100 * (bar.Close - low) / (high - low), 0, 100); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var fast = Average(rank, length, kind);
                     var slow = Average(fast, 20, kind);
@@ -1108,7 +1108,7 @@ internal static partial class BuiltInFormulaReferences
                     var rank = difference.Select((v, i) =>
                     {
                         var window = Window(difference, i, 10).ToArray();
-                        return window.Max() == window.Min() ? 0 : 100 * (v - window.Min()) / (window.Max() - window.Min());
+                        return window.Max() == window.Min() ? 0 : 100 * (v - window.Min()) / (window.Max() - window.Min()); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     return Outputs(("DmiStochastic", Average(Average(rank, 3, kind), 3, kind)));
                 });
@@ -1153,7 +1153,7 @@ internal static partial class BuiltInFormulaReferences
                         var up = Window(upVolume, i, length).Sum(); var down = Window(downVolume, i, length).Sum();
                         // Preserve the published zero-denominator convention, including all-rising windows.
                         var ratio = decline[i] == 0 || up == 0 || down == 0 ? 0 : advance[i] * down / (decline[i] * up);
-                        return ratio == -1 ? 0 : (ratio - 1) / (ratio + 1);
+                        return ratio == -1 ? 0 : (ratio - 1) / (ratio + 1); // NOSONAR: S1244 - Only minus one makes the following denominator exactly zero.
                     }).ToArray()));
                 });
             case IndicatorName.KwanIndicator:
@@ -1166,7 +1166,7 @@ internal static partial class BuiltInFormulaReferences
                         if (i < length || b.Close == 0 || bars[i - length].Close == 0) return 0;
                         var low = Window(bars, i, length).Min(v => v.Low);
                         var high = Window(bars, i, length).Max(v => v.High);
-                        return high == low ? 0 : (b.Close - low) / (high - low) * strength[i] * bars[i - length].Close / b.Close;
+                        return high == low ? 0 : (b.Close - low) / (high - low) * strength[i] * bars[i - length].Close / b.Close; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     // This library's Kwan variant is a delayed cumulative integral, not a rolling mean.
                     return Outputs(("Ki", bars.Select((_, i) => ratios.Take(Math.Max(0, i - smooth + 1)).Sum() / smooth).ToArray()));
@@ -1301,7 +1301,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.RatioOCHLAverager:
                 return new("Rochla", new[] { "Rochla" }, bars =>
                 {
-                    var gains = bars.Select(b => b.High == b.Low ? 0 : Math.Min(1, Math.Abs(b.Close - b.Open) / (b.High - b.Low))).ToArray();
+                    var gains = bars.Select(b => b.High == b.Low ? 0 : Math.Min(1, Math.Abs(b.Close - b.Open) / (b.High - b.Low))).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     return Outputs(("Rochla", ExpandedGainTrajectory(Closes(bars), gains)));
                 });
             case IndicatorName.RetentionAccelerationFilter:
@@ -1316,7 +1316,7 @@ internal static partial class BuiltInFormulaReferences
                         var a = 2 * (high1 - first.Min(b => b.Low));
                         var b = 2 * (high2 - second.Min(b => b.Low));
                         // Cancel the k1/k2 and alpha factors in r2/r1. Keep the original zero-r1 cases.
-                        var ratio = high1 <= 0 || a == 0 || b == 0 || a == 1 || b == 1 || a == b
+                        var ratio = high1 <= 0 || a == 0 || b == 0 || a == 1 || b == 1 || a == b // NOSONAR: S1244 - Preserve the original exact singular cases before algebraic cancellation.
                             ? 0 : Math.Sqrt(high2 / high1) * a / b;
                         return Math.Pow(Math.Min(1, ratio), Math.Sqrt(length)) / length;
                     }).ToArray();
@@ -1492,7 +1492,7 @@ internal static partial class BuiltInFormulaReferences
         var losses = Average(changes.Select(v => Math.Max(0, -v)).ToArray(), length, kind);
         var result = gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
         for (var i = 1; i < result.Length; i++)
-            if (length > 1 && kind is 3 or 6 && values[i] == values[i - 1]) result[i] = result[i - 1];
+            if (length > 1 && kind is 3 or 6 && values[i] == values[i - 1]) result[i] = result[i - 1]; // NOSONAR: S1244 - Only identical observations select the unchanged-price recurrence.
         return result;
     }
 }

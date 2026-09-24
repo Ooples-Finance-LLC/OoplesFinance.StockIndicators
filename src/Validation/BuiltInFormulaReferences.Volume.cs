@@ -16,7 +16,7 @@ internal static partial class BuiltInFormulaReferences
         {
             case IndicatorName.DemandIndex:
                 // This library's single-bar buying/selling-volume ratio, with the first bar defined as zero.
-                return Single("Di", bars => bars.Select((b, i) => i == 0 || b.Volume == 0 || b.High == b.Close || b.High == b.Low
+                return Single("Di", bars => bars.Select((b, i) => i == 0 || b.Volume == 0 || b.High == b.Close || b.High == b.Low // NOSONAR: S1244 - Exact equalities identify zero denominators and the defined degenerate candle.
                     ? 0 : (2 * b.Close - b.Low - b.High) / (b.High - b.Close)).ToArray());
             case IndicatorName.KlingerVolumeOscillator:
                 if (kind == 0) return null;
@@ -25,7 +25,7 @@ internal static partial class BuiltInFormulaReferences
                     var sums = bars.Select(b => b.High + b.Low + b.Close).ToArray();
                     var directions = new int[bars.Count];
                     for (var i = 1; i < bars.Count; i++)
-                        directions[i] = sums[i] == sums[i - 1] ? directions[i - 1] : Math.Sign(sums[i] - sums[i - 1]);
+                        directions[i] = sums[i] == sums[i - 1] ? directions[i - 1] : Math.Sign(sums[i] - sums[i - 1]); // NOSONAR: S1244 - An exact tie retains the preceding trend direction.
                     // Measure each trend segment directly, including the bar preceding its reversal.
                     var force = bars.Select((b, i) =>
                     {
@@ -92,7 +92,7 @@ internal static partial class BuiltInFormulaReferences
                     }
                     var pricePosition = Position(prices);
                     var volumePosition = Position(volumeIndex);
-                    var line = pricePosition.Zip(volumePosition, (p, v) => v == -1 ? 0 : (1 + p) / (1 + v)).ToArray();
+                    var line = pricePosition.Zip(volumePosition, (p, v) => v == -1 ? 0 : (1 + p) / (1 + v)).ToArray(); // NOSONAR: S1244 - Only minus one makes the following denominator exactly zero.
                     return Outputs((disparityKey, line), ("Signal", Average(line, Integer(options, "SignalLength", 4), kind)));
                 });
             case IndicatorName.TradeVolumeIndex:
@@ -157,7 +157,7 @@ internal static partial class BuiltInFormulaReferences
                         var low = previous.Min(b => b.Low);
                         var extra = i < length + 1 ? 0 : bars[i - length - 1].Close;
                         if (extra != 0) { high = Math.Max(high, extra); low = Math.Min(low, extra); }
-                        return high == low ? 0 : ranges[i] / (high - low);
+                        return high == low ? 0 : ranges[i] / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                 });
             case IndicatorName.VolumePriceConfirmationIndicator:
@@ -207,7 +207,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var window = Window(bars, i, length).ToArray();
                     var total = window.Sum(b => b.Volume);
-                    var balance = window.Sum(b => b.High == b.Low ? 0 : b.Volume * (2 * (b.Close - b.Low) / (b.High - b.Low) - 1));
+                    var balance = window.Sum(b => b.High == b.Low ? 0 : b.Volume * (2 * (b.Close - b.Low) / (b.High - b.Low) - 1)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     return total == 0 ? 0 : Clamp(100 * balance / total, -100, 100);
                 }).ToArray());
             case IndicatorName.HawkeyeVolumeIndicator:
@@ -258,7 +258,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var increments = bars.Select((bar, i) =>
                     {
-                        if (i == 0 || bar.Close == bars[i - 1].Close) return 0;
+                        if (i == 0 || bar.Close == bars[i - 1].Close) return 0; // NOSONAR: S1244 - An identical close contributes no price change.
                         var change = bar.Close - bars[i - 1].Close;
                         return change > 0 ? Math.Max(change, bar.Close - bar.Low) : Math.Min(change, bar.Close - bar.High);
                     }).ToArray();
@@ -274,7 +274,7 @@ internal static partial class BuiltInFormulaReferences
                         var prior = i == 0 ? 0 : bars[i - 1].Close;
                         var upper = Math.Max(bar.High, prior);
                         var lower = Math.Min(bar.Low, prior);
-                        return upper == lower ? 0 : bar.Volume * (2 * (bar.Close - lower) / (upper - lower) - 1);
+                        return upper == lower ? 0 : bar.Volume * (2 * (bar.Close - lower) / (upper - lower) - 1); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var numerator = Average(contributions, length, kind);
                     var denominator = Average(bars.Select(b => b.Volume).ToArray(), length, kind);
@@ -397,7 +397,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(flow, i, length).ToArray();
                         var low = window.Min();
                         var high = window.Max();
-                        return high == low ? -100 : 200 * (v - low) / (high - low) - 100;
+                        return high == low ? -100 : 200 * (v - low) / (high - low) - 100; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     return Average(position, Integer(options, "SmoothLength", 3), kind);
                 });
@@ -571,6 +571,6 @@ internal static partial class BuiltInFormulaReferences
         }
     }
 
-    private static double MoneyFlowVolume(Bar bar) => bar.High == bar.Low ? 0
+    private static double MoneyFlowVolume(Bar bar) => bar.High == bar.Low ? 0 // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         : (2 * bar.Close - bar.High - bar.Low) / (bar.High - bar.Low) * (double)bar.Volume;
 }

@@ -94,7 +94,7 @@ public static partial class IndicatorValidationDiscovery
                 }
             foreach (var variant in variants)
             {
-                if (variant.Scale != 1 && !parameters.Any(IsPeriod)) continue;
+                if (variant.Scale != 1 && !parameters.Any(IsPeriod)) continue; // NOSONAR: S1244 - One is an exact discrete configuration selector.
                 if (variant.Weighted && !parameters.Any(p => p.ParameterType == typeof(MovingAvgType))) continue;
                 var arguments = parameters.Where(p => p.ParameterType != typeof(SeriesKey)).ToDictionary(p => p.Name!, p =>
                     IsPeriod(p) ? (object?)Math.Max(1, (int)Math.Round((int)p.DefaultValue!
@@ -272,7 +272,7 @@ public static class MultiSeriesIndicatorValidation
                     throw new InvalidOperationException("A paired bar did not publish exactly the declared outputs.");
                 foreach (var key in testCase.OutputKeys)
                 {
-                    if (speculative is { } tentative && (!tentative.HasValue || tentative.Outputs is null || tentative.Outputs[key] != result.Outputs[key]))
+                    if (speculative is { } tentative && (!tentative.HasValue || tentative.Outputs is null || tentative.Outputs[key] != result.Outputs[key])) // NOSONAR: S1244 - Preview and commit must publish identical values for the same observation.
                         throw new InvalidOperationException("Preview differs from final for "+key);
                     output[key].Add(result.Outputs[key]);
                 }

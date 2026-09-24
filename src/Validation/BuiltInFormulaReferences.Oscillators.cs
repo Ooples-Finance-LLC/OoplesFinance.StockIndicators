@@ -89,7 +89,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var low = window.Min(v => v.Low);
                         var high = window.Max(v => v.High);
-                        return high == low ? -5 : 10 * (b.Close - low) / (high - low) - 5;
+                        return high == low ? -5 : 10 * (b.Close - low) / (high - low) - 5; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var period = Math.Max(2, Math.Min(530, (int)Math.Ceiling(Math.Sqrt(Integer(options, "SmoothLength", 25)))));
                     var smoothed = Average(Average(stochastic, period, kind), period, kind);
@@ -276,7 +276,7 @@ internal static partial class BuiltInFormulaReferences
                 var vigorSignal = Integer(options, "SignalLength", 4);
                 return new("Ervi", new[] { "Ervi", "Signal" }, bars =>
                 {
-                    var proportions = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray();
+                    var proportions = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     var line = Average(proportions, length, kind);
                     return Outputs(("Ervi", line), ("Signal", Average(line, vigorSignal, kind)));
                 });
@@ -291,7 +291,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(prices, i, length).ToArray();
                         var low = window.Min();
                         var high = window.Max();
-                        var position = high == low ? 0 : 2 * (prices[i] - low) / (high - low) - 1;
+                        var position = high == low ? 0 : 2 * (prices[i] - low) / (high - low) - 1; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         normalized = Math.Max(-.999, Math.Min(.999, normalized + .33 * (position - normalized)));
                         transformed[i] = .5 * (Math.Log(1 + normalized) - Math.Log(1 - normalized));
                     }
@@ -449,7 +449,7 @@ internal static partial class BuiltInFormulaReferences
                         var peers = window.Where((_, j) => j != 2).ToArray();
                         var nextUpper = peers.All(b => b.High < center.High) ? center.High : upper;
                         var nextLower = peers.All(b => b.Low > center.Low) ? center.Low : lower;
-                        result[i] = nextUpper != upper ? 1 : nextLower != lower ? -1 : 0;
+                        result[i] = nextUpper != upper ? 1 : nextLower != lower ? -1 : 0; // NOSONAR: S1244 - Breakout direction depends on a bound actually changing.
                         upper = nextUpper;
                         lower = nextLower;
                     }
@@ -685,7 +685,7 @@ internal static partial class BuiltInFormulaReferences
                 var breakoutVolumeLength = Integer(options, "LbLength", 2);
                 return new("Brsi", new[] { "Brsi" }, bars =>
                 {
-                    var power = bars.Select((b, i) => b.High == b.Low ? 0 :
+                    var power = bars.Select((b, i) => b.High == b.Low ? 0 : // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         (b.Open + b.High + b.Low + b.Close) / 4 * (b.Close - b.Open) / (b.High - b.Low)
                         * Window(bars, i, breakoutVolumeLength).Sum(v => v.Volume)).ToArray();
                     var positive = power.Select((v, i) => v > (i == 0 ? 0 : power[i - 1]) ? Math.Abs(v) : 0).ToArray();
@@ -774,7 +774,7 @@ internal static partial class BuiltInFormulaReferences
                         var slow = Window(source, i, slowSpan).ToArray();
                         var low = slow.Min() + efficiency[i] * (fast.Min() - slow.Min());
                         var high = slow.Max() + efficiency[i] * (fast.Max() - slow.Max());
-                        return high == low ? 0 : Math.Max(0, Math.Min(1, (v - low) / (high - low)));
+                        return high == low ? 0 : Math.Max(0, Math.Min(1, (v - low) / (high - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray()));
                 });
             case IndicatorName.AdaptiveRelativeStrengthIndex:
@@ -809,7 +809,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, candleWindow).ToArray();
                         var high = window.Max(b => b.High);
                         var low = window.Min(b => b.Low);
-                        var position = high == low ? 0 : (bars[i].Close - low) / (high - low);
+                        var position = high == low ? 0 : (bars[i].Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         var gain = i < 2 * (candleWindow + candleSmooth) ? 1 : 2d / (candleSmooth + 1) * Math.Abs(2 * position - 1);
                         var input = new[] { bars[i].Close - bars[i].Open, bars[i].High - bars[i].Low };
                         for (var j = 0; j < 2; j++)
@@ -873,7 +873,7 @@ internal static partial class BuiltInFormulaReferences
                         var value = bars[i].Close;
                         upward[i] = value > previous && previous != 0 ? value / previous - 1 : 0;
                         downward[i] = value < previous && value != 0 ? previous / value - 1 : 0;
-                        unchanged[i] = value == previous ? 1d / length : 0;
+                        unchanged[i] = value == previous ? 1d / length : 0; // NOSONAR: S1244 - Unchanged-price mass counts exact ties only.
                     }
                     var rises = Cumulative(upward);
                     var falls = Cumulative(downward);
@@ -887,7 +887,7 @@ internal static partial class BuiltInFormulaReferences
                     var residual = probability.Select((v, i) => v - mean[i]).ToArray();
                     var first = Smooth(residual, strengthSignalGain);
                     var second = Smooth(first, strengthSignalGain);
-                    return Outputs(("Asi", residual.Select((v, i) => strengthSignalGain == 1 ? v
+                    return Outputs(("Asi", residual.Select((v, i) => strengthSignalGain == 1 ? v // NOSONAR: S1244 - Unit gain selects the unfiltered signal exactly.
                         : v - first[i] - (first[i] - second[i]) / (1 - strengthSignalGain)).ToArray()));
                 });
             case IndicatorName.PsychologicalLine:
@@ -1224,7 +1224,7 @@ internal static partial class BuiltInFormulaReferences
                 if (kind == 0) return null;
                 return new("Bop", new[] { "Bop", "BopSignal" }, bars =>
                 {
-                    var line = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray();
+                    var line = bars.Select(b => b.High == b.Low ? 0 : (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     return Outputs(("Bop", line), ("BopSignal", Average(line, length, kind)));
                 });
             case IndicatorName.Trix:

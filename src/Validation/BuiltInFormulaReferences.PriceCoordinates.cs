@@ -23,7 +23,7 @@ internal static partial class BuiltInFormulaReferences
                     var correlations = prices.Select((_, i) =>
                     {
                         var sample = Window(prices, i, lookback).ToArray();
-                        if (sample.Length < 2 || sample.Max() == sample.Min()) return 0d;
+                        if (sample.Length < 2 || sample.Max() == sample.Min()) return 0d; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         if (sample.Length == 2) return (double)Math.Sign(sample[1] - sample[0]);
                         var average = sample.Average();
                         var centeredIndex = Enumerable.Range(0, sample.Length).Select(j => j - (sample.Length - 1d) / 2).ToArray();

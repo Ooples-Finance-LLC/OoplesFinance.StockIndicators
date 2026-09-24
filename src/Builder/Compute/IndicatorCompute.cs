@@ -2795,7 +2795,7 @@ internal static partial class IndicatorCompute
         var avgLosses = averageLoss.Span;
         for (var i = 0; i < count; i++)
         {
-            if (maType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && input[i] == input[i - 1])
+            if (maType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && input[i] == input[i - 1]) // NOSONAR: S1244 - Only identical consecutive prices select the unchanged-price recurrence.
             { output[i] = output[i - 1]; continue; }
             var avgGain = avgGains[i];
             var avgLoss = avgLosses[i];
@@ -10124,7 +10124,7 @@ internal static partial class IndicatorCompute
                     for (var k = 0; k < countAvailable; k++)
                     {
                         var h = highs[i - k]; var l = lows[i - k];
-                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0)
+                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
                             : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
                     }
                     masses[bin] = mass; largestMass = Math.Max(largestMass, mass);
@@ -20690,7 +20690,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var midpointMove = i == 0 ? 0 : ((high[i] + low[i]) - (high[i - 1] + low[i - 1])) / 2;
-            var boxRatio = high[i] != low[i] ? volume[i] / (high[i] - low[i]) : 0;
+            var boxRatio = high[i] != low[i] ? volume[i] / (high[i] - low[i]) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
             output[i] = boxRatio == 0 ? 0 : divisor * midpointMove / boxRatio;
         }
 
@@ -23175,8 +23175,8 @@ internal static partial class IndicatorCompute
             var lowGap = Math.Abs(low.Span[i] - previous);
             var range = high.Span[i] - low.Span[i];
             var largest = Math.Max(range, Math.Max(highGap, lowGap));
-            var denominator = largest == highGap ? previous + highGap / 2
-                : largest == lowGap ? low.Span[i] + lowGap / 2 : low.Span[i] + range / 2;
+            var denominator = largest == highGap ? previous + highGap / 2 // NOSONAR: S1244 - Select the operand returned by Max, including its deterministic tie order.
+                : largest == lowGap ? low.Span[i] + lowGap / 2 : low.Span[i] + range / 2; // NOSONAR: S1244 - Select the operand returned by Max, including its deterministic tie order.
             fraction = gain * (denominator == 0 ? 0 : largest / denominator) + (1 - gain) * fraction;
             result.WritableSpan[i] *= 1 + (band == ChannelBand.Upper ? 1 : -1) * stdDevMult * fraction;
         }
@@ -28341,7 +28341,7 @@ internal static partial class IndicatorCompute
         {
             var value = connorsRsi.Span[i];
             extrema.Add(value);
-            fastK.WritableSpan[i] = extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min);
+            fastK.WritableSpan[i] = extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
 
         var buffer = context.Rent(count);
@@ -28844,7 +28844,7 @@ internal static partial class IndicatorCompute
             var ratio = highest != 0 ? fit[i] / highest : 0;
 
             var triggered = outputKey == "Sign2" ? ratio < .8 : outputKey == "Sign3"
-                ? previousRatio == 1 && ratio < previousRatio : ratio == 1 && previousRatio != 1;
+                ? previousRatio == 1 && ratio < previousRatio : ratio == 1 && previousRatio != 1; // NOSONAR: S1244 - The signal contract detects exact visits to the normalized maximum.
             output[i] = triggered ? -Math.Sign(offset[i]) : 0;
 
             previousRatio = ratio;

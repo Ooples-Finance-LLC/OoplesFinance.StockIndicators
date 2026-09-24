@@ -540,7 +540,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length + 1).ToArray();
                         var high = window.Max(b => b.High);
                         var low = window.Min(b => b.Low);
-                        var distance = high == low ? 0 : Math.Min(1, Math.Abs((bars[i].Close - low) / (high - low) - .5) * 2);
+                        var distance = high == low ? 0 : Math.Min(1, Math.Abs((bars[i].Close - low) / (high - low) - .5) * 2); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         var gain = Math.Pow((1 - distance) * adaptiveSlowGain + distance * adaptiveFastGain, 2);
                         var previous = i == 0 ? 0 : result[i - 1];
                         result[i] = (1 - gain) * previous + gain * bars[i].Close;
@@ -573,7 +573,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var high = window.Max(b => b.High);
                         var low = window.Min(b => b.Low);
-                        var position = high == low ? 0 : Math.Min(1, 2 * Math.Abs(bars[i].Close - (high + low) / 2) / (high - low));
+                        var position = high == low ? 0 : Math.Min(1, 2 * Math.Abs(bars[i].Close - (high + low) / 2) / (high - low)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                         var gain = 2d / (length + 1) * (1 + position);
                         result[i] = (1 - gain) * result[i - 1] + gain * bars[i].Close;
                     }
@@ -1023,7 +1023,7 @@ internal static partial class BuiltInFormulaReferences
     {
         var result = new double[prices.Length];
         if (prices.Length == 0) return result;
-        if (prices.All(value => value == prices[0])) return prices.ToArray();
+        if (prices.All(value => value == prices[0])) return prices.ToArray(); // NOSONAR: S1244 - Only an exactly constant window takes the constant-series shortcut.
         for (var i = 0; i < prices.Length; i++)
         {
             double retained = 1, displacement = 0;

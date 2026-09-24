@@ -322,7 +322,7 @@ public static class IndicatorValidation
                         }
                         catch (IndicatorOutputException ex) when (ex.IndicatorType == testCase.IndicatorType
                             && ex.BarIndex == prefixLength && overflow.Any(value => value.Bar == prefixLength
-                                && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value)))
+                                && value.Slot == ex.OutputSlot && value.Value.Equals(ex.Value))) // NOSONAR: S1244 - Match the actual rejected output value to its exception evidence.
                         {
                             if (overflowSlot.HasValue && (overflowSlot != ex.OutputSlot || overflowSign != Math.Sign(ex.Value)))
                                 Add(fixture.Name, "OutputOverflow", "Fresh runs rejected different output slots or signs.");
@@ -370,7 +370,7 @@ public static class IndicatorValidation
             var primaryValues = run[primary].ToArray();
             if (!run[indicator].ToArray().SequenceEqual(primaryValues))
                 throw new InvalidOperationException("The default series differs from the declared primary output.");
-            if (bars.Count > 0 && !run.Latest[indicator].Equals(primaryValues[bars.Count - 1]))
+            if (bars.Count > 0 && !run.Latest[indicator].Equals(primaryValues[bars.Count - 1])) // NOSONAR: S1244 - Latest must return the same value published in the primary series.
                 throw new InvalidOperationException("The snapshot default differs from the declared primary output.");
             return Array.AsReadOnly(indicator.Outputs.Select(output =>
                 (IReadOnlyList<double>)Array.AsReadOnly(run[output].ToArray())).ToArray());

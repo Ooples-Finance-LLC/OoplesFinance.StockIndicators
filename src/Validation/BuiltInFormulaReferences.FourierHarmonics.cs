@@ -27,7 +27,7 @@ internal static partial class BuiltInFormulaReferences
                 var kernel = Enumerable.Range(0, prices.Length).Select(age =>
                     (discriminant.Magnitude < 1e-12 ? (age+1)*Complex.Pow(first, age)
                         : (Complex.Pow(first, age+1)-Complex.Pow(second, age+1))/discriminant).Real).ToArray();
-                var line = prices.Select((_, i) => i < 4 || damping == 1 ? 0 : (1-damping)/2
+                var line = prices.Select((_, i) => i < 4 || damping == 1 ? 0 : (1-damping)/2 // NOSONAR: S1244 - Unit damping is the exact singular endpoint of this recurrence.
                     * Enumerable.Range(4, i-3).Sum(j => kernel[i-j]*(prices[j]-prices[j-2]))).ToArray();
                 var energy = line.Select((v, i) => v*v+(i < 5 ? 0 : Math.Pow((v-line[i-1])/frequency, 2))).ToArray();
                 harmonics.Add(line); energies.Add(energy);

@@ -72,7 +72,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var window = Window(bars, i, Period("StochLength")).ToArray();
                         var low = window.Min(x => x.Low); var high = window.Max(x => x.High);
-                        return high == low ? 0 : 100 * (b.Close - low) / (high - low);
+                        return high == low ? 0 : 100 * (b.Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var k = Average(stochastic, Period("StochKLength"), 1);
                     var d = Average(k, Period("StochDLength"), 1);
@@ -182,7 +182,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.InternalBarStrengthIndicator:
                 return new("Ibs", new[] { "Ibs", "Signal" }, bars =>
                 {
-                    var position = bars.Select(b => b.High == b.Low ? 0 : 100 * (b.Close - b.Low) / (b.High - b.Low)).ToArray();
+                    var position = bars.Select(b => b.High == b.Low ? 0 : 100 * (b.Close - b.Low) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     var line = position.Select((_, i) => Window(position, i, length).Average()).ToArray();
                     // Fixed signal period three, EMA started at zero rather than the general EMA seed.
                     var signal = line.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => Math.Pow(.5, i - j + 1) * line[j])).ToArray();

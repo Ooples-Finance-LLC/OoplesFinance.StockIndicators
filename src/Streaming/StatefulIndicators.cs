@@ -13331,7 +13331,7 @@ internal sealed class EmaState
         // Round the complete convex combination once. Separate products can erase
         // subnormals and cancellation residues even when the final value is representable.
         var updated = value;
-        if (_length != 1 && value != _prevEma)
+        if (_length != 1 && value != _prevEma) // NOSONAR: S1244 - The recurrence distinguishes an unchanged state from any representable change.
         {
             var weighted = new ExactMeanAccumulator();
             weighted.Add(value, 2);

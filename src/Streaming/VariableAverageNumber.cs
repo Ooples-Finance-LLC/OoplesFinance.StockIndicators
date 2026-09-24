@@ -9,7 +9,7 @@ internal readonly struct VariableAverageNumber : IComparable<VariableAverageNumb
     private VariableAverageNumber(double high, double low) { _high = high; _low = low; }
     public static implicit operator VariableAverageNumber(double value) => new(value, 0);
     public double Value => _high + _low;
-    public int CompareTo(VariableAverageNumber other) => _high != other._high ? _high.CompareTo(other._high) : _low.CompareTo(other._low);
+    public int CompareTo(VariableAverageNumber other) => _high != other._high ? _high.CompareTo(other._high) : _low.CompareTo(other._low); // NOSONAR: S1244 - Lexicographic ordering must compare low parts only when high parts are equal.
     public static VariableAverageNumber Abs(VariableAverageNumber value) => value.CompareTo(0) < 0 ? -value : value;
     public static VariableAverageNumber operator -(VariableAverageNumber value) => new(-value._high, -value._low);
     public static VariableAverageNumber operator +(VariableAverageNumber a, VariableAverageNumber b)

@@ -6,7 +6,7 @@ internal static class ClampedRangePosition
     // Clamp before division so an out-of-range ratio need never be representable.
     internal static double Percent(double value, double lower, double upper)
     {
-        if (upper == lower) return 0;
+        if (upper == lower) return 0; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         if (upper > lower)
         {
             if (value <= lower) return 0;

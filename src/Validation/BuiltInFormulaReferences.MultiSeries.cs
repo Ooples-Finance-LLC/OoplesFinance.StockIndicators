@@ -41,14 +41,14 @@ internal static partial class BuiltInFormulaReferences
                     double[] Location(IReadOnlyList<Bar> source) => source.Select((bar, i) =>
                     {
                         var sample = Window(source, i, window).ToArray(); var lo = sample.Min(v => v.Low); var hi = sample.Max(v => v.High);
-                        return hi == lo ? .5 : (bar.Close-lo)/(hi-lo);
+                        return hi == lo ? .5 : (bar.Close-lo)/(hi-lo); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var stockPosition = Location(primary); var marketPosition = Location(benchmark);
                     var spread = stockPosition.Select((v, i) => Math.Abs(v-marketPosition[i]) <= 64*Math.Pow(2, -52) ? 0 : v-marketPosition[i]).ToArray();
                     result["Ksi"] = spread.Select((v, i) =>
                     {
                         var sample = Window(spread, i, window).ToArray(); var lo = sample.Min(); var hi = sample.Max();
-                        return hi == lo ? 50 : 100*(v-lo)/(hi-lo);
+                        return hi == lo ? 50 : 100*(v-lo)/(hi-lo); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     break;
                 case IndicatorName.RelativeNormalizedVolatility:

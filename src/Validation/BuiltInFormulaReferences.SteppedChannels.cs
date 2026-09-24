@@ -37,16 +37,16 @@ internal static partial class BuiltInFormulaReferences
                     var direction = projected > previous + step ? 1 : projected < previous - step ? -1 : 0;
                     anchor[i] = previous + direction * step;
                     var radius = Math.Abs(anchor[i] - previous) * multiplier;
-                    upper[i] = anchor[i] + radius == anchor[i] ? i == 0 ? 0 : upper[i - 1] : anchor[i] + radius;
-                    lower[i] = anchor[i] - radius == anchor[i] ? i == 0 ? 0 : lower[i - 1] : anchor[i] - radius;
+                    upper[i] = anchor[i] + radius == anchor[i] ? i == 0 ? 0 : upper[i - 1] : anchor[i] + radius; // NOSONAR: S1244 - Detect whether the rounded addition actually changes the anchor.
+                    lower[i] = anchor[i] - radius == anchor[i] ? i == 0 ? 0 : lower[i - 1] : anchor[i] - radius; // NOSONAR: S1244 - Detect whether the rounded subtraction actually changes the anchor.
                 }
                 else
                 {
                     if (i == 0) high = low = price;
                     var nextHigh = price > (i == 0 ? price : upper[i - 1]) ? price : high;
                     var nextLow = price < (i == 0 ? price : lower[i - 1]) ? price : low;
-                    var highChanged = nextHigh != high;
-                    var lowChanged = nextLow != low;
+                    var highChanged = nextHigh != high; // NOSONAR: S1244 - The state transition requires a bound actually changing.
+                    var lowChanged = nextLow != low; // NOSONAR: S1244 - The state transition requires a bound actually changing.
                     highAttractions = lowChanged ? Math.Min(length, highAttractions + 1) : highChanged ? 0 : highAttractions;
                     lowAttractions = highChanged ? Math.Min(length, lowAttractions + 1) : lowChanged ? 0 : lowAttractions;
                     high = nextHigh; low = nextLow;

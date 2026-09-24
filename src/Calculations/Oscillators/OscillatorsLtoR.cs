@@ -3812,7 +3812,7 @@ public static partial class Calculations
                     for (var k = 0; k < countAvailable; k++)
                     {
                         var h = highList[i - k]; var l = lowList[i - k];
-                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0)
+                        mass += h == l ? (l >= lower && (l < upper || bin+1 == length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
                             : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
                     }
                     masses[bin] = mass; largestMass = Math.Max(largestMass, mass);

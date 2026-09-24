@@ -160,7 +160,7 @@ public static partial class Calculations
             var currentVolume = volumeList[i];
             var midpointMove = i == 0 ? 0
                 : ((currentHigh + currentLow) - (highList[i - 1] + lowList[i - 1])) / 2;
-            var boxRatio = currentHigh != currentLow ? currentVolume / (currentHigh - currentLow) : 0;
+            var boxRatio = currentHigh != currentLow ? currentVolume / (currentHigh - currentLow) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
             var emv = boxRatio == 0 ? 0 : divisor * midpointMove / boxRatio;
             emvList.Add(emv);
         }

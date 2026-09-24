@@ -31,7 +31,7 @@ internal static partial class BuiltInFormulaReferences
             double[] Position(int period) => price.Select((v, i) =>
             {
                 var window = Window(bars, i, period).ToArray(); var high = window.Max(b => b.High); var low = window.Min(b => b.Low);
-                return high == low ? 0 : 100*(v-low)/(high-low);
+                return high == low ? 0 : 100*(v-low)/(high-low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
             }).ToArray();
             var stoch = Position(options.StochLength1); var stochMean = Average(stoch, options.StochLength2, 1);
             var williams = Position(14).Select(v => v-100).ToArray();

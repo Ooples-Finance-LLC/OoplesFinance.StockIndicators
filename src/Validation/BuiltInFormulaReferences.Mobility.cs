@@ -17,13 +17,13 @@ internal static partial class BuiltInFormulaReferences
                 if (i < options.Length) return 0d;
                 var sample = Window(bars, i, options.Length).ToArray();
                 var low = sample.Min(b => b.Low); var high = sample.Max(b => b.High);
-                if (high == low) return 0d;
+                if (high == low) return 0d; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                 var width = (high-low)/10;
                 var edges = Enumerable.Range(0, 11).Select(k => k == 10 ? high : low+k*width).ToArray();
                 // Difference of candle CDFs integrates the mass in each common bin.
                 var masses = Enumerable.Range(0, 10).Select(k => sample.Average(b =>
                 {
-                    if (b.High == b.Low) return b.Low >= edges[k] && (b.Low < edges[k+1] || k == 9) ? 1d : 0;
+                    if (b.High == b.Low) return b.Low >= edges[k] && (b.Low < edges[k+1] || k == 9) ? 1d : 0; // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
                     double Cdf(double x) => Math.Max(0, Math.Min(1, (x-b.Low)/(b.High-b.Low)));
                     return Cdf(edges[k+1])-Cdf(edges[k]);
                 })).ToArray();

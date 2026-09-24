@@ -224,7 +224,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var prices = Enumerable.Range(i - rankLength + 1, rankLength).Select(j => j < 0 ? 0 : bars[j].Close).ToArray();
                     // Obtain midranks by counting, independently of the production sort.
-                    var ranks = prices.Select(v => prices.Count(p => p < v) + (prices.Count(p => p == v) - 1d) / 2).ToArray();
+                    var ranks = prices.Select(v => prices.Count(p => p < v) + (prices.Count(p => p == v) - 1d) / 2).ToArray(); // NOSONAR: S1244 - Rank ties require equal observations.
                     var center = (rankLength - 1d) / 2;
                     var covariance = ranks.Select((r, j) => (r - center) * (j - center)).Sum();
                     var rankVariance = ranks.Sum(r => (r - center) * (r - center));

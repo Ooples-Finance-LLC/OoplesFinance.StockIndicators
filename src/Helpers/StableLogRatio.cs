@@ -12,7 +12,7 @@ internal static class StableLogRatio
             // so adjacent prices retain their small nonzero logarithmic return.
             var relative = (current - previous) / previous;
             var argument = 1 + relative;
-            return argument == 1 ? relative : Math.Log(argument) * (relative / (argument - 1));
+            return argument == 1 ? relative : Math.Log(argument) * (relative / (argument - 1)); // NOSONAR: S1244 - Detect exact rounding to one before dividing by argument minus one.
         }
         var (currentMantissa, currentExponent) = Decompose(current);
         var (previousMantissa, previousExponent) = Decompose(previous);

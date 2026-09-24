@@ -951,7 +951,7 @@ public sealed class MobilityOscillatorState : IStreamingIndicatorState, IDisposa
                 for (var k = 0; k < countAvailable; k++)
                 {
                     var h = EhlersStreamingWindow.GetOffsetValue(_highValues, high, k); var l = EhlersStreamingWindow.GetOffsetValue(_lowValues, low, k);
-                    mass += h == l ? (l >= lower && (l < upper || bin+1 == _length1) ? 1 : 0)
+                    mass += h == l ? (l >= lower && (l < upper || bin+1 == _length1) ? 1 : 0) // NOSONAR: S1244 - Equal candle bounds are a point mass, not a narrow interval.
                         : Math.Max(0, Math.Min(h, upper)-Math.Max(l, lower))/(h-l);
                 }
                 _masses[bin] = mass; largestMass = Math.Max(largestMass, mass);

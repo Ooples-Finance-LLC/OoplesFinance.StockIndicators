@@ -378,7 +378,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var window = Window(center, i, Math.Max(2, length)).ToArray();
                         var low = window.Min(); var high = window.Max();
-                        return high == low ? 0 : (v - low) / (high - low);
+                        return high == low ? 0 : (v - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var weighted = Average(rank, 4, 2).Select(v => 2 * v - 1).ToArray();
                     return Outputs(("Escog", weighted.Select((_, i) => Clamp(.96 * ((i == 0 ? 0 : weighted[i - 1]) + .02), 0, 1)).ToArray()));
@@ -492,7 +492,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var window = Window(cycle, i, Math.Max(2, length)).ToArray();
                         var low = window.Min(); var high = window.Max();
-                        return high == low ? 0 : (v - low) / (high - low);
+                        return high == low ? 0 : (v - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var line = Average(rank, 4, 2).Select(v => 2 * v - 1).ToArray();
                     var trigger = line.Select((_, i) => Clamp(.96 * ((i == 0 ? 0 : line[i - 1]) + .02), -1, 1)).ToArray();
@@ -548,7 +548,7 @@ internal static partial class BuiltInFormulaReferences
                     {
                         var window = Window(roofing, i, Math.Max(2, modifiedStoch ? Integer(options, "Length3", 20) : length)).ToArray();
                         var low = window.Min(); var highValue = window.Max();
-                        return highValue == low ? 0 : Math.Max(0, Math.Min(1, (v - low) / (highValue - low)));
+                        return highValue == low ? 0 : Math.Max(0, Math.Min(1, (v - low) / (highValue - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     if (modifiedStoch)
                     {

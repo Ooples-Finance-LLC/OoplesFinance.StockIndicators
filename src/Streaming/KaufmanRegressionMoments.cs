@@ -27,7 +27,7 @@ internal sealed class KaufmanRegressionMoments : IDisposable
         var efficiency = _efficiency.Next(price, isFinal);
         var gain = _count < _length ? 1 : Math.Pow(2d/31 + efficiency*(2d/3 - 2d/31), 2);
         var next = _moments;
-        if (gain == 1)
+        if (gain == 1) // NOSONAR: S1244 - Unit gain discards all prior mass exactly; a near-unit gain must retain it.
             next = new Moments { Price = price };
         else
         {

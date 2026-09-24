@@ -51,7 +51,7 @@ internal static partial class BuiltInFormulaReferences
                             .OrderBy(pair => pair.Price).ToArray();
                         double score = 0;
                         for (var j = 0; j < pairs.Length; j++)
-                            score += pairs.Skip(j + 1).Where(p => p.Price != pairs[j].Price)
+                            score += pairs.Skip(j + 1).Where(p => p.Price != pairs[j].Price) // NOSONAR: S1244 - Kendall tie exclusion requires equal observations.
                                 .Sum(p => Math.Sign(p.Fit - pairs[j].Fit));
                         return 2 * score / (length * (length - 1d));
                     }).ToArray();
@@ -444,7 +444,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(rsi, i, stochLength).ToArray();
                         var minimum = window.Min();
                         var maximum = window.Max();
-                        return maximum == minimum ? 0 : 100 * (v - minimum) / (maximum - minimum);
+                        return maximum == minimum ? 0 : 100 * (v - minimum) / (maximum - minimum); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var line = Average(raw, firstSmooth, kind);
                     return Outputs(("StochRsi", line), ("Signal", Average(line, secondSmooth, kind)));
@@ -547,7 +547,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var low = window.Min(b => b.Low);
                         var high = window.Max(b => b.High);
-                        return high == low ? 0 : 100 * (bar.Close - low) / (high - low);
+                        return high == low ? 0 : 100 * (bar.Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     if (name == IndicatorName.WilliamsR)
                         return Outputs((key, position.Select(v => v - 100).ToArray()));
@@ -668,8 +668,8 @@ internal static partial class BuiltInFormulaReferences
             var upper = lower;
             if (found >= 0)
             {
-                while (lower > 0 && ordered[lower - 1] == value) lower--;
-                while (upper < ordered.Count && ordered[upper] == value) upper++;
+                while (lower > 0 && ordered[lower - 1] == value) lower--; // NOSONAR: S1244 - Rank ties require equal observations.
+                while (upper < ordered.Count && ordered[upper] == value) upper++; // NOSONAR: S1244 - Rank ties require equal observations.
             }
             signedPairs += lower - (ordered.Count - upper);
             ordered.Insert(lower, value);

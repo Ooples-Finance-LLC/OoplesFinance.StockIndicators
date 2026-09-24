@@ -26,7 +26,7 @@ internal static partial class BuiltInFormulaReferences
                     var line = bars.Select((_, i) =>
                     {
                         var values = Window(bars, i, length).Select(b => b.Close).ToArray();
-                        var ranks = values.Select(v => values.Count(x => x < v) + (values.Count(x => x == v) + 1) / 2d).ToArray();
+                        var ranks = values.Select(v => values.Count(x => x < v) + (values.Count(x => x == v) + 1) / 2d).ToArray(); // NOSONAR: S1244 - Rank ties require equal observations.
                         var mean = (values.Length + 1) / 2d;
                         var x = ranks.Select(v => v - mean).ToArray();
                         var y = x.OrderBy(v => v).ToArray();
@@ -86,7 +86,7 @@ internal static partial class BuiltInFormulaReferences
                     double Position(double[] values, int i)
                     {
                         var window = Window(values, i, 5).ToArray();
-                        return window.Max() == window.Min() ? 0 : 100 * (values[i] - window.Min()) / (window.Max() - window.Min());
+                        return window.Max() == window.Min() ? 0 : 100 * (values[i] - window.Min()) / (window.Max() - window.Min()); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }
                     var raw = bars.Select((b, i) =>
                     {
@@ -203,7 +203,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var low = window.Min(bar => bar.Low);
                         var high = window.Max(bar => bar.High);
-                        return high == low ? -50 : 100 * ((b.Close - low) / (high - low) - 1);
+                        return high == low ? -50 : 100 * ((b.Close - low) / (high - low) - 1); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     var gains = Enumerable.Repeat(2d / (Integer(options, "SmoothLength", 3) + 1), bars.Count).ToArray();
                     return Outputs(("Swr", ExpandedGainTrajectory(raw, gains)));
@@ -220,7 +220,7 @@ internal static partial class BuiltInFormulaReferences
                     var alphaSlow = 2d / (slowPeriod + 1);
                     // Solve for the next price that leaves the difference of the two EMAs unchanged.
                     // Equal periods retain the common prior average as their degenerate equilibrium.
-                    var line = prices.Select((_, i) => i == 0 ? 0 : alphaFast == alphaSlow ? fast[i - 1]
+                    var line = prices.Select((_, i) => i == 0 ? 0 : alphaFast == alphaSlow ? fast[i - 1] // NOSONAR: S1244 - Equal gains define the degenerate equilibrium; unequal gains use the quotient.
                         : fast[i - 1] + alphaSlow * (fast[i - 1] - slow[i - 1]) / (alphaFast - alphaSlow)).ToArray();
                     var signal = Average(line, 9, 3);
                     return Outputs(("Rmacd", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, s) => v - s).ToArray()));
@@ -265,7 +265,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.DemarkPressureRatioV2:
                 return new("Dpr", new[] { "Dpr" }, bars =>
                 {
-                    var pressure = bars.Select(b => b.High == b.Low ? 0 : b.Volume * (b.Close - b.Open) / (b.High - b.Low)).ToArray();
+                    var pressure = bars.Select(b => b.High == b.Low ? 0 : b.Volume * (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     var line = pressure.Select((_, i) =>
                     {
                         var window = Window(pressure, i, length).ToArray();
@@ -303,7 +303,7 @@ internal static partial class BuiltInFormulaReferences
                         var window = Window(bars, i, length).ToArray();
                         var lower = window.Min(b => b.Low);
                         var upper = window.Max(b => b.High);
-                        return upper == lower ? 0 : 200 * (bar.Close - lower) / (upper - lower) - 100;
+                        return upper == lower ? 0 : 200 * (bar.Close - lower) / (upper - lower) - 100; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                     }).ToArray();
                     return Outputs(("Mo", line), ("Signal", Average(line, 9, kind)));
                 });

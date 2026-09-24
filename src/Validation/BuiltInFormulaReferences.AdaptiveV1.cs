@@ -36,7 +36,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var high = indices.Select(j => j < 0 ? 0 : bars[j].High).Append(bars[i].High).Max();
                     var low = indices.Select(j => j < 0 ? 0 : bars[j].Low).Append(bars[i].Low).Min();
-                    values[i] = high == low ? 0 : 100 * (bars[i].Close - low) / (high - low);
+                    values[i] = high == low ? 0 : 100 * (bars[i].Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                 }
                 else
                 {

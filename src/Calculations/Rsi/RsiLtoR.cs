@@ -50,7 +50,7 @@ public static partial class Calculations
                 var avgLoss = avgLossBuffer.Span[i];
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
-                if (i > 0 && length > 1 && inputList[i] == inputList[i - 1])
+                if (i > 0 && length > 1 && inputList[i] == inputList[i - 1]) // NOSONAR: S1244 - Only identical consecutive prices select the unchanged-price recurrence.
                 { rsiSpan[i] = rsiSpan[i - 1]; continue; }
 
                 rsiSpan[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
@@ -89,7 +89,7 @@ public static partial class Calculations
                 var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
 
                 var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-                if (movingAvgType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && inputList[i] == inputList[i - 1])
+                if (movingAvgType == MovingAvgType.ExponentialMovingAverage && length > 1 && i > 0 && inputList[i] == inputList[i - 1]) // NOSONAR: S1244 - Only identical consecutive prices select the unchanged-price recurrence.
                     rsi = rsiList[i - 1];
                 rsiList.Add(rsi);
             }

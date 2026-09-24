@@ -132,7 +132,7 @@ public sealed class IndicatorInputDomain
             var proposed = value + change;
             foreach (var range in _ranges)
                 if (range.Field == field && (proposed < range.Minimum || proposed > range.Maximum))
-                    proposed = value == range.Maximum ? range.Minimum : range.Maximum;
+                    proposed = value == range.Maximum ? range.Minimum : range.Maximum; // NOSONAR: S1244 - Choose the opposite declared endpoint to produce a distinct in-domain value.
             return proposed;
         }
         var candidate = new Bar(bar.Time, bar.Open, Changed(IndicatorInputFields.High, bar.High), bar.Low,

@@ -1314,7 +1314,7 @@ public sealed class EaseOfMovementState : IStreamingIndicatorState
         StreamingInputValidation.Validate(bar);
         var midpoint = (bar.High + bar.Low) / 2;
         var midpointMove = _hasPrev ? midpoint - _prevMidpoint : 0;
-        var boxRatio = bar.High != bar.Low ? bar.Volume / (bar.High - bar.Low) : 0;
+        var boxRatio = bar.High != bar.Low ? bar.Volume / (bar.High - bar.Low) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
         var emv = boxRatio == 0 ? 0 : _divisor * midpointMove / boxRatio;
 
         if (isFinal)

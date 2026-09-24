@@ -15,7 +15,7 @@ internal static partial class BuiltInFormulaReferences
                 var window = Window(bars, i, period).ToArray();
                 var high = window.Sum(b => b.High);
                 var low = window.Sum(b => b.Low);
-                if (high == low || high + low == 0) return 0d;
+                if (high == low || high + low == 0) return 0d; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
                 if (low == 0 && high > 0) return 1d;
                 // Ratio form of 1 - fourth-root(H*L) / sqrt((H+L)/2).
                 var ratio = low / high;

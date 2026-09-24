@@ -38,7 +38,7 @@ public sealed class IndicatorErrorBudget
     {
         if (!Finite(expected) || !Finite(actual)) return false;
         if (RequireSameSign && Math.Sign(expected) != Math.Sign(actual)) return false;
-        if (expected == actual) return true;
+        if (expected == actual) return true; // NOSONAR: S1244 - Exact equality is the fast path; configured tolerances are evaluated below.
         // Normalize to avoid overflow both in subtraction and in the allowed error.
         var scale = Math.Max(Math.Abs(expected), Math.Abs(actual));
         return Math.Abs(expected / scale - actual / scale)

@@ -28,15 +28,15 @@ internal static class WilliamsFractalPattern
         if (first < center && second < center) return true;
         if (older < 3) return false;
         var third = sign * neighborhood[older - 3];
-        if (first == center && second < center && third < center) return true;
+        if (first == center && second < center && third < center) return true; // NOSONAR: S1244 - Plateau membership requires exact price ties.
         if (older < 4) return false;
         var fourth = sign * neighborhood[older - 4];
-        if (first <= center && second == center && third < center && fourth < center) return true;
+        if (first <= center && second == center && third < center && fourth < center) return true; // NOSONAR: S1244 - Plateau membership requires exact price ties.
         if (older < 5) return false;
         var fifth = sign * neighborhood[older - 5];
-        if (first <= center && second == center && third == center && fourth < center && fifth < center) return true;
+        if (first <= center && second == center && third == center && fourth < center && fifth < center) return true; // NOSONAR: S1244 - Plateau membership requires exact price ties.
         if (older < 6) return false;
         var sixth = sign * neighborhood[older - 6];
-        return first <= center && second == center && third <= center && fourth == center && fifth < center && sixth < center;
+        return first <= center && second == center && third <= center && fourth == center && fifth < center && sixth < center; // NOSONAR: S1244 - Plateau membership requires exact price ties.
     }
 }

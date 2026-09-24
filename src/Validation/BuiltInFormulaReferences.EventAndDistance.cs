@@ -37,7 +37,7 @@ internal static partial class BuiltInFormulaReferences
                         var extremes = bars.Select((_, i) => upward ? Window(bars, i, period).Min(b => b.Low)
                             : Window(bars, i, period).Max(b => b.High)).ToArray();
                         var ages = bars.Select((_, i) => i - Enumerable.Range(Math.Max(0, i - period + 1), Math.Min(i + 1, period))
-                            .Last(j => (upward ? bars[j].Low : bars[j].High) == extremes[i])).ToArray();
+                            .Last(j => (upward ? bars[j].Low : bars[j].High) == extremes[i])).ToArray(); // NOSONAR: S1244 - Locate the actual extremum observation, including exact ties.
                         return bars.Select((b, i) =>
                         {
                             if (ages[i] == 0) return 0;

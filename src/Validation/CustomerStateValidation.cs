@@ -78,7 +78,7 @@ internal static class CustomerStateValidation
                     default: throw new InvalidOperationException("No supported customer state was supplied for reset validation.");
                 }
                 for (var slot = 0; slot < outputs.Length; slot++)
-                    if (!outputs[slot].Equals(expected[slot][i]))
+                    if (!outputs[slot].Equals(expected[slot][i])) // NOSONAR: S1244 - Lifecycle replay requires identical published values, not tolerance agreement.
                         throw new InvalidOperationException($"{indicator.GetType().FullName}, output {slot}, bar {i}, {phase}: expected {expected[slot][i]:R}, got {outputs[slot]:R}.");
             }
         }

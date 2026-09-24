@@ -15,7 +15,7 @@ internal static class ChronologicalSpearman
         for (var first = 0; first < count;)
         {
             var end = first + 1;
-            while (end < count && prices[end] == prices[first]) end++;
+            while (end < count && prices[end] == prices[first]) end++; // NOSONAR: S1244 - Rank ties require equal observations; nearby distinct prices have distinct ranks.
             var centeredRank = (first + end - 1d) / 2 - center;
             rankVariance += (end - first) * centeredRank * centeredRank;
             for (var j = first; j < end; j++) covariance += (positions[j] - center) * centeredRank;
