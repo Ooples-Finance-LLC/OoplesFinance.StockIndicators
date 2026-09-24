@@ -3130,7 +3130,8 @@ public sealed class MovingAverageEnvelopeState : IStreamingIndicatorState, IDisp
         double mult = 0.025)
     {
         var resolved = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved)
+            : MovingAverageSmootherFactory.Create(maType, resolved);
         _mult = mult;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -3146,9 +3147,8 @@ public sealed class MovingAverageEnvelopeState : IStreamingIndicatorState, IDisp
     {
         var value = _input.GetValue(bar);
         var middle = _smoother.Next(value, isFinal);
-        var factor = middle * _mult;
-        var upper = middle + factor;
-        var lower = middle - factor;
+        var upper = RoundedPercentageBand.Of(middle, _mult, 1);
+        var lower = RoundedPercentageBand.Of(middle, _mult, -1);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

@@ -25,6 +25,8 @@ internal static class StreamingIndicatorFactory
                 => new MoneyFlowIndexState(mfiCore.Length),
             IndicatorName.LogReturns when spec.Options is LogReturnsSpecOptions logReturns
                 => new LogReturnsState(logReturns.Length),
+            IndicatorName.MovingAverageEnvelope when spec.Options is MovingAverageEnvelopeSpecOptions envelope
+                => new MovingAverageEnvelopeState(envelope.MaType, envelope.Length, envelope.Pct),
             IndicatorName.PriceChannel when spec.Options is PriceChannelSpecOptions priceChannel
                 => new PriceChannelState(priceChannel.MaType, priceChannel.Length, priceChannel.Pct),
             IndicatorName.PriceChannel when spec.Options is PriceChannelMiddleSpecOptions priceMiddle => new PriceChannelState(length: priceMiddle.Length),

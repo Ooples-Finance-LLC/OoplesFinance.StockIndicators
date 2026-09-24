@@ -432,6 +432,7 @@ internal static partial class StatefulIndicatorFactory
             RollingMinSpecOptions rmin => new RollingMinState(length: rmin.Length),
             CumulativeSumSpecOptions _ => new CumulativeSumState(),
             AverageDayRangeSpecOptions adr => new AverageDayRangeState(length: adr.Length),
+            MovingAverageEnvelopeSpecOptions envelope => new MovingAverageEnvelopeState(envelope.MaType, envelope.Length, envelope.Pct),
             PriceChannelSpecOptions priceChannel => new PriceChannelState(priceChannel.MaType, priceChannel.Length, priceChannel.Pct),
             PriceChannelMiddleSpecOptions priceMiddle => new PriceChannelState(length: priceMiddle.Length),
             PriceChannelUpperSpecOptions priceUpper => new PriceChannelState(length: priceUpper.Length),

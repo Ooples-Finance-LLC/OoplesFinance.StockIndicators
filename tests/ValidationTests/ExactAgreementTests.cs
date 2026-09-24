@@ -1,4 +1,4 @@
-﻿using System.Reflection;
+using System.Reflection;
 using FluentAssertions;
 using OoplesFinance.StockIndicators.Builder;
 using OoplesFinance.StockIndicators.Indicators;
@@ -49,8 +49,6 @@ public sealed class ExactAgreementTests
         "InternalBarStrengthIndicator.Signal",
         "JrcFractalDimension.Jrcfd",
         "JrcFractalDimension.Signal",
-        "MovingAverageEnvelope.LowerBand",
-        "MovingAverageEnvelope.UpperBand",
         "MovingAverageSupportResistance.LowerBand",
         "PseudoPolynomialChannel.MiddleBand",
         "RateOfChangeBands.LowerBand",

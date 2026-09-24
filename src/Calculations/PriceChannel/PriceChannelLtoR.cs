@@ -125,6 +125,11 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < smaList.Count; i++) smaList[i] = mean.Next(inputList[i], true);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -132,12 +137,11 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevSma20 = i >= 1 ? smaList[i - 1] : 0;
-            var factor = currentSma20 * mult;
 
-            var upperEnvelope = currentSma20 + factor;
+            var upperEnvelope = RoundedPercentageBand.Of(currentSma20, mult, 1);
             upperEnvelopeList.Add(upperEnvelope);
 
-            var lowerEnvelope = currentSma20 - factor;
+            var lowerEnvelope = RoundedPercentageBand.Of(currentSma20, mult, -1);
             lowerEnvelopeList.Add(lowerEnvelope);
 
             var signal = GetCompareSignal(currentValue - currentSma20, prevValue - prevSma20);

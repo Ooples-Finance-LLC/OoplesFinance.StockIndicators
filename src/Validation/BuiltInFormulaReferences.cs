@@ -48,6 +48,20 @@ internal static partial class BuiltInFormulaReferences
                 absolute: builtIn.BatchName == IndicatorName.ChandeMomentumOscillatorAbsoluteAverage), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (HasRoundedEnvelope(builtIn))
+        {
+            var envelopeOptions = builtIn.CreateOptions();
+            var envelopeKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "MiddleBand" }
+                : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName);
+            for (var slot = 0; slot < envelopeKeys.Count; slot++)
+            {
+                var key = envelopeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedEnvelope(bars, Integer(envelopeOptions, "Length", 20), BoundedMeanKind(envelopeOptions, 1), Number(envelopeOptions, .025, "Pct", "Mult"))[key],
+                    IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (HasRoundedPriceChannel(builtIn))
         {
             var channelOptions = builtIn.CreateOptions();

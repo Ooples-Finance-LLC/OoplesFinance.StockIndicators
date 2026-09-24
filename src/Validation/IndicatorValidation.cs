@@ -124,6 +124,7 @@ public static class IndicatorValidation
         var dayRangePeriod = 0;
         var moveTrackerOverflow = false;
         var priceChannelPeriod = 0;
+        var envelopePeriod = 0;
         IndicatorStartupPolicy[] startupPolicies = Array.Empty<IndicatorStartupPolicy>();
         var instances = new HashSet<IIndicator>(IndicatorReferenceComparer.Instance);
         int warmup;
@@ -144,6 +145,8 @@ public static class IndicatorValidation
             cumulativeVolumeOverflow = probe is CumulativeVolumeIndex;
             normalizedVolumePeriod = probe is NormalizedVolume normalized ? normalized.Length : 0;
             volumeZonePeriod = probe is VolumeZoneOscillator zone ? zone.Length : 0;
+            if (probe is IBuiltInIndicator envelope && BuiltInFormulaReferences.HasRoundedEnvelope(envelope))
+                envelopePeriod = (int)envelope.CreateOptions().GetType().GetProperty("Length")!.GetValue(envelope.CreateOptions())!;
             if (probe is IBuiltInIndicator priceChannel && BuiltInFormulaReferences.HasRoundedPriceChannel(priceChannel))
                 priceChannelPeriod = (int)priceChannel.CreateOptions().GetType().GetProperty("Length")!.GetValue(priceChannel.CreateOptions())!;
             moveTrackerOverflow = probe is IBuiltInIndicator moveTracker && moveTracker.BatchName == IndicatorName.MoveTracker;
@@ -173,6 +176,7 @@ public static class IndicatorValidation
                 || BuiltInFormulaReferences.HasBoundedTriangularMean(volumeIndicator)
                 || BuiltInFormulaReferences.HasBoundedChande(volumeIndicator)
                 || BuiltInFormulaReferences.HasBoundedFilteredChande(volumeIndicator)
+                || BuiltInFormulaReferences.HasRoundedEnvelope(volumeIndicator)
                 || BuiltInFormulaReferences.HasRoundedPriceChannel(volumeIndicator)
                 || BuiltInFormulaReferences.HasRoundedObv(volumeIndicator)
                 || BuiltInFormulaReferences.HasRoundedHighLowIndex(volumeIndicator)
@@ -374,6 +378,11 @@ public static class IndicatorValidation
 
         IEnumerable<(string Name, IReadOnlyList<Bar> Bars)> OutputOverflowFixtures()
         {
+            if (envelopePeriod > 0)
+                foreach (var sign in new[] { 1, -1 })
+                    yield return ("moving-average-envelope-" + (sign > 0 ? "positive" : "negative") + "-output-overflow",
+                        Enumerable.Range(0, envelopePeriod + 3).Select(i => new Bar(new DateTime(2020, 1, 1).AddMinutes(i),
+                            sign * double.MaxValue, sign * double.MaxValue, sign * double.MaxValue, sign * double.MaxValue, 1)).ToArray());
             if (priceChannelPeriod > 0)
                 foreach (var sign in new[] { 1, -1 })
                     yield return ("price-channel-" + (sign > 0 ? "positive" : "negative") + "-output-overflow",

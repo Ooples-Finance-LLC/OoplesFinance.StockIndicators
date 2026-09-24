@@ -2066,5 +2066,23 @@
     "before": "StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);",
     "after": "MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);",
     "filter": "FullyQualifiedName~PriceChannelNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
+  },
+  {
+    "id": "envelope-native-rounds-factor-first",
+    "module": "moving-average-envelope",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageEnvelopeState",
+    "before": "var lower = RoundedPercentageBand.Of(middle, _mult, -1);",
+    "after": "var lower = middle - middle * _mult;",
+    "filter": "FullyQualifiedName~EnvelopeNumericalTests.ExtremeMultipliersRetainFiniteLowerBandsDespiteOverflowingProducts"
+  },
+  {
+    "id": "envelope-rounded-sma-replaced",
+    "module": "moving-average-envelope",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageEnvelopeFast(",
+    "before": "StochasticSmooth(data, maType, length, input, maSpan);",
+    "after": "MovingAverage(data, maType, length, input, maSpan);",
+    "filter": "FullyQualifiedName~EnvelopeNumericalTests.AllStagesMatchTheIndependentReferenceAcrossRoutes"
   }
 ]

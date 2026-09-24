@@ -22944,13 +22944,13 @@ internal static partial class IndicatorCompute
         try
         {
             var maSpan = maArray.AsSpan(0, count);
-            MovingAverage(data, maType, length, input, maSpan);
+            StochasticSmooth(data, maType, length, input, maSpan);
 
             // Scale the requested envelope around its middle average.
             var buffer = context.Rent(count);
             for (var i = 0; i < count; i++)
             {
-                buffer.WritableSpan[i] = maSpan[i] * (band == ChannelBand.Upper ? 1 + pct : band == ChannelBand.Lower ? 1 - pct : 1);
+                buffer.WritableSpan[i] = band == ChannelBand.Middle ? maSpan[i] : RoundedPercentageBand.Of(maSpan[i], pct, band == ChannelBand.Upper ? 1 : -1);
             }
 
             return buffer;
