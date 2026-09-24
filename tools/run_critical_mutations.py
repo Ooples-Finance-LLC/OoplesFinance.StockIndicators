@@ -12,7 +12,7 @@ import time
 import xml.etree.ElementTree as ET
 import zipfile
 
-TRX = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}  # NOSONAR: XML namespace identifier, never a network request.
+TRX = {"t": "http://microsoft.com/schemas/VisualStudio/TeamTest/2010"}  # NOSONAR(S5332) XML namespace identifier, never a network request.
 
 
 def test_outcome(path):
