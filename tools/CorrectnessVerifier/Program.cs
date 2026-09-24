@@ -5,6 +5,8 @@ using OoplesFinance.StockIndicators.Validation;
 
 // Standalone public-API consumer: the same executable can validate a source build or an exact NuGet package.
 // Evidence describes executed contracts, not an assertion that all mathematical specifications were reviewed.
+if (args.Length > 2)
+    throw new ArgumentException("Usage: CorrectnessVerifier [output.xml] [comma-separated configuration filters]. Extra arguments would omit requested configurations.");
 var output = args.Length > 0 ? args[0] : "correctness-evidence.xml";
 var filters = args.Length > 1 ? args[1].Split(',') : Array.Empty<string>();
 var assembly = typeof(IIndicator).Assembly;
