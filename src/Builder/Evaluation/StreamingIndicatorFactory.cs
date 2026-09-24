@@ -48,6 +48,8 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.GuppyDistanceIndicator when spec.Options is GuppyDistanceIndicatorSpecOptions gdi => new GuppyDistanceIndicatorState(gdi.MaType, gdi.Length1, gdi.Length2, gdi.Length3, gdi.Length4, gdi.Length5, gdi.Length6, gdi.Length7, gdi.Length8, gdi.Length9, gdi.Length10, gdi.Length11, gdi.Length12),
+            IndicatorName.GuppyMultipleMovingAverage when spec.Options is GuppyMultipleMovingAverageSpecOptions gmma => new GuppyMultipleMovingAverageState(gmma.MaType, gmma.Length1, gmma.Length2, gmma.Length3, gmma.Length4, gmma.Length5, gmma.Length6, gmma.Length7, gmma.Length8, gmma.Length9, gmma.Length10, gmma.Length11, gmma.Length12, gmma.Length13, gmma.Length14, gmma.Length15, gmma.Length16, gmma.Length17, gmma.Length18, gmma.Length19, gmma.Length20, gmma.Length21, gmma.Length22, gmma.Length23, gmma.Length24, gmma.Length25, gmma.Length26, gmma.Length27),
             IndicatorName.TypicalPriceVolatility when spec.Options is TypicalPriceVolatilitySpecOptions typical => new TypicalPriceVolatilityState(typical.Length),
             IndicatorName.DownsideDeviation when spec.Options is DownsideDeviationSpecOptions downside => new DownsideDeviationState(downside.Length),
             IndicatorName.CoefficientOfVariation when spec.Options is CoefficientOfVariationSpecOptions coefficient => new CoefficientOfVariationState(coefficient.Length),

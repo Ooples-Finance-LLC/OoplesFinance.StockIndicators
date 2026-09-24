@@ -947,7 +947,7 @@ public static partial class Calculations
         List<double> superGmmaOscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var superGmmaOscRawSumWindow = new RollingSum();
+        using var superGmmaOscRawSumWindow = new ExactPartialMeanWindow(smoothLength);
 
         var ema3List = GetMovingAverageList(stockData, maType, length1, inputList);
         var ema5List = GetMovingAverageList(stockData, maType, length2, inputList);
@@ -977,6 +977,8 @@ public static partial class Calculations
         var ema67List = GetMovingAverageList(stockData, maType, length34, inputList);
         var ema70List = GetMovingAverageList(stockData, maType, length35, inputList);
 
+        Span<double> fastRibbon = stackalloc double[11];
+        Span<double> slowRibbon = stackalloc double[16];
         for (var i = 0; i < stockData.Count; i++)
         {
             var emaF1 = ema3List[i];
@@ -1007,18 +1009,43 @@ public static partial class Calculations
             var emaS15 = ema67List[i];
             var emaS16 = ema70List[i];
 
-            var superGmmaFast = (emaF1 + emaF2 + emaF3 + emaF4 + emaF5 + emaF6 + emaF7 + emaF8 + emaF9 + emaF10 + emaF11) / 11;
+            fastRibbon[0] = emaF1;
+            fastRibbon[1] = emaF2;
+            fastRibbon[2] = emaF3;
+            fastRibbon[3] = emaF4;
+            fastRibbon[4] = emaF5;
+            fastRibbon[5] = emaF6;
+            fastRibbon[6] = emaF7;
+            fastRibbon[7] = emaF8;
+            fastRibbon[8] = emaF9;
+            fastRibbon[9] = emaF10;
+            fastRibbon[10] = emaF11;
+            var superGmmaFast = GuppyRibbonArithmetic.Mean(fastRibbon);
             superGmmaFastList.Add(superGmmaFast);
 
-            var superGmmaSlow = (emaS1 + emaS2 + emaS3 + emaS4 + emaS5 + emaS6 + emaS7 + emaS8 + emaS9 + emaS10 + emaS11 + emaS12 + emaS13 +
-                                 emaS14 + emaS15 + emaS16) / 16;
+            slowRibbon[0] = emaS1;
+            slowRibbon[1] = emaS2;
+            slowRibbon[2] = emaS3;
+            slowRibbon[3] = emaS4;
+            slowRibbon[4] = emaS5;
+            slowRibbon[5] = emaS6;
+            slowRibbon[6] = emaS7;
+            slowRibbon[7] = emaS8;
+            slowRibbon[8] = emaS9;
+            slowRibbon[9] = emaS10;
+            slowRibbon[10] = emaS11;
+            slowRibbon[11] = emaS12;
+            slowRibbon[12] = emaS13;
+            slowRibbon[13] = emaS14;
+            slowRibbon[14] = emaS15;
+            slowRibbon[15] = emaS16;
+            var superGmmaSlow = GuppyRibbonArithmetic.Mean(slowRibbon);
             superGmmaSlowList.Add(superGmmaSlow);
 
-            var superGmmaOscRaw = superGmmaSlow != 0 ? (superGmmaFast - superGmmaSlow) / superGmmaSlow * 100 : 0;
+            var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
             superGmmaOscRawList.Add(superGmmaOscRaw);
 
-            superGmmaOscRawSumWindow.Add(superGmmaOscRaw);
-            var superGmmaOsc = superGmmaOscRawSumWindow.Average(smoothLength);
+            var superGmmaOsc = superGmmaOscRawSumWindow.Next(superGmmaOscRaw, true);
             superGmmaOscList.Add(superGmmaOsc);
         }
 
@@ -1101,21 +1128,11 @@ public static partial class Calculations
             var ema10 = ema45List[i];
             var ema11 = ema50List[i];
             var ema12 = ema60List[i];
-            var diff12 = Math.Abs(ema1 - ema2);
-            var diff23 = Math.Abs(ema2 - ema3);
-            var diff34 = Math.Abs(ema3 - ema4);
-            var diff45 = Math.Abs(ema4 - ema5);
-            var diff56 = Math.Abs(ema5 - ema6);
-            var diff78 = Math.Abs(ema7 - ema8);
-            var diff89 = Math.Abs(ema8 - ema9);
-            var diff910 = Math.Abs(ema9 - ema10);
-            var diff1011 = Math.Abs(ema10 - ema11);
-            var diff1112 = Math.Abs(ema11 - ema12);
 
-            var fastDistance = diff12 + diff23 + diff34 + diff45 + diff56;
+            var fastDistance = GuppyRibbonArithmetic.Distance(ema1, ema2, ema3, ema4, ema5, ema6);
             fastDistanceList.Add(fastDistance);
 
-            var slowDistance = diff78 + diff89 + diff910 + diff1011 + diff1112;
+            var slowDistance = GuppyRibbonArithmetic.Distance(ema7, ema8, ema9, ema10, ema11, ema12);
             slowDistanceList.Add(slowDistance);
 
             var colFastL = ema1 > ema2 && ema2 > ema3 && ema3 > ema4 && ema4 > ema5 && ema5 > ema6;

@@ -657,19 +657,9 @@ public sealed class GuppyDistanceIndicatorState : IStreamingIndicatorState, IDis
         var ema11 = _ema11.Next(value, isFinal);
         var ema12 = _ema12.Next(value, isFinal);
 
-        var diff12 = Math.Abs(ema1 - ema2);
-        var diff23 = Math.Abs(ema2 - ema3);
-        var diff34 = Math.Abs(ema3 - ema4);
-        var diff45 = Math.Abs(ema4 - ema5);
-        var diff56 = Math.Abs(ema5 - ema6);
-        var diff78 = Math.Abs(ema7 - ema8);
-        var diff89 = Math.Abs(ema8 - ema9);
-        var diff910 = Math.Abs(ema9 - ema10);
-        var diff1011 = Math.Abs(ema10 - ema11);
-        var diff1112 = Math.Abs(ema11 - ema12);
 
-        var fastDistance = diff12 + diff23 + diff34 + diff45 + diff56;
-        var slowDistance = diff78 + diff89 + diff910 + diff1011 + diff1112;
+        var fastDistance = GuppyRibbonArithmetic.Distance(ema1, ema2, ema3, ema4, ema5, ema6);
+        var slowDistance = GuppyRibbonArithmetic.Distance(ema7, ema8, ema9, ema10, ema11, ema12);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -732,7 +722,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _ema67;
     private readonly IMovingAverageSmoother _ema70;
     private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly RollingWindowSum _oscRawSum;
+    private readonly ExactPartialMeanWindow _oscRawSum;
     private readonly StreamingInputResolver _input;
     private readonly int _smoothLength;
 
@@ -773,7 +763,7 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
         _ema70 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length35));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _smoothLength = Math.Max(1, smoothLength);
-        _oscRawSum = new RollingWindowSum(_smoothLength);
+        _oscRawSum = new ExactPartialMeanWindow(_smoothLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -843,12 +833,10 @@ public sealed class GuppyMultipleMovingAverageState : IStreamingIndicatorState, 
         var emaS15 = _ema67.Next(value, isFinal);
         var emaS16 = _ema70.Next(value, isFinal);
 
-        var superGmmaFast = (emaF1 + emaF2 + emaF3 + emaF4 + emaF5 + emaF6 + emaF7 + emaF8 + emaF9 + emaF10 + emaF11) / 11;
-        var superGmmaSlow = (emaS1 + emaS2 + emaS3 + emaS4 + emaS5 + emaS6 + emaS7 + emaS8 +
-            emaS9 + emaS10 + emaS11 + emaS12 + emaS13 + emaS14 + emaS15 + emaS16) / 16;
-        var superGmmaOscRaw = superGmmaSlow != 0 ? (superGmmaFast - superGmmaSlow) / superGmmaSlow * 100 : 0;
-        var oscSum = isFinal ? _oscRawSum.Add(superGmmaOscRaw, out var oscCount) : _oscRawSum.Preview(superGmmaOscRaw, out oscCount);
-        var superGmmaOsc = oscCount > 0 ? oscSum / oscCount : 0;
+        var superGmmaFast = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaF1, emaF2, emaF3, emaF4, emaF5, emaF6, emaF7, emaF8, emaF9, emaF10, emaF11 });
+        var superGmmaSlow = GuppyRibbonArithmetic.Mean(stackalloc double[] { emaS1, emaS2, emaS3, emaS4, emaS5, emaS6, emaS7, emaS8, emaS9, emaS10, emaS11, emaS12, emaS13, emaS14, emaS15, emaS16 });
+        var superGmmaOscRaw = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
+        var superGmmaOsc = _oscRawSum.Next(superGmmaOscRaw, isFinal);
         var signal = _signalSmoother.Next(superGmmaOscRaw, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;

@@ -324,6 +324,30 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.GuppyDistanceIndicator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var distanceOptions = builtIn.CreateOptions();
+            var distanceKeys = new[] { "FastDistance", "SlowDistance" };
+            for (var slot = 0; slot < distanceKeys.Length; slot++)
+            {
+                var key = distanceKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedGuppyDistance(bars, distanceOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.GuppyMultipleMovingAverage && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var guppyOptions = builtIn.CreateOptions();
+            var guppyKeys = new[] { "SuperGmmaOsc", "SuperGmmaSignal" };
+            for (var slot = 0; slot < guppyKeys.Length; slot++)
+            {
+                var key = guppyKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedGuppy(bars, guppyOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TypicalPriceVolatility)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

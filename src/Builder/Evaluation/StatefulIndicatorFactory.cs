@@ -45,6 +45,8 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            GuppyDistanceIndicatorSpecOptions gdi => new GuppyDistanceIndicatorState(gdi.MaType, gdi.Length1, gdi.Length2, gdi.Length3, gdi.Length4, gdi.Length5, gdi.Length6, gdi.Length7, gdi.Length8, gdi.Length9, gdi.Length10, gdi.Length11, gdi.Length12),
+            GuppyMultipleMovingAverageSpecOptions gmma => new GuppyMultipleMovingAverageState(gmma.MaType, gmma.Length1, gmma.Length2, gmma.Length3, gmma.Length4, gmma.Length5, gmma.Length6, gmma.Length7, gmma.Length8, gmma.Length9, gmma.Length10, gmma.Length11, gmma.Length12, gmma.Length13, gmma.Length14, gmma.Length15, gmma.Length16, gmma.Length17, gmma.Length18, gmma.Length19, gmma.Length20, gmma.Length21, gmma.Length22, gmma.Length23, gmma.Length24, gmma.Length25, gmma.Length26, gmma.Length27),
             DiNapoliPreferredStochasticOscillatorSpecOptions diNapoli => new DiNapoliPreferredStochasticOscillatorState(diNapoli.Length),
             DoubleStochasticOscillatorSpecOptions doubleStochastic => new DoubleStochasticOscillatorState(doubleStochastic.MaType, doubleStochastic.Length),
             StochasticFastOscillatorSpecOptions fastStoch => new StochasticFastOscillatorState(fastStoch.MaType, fastStoch.Length, fastStoch.SmoothLength1, fastStoch.SmoothLength2),

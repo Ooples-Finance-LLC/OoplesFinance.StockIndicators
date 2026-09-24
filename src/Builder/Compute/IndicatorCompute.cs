@@ -24386,11 +24386,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = Math.Abs(first.Span[i] - second.Span[i])
-                + Math.Abs(second.Span[i] - third.Span[i])
-                + Math.Abs(third.Span[i] - fourth.Span[i])
-                + Math.Abs(fourth.Span[i] - fifth.Span[i])
-                + Math.Abs(fifth.Span[i] - sixth.Span[i]);
+            output[i] = GuppyRibbonArithmetic.Distance(first.Span[i], second.Span[i], third.Span[i], fourth.Span[i], fifth.Span[i], sixth.Span[i]);
         }
 
         return buffer;
@@ -24543,13 +24539,9 @@ internal static partial class IndicatorCompute
             52, 55, 58, 61, 64, 67, 70
         };
 
-        using var fastRibbon = context.Rent(count);
-        using var slowRibbon = context.Rent(count);
         using var scratch = context.Rent(count);
-        var fast = fastRibbon.WritableSpan;
-        var slow = slowRibbon.WritableSpan;
-        fast.Clear();
-        slow.Clear();
+        var fast = new ExactMeanAccumulator[count];
+        var slow = new ExactMeanAccumulator[count];
 
         for (var j = 0; j < fastLengths.Length; j++)
         {
@@ -24557,7 +24549,7 @@ internal static partial class IndicatorCompute
             var averaged = scratch.Span;
             for (var i = 0; i < count; i++)
             {
-                fast[i] += averaged[i];
+                fast[i].Add(averaged[i]);
             }
         }
 
@@ -24567,7 +24559,7 @@ internal static partial class IndicatorCompute
             var averaged = scratch.Span;
             for (var i = 0; i < count; i++)
             {
-                slow[i] += averaged[i];
+                slow[i].Add(averaged[i]);
             }
         }
 
@@ -24575,14 +24567,13 @@ internal static partial class IndicatorCompute
         var oscillatorRaw = raw.WritableSpan;
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        var rawSum = new RollingSum();
+        using var rawSum = new ExactPartialMeanWindow(smoothLength);
         for (var i = 0; i < count; i++)
         {
-            var superGmmaFast = fast[i] / 11;
-            var superGmmaSlow = slow[i] / 16;
-            oscillatorRaw[i] = superGmmaSlow != 0 ? (superGmmaFast - superGmmaSlow) / superGmmaSlow * 100 : 0;
-            rawSum.Add(oscillatorRaw[i]);
-            output[i] = rawSum.Average(Math.Max(1, smoothLength));
+            var superGmmaFast = fast[i].Mean(11);
+            var superGmmaSlow = slow[i].Mean(16);
+            oscillatorRaw[i] = GuppyRibbonArithmetic.Percent(superGmmaFast, superGmmaSlow);
+            output[i] = rawSum.Next(oscillatorRaw[i], true);
         }
 
         if (series == MacdSeries.Signal)

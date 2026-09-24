@@ -2751,5 +2751,37 @@
     "id": "typical-volatility-preview-commits",
     "before": "mean.Mean(3), commit",
     "after": "mean.Mean(3), true"
+  },
+  {
+    "module": "guppy",
+    "file": "src/Helpers/GuppyRibbonArithmetic.cs",
+    "filter": "FullyQualifiedName~GuppyNumericalTests.RibbonsPreserveCancellationScaleAndTinyDenominators|FullyQualifiedName~GuppyNumericalTests.RawSmoothingUsesAvailableHistoryAndSignalStillUsesRawOscillator|FullyQualifiedName~GuppyNumericalTests.SelectedInputReachesBothGuppyFamilies",
+    "id": "guppy-wrong-ribbon-divisor",
+    "before": "sum.Mean(values.Length)",
+    "after": "sum.Mean(values.Length + 1)"
+  },
+  {
+    "module": "guppy",
+    "file": "src/Helpers/GuppyRibbonArithmetic.cs",
+    "filter": "FullyQualifiedName~GuppyNumericalTests.RibbonsPreserveCancellationScaleAndTinyDenominators|FullyQualifiedName~GuppyNumericalTests.RawSmoothingUsesAvailableHistoryAndSignalStillUsesRawOscillator|FullyQualifiedName~GuppyNumericalTests.SelectedInputReachesBothGuppyFamilies",
+    "id": "guppy-wrong-percent",
+    "before": "numerator.Add(fast, 100); numerator.Add(slow, -100);",
+    "after": "numerator.Add(fast, 10); numerator.Add(slow, -10);"
+  },
+  {
+    "module": "guppy",
+    "file": "src/Helpers/ExactPartialMeanWindow.cs",
+    "filter": "FullyQualifiedName~GuppyNumericalTests.RibbonsPreserveCancellationScaleAndTinyDenominators|FullyQualifiedName~GuppyNumericalTests.RawSmoothingUsesAvailableHistoryAndSignalStillUsesRawOscillator|FullyQualifiedName~GuppyNumericalTests.SelectedInputReachesBothGuppyFamilies",
+    "id": "guppy-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
+  },
+  {
+    "module": "guppy",
+    "file": "src/Helpers/GuppyRibbonArithmetic.cs",
+    "filter": "FullyQualifiedName~GuppyNumericalTests.RibbonsPreserveCancellationScaleAndTinyDenominators|FullyQualifiedName~GuppyNumericalTests.RawSmoothingUsesAvailableHistoryAndSignalStillUsesRawOscillator|FullyQualifiedName~GuppyNumericalTests.SelectedInputReachesBothGuppyFamilies",
+    "id": "guppy-distance-skips-last-gap",
+    "before": "i < values.Length",
+    "after": "i < values.Length - 1"
   }
 ]
