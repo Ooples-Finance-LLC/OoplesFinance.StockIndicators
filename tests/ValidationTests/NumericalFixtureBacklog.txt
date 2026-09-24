@@ -679,10 +679,6 @@ OoplesFinance.StockIndicators.Indicators.DoubleSmoothedStochastic/longer-periods
 OoplesFinance.StockIndicators.Indicators.DoubleSmoothedStochastic/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DoubleSmoothedStochastic/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DoubleSmoothedStochastic/weighted-average
-OoplesFinance.StockIndicators.Indicators.DownsideDeviation/default
-OoplesFinance.StockIndicators.Indicators.DownsideDeviation/longer-periods
-OoplesFinance.StockIndicators.Indicators.DownsideDeviation/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DownsideDeviation/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/default
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/longer-length1
 OoplesFinance.StockIndicators.Indicators.DrunkardWalk/longer-length2

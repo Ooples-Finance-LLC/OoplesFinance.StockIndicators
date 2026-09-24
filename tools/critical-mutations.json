@@ -2703,5 +2703,29 @@
     "id": "coefficient-preview-commits",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "downside",
+    "file": "src/Helpers/ExactDownsideWindow.cs",
+    "filter": "FullyQualifiedName~DownsideDeviationNumericalTests",
+    "id": "downside-whole-window-divisor",
+    "before": "denominator * shortfalls",
+    "after": "denominator * _prices.Capacity"
+  },
+  {
+    "module": "downside",
+    "file": "src/Helpers/ExactDownsideWindow.cs",
+    "filter": "FullyQualifiedName~DownsideDeviationNumericalTests",
+    "id": "downside-ignore-target",
+    "before": "- _target * previous",
+    "after": "- BigInteger.Zero * previous"
+  },
+  {
+    "module": "downside",
+    "file": "src/Helpers/ExactDownsideWindow.cs",
+    "filter": "FullyQualifiedName~DownsideDeviationNumericalTests",
+    "id": "downside-preview-commits",
+    "before": "if (commit)",
+    "after": "if (true)"
   }
 ]

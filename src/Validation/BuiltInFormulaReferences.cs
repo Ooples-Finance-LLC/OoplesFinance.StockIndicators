@@ -324,6 +324,14 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.DownsideDeviation)
+        {
+            var downsideOptions = builtIn.CreateOptions();
+            var period = Integer(downsideOptions, "Length", 20);
+            var target = Number(downsideOptions, 0, "TargetReturn");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoundedDownside(bars, period, target), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.CoefficientOfVariation)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 20);

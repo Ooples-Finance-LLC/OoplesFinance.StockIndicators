@@ -61,16 +61,12 @@ public sealed class CoefficientOfVariationState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Dd")]
 public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _targetReturn;
-    private readonly PooledRingBuffer<double> _window;
+    private readonly ExactDownsideWindow _window;
     private readonly StreamingInputResolver _input;
 
     public DownsideDeviationState(int length = 20, double targetReturn = 0)
     {
-        _length = Math.Max(1, length);
-        _targetReturn = targetReturn;
-        _window = new PooledRingBuffer<double>(_length);
+        _window = new ExactDownsideWindow(length, targetReturn);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -78,38 +74,14 @@ public sealed class DownsideDeviationState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
-        _window.Clear();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
 
-        double downsideDeviation = 0;
-        if (_window.Count >= _length)
-        {
-            double sumSquaredDownside = 0;
-            var shortfalls = 0;
-            for (var i = 1; i <= _length; i++)
-            {
-                var prevValue = _window[i - 1];
-                var currentValue = i < _length ? _window[i] : value;
-                var ret = prevValue > 0 ? (currentValue - prevValue) / prevValue : 0;
-                if (ret < _targetReturn)
-                {
-                    var shortfall = ret - _targetReturn;
-                    sumSquaredDownside += shortfall * shortfall;
-                    shortfalls++;
-                }
-            }
-
-            downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
-        }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-        }
+        var downsideDeviation = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

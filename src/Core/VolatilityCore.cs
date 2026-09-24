@@ -875,28 +875,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumSquaredDownside = 0;
-            var count = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var ret = close[j - 1] > 0 ? (close[j] - close[j - 1]) / close[j - 1] : 0;
-                if (ret < targetReturn)
-                {
-                    sumSquaredDownside += (ret - targetReturn) * (ret - targetReturn);
-                    count++;
-                }
-            }
-
-            output[i] = count > 0 ? Math.Sqrt(sumSquaredDownside / count) : 0;
-        }
+        using var window = new ExactDownsideWindow(length, targetReturn);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

@@ -2746,7 +2746,7 @@ public sealed class FormulaContractCoverageTests
         Check(new GeometricMeanMovingAverage(2), new[] { -1d, 0, 4 }, new[] { -1d, 0, 4 });
         Check(new HarmonicMeanMovingAverage(2), new[] { 1d, 4, 16 }, new[] { 1d, 8d / 5, 32d / 5 });
         Check(new HarmonicMeanMovingAverage(2), new[] { -1d, 1, 0 }, new[] { -1d, 0, 1 });
-        Check(new LeoMovingAverage(2), new[] { 1d, 2, 4 }, new[] { 4d / 3, 11d / 6, 11d / 3 });
+        Check(new LeoMovingAverage(2), new[] { 1d, 2, 4 }, new[] { 2 * (2d / 3), 2 * (5d / 3) - 1.5, 2 * (10d / 3) - 3 });
         Check(new EndPointMovingAverage(3), new[] { 1d, 2, 4 }, new[] { 1d / 6, 2d / 3, 11d / 6 });
         Check(new EndPointMovingAverage(7), new[] { 1d, 2, 4 }, new[] { 0d, 0, 0 });
         Check(new GeneralizedDoubleExponentialMovingAverage(length: 2, volumeFactor: .5),
@@ -2763,7 +2763,7 @@ public sealed class FormulaContractCoverageTests
         Check(new SlowSmoothedMovingAverage(3), new[] { 1d, 2, 4 }, new[] { 1d, 2, 4 });
         Check(new MedianValue(3), new[] { 1d, 8, 4, 2 }, new[] { 1d, 8, 4, 4 });
         Check(new MedianValue(2), new[] { 1d, 8, 4 }, new[] { 1d, 4.5, 6 });
-        Check(new Skewness(3), new[] { 1d, 1, 4 }, new[] { 0d, 0, 1 / Math.Sqrt(2) });
+        Check(new Skewness(3), new[] { 1d, 1, 4 }, new[] { 0d, 0, Math.Sqrt(0.5) });
         Check(new TypicalPriceVolatility(2), new[] { 1d, 4, 8 }, new[] { 0d, 1.5, 2 });
 
         static void Check(IIndicator indicator, double[] input, double[] expected)

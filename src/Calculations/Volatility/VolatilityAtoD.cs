@@ -112,27 +112,10 @@ public static partial class Calculations
         List<double> ddList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactDownsideWindow(length, targetReturn);
         for (var i = 0; i < count; i++)
         {
-            double downsideDeviation = 0;
-            if (i >= length)
-            {
-                double sumSquaredDownside = 0;
-                var shortfalls = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var prevValue = inputList[j - 1];
-                    var ret = prevValue > 0 ? (inputList[j] - prevValue) / prevValue : 0;
-                    if (ret < targetReturn)
-                    {
-                        var shortfall = ret - targetReturn;
-                        sumSquaredDownside += shortfall * shortfall;
-                        shortfalls++;
-                    }
-                }
-
-                downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
-            }
+            var downsideDeviation = window.Next(inputList[i], true);
 
             ddList.Add(downsideDeviation);
 

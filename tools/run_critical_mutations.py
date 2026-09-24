@@ -102,9 +102,11 @@ def main():
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--output", default="artifacts/correctness/mutations")
     parser.add_argument("--timeout", type=int, default=300)
+    parser.add_argument("--baseline-timeout", type=int, default=1800,
+                        help="Seconds for the initial build and union of all selected test filters.")
     parser.add_argument("--only", nargs="+", help="Run selected faults; a subset cannot satisfy the full release gate.")
     args = parser.parse_args()
-    if args.timeout <= 0:
+    if args.timeout <= 0 or args.baseline_timeout <= 0:
         raise ValueError("The per-run timeout must be positive.")
     repo = Path(__file__).resolve().parent.parent
     output = Path(args.output).resolve()
@@ -153,7 +155,7 @@ def main():
             subprocess.run(["dotnet", "restore", "tests/OoplesFinance.StockIndicators.Tests.Unit.csproj"],
                            cwd=worktree, stdout=log, stderr=subprocess.STDOUT, check=True, timeout=args.timeout)
         baseline_filter = "|".join(sorted({e["filter"] for e in entries}))
-        baseline = run_tests(worktree, output / "baseline", baseline_filter, args.timeout)
+        baseline = run_tests(worktree, output / "baseline", baseline_filter, args.baseline_timeout)
         evidence["baseline"] = baseline
         if baseline["outcome"] != "passed":
             raise RuntimeError("The unchanged snapshot did not pass. No mutation kills can be credited.")

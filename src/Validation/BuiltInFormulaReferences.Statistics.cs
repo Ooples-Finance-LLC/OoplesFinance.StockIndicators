@@ -385,14 +385,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Cv", new[] { "Cv" }, bars => Outputs(("Cv", RoundedCoefficient(bars, length))));
             case IndicatorName.DownsideDeviation:
                 var target = Number(options, 0, "TargetReturn");
-                return new("Dd", new[] { "Dd" }, bars => Outputs(("Dd", bars.Select((_, i) =>
-                {
-                    if (i < length) return 0;
-                    var shortfalls = Enumerable.Range(i - length + 1, length)
-                        .Select(j => (bars[j - 1].Close > 0 ? bars[j].Close / bars[j - 1].Close - 1 : 0) - target)
-                        .Where(v => v < 0).ToArray();
-                    return shortfalls.Length == 0 ? 0 : Math.Sqrt(shortfalls.Average(v => v * v));
-                }).ToArray())));
+                return new("Dd", new[] { "Dd" }, bars => Outputs(("Dd", RoundedDownside(bars, length, target))));
             case IndicatorName.CloseToCloseVolatility:
                 return new("Ctcv", new[] { "Ctcv" }, bars =>
                 {

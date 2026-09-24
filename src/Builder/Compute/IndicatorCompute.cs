@@ -7818,7 +7818,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDownsideDeviationFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var close = SpanCompat.AsReadOnlySpan(input);
         var buffer = context.Rent(data.Count);
         VolatilityCore.DownsideDeviation(close, buffer.WritableSpan, length);
         return buffer;
