@@ -18271,11 +18271,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTFSTetherLineFast(StockData data, ComputeContext context, int length = 50)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.TFSTetherLineIndicator(high, low, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeTFSTetherLineIndicatorFast(data, context, length);
     }
 
     /// <summary>
@@ -18995,7 +18991,7 @@ internal static partial class IndicatorCompute
         {
             highWindow.Add(highs[i]);
             lowWindow.Add(lows[i]);
-            output[i] = (highWindow.Max + lowWindow.Min) / 2;
+            output[i] = PriceMean.Of(highWindow.Max, lowWindow.Min);
         }
 
         return buffer;

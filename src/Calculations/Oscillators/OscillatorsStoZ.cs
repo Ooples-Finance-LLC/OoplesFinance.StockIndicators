@@ -2719,7 +2719,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevTetherLine = GetLastOrDefault(tetherLineList);
-            var tetherLine = (highest + lowest) / 2;
+            var tetherLine = PriceMean.Of(highest, lowest);
             tetherLineList.Add(tetherLine);
 
             var signal = GetCompareSignal(currentValue - tetherLine, prevValue - prevTetherLine);

@@ -2148,5 +2148,32 @@
     "before": " or IndicatorName.GannSwingOscillator or IndicatorName.GannTrendOscillator",
     "after": "",
     "filter": "FullyQualifiedName~NumericalEnrollmentCoverageTests.MissingNumericalConfigurationsCannotGrowOrHideCompletedWork"
+  },
+  {
+    "id": "tether-native-midpoint-overflow",
+    "module": "tfs-tether",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TFSTetherLineIndicatorState",
+    "before": "var tether = PriceMean.Of(highest, lowest);",
+    "after": "var tether = (highest + lowest) / 2;",
+    "filter": "FullyQualifiedName~TetherNumericalTests.EveryRoutePublishesTheExactWindowMidpoint"
+  },
+  {
+    "id": "tether-close-overload-publishes-range-position",
+    "module": "tfs-tether",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void TFSTetherLineIndicator(ReadOnlySpan<double> close,",
+    "before": "output[i] = PriceMean.Of(highest, lowest);",
+    "after": "output[i] = highest == lowest ? 0 : 100 * (close[i] - lowest) / (highest - lowest);",
+    "filter": "FullyQualifiedName~TetherNumericalTests.EveryRoutePublishesTheExactWindowMidpoint"
+  },
+  {
+    "id": "tether-alias-ignores-selected-range",
+    "module": "tfs-tether",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTFSTetherLineFast(",
+    "before": "return ComputeTFSTetherLineIndicatorFast(data, context, length);",
+    "after": "var buffer = context.Rent(data.Count);\n        OscillatorCore.TFSTetherLineIndicator(SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), buffer.WritableSpan, length);\n        return buffer;",
+    "filter": "FullyQualifiedName~TetherNumericalTests.LegacyChainedAliasesUseTheSyntheticRange"
   }
 ]

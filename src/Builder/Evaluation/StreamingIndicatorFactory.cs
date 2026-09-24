@@ -25,6 +25,8 @@ internal static class StreamingIndicatorFactory
                 => new MoneyFlowIndexState(mfiCore.Length),
             IndicatorName.LogReturns when spec.Options is LogReturnsSpecOptions logReturns
                 => new LogReturnsState(logReturns.Length),
+            IndicatorName.TFSTetherLineIndicator when spec.Options is TFSTetherLineIndicatorSpecOptions tether => new TFSTetherLineIndicatorState(tether.Length),
+            IndicatorName.TFSTetherLineIndicator when spec.Options is TFSTetherLineSpecOptions tetherAlias => new TFSTetherLineIndicatorState(tetherAlias.Length),
             IndicatorName.RangeIdentifier when spec.Options is RangeIdentifierSpecOptions rangeIdentifier
                 => new RangeIdentifierState(rangeIdentifier.Length),
             IndicatorName.MovingAverageEnvelope when spec.Options is MovingAverageEnvelopeSpecOptions envelope

@@ -522,7 +522,7 @@ public sealed class TFSTetherLineIndicatorState : IStreamingIndicatorState, IDis
         _ = _input.GetValue(bar);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var tether = (highest + lowest) / 2;
+        var tether = PriceMean.Of(highest, lowest);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

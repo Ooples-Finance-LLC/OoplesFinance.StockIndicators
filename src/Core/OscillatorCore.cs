@@ -9123,7 +9123,7 @@ internal static class OscillatorCore
 
             var highest = highWindow.Max;
             var lowest = lowWindow.Min;
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -10144,9 +10144,7 @@ internal static class OscillatorCore
 
             var highest = highWindow.Max;
             var lowest = lowWindow.Min;
-            var range = highest - lowest;
-
-            output[i] = range != 0 ? (close[i] - lowest) / range * 100 : 0;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 

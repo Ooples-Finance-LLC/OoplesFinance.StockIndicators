@@ -676,7 +676,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.TFSTetherLineIndicator:
                 return new("Tether", new[] { "Tether" }, bars => Outputs(("Tether", bars.Select((_, i) =>
-                    (Window(bars, i, length).Max(b => b.High) + Window(bars, i, length).Min(b => b.Low)) / 2).ToArray())));
+                    ExactPriceMean(Window(bars, i, length).Max(b => b.High), Window(bars, i, length).Min(b => b.Low))).ToArray())));
             case IndicatorName.PriceChannel:
                 var channelPercent = Number(options, .06, "Pct");
                 return new("MiddleChannel", new[] { "MiddleChannel", "UpperChannel", "LowerChannel" }, bars =>

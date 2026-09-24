@@ -317,6 +317,8 @@ internal static partial class StatefulIndicatorFactory
             SmartEnvelopeSpecOptions smart => new SmartEnvelopeState(smart.Length, smart.Factor),
             TrendStepSpecOptions step => new TrendStepState(step.Length),
             RangeBandsSpecOptions range => new RangeBandsState(range.StdDevFactor, range.MaType, range.Length),
+            TFSTetherLineIndicatorSpecOptions tether => new TFSTetherLineIndicatorState(tether.Length),
+            TFSTetherLineSpecOptions tetherAlias => new TFSTetherLineIndicatorState(tetherAlias.Length),
             RangeIdentifierSpecOptions rangeId => new RangeIdentifierState(rangeId.Length),
             QmaSmaDifferenceSpecOptions spread => new QmaSmaDifferenceState(spread.Length),
             MovingAverageDisplacedEnvelopeSpecOptions displaced => new MovingAverageDisplacedEnvelopeState(displaced.MaType, displaced.Length1, displaced.Length2, displaced.Pct),
