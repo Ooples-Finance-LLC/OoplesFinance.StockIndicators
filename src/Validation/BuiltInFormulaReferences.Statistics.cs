@@ -378,9 +378,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.Skewness:
                 return new("Skewness", new[] { "Skewness" }, bars => Outputs(("Skewness", RoundedSkewness(bars, length))));
             case IndicatorName.TypicalPriceVolatility:
-                return new("Tpv", new[] { "Tpv" }, bars => Outputs(("Tpv",
-                    PopulationVariance(bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray(), length)
-                        .Select(Math.Sqrt).ToArray())));
+                return new("Tpv", new[] { "Tpv" }, bars => Outputs(("Tpv", RoundedTypicalVolatility(bars, length))));
             case IndicatorName.CoefficientOfVariation:
                 return new("Cv", new[] { "Cv" }, bars => Outputs(("Cv", RoundedCoefficient(bars, length))));
             case IndicatorName.DownsideDeviation:

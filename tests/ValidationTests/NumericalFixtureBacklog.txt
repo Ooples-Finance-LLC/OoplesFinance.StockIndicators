@@ -4273,10 +4273,6 @@ OoplesFinance.StockIndicators.Indicators.TwiggsMoneyFlow/longer-periods
 OoplesFinance.StockIndicators.Indicators.TwiggsMoneyFlow/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TwiggsMoneyFlow/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TwiggsMoneyFlow/weighted-average
-OoplesFinance.StockIndicators.Indicators.TypicalPriceVolatility/default
-OoplesFinance.StockIndicators.Indicators.TypicalPriceVolatility/longer-periods
-OoplesFinance.StockIndicators.Indicators.TypicalPriceVolatility/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TypicalPriceVolatility/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/default
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/minimum-periods

@@ -48,6 +48,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.TypicalPriceVolatility when spec.Options is TypicalPriceVolatilitySpecOptions typical => new TypicalPriceVolatilityState(typical.Length),
             IndicatorName.DownsideDeviation when spec.Options is DownsideDeviationSpecOptions downside => new DownsideDeviationState(downside.Length),
             IndicatorName.CoefficientOfVariation when spec.Options is CoefficientOfVariationSpecOptions coefficient => new CoefficientOfVariationState(coefficient.Length),
             IndicatorName.Skewness when spec.Options is SkewnessSpecOptions skew => new SkewnessState(skew.Length),

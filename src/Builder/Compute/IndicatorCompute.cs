@@ -17849,9 +17849,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTypicalPriceVolatilityFast(StockData data, ComputeContext context, int length = 14)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var high = SpanCompat.AsReadOnlySpan(highs);
+        var low = SpanCompat.AsReadOnlySpan(lows);
+        var close = SpanCompat.AsReadOnlySpan(input);
         var buffer = context.Rent(data.Count);
         OscillatorCore.TypicalPriceVolatility(high, low, close, buffer.WritableSpan, length);
         return buffer;

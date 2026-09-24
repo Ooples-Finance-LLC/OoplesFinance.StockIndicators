@@ -296,28 +296,10 @@ public static partial class Calculations
         List<double> volatilityList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactTypicalVolatilityWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double volatility = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += (highList[j] + lowList[j] + inputList[j]) / 3;
-                }
-
-                var mean = sum / length;
-                double sumSquaredDev = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var typicalPrice = (highList[j] + lowList[j] + inputList[j]) / 3;
-                    var dev = typicalPrice - mean;
-                    sumSquaredDev += dev * dev;
-                }
-
-                volatility = Sqrt(sumSquaredDev / length);
-            }
+            var volatility = window.Next(highList[i], lowList[i], inputList[i], true);
 
             volatilityList.Add(volatility);
 

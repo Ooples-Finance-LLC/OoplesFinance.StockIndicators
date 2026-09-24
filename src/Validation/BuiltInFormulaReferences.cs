@@ -324,6 +324,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TypicalPriceVolatility)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.Reference(0, bars => RoundedTypicalVolatility(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DownsideDeviation)
         {
             var downsideOptions = builtIn.CreateOptions();

@@ -8688,35 +8688,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            // CalculateTypicalPriceVolatility returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean of typical prices
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var tp = (high[j] + low[j] + close[j]) / 3;
-                sum += tp;
-            }
-            var mean = sum / length;
-
-            // Calculate standard deviation
-            double sumSquaredDev = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var tp = (high[j] + low[j] + close[j]) / 3;
-                var dev = tp - mean;
-                sumSquaredDev += dev * dev;
-            }
-            output[i] = Math.Sqrt(sumSquaredDev / length);
-        }
+        using var window = new ExactTypicalVolatilityWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     #endregion

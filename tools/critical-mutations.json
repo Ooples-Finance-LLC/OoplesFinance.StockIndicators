@@ -2727,5 +2727,29 @@
     "id": "downside-preview-commits",
     "before": "if (commit)",
     "after": "if (true)"
+  },
+  {
+    "module": "typical-volatility",
+    "file": "src/Helpers/ExactTypicalVolatilityWindow.cs",
+    "filter": "FullyQualifiedName~TypicalPriceVolatilityNumericalTests",
+    "id": "typical-volatility-wrong-mean",
+    "before": "mean.Mean(3)",
+    "after": "mean.Mean(2)"
+  },
+  {
+    "module": "typical-volatility",
+    "file": "src/Helpers/ExactTypicalVolatilityWindow.cs",
+    "filter": "FullyQualifiedName~TypicalPriceVolatilityNumericalTests",
+    "id": "typical-volatility-ignore-low",
+    "before": "mean.Add(low);",
+    "after": "mean.Add(high);"
+  },
+  {
+    "module": "typical-volatility",
+    "file": "src/Helpers/ExactTypicalVolatilityWindow.cs",
+    "filter": "FullyQualifiedName~TypicalPriceVolatilityNumericalTests",
+    "id": "typical-volatility-preview-commits",
+    "before": "mean.Mean(3), commit",
+    "after": "mean.Mean(3), true"
   }
 ]
