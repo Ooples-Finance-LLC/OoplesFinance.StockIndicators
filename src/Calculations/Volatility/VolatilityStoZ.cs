@@ -208,26 +208,10 @@ public static partial class Calculations
         List<double> varianceList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactVarianceWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double variance = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                variance /= length;
-            }
+            var variance = window.Next(inputList[i], true);
 
             varianceList.Add(variance);
 

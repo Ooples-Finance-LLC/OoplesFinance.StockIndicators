@@ -2470,5 +2470,32 @@
     "before": "if (commit)",
     "after": "if (true)",
     "filter": "FullyQualifiedName~SimplifiedLsmaNumericalTests.RoutesMatchIndependentWindowReference"
+  },
+  {
+    "id": "variance-uses-sample-divisor",
+    "module": "variance",
+    "file": "src/Helpers/ExactVarianceWindow.cs",
+    "scope": "internal double Next(",
+    "before": "(long)length * length);",
+    "after": "(long)length * Math.Max(1, length - 1));",
+    "filter": "FullyQualifiedName~VarianceNumericalTests.ExactMeanPreventsTranslationBiasAndConstantOverflow"
+  },
+  {
+    "id": "variance-keeps-expired-square",
+    "module": "variance",
+    "file": "src/Helpers/ExactVarianceWindow.cs",
+    "scope": "internal double Next(",
+    "before": "squares -= expired * expired;",
+    "after": "// Fault: expired squared observation remains.",
+    "filter": "FullyQualifiedName~VarianceNumericalTests.EveryRouteMatchesIndependentPopulationVariance"
+  },
+  {
+    "id": "variance-preview-commits",
+    "module": "variance",
+    "file": "src/Helpers/ExactVarianceWindow.cs",
+    "scope": "internal double Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VarianceNumericalTests.EveryRouteMatchesIndependentPopulationVariance"
   }
 ]

@@ -425,39 +425,9 @@ internal static class VolatilityCore
     internal static void Variance(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateVariance returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean
-            var anchor = input[i - length + 1];
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j] - anchor;
-            }
-            var mean = anchor + sum / length;
-
-            // Calculate variance
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - mean;
-                variance += diff * diff;
-            }
-
-            output[i] = variance / length;
-        }
+        using var window = new ExactVarianceWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

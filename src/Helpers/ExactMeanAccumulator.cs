@@ -181,6 +181,10 @@ internal struct ExactMeanAccumulator
         return Encode((ulong)root, grid + 1074, false);
     }
 
+    // Squared binary64 integers use units of 2^-2148 instead of 2^-1074.
+    internal static double SquaredUnitMean(BigInteger numerator, long count)
+        => new ExactMeanAccumulator { _wide = true, _large = numerator, _scale = -1074 }.Mean(count);
+
     internal double Mean(long count)
     {
         if (count <= 0) throw new ArgumentOutOfRangeException(nameof(count));
