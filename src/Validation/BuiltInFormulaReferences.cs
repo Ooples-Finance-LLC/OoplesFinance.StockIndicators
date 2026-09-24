@@ -324,6 +324,30 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.InterquartileRangeBands)
+        {
+            var quartileOptions = builtIn.CreateOptions();
+            var quartileKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < quartileKeys.Length; slot++)
+            {
+                var key = quartileKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedQuartileBands(bars, Integer(quartileOptions, "Length", 14), Number(quartileOptions, 1.5, "Mult"))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.RangeBands && BoundedMeanKind(builtIn.CreateOptions(), 1) is 1 or 2)
+        {
+            var rangeOptions = builtIn.CreateOptions();
+            var rangeKeys = new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++)
+            {
+                var key = rangeKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedRangeBands(bars, rangeOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MidpointOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
         {
             var midpointOptions = builtIn.CreateOptions();

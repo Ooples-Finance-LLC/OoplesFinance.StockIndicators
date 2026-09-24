@@ -2438,7 +2438,8 @@ public sealed class RangeBandsState : IStreamingIndicatorState, IDisposable
     {
         _length = Math.Max(1, length);
         _stdDevFactor = stdDevFactor;
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, _length);
+        _middleSmoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(_length) : MovingAverageSmootherFactory.Create(maType, _length);
         var windowLength = _length;
         _maxWindow = new RollingWindowMax(windowLength);
         _minWindow = new RollingWindowMin(windowLength);
@@ -2460,9 +2461,8 @@ public sealed class RangeBandsState : IStreamingIndicatorState, IDisposable
         var middle = _middleSmoother.Next(value, isFinal);
         var highest = isFinal ? _maxWindow.Add(middle, out _) : _maxWindow.Preview(middle, out _);
         var lowest = isFinal ? _minWindow.Add(middle, out _) : _minWindow.Preview(middle, out _);
-        var rangeDev = highest - lowest;
-        var upper = middle + (rangeDev * _stdDevFactor);
-        var lower = middle - (rangeDev * _stdDevFactor);
+        var upper = RangeBandArithmetic.Band(middle, highest, lowest, _stdDevFactor);
+        var lower = RangeBandArithmetic.Band(middle, highest, lowest, -_stdDevFactor);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

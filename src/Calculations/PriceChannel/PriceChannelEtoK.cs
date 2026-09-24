@@ -101,16 +101,15 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var q1 = q1List[i];
             var q3 = q3List[i];
-            var iqr = q3 - q1;
 
-            var upperBand = q3 + (mult * iqr);
+            var upperBand = RangeBandArithmetic.Band(q3, q3, q1, mult);
             upperBandList.Add(upperBand);
 
-            var lowerBand = q1 - (mult * iqr);
+            var lowerBand = RangeBandArithmetic.Band(q1, q3, q1, -mult);
             lowerBandList.Add(lowerBand);
 
             var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (upperBand + lowerBand) / 2;
+            var middleBand = RangeBandArithmetic.Midpoint(q1, q3);
             middleBandList.Add(middleBand);
 
             var signal = GetCompareSignal(currentValue - middleBand, prevValue - prevMiddleBand);

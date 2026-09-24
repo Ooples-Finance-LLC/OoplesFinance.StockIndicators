@@ -2807,5 +2807,37 @@
     "id": "midpoint-missing-clamp",
     "before": "Math.Max(-100, Math.Min(100, numerator.Ratio(denominator)))",
     "after": "numerator.Ratio(denominator)"
+  },
+  {
+    "module": "range-band",
+    "file": "src/Helpers/RangeBandArithmetic.cs",
+    "filter": "FullyQualifiedName~RangeBandNumericalTests",
+    "id": "range-band-wrong-side",
+    "before": "sum.AddProduct(low, multiplier, -1)",
+    "after": "sum.AddProduct(low, multiplier, 1)"
+  },
+  {
+    "module": "range-band",
+    "file": "src/Helpers/RangeBandArithmetic.cs",
+    "filter": "FullyQualifiedName~RangeBandNumericalTests",
+    "id": "range-band-ignore-middle",
+    "before": "sum.Add(middle);",
+    "after": "sum.Add(0);"
+  },
+  {
+    "module": "range-band",
+    "file": "src/Builder/Compute/BuilderArmBinding.cs",
+    "filter": "FullyQualifiedName~RangeBandNumericalTests",
+    "id": "range-band-discard-selected-input",
+    "before": "bars.InputValues = new List<double>(data.InputValues);",
+    "after": "bars.InputValues = new List<double>(data.ClosePrices);"
+  },
+  {
+    "module": "range-band",
+    "file": "src/Helpers/RangeBandArithmetic.cs",
+    "filter": "FullyQualifiedName~RangeBandNumericalTests",
+    "id": "range-band-midpoint-wrong-divisor",
+    "before": "sum.Mean(2)",
+    "after": "sum.Mean(1)"
   }
 ]

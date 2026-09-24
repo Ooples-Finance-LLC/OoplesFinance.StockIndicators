@@ -326,22 +326,8 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", middle.Zip(width, (v, w) => v - multiplier * w).ToArray()));
                 });
             case IndicatorName.InterquartileRangeBands:
-                return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
-                {
-                    var upper = new double[bars.Count];
-                    var lower = new double[bars.Count];
-                    var multiplier = Number(options, 1.5, "Mult");
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var ordered = Window(bars, i, length).Select(b => b.Close).OrderBy(v => v).ToArray();
-                        var q1 = ordered[(ordered.Length + 3) / 4 - 1];
-                        var q3 = ordered[(3 * ordered.Length + 3) / 4 - 1];
-                        upper[i] = q3 + multiplier * (q3 - q1);
-                        lower[i] = q1 - multiplier * (q3 - q1);
-                    }
-                    return Outputs(("UpperBand", upper), ("LowerBand", lower),
-                        ("MiddleBand", upper.Zip(lower, (u, l) => (u + l) / 2).ToArray()));
-                });
+                return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" },
+                    bars => RoundedQuartileBands(bars, length, Number(options, 1.5, "Mult")));
             case IndicatorName.RangeBands:
                 return new("MiddleBand", new[] { "UpperBand", "MiddleBand", "LowerBand" }, bars =>
                 {

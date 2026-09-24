@@ -886,7 +886,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
         var (highestList, lowestList) = length <= 1 ? (smaList, smaList) : GetMaxAndMinValuesList(smaList, length);
 
         for (var i = 0; i < stockData.Count; i++)
@@ -897,14 +898,13 @@ public static partial class Calculations
             var lowest = lowestList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
-            var rangeDev = highest - lowest;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (rangeDev * stdDevFactor);
+            var upperBand = RangeBandArithmetic.Band(middleBand, highest, lowest, stdDevFactor);
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (rangeDev * stdDevFactor);
+            var lowerBand = RangeBandArithmetic.Band(middleBand, highest, lowest, -stdDevFactor);
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 

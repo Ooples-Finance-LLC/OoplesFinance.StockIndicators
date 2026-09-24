@@ -466,10 +466,9 @@ public sealed class InterquartileRangeBandsState : IStreamingIndicatorState, IDi
 
         var q1 = isFinal ? _order.PercentileNearestRank(25) : _order.PercentileNearestRank(25, value);
         var q3 = isFinal ? _order.PercentileNearestRank(75) : _order.PercentileNearestRank(75, value);
-        var iqr = q3 - q1;
-        var upper = q3 + (_mult * iqr);
-        var lower = q1 - (_mult * iqr);
-        var middle = (upper + lower) / 2;
+        var upper = RangeBandArithmetic.Band(q3, q3, q1, _mult);
+        var lower = RangeBandArithmetic.Band(q1, q3, q1, -_mult);
+        var middle = RangeBandArithmetic.Midpoint(q1, q3);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

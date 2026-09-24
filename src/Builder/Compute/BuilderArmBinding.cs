@@ -67,6 +67,10 @@ internal static class BuilderArmBinding
         {
             bars.SetInputSeries(new List<double>(data.ChainedValues));
         }
+        else
+        {
+            bars.InputValues = new List<double>(data.InputValues);
+        }
 
         var parameters = method.GetParameters();
         var map = ArgumentMaps.GetOrAdd((spec.Options.GetType(), target.Name), key => MapArguments(key.Options, target, parameters));
