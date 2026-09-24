@@ -336,6 +336,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PercentageTrailingStops)
+        {
+            var stopOptions = builtIn.CreateOptions();
+            var stopKeys = new[] { "LongStop", "ShortStop" };
+            for (var slot = 0; slot < stopKeys.Length; slot++)
+            {
+                var key = stopKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPercentageStops(bars, stopOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.NickRypockTrailingReverse)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 2);

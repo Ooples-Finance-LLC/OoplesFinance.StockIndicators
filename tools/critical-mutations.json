@@ -2986,5 +2986,32 @@
     "id": "trailing-reverse-percent-direction",
     "before": "_pct = Math.Max(1, length);",
     "after": "_pct = -Math.Max(1, length);"
+  },
+  {
+    "module": "percentage-stops",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrailingStopsState",
+    "filter": "FullyQualifiedName~PercentageStopNumericalTests",
+    "id": "percentage-stops-current-window",
+    "before": "var prevHH = _hasPrev ? _prevHighest : currentClose;",
+    "after": "var prevHH = currentHigh;"
+  },
+  {
+    "module": "percentage-stops",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrailingStopsState",
+    "filter": "FullyQualifiedName~PercentageStopNumericalTests",
+    "id": "percentage-stops-nonstrict-breakout",
+    "before": "currentHigh > prevHH ?",
+    "after": "currentHigh >= prevHH ?"
+  },
+  {
+    "module": "percentage-stops",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrailingStopsState",
+    "filter": "FullyQualifiedName~PercentageStopNumericalTests",
+    "id": "percentage-stops-reversed-short",
+    "before": "RoundedPercentageBand.Percent(currentLow, _pct, 1)",
+    "after": "RoundedPercentageBand.Percent(currentLow, _pct, -1)"
   }
 ]

@@ -48,6 +48,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
+            IndicatorName.PercentageTrailingStops when spec.Options is PercentageTrailingStopsSpecOptions stops => new PercentageTrailingStopsState(stops.Length, stops.Pct),
             IndicatorName.NickRypockTrailingReverse when spec.Options is NickRypockTrailingReverseSpecOptions reversal => new NickRypockTrailingReverseState(reversal.Length),
             IndicatorName.QmaSmaDifference when spec.Options is QmaSmaDifferenceSpecOptions spread => new QmaSmaDifferenceState(spread.Length),
             IndicatorName.MovingAverageDisplacedEnvelope when spec.Options is MovingAverageDisplacedEnvelopeSpecOptions envelope => new MovingAverageDisplacedEnvelopeState(envelope.MaType, envelope.Length1, envelope.Length2, envelope.Pct),

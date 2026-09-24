@@ -926,7 +926,7 @@ public sealed class PercentageTrailingStopsState : IStreamingIndicatorState, IDi
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
-        _pct = pct / 100;
+        _pct = pct;
     }
 
     public IndicatorName Name => IndicatorName.PercentageTrailingStops;
@@ -952,8 +952,8 @@ public sealed class PercentageTrailingStopsState : IStreamingIndicatorState, IDi
         var prevStopS = _hasPrev ? _prevStopS : currentClose;
         var prevStopL = _hasPrev ? _prevStopL : currentClose;
 
-        var stopL = currentHigh > prevHH ? currentHigh - (_pct * currentHigh) : prevStopL;
-        var stopS = currentLow < prevLL ? currentLow + (_pct * currentLow) : prevStopS;
+        var stopL = currentHigh > prevHH ? RoundedPercentageBand.Percent(currentHigh, _pct, -1) : prevStopL;
+        var stopS = currentLow < prevLL ? RoundedPercentageBand.Percent(currentLow, _pct, 1) : prevStopS;
 
         var highest = isFinal ? _highWindow.Add(currentHigh, out _) : _highWindow.Preview(currentHigh, out _);
         var lowest = isFinal ? _lowWindow.Add(currentLow, out _) : _lowWindow.Preview(currentLow, out _);

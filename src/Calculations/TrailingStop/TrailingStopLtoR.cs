@@ -199,10 +199,10 @@ public static partial class Calculations
             var pSS = i >= 1 ? GetLastOrDefault(stopSList) : currentClose;
             var pSL = i >= 1 ? GetLastOrDefault(stopLList) : currentClose;
 
-            var stopL = currentHigh > prevHH ? currentHigh - (pct / 100 * currentHigh) : pSL;
+            var stopL = currentHigh > prevHH ? RoundedPercentageBand.Percent(currentHigh, pct, -1) : pSL;
             stopLList.Add(stopL);
 
-            var stopS = currentLow < prevLL ? currentLow + (pct / 100 * currentLow) : pSS;
+            var stopS = currentLow < prevLL ? RoundedPercentageBand.Percent(currentLow, pct, 1) : pSS;
             stopSList.Add(stopS);
 
             var signal = GetConditionSignal(prevHigh < stopS && currentHigh > stopS, prevLow > stopL && currentLow < stopL);
