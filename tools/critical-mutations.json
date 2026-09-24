@@ -2255,5 +2255,32 @@
     "before": "sum.Add(weighted, 2);",
     "after": "sum.Add(weighted, 1);",
     "filter": "FullyQualifiedName~LeoNumericalTests"
+  },
+  {
+    "id": "dema-intermediate-overflow",
+    "module": "exponential-extrapolation",
+    "file": "src/Helpers/ExponentialExtrapolation.cs",
+    "scope": "internal static double Double(",
+    "before": "return sum.Mean(1);",
+    "after": "return 2 * first - second;",
+    "filter": "FullyQualifiedName~ExponentialExtrapolationNumericalTests"
+  },
+  {
+    "id": "tema-intermediate-overflow",
+    "module": "exponential-extrapolation",
+    "file": "src/Helpers/ExponentialExtrapolation.cs",
+    "scope": "internal static double Triple(",
+    "before": "return sum.Mean(1);",
+    "after": "return 3 * first - 3 * second + third;",
+    "filter": "FullyQualifiedName~ExponentialExtrapolationNumericalTests"
+  },
+  {
+    "id": "tema-missing-third-stage",
+    "module": "exponential-extrapolation",
+    "file": "src/Helpers/ExponentialExtrapolation.cs",
+    "scope": "internal static double Triple(",
+    "before": "sum.Add(third);",
+    "after": "sum.Add(0);",
+    "filter": "FullyQualifiedName~ExponentialExtrapolationNumericalTests"
   }
 ]

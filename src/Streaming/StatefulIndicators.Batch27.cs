@@ -1520,7 +1520,7 @@ public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorSt
         var value = _input.GetValue(bar);
         var ema1 = _ema1.Next(value, isFinal);
         var ema2 = _ema2.Next(ema1, isFinal);
-        var zema = ema1 + (ema1 - ema2);
+        var zema = ExponentialExtrapolation.Double(ema1, ema2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

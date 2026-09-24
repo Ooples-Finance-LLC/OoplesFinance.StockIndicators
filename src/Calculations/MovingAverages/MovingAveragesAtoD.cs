@@ -982,7 +982,7 @@ public static partial class Calculations
             var currentEma2 = ema2List[i];
 
             var prevDema = GetLastOrDefault(demaList);
-            var dema = (2 * currentEma) - currentEma2;
+            var dema = ExponentialExtrapolation.Double(currentEma, currentEma2);
             demaList.Add(dema);
 
             var signal = GetCompareSignal(currentValue - dema, prevValue - prevDema);

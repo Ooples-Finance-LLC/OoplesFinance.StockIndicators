@@ -233,7 +233,7 @@ public static partial class Calculations
             var currentEma3 = ema3List[i];
 
             var prevTema = GetLastOrDefault(temaList);
-            var tema = (3 * currentEma1) - (3 * currentEma2) + currentEma3;
+            var tema = ExponentialExtrapolation.Triple(currentEma1, currentEma2, currentEma3);
             temaList.Add(tema);
 
             var signal = GetCompareSignal(currentValue - tema, prevValue - prevTema);
@@ -573,10 +573,9 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var ema1 = ema1List[i];
             var ema2 = ema2List[i];
-            var d = ema1 - ema2;
 
             var prevZema = GetLastOrDefault(zemaList);
-            var zema = ema1 + d;
+            var zema = ExponentialExtrapolation.Double(ema1, ema2);
             zemaList.Add(zema);
 
             var signal = GetCompareSignal(currentValue - zema, prevValue - prevZema);

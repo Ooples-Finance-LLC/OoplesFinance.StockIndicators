@@ -608,10 +608,6 @@ OoplesFinance.StockIndicators.Indicators.DeltaMovingAverage/minimum-length2
 OoplesFinance.StockIndicators.Indicators.DeltaMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DeltaMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DeltaMovingAverage/weighted-average
-OoplesFinance.StockIndicators.Indicators.Dema/default
-OoplesFinance.StockIndicators.Indicators.Dema/longer-periods
-OoplesFinance.StockIndicators.Indicators.Dema/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Dema/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Dema2Lines/default
 OoplesFinance.StockIndicators.Indicators.Dema2Lines/longer-fastLength
 OoplesFinance.StockIndicators.Indicators.Dema2Lines/longer-periods
@@ -4143,10 +4139,6 @@ OoplesFinance.StockIndicators.Indicators.TechnicalRatings/minimum-stochLength2
 OoplesFinance.StockIndicators.Indicators.TechnicalRatings/minimum-stochLength3
 OoplesFinance.StockIndicators.Indicators.TechnicalRatings/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TechnicalRatings/weighted-average
-OoplesFinance.StockIndicators.Indicators.Tema/default
-OoplesFinance.StockIndicators.Indicators.Tema/longer-periods
-OoplesFinance.StockIndicators.Indicators.Tema/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Tema/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/default
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/longer-length
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/longer-periods
@@ -4843,10 +4835,6 @@ OoplesFinance.StockIndicators.Indicators.ZigZag/default
 OoplesFinance.StockIndicators.Indicators.ZigZag/longer-periods
 OoplesFinance.StockIndicators.Indicators.ZigZag/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ZigZag/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Zlema/default
-OoplesFinance.StockIndicators.Indicators.Zlema/longer-periods
-OoplesFinance.StockIndicators.Indicators.Zlema/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Zlema/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ZweigMarketBreadthIndicator/default
 OoplesFinance.StockIndicators.Indicators.ZweigMarketBreadthIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.ZweigMarketBreadthIndicator/minimum-periods

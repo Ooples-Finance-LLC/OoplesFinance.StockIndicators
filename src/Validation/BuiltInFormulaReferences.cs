@@ -251,6 +251,14 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.Reference(0, bars => RoundedHannMean(bars, period), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.DoubleExponentialMovingAverage or IndicatorName.TripleExponentialMovingAverage or IndicatorName.ZeroLagExponentialMovingAverage)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            var triple = builtIn.BatchName == IndicatorName.TripleExponentialMovingAverage;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedExponentialExtrapolation(bars, period, triple), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.LeoMovingAverage)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

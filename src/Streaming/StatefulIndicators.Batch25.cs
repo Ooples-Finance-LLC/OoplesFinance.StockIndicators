@@ -757,7 +757,7 @@ public sealed class TripleExponentialMovingAverageState : IStreamingIndicatorSta
         var ema1 = _ema1.Next(value, isFinal);
         var ema2 = _ema2.Next(ema1, isFinal);
         var ema3 = _ema3.Next(ema2, isFinal);
-        var tema = (3 * ema1) - (3 * ema2) + ema3;
+        var tema = ExponentialExtrapolation.Triple(ema1, ema2, ema3);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

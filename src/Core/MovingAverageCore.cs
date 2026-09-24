@@ -206,7 +206,7 @@ internal static class MovingAverageCore
             // DEMA = 2*EMA - EMA(EMA)
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * ema1[i]) - ema2[i];
+                output[i] = ExponentialExtrapolation.Double(ema1[i], ema2[i]);
             }
         }
         finally
@@ -248,7 +248,7 @@ internal static class MovingAverageCore
             // TEMA = 3*EMA - 3*EMA(EMA) + EMA(EMA(EMA))
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (3 * ema1[i]) - (3 * ema2[i]) + ema3[i];
+                output[i] = ExponentialExtrapolation.Triple(ema1[i], ema2[i], ema3[i]);
             }
         }
         finally
@@ -392,7 +392,7 @@ internal static class MovingAverageCore
             // ZEMA = 2*ema1 - ema2
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * ema1[i]) - ema2[i];
+                output[i] = ExponentialExtrapolation.Double(ema1[i], ema2[i]);
             }
         }
         finally

@@ -13480,7 +13480,7 @@ internal sealed class DoubleExponentialMovingAverageSmoother : IMovingAverageSmo
     {
         var ema1 = _ema1.GetNext(value, isFinal);
         var ema2 = _ema2.GetNext(ema1, isFinal);
-        return (2 * ema1) - ema2;
+        return ExponentialExtrapolation.Double(ema1, ema2);
     }
 
     public void Reset()
@@ -13509,7 +13509,7 @@ internal sealed class ZeroLagExponentialMovingAverageSmoother : IMovingAverageSm
     {
         var ema1 = _ema1.GetNext(value, isFinal);
         var ema2 = _ema2.GetNext(ema1, isFinal);
-        return ema1 + (ema1 - ema2);
+        return ExponentialExtrapolation.Double(ema1, ema2);
     }
 
     public void Reset()
@@ -13541,7 +13541,7 @@ internal sealed class TripleExponentialMovingAverageSmoother : IMovingAverageSmo
         var ema1 = _ema1.GetNext(value, isFinal);
         var ema2 = _ema2.GetNext(ema1, isFinal);
         var ema3 = _ema3.GetNext(ema2, isFinal);
-        return (3 * ema1) - (3 * ema2) + ema3;
+        return ExponentialExtrapolation.Triple(ema1, ema2, ema3);
     }
 
     public void Reset()

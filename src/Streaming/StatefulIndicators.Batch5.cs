@@ -991,7 +991,7 @@ public sealed class DoubleExponentialMovingAverageState : IStreamingIndicatorSta
         var value = _input.GetValue(bar);
         var ema1 = _ema1.Next(value, isFinal);
         var ema2 = _ema2.Next(ema1, isFinal);
-        var dema = (2 * ema1) - ema2;
+        var dema = ExponentialExtrapolation.Double(ema1, ema2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
