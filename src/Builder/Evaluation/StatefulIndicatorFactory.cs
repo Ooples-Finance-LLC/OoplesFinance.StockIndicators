@@ -60,6 +60,7 @@ internal static partial class StatefulIndicatorFactory
             McClellanOscillatorSpecOptions breadth => new McClellanOscillatorState(breadth.MaType),
             DecisionPointBreadthSwenlinTradingOscillatorSpecOptions breadth => new DecisionPointBreadthSwenlinTradingOscillatorState(length: breadth.Length),
             TickLineMomentumOscillatorSpecOptions breadth => new TickLineMomentumOscillatorState(breadth.MaType, breadth.Length),
+            ApirineSlowRelativeStrengthIndexSpecOptions apirine => new ApirineSlowRelativeStrengthIndexState(apirine.MaType, apirine.Length, apirine.SmoothLength),
             SelfAdjustingRelativeStrengthIndexSpecOptions self => new SelfAdjustingRelativeStrengthIndexState(self.MaType, self.Length, self.SmoothingLength, self.Mult),
             AdaptiveRelativeStrengthIndexSpecOptions adaptive => new AdaptiveRelativeStrengthIndexState(adaptive.MaType, adaptive.Length),
             AdaptiveRsiSpecOptions => new AdaptiveRelativeStrengthIndexState(),

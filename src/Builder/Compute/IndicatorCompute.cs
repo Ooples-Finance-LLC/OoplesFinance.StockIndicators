@@ -23879,6 +23879,14 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new ApirineRsiWindow(maType, length, smoothLength, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(input[i], true);
+            return stable;
+        }
+
         using var average = context.Rent(count);
         var substitutions = ComponentAverage.Substitutions;
         MovingAverage(data, maType, smoothLength, input, average.WritableSpan);

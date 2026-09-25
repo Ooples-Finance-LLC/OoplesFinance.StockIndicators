@@ -9740,6 +9740,7 @@ public sealed class AnchoredMomentumState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Asrsi")]
 public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly ApirineRsiWindow? _wide;
     private readonly IMovingAverageSmoother _smooth;
     private readonly IMovingAverageSmoother _gain;
     private readonly IMovingAverageSmoother _loss;
@@ -9752,6 +9753,7 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
     public ApirineSlowRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14,
         int smoothLength = 6)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new ApirineRsiWindow(maType, length, smoothLength);
         _stableWilder = maType == MovingAvgType.WildersSmoothingMethod;
         _retention = 1 - 1d / Math.Max(1, smoothLength);
         _smooth = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
@@ -9764,6 +9766,7 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
 
     public void Reset()
     {
+        _wide?.Reset();
         _residual = 0;
         _previousPrice = 0;
         _smooth.Reset();
@@ -9774,6 +9777,11 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
+        if (_wide is not null)
+        {
+            var wideValue = _wide.Next(value, isFinal);
+            return new StreamingIndicatorStateResult(wideValue, includeOutputs ? new Dictionary<string, double> { { "Asrsi", wideValue } } : null);
+        }
         var r1 = _smooth.Next(value, isFinal);
         var residual = _stableWilder ? _retention * (_residual + (value - _previousPrice)) : value - r1;
         if (isFinal)
@@ -9802,6 +9810,7 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _smooth.Dispose();
         _gain.Dispose();
         _loss.Dispose();
