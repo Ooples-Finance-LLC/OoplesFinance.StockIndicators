@@ -400,6 +400,7 @@ internal static partial class StatefulIndicatorFactory
             StochasticDSpecOptions stochasticD => new StochasticOscillatorState(length: stochasticD.Length),
             PpoSpecOptions ppo => new PercentagePriceOscillatorState(ppo.MaType, ppo.FastLength, ppo.SlowLength, ppo.SignalLength),
             PercentagePriceOscillatorSpecOptions ppo2 => new PercentagePriceOscillatorState(ppo2.MaType, ppo2.FastLength, ppo2.SlowLength, ppo2.SignalLength),
+            PercentageVolumeOscillatorSpecOptions pvo2 => new PercentageVolumeOscillatorState(pvo2.MaType, pvo2.FastLength, pvo2.SlowLength, pvo2.SignalLength),
             PriceOscillatorPercentSpecOptions percentPpo => new PercentagePriceOscillatorState(percentPpo.MaType, percentPpo.ShortLength, percentPpo.LongLength, percentPpo.SignalLength),
             AbsolutePriceOscillatorSpecOptions absolute => new AbsolutePriceOscillatorState(absolute.MaType, absolute.FastLength, absolute.SlowLength),
             PriceOscillatorSpecOptions priceOscillator => new AbsolutePriceOscillatorState(fastLength: priceOscillator.ShortLength, slowLength: priceOscillator.LongLength),

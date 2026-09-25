@@ -336,6 +336,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PercentageVolumeOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
+        {
+            var pvoOptions = builtIn.CreateOptions();
+            var pvoKeys = new[] { "Pvo", "Signal", "Histogram" };
+            for (var slot = 0; slot < pvoKeys.Length; slot++)
+            {
+                var key = pvoKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedPvo(bars, pvoOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PercentagePriceOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
         {
             var ppoOptions = builtIn.CreateOptions();

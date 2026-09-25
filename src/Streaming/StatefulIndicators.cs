@@ -4507,6 +4507,7 @@ public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _signal;
     private StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public PercentageVolumeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int fastLength = 12, int slowLength = 26, int signalLength = 9)
@@ -4527,6 +4528,7 @@ public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, 
         _fast.Reset();
         _slow.Reset();
         _signal.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -4534,8 +4536,10 @@ public sealed class PercentageVolumeOscillatorState : IStreamingIndicatorState, 
         var value = _input.GetValue(bar);
         var fast = _fast.Next(value, isFinal);
         var slow = _slow.Next(value, isFinal);
-        var pvo = slow != 0 ? 100 * (fast - slow) / slow : 0;
-        var signal = _signal.Next(pvo, isFinal);
+        var pvo = RoundedPercentageChange.Of(fast, slow);
+        var invalidSignal = _signalInvalid || double.IsInfinity(pvo);
+        var signal = invalidSignal ? double.NaN : _signal.Next(pvo, isFinal);
+        if (isFinal) _signalInvalid = invalidSignal;
         var histogram = pvo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
