@@ -839,15 +839,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ahma", result));
                 });
             case IndicatorName.SharpModifiedMovingAverage:
-                var sharpKind = AverageKind(options, 1);
-                if (sharpKind == 0) return null;
-                return new("Smma", new[] { "Smma" }, bars =>
-                {
-                    var smooth = Average(Closes(bars), length, sharpKind);
-                    return Outputs(("Smma", bars.Select((_, i) => smooth[i] +
-                        Enumerable.Range(0, Math.Min(length, i + 1)).Sum(j =>
-                            bars[i - j].Close * 3 * (length - 1d - 2 * j) / (length * (length + 1d)))).ToArray()));
-                });
+                if (AverageKind(options, 1) == 0) return null;
+                return new("Smma", new[] { "Smma" }, bars => AffineAverageOutputs(bars, indicator));
             case IndicatorName.SlowSmoothedMovingAverage:
                 var slowKind = AverageKind(options, 2);
                 if (slowKind == 0) return null;
@@ -911,16 +904,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Gdema", first.Select((v, i) => v + generalizedFactor * (v - second[i])).ToArray()));
                 });
             case IndicatorName.EndPointMovingAverage:
-                var offset = Integer(options, "Offset", 4);
-                return new("Epma", new[] { "Epma" }, bars =>
-                {
-                    // Affine FIR in chronological coordinates, normalized by its closed-form sum.
-                    var denominator = length * ((length + 1d) / 2 - offset);
-                    var result = bars.Select((_, i) => denominator == 0 ? 0 :
-                        Enumerable.Range(Math.Max(0, i - length + 1), Math.Min(i + 1, length))
-                            .Sum(j => bars[j].Close * (j - i + length - offset)) / denominator).ToArray();
-                    return Outputs(("Epma", result));
-                });
+                return new("Epma", new[] { "Epma" }, bars => AffineAverageOutputs(bars, indicator));
             case IndicatorName.JsaMovingAverage:
                 return new("Jma", new[] { "Jma" }, bars => Outputs(("Jma", bars.Select((b, i) =>
                     (b.Close + (i >= length ? bars[i - length].Close : 0)) / 2).ToArray())));

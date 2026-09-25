@@ -1564,10 +1564,6 @@ OoplesFinance.StockIndicators.Indicators.Emv/default
 OoplesFinance.StockIndicators.Indicators.Emv/longer-periods
 OoplesFinance.StockIndicators.Indicators.Emv/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Emv/shorter-periods
-OoplesFinance.StockIndicators.Indicators.EndPointMovingAverage/default
-OoplesFinance.StockIndicators.Indicators.EndPointMovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.EndPointMovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.EndPointMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.EnhancedIndex/default
 OoplesFinance.StockIndicators.Indicators.EnhancedIndex/longer-length
 OoplesFinance.StockIndicators.Indicators.EnhancedIndex/longer-periods
@@ -3046,11 +3042,6 @@ OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SharpModifiedMovingAverage/default
-OoplesFinance.StockIndicators.Indicators.SharpModifiedMovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.SharpModifiedMovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SharpModifiedMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SharpModifiedMovingAverage/weighted-average
 OoplesFinance.StockIndicators.Indicators.SharpeRatio/default
 OoplesFinance.StockIndicators.Indicators.SharpeRatio/longer-periods
 OoplesFinance.StockIndicators.Indicators.SharpeRatio/minimum-periods

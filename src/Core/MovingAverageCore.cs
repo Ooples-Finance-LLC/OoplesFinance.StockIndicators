@@ -2120,38 +2120,14 @@ internal static class MovingAverageCore
     }
 
     /// <summary>
-    /// Computes End Point Moving Average (Least Squares MA).
+    /// Computes the zero-padded, offset-weighted End Point Moving Average.
     /// </summary>
-    internal static void EndPointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    internal static void EndPointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 11, int offset = 4)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j + 1.0;
-                var y = input[i - (length - 1 - j)];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
-
-            var slope = (length * sumXY - sumX * sumY) / (length * sumX2 - sumX * sumX);
-            var intercept = (sumY - slope * sumX) / length;
-            output[i] = intercept + slope * length; // End point value
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var window = new AffineAverageWindow(length, offset, capacityHint: input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i]);
     }
 
     /// <summary>
@@ -3105,34 +3081,20 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Sharp Modified Moving Average using span-based computation.
     /// </summary>
-    internal static void SharpModifiedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double factor = 0.7)
+    internal static void SharpModifiedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        length = Math.Max(1, length);
+        var buffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            SimpleMovingAverage(input, sma, length);
-
-            var alpha = 2.0 / (length + 1);
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var smaVal = sma[i];
-                var prevSmma = i >= 1 ? output[i - 1] : currentValue;
-                var diff = currentValue - smaVal;
-
-                output[i] = prevSmma + (alpha * diff * factor);
-            }
+            var average = buffer.AsSpan(0, input.Length);
+            SimpleMovingAverage(input, average, length);
+            using var window = new AffineAverageWindow(length, sharp: true, capacityHint: input.Length, exactSimple: true);
+            for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], average[i]);
         }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-        }
+        finally { ArrayPool<double>.Shared.Return(buffer); }
     }
 
     /// <summary>

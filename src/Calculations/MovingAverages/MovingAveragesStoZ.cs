@@ -1784,22 +1784,15 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
+        using var window = new AffineAverageWindow(length, sharp: true, capacityHint: stockData.Count, exactSimple: maType == MovingAvgType.SimpleMovingAverage);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var currentSma = smaList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double slope = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevValue = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                double factor = 1 + (2 * (j - 1));
-                slope += prevValue * (length - factor) / 2;
-            }
-
             var prevShmma = GetLastOrDefault(shmmaList);
-            var shmma = currentSma + (6 * slope / ((length + 1) * length));
+            var shmma = window.Next(currentValue, currentSma);
             shmmaList.Add(shmma);
 
             var signal = GetCompareSignal(currentValue - shmma, prevVal - prevShmma);

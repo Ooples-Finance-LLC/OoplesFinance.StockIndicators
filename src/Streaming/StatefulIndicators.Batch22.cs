@@ -1197,71 +1197,30 @@ public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Smma")]
 public sealed class SharpModifiedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly AffineAverageWindow _window;
+    private readonly IMovingAverageSmoother _average;
     private readonly StreamingInputResolver _input;
 
     public SharpModifiedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        _length = Math.Max(1, length);
-        _weights = new double[_length];
-        for (var j = 0; j < _length; j++)
-        {
-            var factor = 1 + (2 * j);
-            _weights[j] = (_length - factor) / 2d;
-        }
-
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _values = new PooledRingBuffer<double>(_length);
+        _average = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _window = new AffineAverageWindow(length, sharp: true, exactSimple: maType == MovingAvgType.SimpleMovingAverage);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.SharpModifiedMovingAverage;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _values.Clear();
-    }
+    public void Reset() { _window.Reset(); _average.Reset(); }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        double slope = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            slope += prevValue * _weights[j];
-        }
-
-        var denom = (_length + 1d) * _length;
-        var smma = denom != 0 ? sma + (6 * slope / denom) : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Smma", smma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(smma, outputs);
+        var result = _window.Next(value, _average.Next(value, isFinal), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Smma", result } } : null;
+        return new StreamingIndicatorStateResult(result, outputs);
     }
 
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); _average.Dispose(); }
 }
 
 [PrimaryOutput("ARatio")]

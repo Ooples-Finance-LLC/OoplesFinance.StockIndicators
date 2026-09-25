@@ -4671,5 +4671,54 @@
     "before": "builtIn.BatchName == IndicatorName.HarmonicMeanMovingAverage",
     "after": "builtIn.BatchName == (IndicatorName)(-1)",
     "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.PublishedOverflowHasIndependentRejectionEvidence"
+  },
+  {
+    "id": "affine-endpoint-offset",
+    "module": "numerical",
+    "file": "src/Helpers/AffineAverageWindow.cs",
+    "before": "(long)length - offset",
+    "after": "(long)length",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests"
+  },
+  {
+    "id": "affine-sharp-slope",
+    "module": "numerical",
+    "file": "src/Helpers/AffineAverageWindow.cs",
+    "before": "_weightStep = sharp ? -6 : -1;",
+    "after": "_weightStep = sharp ? -3 : -1;",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests"
+  },
+  {
+    "id": "affine-sharp-rounded-mean",
+    "module": "numerical",
+    "file": "src/Helpers/AffineAverageWindow.cs",
+    "before": "if (_sharp && _exactSimple)",
+    "after": "if (_sharp && _exactSimple && _length < 0)",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests"
+  },
+  {
+    "id": "affine-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/AffineAverageWindow.cs",
+    "before": "if (isFinal) _values.TryAdd(value, out _);",
+    "after": "_values.TryAdd(value, out _);",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests"
+  },
+  {
+    "id": "affine-reset-retains-history",
+    "module": "numerical",
+    "file": "src/Helpers/AffineAverageWindow.cs",
+    "before": "internal void Reset() => _values.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests"
+  },
+  {
+    "id": "affine-endpoint-raw-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var values = data.InputValues;",
+    "filter": "FullyQualifiedName~AffineAverageNumericalTests.SharedMovingAverageRoutesPreservePublishedWeights",
+    "scope": "internal static ComputeBuffer ComputeEndPointMovingAverageFast"
   }
 ]
