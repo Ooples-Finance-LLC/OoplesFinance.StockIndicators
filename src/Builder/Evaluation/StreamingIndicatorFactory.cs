@@ -14,7 +14,7 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
-        if (spec.Options is DirectionalTrendIndexSpecOptions or OscOscillatorSpecOptions or WamiOscillatorSpecOptions or TsiSpecOptions or TrueStrengthIndexSpecOptions or ErgodicTrueStrengthIndexV1SpecOptions or ErgodicTrueStrengthIndexV2SpecOptions or
+        if (spec.Options is SmoothedDeltaRatioOscillatorSpecOptions or DoubleSmoothedMomentaSpecOptions or DirectionalTrendIndexSpecOptions or OscOscillatorSpecOptions or WamiOscillatorSpecOptions or TsiSpecOptions or TrueStrengthIndexSpecOptions or ErgodicTrueStrengthIndexV1SpecOptions or ErgodicTrueStrengthIndexV2SpecOptions or
             EndPointMovingAverageSpecOptions or SharpModifiedMovingAverageSpecOptions or
             HarmonicMeanMovingAverageSpecOptions or
             CloseToCloseVolatilitySpecOptions or ParkinsonVolatilitySpecOptions or

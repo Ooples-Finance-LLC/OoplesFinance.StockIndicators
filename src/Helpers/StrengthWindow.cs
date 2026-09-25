@@ -95,9 +95,9 @@ internal sealed class StrengthWindow : IDisposable
         if (final) { _previous = price; _hasPrevious = true; }
         return result;
     }
-    internal double NextChange(StrengthValue signed, bool final)
+    internal double NextChange(StrengthValue signed, bool final) => NextPair(signed, signed.Absolute, final);
+    internal double NextPair(StrengthValue signed, StrengthValue absolute, bool final)
     {
-        var absolute = signed.Absolute;
         for (var i = 0; i < _signed.Length; i++)
         {
             signed = _signed[i].Next(signed, final);

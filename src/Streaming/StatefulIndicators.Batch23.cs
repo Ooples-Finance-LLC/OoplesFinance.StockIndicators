@@ -8,6 +8,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Sdro")]
 public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly SmoothedDeltaWindow? _wide;
     private readonly int _length;
     private readonly IMovingAverageSmoother _sma;
     private readonly IMovingAverageSmoother _absSmoother;
@@ -18,6 +19,7 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
 
     public SmoothedDeltaRatioOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new SmoothedDeltaWindow(maType, length);
         _length = Math.Max(1, length);
         _sma = MovingAverageSmootherFactory.Create(maType, _length);
         _absSmoother = MovingAverageSmootherFactory.Create(maType, _length);
@@ -30,6 +32,7 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
 
     public void Reset()
     {
+        _wide?.Reset();
         _sma.Reset();
         _absSmoother.Reset();
         _values.Clear();
@@ -40,6 +43,11 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(value, isFinal);
+            return new StreamingIndicatorStateResult(next, includeOutputs ? new Dictionary<string, double> { { "Sdro", next } } : null);
+        }
         var sma = _sma.Next(value, isFinal);
         var prevValue = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length) : 0;
         var prevSma = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_smaValues, _length) : 0;
@@ -69,6 +77,7 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _sma.Dispose();
         _absSmoother.Dispose();
         _values.Dispose();

@@ -2838,35 +2838,48 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var sma = smaList[i];
-            var prevSma = i >= length ? smaList[i - length] : 0;
+            using var window = new SmoothedDeltaWindow(maType, length, stockData.Count);
+            foreach (var price in inputList) cList.Add(window.Next(price, true));
+        }
+        else
+        {
+            var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
-            var absChg = Math.Abs(MinPastValues(i, length, currentValue - prevValue));
-            absChgList.Add(absChg);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var prevValue = i >= length ? inputList[i - length] : 0;
+                var sma = smaList[i];
+                var prevSma = i >= length ? smaList[i - length] : 0;
 
-            var b = MinPastValues(i, length, sma - prevSma);
-            bList.Add(b);
+                var absChg = Math.Abs(MinPastValues(i, length, currentValue - prevValue));
+                absChgList.Add(absChg);
+
+                var b = MinPastValues(i, length, sma - prevSma);
+                bList.Add(b);
+            }
+
+            var aList = GetMovingAverageList(stockData, maType, length, absChgList);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var a = aList[i];
+                var b = bList[i];
+
+                var c = a != 0 ? MinOrMax(b / a, 1, 0) : 0;
+                cList.Add(c);
+
+
+            }
         }
 
-        var aList = GetMovingAverageList(stockData, maType, length, absChgList);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var a = aList[i];
-            var b = bList[i];
-            var prevC1 = i >= 1 ? cList[i - 1] : 0;
-            var prevC2 = i >= 2 ? cList[i - 2] : 0;
-
-            var c = a != 0 ? MinOrMax(b / a, 1, 0) : 0;
-            cList.Add(c);
-
-            var signal = GetRsiSignal(c - prevC1, prevC1 - prevC2, c, prevC1, 0.8, 0.2);
-            signalsList?.Add(signal);
+            var c = cList[i];
+            var previous = i >= 1 ? cList[i - 1] : 0;
+            var before = i >= 2 ? cList[i - 2] : 0;
+            signalsList?.Add(GetRsiSignal(c - previous, previous - before, c, previous, 0.8, 0.2));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

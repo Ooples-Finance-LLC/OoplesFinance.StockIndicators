@@ -393,6 +393,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dso", line), ("Signal", Average(line, 3, kind)));
                 });
             case IndicatorName.DoubleSmoothedMomenta:
+                if (kind is 1 or 2 or 3 or 6) return new("Dsm", new[] { "Dsm", "Signal" }, bars => MomentaOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var momentaRange = Math.Max(2, Integer(options, "MomentumLength", 2));
                 var momentaFirst = Integer(options, "FirstSmooth", 5);

@@ -234,6 +234,43 @@ public sealed partial class SharedIndicatorValidationTests
             new() { RequireFormulaReference = true }));
     }
 
+    [Fact]
+    public void DiscoveryVariesEachSmoothingPeriodIndependently()
+    {
+        var cases = IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly, typeof(Identity).Assembly });
+        foreach (var type in new[] { typeof(DoubleSmoothedMomenta), typeof(CustomerWithSmoothingPeriods) })
+        {
+            var selected = cases.Where(c => c.IndicatorType == type).ToArray();
+            foreach (var (name, expected) in new[]
+            {
+                ("default", (2, 5, 25)), ("minimum-periods", (1, 1, 1)),
+                ("shorter-periods", (1, 2, 12)), ("longer-periods", (3, 8, 38)),
+                ("minimum-momentumLength", (1, 5, 25)), ("longer-momentumLength", (3, 5, 25)),
+                ("minimum-firstSmooth", (2, 1, 25)), ("longer-firstSmooth", (2, 8, 25)),
+                ("minimum-secondSmooth", (2, 5, 1)), ("longer-secondSmooth", (2, 5, 38))
+            })
+            {
+                var instance = Assert.Single(selected, c => c.Name == name).Factory();
+                var actual = instance is CustomerWithSmoothingPeriods customer ? customer.Periods :
+                    BuiltInPeriods((IBuiltInIndicator)instance);
+                Assert.Equal(expected, actual);
+            }
+        }
+
+        static (int, int, int) BuiltInPeriods(IBuiltInIndicator indicator)
+        {
+            var options = (OoplesFinance.StockIndicators.Builder.Specs.DoubleSmoothedMomentaSpecOptions)indicator.CreateOptions();
+            return (options.MomentumLength, options.FirstSmooth, options.SecondSmooth);
+        }
+    }
+
+    public sealed class CustomerWithSmoothingPeriods : Identity
+    {
+        public CustomerWithSmoothingPeriods(int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)
+            => Periods = (momentumLength, firstSmooth, secondSmooth);
+        public (int, int, int) Periods { get; }
+    }
+
     public sealed class CustomerWithPeriods : Identity
     {
         public CustomerWithPeriods(int length = 14, int signalPeriod = 5)

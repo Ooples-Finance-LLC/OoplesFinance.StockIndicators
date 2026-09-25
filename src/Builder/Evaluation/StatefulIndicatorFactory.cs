@@ -445,6 +445,8 @@ internal static partial class StatefulIndicatorFactory
             ApoSpecOptions apo => new AbsolutePriceOscillatorState(maType: apo.MaType, fastLength: apo.FastLength, slowLength: apo.SlowLength),
             ErgodicTrueStrengthIndexV2SpecOptions pair => new ErgodicTrueStrengthIndexV2State(pair.MaType, pair.Length1, pair.Length2, pair.Length3, pair.Length4, pair.Length5, pair.Length6, pair.SignalLength),
             OscOscillatorSpecOptions osc => new OscOscillatorState(osc.MaType, Math.Max(1, osc.Length / 2), osc.Length),
+            SmoothedDeltaRatioOscillatorSpecOptions deltaRatio => new SmoothedDeltaRatioOscillatorState(deltaRatio.MaType, deltaRatio.Length),
+            DoubleSmoothedMomentaSpecOptions momenta => new DoubleSmoothedMomentaState(momenta.MaType, momenta.MomentumLength, momenta.FirstSmooth, momenta.SecondSmooth),
             WamiOscillatorSpecOptions wami => new WamiOscillatorState(wami.MaType, wami.Length),
             TrueStrengthIndexSpecOptions strength => new TrueStrengthIndexState(strength.MaType, strength.Length1, strength.Length2, strength.SignalLength),
             ErgodicTrueStrengthIndexV1SpecOptions ergodic => new ErgodicTrueStrengthIndexV1State(ergodic.MaType, ergodic.Length1, ergodic.Length2, ergodic.Length3, ergodic.SignalLength),

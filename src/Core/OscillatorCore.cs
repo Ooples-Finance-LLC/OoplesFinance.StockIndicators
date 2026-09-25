@@ -3709,49 +3709,14 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Double Smoothed Momenta (EMA of EMA of momentum).
+    /// Computes Double Smoothed Momenta (twice-smoothed displacement divided by twice-smoothed range).
     /// </summary>
-    internal static void DoubleSmoothedMomenta(ReadOnlySpan<double> input, Span<double> output, int momentumLength = 1, int firstSmooth = 25, int secondSmooth = 13)
+    internal static void DoubleSmoothedMomenta(ReadOnlySpan<double> input, Span<double> output, int momentumLength = 2, int firstSmooth = 5, int secondSmooth = 25)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // First compute momentum (price difference over period)
-        var pool = ArrayPool<double>.Shared;
-        var momentumArray = pool.Rent(input.Length);
-        var firstEmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var momentum = momentumArray.AsSpan(0, input.Length);
-
-            // Momentum = current - previous (by momentumLength)
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < momentumLength)
-                {
-                    momentum[i] = 0;
-                }
-                else
-                {
-                    momentum[i] = input[i] - input[i - momentumLength];
-                }
-            }
-
-            // First EMA of momentum
-            var firstEma = firstEmaArray.AsSpan(0, input.Length);
-            MovingAverageCore.ExponentialMovingAverage(momentum, firstEma, firstSmooth);
-
-            // Second EMA (double smoothing)
-            MovingAverageCore.ExponentialMovingAverage(firstEma, output, secondSmooth);
-        }
-        finally
-        {
-            pool.Return(momentumArray);
-            pool.Return(firstEmaArray);
-        }
+        using var window = new MomentaRangeWindow(MovingAvgType.ExponentialMovingAverage, momentumLength, firstSmooth, secondSmooth, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -6103,64 +6068,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Smoothed Delta Ratio Oscillator using delta ratios.
     /// </summary>
-    internal static void SmoothedDeltaRatioOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int smoothLength = 3)
+    internal static void SmoothedDeltaRatioOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 100)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deltaRatioArray = pool.Rent(close.Length);
-        var smoothedArray = pool.Rent(close.Length);
-
-        try
-        {
-            var deltaRatio = deltaRatioArray.AsSpan(0, close.Length);
-            var smoothed = smoothedArray.AsSpan(0, close.Length);
-
-            // Calculate delta ratio
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    deltaRatio[i] = 0;
-                }
-                else
-                {
-                    var upSum = 0.0;
-                    var downSum = 0.0;
-                    for (var j = i - length + 1; j <= i; j++)
-                    {
-                        var delta = close[j] - close[j - 1];
-                        if (delta > 0) upSum += delta;
-                        else downSum += Math.Abs(delta);
-                    }
-
-                    if (upSum + downSum != 0)
-                    {
-                        deltaRatio[i] = (upSum - downSum) / (upSum + downSum) * 100;
-                    }
-                    else
-                    {
-                        deltaRatio[i] = 0;
-                    }
-                }
-            }
-
-            // Smooth the result
-            MovingAverageCore.SimpleMovingAverage(deltaRatio, smoothed, smoothLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothed[i];
-            }
-        }
-        finally
-        {
-            pool.Return(deltaRatioArray);
-            pool.Return(smoothedArray);
-        }
+        using var window = new SmoothedDeltaWindow(MovingAvgType.SimpleMovingAverage, length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

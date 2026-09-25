@@ -164,6 +164,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.SmoothedDeltaRatioOscillator:
                 var deltaKind = AverageKind(options, 1);
+                if (deltaKind is 1 or 2 or 3 or 6) return new("Sdro", new[] { "Sdro" }, bars => SmoothedDeltaOutputs(bars, indicator));
                 if (deltaKind == 0) return null;
                 return new("Sdro", new[] { "Sdro" }, bars =>
                 {

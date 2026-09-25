@@ -4953,5 +4953,130 @@
     "before": "new[] { length1, length2, length3 }",
     "after": "new[] { length1, length2, length2 }",
     "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "momenta-loses-minimum-range",
+    "module": "numerical",
+    "file": "src/Helpers/MomentaRangeWindow.cs",
+    "before": "Math.Max(2, lookback)",
+    "after": "Math.Max(1, lookback)",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.MinimumRangeStillUsesTwoBars"
+  },
+  {
+    "id": "momenta-overflows-displacement",
+    "module": "numerical",
+    "file": "src/Helpers/MomentaRangeWindow.cs",
+    "before": "StrengthValue.Round(top, 1)",
+    "after": "new StrengthValue(price - low)",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.WideRangesPublishTheHandCalculatedPercentage"
+  },
+  {
+    "id": "momenta-loses-second-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/MomentaRangeWindow.cs",
+    "before": "new[] { first, second }",
+    "after": "new[] { first }",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "momenta-preview-commits-range",
+    "module": "numerical",
+    "file": "src/Helpers/MomentaRangeWindow.cs",
+    "before": "var low = final ?",
+    "after": "var low = true ?",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.WideRangesPublishTheHandCalculatedPercentage"
+  },
+  {
+    "id": "momenta-reset-retains-range",
+    "module": "numerical",
+    "file": "src/Helpers/MomentaRangeWindow.cs",
+    "before": "_maximum.Reset(); _minimum.Reset();",
+    "after": "_maximum.Reset();",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.WideRangesPublishTheHandCalculatedPercentage"
+  },
+  {
+    "id": "momenta-arm-ignores-selected-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "stableWindow.Next(inputList[i], true)",
+    "after": "stableWindow.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.WideRangesPublishTheHandCalculatedPercentage",
+    "scope": "internal static ComputeBuffer ComputeDoubleSmoothedMomentaFast"
+  },
+  {
+    "id": "momenta-bypasses-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~MomentaNumericalTests.PublicRatioAndSignalHonorAllFiveCustomerStages",
+    "scope": "internal static ComputeBuffer ComputeDoubleSmoothedMomentaFast"
+  },
+  {
+    "id": "discovery-ignores-smoothing-periods",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "|| p.Name.IndexOf(\"smooth\", StringComparison.OrdinalIgnoreCase) >= 0",
+    "after": "",
+    "filter": "FullyQualifiedName~SharedIndicatorValidationTests.DiscoveryVariesEachSmoothingPeriodIndependently"
+  },
+  {
+    "id": "smoothed-delta-overflows-change",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedDeltaWindow.cs",
+    "before": "StrengthValue.Round(change, 1).Absolute",
+    "after": "new StrengthValue(Math.Abs(_count >= _length ? price - _prices[0] : 0))",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios"
+  },
+  {
+    "id": "smoothed-delta-loses-mean-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedDeltaWindow.cs",
+    "before": "movement.Add(_means[0], -1);",
+    "after": "movement.Add(mean, -1);",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios"
+  },
+  {
+    "id": "smoothed-delta-preview-commits-lags",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedDeltaWindow.cs",
+    "before": "if (final) { _prices.TryAdd",
+    "after": "{ _prices.TryAdd",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios"
+  },
+  {
+    "id": "smoothed-delta-reset-retains-count",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedDeltaWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios"
+  },
+  {
+    "id": "smoothed-delta-arm-ignores-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(inputList[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios",
+    "scope": "internal static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast"
+  },
+  {
+    "id": "smoothed-delta-bypasses-components",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.PublicRatioHonorsBothCustomerAverages",
+    "scope": "internal static ComputeBuffer ComputeSmoothedDeltaRatioOscillatorFast"
+  },
+  {
+    "id": "smoothed-delta-loses-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "MovingAvgType.SimpleMovingAverage, length, close.Length",
+    "after": "MovingAvgType.SimpleMovingAverage, 1, close.Length",
+    "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios",
+    "scope": "internal static void SmoothedDeltaRatioOscillator"
   }
 ]
