@@ -64,15 +64,6 @@ public sealed class ExactAgreementTests
         "MacZVwapIndicator.Histogram",
         "MacZVwapIndicator.Macz",
         "MacZVwapIndicator.Signal",
-        // Signal and Histogram are taken from the primary above, so they inherit its one-ulp offset:
-        // measured at 1.8e-15 absolute, 3.2e-16 relative, over the same walk this test uses.
-        "PercentageVolumeOscillator.Histogram",
-        "PercentageVolumeOscillator.Pvo",
-        "PercentageVolumeOscillator.Signal",
-        // Same inheritance as the twin above: both are taken from the primary on this line.
-        "Pvo.Histogram",
-        "Pvo.Pvo",
-        "Pvo.Signal",
     };
 
     [Fact]

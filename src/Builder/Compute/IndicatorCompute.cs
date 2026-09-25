@@ -410,9 +410,9 @@ internal static partial class IndicatorCompute
             },
             PvoSpecOptions pvo => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputePvoFast(data, context, pvo.Length, pvo.MaType),
+                "Signal" => SmoothFinitePublished(data, context, ComputePvoFast(data, context, pvo.Length, pvo.MaType),
                     pvo.SignalLength, pvo.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
+                "Histogram" => DifferenceFromFiniteSmoothing(data, context,
                     ComputePvoFast(data, context, pvo.Length, pvo.MaType), pvo.SignalLength, pvo.MaType),
                 _ => ComputePvoFast(data, context, pvo.Length, pvo.MaType)
             },
@@ -1672,10 +1672,10 @@ internal static partial class IndicatorCompute
                 }),
             PercentageVolumeOscillatorSpecOptions pvo2 => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context,
+                "Signal" => SmoothFinitePublished(data, context,
                     ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType),
                     pvo2.SignalLength, pvo2.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
+                "Histogram" => DifferenceFromFiniteSmoothing(data, context,
                     ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType),
                     pvo2.SignalLength, pvo2.MaType),
                 _ => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType)
@@ -3410,6 +3410,21 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// A series less its own smoothing, which is the shape of most published histograms.
     /// </summary>
+    private static ComputeBuffer DifferenceFromFiniteSmoothing(StockData data, ComputeContext context, ComputeBuffer source,
+        int length, MovingAvgType maType)
+    {
+        using (source)
+        {
+            var finiteInput = FiniteSignalInput.Create(source.ToArray(), out var finiteCount);
+            using var signal = context.Rent(finiteInput.Count);
+            StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(finiteInput), signal.WritableSpan);
+            var output = context.Rent(finiteInput.Count);
+            for (var i = 0; i < finiteInput.Count; i++) output.WritableSpan[i] = i >= finiteCount
+                ? double.NaN : source.Span[i] - signal.Span[i];
+            return output;
+        }
+    }
+
     private static ComputeBuffer DifferenceFromSmoothing(StockData data, ComputeContext context, ComputeBuffer source,
         int length, MovingAvgType maType)
     {
@@ -20874,7 +20889,7 @@ internal static partial class IndicatorCompute
         // The batch averages the volume with the average it is given, and OscillatorCore's routine takes an
         // exponential one whatever it is asked for, so the two averages are taken here instead. An arm that
         // kept the core call answered a request for any other average with the exponential series.
-        var volumeSpan = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var volumeSpan = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes);
         var count = data.Count;
         using var fastBuffer = context.Rent(count);
         using var slowBuffer = context.Rent(count);
@@ -20888,7 +20903,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var slow = slowBuffer.Span[i];
-            output[i] = slow != 0 ? ((fastBuffer.Span[i] - slow) / slow) * 100 : 0;
+            output[i] = RoundedPercentageChange.Of(fastBuffer.Span[i], slow);
         }
 
         return buffer;

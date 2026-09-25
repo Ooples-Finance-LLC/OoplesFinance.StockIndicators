@@ -3120,5 +3120,41 @@
     "id": "ppo-numerical-overflow-fed-to-signal",
     "before": "var signal = invalidSignal ? double.NaN : _signal.Next(ppo, isFinal);",
     "after": "var signal = _signal.Next(ppo, isFinal);"
+  },
+  {
+    "module": "pvo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~PvoNumericalTests",
+    "id": "pvo-numerical-intermediate-overflow",
+    "before": "var pvo = RoundedPercentageChange.Of(fast, slow);",
+    "after": "var pvo = slow == 0 ? 0 : 100 * (fast - slow) / slow;",
+    "scope": "public sealed class PercentageVolumeOscillatorState"
+  },
+  {
+    "module": "pvo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~PvoNumericalTests",
+    "id": "pvo-numerical-reversed-histogram",
+    "before": "var histogram = pvo - signal;",
+    "after": "var histogram = signal - pvo;",
+    "scope": "public sealed class PercentageVolumeOscillatorState"
+  },
+  {
+    "module": "pvo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class PercentageVolumeOscillatorState",
+    "filter": "FullyQualifiedName~PvoNumericalTests",
+    "id": "pvo-numerical-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signal.Next(pvo, isFinal);",
+    "after": "var signal = _signal.Next(pvo, isFinal);"
+  },
+  {
+    "module": "pvo-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePercentageVolumeOscillatorFast",
+    "filter": "FullyQualifiedName~PvoNumericalTests",
+    "id": "pvo-numerical-ignored-selected-input",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes",
+    "after": "data.Volumes"
   }
 ]

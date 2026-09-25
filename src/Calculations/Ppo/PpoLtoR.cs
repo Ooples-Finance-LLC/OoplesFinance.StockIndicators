@@ -94,11 +94,13 @@ public static partial class Calculations
             var fastEma = fastEmaList[i];
             var slowEma = slowEmaList[i];
 
-            var pvo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
+            var pvo = RoundedPercentageChange.Of(fastEma, slowEma);
             pvoList.Add(pvo);
         }
 
-        var pvoSignalList = GetMovingAverageList(stockData, maType, signalLength, pvoList);
+        var finiteSignalInput = FiniteSignalInput.Create(pvoList, out var finiteCount);
+        var pvoSignalList = GetMovingAverageList(stockData, maType, signalLength, finiteSignalInput);
+        for (var i = finiteCount; i < pvoSignalList.Count; i++) pvoSignalList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var pvo = pvoList[i];

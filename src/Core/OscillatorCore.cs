@@ -1070,7 +1070,7 @@ internal static class OscillatorCore
 
             for (var i = 0; i < volume.Length; i++)
             {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(fastEma[i], slowEma[i]);
             }
         }
         finally
