@@ -26121,11 +26121,17 @@ internal static partial class IndicatorCompute
 
         if (series == QuasiWhiteNoiseSeries.WhiteNoiseMa)
         {
-            MovingAverage(data, maType, noiseLength, noise.Span, output);
+            if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+            {
+                using var average = new StrengthAverage(maType, noiseLength, count);
+                for (var i = 0; i < count; i++) output[i] = average.Next(new StrengthValue(noiseSpan[i]), true).Mantissa;
+            }
+            else MovingAverage(data, maType, noiseLength, noise.Span, output);
             return buffer;
         }
 
-        VolatilityCore.StandardDeviation(noise.Span, output, noiseLength);
+        using var deviation = new ExactPopulationWindow(noiseLength);
+        for (var i = 0; i < count; i++) output[i] = deviation.Next(noiseSpan[i], true);
         if (series == QuasiWhiteNoiseSeries.WhiteNoiseVariance)
         {
             for (var i = 0; i < count; i++)

@@ -6249,5 +6249,67 @@
     "after": "!StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~ConnorsNumericalTests.RawCustomerStagesPreserveAllFourRsiAveragesAndBothStochasticStages",
     "scope": "private static ComputeBuffer SmoothStrength("
+  },
+  {
+    "id": "quasi-noise-batch-loses-divisor",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "(connorsRsi - 50) * (1 / divisor)",
+    "after": "(connorsRsi - 50)",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods",
+    "scope": "public static StockData CalculateQuasiWhiteNoise("
+  },
+  {
+    "id": "quasi-noise-raw-swaps-rank-and-strength-periods",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComputeConnorsRsiFast(data, context, noiseLength, noiseLength, length, maType)",
+    "after": "ComputeConnorsRsiFast(data, context, length, length, noiseLength, maType)",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods",
+    "scope": "internal static ComputeBuffer ComputeQuasiWhiteNoiseFast("
+  },
+  {
+    "id": "quasi-noise-raw-variance-is-deviation",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output[i] *= output[i];",
+    "after": "output[i] = output[i];",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods",
+    "scope": "internal static ComputeBuffer ComputeQuasiWhiteNoiseFast("
+  },
+  {
+    "id": "quasi-noise-preview-commits-deviation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "_whiteNoiseStdDev.Next(_whiteNoiseValue, isFinal)",
+    "after": "_whiteNoiseStdDev.Next(_whiteNoiseValue, true)",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods",
+    "scope": "public sealed class QuasiWhiteNoiseState"
+  },
+  {
+    "id": "quasi-noise-reset-keeps-average",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "_exactAverage?.Reset();",
+    "after": "// injected retained average",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods",
+    "scope": "public sealed class QuasiWhiteNoiseState"
+  },
+  {
+    "id": "quasi-noise-typed-loses-divisor",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new QuasiWhiteNoiseState(noise.MaType, noise.Length, noise.NoiseLength, noise.Divisor)",
+    "after": "new QuasiWhiteNoiseState(noise.MaType, noise.Length, noise.NoiseLength, 40)",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.AllOutputsPreserveScalingSelectedInputsPopulationWindowAndNativePeriods"
+  },
+  {
+    "id": "quasi-noise-bypasses-customer-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.RawCustomerStagesPreserveAllRsiAveragesAndThePublishedMean",
+    "scope": "internal static ComputeBuffer ComputeQuasiWhiteNoiseFast("
   }
 ]

@@ -1286,12 +1286,13 @@ public sealed class QuantitativeQualitativeEstimationState : IStreamingIndicator
 public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
 {
     private readonly ConnorsRelativeStrengthIndexState _connors;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _whiteNoiseSma;
 
     // The deviation of the noise window about its own mean, matching the batch calculation: WhiteNoiseVariance
     // is this squared, and squaring the smoothed residual measure gives a quantity that is not a variance.
     // See issue #223.
-    private readonly RollingStandardDeviation _whiteNoiseStdDev;
+    private readonly ExactPopulationWindow _whiteNoiseStdDev;
     private readonly double _divisor;
     private double _whiteNoiseValue;
 
@@ -1302,7 +1303,8 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
         var resolvedNoise = Math.Max(1, noiseLength);
         _connors = new ConnorsRelativeStrengthIndexState(maType, resolvedNoise, resolvedNoise, resolvedLength);
         _whiteNoiseSma = MovingAverageSmootherFactory.Create(maType, resolvedNoise);
-        _whiteNoiseStdDev = new RollingStandardDeviation(resolvedNoise);
+        _whiteNoiseStdDev = new ExactPopulationWindow(resolvedNoise);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, resolvedNoise);
         _divisor = divisor;
     }
 
@@ -1310,6 +1312,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _connors.Reset();
         _whiteNoiseSma.Reset();
         _whiteNoiseStdDev.Reset();
@@ -1321,7 +1324,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
         StreamingInputValidation.Validate(bar);
         var connors = _connors.Update(bar, isFinal, includeOutputs: false).Value;
         _whiteNoiseValue = (connors - 50) * (1d / _divisor);
-        var whiteNoiseMa = _whiteNoiseSma.Next(_whiteNoiseValue, isFinal);
+        var whiteNoiseMa = _exactAverage is null ? _whiteNoiseSma.Next(_whiteNoiseValue, isFinal) : _exactAverage.Next(new StrengthValue(_whiteNoiseValue), isFinal).Mantissa;
         var whiteNoiseStdDev = _whiteNoiseStdDev.Next(_whiteNoiseValue, isFinal);
         var whiteNoiseVariance = MathHelper.Pow(whiteNoiseStdDev, 2);
 
@@ -1342,6 +1345,7 @@ public sealed class QuasiWhiteNoiseState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _connors.Dispose();
         _whiteNoiseSma.Dispose();
         _whiteNoiseStdDev.Dispose();
