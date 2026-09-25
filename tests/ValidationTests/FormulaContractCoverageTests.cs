@@ -2180,17 +2180,17 @@ public sealed class FormulaContractCoverageTests
     public void OscillatorReferencesMatchHandCalculatedLinesSignalsAndHistograms()
     {
         var bars = new[] { 1d, 2, 4, 8 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
-        Check(new Macd(2, 3, 2), new[]
-        {
-            new[] { 0d, 0, 5d / 6, 11d / 9 },
-            new[] { 0d, 0, 5d / 9, 1 },
-            new[] { 0d, 0, 5d / 18, 2d / 9 }
-        });
         // The two means and signal round at their published stages before the next equation.
         var fast = new[] { 1d, 1.5, (new ReferenceFraction(19) / new ReferenceFraction(6)).ToDouble(), 0 };
         fast[3] = ((new ReferenceFraction(16) + ReferenceFraction.FromDouble(fast[2])) / new ReferenceFraction(3)).ToDouble();
         var slow = new[] { 1d, 1.5, (new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble(), 0 };
         slow[3] = ((new ReferenceFraction(8) + ReferenceFraction.FromDouble(slow[2])) / new ReferenceFraction(2)).ToDouble();
+        var macdLine = fast.Select((value, i) => (ReferenceFraction.FromDouble(value) - ReferenceFraction.FromDouble(slow[i])).ToDouble()).ToArray();
+        var macdSignal = new double[4];
+        for (var i = 2; i < 4; i++) macdSignal[i] = ((new ReferenceFraction(2) * ReferenceFraction.FromDouble(macdLine[i]) +
+            ReferenceFraction.FromDouble(macdSignal[i - 1])) / new ReferenceFraction(3)).ToDouble();
+        var macdHistogram = macdLine.Select((value, i) => (ReferenceFraction.FromDouble(value) - ReferenceFraction.FromDouble(macdSignal[i])).ToDouble()).ToArray();
+        Check(new Macd(2, 3, 2), new[] { macdLine, macdSignal, macdHistogram });
         var line = fast.Select((value, i) => (new ReferenceFraction(100) *
             (ReferenceFraction.FromDouble(value) / ReferenceFraction.FromDouble(slow[i]) - new ReferenceFraction(1))).ToDouble()).ToArray();
         var signal = new double[4];

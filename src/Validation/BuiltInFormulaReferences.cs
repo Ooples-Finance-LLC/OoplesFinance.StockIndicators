@@ -336,6 +336,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MovingAverageConvergenceDivergence)
+        {
+            var macdOptions = builtIn.CreateOptions();
+            var macdKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Macd" } : new[] { "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < macdKeys.Length; slot++)
+            {
+                var key = macdKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMacd(bars, macdOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PercentageVolumeOscillator && BoundedMeanKind(builtIn.CreateOptions(), 3) is 2 or 3)
         {
             var pvoOptions = builtIn.CreateOptions();
