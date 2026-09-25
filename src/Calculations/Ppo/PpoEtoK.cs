@@ -19,25 +19,23 @@ public static partial class Calculations
         List<double> ppoSignalLineList = new(stockData.Count);
         List<double> ppoHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum ppoSum = new();
+        using var ppoMean = new Streaming.RoundedPartialMeanSmoother(Math.Max(1, Math.Min(signalLength, stockData.Count)));
         var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        inputList = RoundedImpulseOscillator.Input(stockData, inputList);
 
         var typicalPriceZeroLagEmaList = GetMovingAverageList(stockData, MovingAvgType.ZeroLagExponentialMovingAverage, length, inputList);
-        var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);
-        var wellesWilderLowMovingAvgList = GetMovingAverageList(stockData, maType, length, lowList);
+        var wellesWilderHighMovingAvgList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(highList, length) : GetMovingAverageList(stockData, maType, length, highList);
+        var wellesWilderLowMovingAvgList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(lowList, length) : GetMovingAverageList(stockData, maType, length, lowList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var hi = wellesWilderHighMovingAvgList[i];
             var lo = wellesWilderLowMovingAvgList[i];
             var mi = typicalPriceZeroLagEmaList[i];
-            var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
-
-            var ppo = mi > hi && hi != 0 ? macd / hi * 100 : mi < lo && lo != 0 ? macd / lo * 100 : 0;
+            var ppo = RoundedImpulseOscillator.Line(mi, hi, lo, true);
             ppoList.Add(ppo);
-            ppoSum.Add(ppo);
 
-            var ppoSignalLine = ppoSum.Average(signalLength);
+            var ppoSignalLine = ppoMean.Next(ppo, true);
             ppoSignalLineList.Add(ppoSignalLine);
 
             var prevPpoHistogram = GetLastOrDefault(ppoHistogramList);

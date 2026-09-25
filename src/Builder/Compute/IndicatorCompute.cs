@@ -847,6 +847,8 @@ internal static partial class IndicatorCompute
                     ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length, eppo.MaType), 5, eppo.MaType),
                 _ => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length, eppo.MaType)
             },
+            ImpulseMovingAverageConvergenceDivergenceSpecOptions impulse => ComputeImpulseOscillatorFast(data, context,
+                impulse.Length, impulse.SignalLength, impulse.MaType, false, spec.OutputKey ?? "Macd"),
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length,
                 series: spec.OutputKey == "Signal" ? MacdSeries.Signal : spec.OutputKey == "Histogram" ? MacdSeries.Histogram : MacdSeries.Line),
             _4MovingAverageConvergenceDivergenceSpecOptions fourMacd => ComputeFourOscillatorFast(data, context,
@@ -9831,45 +9833,32 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeImpulsePercentagePriceOscillatorFast(StockData data, ComputeContext context, int length = 34,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, MacdSeries series = MacdSeries.Line)
+        => ComputeImpulseOscillatorFast(data, context, length, 9, maType, true,
+            series == MacdSeries.Signal ? "Signal" : series == MacdSeries.Histogram ? "Histogram" : "Ppo");
+
+    internal static ComputeBuffer ComputeImpulseOscillatorFast(StockData data, ComputeContext context, int length,
+        int signalLength, MovingAvgType maType, bool percentage, string key)
     {
-        // CalculateImpulsePercentagePriceOscillator smooths the typical price with a zero lag exponential
-        // average and reports how far it has broken out of the Wilders channel drawn from the smoothed high
-        // and low, as a percentage of whichever side it broke. The core routine this replaced read the close
-        // and used the classic twelve and twenty-six periods instead.
         var (inputList, highList, lowList, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        inputList = RoundedImpulseOscillator.Input(data, inputList);
         var count = inputList.Count;
-
         using var middle = context.Rent(count);
-        MovingAverage(data, MovingAvgType.ZeroLagExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(inputList),
-            middle.WritableSpan);
-        using var upper = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(highList), upper.WritableSpan);
-        using var lower = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(lowList), lower.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
+        MovingAverageCore.ZeroLagEma(SpanCompat.AsReadOnlySpan(inputList), middle.WritableSpan, length);
+        using var high = context.Rent(count);
+        using var low = context.Rent(count);
+        StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(highList), high.WritableSpan);
+        StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(lowList), low.WritableSpan);
+        var result = context.Rent(count);
+        using var signal = new Streaming.RoundedPartialMeanSmoother(Math.Max(1, Math.Min(signalLength, count)));
         for (var i = 0; i < count; i++)
         {
-            var mi = middle.Span[i];
-            var hi = upper.Span[i];
-            var lo = lower.Span[i];
-            output[i] = mi > hi && hi != 0 ? (mi - hi) / hi * 100 : mi < lo && lo != 0 ? (mi - lo) / lo * 100 : 0;
+            var line = RoundedImpulseOscillator.Line(middle.Span[i], high.Span[i], low.Span[i], percentage);
+            var average = signal.Next(line, true);
+            result.WritableSpan[i] = key == "Signal" ? average : key == "Histogram" ? line - average : line;
         }
-
-        if (series != MacdSeries.Line)
-        {
-            var signalWindow = new RollingSum();
-            for (var i = 0; i < count; i++)
-            {
-                signalWindow.Add(output[i]);
-                var signal = signalWindow.Average(9);
-                output[i] = series == MacdSeries.Signal ? signal : output[i] - signal;
-            }
-        }
-
-        return buffer;
+        return result;
     }
+
 
     /// <summary>
     /// Computes Linda Raschke 3/10 Oscillator using zero-allocation fast path.

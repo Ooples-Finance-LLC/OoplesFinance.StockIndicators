@@ -117,6 +117,7 @@ internal static partial class StatefulIndicatorFactory
             PercentagePriceOscillatorLeaderSpecOptions leader => new PercentagePriceOscillatorLeaderState(signalLength: leader.Length),
             TFSMboIndicatorSpecOptions tfs => new TFSMboIndicatorState(tfs.MaType, tfs.FastLength, tfs.SlowLength, tfs.SignalLength),
             TFSMboPercentagePriceOscillatorSpecOptions tfs => new TFSMboPercentagePriceOscillatorState(tfs.MaType),
+            ImpulsePercentagePriceOscillatorSpecOptions impulse => new ImpulsePercentagePriceOscillatorState(length: impulse.Length),
             DiNapoliMovingAverageConvergenceDivergenceSpecOptions d => new DiNapoliMovingAverageConvergenceDivergenceState(d.Lc, d.Sc, d.Sp),
             ImpulseMovingAverageConvergenceDivergenceSpecOptions d => new ImpulseMovingAverageConvergenceDivergenceState(d.MaType, d.Length, d.SignalLength),
             MovingAverageConvergenceDivergenceLeaderSpecOptions d => new MovingAverageConvergenceDivergenceLeaderState(d.MaType, d.FastLength, d.SlowLength, d.SignalLength),

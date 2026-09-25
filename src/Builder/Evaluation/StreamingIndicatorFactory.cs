@@ -22,6 +22,8 @@ internal static class StreamingIndicatorFactory
             IndicatorName.TFSMboIndicator when spec.Options is TFSMboIndicatorSpecOptions tfs => new TFSMboIndicatorState(tfs.MaType, tfs.FastLength, tfs.SlowLength, tfs.SignalLength),
             IndicatorName.TFSMboPercentagePriceOscillator when spec.Options is TFSMboPercentagePriceOscillatorSpecOptions tfs => new TFSMboPercentagePriceOscillatorState(tfs.MaType),
             IndicatorName.StochasticMovingAverageConvergenceDivergenceOscillator when spec.Options is StochasticMacdOscillatorSpecOptions stochastic => new StochasticMovingAverageConvergenceDivergenceOscillatorState(length: stochastic.Length),
+            IndicatorName.ImpulseMovingAverageConvergenceDivergence when spec.Options is ImpulseMovingAverageConvergenceDivergenceSpecOptions impulse => new ImpulseMovingAverageConvergenceDivergenceState(impulse.MaType, impulse.Length, impulse.SignalLength),
+            IndicatorName.ImpulsePercentagePriceOscillator when spec.Options is ImpulsePercentagePriceOscillatorSpecOptions impulse => new ImpulsePercentagePriceOscillatorState(length: impulse.Length),
             IndicatorName.MarketFacilitationIndex => new MarketFacilitationIndexState(),
             IndicatorName.TrueRange => new TrueRangeState(),
             IndicatorName.Range => new RangeState(),

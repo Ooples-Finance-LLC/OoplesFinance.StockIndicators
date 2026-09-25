@@ -3775,5 +3775,59 @@
     "before": "RoundedStochasticMacd.Of(fast[i], slow[i], window.Max, window.Min)",
     "after": "RoundedStochasticMacd.Of(slow[i], fast[i], window.Max, window.Min)",
     "filter": "FullyQualifiedName~StochasticMacdNumericalTests.CloseOnlyCoreMatchesDegenerateOhlcAndDoesNotStochasticizeTheMacdHistory"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-rounded-typical-sum",
+    "file": "src/Helpers/RoundedImpulseOscillator.cs",
+    "scope": "internal static List<double> Input",
+    "before": "Streaming.RollingMoneyFlowIndex.TypicalPrice(data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i])",
+    "after": "PriceMean.Of(data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i])",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.EveryRouteMatchesIndependentImpulseStages"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-fast-ema-middle",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeImpulseOscillatorFast",
+    "before": "MovingAverageCore.ZeroLagEma(SpanCompat.AsReadOnlySpan(inputList), middle.WritableSpan, length);",
+    "after": "MovingAverageCore.ExponentialMovingAverage(SpanCompat.AsReadOnlySpan(inputList), middle.WritableSpan, length);",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.EveryRouteMatchesIndependentImpulseStages"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-premature-percentage-overflow",
+    "file": "src/Helpers/RoundedImpulseOscillator.cs",
+    "scope": "internal static double Line",
+    "before": "RoundedPercentageChange.Of(middle, boundary)",
+    "after": "(boundary == 0 ? 0 : 100 * (middle - boundary) / boundary)",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.EveryRouteMatchesIndependentImpulseStages"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-full-window-signal",
+    "file": "src/Streaming/RoundedPartialMeanSmoother.cs",
+    "scope": "public double Next",
+    "before": "return next.Mean(count);",
+    "after": "return count < _window.Capacity ? 0 : next.Mean(count);",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.CoreUsesZeroLagBreakoutAndAvailableSampleSignalStartsImmediately"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-preview-poisons-signal",
+    "file": "src/Streaming/RoundedPartialMeanSmoother.cs",
+    "scope": "public double Next",
+    "before": "if (isFinal) _invalid = invalid;",
+    "after": "_invalid = invalid;",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.MiddleOverflowPreviewDoesNotCommitInvalidSignal"
+  },
+  {
+    "module": "impulse-oscillator-numerical",
+    "id": "impulse-factory-discards-periods",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new ImpulseMovingAverageConvergenceDivergenceState(impulse.MaType, impulse.Length, impulse.SignalLength)",
+    "after": "new ImpulseMovingAverageConvergenceDivergenceState()",
+    "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.EveryRouteMatchesIndependentImpulseStages"
   }
 ]

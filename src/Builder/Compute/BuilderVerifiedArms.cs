@@ -142,6 +142,7 @@ internal static class BuilderVerifiedArms
         typeof(DetrendedPriceOscillatorSpecOptions),
         typeof(DetrendedSyntheticPriceSpecOptions),
         typeof(MovingAverageConvergenceDivergenceLeaderSpecOptions),
+        typeof(ImpulseMovingAverageConvergenceDivergenceSpecOptions),
         typeof(DiNapoliMovingAverageConvergenceDivergenceSpecOptions),
         typeof(DiNapoliPercentagePriceOscillatorSpecOptions),
         typeof(DiNapoliPreferredStochasticOscillatorSpecOptions),
