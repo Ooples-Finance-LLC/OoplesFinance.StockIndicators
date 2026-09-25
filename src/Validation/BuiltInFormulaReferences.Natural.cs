@@ -42,7 +42,10 @@ internal static partial class BuiltInFormulaReferences
                     var window = Window(bars, i, length).ToArray();
                     var high = window.Max(v => v.High);
                     var low = window.Min(v => v.Low);
-                    return high == low ? 0 : (b.Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+                    if (high == low) return 0; // NOSONAR: S1244 - Equal bounds define an exactly zero range.
+                    var numerator = ReferenceFraction.FromDouble(b.Close) - ReferenceFraction.FromDouble(low);
+                    var denominator = ReferenceFraction.FromDouble(high) - ReferenceFraction.FromDouble(low);
+                    return (numerator / denominator).ToDouble();
                 }).ToArray();
                 var raw = bars.Select((_, i) => 200 / weights.Sum() * Enumerable.Range(0, Math.Min(length, i + 1))
                     .Sum(j => weights[j] * position[i - j]) - 100).ToArray();

@@ -14,7 +14,18 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
-        if (spec.Options is ConditionalAccumulatorSpecOptions or
+        if (spec.Options is NaturalDirectionalComboSpecOptions or
+            NaturalDirectionalIndexSpecOptions or
+            NaturalStochasticIndicatorSpecOptions or
+            NaturalMarketMirrorSpecOptions or
+            NaturalMarketRiverSpecOptions or
+            NaturalMarketComboSpecOptions or
+            NaturalMarketSlopeSpecOptions or
+            McClellanOscillatorSpecOptions or
+            DecisionPointBreadthSwenlinTradingOscillatorSpecOptions or
+            ZweigMarketBreadthIndicatorSpecOptions or
+            TickLineMomentumOscillatorSpecOptions or
+            ConditionalAccumulatorSpecOptions or
             ContractHighSpecOptions or
             ContractLowSpecOptions or
             DemarkReversalPointsSpecOptions or
