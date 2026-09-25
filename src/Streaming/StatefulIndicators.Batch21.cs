@@ -699,6 +699,7 @@ public sealed class RelativeDifferenceOfSquaresOscillatorState : IStreamingIndic
 [PrimaryOutput("Rmi")]
 public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RelativeMomentumWindow? _wide;
     private readonly int _length2;
     private readonly IMovingAverageSmoother _avgGain;
     private readonly IMovingAverageSmoother _avgLoss;
@@ -709,6 +710,7 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
     public RelativeMomentumIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 14, int length2 = 3)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new RelativeMomentumWindow(maType, length1, length2);
         _length2 = Math.Max(1, length2);
         _avgGain = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _avgLoss = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
@@ -721,6 +723,7 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
+        _wide?.Reset();
         _avgGain.Reset();
         _avgLoss.Reset();
         _signal.Reset();
@@ -729,6 +732,13 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs ? new Dictionary<string, double>
+                { { "Rmi", next.Value }, { "Signal", next.Signal }, { "Histogram", next.Histogram } } : null);
+        }
         var value = _input.GetValue(bar);
         var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length2);
         var hasLength = _values.Count >= _length2;
@@ -763,6 +773,7 @@ public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _avgGain.Dispose();
         _avgLoss.Dispose();
         _signal.Dispose();

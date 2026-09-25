@@ -134,6 +134,25 @@ public static partial class Calculations
     public static StockData CalculateRelativeMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 14, int length2 = 3)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count); var histogram = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new RelativeMomentumWindow(maType, length1, length2, stockData.Count);
+            double previous = 0, previousHistogram = 0;
+            foreach (var price in prices)
+            {
+                var next = window.Next(price, true);
+                line.Add(next.Value); signal.Add(next.Signal); histogram.Add(next.Histogram);
+                events?.Add(GetRsiSignal(next.Histogram, previousHistogram, next.Value, previous, 70, 30));
+                previous = next.Value; previousHistogram = next.Histogram;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rmi", line }, { "Signal", signal }, { "Histogram", histogram } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RelativeMomentumIndex;
+            return stockData;
+        }
+
         List<double> rsiList = new(stockData.Count);
         List<double> lossList = new(stockData.Count);
         List<double> gainList = new(stockData.Count);

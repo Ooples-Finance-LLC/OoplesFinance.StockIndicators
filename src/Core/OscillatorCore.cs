@@ -1390,50 +1390,16 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Relative Momentum Index.
     /// </summary>
-    internal static void RelativeMomentumIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14, int momentum = 4)
+    internal static void RelativeMomentumIndex(ReadOnlySpan<double> input, Span<double> output, int length = 14, int momentum = 3)
     {
         if (output.Length < input.Length)
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double upSum = 0;
-        double downSum = 0;
-        var k = 1.0 / length;
+        using var window = new RelativeMomentumWindow(MovingAvgType.WildersSmoothingMethod, length, momentum, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < momentum)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = input[i] - input[i - momentum];
-            var up = change > 0 ? change : 0;
-            var down = change < 0 ? Math.Abs(change) : 0;
-
-            if (i < length + momentum)
-            {
-                upSum += up;
-                downSum += down;
-                output[i] = 0;
-            }
-            else if (i == length + momentum)
-            {
-                upSum += up;
-                downSum += down;
-                var total = upSum + downSum;
-                output[i] = total != 0 ? 100 * upSum / total : 50;
-            }
-            else
-            {
-                upSum = (up * k) + (upSum * (1 - k));
-                downSum = (down * k) + (downSum * (1 - k));
-                var total = upSum + downSum;
-                output[i] = total != 0 ? 100 * upSum / total : 50;
-            }
-        }
     }
 
     /// <summary>
@@ -1446,28 +1412,10 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double upSum = 0;
-        double downSum = 0;
+        if (open.Length < close.Length) throw new ArgumentException("Open span must be at least close length.", nameof(open));
+        using var window = new IntradayGainLossWindow(length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], true);
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            var up = close[i] > open[i] ? close[i] - open[i] : 0;
-            var down = close[i] < open[i] ? open[i] - close[i] : 0;
-
-            upSum += up;
-            downSum += down;
-
-            if (i >= length)
-            {
-                var oldUp = close[i - length] > open[i - length] ? close[i - length] - open[i - length] : 0;
-                var oldDown = close[i - length] < open[i - length] ? open[i - length] - close[i - length] : 0;
-                upSum -= oldUp;
-                downSum -= oldDown;
-            }
-
-            var total = upSum + downSum;
-            output[i] = i >= length - 1 && total != 0 ? 100 * upSum / total : 0;
-        }
     }
 
     /// <summary>

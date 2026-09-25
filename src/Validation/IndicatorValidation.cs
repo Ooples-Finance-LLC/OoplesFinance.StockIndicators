@@ -469,7 +469,7 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is PriceMomentumOscillator or Pmo or DecisionPointPriceMomentumOscillator or CoppockCurve or SmoothedRateOfChange or SmoothedRoc or KnowSureThing or Kst or PringSpecialK or SpecialK or SmoothedDeltaRatioOscillator or DoubleSmoothedMomenta or DirectionalTrendIndex or OscOscillator or WamiOscillator or Tsi or TrueStrengthIndex or ErgodicTrueStrengthIndexV1 or ErgodicTrueStrengthIndexV2 or
+        var includeNumericalExtremes = probe is RelativeMomentumIndex or IntradayMomentumIndex or ChandeIntradayMomentumIndex or PriceMomentumOscillator or Pmo or DecisionPointPriceMomentumOscillator or CoppockCurve or SmoothedRateOfChange or SmoothedRoc or KnowSureThing or Kst or PringSpecialK or SpecialK or SmoothedDeltaRatioOscillator or DoubleSmoothedMomenta or DirectionalTrendIndex or OscOscillator or WamiOscillator or Tsi or TrueStrengthIndex or ErgodicTrueStrengthIndexV1 or ErgodicTrueStrengthIndexV2 or
             EndPointMovingAverage or SharpModifiedMovingAverage or
             HarmonicMeanMovingAverage or
             CloseToCloseVolatility or ParkinsonVolatility or

@@ -437,14 +437,8 @@ internal static partial class IndicatorCompute
             VortexNegativeSpecOptions vn => ComputeVortexNegativeFast(data, context, vn.Length),
             TrendIntensityIndexSpecOptions tii => ComputeTrendIntensityIndexFast(data, context, tii.Length, tii.MaType),
             AbsoluteStrengthIndexSpecOptions asi => ComputeAbsoluteStrengthIndexFast(data, context, asi.Length),
-            RelativeMomentumIndexSpecOptions rmi => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum, rmi.MaType), rmi.Length, rmi.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
-                    ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum, rmi.MaType), rmi.Length, rmi.MaType),
-                _ => ComputeRelativeMomentumIndexFast(data, context, rmi.Length, rmi.Momentum, rmi.MaType)
-            },
+            RelativeMomentumIndexSpecOptions rmi => ComputeRelativeMomentumIndexFast(data, context,
+                rmi.Length, rmi.Momentum, rmi.MaType, spec.OutputKey ?? "Rmi"),
             IntradayMomentumIndexSpecOptions imi => ComputeIntradayMomentumIndexFast(data, context, imi.Length),
 
             // Batch 3 - Volume weighted MAs
@@ -4752,13 +4746,25 @@ internal static partial class IndicatorCompute
     /// Computes Relative Momentum Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeRelativeMomentumIndexFast(StockData data, ComputeContext context, int length1 = 14, int length2 = 3,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, string outputKey = "Rmi")
     {
         // CalculateRelativeMomentumIndex is an RSI over the change across length2 bars rather than one: the
         // gains and losses are averaged over length1 by maType, which the arm never received.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = data.Count;
+
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var window = new RelativeMomentumWindow(maType, length1, length2, count);
+            var stable = context.Rent(count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = window.Next(input[i], true);
+                stable.WritableSpan[i] = outputKey == "Signal" ? next.Signal : outputKey == "Histogram" ? next.Histogram : next.Value;
+            }
+            return stable;
+        }
 
         using var gains = context.Rent(count);
         using var losses = context.Rent(count);
@@ -4789,7 +4795,8 @@ internal static partial class IndicatorCompute
             output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
         }
 
-        return buffer;
+        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, length1, maType)
+            : outputKey == "Histogram" ? DifferenceFromSmoothing(data, context, buffer, length1, maType) : buffer;
     }
 
     /// <summary>
@@ -4806,20 +4813,8 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        var gainsSumWindow = new RollingSum();
-        var lossesSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var gains = input[i] > opens[i] ? input[i] - opens[i] : 0;
-            gainsSumWindow.Add(gains);
-
-            var losses = input[i] < opens[i] ? opens[i] - input[i] : 0;
-            lossesSumWindow.Add(losses);
-
-            var upt = gainsSumWindow.Sum(length);
-            var dnt = lossesSumWindow.Sum(length);
-            output[i] = upt + dnt != 0 ? MathHelper.MinOrMax(100 * upt / (upt + dnt), 100, 0) : 0;
-        }
+        using var window = new IntradayGainLossWindow(length, count);
+        for (var i = 0; i < count; i++) output[i] = window.Next(input[i], opens[i], true);
 
         return buffer;
     }
@@ -18146,26 +18141,9 @@ internal static partial class IndicatorCompute
         var (inputList, _, _, openList, _) = CalculationsHelper.GetInputValuesList(data);
         var count = inputList.Count;
 
-        var gainSum = new RollingSum();
-        var lossSum = new RollingSum();
-
+        using var window = new IntradayGainLossWindow(length, count);
         var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var close = inputList[i];
-            var open = openList[i];
-
-            var gain = Math.Max(close - open, 0);
-            var loss = Math.Max(open - close, 0);
-            gainSum.Add(gain);
-            lossSum.Add(loss);
-
-            var up = gainSum.Sum(length);
-            var down = lossSum.Sum(length);
-            output[i] = up + down != 0 ? MathHelper.MinOrMax(100 * up / (up + down), 100, 0) : 0;
-        }
+        for (var i = 0; i < count; i++) buffer.WritableSpan[i] = window.Next(inputList[i], openList[i], true);
 
         return buffer;
     }

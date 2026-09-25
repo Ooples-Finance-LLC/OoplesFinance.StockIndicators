@@ -924,6 +924,8 @@ internal static partial class BuiltInFormulaReferences
                         or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan or IndicatorName.MedianValue or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
                                 || builtIn.BatchName == IndicatorName.Trimean && key != "Trimean"
                                 ? IndicatorErrorBudget.Exact : new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
+                        : builtIn.BatchName == IndicatorName.ChandeIntradayMomentumIndex || builtIn.BatchName == IndicatorName.RelativeMomentumIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
                         : builtIn.BatchName == IndicatorName.WamiOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6
                             ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
                         : builtIn.BatchName is IndicatorName.PriceMomentumOscillator or IndicatorName.DecisionPointPriceMomentumOscillator or IndicatorName.CoppockCurve or IndicatorName.SmoothedRateOfChange or IndicatorName.KnowSureThing or IndicatorName.PringSpecialK
