@@ -88,6 +88,7 @@ public sealed class SmoothedDeltaRatioOscillatorState : IStreamingIndicatorState
 [PrimaryOutput("Sroc")]
 public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDisposable
 {
+    private readonly SmoothedReturnWindow? _wide;
     private readonly int _length;
     private readonly IMovingAverageSmoother _smoother;
     private readonly PooledRingBuffer<double> _maValues;
@@ -97,6 +98,7 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
     public SmoothedRateOfChangeState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21,
         int smoothingLength = 13)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new SmoothedReturnWindow(maType, length, smoothingLength);
         _length = Math.Max(1, length);
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothingLength));
         _maValues = new PooledRingBuffer<double>(_length);
@@ -107,6 +109,7 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
 
     public void Reset()
     {
+        _wide?.Reset();
         _smoother.Reset();
         _maValues.Clear();
         _index = 0;
@@ -114,11 +117,18 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next, includeOutputs
+                ? new Dictionary<string, double> { { "Sroc", next } } : null);
+        }
         var value = _input.GetValue(bar);
         var ma = _smoother.Next(value, isFinal);
         var prevMa = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_maValues, _length) : 0;
         var mom = ma - prevMa;
-        var sroc = prevMa != 0 ? 100 * mom / prevMa : 100;
+        var sroc = prevMa != 0 ? RoundedPercentageChange.Of(ma, prevMa) : 100;
 
         if (isFinal)
         {
@@ -140,6 +150,7 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _smoother.Dispose();
         _maValues.Dispose();
     }

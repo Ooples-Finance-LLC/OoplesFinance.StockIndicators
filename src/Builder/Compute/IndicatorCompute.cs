@@ -361,12 +361,8 @@ internal static partial class IndicatorCompute
                 "StreakRsi" => ComputeConnorsRsiFast(data, context, length2: crsi.Length, series: ConnorsRsiSeries.StreakStrength),
                 _ => null
             },
-            PmoSpecOptions pmo => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context, ComputePmoFast(data, context, pmo.Length),
-                    pmo.SignalLength, pmo.MaType),
-                _ => ComputePmoFast(data, context, pmo.Length)
-            },
+            PmoSpecOptions pmo => ComputePriceMomentumOscillatorFast(data, context, pmo.Length, maType: pmo.MaType,
+                signalLength: pmo.SignalLength, outputKey: spec.OutputKey),
             KstSpecOptions kst => ComputeKstFast(data, context, kst.Length, spec.OutputKey),
             PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
             ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length),
@@ -1681,13 +1677,8 @@ internal static partial class IndicatorCompute
                 _ => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue)
             },
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
-            PriceMomentumOscillatorSpecOptions pmo2 => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2),
-                    pmo2.SignalLength, pmo2.MaType),
-                _ => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2)
-            },
+            PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2,
+                pmo2.MaType, pmo2.SignalLength, spec.OutputKey),
             PriceVolumeTrendSpecOptions pvt2 => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt2.Length, pvt2.MaType),
@@ -4905,6 +4896,14 @@ internal static partial class IndicatorCompute
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
         var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
+
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new RocBankWindow(maType, new[] { fastLength, slowLength }, new[] { 1, 1 }, new[] { 1, 1 }, length, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(inputList[i], true).Signal;
+            return stable;
+        }
 
         using var totalBuffer = context.Rent(count);
         var total = totalBuffer.WritableSpan;
@@ -12607,41 +12606,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDecisionPointPriceMomentumOscillatorFast(StockData data, ComputeContext context,
         int length1 = 35, int length2 = 20, string? outputKey = null)
-    {
-        // CalculateDecisionPointPriceMomentumOscillator smooths the chained series' bar-on-bar percentage
-        // change twice, the second pass over ten times the first, which is what makes it a momentum reading
-        // rather than a rate of change. The core this replaced read the raw close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var smoothingOuter = (double)2 / length1;
-        var smoothingInner = (double)2 / length2;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double pmol2 = 0;
-        double pmol = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var ival = prevValue != 0 ? input[i] / prevValue * 100 : 100;
-
-            pmol2 = ((ival - 100 - pmol2) * smoothingOuter) + pmol2;
-            pmol = (((10 * pmol2) - pmol) * smoothingInner) + pmol;
-            output[i] = pmol;
-        }
-
-        if (outputKey is "Signal" or "Histogram")
-        {
-            using var signal = context.Rent(count);
-            MovingAverage(data, MovingAvgType.ExponentialMovingAverage, 10, output, signal.WritableSpan);
-            for (var i = 0; i < count; i++)
-                output[i] = outputKey == "Signal" ? signal.Span[i] : output[i] - signal.Span[i];
-        }
-        return buffer;
-    }
+        => ComputePriceMomentumOscillatorFast(data, context, length1, length2, outputKey: outputKey);
 
     /// <summary>
     /// Computes TFS MBO Percentage Price Oscillator using zero-allocation fast path.
@@ -19784,6 +19749,14 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new SmoothedReturnWindow(maType, length, smoothingLength, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(inputList[i], true);
+            return stable;
+        }
+
         using var smoothed = context.Rent(count);
         MovingAverage(data, maType, smoothingLength, SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
         var ma = smoothed.Span;
@@ -19793,7 +19766,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var previousMa = i >= length ? ma[i - length] : 0;
-            sroc[i] = previousMa != 0 ? 100 * (ma[i] - previousMa) / previousMa : 100;
+            sroc[i] = previousMa != 0 ? RoundedPercentageChange.Of(ma[i], previousMa) : 100;
         }
 
         return buffer;
@@ -20808,6 +20781,20 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides
+            && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4)
+        {
+            var stable = context.Rent(count);
+            using var bank = new RocBankWindow(maType, new[] { rocLength1, rocLength2, rocLength3, rocLength4 },
+                new[] { length1, length2, length3, length4 }, new[] { 1, 2, 3, 4 }, signalLength, count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = bank.Next(inputList[i], true);
+                stable.WritableSpan[i] = outputKey == "Signal" ? next.Signal : next.Value;
+            }
+            return stable;
+        }
+
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         output.Clear();
@@ -20968,7 +20955,7 @@ internal static partial class IndicatorCompute
     /// Computes Price Momentum Oscillator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputePriceMomentumOscillatorFast(StockData data, ComputeContext context, int length1 = 35,
-        int length2 = 20)
+        int length2 = 20, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int signalLength = 10, string? outputKey = null)
     {
         // CalculatePriceMomentumOscillator smooths the one bar rate of change with a custom 2/length factor
         // rather than a moving average, multiplies that by ten and smooths it a second time the same way. The
@@ -20977,22 +20964,29 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
-        var sc1 = 2 / (double)length1;
-        var sc2 = 2 / (double)length2;
-
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new PriceMomentumWindow(maType, length1, length2, signalLength, count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = window.Next(inputList[i], true);
+                stable.WritableSpan[i] = outputKey == "Signal" ? next.Signal : outputKey == "Histogram" ? next.Histogram : next.Value;
+            }
+            return stable;
+        }
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        double rocMa = 0, pmo = 0;
-        for (var i = 0; i < count; i++)
+        using var fixedStages = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, length1, length2, 1, count);
+        for (var i = 0; i < count; i++) output[i] = fixedStages.Next(inputList[i], true).Value;
+
+        if (outputKey == "Signal") return SmoothPublished(data, context, buffer, signalLength, maType);
+        if (outputKey == "Histogram")
         {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var roc = prevValue != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / prevValue * 100 : 0;
-
-            rocMa += (roc - rocMa) * sc1;
-            pmo += ((rocMa * 10) - pmo) * sc2;
-            output[i] = pmo;
+            using var signal = context.Rent(count);
+            MovingAverage(data, maType, signalLength, buffer.Span, signal.WritableSpan);
+            for (var i = 0; i < count; i++) output[i] -= signal.Span[i];
         }
-
         return buffer;
     }
 
@@ -25958,6 +25952,19 @@ internal static partial class IndicatorCompute
             length8, length9, length11, length12, length13, length14 };
         Span<int> smoothLengths = stackalloc int[12] { length1, length1, length1, length2, length6, length7,
             length8, length9, length10, length10, length10, length11 };
+
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var bank = new RocBankWindow(maType, rocLengths.ToArray(), smoothLengths.ToArray(),
+                new[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }, smoothLength, count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = bank.Next(inputList[i], true);
+                stable.WritableSpan[i] = series == MacdSeries.Line ? next.Value : series == MacdSeries.Signal ? next.Signal : next.Value - next.Signal;
+            }
+            return stable;
+        }
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;

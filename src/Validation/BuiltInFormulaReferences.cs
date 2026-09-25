@@ -926,6 +926,9 @@ internal static partial class BuiltInFormulaReferences
                                 ? IndicatorErrorBudget.Exact : new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
                         : builtIn.BatchName == IndicatorName.WamiOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6
                             ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.PriceMomentumOscillator or IndicatorName.DecisionPointPriceMomentumOscillator or IndicatorName.CoppockCurve or IndicatorName.SmoothedRateOfChange or IndicatorName.KnowSureThing or IndicatorName.PringSpecialK
+                            && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
                         : builtIn.BatchName is IndicatorName.SmoothedDeltaRatioOscillator or IndicatorName.DoubleSmoothedMomenta or IndicatorName.DirectionalTrendIndex or IndicatorName.OscOscillator or IndicatorName.TrueStrengthIndex or IndicatorName.ErgodicTrueStrengthIndexV1 or IndicatorName.ErgodicTrueStrengthIndexV2
                             && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6
                             ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)

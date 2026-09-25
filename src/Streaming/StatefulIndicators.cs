@@ -7244,6 +7244,7 @@ public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Cc")]
 public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RocBankWindow? _wide;
     private readonly RateOfChangeState _rocFast;
     private readonly RateOfChangeState _rocSlow;
     private readonly IMovingAverageSmoother _smoother;
@@ -7251,6 +7252,7 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
     public CoppockCurveState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10, int fastLength = 11,
         int slowLength = 14)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new RocBankWindow(maType, new[] { fastLength, slowLength }, new[] { 1, 1 }, new[] { 1, 1 }, length);
         _rocFast = new RateOfChangeState(Math.Max(1, fastLength));
         _rocSlow = new RateOfChangeState(Math.Max(1, slowLength));
         _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
@@ -7260,6 +7262,7 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _wide?.Reset();
         _rocFast.Reset();
         _rocSlow.Reset();
         _smoother.Reset();
@@ -7271,6 +7274,12 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
         // CalculateCoppockCurve sums two rates of change of the price. This took the slow one of the fast
         // rate of change instead, because the batch indicator used to hand its second component the first
         // one's output through the chained series.
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal).Signal;
+            return new StreamingIndicatorStateResult(next, includeOutputs
+                ? new Dictionary<string, double> { { "Cc", next } } : null);
+        }
         var rocFast = _rocFast.Update(bar, isFinal, includeOutputs: false).Value;
         var rocSlow = _rocSlow.Update(bar, isFinal, includeOutputs: false).Value;
         var rocTotal = rocFast + rocSlow;
@@ -7290,6 +7299,7 @@ public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _rocFast.Dispose();
         _rocSlow.Dispose();
         _smoother.Dispose();

@@ -328,6 +328,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Emad", fast.Select((v, i) => slow[i] == 0 ? 0 : 100 * (v / slow[i] - 1)).ToArray()));
                 });
             case IndicatorName.DecisionPointPriceMomentumOscillator:
+                if (kind is 1 or 2 or 3 or 6) return new("Dppmo", new[] { "Dppmo", "Signal", "Histogram" }, bars => RocPipelineOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var pmoFirst = 2 * length + 7;
                 var pmoSecond = length + 6;
@@ -1092,6 +1093,7 @@ internal static partial class BuiltInFormulaReferences
                     return Oscillator("Rmi", line, Average(line, length, kind));
                 });
             case IndicatorName.PriceMomentumOscillator:
+                if (kind is 1 or 2 or 3 or 6) return new("Pmo", new[] { "Pmo", "Signal" }, bars => RocPipelineOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var firstPeriod = Integer(options, "Length1", length);
                 var secondPeriod = Integer(options, "Length2", 20);
@@ -1107,6 +1109,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.CoppockCurve:
                 kind = AverageKind(options, 2);
+                if (kind is 1 or 2 or 3 or 6) return new("Cc", new[] { "Cc" }, bars => RocPipelineOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var fastRoc = Integer(options, "FastLength", 11);
                 var slowRoc = Integer(options, "SlowLength", 14);

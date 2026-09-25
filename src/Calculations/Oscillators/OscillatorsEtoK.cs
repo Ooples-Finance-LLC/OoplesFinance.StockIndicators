@@ -2508,30 +2508,47 @@ public static partial class Calculations
         List<double> kstList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var roc1List = CalculateRateOfChange(stockData, rocLength1).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc2List = CalculateRateOfChange(stockData, rocLength2).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc3List = CalculateRateOfChange(stockData, rocLength3).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc4List = CalculateRateOfChange(stockData, rocLength4).ChainedValues;
-        var roc1SmaList = GetMovingAverageList(stockData, maType, length1, roc1List);
-        var roc2SmaList = GetMovingAverageList(stockData, maType, length2, roc2List);
-        var roc3SmaList = GetMovingAverageList(stockData, maType, length3, roc3List);
-        var roc4SmaList = GetMovingAverageList(stockData, maType, length4, roc4List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> kstSignalList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4)
         {
-            var roc1 = roc1SmaList[i];
-            var roc2 = roc2SmaList[i];
-            var roc3 = roc3SmaList[i];
-            var roc4 = roc4SmaList[i];
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            kstSignalList = new(stockData.Count);
+            using var bank = new RocBankWindow(maType, new[] { rocLength1, rocLength2, rocLength3, rocLength4 }, new[] { length1, length2, length3, length4 }, new[] { 1, 2, 3, 4 }, signalLength, stockData.Count);
+            foreach (var price in prices)
+            {
+                var next = bank.Next(price, true);
+                kstList.Add(next.Value); kstSignalList.Add(next.Signal);
+            }
+        }
+        else
+        {
+            var roc1List = CalculateRateOfChange(stockData, rocLength1).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc2List = CalculateRateOfChange(stockData, rocLength2).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc3List = CalculateRateOfChange(stockData, rocLength3).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc4List = CalculateRateOfChange(stockData, rocLength4).ChainedValues;
+            var roc1SmaList = GetMovingAverageList(stockData, maType, length1, roc1List);
+            var roc2SmaList = GetMovingAverageList(stockData, maType, length2, roc2List);
+            var roc3SmaList = GetMovingAverageList(stockData, maType, length3, roc3List);
+            var roc4SmaList = GetMovingAverageList(stockData, maType, length4, roc4List);
 
-            var kst = (roc1 * weight1) + (roc2 * weight2) + (roc3 * weight3) + (roc4 * weight4);
-            kstList.Add(kst);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var roc1 = roc1SmaList[i];
+                var roc2 = roc2SmaList[i];
+                var roc3 = roc3SmaList[i];
+                var roc4 = roc4SmaList[i];
+
+                var kst = (roc1 * weight1) + (roc2 * weight2) + (roc3 * weight3) + (roc4 * weight4);
+                kstList.Add(kst);
+            }
+
+            kstSignalList = GetMovingAverageList(stockData, maType, signalLength, kstList);
         }
 
-        var kstSignalList = GetMovingAverageList(stockData, maType, signalLength, kstList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var kst = kstList[i];

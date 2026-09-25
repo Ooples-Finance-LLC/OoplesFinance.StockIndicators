@@ -5078,5 +5078,294 @@
     "after": "MovingAvgType.SimpleMovingAverage, 1, close.Length",
     "filter": "FullyQualifiedName~SmoothedDeltaNumericalTests.LaggedMeanMovementMatchesHandCalculatedRatios",
     "scope": "internal static void SmoothedDeltaRatioOscillator"
+  },
+  {
+    "id": "roc-bank-loses-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "new BigInteger(weight) << UpperShift",
+    "after": "new BigInteger(weight)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.UnpublishedOverflowBecomesAFiniteSmoothedValue"
+  },
+  {
+    "id": "roc-bank-overflows-before-division",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "return Round(numerator, previous);",
+    "after": "return new RocBankValue(100 * (current - previous) / previous);",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale"
+  },
+  {
+    "id": "roc-bank-discards-leg-weights",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "AddTo(ref total, _weights[i]);",
+    "after": "AddTo(ref total, 1);",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale"
+  },
+  {
+    "id": "roc-bank-preview-commits-prices",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "if (final) { _prices.TryAdd",
+    "after": "{ _prices.TryAdd",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale"
+  },
+  {
+    "id": "roc-bank-reset-retains-leg-state",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "foreach (var leg in _legs) leg.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DistinctPeriodsAndEverySmoothingKindMatchRationalStages"
+  },
+  {
+    "id": "roc-bank-ema-loses-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "RocBankValue.Round(sum, count: _count + 1)",
+    "after": "RocBankValue.Round(sum, count: _length)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DistinctPeriodsAndEverySmoothingKindMatchRationalStages"
+  },
+  {
+    "id": "roc-bank-discards-negative-origins",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "if (previous == 0) return default;",
+    "after": "if (previous <= 0) return default;",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale"
+  },
+  {
+    "id": "roc-bank-hides-published-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "return sum.Mean(1);",
+    "after": "return double.IsInfinity(sum.Mean(1)) ? 0 : sum.Mean(1);",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.GenuinePublishedOverflowHasIndependentRejectionEvidence"
+  },
+  {
+    "id": "kst-bank-ignores-selected-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "bank.Next(inputList[i], true)",
+    "after": "bank.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale",
+    "scope": "internal static ComputeBuffer ComputeKnowSureThingFast"
+  },
+  {
+    "id": "kst-bank-bypasses-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.PublicBanksHonorEveryCustomerStage",
+    "scope": "internal static ComputeBuffer ComputeKnowSureThingFast"
+  },
+  {
+    "id": "pring-bank-ignores-selected-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "bank.Next(inputList[i], true)",
+    "after": "bank.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.WeightedBanksMatchHandReturnsAtEveryScale",
+    "scope": "internal static ComputeBuffer ComputePringSpecialKFast"
+  },
+  {
+    "id": "pring-bank-bypasses-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.PublicBanksHonorEveryCustomerStage",
+    "scope": "internal static ComputeBuffer ComputePringSpecialKFast"
+  },
+  {
+    "id": "pring-bank-core-loses-forty-bar-leg",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new[] { 10, 15, 20, 30, 40, 65",
+    "after": "new[] { 10, 15, 20, 30, 50, 65",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DefaultSpecialKCoreUsesEveryPublishedHorizon",
+    "scope": "internal static void SpecialK"
+  },
+  {
+    "id": "pring-bank-native-loses-horizon",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "length11, length12, length13, length14 }",
+    "after": "length11, length12, length12, length14 }",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DistinctPeriodsAndEverySmoothingKindMatchRationalStages",
+    "scope": "public sealed class PringSpecialKState"
+  },
+  {
+    "id": "kst-bank-native-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "before": "new[] { 1, 2, 3, 4 }, signalLength",
+    "after": "new[] { 1, 2, 3, 4 }, length1",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DistinctPeriodsAndEverySmoothingKindMatchRationalStages",
+    "scope": "public sealed class KnowSureThingState"
+  },
+  {
+    "id": "pmo-publishes-return-too-early",
+    "module": "numerical",
+    "file": "src/Helpers/PriceMomentumWindow.cs",
+    "before": "RocBankValue.Return(price, _price)",
+    "after": "new RocBankValue(RoundedPercentageChange.Of(price, _price))",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.WideUnpublishedReturnBecomesFiniteAfterFixedSmoothing"
+  },
+  {
+    "id": "pmo-changes-fixed-pole",
+    "module": "numerical",
+    "file": "src/Helpers/PriceMomentumWindow.cs",
+    "before": "_firstPeriod - 2L",
+    "after": "_firstPeriod - 1L",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations"
+  },
+  {
+    "id": "pmo-loses-tenfold-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PriceMomentumWindow.cs",
+    "before": "first.AddTo(ref scaledSum, 10)",
+    "after": "first.AddTo(ref scaledSum, 1)",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations"
+  },
+  {
+    "id": "pmo-preview-commits-price",
+    "module": "numerical",
+    "file": "src/Helpers/PriceMomentumWindow.cs",
+    "before": "if (final) { _price = price;",
+    "after": "{ _price = price;",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations"
+  },
+  {
+    "id": "pmo-reset-retains-price",
+    "module": "numerical",
+    "file": "src/Helpers/PriceMomentumWindow.cs",
+    "before": "_price = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations"
+  },
+  {
+    "id": "smoothed-return-loses-zero-sentinel",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedReturnWindow.cs",
+    "before": "previous == 0 ? 100",
+    "after": "previous == 0 ? 0",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations"
+  },
+  {
+    "id": "smoothed-return-loses-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedReturnWindow.cs",
+    "before": "_history[0]",
+    "after": "_history[_history.Count - 1]",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.SmoothedMeanUsesTheRequestedLag"
+  },
+  {
+    "id": "smoothed-return-reset-retains-count",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedReturnWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.SmoothedMeanUsesTheRequestedLag"
+  },
+  {
+    "id": "pmo-bypasses-customer-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.CustomerAveragesDoNotReplaceTheFixedMomentumKernels",
+    "scope": "internal static ComputeBuffer ComputePriceMomentumOscillatorFast"
+  },
+  {
+    "id": "coppock-bypasses-customer-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.CustomerAveragesDoNotReplaceTheFixedMomentumKernels",
+    "scope": "internal static ComputeBuffer ComputeCoppockCurveFast"
+  },
+  {
+    "id": "smoothed-return-bypasses-customer-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.CustomerAveragesDoNotReplaceTheFixedMomentumKernels",
+    "scope": "internal static ComputeBuffer ComputeSmoothedRateOfChangeFast"
+  },
+  {
+    "id": "coppock-loses-slow-return",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "new[] { fastLength, slowLength }",
+    "after": "new[] { fastLength, fastLength }",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.FixedKernelsAndSentinelsMatchHandCalculations",
+    "scope": "internal static ComputeBuffer ComputeCoppockCurveFast"
+  },
+  {
+    "id": "coppock-core-loses-smoothing",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new[] { 1, 1 }, wmaLength, input.Length",
+    "after": "new[] { 1, 1 }, 1, input.Length",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.CoreDefaultsMatchPublishedPeriodsAndFormulas",
+    "scope": "internal static void CoppockCurve"
+  },
+  {
+    "id": "decision-pmo-native-ignores-selection",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "_wide.Next(bar.Close, isFinal)",
+    "after": "_wide.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~RocPipelineNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields",
+    "scope": "public sealed class DecisionPointPriceMomentumOscillatorState"
+  },
+  {
+    "id": "roc-bank-integer-mean-loses-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "var mean = sum.Mean(count);",
+    "after": "var mean = sum.Mean(1);",
+    "filter": "FullyQualifiedName~RocBankNumericalTests.DistinctPeriodsAndEverySmoothingKindMatchRationalStages"
+  },
+  {
+    "id": "roc-native-input-PriceMomentumOscillatorState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected: bypass finite input validation",
+    "filter": "FullyQualifiedName~NativeRoutesRejectNonfiniteFieldsBeforeChangingState"
+  },
+  {
+    "id": "roc-native-input-DecisionPointPriceMomentumOscillatorState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected: bypass finite input validation",
+    "filter": "FullyQualifiedName~NativeRoutesRejectNonfiniteFieldsBeforeChangingState"
+  },
+  {
+    "id": "roc-native-input-SmoothedRateOfChangeState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected: bypass finite input validation",
+    "filter": "FullyQualifiedName~NativeRoutesRejectNonfiniteFieldsBeforeChangingState"
+  },
+  {
+    "id": "roc-native-input-CoppockCurveState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CoppockCurveState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected: bypass finite input validation",
+    "filter": "FullyQualifiedName~NativeRoutesRejectNonfiniteFieldsBeforeChangingState"
   }
 ]

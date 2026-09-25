@@ -1206,6 +1206,24 @@ public static partial class Calculations
     public static StockData CalculateCoppockCurve(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 10,
         int fastLength = 11, int slowLength = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, _, _, _, _) = GetInputValuesList(stockData);
+            var stableLine = new List<double>(stockData.Count);
+            var stableSignals = CreateSignalsList(stockData);
+            using var stableWindow = new RocBankWindow(maType, new[] { fastLength, slowLength }, new[] { 1, 1 }, new[] { 1, 1 }, length, stockData.Count);
+            double previous = 0;
+            foreach (var price in stableInput)
+            {
+                var next = stableWindow.Next(price, true).Signal;
+                stableLine.Add(next); stableSignals?.Add(GetCompareSignal(next, previous)); previous = next;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cc", stableLine } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(stableLine);
+            stockData.IndicatorName = IndicatorName.CoppockCurve;
+            return stockData;
+        }
+
         List<double> rocTotalList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 

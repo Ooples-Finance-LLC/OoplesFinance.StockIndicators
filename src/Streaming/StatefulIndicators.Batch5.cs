@@ -86,6 +86,7 @@ public sealed class CoralTrendIndicatorState : IStreamingIndicatorState
 [PrimaryOutput("Dppmo")]
 public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly PriceMomentumWindow? _wide;
     private readonly double _smPmol2;
     private readonly double _smPmol;
     private readonly IMovingAverageSmoother _signalSmoother;
@@ -98,6 +99,7 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
     public DecisionPointPriceMomentumOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 35, int length2 = 20, int signalLength = 10)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new PriceMomentumWindow(maType, length1, length2, signalLength);
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
         _smPmol2 = (double)2 / resolved1;
@@ -110,6 +112,7 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
 
     public void Reset()
     {
+        _wide?.Reset();
         _signalSmoother.Reset();
         _prevPmol2 = 0;
         _prevPmol = 0;
@@ -119,6 +122,13 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs
+                ? new Dictionary<string, double> { { "Dppmo", next.Value }, { "Signal", next.Signal }, { "Histogram", next.Histogram } } : null);
+        }
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var ival = prevValue != 0 ? value / prevValue * 100 : 100;
@@ -153,6 +163,7 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _signalSmoother.Dispose();
     }
 }
