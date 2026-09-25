@@ -2417,8 +2417,10 @@ public sealed class FormulaContractCoverageTests
             Enumerable.Repeat(0d, 26).Append(leaderSpike).ToArray(),
             Enumerable.Repeat(0d, 26).Append(2 * leaderSpike / 3).ToArray(),
             Enumerable.Repeat(0d, 26).Append(leaderSpike / 3).ToArray());
-        const double diNapoliFirst = 9128900d / 93896;
-        const double diNapoliSignal = diNapoliFirst * 20000 / 100503;
+        var diNapoliFast = ReferenceFraction.FromDouble(2 / (1 + 8.3896));
+        var diNapoliSlow = ReferenceFraction.FromDouble(2 / (1 + 17.5185));
+        var diNapoliFirst = (new ReferenceFraction(100) * (diNapoliFast / diNapoliSlow - new ReferenceFraction(1))).ToDouble();
+        var diNapoliSignal = (ReferenceFraction.FromDouble(diNapoliFirst) * ReferenceFraction.FromDouble(2 / (1 + 9.0503))).ToDouble();
         Check(new DiNapoliPercentagePriceOscillator(14), prices.Take(1).ToArray(),
             new[] { diNapoliFirst }, new[] { diNapoliSignal }, new[] { diNapoliFirst - diNapoliSignal });
         Check(new TrendDetectionIndex(1, 2), prices, new[] { 0d, 1, 1 }, new[] { 0d, 1, 2 });

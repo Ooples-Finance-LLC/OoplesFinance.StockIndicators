@@ -6,7 +6,12 @@ namespace OoplesFinance.StockIndicators.Builder.Specs;
 public sealed class DiNapoliMovingAverageConvergenceDivergenceSpecOptions : IIndicatorSpecOptions
 {
     public DiNapoliMovingAverageConvergenceDivergenceSpecOptions(double lc = 17.5185, double sc = 8.3896, double sp = 9.0503)
-    { Lc = lc; Sc = sc; Sp = sp; }
+    {
+        Helpers.RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        Helpers.RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        Helpers.RoundedFractionalEma.Coefficient(sp, nameof(sp));
+        Lc = lc; Sc = sc; Sp = sp;
+    }
     public double Lc { get; } public double Sc { get; } public double Sp { get; }
 }
 

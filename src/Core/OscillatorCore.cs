@@ -4797,38 +4797,20 @@ internal static class OscillatorCore
 
     /// <summary>
     /// Computes DiNapoli Percentage Price Oscillator.
-    /// Uses DiNapoli's preferred periods of 3.0 and 3.7 for DEMA calculation.
+    /// Uses the fractional-period, zero-seeded fast and slow averages.
     /// </summary>
-    internal static void DiNapoliPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int longLength = 7)
+    internal static void DiNapoliPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output,
+        double sc = 8.3896, double lc = 17.5185)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var fastCoefficient = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        var slowCoefficient = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        double fast = 0, slow = 0;
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortDemaArray = pool.Rent(input.Length);
-        var longDemaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var shortDema = shortDemaArray.AsSpan(0, input.Length);
-            var longDema = longDemaArray.AsSpan(0, input.Length);
-
-            // Calculate short and long DEMA
-            MovingAverageCore.DoubleExponentialMovingAverage(input, shortDema, shortLength);
-            MovingAverageCore.DoubleExponentialMovingAverage(input, longDema, longLength);
-
-            // Calculate PPO: ((shortDema - longDema) / longDema) * 100
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = longDema[i] != 0 ? ((shortDema[i] - longDema[i]) / longDema[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(shortDemaArray);
-            pool.Return(longDemaArray);
+            fast = RoundedFractionalEma.Next(input[i], fast, fastCoefficient);
+            slow = RoundedFractionalEma.Next(input[i], slow, slowCoefficient);
+            output[i] = RoundedFractionalEma.Percentage(fast, slow);
         }
     }
 

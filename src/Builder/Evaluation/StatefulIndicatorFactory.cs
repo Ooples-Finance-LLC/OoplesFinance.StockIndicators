@@ -421,6 +421,7 @@ internal static partial class StatefulIndicatorFactory
             ErgodicPercentagePriceOscillatorSpecOptions ergodicPpo => new ErgodicPercentagePriceOscillatorState(ergodicPpo.MaType, length2: ergodicPpo.Length),
             MirroredPercentagePriceOscillatorSpecOptions mirror => new MirroredPercentagePriceOscillatorState(mirror.MaType, mirror.Length, mirror.SignalLength),
             LindaRaschke310OscillatorSpecOptions linda => new LindaRaschke3_10OscillatorState(linda.MaType, linda.FastLength, linda.SlowLength, linda.SmoothLength),
+            DiNapoliPercentagePriceOscillatorSpecOptions => new DiNapoliPercentagePriceOscillatorState(),
             DidiIndexSpecOptions didi => new DidiIndexState(didi.MaType, didi.ShortLength, didi.MediumLength, didi.LongLength),
             MacdSpecOptions macd => CreateMacdState(macd),
             MacdLineSpecOptions macdl => new MovingAverageConvergenceDivergenceState(macdl.FastLength, macdl.SlowLength),

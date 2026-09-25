@@ -3523,5 +3523,59 @@
     "id": "four-fast-ignores-selected-input",
     "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
     "after": "var values = data.ClosePrices;"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Helpers/RoundedFractionalEma.cs",
+    "scope": "internal static double Next",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.EveryRouteMatchesIndependentFractionalFilters",
+    "id": "dinapoli-intermediate-update-overflow",
+    "before": "return sum.Mean(1);",
+    "after": "return previous + coefficient * (value - previous);"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Calculations/Ppo/PpoAtoD.cs",
+    "scope": "public static StockData CalculateDiNapoliPercentagePriceOscillator",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.EveryRouteMatchesIndependentFractionalFilters",
+    "id": "dinapoli-premature-percentage-overflow",
+    "before": "var ppo = RoundedFractionalEma.Percentage(fs, ss);",
+    "after": "var ppo = ss == 0 ? 0 : 100 * (fs - ss) / ss;"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DiNapoliPercentagePriceOscillator",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.CoreUsesFractionalZeroSeededFiltersAndPreservesFiniteExtremeResults",
+    "id": "dinapoli-core-wrong-sign",
+    "before": "output[i] = RoundedFractionalEma.Percentage(fast, slow);",
+    "after": "output[i] = Math.Abs(RoundedFractionalEma.Percentage(fast, slow));"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.EveryRouteMatchesIndependentFractionalFilters",
+    "id": "dinapoli-factory-discards-fractional-periods",
+    "before": "new DiNapoliMovingAverageConvergenceDivergenceState(diNapoliMacd.Lc, diNapoliMacd.Sc, diNapoliMacd.Sp)",
+    "after": "new DiNapoliMovingAverageConvergenceDivergenceState()"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Helpers/RoundedFractionalEma.cs",
+    "scope": "internal static double Coefficient",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.InvalidFractionalPeriodsAreRejectedEvenForEmptyInput",
+    "id": "dinapoli-zero-period-accepted",
+    "before": "period <= 0",
+    "after": "period < 0"
+  },
+  {
+    "module": "dinapoli-oscillator-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DiNapoliPercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~DiNapoliOscillatorNumericalTests.OverflowPreviewDoesNotCommitSignalState",
+    "id": "dinapoli-preview-commits",
+    "before": "if (isFinal)\n        {\n            _fast = fast;",
+    "after": "if (true)\n        {\n            _fast = fast;"
   }
 ]
