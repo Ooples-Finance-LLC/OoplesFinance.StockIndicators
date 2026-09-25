@@ -376,6 +376,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TrendForceHistogram)
+        {
+            var period = Integer(builtIn.CreateOptions(), "Length", 14);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedTrendForceReference(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.AwesomeOscillator or IndicatorName.AcceleratorOscillator)
         {
             var awesomeOptions = builtIn.CreateOptions();

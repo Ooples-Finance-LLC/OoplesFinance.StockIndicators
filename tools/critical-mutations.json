@@ -3883,5 +3883,41 @@
     "before": "new AwesomeOscillatorState(fastLength: awesome.Length, maType: awesome.MaType)",
     "after": "new AwesomeOscillatorState()",
     "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.EveryRouteMatchesIndependentMedianAndAverageStages"
+  },
+  {
+    "module": "trend-force-numerical",
+    "id": "trend-force-forgets-opposite-reset",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateTrendForceHistogram",
+    "before": "var c = a == 1 ? prevC + 1 : b - prevB == 1 ? 0 : prevC;",
+    "after": "var c = a == 1 ? prevC + 1 : prevC;",
+    "filter": "FullyQualifiedName~TrendForceNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-force-numerical",
+    "id": "trend-force-current-average-baseline",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateTrendForceHistogram",
+    "before": "var rmean = avgSum.Mean(i + 1);",
+    "after": "var rmean = avg;",
+    "filter": "FullyQualifiedName~TrendForceNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-force-numerical",
+    "id": "trend-force-preview-commits",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TrendForceHistogramState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TrendForceNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-force-numerical",
+    "id": "trend-force-factory-discards-length",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new TrendForceHistogramState(trendForce.Length)",
+    "after": "new TrendForceHistogramState()",
+    "filter": "FullyQualifiedName~TrendForceNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
   }
 ]
