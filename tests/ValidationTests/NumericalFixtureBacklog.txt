@@ -2771,11 +2771,6 @@ OoplesFinance.StockIndicators.Indicators.RootMovingAverageSquaredErrorBands/long
 OoplesFinance.StockIndicators.Indicators.RootMovingAverageSquaredErrorBands/minimum-periods
 OoplesFinance.StockIndicators.Indicators.RootMovingAverageSquaredErrorBands/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RootMovingAverageSquaredErrorBands/weighted-average
-OoplesFinance.StockIndicators.Indicators.Rsi/default
-OoplesFinance.StockIndicators.Indicators.Rsi/longer-periods
-OoplesFinance.StockIndicators.Indicators.Rsi/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Rsi/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Rsi/weighted-average
 OoplesFinance.StockIndicators.Indicators.RunningEquity/default
 OoplesFinance.StockIndicators.Indicators.RunningEquity/longer-periods
 OoplesFinance.StockIndicators.Indicators.RunningEquity/minimum-periods

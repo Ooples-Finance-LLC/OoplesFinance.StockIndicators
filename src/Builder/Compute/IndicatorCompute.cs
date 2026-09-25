@@ -220,8 +220,8 @@ internal static partial class IndicatorCompute
             // Oscillators
             RsiSpecOptions rsi => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeRsiFast(data, context, rsi.Length, rsi.MaType), 3, rsi.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context, ComputeRsiFast(data, context, rsi.Length, rsi.MaType), 3, rsi.MaType),
+                "Signal" => SmoothStrength(data, context, ComputeRsiFast(data, context, rsi.Length, rsi.MaType), 3, rsi.MaType),
+                "Histogram" => RsiHistogram(data, context, ComputeRsiFast(data, context, rsi.Length, rsi.MaType), 3, rsi.MaType),
                 _ => ComputeRsiFast(data, context, rsi.Length, rsi.MaType)
             },
             RocSpecOptions roc => ComputeRocFast(data, context, roc.Length),
@@ -2739,9 +2739,10 @@ internal static partial class IndicatorCompute
     {
         var count = input.Length;
 
-        if (maType == MovingAvgType.WildersSmoothingMethod && !ComponentAverage.HasOverrides)
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
         {
-            OscillatorCore.RelativeStrengthIndex(input, output, length);
+            using var window = new PriceRsiWindow(maType, length, count);
+            for (var i = 0; i < count; i++) output[i] = window.Next(input[i], true);
             return;
         }
 
@@ -3415,6 +3416,18 @@ internal static partial class IndicatorCompute
             }
 
             return buffer;
+        }
+    }
+
+    private static ComputeBuffer RsiHistogram(StockData data, ComputeContext context, ComputeBuffer source, int length, MovingAvgType kind)
+    {
+        if (!StrengthWindow.Supports(kind) || ComponentAverage.HasOverrides) return DifferenceFromSmoothing(data, context, source, length, kind);
+        using (source)
+        using (var signal = new StrengthAverage(kind, length, source.Span.Length))
+        {
+            var output = context.Rent(source.Span.Length);
+            for (var i = 0; i < source.Span.Length; i++) output.WritableSpan[i] = source.Span[i] - signal.Next(new StrengthValue(source.Span[i]), true).Mantissa;
+            return output;
         }
     }
 

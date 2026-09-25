@@ -107,6 +107,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Mo", line), ("Signal", Smooth(line)));
                 });
             case IndicatorName.RelativeStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Rsi", new[] { "Rsi", "Signal", "Histogram" }, bars => PriceRsiOutputs(bars, indicator));
                 return new("Rsi", new[] { "Rsi", "Signal", "Histogram" }, bars =>
                 {
                     var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();

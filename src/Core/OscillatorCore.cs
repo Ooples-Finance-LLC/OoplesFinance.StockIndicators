@@ -29,32 +29,9 @@ internal static class OscillatorCore
             return;
         }
 
-        // CalculateRelativeStrengthIndex smooths its gains and losses with WellesWilderMovingAverage from
-        // the first bar, with no simple average to seed it and no blank run-in. Seeding the two averages
-        // from a simple mean over the first fourteen changes, and publishing nothing until then, put this
-        // arm on a different curve from the indicator for the whole series rather than just its opening.
-        length = Math.Max(1, length);
-        double avgGain = 0;
-        double avgLoss = 0;
+        using var window = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, length, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            var change = i >= 1 ? input[i] - input[i - 1] : 0;
-            var gain = change > 0 ? change : 0;
-            var loss = change < 0 ? -change : 0;
-
-            avgGain = RoundedWilder.Next(gain, avgGain, length);
-            avgLoss = RoundedWilder.Next(loss, avgLoss, length);
-
-            // Both averages decay by the same factor when price does not move.
-            if (i > 0 && length > 1 && change == 0) { output[i] = output[i - 1]; continue; }
-
-            var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-
-            // No losses at all is a full reading, no gains at all is an empty one, which is how the
-            // indicator reports an opening bar that has neither.
-            output[i] = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + rs))));
-        }
     }
 
     /// <summary>

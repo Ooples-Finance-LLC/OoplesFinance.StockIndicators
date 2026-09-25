@@ -311,7 +311,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),
             IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SmaSpecOptions)spec.Options).Length),
             IndicatorName.ExponentialMovingAverage => new ExponentialMovingAverageState(((EmaSpecOptions)spec.Options).Length),
-            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((RsiSpecOptions)spec.Options).Length),
+            IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((RsiSpecOptions)spec.Options).Length, maType: ((RsiSpecOptions)spec.Options).MaType),
             IndicatorName.MovingAverageConvergenceDivergence when spec.Options is MacdSpecOptions macd => new MovingAverageConvergenceDivergenceState(macd.FastLength, macd.SlowLength, macd.SignalLength),
             IndicatorName.MovingAverageConvergenceDivergence when spec.Options is MacdLineSpecOptions line => new MovingAverageConvergenceDivergenceState(line.FastLength, line.SlowLength),
             IndicatorName.MovingAverageConvergenceDivergence when spec.Options is MacdSignalSpecOptions signal => new MovingAverageConvergenceDivergenceState(signal.FastLength, signal.SlowLength, signal.SignalLength),
