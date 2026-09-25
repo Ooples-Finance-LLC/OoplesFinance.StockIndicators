@@ -162,10 +162,21 @@ public static partial class Calculations
         foreach (var value in connorsRsiList)
         {
             extrema.Add(value);
-            raw.Add(extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+            raw.Add(ClampedRangePosition.Percent(value, extrema.Min, extrema.Max)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
-        var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
-        var slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        List<double> fastDList, slowDList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var fast = new StrengthAverage(maType, smoothLength1, raw.Count);
+            using var slow = new StrengthAverage(maType, smoothLength2, raw.Count);
+            fastDList = raw.Select(v => fast.Next(new StrengthValue(v), true).Mantissa).ToList();
+            slowDList = fastDList.Select(v => slow.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else
+        {
+            fastDList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+            slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {

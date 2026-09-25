@@ -4141,7 +4141,7 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
 {
     private readonly RsiState _rsi;
     private readonly RsiState _streakRsi;
-    private RollingOrderStatistic _rocRank;
+    private ReturnOrderStatistic _rocRank;
     private readonly int _rankLength;
     private readonly StreamingInputResolver _input;
     private double _prevValue;
@@ -4154,7 +4154,7 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
         _rsi = new RsiState(maType, Math.Max(1, length2));
         _streakRsi = new RsiState(maType, Math.Max(1, length1));
         _rankLength = Math.Max(1, length3);
-        _rocRank = new RollingOrderStatistic(_rankLength);
+        _rocRank = new ReturnOrderStatistic(_rankLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -4165,7 +4165,7 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
         _rsi.Reset();
         _streakRsi.Reset();
         _rocRank.Dispose();
-        _rocRank = new RollingOrderStatistic(_rankLength);
+        _rocRank = new ReturnOrderStatistic(_rankLength);
         _prevValue = 0;
         _streak = 0;
         _hasPrev = false;
@@ -4179,9 +4179,8 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
 
         // Connors ranks the one-bar rate of change of the price; this used to rank a length3-bar rate of change
         // of the RSI, copying the batch.
-        var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
-        var pctRank = 100d * _rocRank.CountLessThan(roc) / _rankLength;
-        if (isFinal) _rocRank.Add(roc);
+        var pctRank = 100d * _rocRank.CountLessThan(currentValue, prevValue) / _rankLength;
+        if (isFinal) _rocRank.Add(currentValue, prevValue);
 
         var prevStreak = _streak;
         var streak = !_hasPrev ? 0 : currentValue > prevValue
@@ -4191,7 +4190,7 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
                 : 0;
         var streakRsi = _streakRsi.Next(streak, isFinal);
 
-        var connors = MathHelper.MinOrMax((rsi + pctRank + streakRsi) / 3, 100, 0);
+        var connors = ConnorsValue.Combine(rsi, pctRank, streakRsi);
 
         if (isFinal)
         {
@@ -4227,6 +4226,7 @@ public sealed class ConnorsRelativeStrengthIndexState : IStreamingIndicatorState
 public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
+    private readonly StrengthAverage? _exactFast, _exactSlow;
     private readonly ConnorsRelativeStrengthIndexState _connors;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
@@ -4236,6 +4236,11 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
     public StochasticConnorsRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 2, int length2 = 3, int length3 = 100, int smoothLength1 = 3, int smoothLength2 = 3)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _exactFast = new StrengthAverage(maType, smoothLength1);
+            _exactSlow = new StrengthAverage(maType, smoothLength2);
+        }
         _length = Math.Max(1, length2);
         _connors = new ConnorsRelativeStrengthIndexState(maType, length1, length2, length3);
         _maxWindow = new RollingWindowMax(_length);
@@ -4248,6 +4253,7 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 
     public void Reset()
     {
+        _exactFast?.Reset(); _exactSlow?.Reset();
         _connors.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
@@ -4261,10 +4267,9 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
         var connors = _connors.Update(bar, isFinal, includeOutputs: false).Value;
         var highest = isFinal ? _maxWindow.Add(connors, out _) : _maxWindow.Preview(connors, out _);
         var lowest = isFinal ? _minWindow.Add(connors, out _) : _minWindow.Preview(connors, out _);
-        var range = highest - lowest;
-        var fastK = range != 0 ? MathHelper.MinOrMax((connors - lowest) / range * 100, 100, 0) : 0;
-        var fastD = _fastSmoother.Next(fastK, isFinal);
-        var slowD = _slowSmoother.Next(fastD, isFinal);
+        var fastK = ClampedRangePosition.Percent(connors, lowest, highest);
+        var fastD = _exactFast is null ? _fastSmoother.Next(fastK, isFinal) : _exactFast.Next(new StrengthValue(fastK), isFinal).Mantissa;
+        var slowD = _exactSlow is null ? _slowSmoother.Next(fastD, isFinal) : _exactSlow.Next(new StrengthValue(fastD), isFinal).Mantissa;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -4281,6 +4286,7 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 
     public void Dispose()
     {
+        _exactFast?.Dispose(); _exactSlow?.Dispose();
         _connors.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();

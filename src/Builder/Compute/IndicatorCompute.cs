@@ -21231,15 +21231,14 @@ internal static partial class IndicatorCompute
         var streak = streaks.WritableSpan;
         var rank = ranks.WritableSpan;
 
-        using var rateOfChangeOrder = new RollingOrderStatistic(length3);
+        using var rateOfChangeOrder = new ReturnOrderStatistic(length3);
         double previousStreak = 0;
         for (var i = 0; i < count; i++)
         {
             var previousValue = i >= 1 ? input[i - 1] : 0;
-            var rateOfChange = previousValue != 0 ? (input[i] - previousValue) / previousValue * 100 : 0;
-            var below = rateOfChangeOrder.CountLessThan(rateOfChange);
-            rateOfChangeOrder.Add(rateOfChange);
-            rank[i] = MathHelper.MinOrMax((double)below / length3 * 100, 100, 0);
+            var below = rateOfChangeOrder.CountLessThan(input[i], previousValue);
+            rateOfChangeOrder.Add(input[i], previousValue);
+            rank[i] = 100d * below / length3;
 
             streak[i] = i == 0 ? 0 : input[i] > previousValue
                 ? previousStreak >= 0 ? previousStreak + 1 : 1
@@ -21261,7 +21260,7 @@ internal static partial class IndicatorCompute
                 ConnorsRsiSeries.PriceStrength => priceStrength.Span[i],
                 ConnorsRsiSeries.PercentRank => rank[i],
                 ConnorsRsiSeries.StreakStrength => streakStrength.Span[i],
-                _ => MathHelper.MinOrMax((priceStrength.Span[i] + rank[i] + streakStrength.Span[i]) / 3, 100, 0)
+                _ => ConnorsValue.Combine(priceStrength.Span[i], rank[i], streakStrength.Span[i])
             };
         }
 
@@ -28287,26 +28286,17 @@ internal static partial class IndicatorCompute
 
         using var connorsRsi = ComputeConnorsRsiFast(data, context, length1, length2, length3, maType);
 
-        using var fastK = context.Rent(count);
+        var fastK = context.Rent(count);
         var extrema = new RollingMinMax(Math.Max(1, length2));
         for (var i = 0; i < count; i++)
         {
             var value = connorsRsi.Span[i];
             extrema.Add(value);
-            fastK.WritableSpan[i] = extrema.Max == extrema.Min ? 0 : 100 * (value - extrema.Min) / (extrema.Max - extrema.Min); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+            fastK.WritableSpan[i] = ClampedRangePosition.Percent(value, extrema.Min, extrema.Max); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
 
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength1, fastK.Span, buffer.WritableSpan);
-
-        if (outputKey == "Signal")
-        {
-            var signal = context.Rent(count);
-            MovingAverage(data, maType, smoothLength2, buffer.Span, signal.WritableSpan);
-            buffer.Dispose();
-            return signal;
-        }
-        return buffer;
+        var buffer = SmoothStrength(data, context, fastK, smoothLength1, maType);
+        return outputKey == "Signal" ? SmoothStrength(data, context, buffer, smoothLength2, maType) : buffer;
     }
 
     // Batch 30 - Stochastic Regular

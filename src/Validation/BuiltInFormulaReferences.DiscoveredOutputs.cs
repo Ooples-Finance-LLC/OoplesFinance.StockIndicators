@@ -63,6 +63,9 @@ internal static partial class BuiltInFormulaReferences
                 kind = AverageKind(options, 6);
                 if (kind == 0) return null;
                 var noise = indicator.BatchName == IndicatorName.QuasiWhiteNoise;
+                if (!noise && kind is 1 or 2 or 3 or 6)
+                    return new(indicator.BatchName == IndicatorName.ConnorsRelativeStrengthIndex ? "ConnorsRsi" : "SaRsi",
+                        indicator.BatchName == IndicatorName.ConnorsRelativeStrengthIndex ? new[] { "Rsi", "PctRank", "StreakRsi", "ConnorsRsi" } : new[] { "SaRsi", "Signal" }, bars => ConnorsOutputs(bars, indicator));
                 var stochastic = indicator.BatchName == IndicatorName.StochasticConnorsRelativeStrengthIndex;
                 var streakLength = noise ? Integer(options, "NoiseLength", 500) : Integer(options, "Length1", 2);
                 var priceLength = noise ? streakLength : Integer(options, "Length2", Integer(options, "Length", 3));
@@ -203,12 +206,13 @@ internal static partial class BuiltInFormulaReferences
     {
         // Connors' rank is strict, over the preceding N one-bar returns. Ties are not advances.
         // Independently confirmed against Stock.Indicators ConnorsRsi.Series.cs (CalcStreak).
-        var changes = prices.Select((value, i) => i == 0 ? 0 : value - prices[i - 1]).ToArray();
-        var direction = changes.Select(Math.Sign).ToArray();
+        var direction = prices.Select((value, i) => i == 0 ? 0 : value.CompareTo(prices[i - 1])).ToArray();
         var streak = prices.Select((_, i) => direction[i] == 0 ? 0d : direction[i]
             * (double)direction.Take(i + 1).Reverse().TakeWhile(value => value == direction[i]).Count()).ToArray();
         double[] Strength(double[] values, int period)
         {
+            if (kind is 1 or 2 or 3 or 6)
+                return RoundedPriceRsi(values.Select(v => new Bar(DateTime.UnixEpoch, v, v, v, v, 1)).ToArray(), period, kind);
             var differences = values.Select((value, i) => i == 0 ? 0 : value - values[i - 1]).ToArray();
             var up = Average(differences.Select(value => Math.Max(0, value)).ToArray(), period, kind);
             var down = Average(differences.Select(value => Math.Max(0, -value)).ToArray(), period, kind);
@@ -219,12 +223,13 @@ internal static partial class BuiltInFormulaReferences
                     if (differences[i] == 0) strength[i] = strength[i - 1];
             return strength;
         }
-        var returns = changes.Select((change, i) => i == 0 || prices[i - 1] == 0 ? 0 : change / prices[i - 1] * 100).ToArray();
-        var rank = returns.Select((value, i) => 100d / rankLength
-            * returns.Skip(Math.Max(0, i - rankLength)).Take(Math.Min(i, rankLength)).Count(previous => previous < value)).ToArray();
+        var returns = prices.Select((value, i) => i == 0 || prices[i - 1] == 0 ? new ReferenceFraction(0) :
+            (ReferenceFraction.FromDouble(value) - ReferenceFraction.FromDouble(prices[i - 1])) / ReferenceFraction.FromDouble(prices[i - 1])).ToArray();
+        var rank = returns.Select((value, i) => 100d
+            * returns.Skip(Math.Max(0, i - rankLength)).Take(Math.Min(i, rankLength)).Count(previous => previous.CompareTo(value) < 0) / rankLength).ToArray();
         var priceRsi = Strength(prices, priceLength);
         var streakRsi = Strength(streak, streakLength);
-        var composite = rank.Select((value, i) => (priceRsi[i] + streakRsi[i] + value) / 3).ToArray();
+        var composite = rank.Select((value, i) => ((ReferenceFraction.FromDouble(priceRsi[i]) + ReferenceFraction.FromDouble(streakRsi[i]) + ReferenceFraction.FromDouble(value)) / new ReferenceFraction(3)).ToDouble()).ToArray();
         return Outputs(("Rsi", priceRsi), ("PctRank", rank), ("StreakRsi", streakRsi), ("ConnorsRsi", composite));
     }
 

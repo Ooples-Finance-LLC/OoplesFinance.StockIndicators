@@ -60,6 +60,8 @@ internal static partial class StatefulIndicatorFactory
             McClellanOscillatorSpecOptions breadth => new McClellanOscillatorState(breadth.MaType),
             DecisionPointBreadthSwenlinTradingOscillatorSpecOptions breadth => new DecisionPointBreadthSwenlinTradingOscillatorState(length: breadth.Length),
             TickLineMomentumOscillatorSpecOptions breadth => new TickLineMomentumOscillatorState(breadth.MaType, breadth.Length),
+            ConnorsRelativeStrengthIndexSpecOptions connors => new ConnorsRelativeStrengthIndexState(connors.MaType, connors.Length1, connors.Length2, connors.Length3),
+            StochasticConnorsRelativeStrengthIndexSpecOptions connors => new StochasticConnorsRelativeStrengthIndexState(connors.MaType, connors.Length1, connors.Length2, connors.Length3, connors.SmoothLength1, connors.SmoothLength2),
             CCTStochRelativeStrengthIndexSpecOptions => new CCTStochRelativeStrengthIndexState(),
             CCTStochRSISpecOptions cct => new CCTStochRelativeStrengthIndexState(cct.MaType, cct.Length1, cct.Length2, cct.Length3, cct.Length4, cct.Length5, cct.SmoothLength1, cct.SmoothLength2),
             StochasticRelativeStrengthIndexSpecOptions stochastic => new StochasticRelativeStrengthIndexState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, stochastic.SmoothLength2),
