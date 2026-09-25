@@ -1747,9 +1747,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var mediumSmaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var shortSmaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var longSmaList = GetMovingAverageList(stockData, maType, length3, inputList);
+        var mediumSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length2) : GetMovingAverageList(stockData, maType, length2, inputList);
+        var shortSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length1) : GetMovingAverageList(stockData, maType, length1, inputList);
+        var longSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length3) : GetMovingAverageList(stockData, maType, length3, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {

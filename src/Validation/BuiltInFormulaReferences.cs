@@ -336,6 +336,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.DidiIndex)
+        {
+            var didiOptions = builtIn.CreateOptions();
+            var didiKeys = new[] { "Curta", "Media", "Longa" };
+            for (var slot = 0; slot < didiKeys.Length; slot++)
+            {
+                var key = didiKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDidi(bars, didiOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.ErgodicMovingAverageConvergenceDivergence or IndicatorName.ErgodicPercentagePriceOscillator)
         {
             var ergodicOptions = builtIn.CreateOptions();

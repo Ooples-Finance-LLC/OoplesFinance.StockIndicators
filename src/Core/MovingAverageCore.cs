@@ -6247,34 +6247,16 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DidiIndex(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int mediumLength = 8, int longLength = 20)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
+        using var shortMean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, shortLength));
+        using var mediumMean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, mediumLength));
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortMa = pool.Rent(input.Length);
-        var mediumMa = pool.Rent(input.Length);
-        var longMa = pool.Rent(input.Length);
-
-        try
-        {
-            SimpleMovingAverage(input, shortMa.AsSpan(0, input.Length), shortLength);
-            SimpleMovingAverage(input, mediumMa.AsSpan(0, input.Length), mediumLength);
-            SimpleMovingAverage(input, longMa.AsSpan(0, input.Length), longLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var medium = mediumMa[i];
-                // Didi Index: ratio of short MA to medium MA minus ratio of long MA to medium MA
-                output[i] = medium != 0 ? (shortMa[i] / medium) - (longMa[i] / medium) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(shortMa);
-            pool.Return(mediumMa);
-            pool.Return(longMa);
+            var first = shortMean.Next(input[i], true);
+            var middle = mediumMean.Next(input[i], true);
+            // The primary Curta output is independent of the separate Longa series.
+            output[i] = middle == 0 ? 0 : first / middle;
         }
     }
 

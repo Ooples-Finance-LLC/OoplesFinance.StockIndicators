@@ -2361,7 +2361,7 @@ public sealed class FormulaContractCoverageTests
         Check(new LinearExtrapolation(1), prices, new[] { 0d, 1, 3 });
         Check(new EhlersLaguerreFilter(1), prices, new[] { 1d, 7d / 6, 11d / 6 });
         Check(new DidiIndex(1, 2, 3), prices, new[] { 0d, 4d / 3, 4d / 3 },
-            new[] { 0d, 1, 1 }, new[] { 0d, 0, 7d / 9 });
+            new[] { 0d, 1, 1 }, new[] { 0d, 0, (ReferenceFraction.FromDouble((new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble()) / new ReferenceFraction(3)).ToDouble() });
         Check(new DetrendedSyntheticPrice(3), prices, new[] { 0d, .25, .6875 });
         var tiedPrices = new[] { 1d, 2, 2, 1, 3 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new PercentRank(2), tiedPrices, new[] { 0d, 0, 50, 0, 100 });
