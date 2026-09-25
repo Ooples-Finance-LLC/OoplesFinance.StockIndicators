@@ -1794,6 +1794,7 @@ public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingI
     private double _prevFastMa;
     private double _prevSlowMa;
     private bool _hasPrev;
+    private bool _signalInvalid;
 
     public ReverseMovingAverageConvergenceDivergenceState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26,
@@ -1801,11 +1802,11 @@ public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingI
     {
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
-        _fastAlpha = 2d / (1 + resolvedFast);
-        _slowAlpha = 2d / (1 + resolvedSlow);
-        _fastMa = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowMa = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _signalMa = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _fastAlpha = 2d / (1d + resolvedFast);
+        _slowAlpha = 2d / (1d + resolvedSlow);
+        _fastMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedFast) : MovingAverageSmootherFactory.Create(maType, resolvedFast);
+        _slowMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedSlow) : MovingAverageSmootherFactory.Create(maType, resolvedSlow);
+        _signalMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1819,16 +1820,18 @@ public sealed class ReverseMovingAverageConvergenceDivergenceState : IStreamingI
         _prevFastMa = 0;
         _prevSlowMa = 0;
         _hasPrev = false;
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var diffAlpha = _fastAlpha - _slowAlpha;
         var prevFast = _hasPrev ? _prevFastMa : 0;
         var prevSlow = _hasPrev ? _prevSlowMa : 0;
-        var pMacdEq = diffAlpha != 0 ? ((prevFast * _fastAlpha) - (prevSlow * _slowAlpha)) / diffAlpha : prevFast;
-        var signal = _signalMa.Next(pMacdEq, isFinal);
+        var pMacdEq = RoundedReverseMacd.Equilibrium(prevFast, prevSlow, _fastAlpha, _slowAlpha);
+        var invalid = _signalInvalid || double.IsNaN(pMacdEq) || double.IsInfinity(pMacdEq);
+        var signal = invalid ? double.NaN : _signalMa.Next(pMacdEq, isFinal);
+        if (isFinal) _signalInvalid = invalid;
         var histogram = pMacdEq - signal;
 
         var value = _input.GetValue(bar);

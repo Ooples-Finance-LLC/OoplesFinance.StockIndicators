@@ -3577,5 +3577,50 @@
     "id": "dinapoli-preview-commits",
     "before": "if (isFinal)\n        {\n            _fast = fast;",
     "after": "if (true)\n        {\n            _fast = fast;"
+  },
+  {
+    "module": "reverse-macd-numerical",
+    "id": "reverse-macd-premature-products",
+    "file": "src/Helpers/RoundedReverseMacd.cs",
+    "scope": "internal static double Equilibrium",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return (fast * a - slow * b) / (a - b);",
+    "filter": "FullyQualifiedName~ReverseMacdNumericalTests.EveryRouteMatchesIndependentEquilibrium"
+  },
+  {
+    "module": "reverse-macd-numerical",
+    "id": "reverse-macd-current-instead-of-prior",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast",
+    "before": "i == 0 ? 0 : fast.Span[i - 1]",
+    "after": "fast.Span[i]",
+    "filter": "FullyQualifiedName~ReverseMacdNumericalTests.EveryRouteMatchesIndependentEquilibrium"
+  },
+  {
+    "module": "reverse-macd-numerical",
+    "id": "reverse-macd-factory-discards-periods",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new ReverseMovingAverageConvergenceDivergenceState(fastLength: reverse.FastLength, slowLength: reverse.SlowLength, macdLevel: reverse.MacdLevel)",
+    "after": "new ReverseMovingAverageConvergenceDivergenceState()",
+    "filter": "FullyQualifiedName~ReverseMacdNumericalTests.EveryRouteMatchesIndependentEquilibrium"
+  },
+  {
+    "module": "reverse-macd-numerical",
+    "id": "reverse-macd-preview-commits-means",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class ReverseMovingAverageConvergenceDivergenceState",
+    "before": "if (isFinal)\n        {\n            _prevFastMa = fastMa;",
+    "after": "if (true)\n        {\n            _prevFastMa = fastMa;",
+    "filter": "FullyQualifiedName~ReverseMacdNumericalTests.PreviewDoesNotChangeFutureEquilibriumAndOverflowInvalidatesSignalUntilReset"
+  },
+  {
+    "module": "reverse-macd-numerical",
+    "id": "reverse-macd-fast-ignores-input",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast",
+    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var values = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ReverseMacdNumericalTests.SelectedInputControlsEveryOutput"
   }
 ]

@@ -1337,32 +1337,30 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12, int slowLength = 26, int signalLength = 9,
         double macdLevel = 0)
     {
-        List<double> pMacdLevelList = new(stockData.Count);
         List<double> pMacdEqList = new(stockData.Count);
         List<double> histogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastAlpha = (double)2 / (1 + fastLength);
-        var slowAlpha = (double)2 / (1 + slowLength);
+        var fastAlpha = 2d / (1d + Math.Max(1, fastLength));
+        var slowAlpha = 2d / (1d + Math.Max(1, slowLength));
 
-        var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var fastEmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowEmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevFastEma = i >= 1 ? fastEmaList[i - 1] : 0;
             var prevSlowEma = i >= 1 ? slowEmaList[i - 1] : 0;
 
-            var pMacdEq = fastAlpha - slowAlpha != 0 ? ((prevFastEma * fastAlpha) - (prevSlowEma * slowAlpha)) / (fastAlpha - slowAlpha) : prevFastEma;
+            var pMacdEq = RoundedReverseMacd.Equilibrium(prevFastEma, prevSlowEma, fastAlpha, slowAlpha);
             pMacdEqList.Add(pMacdEq);
-
-            var pMacdLevel = fastAlpha - slowAlpha != 0 ? (macdLevel - (prevFastEma * (1 - fastAlpha)) + (prevSlowEma * (1 - slowAlpha))) /
-                                                          (fastAlpha - slowAlpha) : 0;
-            pMacdLevelList.Add(pMacdLevel);
         }
 
-        var pMacdEqSignalList = GetMovingAverageList(stockData, maType, signalLength, pMacdEqList);
+        var finiteInput = FiniteSignalInput.Create(pMacdEqList, out var finiteCount);
+        var pMacdEqSignalList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finiteInput, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finiteInput);
+        for (var i = finiteCount; i < pMacdEqSignalList.Count; i++) pMacdEqSignalList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var pMacdEq = pMacdEqList[i];

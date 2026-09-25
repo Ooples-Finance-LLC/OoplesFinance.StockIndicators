@@ -113,6 +113,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersHilbertTransformerIndicatorSpecOptions h2 => new EhlersHilbertTransformerIndicatorState(h2.Length1, h2.Length2, h2.Length3),
             EhlersInstantaneousPhaseIndicatorSpecOptions h3 => new EhlersInstantaneousPhaseIndicatorState(h3.Length1, h3.Length2),
             EhlersClassicHilbertTransformerSpecOptions h4 => new EhlersClassicHilbertTransformerState(h4.Length1, h4.Length2),
+            ReverseMovingAverageConvergenceDivergenceSpecOptions reverse => new ReverseMovingAverageConvergenceDivergenceState(fastLength: reverse.FastLength, slowLength: reverse.SlowLength, macdLevel: reverse.MacdLevel),
             DiNapoliMovingAverageConvergenceDivergenceSpecOptions d => new DiNapoliMovingAverageConvergenceDivergenceState(d.Lc, d.Sc, d.Sp),
             ImpulseMovingAverageConvergenceDivergenceSpecOptions d => new ImpulseMovingAverageConvergenceDivergenceState(d.MaType, d.Length, d.SignalLength),
             MovingAverageConvergenceDivergenceLeaderSpecOptions d => new MovingAverageConvergenceDivergenceLeaderState(d.MaType, d.FastLength, d.SlowLength, d.SignalLength),

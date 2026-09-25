@@ -1373,13 +1373,8 @@ internal static partial class IndicatorCompute
             PriceOscillatorSpecOptions posc => ComputeAbsolutePriceOscillatorFast(data, context, posc.ShortLength,
                 posc.LongLength),
             ReverseEngineeringRsiSpecOptions rersi => ComputeReverseEngineeringRsiFast(data, context, rersi.Length, rersi.RsiLevel),
-            ReverseMovingAverageConvergenceDivergenceSpecOptions rmacd => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context, ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel), 9, MovingAvgType.ExponentialMovingAverage),
-                "Histogram" => DifferenceFromSmoothing(data, context, ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel), 9, MovingAvgType.ExponentialMovingAverage),
-                _ => ComputeReverseMovingAverageConvergenceDivergenceFast(data, context, rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel)
-            },
-            SimplePriceZoneSpecOptions spz => ComputeSimplePriceZoneFast(data, context, spz.Length),
+            ReverseMovingAverageConvergenceDivergenceSpecOptions rmacd => ComputeReverseMovingAverageConvergenceDivergenceFast(data, context,
+                rmacd.FastLength, rmacd.SlowLength, rmacd.MacdLevel, spec.OutputKey ?? "Rmacd"),
             StochasticRsiOscillatorSpecOptions srsio => spec.OutputKey switch
             {
                 "Signal" => ComputeStochasticRsiSignalFast(data, context, srsio.RsiLength, stochLength: srsio.StochLength),
@@ -17733,13 +17728,30 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Reverse Moving Average Convergence Divergence using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26, double macdLevel = 0)
+    internal static ComputeBuffer ComputeReverseMovingAverageConvergenceDivergenceFast(StockData data, ComputeContext context,
+        int fastLength = 12, int slowLength = 26, double macdLevel = 0, string key = "Rmacd")
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ReverseMovingAverageConvergenceDivergence(inputSpan, buffer.WritableSpan, fastLength, slowLength, macdLevel);
-        return buffer;
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(values);
+        using var fast = context.Rent(values.Count);
+        using var slow = context.Rent(values.Count);
+        StochasticSmooth(data, MovingAvgType.ExponentialMovingAverage, fastLength, input, fast.WritableSpan);
+        StochasticSmooth(data, MovingAvgType.ExponentialMovingAverage, slowLength, input, slow.WritableSpan);
+        var line = new List<double>(values.Count);
+        var a = 2d / (1d + Math.Max(1, fastLength));
+        var b = 2d / (1d + Math.Max(1, slowLength));
+        for (var i = 0; i < values.Count; i++)
+            line.Add(RoundedReverseMacd.Equilibrium(i == 0 ? 0 : fast.Span[i - 1], i == 0 ? 0 : slow.Span[i - 1], a, b));
+        var finite = FiniteSignalInput.Create(line, out var finiteCount);
+        using var signal = context.Rent(values.Count);
+        StochasticSmooth(data, MovingAvgType.ExponentialMovingAverage, 9, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);
+        var result = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++)
+        {
+            var average = i < finiteCount ? signal.Span[i] : double.NaN;
+            result.WritableSpan[i] = key == "Signal" ? average : key == "Histogram" ? line[i] - average : line[i];
+        }
+        return result;
     }
 
     /// <summary>
