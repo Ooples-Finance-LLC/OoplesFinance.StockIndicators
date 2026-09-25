@@ -926,6 +926,8 @@ internal static partial class BuiltInFormulaReferences
                                 ? IndicatorErrorBudget.Exact : new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
                         : builtIn.BatchName == IndicatorName.HarmonicMeanMovingAverage
                             ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
+                        : builtIn.BatchName is IndicatorName.EndPointMovingAverage or IndicatorName.SharpModifiedMovingAverage
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
                         : builtIn.BatchName is IndicatorName.MayerMultiple or IndicatorName.JapaneseCorrelationCoefficient
                             ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
                             : builtIn.BatchName is IndicatorName.HistoricalVolatility or IndicatorName.KaseSerialDependencyIndex

@@ -422,68 +422,28 @@ public sealed class EmaWaveIndicatorState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Epma")]
 public sealed class EndPointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly AffineAverageWindow _window;
     private readonly StreamingInputResolver _input;
 
     public EndPointMovingAverageState(int length = 11, int offset = 4)
     {
-        var resolved = Math.Max(1, length);
-        _weights = new double[resolved];
-        double weightSum = 0;
-        for (var j = 0; j < resolved; j++)
-        {
-            var weight = resolved - j - offset;
-            _weights[j] = weight;
-            weightSum += weight;
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(resolved);
+        _window = new AffineAverageWindow(length, offset);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
     public IndicatorName Name => IndicatorName.EndPointMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
+    public void Reset() { _window.Reset(); }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < _weights.Length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * _weights[j];
-        }
-
-        var epma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Epma", epma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(epma, outputs);
+        var result = _window.Next(value, isFinal: isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(1) { { "Epma", result } } : null;
+        return new StreamingIndicatorStateResult(result, outputs);
     }
 
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); }
 }
 
 [PrimaryOutput("Ei")]

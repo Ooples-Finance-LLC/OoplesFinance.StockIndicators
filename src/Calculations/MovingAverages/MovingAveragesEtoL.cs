@@ -309,23 +309,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        using var window = new AffineAverageWindow(length, offset, capacityHint: stockData.Count);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                double weight = length - j - offset;
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
             var prevEpma = GetLastOrDefault(epmaList);
-            var epma = weightedSum != 0 ? 1 / weightedSum * sum : 0;
+            var epma = window.Next(currentValue);
             epmaList.Add(epma);
 
             var signal = GetCompareSignal(currentValue - epma, prevVal - prevEpma);

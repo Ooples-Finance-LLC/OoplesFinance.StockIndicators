@@ -6218,31 +6218,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEndPointMovingAverageFast(StockData data, ComputeContext context, int length = 11,
         int offset = 4)
     {
-        // CalculateEndPointMovingAverage weights the window linearly but shifts the ramp down by the offset,
-        // so the oldest bars carry negative weight. MovingAverageCore.EndpointMovingAverage read the close
-        // and knew nothing of the offset.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                double weight = length - j - offset;
-                var prevValue = i >= j ? input[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? 1 / weightedSum * sum : 0;
-        }
-
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(values.Count);
+        MovingAverageCore.EndPointMovingAverage(SpanCompat.AsReadOnlySpan(values), buffer.WritableSpan, length, offset);
         return buffer;
     }
 
@@ -16562,9 +16540,6 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSharpModifiedMovingAverageFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateSharpModifiedMovingAverage adds a slope correction to a plain average of the window, the
-        // slope being the window weighted by its distance from the middle. The core routine implemented a
-        // different correction and could not be given an average type.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
@@ -16576,18 +16551,8 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double slope = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevValue = i >= j - 1 ? input[i - (j - 1)] : 0;
-                double factor = 1 + (2 * (j - 1));
-                slope += prevValue * (length - factor) / 2;
-            }
-
-            output[i] = sma[i] + (6 * slope / ((length + 1) * length));
-        }
+        using var window = new AffineAverageWindow(length, sharp: true, capacityHint: count, exactSimple: maType == MovingAvgType.SimpleMovingAverage);
+        for (var i = 0; i < count; i++) output[i] = window.Next(input[i], sma[i]);
 
         return buffer;
     }
