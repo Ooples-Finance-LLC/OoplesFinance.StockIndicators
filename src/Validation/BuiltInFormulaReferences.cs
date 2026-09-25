@@ -1022,13 +1022,13 @@ internal static partial class BuiltInFormulaReferences
         var result = new double[values.Length];
         var rate = new ReferenceFraction(2) / new ReferenceFraction((long)length + 1);
         var previous = new ReferenceFraction(0);
+        var prefix = new ReferenceFraction(0);
         for (var i = 0; i < values.Length; i++)
         {
             ReferenceFraction next;
             if (i < length)
             {
-                var prefix = new ReferenceFraction(0);
-                for (var j = 0; j <= i; j++) prefix += values[j];
+                prefix += values[i];
                 next = prefix / new ReferenceFraction(i + 1);
             }
             else next = previous + rate * (values[i] - previous);
@@ -1051,8 +1051,14 @@ internal static partial class BuiltInFormulaReferences
         return result;
     }
 
-    private static double[] Average(IReadOnlyList<double> values, int length, int kind)
+    internal static double[] Average(IReadOnlyList<double> values, int length, int kind)
     {
+        // Bounded means of finite inputs have representable results even when their
+        // sums or corrections overflow binary64. Round each independent exact stage.
+        // Preserve the existing IEEE propagation for nonfinite upstream stages.
+        if ((kind is 1 or 2 or 3 or 6) && values.All(value => !double.IsNaN(value) && !double.IsInfinity(value)))
+            return RoundedBoundedStage(values, length, kind);
+
         if (kind == 4 || kind == 5)
         {
             var first = Average(values, length, 3);

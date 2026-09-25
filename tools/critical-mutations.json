@@ -4018,5 +4018,41 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.InputValues",
     "filter": "FullyQualifiedName~TrendImpulseNumericalTests.SelectedInputControlsHeldBreakouts"
+  },
+  {
+    "module": "shared-average-reference-numerical",
+    "id": "shared-average-reference-unsafe-double-arithmetic",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "internal static double[] Average",
+    "before": "        if ((kind is 1 or 2 or 3 or 6) && values.All(value => !double.IsNaN(value) && !double.IsInfinity(value)))\n            return RoundedBoundedStage(values, length, kind);",
+    "after": "        // Inject the former overflowing sum/correction reference path.",
+    "filter": "FullyQualifiedName~SharedAverageReferenceTests"
+  },
+  {
+    "module": "shared-average-reference-numerical",
+    "id": "shared-average-reference-misses-window-eviction",
+    "file": "src/Validation/BuiltInFormulaReferences.Foundation.cs",
+    "scope": "private static double[] ExactDeviationSignal",
+    "before": "if (i >= length) sum -= ReferenceFraction.FromDouble(values[i - length]);",
+    "after": "if (i > length) sum -= ReferenceFraction.FromDouble(values[i - length]);",
+    "filter": "FullyQualifiedName~SharedAverageReferenceTests"
+  },
+  {
+    "module": "shared-average-reference-numerical",
+    "id": "shared-average-reference-keeps-old-weights",
+    "file": "src/Validation/BuiltInFormulaReferences.Foundation.cs",
+    "scope": "private static double[] ExactDeviationSignal",
+    "before": "if (kind == 2) weighted += new ReferenceFraction(length) * current - sum;",
+    "after": "if (kind == 2) weighted += new ReferenceFraction(length) * current;",
+    "filter": "FullyQualifiedName~SharedAverageReferenceTests"
+  },
+  {
+    "module": "shared-average-reference-numerical",
+    "id": "shared-average-reference-drops-ema-prefix",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "private static double[] RoundedEma(IReadOnlyList<double>",
+    "before": "prefix += values[i];",
+    "after": "prefix = values[i];",
+    "filter": "FullyQualifiedName~SharedAverageReferenceTests"
   }
 ]
