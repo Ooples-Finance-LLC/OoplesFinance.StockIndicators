@@ -970,6 +970,7 @@ public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingI
     private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public ErgodicMovingAverageConvergenceDivergenceState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 5,
@@ -988,6 +989,7 @@ public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingI
         _ema1.Reset();
         _ema2.Reset();
         _signalSmoother.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -996,7 +998,9 @@ public sealed class ErgodicMovingAverageConvergenceDivergenceState : IStreamingI
         var ema1 = _ema1.Next(value, isFinal);
         var ema2 = _ema2.Next(value, isFinal);
         var macd = ema1 - ema2;
-        var signal = _signalSmoother.Next(macd, isFinal);
+        var invalidSignal = _signalInvalid || double.IsInfinity(macd);
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(macd, isFinal);
+        if (isFinal) _signalInvalid = invalidSignal;
         var histogram = macd - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -1028,6 +1032,7 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
     private readonly IMovingAverageSmoother _ema2;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public ErgodicPercentagePriceOscillatorState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 5,
@@ -1046,6 +1051,7 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
         _ema1.Reset();
         _ema2.Reset();
         _signalSmoother.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1053,9 +1059,10 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
         var value = _input.GetValue(bar);
         var ema1 = _ema1.Next(value, isFinal);
         var ema2 = _ema2.Next(value, isFinal);
-        var macd = ema1 - ema2;
-        var ppo = ema2 != 0 ? macd / ema2 * 100 : 0;
-        var signal = _signalSmoother.Next(ppo, isFinal);
+        var ppo = RoundedPercentageChange.Of(ema1, ema2);
+        var invalidSignal = _signalInvalid || double.IsInfinity(ppo);
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(ppo, isFinal);
+        if (isFinal) _signalInvalid = invalidSignal;
         var histogram = ppo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

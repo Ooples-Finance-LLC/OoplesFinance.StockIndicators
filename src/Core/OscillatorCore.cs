@@ -4889,66 +4889,11 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ergodic Percentage Price Oscillator.
     /// </summary>
-    internal static void ErgodicPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 5, int longLength = 20, int signalLength = 5)
+    internal static void ErgodicPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 5, int longLength = 32, int signalLength = 5)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var priceChangeArray = pool.Rent(input.Length);
-        var absPriceChangeArray = pool.Rent(input.Length);
-        var emaShortPcArray = pool.Rent(input.Length);
-        var emaLongPcArray = pool.Rent(input.Length);
-        var emaShortAbsArray = pool.Rent(input.Length);
-        var emaLongAbsArray = pool.Rent(input.Length);
-
-        try
-        {
-            var priceChange = priceChangeArray.AsSpan(0, input.Length);
-            var absPriceChange = absPriceChangeArray.AsSpan(0, input.Length);
-            var emaShortPc = emaShortPcArray.AsSpan(0, input.Length);
-            var emaLongPc = emaLongPcArray.AsSpan(0, input.Length);
-            var emaShortAbs = emaShortAbsArray.AsSpan(0, input.Length);
-            var emaLongAbs = emaLongAbsArray.AsSpan(0, input.Length);
-
-            // Calculate price changes
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    priceChange[i] = 0;
-                    absPriceChange[i] = 0;
-                }
-                else
-                {
-                    priceChange[i] = input[i] - input[i - 1];
-                    absPriceChange[i] = Math.Abs(priceChange[i]);
-                }
-            }
-
-            // Apply double smoothing
-            MovingAverageCore.ExponentialMovingAverage(priceChange, emaShortPc, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(emaShortPc, emaLongPc, longLength);
-            MovingAverageCore.ExponentialMovingAverage(absPriceChange, emaShortAbs, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(emaShortAbs, emaLongAbs, longLength);
-
-            // Calculate oscillator
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = emaLongAbs[i] != 0 ? (emaLongPc[i] / emaLongAbs[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(priceChangeArray);
-            pool.Return(absPriceChangeArray);
-            pool.Return(emaShortPcArray);
-            pool.Return(emaLongPcArray);
-            pool.Return(emaShortAbsArray);
-            pool.Return(emaLongAbsArray);
-        }
+        // This core publishes the raw long-minus-short percentage line. Signal length affects only
+        // the separately published signal, not the primary series.
+        PercentagePriceOscillator(input, output, longLength, shortLength);
     }
 
     /// <summary>

@@ -133,7 +133,9 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, macdList);
+        var finiteInput = FiniteSignalInput.Create(macdList, out var finiteCount);
+        var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, finiteInput);
+        for (var i = finiteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macd = macdList[i];
