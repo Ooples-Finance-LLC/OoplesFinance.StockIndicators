@@ -396,44 +396,23 @@ public static partial class Calculations
     public static StockData CalculateInverseFisherFastZScore(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 50)
     {
-        List<double> ifzList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
+        length = Math.Max(1, length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var length1 = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        stockData.SetCustomValues(smaList);
-        var stdDevList = GetStandardDeviationList(smaList, length);
-        stockData.SetCustomValues(smaList);
-        var linreg1List = CalculateLinearRegression(stockData, length).ChainedValues;
-        stockData.SetCustomValues(smaList);
-        var linreg2List = CalculateLinearRegression(stockData, length1).ChainedValues;
-
+        var exact = StrengthWindow.Supports(maType);
+        var means = exact ? StrengthWindow.Smooth(inputList, maType, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var state = new StandardizedScoreWindow(length, true);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var linreg1 = linreg1List[i];
-            var linreg2 = linreg2List[i];
-            var stdDev = stdDevList[i];
-            var fz = stdDev != 0 ? (linreg2 - linreg1) / stdDev / 2 : 0;
-            var prevIfz1 = i >= 1 ? ifzList[i - 1] : 0;
-            var prevIfz2 = i >= 2 ? ifzList[i - 2] : 0;
-
-            var ifz = Exp(10 * fz) + 1 != 0 ? (Exp(10 * fz) - 1) / (Exp(10 * fz) + 1) : 0;
-            ifzList.Add(ifz);
-
-            var signal = GetCompareSignal(ifz - prevIfz1, prevIfz1 - prevIfz2);
-            signalsList?.Add(signal);
+            var score = state.Next(inputList[i], means[i], exact && maType == MovingAvgType.SimpleMovingAverage, true);
+            score = StandardizedScoreWindow.Inverse(score, true);
+            var previous = i > 0 ? values[i - 1] : 0;
+            var older = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetCompareSignal(score - previous, previous - older)); values.Add(score);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Iffzs", ifzList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ifzList);
-        stockData.IndicatorName = IndicatorName.InverseFisherFastZScore;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Iffzs", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.InverseFisherFastZScore; return stockData;
     }
 
 
@@ -448,41 +427,23 @@ public static partial class Calculations
     public static StockData CalculateInverseFisherZScore(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> fList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
+        length = Math.Max(1, length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
+        var exact = StrengthWindow.Supports(maType);
+        var means = exact ? StrengthWindow.Smooth(inputList, maType, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var state = new StandardizedScoreWindow(length, false);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var stdDev = stdDevList[i];
-            var prevF1 = i >= 1 ? fList[i - 1] : 0;
-            var prevF2 = i >= 2 ? fList[i - 2] : 0;
-            var z = stdDev != 0 ? (currentValue - sma) / stdDev : 0;
-            var expZ = Exp(2 * z);
-
-            var f = expZ + 1 != 0 ? MinOrMax((((expZ - 1) / (expZ + 1)) + 1) * 50, 100, 0) : 0;
-            fList.Add(f);
-
-            var signal = GetRsiSignal(f - prevF1, prevF1 - prevF2, f, prevF1, 80, 20);
-            signalsList?.Add(signal);
+            var score = state.Next(inputList[i], means[i], exact && maType == MovingAvgType.SimpleMovingAverage, true);
+            score = StandardizedScoreWindow.Inverse(score, false);
+            var previous = i > 0 ? values[i - 1] : 0;
+            var older = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetRsiSignal(score - previous, previous - older, score, previous, 80, 20)); values.Add(score);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ifzs", fList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fList);
-        stockData.IndicatorName = IndicatorName.InverseFisherZScore;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ifzs", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.InverseFisherZScore; return stockData;
     }
 
 

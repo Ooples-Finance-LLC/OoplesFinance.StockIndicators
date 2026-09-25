@@ -17,6 +17,15 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.ZScore or IndicatorName.FastZScore or IndicatorName.InverseFisherZScore or IndicatorName.InverseFisherFastZScore
+            && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName switch { IndicatorName.ZScore => "Zscore", IndicatorName.FastZScore => "Fzs", IndicatorName.InverseFisherZScore => "Ifzs", _ => "Iffzs" };
+            var budget = builtIn.BatchName == IndicatorName.InverseFisherZScore ? ZScoreLogisticBudget
+                : builtIn.BatchName == IndicatorName.InverseFisherFastZScore ? RsiInverseFisherBudget : IndicatorErrorBudget.Exact;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZScoreOutputs(bars, builtIn)[key], budget);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersFisherTransform)
         {
             yield return IndicatorValidationRule.Reference(0, bars => FisherValues(Closes(bars), Integer(builtIn.CreateOptions(), "Length", 10)), FisherBudget);

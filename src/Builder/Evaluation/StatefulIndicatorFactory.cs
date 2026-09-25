@@ -602,6 +602,10 @@ internal static partial class StatefulIndicatorFactory
             // Additional oscillators - using named parameters to skip MovingAvgType defaults
             AwesomeOscillatorSpecOptions ao => new AwesomeOscillatorState(fastLength: ao.Length, maType: ao.MaType),
             AcceleratorOscillatorSpecOptions aco => new AcceleratorOscillatorState(fastLength: aco.Length, maType: aco.MaType),
+            ZScoreSpecOptions scoreZScore => new ZScoreState(scoreZScore.MaType, scoreZScore.Length),
+            FastZScoreSpecOptions scoreFastZScore => new FastZScoreState(scoreFastZScore.MaType, scoreFastZScore.Length),
+            InverseFisherZScoreSpecOptions scoreInverseFisherZScore => new InverseFisherZScoreState(scoreInverseFisherZScore.MaType, scoreInverseFisherZScore.Length),
+            InverseFisherFastZScoreSpecOptions scoreInverseFisherFastZScore => new InverseFisherFastZScoreState(scoreInverseFisherFastZScore.MaType, scoreInverseFisherFastZScore.Length),
             FisherTransformSpecOptions ft => new EhlersFisherTransformState(length: ft.Length),
             EhlersFisherTransformSpecOptions eft => new EhlersFisherTransformState(length: eft.Length),
             ConnorsRsiSpecOptions crsi => new ConnorsRelativeStrengthIndexState(length2: crsi.Length),

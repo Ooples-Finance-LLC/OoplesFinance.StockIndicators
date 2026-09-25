@@ -437,6 +437,7 @@ internal static partial class BuiltInFormulaReferences
                     PopulationVariance(Closes(bars), length).Select(v => Math.Sqrt(v / length)).ToArray())));
             case IndicatorName.FastZScore:
             case IndicatorName.InverseFisherFastZScore:
+                if (kind is 1 or 2 or 3 or 6) return new(name == IndicatorName.FastZScore ? "Fzs" : "Iffzs", new[] { name == IndicatorName.FastZScore ? "Fzs" : "Iffzs" }, bars => ZScoreOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var fastKey = name == IndicatorName.FastZScore ? "Fzs" : "Iffzs";
                 return new(fastKey, new[] { fastKey }, bars =>
@@ -453,6 +454,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.InverseFisherZScore:
             case IndicatorName.ZScore:
+                if (kind is 1 or 2 or 3 or 6) return new(name == IndicatorName.ZScore ? "Zscore" : "Ifzs", new[] { name == IndicatorName.ZScore ? "Zscore" : "Ifzs" }, bars => ZScoreOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var scoreKey = name == IndicatorName.ZScore ? "Zscore" : "Ifzs";
                 return new(scoreKey, new[] { scoreKey }, bars =>

@@ -7486,42 +7486,10 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void ZScore(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateZScore divides a deviation from a simple moving average by a standard deviation, and
-            // both of those blank their run-in, so a zero denominator makes the score itself zero until the
-            // window fills. A shortened window here measured a spread against a mean drawn from fewer bars.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate standard deviation
-            double sumSquaredDev = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var dev = input[j] - sma;
-                sumSquaredDev += dev * dev;
-            }
-            var stdDev = Math.Sqrt(sumSquaredDev / length);
-
-            // Calculate Z-Score
-            output[i] = stdDev != 0 ? (input[i] - sma) / stdDev : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must cover every input.", nameof(output));
+        using var average = new StrengthAverage(MovingAvgType.SimpleMovingAverage, length, input.Length);
+        using var state = new StandardizedScoreWindow(length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], average.Next(new StrengthValue(input[i]), true).Mantissa, true, true);
     }
 
     /// <summary>
@@ -7554,8 +7522,10 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void FastZScore(ReadOnlySpan<double> input, Span<double> output, int length = 5)
     {
-        // FastZScore uses same formula as ZScore but with shorter default period
-        ZScore(input, output, length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must cover every input.", nameof(output));
+        using var average = new StrengthAverage(MovingAvgType.SimpleMovingAverage, length, input.Length);
+        using var state = new StandardizedScoreWindow(length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = state.Next(input[i], average.Next(new StrengthValue(input[i]), true).Mantissa, true, true);
     }
 
     /// <summary>

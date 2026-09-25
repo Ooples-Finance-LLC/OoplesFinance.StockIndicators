@@ -7,53 +7,30 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Zscore")]
 public sealed class ZScoreState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _meanMa;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly StandardizedScoreWindow _score;
+    private readonly StrengthAverage? _exact;
+    private readonly IMovingAverageSmoother? _fallback;
     private readonly StreamingInputResolver _input;
-    private double _inputValue;
-
+    private readonly bool _simple;
     public ZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        var resolved = Math.Max(1, length);
-        _meanMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _score = new StandardizedScoreWindow(length, false);
+        if (StrengthWindow.Supports(maType)) _exact = new StrengthAverage(maType, length);
+        else _fallback = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _simple = maType == MovingAvgType.SimpleMovingAverage;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
-
     public IndicatorName Name => IndicatorName.ZScore;
-
-    public void Reset()
-    {
-        _meanMa.Reset();
-        _stdDev.Reset();
-        _inputValue = 0;
-    }
-
+    public void Reset() { _score.Reset(); _exact?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        _inputValue = value;
-        var mean = _meanMa.Next(value, isFinal);
-        var stdDev = _stdDev.Next(_inputValue, isFinal);
-        var zscore = stdDev != 0 ? (value - mean) / stdDev : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Zscore", zscore }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zscore, outputs);
+        var mean = _exact is null ? _fallback!.Next(value, isFinal) : _exact.Next(new StrengthValue(value), isFinal).Mantissa;
+        var score = _score.Next(value, mean, _simple, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Zscore", score } } : null;
+        return new StreamingIndicatorStateResult(score, outputs);
     }
-
-    public void Dispose()
-    {
-        _meanMa.Dispose();
-        _stdDev.Dispose();
-    }
+    public void Dispose() { _score.Dispose(); _exact?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Zmbti")]

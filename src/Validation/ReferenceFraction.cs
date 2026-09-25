@@ -28,6 +28,19 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
         var power = exponent == 0 ? -1074 : exponent - 1075;
         return power >= 0 ? new(significand << power, BigInteger.One) : new(significand, BigInteger.One << -power);
     }
+    internal double LogisticPercentToDouble()
+    {
+        var magnitude = BigInteger.Abs(_numerator);
+        if (magnitude >= 400 * _denominator) return Sign < 0 ? 0 : 100;
+        const int precision = 192;
+        var scale = BigInteger.One << precision;
+        var argument = magnitude * scale / (512 * _denominator);
+        var exponential = scale; var term = scale;
+        for (var n = 1; n <= 60; n++) { term = term * argument / (scale * n); exponential += term; }
+        for (var n = 0; n < 10; n++) exponential = exponential * exponential / scale;
+        return new ReferenceFraction(100 * (Sign < 0 ? scale : exponential), scale + exponential).ToDouble();
+    }
+
     internal double TanhToDouble()
     {
         var magnitude = BigInteger.Abs(_numerator);

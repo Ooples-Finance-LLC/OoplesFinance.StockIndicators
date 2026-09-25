@@ -336,45 +336,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateFastZScore(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
     {
-        List<double> gsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
+        length = Math.Max(1, length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var length2 = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        stockData.SetCustomValues(smaList);
-        var smaLinregList = CalculateLinearRegression(stockData, length).ChainedValues;
-        stockData.SetCustomValues(smaList);
-        var linreg2List = CalculateLinearRegression(stockData, length2).ChainedValues;
-        stockData.SetCustomValues(smaList);
-        var smaStdDevList = GetStandardDeviationList(smaList, length);
-
+        var exact = StrengthWindow.Supports(maType);
+        var means = exact ? StrengthWindow.Smooth(inputList, maType, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var state = new StandardizedScoreWindow(length, true);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var stdDev = smaStdDevList[i];
-            var linreg = smaLinregList[i];
-            var linreg2 = linreg2List[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var gs = stdDev != 0 ? (linreg2 - linreg) / stdDev / 2 : 0;
-            gsList.Add(gs);
-
-            var signal = GetVolatilitySignal(currentValue - sma, prevValue - prevSma, gs, 0);
-            signalsList?.Add(signal);
+            var score = state.Next(inputList[i], means[i], exact && maType == MovingAvgType.SimpleMovingAverage, true);
+            var previous = i > 0 ? values[i - 1] : 0;
+            var older = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetVolatilitySignal(inputList[i] - means[i], i > 0 ? inputList[i - 1] - means[i - 1] : 0, score, 0)); values.Add(score);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fzs", gsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gsList);
-        stockData.IndicatorName = IndicatorName.FastZScore;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fzs", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.FastZScore; return stockData;
     }
 
 }

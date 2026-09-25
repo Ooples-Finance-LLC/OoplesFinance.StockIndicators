@@ -533,96 +533,35 @@ public sealed class InverseDistanceWeightedMovingAverageState : IStreamingIndica
 [PrimaryOutput("Iffzs")]
 public sealed class InverseFisherFastZScoreState : IStreamingIndicatorState, IDisposable
 {
-    private readonly FastZScoreState _fastZScore;
-
-    public InverseFisherFastZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50)
-    {
-        _fastZScore = new FastZScoreState(maType, length);
-    }
-
+    private readonly FastZScoreState _score;
+    public InverseFisherFastZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50) => _score = new FastZScoreState(maType, length);
     public IndicatorName Name => IndicatorName.InverseFisherFastZScore;
-
-    public void Reset()
-    {
-        _fastZScore.Reset();
-    }
-
+    public void Reset() => _score.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var fz = _fastZScore.Update(bar, isFinal, includeOutputs: false).Value;
-        var exp = MathHelper.Exp(10 * fz);
-        var ifz = exp + 1 != 0 ? (exp - 1) / (exp + 1) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Iffzs", ifz }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ifz, outputs);
+        var value = StandardizedScoreWindow.Inverse(_score.Update(bar, isFinal, false).Value, true);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Iffzs", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _fastZScore.Dispose();
-    }
+    public void Dispose() => _score.Dispose();
 }
 
 [PrimaryOutput("Ifzs")]
 public sealed class InverseFisherZScoreState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingStandardDeviation _stdDevCalc;
-    private readonly StreamingInputResolver _input;
-
-    public InverseFisherZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDevCalc = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ZScoreState _score;
+    public InverseFisherZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100) => _score = new ZScoreState(maType, length);
     public IndicatorName Name => IndicatorName.InverseFisherZScore;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _stdDevCalc.Reset();
-    }
-
+    public void Reset() => _score.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        // Compute deviation using the same SMA that's used for z-score
-        var deviation = value - sma;
-        var stdDev = _stdDevCalc.Next(value, isFinal);
-        var z = stdDev != 0 ? deviation / stdDev : 0;
-        var expZ = MathHelper.Exp(2 * z);
-        var f = expZ + 1 != 0 ? MathHelper.MinOrMax((((expZ - 1) / (expZ + 1)) + 1) * 50, 100, 0) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ifzs", f }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(f, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = StandardizedScoreWindow.Inverse(_score.Update(bar, isFinal, false).Value, false);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Ifzs", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _stdDevCalc.Dispose();
-    }
+    public void Dispose() => _score.Dispose();
 }
 
 [PrimaryOutput("Jo")]
