@@ -979,6 +979,7 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (high.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var medianArray = pool.Rent(high.Length);
         var fastSmaArray = pool.Rent(high.Length);
@@ -993,11 +994,11 @@ internal static class OscillatorCore
             // Median price
             for (var i = 0; i < high.Length; i++)
             {
-                median[i] = (high[i] + low[i]) / 2;
+                median[i] = PriceMean.Of(high[i], low[i]);
             }
 
-            MovingAverageCore.SimpleMovingAverage(median, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(median, slowSma, slowLength);
+            BollingerArithmetic.Mean(median, fastSma, fastLength);
+            BollingerArithmetic.Mean(median, slowSma, slowLength);
 
             for (var i = 0; i < high.Length; i++)
             {
@@ -1022,6 +1023,7 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (high.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var aoArray = pool.Rent(high.Length);
         var aoSmaArray = pool.Rent(high.Length);
@@ -1032,11 +1034,12 @@ internal static class OscillatorCore
             var aoSma = aoSmaArray.AsSpan(0, high.Length);
 
             AwesomeOscillator(high, low, ao, fastLength, slowLength);
-            MovingAverageCore.SimpleMovingAverage(ao, aoSma, signalLength);
+            var finite = FiniteSignalInput.Create(ao.ToArray(), out var finiteCount);
+            BollingerArithmetic.Mean(Compatibility.SpanCompat.AsReadOnlySpan(finite), aoSma, signalLength);
 
             for (var i = 0; i < high.Length; i++)
             {
-                output[i] = ao[i] - aoSma[i];
+                output[i] = i < finiteCount ? ao[i] - aoSma[i] : double.NaN;
             }
         }
         finally

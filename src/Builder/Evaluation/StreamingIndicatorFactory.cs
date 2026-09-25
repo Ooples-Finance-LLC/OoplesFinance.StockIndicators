@@ -24,6 +24,8 @@ internal static class StreamingIndicatorFactory
             IndicatorName.StochasticMovingAverageConvergenceDivergenceOscillator when spec.Options is StochasticMacdOscillatorSpecOptions stochastic => new StochasticMovingAverageConvergenceDivergenceOscillatorState(length: stochastic.Length),
             IndicatorName.ImpulseMovingAverageConvergenceDivergence when spec.Options is ImpulseMovingAverageConvergenceDivergenceSpecOptions impulse => new ImpulseMovingAverageConvergenceDivergenceState(impulse.MaType, impulse.Length, impulse.SignalLength),
             IndicatorName.ImpulsePercentagePriceOscillator when spec.Options is ImpulsePercentagePriceOscillatorSpecOptions impulse => new ImpulsePercentagePriceOscillatorState(length: impulse.Length),
+            IndicatorName.AwesomeOscillator when spec.Options is AwesomeOscillatorSpecOptions awesome => new AwesomeOscillatorState(fastLength: awesome.Length, maType: awesome.MaType),
+            IndicatorName.AcceleratorOscillator when spec.Options is AcceleratorOscillatorSpecOptions accelerator => new AcceleratorOscillatorState(fastLength: accelerator.Length, maType: accelerator.MaType),
             IndicatorName.MarketFacilitationIndex => new MarketFacilitationIndexState(),
             IndicatorName.TrueRange => new TrueRangeState(),
             IndicatorName.Range => new RangeState(),
