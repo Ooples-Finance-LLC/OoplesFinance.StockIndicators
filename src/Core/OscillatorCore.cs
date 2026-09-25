@@ -5389,51 +5389,17 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Impulse Percentage Price Oscillator.
     /// </summary>
-    internal static void ImpulsePercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 12, int longLength = 26, int signalLength = 9)
+    internal static void ImpulsePercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 34)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var middle = new ZeroLagExponentialMovingAverageSmoother(Math.Max(1, length));
+        using var boundary = MovingAverageSmootherFactory.Create(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length));
+        // A close-only input represents bars with high=low=close.
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortEmaArray = pool.Rent(input.Length);
-        var longEmaArray = pool.Rent(input.Length);
-        var ppoArray = pool.Rent(input.Length);
-        var signalArray = pool.Rent(input.Length);
-
-        try
-        {
-            var shortEma = shortEmaArray.AsSpan(0, input.Length);
-            var longEma = longEmaArray.AsSpan(0, input.Length);
-            var ppo = ppoArray.AsSpan(0, input.Length);
-            var signal = signalArray.AsSpan(0, input.Length);
-
-            // Calculate EMAs
-            MovingAverageCore.ExponentialMovingAverage(input, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(input, longEma, longLength);
-
-            // Calculate PPO
-            for (var i = 0; i < input.Length; i++)
-            {
-                ppo[i] = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-            }
-
-            // Calculate signal line
-            MovingAverageCore.ExponentialMovingAverage(ppo, signal, signalLength);
-
-            // Impulse = PPO - Signal (histogram)
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = ppo[i] - signal[i];
-            }
-        }
-        finally
-        {
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
-            pool.Return(ppoArray);
-            pool.Return(signalArray);
+            var level = boundary.Next(input[i], true);
+            output[i] = RoundedImpulseOscillator.Line(middle.Next(input[i], true), level, level, true);
         }
     }
 

@@ -1996,7 +1996,7 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
     private readonly EmaState _ema2;
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
-    private readonly RollingWindowSum _signalSum;
+    private readonly RoundedPartialMeanSmoother _signalSum;
     private StreamingInputResolver _input;
 
     public ImpulseMovingAverageConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
@@ -2005,10 +2005,10 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
         _signalLength = Math.Max(1, signalLength);
         _ema1 = new EmaState(resolved);
         _ema2 = new EmaState(resolved);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSum = new RollingWindowSum(_signalLength);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
+        _highSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _lowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _signalSum = new RoundedPartialMeanSmoother(_signalLength);
+        _input = new StreamingInputResolver(InputName.TypicalPrice, b => RollingMoneyFlowIndex.TypicalPrice(b.High, b.Low, b.Close));
     }
 
     public IndicatorName Name => IndicatorName.ImpulseMovingAverageConvergenceDivergence;
@@ -2030,12 +2030,11 @@ public sealed class ImpulseMovingAverageConvergenceDivergenceState : IStreamingI
         var value = _input.GetValue(bar);
         var ema1 = _ema1.GetNext(value, isFinal);
         var ema2 = _ema2.GetNext(ema1, isFinal);
-        var mi = (2 * ema1) - ema2;
+        var mi = ExponentialExtrapolation.Double(ema1, ema2);
         var hi = _highSmoother.Next(bar.High, isFinal);
         var lo = _lowSmoother.Next(bar.Low, isFinal);
-        var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
-        var macdSum = isFinal ? _signalSum.Add(macd, out var count) : _signalSum.Preview(macd, out count);
-        var signal = count > 0 ? macdSum / count : 0;
+        var macd = RoundedImpulseOscillator.Line(mi, hi, lo, false);
+        var signal = _signalSum.Next(macd, isFinal);
         var histogram = macd - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

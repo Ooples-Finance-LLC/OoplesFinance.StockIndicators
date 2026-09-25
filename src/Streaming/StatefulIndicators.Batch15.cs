@@ -14,7 +14,7 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
     private readonly EmaState _ema2;
     private readonly IMovingAverageSmoother _highSmoother;
     private readonly IMovingAverageSmoother _lowSmoother;
-    private readonly RollingWindowSum _signalSum;
+    private readonly RoundedPartialMeanSmoother _signalSum;
     private StreamingInputResolver _input;
 
     public ImpulsePercentagePriceOscillatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 34, int signalLength = 9)
@@ -23,10 +23,10 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
         _signalLength = Math.Max(1, signalLength);
         _ema1 = new EmaState(resolved);
         _ema2 = new EmaState(resolved);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSum = new RollingWindowSum(_signalLength);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
+        _highSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _lowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _signalSum = new RoundedPartialMeanSmoother(_signalLength);
+        _input = new StreamingInputResolver(InputName.TypicalPrice, b => RollingMoneyFlowIndex.TypicalPrice(b.High, b.Low, b.Close));
     }
 
     public IndicatorName Name => IndicatorName.ImpulsePercentagePriceOscillator;
@@ -48,13 +48,11 @@ public sealed class ImpulsePercentagePriceOscillatorState : IStreamingIndicatorS
         var value = _input.GetValue(bar);
         var ema1 = _ema1.GetNext(value, isFinal);
         var ema2 = _ema2.GetNext(ema1, isFinal);
-        var mi = (2 * ema1) - ema2;
+        var mi = ExponentialExtrapolation.Double(ema1, ema2);
         var hi = _highSmoother.Next(bar.High, isFinal);
         var lo = _lowSmoother.Next(bar.Low, isFinal);
-        var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
-        var ppo = mi > hi && hi != 0 ? macd / hi * 100 : mi < lo && lo != 0 ? macd / lo * 100 : 0;
-        var ppoSum = isFinal ? _signalSum.Add(ppo, out var count) : _signalSum.Preview(ppo, out count);
-        var signal = count > 0 ? ppoSum / count : 0;
+        var ppo = RoundedImpulseOscillator.Line(mi, hi, lo, true);
+        var signal = _signalSum.Next(ppo, isFinal);
         var histogram = ppo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

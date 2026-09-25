@@ -1412,8 +1412,14 @@ public sealed class FormulaContractCoverageTests
             [1, -.25, .25], [1, 2, 4], [0, 2.25, 3.75]);
         Check(new MirroredMovingAverageConvergenceDivergence(1, 2, new Sma()),
             [1, 2, 4], [0, 1.5, 3], [1, .5, 1], [-1, -2, -4], [0, -1.5, -3], [-1, -.5, -1]);
+        // Each EMA publishes a rounded stage before extrapolation and channel subtraction.
+        var first = ReferenceFraction.FromDouble(19d / 6);
+        var second = ReferenceFraction.FromDouble(((new ReferenceFraction(2) * first + ReferenceFraction.FromDouble(1.25)) / new ReferenceFraction(3)).ToDouble());
+        var middle = ReferenceFraction.FromDouble((new ReferenceFraction(2) * first - second).ToDouble());
+        var impulse = (middle - ReferenceFraction.FromDouble(2.625)).ToDouble();
+        var signal = ((ReferenceFraction.FromDouble(.5) + ReferenceFraction.FromDouble(impulse)) / new ReferenceFraction(2)).ToDouble();
         Check(new ImpulseMovingAverageConvergenceDivergence(2, 2),
-            [.5, .5, 85d / 72], [.5, .5, 121d / 144], [0, 0, 49d / 144]);
+            [.5, .5, impulse], [.5, .5, signal], [0, 0, impulse - signal]);
         void Check(IIndicator indicator, params double[][] expected)
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();
