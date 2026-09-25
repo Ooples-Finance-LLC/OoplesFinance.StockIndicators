@@ -376,6 +376,19 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.TFSMboIndicator or IndicatorName.TFSMboPercentagePriceOscillator)
+        {
+            var tfsOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.TFSMboPercentagePriceOscillator;
+            var tfsKeys = new[] { percentage ? "Ppo" : "TfsMob", "Signal", "Histogram" };
+            for (var slot = 0; slot < tfsKeys.Length; slot++)
+            {
+                var key = tfsKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedTfsOscillator(bars, tfsOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.MovingAverageConvergenceDivergenceLeader or IndicatorName.PercentagePriceOscillatorLeader)
         {
             var leaderOptions = builtIn.CreateOptions();

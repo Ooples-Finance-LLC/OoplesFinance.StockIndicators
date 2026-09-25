@@ -386,13 +386,14 @@ public sealed class TFSMboIndicatorState : IStreamingIndicatorState, IDisposable
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public TFSMboIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 25,
         int slowLength = 200, int signalLength = 18)
     {
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _signal = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -403,6 +404,7 @@ public sealed class TFSMboIndicatorState : IStreamingIndicatorState, IDisposable
         _fast.Reset();
         _slow.Reset();
         _signal.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -411,7 +413,9 @@ public sealed class TFSMboIndicatorState : IStreamingIndicatorState, IDisposable
         var mob1 = _fast.Next(value, isFinal);
         var mob2 = _slow.Next(value, isFinal);
         var tfsMob = mob1 - mob2;
-        var signal = _signal.Next(tfsMob, isFinal);
+        var invalid = _signalInvalid || double.IsInfinity(tfsMob) || double.IsNaN(tfsMob);
+        var signal = invalid ? double.NaN : _signal.Next(tfsMob, isFinal);
+        if (isFinal) _signalInvalid = invalid;
         var histogram = tfsMob - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -443,13 +447,14 @@ public sealed class TFSMboPercentagePriceOscillatorState : IStreamingIndicatorSt
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public TFSMboPercentagePriceOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 25, int slowLength = 200, int signalLength = 18)
     {
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _signal = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -460,6 +465,7 @@ public sealed class TFSMboPercentagePriceOscillatorState : IStreamingIndicatorSt
         _fast.Reset();
         _slow.Reset();
         _signal.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -467,9 +473,10 @@ public sealed class TFSMboPercentagePriceOscillatorState : IStreamingIndicatorSt
         var value = _input.GetValue(bar);
         var mob1 = _fast.Next(value, isFinal);
         var mob2 = _slow.Next(value, isFinal);
-        var tfsMob = mob1 - mob2;
-        var ppo = mob2 != 0 ? tfsMob / mob2 * 100 : 0;
-        var signal = _signal.Next(ppo, isFinal);
+        var ppo = RoundedPercentageChange.Of(mob1, mob2);
+        var invalid = _signalInvalid || double.IsInfinity(ppo) || double.IsNaN(ppo);
+        var signal = invalid ? double.NaN : _signal.Next(ppo, isFinal);
+        if (isFinal) _signalInvalid = invalid;
         var histogram = ppo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

@@ -7773,34 +7773,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TFSMboPercentagePriceOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 25, int slowLength = 200)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
-
-            // TFS MBO PPO = ((fast - slow) / slow) * 100
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var fast = new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength));
+        using var slow = new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength));
+        for (var i = 0; i < close.Length; i++) output[i] = RoundedPercentageChange.Of(fast.Next(close[i], true), slow.Next(close[i], true));
     }
 
     /// <summary>
