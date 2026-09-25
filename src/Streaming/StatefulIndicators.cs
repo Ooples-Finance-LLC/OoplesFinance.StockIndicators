@@ -4346,6 +4346,7 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
     private readonly EmaState _slow;
     private readonly EmaState _signal;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public MovingAverageConvergenceDivergenceState(int fastLength = 12, int slowLength = 26, int signalLength = 9)
     {
@@ -4362,6 +4363,7 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
         _fast.Reset();
         _slow.Reset();
         _signal.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -4370,7 +4372,9 @@ public sealed class MovingAverageConvergenceDivergenceState : IStreamingIndicato
         var fast = _fast.GetNext(value, isFinal);
         var slow = _slow.GetNext(value, isFinal);
         var macd = fast - slow;
-        var signal = _signal.GetNext(macd, isFinal);
+        var invalidSignal = _signalInvalid || double.IsInfinity(macd);
+        var signal = invalidSignal ? double.NaN : _signal.GetNext(macd, isFinal);
+        if (isFinal) _signalInvalid = invalidSignal;
         var histogram = macd - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

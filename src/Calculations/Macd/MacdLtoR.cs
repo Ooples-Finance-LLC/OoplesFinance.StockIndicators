@@ -22,7 +22,9 @@ public static partial class Calculations
         var fastEmaList = GetMovingAverageList(stockData, movingAvgType, fastLength, inputList);
         var slowEmaList = GetMovingAverageList(stockData, movingAvgType, slowLength, inputList);
         var macdList = GetDifferenceList(fastEmaList, slowEmaList);
-        var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, macdList);
+        var finiteInput = FiniteSignalInput.Create(macdList, out var finiteCount);
+        var macdSignalLineList = GetMovingAverageList(stockData, movingAvgType, signalLength, finiteInput);
+        for (var i = finiteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
         for (var i = 0; i < stockData.Count; i++)
         {

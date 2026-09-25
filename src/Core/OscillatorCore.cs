@@ -1425,7 +1425,10 @@ internal static class OscillatorCore
         {
             var macdLine = macdLineArray.AsSpan(0, input.Length);
             MacdLine(input, macdLine, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(macdLine, output, signalLength);
+            var finiteCount = 0;
+            while (finiteCount < macdLine.Length && !double.IsInfinity(macdLine[finiteCount])) finiteCount++;
+            MovingAverageCore.ExponentialMovingAverage(macdLine.Slice(0, finiteCount), output.Slice(0, finiteCount), signalLength);
+            output.Slice(finiteCount, input.Length - finiteCount).Fill(double.NaN);
         }
         finally
         {
@@ -1453,7 +1456,10 @@ internal static class OscillatorCore
             var signalLine = signalLineArray.AsSpan(0, input.Length);
 
             MacdLine(input, macdLine, fastLength, slowLength);
-            MovingAverageCore.ExponentialMovingAverage(macdLine, signalLine, signalLength);
+            var finiteCount = 0;
+            while (finiteCount < macdLine.Length && !double.IsInfinity(macdLine[finiteCount])) finiteCount++;
+            MovingAverageCore.ExponentialMovingAverage(macdLine.Slice(0, finiteCount), signalLine.Slice(0, finiteCount), signalLength);
+            signalLine.Slice(finiteCount, input.Length - finiteCount).Fill(double.NaN);
 
             for (var i = 0; i < input.Length; i++)
             {

@@ -3156,5 +3156,31 @@
     "id": "pvo-numerical-ignored-selected-input",
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes",
     "after": "data.Volumes"
+  },
+  {
+    "module": "macd-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageConvergenceDivergenceState",
+    "filter": "FullyQualifiedName~MacdNumericalTests",
+    "id": "macd-numerical-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signal.GetNext(macd, isFinal);",
+    "after": "var signal = _signal.GetNext(macd, isFinal);"
+  },
+  {
+    "module": "macd-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageConvergenceDivergenceState",
+    "filter": "FullyQualifiedName~MacdNumericalTests",
+    "id": "macd-numerical-reversed-histogram",
+    "before": "var histogram = macd - signal;",
+    "after": "var histogram = signal - macd;"
+  },
+  {
+    "module": "macd-numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "filter": "FullyQualifiedName~MacdNumericalTests",
+    "id": "macd-numerical-dropped-signal-length",
+    "before": "new MovingAverageConvergenceDivergenceState(signal.FastLength, signal.SlowLength, signal.SignalLength)",
+    "after": "new MovingAverageConvergenceDivergenceState(signal.FastLength, signal.SlowLength)"
   }
 ]
