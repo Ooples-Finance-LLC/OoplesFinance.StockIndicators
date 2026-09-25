@@ -386,6 +386,7 @@ internal static partial class StatefulIndicatorFactory
             RangeIdentifierSpecOptions rangeId => new RangeIdentifierState(rangeId.Length),
             QmaSmaDifferenceSpecOptions spread => new QmaSmaDifferenceState(spread.Length),
             MovingAverageDisplacedEnvelopeSpecOptions displaced => new MovingAverageDisplacedEnvelopeState(displaced.MaType, displaced.Length1, displaced.Length2, displaced.Pct),
+            ErgodicMeanDeviationIndicatorSpecOptions emdi => new ErgodicMeanDeviationIndicatorState(emdi.MaType, emdi.Length1, emdi.Length2, emdi.Length3, emdi.SignalLength),
             EmaWaveIndicatorSpecOptions wave => new EmaWaveIndicatorState(wave.Length1, wave.Length2, wave.Length3, wave.SmoothLength),
             FunctionToCandlesSpecOptions candles => new FunctionToCandlesState(candles.MaType, candles.Length),
             LogisticCorrelationSpecOptions lc => new LogisticCorrelationState(lc.Length, lc.K),

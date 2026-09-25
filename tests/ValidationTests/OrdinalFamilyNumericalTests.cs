@@ -138,7 +138,7 @@ public sealed class OrdinalFamilyNumericalTests
         => CheckRoutes(testCase, route);
 
     internal void CheckRoutes(IndicatorValidationCase testCase, string route,
-        Func<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>? overflowReference = null)
+        Func<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>? overflowReference = null, IndicatorErrorBudget? overflowBudget = null)
     {
         var indicator = testCase.Factory();
         var builtIn = (IBuiltInIndicator)indicator;
@@ -200,7 +200,7 @@ public sealed class OrdinalFamilyNumericalTests
                 if (overflowReference is not null)
                 {
                     var expected = overflowReference(bars);
-                    var budget = new IndicatorErrorBudget(1e-9, 1e-9);
+                    var budget = overflowBudget ?? new IndicatorErrorBudget(1e-9, 1e-9);
                     for (var slot = 0; slot < keys.Length; slot++)
                     for (var i = 0; i < bars.Count; i++)
                     {

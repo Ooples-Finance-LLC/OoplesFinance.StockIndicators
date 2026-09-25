@@ -6623,5 +6623,138 @@
     "before": "new FastZScoreState(scoreFastZScore.MaType, scoreFastZScore.Length)",
     "after": "new FastZScoreState(scoreFastZScore.MaType, 200)",
     "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "residual-pressure-loses-wide-residual",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualAverageWindow.cs",
+    "before": "StrengthValue.Round(residual, 1)",
+    "after": "new StrengthValue(value - mean.Mantissa)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-mean-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualAverageWindow.cs",
+    "before": "_mean.Next(new StrengthValue(value), commit)",
+    "after": "_mean.Next(new StrengthValue(value), true)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-reset-retains-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualAverageWindow.cs",
+    "before": "_mean.Reset();",
+    "after": "// injected retained mean\n",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-narrows-before-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/ResidualAverageWindow.cs",
+    "before": "_stages[i].Next(current, commit)",
+    "after": "_stages[i].Next(new StrengthValue(Publish(current)), commit)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-wave-raw-loses-middle-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Wb\" ? length2",
+    "after": "outputKey == \"Wb\" ? length1",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods",
+    "scope": "internal static ComputeBuffer ComputeEmaWaveFast("
+  },
+  {
+    "id": "residual-pressure-raw-publishes-primary-as-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? value.Signal : value.Value",
+    "after": "value.Value",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods",
+    "scope": "internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast("
+  },
+  {
+    "id": "residual-pressure-pressure-overflows-range",
+    "module": "numerical",
+    "file": "src/Helpers/TraderPressureWindow.cs",
+    "before": "ExactVarianceWindow.Units(upper) - ExactVarianceWindow.Units(lower)",
+    "after": "ExactVarianceWindow.Units(upper - lower)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-pressure-omits-low-rise",
+    "module": "numerical",
+    "file": "src/Helpers/TraderPressureWindow.cs",
+    "before": "BigInteger.Max(highChange, BigInteger.Zero) + BigInteger.Max(lowChange, BigInteger.Zero)",
+    "after": "BigInteger.Max(highChange, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-pressure-caches-wrong-low",
+    "module": "numerical",
+    "file": "src/Helpers/TraderPressureWindow.cs",
+    "before": "_previousLow = low;",
+    "after": "_previousLow = high;",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-pressure-reset-retains-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/TraderPressureWindow.cs",
+    "before": "_high.Reset();",
+    "after": "// injected retained high window\n",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-pressure-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/TraderPressureWindow.cs",
+    "before": "if (commit) { _previousHigh = high;",
+    "after": "if (true) { _previousHigh = high;",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-pressure-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.EveryCustomerAverageStageControlsItsPublishedOutputs",
+    "scope": "internal static ComputeBuffer ComputeTraderPressureIndexFast("
+  },
+  {
+    "id": "residual-pressure-ergodic-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.EveryCustomerAverageStageControlsItsPublishedOutputs",
+    "scope": "internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast("
+  },
+  {
+    "id": "residual-pressure-typed-ergodic-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new ErgodicMeanDeviationIndicatorState(emdi.MaType, emdi.Length1, emdi.Length2, emdi.Length3, emdi.SignalLength)",
+    "after": "new ErgodicMeanDeviationIndicatorState(emdi.MaType, emdi.Length1, emdi.Length2, emdi.Length3, emdi.Length3)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-typed-pressure-loses-smoothing",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new TraderPressureIndexState(pressure.MaType, pressure.Length1, pressure.Length2, pressure.SmoothLength)",
+    "after": "new TraderPressureIndexState(pressure.MaType, pressure.Length1, pressure.Length2, pressure.Length1)",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods"
+  },
+  {
+    "id": "residual-pressure-wave-native-loses-slow-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "_c = new ResidualAverageWindow(MovingAvgType.ExponentialMovingAverage, length3,",
+    "after": "_c = new ResidualAverageWindow(MovingAvgType.ExponentialMovingAverage, length2,",
+    "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods",
+    "scope": "public sealed class EmaWaveIndicatorState"
   }
 ]

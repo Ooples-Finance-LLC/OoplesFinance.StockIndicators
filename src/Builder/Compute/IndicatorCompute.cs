@@ -2,6 +2,7 @@
 using OoplesFinance.StockIndicators.Builder.Specs;
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
+using OoplesFinance.StockIndicators.Streaming;
 using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Models;
 
@@ -1846,10 +1847,9 @@ internal static partial class IndicatorCompute
                 ? SmoothPublished(data, context, ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
                     glma.SignalLength, glma.MaType)
                 : ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
-            ErgodicMeanDeviationIndicatorSpecOptions emdi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeErgodicMeanDeviationIndicatorFast(data, context,
-                    emdi.Length1, emdi.Length2, emdi.Length3, emdi.MaType), emdi.SignalLength, emdi.MaType)
-                : ComputeErgodicMeanDeviationIndicatorFast(data, context, emdi.Length1, emdi.Length2, emdi.Length3, emdi.MaType),
+            EmaWaveIndicatorSpecOptions wave => ComputeEmaWaveFast(data, context, wave.Length1, wave.Length2, wave.Length3, wave.SmoothLength, spec.OutputKey),
+            ErgodicMeanDeviationIndicatorSpecOptions emdi => ComputeErgodicMeanDeviationIndicatorFast(data, context,
+                emdi.Length1, emdi.Length2, emdi.Length3, emdi.MaType, emdi.SignalLength, spec.OutputKey),
 
             // Batch 13 - Volatility Indicators with Core Methods
             MayerMultipleSpecOptions mm => ComputeMayerMultipleFast(data, context, mm.Length, mm.MaType),
@@ -22128,18 +22128,35 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Ergodic Mean Deviation Indicator with signal line.
+    /// Computes one EMA Wave residual output.
     /// </summary>
+    internal static ComputeBuffer ComputeEmaWaveFast(StockData data, ComputeContext context, int length1, int length2, int length3, int smoothLength, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new ResidualAverageWindow(MovingAvgType.ExponentialMovingAverage, outputKey == "Wb" ? length2 : outputKey == "Wc" ? length3 : length1, MovingAvgType.SimpleMovingAverage, smoothLength);
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value;
+        return result;
+    }
+
+    /// <summary>Computes Ergodic Mean Deviation and its signal without narrowing hidden residuals.</summary>
     internal static ComputeBuffer ComputeErgodicMeanDeviationIndicatorFast(StockData data, ComputeContext context, int length1 = 32,
-        int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 5, int length3 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int signalLength = 5, string? outputKey = null)
     {
         // CalculateErgodicMeanDeviationIndicator publishes "Emdi": the deviation of the chained series from its
-        // own moving average, smoothed twice more. The spec's signalLength feeds only the separate "Signal"
-        // series, so it is not a parameter of this arm.
+        // own moving average, smoothed twice more, followed by a separate signal stage.
+        // The exact route retains wide residuals through every stage before publishing an output.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var window = new ResidualAverageWindow(maType, length1, maType, length2, length3, signalLength);
+            var result = context.Rent(count);
+            for (var i = 0; i < count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Value; }
+            return result;
+        }
         using var average = context.Rent(count);
         MovingAverage(data, maType, length1, input, average.WritableSpan);
         var ma = average.Span;
@@ -22156,7 +22173,10 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         MovingAverage(data, maType, length3, smoothed.Span, buffer.WritableSpan);
-        return buffer;
+        var signal = context.Rent(count);
+        MovingAverage(data, maType, signalLength, buffer.Span, signal.WritableSpan);
+        if (outputKey == "Signal") { buffer.Dispose(); return signal; }
+        signal.Dispose(); return buffer;
     }
 
     /// <summary>
@@ -29526,63 +29546,30 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeTraderPressureIndexFast(StockData data, ComputeContext context, int length1 = 7, int length2 = 2, int smoothLength = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, string? outputKey = null)
     {
-        // V1 Algorithm: high/low changes, highest/lowest range, bulls/bears calculation, net smoothing
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        int count = data.Count;
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-
-        // Compute highest/lowest over length2
-        var highestBuffer = context.Rent(count);
-        var lowestBuffer = context.Rent(count);
-        VolatilityCore.Highest(high, highestBuffer.WritableSpan, length2);
-        VolatilityCore.Lowest(low, lowestBuffer.WritableSpan, length2);
-
-        // Compute bulls and bears
-        var bullsBuffer = context.Rent(count);
-        var bearsBuffer = context.Rent(count);
-
-        for (int i = 0; i < count; i++)
+        var count = data.Count;
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
         {
-            double prevHigh = i >= 1 ? high[i - 1] : 0;
-            double prevLow = i >= 1 ? low[i - 1] : 0;
-            double hiup = Math.Max(high[i] - prevHigh, 0);
-            double loup = Math.Max(low[i] - prevLow, 0);
-            double hidn = Math.Min(high[i] - prevHigh, 0);
-            double lodn = Math.Min(low[i] - prevLow, 0);
-            double range = highestBuffer.Span[i] - lowestBuffer.Span[i];
-
-            bullsBuffer.WritableSpan[i] = range != 0 ? Math.Min((hiup + loup) / range, 1) * 100 : 0;
-            bearsBuffer.WritableSpan[i] = range != 0 ? Math.Max((hidn + lodn) / range, -1) * -100 : 0;
+            using var window = new TraderPressureWindow(maType, length1, length2, smoothLength);
+            var output = context.Rent(count);
+            for (var i = 0; i < count; i++) { var value = window.Next(data.HighPrices[i], data.LowPrices[i], true); output.WritableSpan[i] = outputKey == "Bulls" ? value.Bulls : outputKey == "Bears" ? value.Bears : value.Net; }
+            return output;
         }
-
-        // Average bulls and bears over length1
-        var avgBullsBuffer = context.Rent(count);
-        var avgBearsBuffer = context.Rent(count);
-        maCore.Compute(bullsBuffer.Span, avgBullsBuffer.WritableSpan, length1);
-        maCore.Compute(bearsBuffer.Span, avgBearsBuffer.WritableSpan, length1);
-
-        // Compute net
-        var netBuffer = context.Rent(count);
-        for (int i = 0; i < count; i++)
+        using var high = new RollingWindowMax(Math.Max(1, length2)); using var low = new RollingWindowMin(Math.Max(1, length2));
+        using var bulls = context.Rent(count); using var bears = context.Rent(count);
+        for (var i = 0; i < count; i++)
         {
-            netBuffer.WritableSpan[i] = avgBullsBuffer.Span[i] - avgBearsBuffer.Span[i];
+            var h = data.HighPrices[i]; var l = data.LowPrices[i]; var upper = high.Add(h, out _); var lower = low.Add(l, out _);
+            var ph = i == 0 ? 0 : data.HighPrices[i - 1]; var pl = i == 0 ? 0 : data.LowPrices[i - 1];
+            bulls.WritableSpan[i] = TraderPressureWindow.Pressure(h, l, ph, pl, upper, lower, true);
+            bears.WritableSpan[i] = TraderPressureWindow.Pressure(h, l, ph, pl, upper, lower, false);
         }
-
-        // Smooth net
-        var result = context.Rent(count);
-        if (outputKey == "Bulls") avgBullsBuffer.Span.CopyTo(result.WritableSpan);
-        else if (outputKey == "Bears") avgBearsBuffer.Span.CopyTo(result.WritableSpan);
-        else maCore.Compute(netBuffer.Span, result.WritableSpan, smoothLength);
-
-        highestBuffer.Dispose();
-        lowestBuffer.Dispose();
-        bullsBuffer.Dispose();
-        bearsBuffer.Dispose();
-        avgBullsBuffer.Dispose();
-        avgBearsBuffer.Dispose();
-        netBuffer.Dispose();
-
+        using var avgBulls = context.Rent(count); using var avgBears = context.Rent(count); using var net = context.Rent(count);
+        MovingAverage(data, maType, length1, bulls.Span, avgBulls.WritableSpan);
+        MovingAverage(data, maType, length1, bears.Span, avgBears.WritableSpan);
+        for (var i = 0; i < count; i++) net.WritableSpan[i] = avgBulls.Span[i] - avgBears.Span[i];
+        var result = context.Rent(count); MovingAverage(data, maType, smoothLength, net.Span, result.WritableSpan);
+        if (outputKey == "Bulls") avgBulls.Span.CopyTo(result.WritableSpan);
+        else if (outputKey == "Bears") avgBears.Span.CopyTo(result.WritableSpan);
         return result;
     }
 

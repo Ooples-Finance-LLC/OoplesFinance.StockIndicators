@@ -17,6 +17,19 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EmaWaveIndicator ||
+            (builtIn.BatchName is IndicatorName.ErgodicMeanDeviationIndicator or IndicatorName.TraderPressureIndex
+            && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.TraderPressureIndex ? 2 : 3) is 1 or 2 or 3 or 6))
+        {
+            var residualKeys = builtIn.BatchName == IndicatorName.EmaWaveIndicator ? new[] { "Wa", "Wb", "Wc" }
+                : builtIn.BatchName == IndicatorName.TraderPressureIndex ? new[] { "Tpx", "Bulls", "Bears" } : new[] { "Emdi", "Signal" };
+            for (var slot = 0; slot < residualKeys.Length; slot++)
+            {
+                var key = residualKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ResidualPressureOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.ZScore or IndicatorName.FastZScore or IndicatorName.InverseFisherZScore or IndicatorName.InverseFisherFastZScore
             && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
