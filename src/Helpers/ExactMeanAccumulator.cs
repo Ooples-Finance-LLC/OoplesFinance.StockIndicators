@@ -12,6 +12,7 @@ internal struct ExactMeanAccumulator
     private bool _wide;
     private bool IsZero => _wide ? _large.IsZero : _small == 0;
     internal bool IsExactlyZero => IsZero;
+    internal int Sign => _wide ? _large.Sign : Math.Sign(_small);
 
     internal static bool SevereCancellation(double left, double right, double result) =>
         left != 0 && right != 0 && Math.Abs(result) <= 1e-4 * Math.Max(Math.Abs(left), Math.Abs(right));

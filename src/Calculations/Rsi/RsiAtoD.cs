@@ -22,11 +22,10 @@ public static partial class Calculations
         length2 = Math.Max(1, length2);
         length3 = Math.Max(1, length3);
         List<double> streakList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
         List<double> pctRankList = new(stockData.Count);
         List<double> connorsRsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        using var rocOrder = new RollingOrderStatistic(length3);
+        using var rocOrder = new ReturnOrderStatistic(length3);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length2, length2).ChainedValues;
@@ -38,12 +37,10 @@ public static partial class Calculations
 
             // Connors ranks the one-bar rate of change of the price over length3 bars. This used to rank a
             // length3-bar rate of change of the RSI, read back from the RSI just published.
-            var roc = prevValue != 0 ? (currentValue - prevValue) / prevValue * 100 : 0;
-            tempList.Add(roc);
             // Rank strictly against the preceding window before adding the current observation.
-            var count = rocOrder.CountLessThan(roc);
-            rocOrder.Add(roc);
-            var pctRank = MinOrMax((double)count / length3 * 100, 100, 0);
+            var count = rocOrder.CountLessThan(currentValue, prevValue);
+            rocOrder.Add(currentValue, prevValue);
+            var pctRank = 100d * count / length3;
             pctRankList.Add(pctRank);
 
             var prevStreak = GetLastOrDefault(streakList);
@@ -62,7 +59,7 @@ public static partial class Calculations
             var prevConnorsRsi1 = i >= 1 ? connorsRsiList[i - 1] : 0;
             var prevConnorsRsi2 = i >= 2 ? connorsRsiList[i - 2] : 0;
 
-            var connorsRsi = MinOrMax((currentRsi + percentRank + streakRsi) / 3, 100, 0);
+            var connorsRsi = ConnorsValue.Combine(currentRsi, percentRank, streakRsi);
             connorsRsiList.Add(connorsRsi);
 
             var signal = GetRsiSignal(connorsRsi - prevConnorsRsi1, prevConnorsRsi1 - prevConnorsRsi2, connorsRsi, prevConnorsRsi1, 70, 30);

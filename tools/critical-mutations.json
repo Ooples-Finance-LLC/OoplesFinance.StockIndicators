@@ -6146,5 +6146,108 @@
     "after": "smoothLength1, smoothLength1 }",
     "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
     "scope": "public sealed class CCTStochRelativeStrengthIndexState"
+  },
+  {
+    "id": "connors-rounded-returns-collapse-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnOrderStatistic.cs",
+    "before": "return difference.Sign;",
+    "after": "return (_current / _previous).CompareTo(other._current / other._previous);",
+    "filter": "FullyQualifiedName~ReturnOrderStatisticTests"
+  },
+  {
+    "id": "connors-rank-counts-ties",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnOrderStatistic.cs",
+    "before": "key.CompareTo(node.Key) <= 0",
+    "after": "key.CompareTo(node.Key) < 0",
+    "filter": "FullyQualifiedName~ReturnOrderStatisticTests"
+  },
+  {
+    "id": "connors-rank-keeps-expired-return",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnOrderStatistic.cs",
+    "before": "_window.Count == _length",
+    "after": "_window.Count == _length + 1",
+    "filter": "FullyQualifiedName~ReturnOrderStatisticTests"
+  },
+  {
+    "id": "connors-preview-commits-return",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "if (isFinal) _rocRank.Add(currentValue, prevValue);",
+    "after": "_rocRank.Add(currentValue, prevValue);",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset",
+    "scope": "public sealed class ConnorsRelativeStrengthIndexState"
+  },
+  {
+    "id": "connors-reset-keeps-rank-window",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_rocRank.Dispose();\n        _rocRank = new ReturnOrderStatistic(_rankLength);",
+    "after": "// injected retained return history",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset",
+    "scope": "public sealed class ConnorsRelativeStrengthIndexState"
+  },
+  {
+    "id": "connors-batch-loses-price-period",
+    "module": "numerical",
+    "file": "src/Calculations/Rsi/RsiAtoD.cs",
+    "before": "CalculateRelativeStrengthIndex(stockData, maType, length2, length2)",
+    "after": "CalculateRelativeStrengthIndex(stockData, maType, length1, length1)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset",
+    "scope": "public static StockData CalculateConnorsRelativeStrengthIndex("
+  },
+  {
+    "id": "connors-composite-divides-by-two",
+    "module": "numerical",
+    "file": "src/Helpers/ConnorsValue.cs",
+    "before": "sum.Mean(3)",
+    "after": "sum.Mean(2)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset"
+  },
+  {
+    "id": "connors-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset",
+    "scope": "internal static ComputeBuffer ComputeConnorsRsiFast("
+  },
+  {
+    "id": "connors-stochastic-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SmoothStrength(data, context, buffer, smoothLength2, maType)",
+    "after": "SmoothStrength(data, context, buffer, smoothLength1, maType)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.AllDirectRoutesPreserveExactRanksSelectedInputsPeriodsPreviewAndReset",
+    "scope": "internal static ComputeBuffer ComputeStochasticConnorsRsiFast("
+  },
+  {
+    "id": "connors-typed-loses-rank-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new ConnorsRelativeStrengthIndexState(connors.MaType, connors.Length1, connors.Length2, connors.Length3)",
+    "after": "new ConnorsRelativeStrengthIndexState(connors.MaType, connors.Length1, connors.Length2, connors.Length2)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.TypedAndLiveFactoriesPreserveEveryPeriod"
+  },
+  {
+    "id": "connors-bypasses-customer-rsi-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.RawCustomerStagesPreserveAllFourRsiAveragesAndBothStochasticStages",
+    "scope": "private static void RelativeStrengthIndex("
+  },
+  {
+    "id": "connors-bypasses-customer-stochastic-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ConnorsNumericalTests.RawCustomerStagesPreserveAllFourRsiAveragesAndBothStochasticStages",
+    "scope": "private static ComputeBuffer SmoothStrength("
   }
 ]

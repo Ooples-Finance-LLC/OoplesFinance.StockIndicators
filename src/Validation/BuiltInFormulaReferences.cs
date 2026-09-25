@@ -17,6 +17,18 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.ConnorsRelativeStrengthIndex or IndicatorName.StochasticConnorsRelativeStrengthIndex
+            && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var connorsKeys = builtIn.BatchOutputKey is { } only ? new[] { only } : builtIn.BatchName == IndicatorName.ConnorsRelativeStrengthIndex
+                ? new[] { "Rsi", "PctRank", "StreakRsi", "ConnorsRsi" } : new[] { "SaRsi", "Signal" };
+            for (var slot = 0; slot < connorsKeys.Length; slot++)
+            {
+                var key = connorsKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => ConnorsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.CCTStochRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var cctRsiKeys = new[] { "Type1", "Type2", "Type3", "Type4", "Type5", "Type6", "TypeCustom", "Signal" };

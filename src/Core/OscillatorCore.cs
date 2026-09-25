@@ -1090,18 +1090,18 @@ internal static class OscillatorCore
             RelativeStrengthIndex(streak, streakRsi, streakLength);
 
             // Strict percentile rank against the previous ROC observations, using a fixed denominator.
-            using var history = new RollingOrderStatistic(rocLength);
+            using var history = new ReturnOrderStatistic(rocLength);
             for (var i = 0; i < close.Length; i++)
             {
-                var change = i > 0 && close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] * 100 : 0;
-                rocRank[i] = 100d * history.CountLessThan(change) / rocLength;
-                history.Add(change);
+                var previous = i > 0 ? close[i - 1] : 0;
+                rocRank[i] = 100d * history.CountLessThan(close[i], previous) / rocLength;
+                history.Add(close[i], previous);
             }
 
             // Combine all three
             for (var i = 0; i < close.Length; i++)
             {
-                output[i] = (rsi[i] + streakRsi[i] + rocRank[i]) / 3;
+                output[i] = ConnorsValue.Combine(rsi[i], rocRank[i], streakRsi[i]);
             }
         }
         finally
