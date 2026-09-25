@@ -10732,8 +10732,9 @@ internal static partial class IndicatorCompute
         using var order = new RollingOrderStatistic(options.AnnualLength);
         for (var i = 0; i < data.Count; i++)
         {
-            var ratio = i > 0 && values[i - 1] != 0 ? values[i] / values[i - 1] : 0;
-            var log = ratio > 0 ? Math.Log(ratio) : 0;
+            var previous = i > 0 ? values[i - 1] : 0;
+            var log = values[i] != 0 && previous != 0 && Math.Sign(values[i]) == Math.Sign(previous)
+                ? StableLogRatio.Of(Math.Abs(values[i]), Math.Abs(previous)) : 0;
             var sum = logs.Add(log, out var count);
             var residual = log - sum / count;
             var squares = residuals.Add(residual * residual, out _);

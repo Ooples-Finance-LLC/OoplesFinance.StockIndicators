@@ -931,8 +931,9 @@ internal static partial class BuiltInFormulaReferences
                 return new("Hvp", new[] { "Hvp", "Signal" }, bars =>
                 {
                     var annual = Integer(options, "AnnualLength", 252);
-                    var logs = bars.Select((b, i) => i > 0 && bars[i - 1].Close != 0 && b.Close / bars[i - 1].Close > 0
-                        ? Math.Log(b.Close / bars[i - 1].Close) : 0).ToArray();
+                    var logs = bars.Select((b, i) => i > 0 && bars[i - 1].Close != 0 && b.Close != 0
+                        && Math.Sign(b.Close) == Math.Sign(bars[i - 1].Close)
+                        ? (ReferenceFraction.FromDouble(Math.Abs(b.Close)) / ReferenceFraction.FromDouble(Math.Abs(bars[i - 1].Close))).LogToDouble() : 0).ToArray();
                     // Published residual volatility uses each log return's contemporaneous window mean.
                     var residuals = logs.Select((v, i) => Math.Pow(v - Window(logs, i, length).Average(), 2)).ToArray();
                     var volatility = logs.Select((_, i) => length == 1 ? 0 : Math.Sqrt(Window(residuals, i, length).Sum() * annual / (length - 1))).ToArray();
