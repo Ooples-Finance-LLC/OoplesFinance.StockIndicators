@@ -86,13 +86,14 @@ public static partial class Calculations
         {
             var ema1 = period1EmaList[i];
             var ema2 = period2EmaList[i];
-            var macd = ema1 - ema2;
 
-            var ppo = ema2 != 0 ? macd / ema2 * 100 : 0;
+            var ppo = RoundedPercentageChange.Of(ema1, ema2);
             ppoList.Add(ppo);
         }
 
-        var ppoSignalLineList = GetMovingAverageList(stockData, maType, length3, ppoList);
+        var finiteInput = FiniteSignalInput.Create(ppoList, out var finiteCount);
+        var ppoSignalLineList = GetMovingAverageList(stockData, maType, length3, finiteInput);
+        for (var i = finiteCount; i < ppoSignalLineList.Count; i++) ppoSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];

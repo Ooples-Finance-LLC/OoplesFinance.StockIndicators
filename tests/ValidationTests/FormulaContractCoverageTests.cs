@@ -2389,10 +2389,18 @@ public sealed class FormulaContractCoverageTests
         Check(new QuadraticMovingAverage(2), prices, new[] { 1d, Math.Sqrt(2.5), Math.Sqrt(10) });
         Check(new TFSMboIndicator(2, 3, 2), prices,
             new[] { 0d, 1.5, 2d / 3 }, new[] { 0d, .75, 13d / 12 }, new[] { 0d, .75, -5d / 12 });
+        var ergodicFast = (new ReferenceFraction(19) / new ReferenceFraction(6)).ToDouble();
+        var ergodicSlow = (new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble();
+        var ergodicDifference = (ReferenceFraction.FromDouble(ergodicFast) - ReferenceFraction.FromDouble(ergodicSlow)).ToDouble();
+        var ergodicSignal = (new ReferenceFraction(2) * ReferenceFraction.FromDouble(ergodicDifference) / new ReferenceFraction(3)).ToDouble();
         Check(new ErgodicMovingAverageConvergenceDivergence(2, 3, 2), prices,
-            new[] { 0d, 0, 5d / 6 }, new[] { 0d, 0, 5d / 9 }, new[] { 0d, 0, 5d / 18 });
+            new[] { 0d, 0, ergodicDifference }, new[] { 0d, 0, ergodicSignal },
+            new[] { 0d, 0, (ReferenceFraction.FromDouble(ergodicDifference) - ReferenceFraction.FromDouble(ergodicSignal)).ToDouble() });
+        var ergodicRatio = (new ReferenceFraction(100) * (ReferenceFraction.FromDouble(ergodicSlow) / ReferenceFraction.FromDouble(ergodicFast) - new ReferenceFraction(1))).ToDouble();
+        var ergodicRatioSignal = (ReferenceFraction.FromDouble(ergodicRatio) / new ReferenceFraction(3)).ToDouble();
         Check(new ErgodicPercentagePriceOscillator(2), prices,
-            new[] { 0d, 0, -500d / 19 }, new[] { 0d, 0, -500d / 57 }, new[] { 0d, 0, -1000d / 57 });
+            new[] { 0d, 0, ergodicRatio }, new[] { 0d, 0, ergodicRatioSignal },
+            new[] { 0d, 0, (ReferenceFraction.FromDouble(ergodicRatio) - ReferenceFraction.FromDouble(ergodicRatioSignal)).ToDouble() });
         var longPrices = Enumerable.Repeat(10d, 200).Append(20d)
             .Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new TFSMboPercentagePriceOscillator(14), longPrices,

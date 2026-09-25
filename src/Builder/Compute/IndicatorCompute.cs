@@ -839,9 +839,9 @@ internal static partial class IndicatorCompute
                 series: spec.OutputKey switch { "Signal" => MacdSeries.Signal, "Histogram" => MacdSeries.Histogram, _ => MacdSeries.Line }),
             ErgodicPercentagePriceOscillatorSpecOptions eppo => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context,
+                "Signal" => SmoothFinitePublished(data, context,
                     ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length, eppo.MaType), 5, eppo.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
+                "Histogram" => DifferenceFromFiniteSmoothing(data, context,
                     ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length, eppo.MaType), 5, eppo.MaType),
                 _ => ComputeErgodicPercentagePriceOscillatorFast(data, context, eppo.Length, eppo.MaType)
             },
@@ -9445,7 +9445,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var ema2 = fast.Span[i];
-            output[i] = ema2 != 0 ? (slow.Span[i] - ema2) / ema2 * 100 : 0;
+            output[i] = RoundedPercentageChange.Of(slow.Span[i], ema2);
         }
 
         return buffer;
@@ -27950,7 +27950,9 @@ internal static partial class IndicatorCompute
         }
 
         using var signalLine = context.Rent(count);
-        MovingAverage(data, maType, length3, line.Span, signalLine.WritableSpan);
+        var finiteInput = FiniteSignalInput.Create(line.ToArray(), out var finiteCount);
+        MovingAverage(data, maType, length3, SpanCompat.AsReadOnlySpan(finiteInput), signalLine.WritableSpan);
+        for (var i = finiteCount; i < count; i++) signalLine.WritableSpan[i] = double.NaN;
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;

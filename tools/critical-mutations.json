@@ -3299,5 +3299,49 @@
     "id": "elliott-ignored-selected-input",
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices"
+  },
+  {
+    "module": "ergodic-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ErgodicMovingAverageConvergenceDivergenceState",
+    "filter": "FullyQualifiedName~ErgodicNumericalTests",
+    "id": "ergodic-macd-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signalSmoother.Next(macd, isFinal);",
+    "after": "var signal = _signalSmoother.Next(macd, isFinal);"
+  },
+  {
+    "module": "ergodic-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ErgodicPercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~ErgodicNumericalTests",
+    "id": "ergodic-ppo-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signalSmoother.Next(ppo, isFinal);",
+    "after": "var signal = _signalSmoother.Next(ppo, isFinal);"
+  },
+  {
+    "module": "ergodic-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void ErgodicPercentagePriceOscillator",
+    "filter": "FullyQualifiedName~CorePublishesLongMinusShortPercentageRatherThanDoubleSmoothedMomentum",
+    "id": "ergodic-core-reversed-lengths",
+    "before": "PercentagePriceOscillator(input, output, longLength, shortLength);",
+    "after": "PercentagePriceOscillator(input, output, shortLength, longLength);"
+  },
+  {
+    "module": "ergodic-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ErgodicPercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~ErgodicNumericalTests",
+    "id": "ergodic-ppo-intermediate-overflow",
+    "before": "RoundedPercentageChange.Of(ema1, ema2)",
+    "after": "ema2 == 0 ? 0 : (ema1 - ema2) / ema2 * 100"
+  },
+  {
+    "module": "ergodic-numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "filter": "FullyQualifiedName~ErgodicNumericalTests",
+    "id": "ergodic-macd-dropped-signal-length",
+    "before": "new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2, ergodic.Length3)",
+    "after": "new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2)"
   }
 ]
