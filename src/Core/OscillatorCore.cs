@@ -453,59 +453,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrueStrengthIndex(ReadOnlySpan<double> input, Span<double> output, int longLength = 25, int shortLength = 13)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pcArray = pool.Rent(input.Length);
-        var absPcArray = pool.Rent(input.Length);
-        var pcEma1Array = pool.Rent(input.Length);
-        var pcEma2Array = pool.Rent(input.Length);
-        var absPcEma1Array = pool.Rent(input.Length);
-        var absPcEma2Array = pool.Rent(input.Length);
-
-        try
-        {
-            var pc = pcArray.AsSpan(0, input.Length);
-            var absPc = absPcArray.AsSpan(0, input.Length);
-            var pcEma1 = pcEma1Array.AsSpan(0, input.Length);
-            var pcEma2 = pcEma2Array.AsSpan(0, input.Length);
-            var absPcEma1 = absPcEma1Array.AsSpan(0, input.Length);
-            var absPcEma2 = absPcEma2Array.AsSpan(0, input.Length);
-
-            // Price change
-            pc[0] = 0;
-            absPc[0] = 0;
-            for (var i = 1; i < input.Length; i++)
-            {
-                pc[i] = input[i] - input[i - 1];
-                absPc[i] = Math.Abs(pc[i]);
-            }
-
-            // Double smoothed price change
-            MovingAverageCore.ExponentialMovingAverage(pc, pcEma1, longLength);
-            MovingAverageCore.ExponentialMovingAverage(pcEma1, pcEma2, shortLength);
-
-            // Double smoothed absolute price change
-            MovingAverageCore.ExponentialMovingAverage(absPc, absPcEma1, longLength);
-            MovingAverageCore.ExponentialMovingAverage(absPcEma1, absPcEma2, shortLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = absPcEma2[i] != 0 ? 100 * pcEma2[i] / absPcEma2[i] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(pcArray);
-            pool.Return(absPcArray);
-            pool.Return(pcEma1Array);
-            pool.Return(pcEma2Array);
-            pool.Return(absPcEma1Array);
-            pool.Return(absPcEma2Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var window = new StrengthWindow(MovingAvgType.ExponentialMovingAverage, new[] { longLength, shortLength }, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

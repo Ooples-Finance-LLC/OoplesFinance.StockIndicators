@@ -248,7 +248,7 @@ internal static partial class IndicatorCompute
             UltimateOscillatorSpecOptions uo => ComputeUltimateOscillatorFast(data, context, uo.Length1, uo.Length2, uo.Length3),
             TsiSpecOptions tsi => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType), 7, tsi.MaType),
+                "Signal" => SmoothStrength(data, context, ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType), 7, tsi.MaType),
                 _ => ComputeTsiFast(data, context, tsi.LongLength, tsi.ShortLength, tsi.MaType)
             },
             StochRsiSpecOptions srsi => spec.OutputKey switch
@@ -1702,7 +1702,7 @@ internal static partial class IndicatorCompute
             TriangularMovingAverageSpecOptions tma2 => ComputeTriangularMovingAverageFast(data, context, tma2.Length, tma2.MaType),
             TrueStrengthIndexSpecOptions tsi2 => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2, tsi2.MaType), tsi2.SignalLength, tsi2.MaType),
+                "Signal" => SmoothStrength(data, context, ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2, tsi2.MaType), tsi2.SignalLength, tsi2.MaType),
                 _ => ComputeTrueStrengthIndexFast(data, context, tsi2.Length1, tsi2.Length2, tsi2.MaType)
             },
 
@@ -2367,7 +2367,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             ErgodicTrueStrengthIndexV1SpecOptions etsiv1 => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
+                ? SmoothStrength(data, context, ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1,
                     etsiv1.Length2, etsiv1.Length3, etsiv1.MaType), etsiv1.SignalLength, etsiv1.MaType)
                 : ComputeErgodicTsiV1Fast(data, context, etsiv1.Length1, etsiv1.Length2, etsiv1.Length3, etsiv1.MaType),
             ErgodicTrueStrengthIndexV2SpecOptions etsiv2 => spec.OutputKey switch
@@ -3430,6 +3430,21 @@ internal static partial class IndicatorCompute
                 output[i] = source.Span[i] - signalLine.Span[i];
             }
 
+            return buffer;
+        }
+    }
+
+    private static ComputeBuffer SmoothStrength(StockData data, ComputeContext context, ComputeBuffer source,
+        int length, MovingAvgType maType)
+    {
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
+            return SmoothPublished(data, context, source, length, maType);
+        using (source)
+        using (var stage = new StrengthAverage(maType, length, source.Span.Length))
+        {
+            var buffer = context.Rent(source.Span.Length);
+            for (var i = 0; i < source.Span.Length; i++)
+                buffer.WritableSpan[i] = stage.Next(new StrengthValue(source.Span[i]), true).Mantissa;
             return buffer;
         }
     }
@@ -20991,6 +21006,14 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new StrengthWindow(maType, new[] { length1, length2 }, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(input[i], true);
+            return stable;
+        }
+
         using var change = context.Rent(count);
         using var absoluteChange = context.Rent(count);
         var pc = change.WritableSpan;
@@ -27952,6 +27975,14 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new StrengthWindow(maType, new[] { length1, length2, length3 }, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(input[i], true);
+            return stable;
+        }
+
         using var change = context.Rent(count);
         using var absoluteChange = context.Rent(count);
         var priceDiff = change.WritableSpan;
@@ -27995,14 +28026,8 @@ internal static partial class IndicatorCompute
         int length5 = 6, int length6 = 2, int signalLength = 2,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        using var index = ComputeErgodicTsiV2Fast(data, context, length4, length5, length6, maType);
-        var source = index.Span;
-
-        var buffer = context.Rent(source.Length);
-        buffer.WritableSpan.Clear();
-        MovingAverage(data, maType, signalLength, source, buffer.WritableSpan);
-
-        return buffer;
+        return SmoothStrength(data, context,
+            ComputeErgodicTsiV2Fast(data, context, length4, length5, length6, maType), signalLength, maType);
     }
 
     internal static ComputeBuffer ComputeErgodicTsiV2Fast(StockData data, ComputeContext context, int length4 = 17, int length5 = 6,
@@ -28021,6 +28046,14 @@ internal static partial class IndicatorCompute
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
+
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new StrengthWindow(maType, new[] { length4, length5, length6 }, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(input[i], true);
+            return stable;
+        }
 
         using var changes = context.Rent(count);
         using var absoluteChanges = context.Rent(count);

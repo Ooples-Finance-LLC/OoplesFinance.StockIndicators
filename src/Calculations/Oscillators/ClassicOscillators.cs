@@ -752,32 +752,39 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        if (StrengthWindow.Supports(maType))
+            tsiList.AddRange(StrengthWindow.Compute(inputList, maType, length1, length2));
+        else
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var pc = MinPastValues(i, 1, currentValue - prevValue);
-            pcList.Add(pc);
+                var pc = MinPastValues(i, 1, currentValue - prevValue);
+                pcList.Add(pc);
 
-            var absPC = Math.Abs(pc);
-            absPCList.Add(absPC);
+                var absPC = Math.Abs(pc);
+                absPCList.Add(absPC);
+            }
+
+            var pcSmooth1List = GetMovingAverageList(stockData, maType, length1, pcList);
+            var pcSmooth2List = GetMovingAverageList(stockData, maType, length2, pcSmooth1List);
+            var absPCSmooth1List = GetMovingAverageList(stockData, maType, length1, absPCList);
+            var absPCSmooth2List = GetMovingAverageList(stockData, maType, length2, absPCSmooth1List);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var absSmooth2PC = absPCSmooth2List[i];
+                var smooth2PC = pcSmooth2List[i];
+
+                var tsi = absSmooth2PC != 0 ? MinOrMax(100 * smooth2PC / absSmooth2PC, 100, -100) : 0;
+                tsiList.Add(tsi);
+            }
+
         }
 
-        var pcSmooth1List = GetMovingAverageList(stockData, maType, length1, pcList);
-        var pcSmooth2List = GetMovingAverageList(stockData, maType, length2, pcSmooth1List);
-        var absPCSmooth1List = GetMovingAverageList(stockData, maType, length1, absPCList);
-        var absPCSmooth2List = GetMovingAverageList(stockData, maType, length2, absPCSmooth1List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var absSmooth2PC = absPCSmooth2List[i];
-            var smooth2PC = pcSmooth2List[i];
-
-            var tsi = absSmooth2PC != 0 ? MinOrMax(100 * smooth2PC / absSmooth2PC, 100, -100) : 0;
-            tsiList.Add(tsi);
-        }
-
-        var tsiSignalList = GetMovingAverageList(stockData, maType, signalLength, tsiList);
+        var tsiSignalList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(tsiList, maType, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, tsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var tsi = tsiList[i];

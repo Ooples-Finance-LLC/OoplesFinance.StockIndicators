@@ -469,7 +469,8 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is EndPointMovingAverage or SharpModifiedMovingAverage or
+        var includeNumericalExtremes = probe is Tsi or TrueStrengthIndex or ErgodicTrueStrengthIndexV1 or ErgodicTrueStrengthIndexV2 or
+            EndPointMovingAverage or SharpModifiedMovingAverage or
             HarmonicMeanMovingAverage or
             CloseToCloseVolatility or ParkinsonVolatility or
             GarmanKlassVolatility or RogersSatchellVolatility or YangZhangVolatility or
