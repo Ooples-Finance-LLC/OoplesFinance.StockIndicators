@@ -13444,33 +13444,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersInverseFisherTransformFast(StockData data, ComputeContext context, int length1 = 5,
         int length2 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // The batch transforms a smoothed, rescaled relative strength index, not the raw price series.
-        var count = data.Count;
-
-        using var rsi = ComputeRsiFast(data, context, Math.Max(length1, 1), maType);
-        var rsiValues = rsi.Span;
-
-        using var rescaled = context.Rent(count);
-        var v1 = rescaled.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            v1[i] = 0.1 * (rsiValues[i] - 50);
-        }
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(length2, 1), rescaled.Span, smoothed.WritableSpan);
-        var v2 = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var top = MathHelper.Exp(2 * v2[i]) - 1;
-            var bottom = MathHelper.Exp(2 * v2[i]) + 1;
-            output[i] = bottom != 0 ? MathHelper.MinOrMax(top / bottom, 1, -1) : 0;
-        }
-
-        return buffer;
+        var source = ComputeRsiFast(data, context, length1, maType);
+        for (var i = 0; i < source.Span.Length; i++) source.WritableSpan[i] = .1 * (source.Span[i] - 50);
+        var result = SmoothStrength(data, context, source, length2, maType);
+        for (var i = 0; i < result.Span.Length; i++) result.WritableSpan[i] = Math.Tanh(result.Span[i]);
+        return result;
     }
 
     /// <summary>
@@ -15038,38 +15016,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeInverseFisherTransformCoreFast(StockData data, ComputeContext context, int length1 = 5,
         int length2 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateEhlersInverseFisherTransform centres the relative strength index on zero, scales it by a
-        // tenth, smooths that over length2 and then applies the inverse transform. The spec's only option is
-        // marked obsolete because it sets none of this, so both lengths keep the batch's own defaults.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var relativeStrength = context.Rent(count);
-        RelativeStrengthIndex(data, context, input, Math.Max(length1, 1), maType, relativeStrength.WritableSpan);
-        var rsi = relativeStrength.Span;
-
-        using var scaled = context.Rent(count);
-        var v1 = scaled.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            v1[i] = 0.1 * (rsi[i] - 50);
-        }
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(length2, 1), scaled.Span, smoothed.WritableSpan);
-        var v2 = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var top = MathHelper.Exp(2 * v2[i]);
-            var bottom = top + 1;
-            output[i] = bottom != 0 ? MathHelper.MinOrMax((top - 1) / bottom, 1, -1) : 0;
-        }
-
-        return buffer;
+        return ComputeEhlersInverseFisherTransformFast(data, context, length1, length2, maType);
     }
 
     /// <summary>
@@ -21870,6 +21817,7 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer ComputeOscillatorInverseFisherFast(StockData data, ComputeContext context,
         int length, int signalLength, MovingAvgType kind, bool cci, double constant)
     {
+        if (!cci) return ComputeEhlersInverseFisherTransformFast(data, context, length, signalLength, kind);
         using var source = cci ? ComputeCciFast(data, context, length, kind, constant)
             : ComputeRsiFast(data, context, length, kind);
         for (var i = 0; i < data.Count; i++) source.WritableSpan[i] = .1 * (source.Span[i] - 50);

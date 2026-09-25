@@ -1116,6 +1116,8 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform:
             case IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform:
+                if (name == IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform && kind is 1 or 2 or 3 or 6)
+                    return new("Eiftrsi", new[] { "Eiftrsi" }, bars => RsiInverseFisherOutputs(bars, indicator));
                 var inverseCommodity = name == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform;
                 var inverseKey = inverseCommodity ? "Eiftcci" : "Eiftrsi";
                 return new(inverseKey, new[] { inverseKey }, bars =>

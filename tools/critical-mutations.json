@@ -6311,5 +6311,85 @@
     "after": "StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~QuasiWhiteNoiseNumericalTests.RawCustomerStagesPreserveAllRsiAveragesAndThePublishedMean",
     "scope": "internal static ComputeBuffer ComputeQuasiWhiteNoiseFast("
+  },
+  {
+    "id": "rsi-inverse-fisher-raw-erases-tiny-transform",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "Math.Tanh(result.Span[i])",
+    "after": "(Math.Exp(2 * result.Span[i]) - 1) / (Math.Exp(2 * result.Span[i]) + 1)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.AllThreeCustomerStagesAreHonored",
+    "scope": "internal static ComputeBuffer ComputeEhlersInverseFisherTransformFast("
+  },
+  {
+    "id": "rsi-inverse-fisher-batch-skips-smoothing",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "before": "Math.Tanh(v2)",
+    "after": "Math.Tanh(v1List[i])",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.DirectCoreRawAliasesAndFactoriesPreserveSelectedPricesAndAllPeriods",
+    "scope": "public static StockData CalculateEhlersInverseFisherTransform("
+  },
+  {
+    "id": "rsi-inverse-fisher-relative-batch-erases-small-signal",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "before": "Math.Tanh(v2)",
+    "after": "(Math.Exp(2 * v2) - 1) / (Math.Exp(2 * v2) + 1)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.NearZeroSignalsSurviveBatchRawCoreAndNativeTransforms",
+    "scope": "public static StockData CalculateEhlersRelativeStrengthIndexInverseFisherTransform("
+  },
+  {
+    "id": "rsi-inverse-fisher-core-loses-rsi-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new RsiState(maType, length)",
+    "after": "new RsiState(maType, 5)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.NearZeroSignalsSurviveBatchRawCoreAndNativeTransforms",
+    "scope": "internal static void InverseFisherTransform("
+  },
+  {
+    "id": "rsi-inverse-fisher-native-preview-commits-smoothing",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "before": "_exactAverage.Next(new StrengthValue(v1), isFinal)",
+    "after": "_exactAverage.Next(new StrengthValue(v1), true)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.DirectCoreRawAliasesAndFactoriesPreserveSelectedPricesAndAllPeriods",
+    "scope": "public sealed class EhlersInverseFisherTransformState"
+  },
+  {
+    "id": "rsi-inverse-fisher-native-reset-keeps-smoothing",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "before": "_exactAverage?.Reset();",
+    "after": "// injected retained average",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.DirectCoreRawAliasesAndFactoriesPreserveSelectedPricesAndAllPeriods",
+    "scope": "public sealed class EhlersInverseFisherTransformState"
+  },
+  {
+    "id": "rsi-inverse-fisher-typed-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new EhlersRelativeStrengthIndexInverseFisherTransformState(inverseRsi.MaType, inverseRsi.Length, inverseRsi.SignalLength)",
+    "after": "new EhlersRelativeStrengthIndexInverseFisherTransformState(inverseRsi.MaType, inverseRsi.Length, inverseRsi.Length)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.DirectCoreRawAliasesAndFactoriesPreserveSelectedPricesAndAllPeriods"
+  },
+  {
+    "id": "rsi-inverse-fisher-raw-alias-loses-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComputeEhlersInverseFisherTransformFast(data, context, length1, length2, maType)",
+    "after": "ComputeEhlersInverseFisherTransformFast(data, context, length2, length2, maType)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.DirectCoreRawAliasesAndFactoriesPreserveSelectedPricesAndAllPeriods",
+    "scope": "internal static ComputeBuffer ComputeInverseFisherTransformCoreFast("
+  },
+  {
+    "id": "rsi-inverse-fisher-bypasses-customer-smoothing",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.AllThreeCustomerStagesAreHonored",
+    "scope": "private static ComputeBuffer SmoothStrength("
   }
 ]

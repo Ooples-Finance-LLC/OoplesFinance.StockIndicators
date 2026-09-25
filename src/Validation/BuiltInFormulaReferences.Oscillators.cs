@@ -306,6 +306,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.EhlersInverseFisherTransform:
                 kind = AverageKind(options, 2);
+                if (kind is 1 or 2 or 3 or 6) return new("Eift", new[] { "Eift" }, bars => RsiInverseFisherOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var inverseRsiLength = options is OoplesFinance.StockIndicators.Builder.Specs.InverseFisherTransformCoreSpecOptions ? 5 : length;
                 return new("Eift", new[] { "Eift" }, bars =>
