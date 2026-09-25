@@ -141,10 +141,9 @@ public static partial class Calculations
             var rsi = rsiList[i];
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var alpha = 2 * Math.Abs((rsi / 100) - 0.5);
 
             var prevArsi = GetLastOrDefault(arsiList);
-            var arsi = (alpha * currentValue) + ((1 - alpha) * prevArsi);
+            var arsi = AdaptiveRsiBlend.Next(currentValue, prevArsi, rsi);
             arsiList.Add(arsi);
 
             var signal = GetCompareSignal(currentValue - arsi, prevValue - prevArsi);

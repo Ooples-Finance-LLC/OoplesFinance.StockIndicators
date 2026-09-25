@@ -140,6 +140,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Mrsi", line), ("Signal", Average(line, period, momentaKind)));
                 });
             case IndicatorName.SelfAdjustingRelativeStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("SaRsi", new[] { "SaRsi", "Signal", "ObLevel", "OsLevel" }, bars => SelfAdjustingRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 return new("SaRsi", new[] { "SaRsi", "Signal", "ObLevel", "OsLevel" }, bars =>
                 {

@@ -95,8 +95,15 @@ public static partial class Calculations
         // relative strength index, so sigma is the windowed deviation of that index; the quantity this
         // replaces is about 55% wider, which pushed both levels further from 50 and made the indicator reach
         // them less often. Taken over rsiList by name. See #190.
-        var rsiStdDevList = GetStandardDeviationList(rsiList, length);
-        var rsiSmaList = GetMovingAverageList(stockData, maType, smoothingLength, rsiList);
+        using var deviation = new ExactPopulationWindow(length);
+        var rsiStdDevList = rsiList.Select(v => deviation.Next(v, true)).ToList();
+        List<double> rsiSmaList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var smoothing = new StrengthAverage(maType, smoothingLength, stockData.Count);
+            rsiSmaList = rsiList.Select(v => smoothing.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else rsiSmaList = GetMovingAverageList(stockData, maType, smoothingLength, rsiList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
