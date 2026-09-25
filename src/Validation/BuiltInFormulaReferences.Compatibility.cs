@@ -2,7 +2,7 @@ namespace OoplesFinance.StockIndicators.Validation;
 
 internal static partial class BuiltInFormulaReferences
 {
-    private static IndicatorValidationRule FullReference(int slot,
+    internal static IndicatorValidationRule FullReference(int slot,
         Func<IReadOnlyList<Indicators.Bar>, IReadOnlyList<double>> reference) =>
         IndicatorValidationRule.Reference(slot, reference, new IndicatorErrorBudget(1e-9, 1e-9), includeWarmup: true);
 

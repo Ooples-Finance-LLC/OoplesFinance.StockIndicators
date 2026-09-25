@@ -29,8 +29,12 @@ public sealed class CorrectnessAssuranceTests
     public void BuiltInReferencesCheckStartupEvenWhenWarmupExceedsTheFixture()
     {
         var bars = new[] { new Bar(DateTime.UnixEpoch, 1, 1, 1, 1, 1) };
-        // Keep a FullReference adapter case as well as the specialized exact
-        // references: promoting SMA/EMA must not leave the shared adapter untested.
+        // Exercise the adapter directly so promoting indicators to specialized exact
+        // references cannot silently remove the adapter's startup coverage.
+        var adapter = BuiltInFormulaReferences.FullReference(0, input => input.Select(b => b.Close).ToArray());
+        adapter.Check(new IndicatorValidationContext("adapter-startup", bars, new[] { new[] { 1d } }, 100));
+        Assert.Throws<InvalidOperationException>(() => adapter.Check(
+            new IndicatorValidationContext("wrong-adapter-startup", bars, new[] { new[] { 2d } }, 100)));
         foreach (var (indicator, initial) in new (IIndicator, double)[]
             { (new Sma(2), 0), (new Ema(2), 1), (new OoplesFinance.StockIndicators.Indicators.Range(100), 0) })
         {
