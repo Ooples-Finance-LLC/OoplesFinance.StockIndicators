@@ -2387,8 +2387,11 @@ public sealed class FormulaContractCoverageTests
         Check(new PrettyGoodOscillator(2), bars, new[] { 0d, 5d / 9, -1d / 3 });
         Check(new MayerMultiple(2), prices, new[] { 0d, 4d / 3, 4d / 3 });
         Check(new QuadraticMovingAverage(2), prices, new[] { 1d, Math.Sqrt(2.5), Math.Sqrt(10) });
+        var tfsSlow = (new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble();
+        var tfsDifference = (new ReferenceFraction(3) - ReferenceFraction.FromDouble(tfsSlow)).ToDouble();
+        var tfsSignal = ((ReferenceFraction.FromDouble(1.5) + ReferenceFraction.FromDouble(tfsDifference)) / new ReferenceFraction(2)).ToDouble();
         Check(new TFSMboIndicator(2, 3, 2), prices,
-            new[] { 0d, 1.5, 2d / 3 }, new[] { 0d, .75, 13d / 12 }, new[] { 0d, .75, -5d / 12 });
+            new[] { 0d, 1.5, tfsDifference }, new[] { 0d, .75, tfsSignal }, new[] { 0d, .75, tfsDifference - tfsSignal });
         var ergodicFast = (new ReferenceFraction(19) / new ReferenceFraction(6)).ToDouble();
         var ergodicSlow = (new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble();
         var ergodicDifference = (ReferenceFraction.FromDouble(ergodicFast) - ReferenceFraction.FromDouble(ergodicSlow)).ToDouble();
@@ -2403,20 +2406,31 @@ public sealed class FormulaContractCoverageTests
             new[] { 0d, 0, (ReferenceFraction.FromDouble(ergodicRatio) - ReferenceFraction.FromDouble(ergodicRatioSignal)).ToDouble() });
         var longPrices = Enumerable.Repeat(10d, 200).Append(20d)
             .Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
+        var tfsRatio = (new ReferenceFraction(100) * (ReferenceFraction.FromDouble(10.4) / ReferenceFraction.FromDouble(10.05) - new ReferenceFraction(1))).ToDouble();
+        var tfsRatioSignal = (ReferenceFraction.FromDouble(tfsRatio) / new ReferenceFraction(18)).ToDouble();
         Check(new TFSMboPercentagePriceOscillator(14), longPrices,
-            Enumerable.Repeat(0d, 200).Append(700d / 201).ToArray(),
-            Enumerable.Repeat(0d, 200).Append(700d / (201 * 18)).ToArray(),
-            Enumerable.Repeat(0d, 200).Append(700d * 17 / (201 * 18)).ToArray());
+            Enumerable.Repeat(0d, 200).Append(tfsRatio).ToArray(),
+            Enumerable.Repeat(0d, 200).Append(tfsRatioSignal).ToArray(),
+            Enumerable.Repeat(0d, 200).Append(tfsRatio - tfsRatioSignal).ToArray());
         Check(new MirroredPercentagePriceOscillator(2), bars.Take(1).ToArray(),
             new[] { 10d }, new[] { 10d }, new[] { 0d },
             new[] { -100d / 11 }, new[] { -100d / 11 }, new[] { 0d });
         var leaderPrices = Enumerable.Repeat(10d, 26).Append(20d)
             .Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
-        const double leaderSpike = 1741600d / 140777;
+        // After 26 constant prices, each EMA and its residual EMA has completed startup.
+        double LeaderLeg(long divisor)
+        {
+            var mean = (new ReferenceFraction(10) + new ReferenceFraction(20) / new ReferenceFraction(divisor)).ToDouble();
+            var residual = (new ReferenceFraction(20) - ReferenceFraction.FromDouble(mean)).ToDouble();
+            var correction = (new ReferenceFraction(2) * ReferenceFraction.FromDouble(residual) / new ReferenceFraction(divisor)).ToDouble();
+            return (ReferenceFraction.FromDouble(mean) + ReferenceFraction.FromDouble(correction)).ToDouble();
+        }
+        var leaderSpike = (new ReferenceFraction(100) * (ReferenceFraction.FromDouble(LeaderLeg(13)) / ReferenceFraction.FromDouble(LeaderLeg(27)) - new ReferenceFraction(1))).ToDouble();
+        var leaderSignal = (new ReferenceFraction(2) * ReferenceFraction.FromDouble(leaderSpike) / new ReferenceFraction(3)).ToDouble();
         Check(new PercentagePriceOscillatorLeader(2), leaderPrices,
             Enumerable.Repeat(0d, 26).Append(leaderSpike).ToArray(),
-            Enumerable.Repeat(0d, 26).Append(2 * leaderSpike / 3).ToArray(),
-            Enumerable.Repeat(0d, 26).Append(leaderSpike / 3).ToArray());
+            Enumerable.Repeat(0d, 26).Append(leaderSignal).ToArray(),
+            Enumerable.Repeat(0d, 26).Append(leaderSpike - leaderSignal).ToArray());
         var diNapoliFast = ReferenceFraction.FromDouble(2 / (1 + 8.3896));
         var diNapoliSlow = ReferenceFraction.FromDouble(2 / (1 + 17.5185));
         var diNapoliFirst = (new ReferenceFraction(100) * (diNapoliFast / diNapoliSlow - new ReferenceFraction(1))).ToDouble();

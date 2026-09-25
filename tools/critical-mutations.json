@@ -3730,5 +3730,50 @@
     "before": "StochasticSmooth(data, maType, fastLength, input, fast.WritableSpan);\n        StochasticSmooth(data, maType, slowLength, input, slow.WritableSpan);",
     "after": "StochasticSmooth(data, maType, slowLength, input, slow.WritableSpan);\n        StochasticSmooth(data, maType, fastLength, input, fast.WritableSpan);",
     "filter": "FullyQualifiedName~TfsOscillatorNumericalTests.CustomerAveragesReceiveFastSlowSignalOrder"
+  },
+  {
+    "module": "stochastic-macd-numerical",
+    "id": "stochastic-macd-premature-range-overflow",
+    "file": "src/Helpers/RoundedStochasticMacd.cs",
+    "scope": "internal static double Of",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return 10 * (fast - slow) / (high - low);",
+    "filter": "FullyQualifiedName~StochasticMacdNumericalTests.RangeRatioPreservesCancellationSubnormalsAndFiniteExtremeResults"
+  },
+  {
+    "module": "stochastic-macd-numerical",
+    "id": "stochastic-macd-fast-ignores-custom-range",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStochasticMacdOscillatorFast",
+    "before": "CustomRange(data, input, highSeries.WritableSpan, lowSeries.WritableSpan);",
+    "after": "SpanCompat.AsReadOnlySpan(data.HighPrices).CopyTo(highSeries.WritableSpan);\n        SpanCompat.AsReadOnlySpan(data.LowPrices).CopyTo(lowSeries.WritableSpan);",
+    "filter": "FullyQualifiedName~StochasticMacdNumericalTests.SelectedInputControlsEveryOutput"
+  },
+  {
+    "module": "stochastic-macd-numerical",
+    "id": "stochastic-macd-factory-discards-range-period",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new StochasticMovingAverageConvergenceDivergenceOscillatorState(length: stochastic.Length)",
+    "after": "new StochasticMovingAverageConvergenceDivergenceOscillatorState()",
+    "filter": "FullyQualifiedName~StochasticMacdNumericalTests.EveryRouteMatchesIndependentRangeFormula"
+  },
+  {
+    "module": "stochastic-macd-numerical",
+    "id": "stochastic-macd-preview-poisons-signal",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState",
+    "before": "if (isFinal) _signalInvalid = invalid;",
+    "after": "_signalInvalid = invalid;",
+    "filter": "FullyQualifiedName~StochasticMacdNumericalTests.NarrowRangeOverflowPreviewDoesNotCommitSignalState"
+  },
+  {
+    "module": "stochastic-macd-numerical",
+    "id": "stochastic-macd-core-wrong-sign",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void StochasticMacdOscillator",
+    "before": "RoundedStochasticMacd.Of(fast[i], slow[i], window.Max, window.Min)",
+    "after": "RoundedStochasticMacd.Of(slow[i], fast[i], window.Max, window.Min)",
+    "filter": "FullyQualifiedName~StochasticMacdNumericalTests.CloseOnlyCoreMatchesDegenerateOhlcAndDoesNotStochasticizeTheMacdHistory"
   }
 ]

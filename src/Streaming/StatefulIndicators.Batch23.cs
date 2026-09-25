@@ -1012,6 +1012,7 @@ public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState 
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _signal;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public StochasticMovingAverageConvergenceDivergenceOscillatorState(
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 45, int fastLength = 12,
@@ -1020,9 +1021,9 @@ public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState 
         var resolved = Math.Max(1, length);
         _highWindow = new RollingWindowMax(resolved);
         _lowWindow = new RollingWindowMin(resolved);
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _signal = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1035,6 +1036,7 @@ public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState 
         _fast.Reset();
         _slow.Reset();
         _signal.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1044,11 +1046,10 @@ public sealed class StochasticMovingAverageConvergenceDivergenceOscillatorState 
         var slow = _slow.Next(value, isFinal);
         var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
         var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var fastStochastic = range != 0 ? (fast - lowest) / range : 0;
-        var slowStochastic = range != 0 ? (slow - lowest) / range : 0;
-        var macd = 10 * (fastStochastic - slowStochastic);
-        var signal = _signal.Next(macd, isFinal);
+        var macd = RoundedStochasticMacd.Of(fast, slow, highest, lowest);
+        var invalid = _signalInvalid || double.IsInfinity(macd) || double.IsNaN(macd);
+        var signal = invalid ? double.NaN : _signal.Next(macd, isFinal);
+        if (isFinal) _signalInvalid = invalid;
         var histogram = macd - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;
