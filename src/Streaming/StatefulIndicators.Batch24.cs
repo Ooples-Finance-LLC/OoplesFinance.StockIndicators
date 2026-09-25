@@ -2071,7 +2071,7 @@ public sealed class TrendExhaustionIndicatorState : IStreamingIndicatorState, ID
     public TrendExhaustionIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
     {
         var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
+        _highWindow = new RollingWindowMax(Math.Max(2, resolved));
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
         _input = new StreamingInputResolver(InputName.Close, null);
         _sc = (double)2 / (resolved + 1);

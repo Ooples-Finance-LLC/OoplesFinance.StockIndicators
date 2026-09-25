@@ -45,6 +45,10 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            GannHiLoActivatorSpecOptions trend => new GannHiLoActivatorState(trend.MaType, trend.Length),
+            SupportResistanceSpecOptions trend => new SupportResistanceState(trend.MaType, trend.Length),
+            TrendExhaustionIndicatorSpecOptions trend => new TrendExhaustionIndicatorState(trend.MaType, trend.Length),
+            RelativeDifferenceOfSquaresOscillatorSpecOptions trend => new RelativeDifferenceOfSquaresOscillatorState(trend.Length),
             NaturalDirectionalComboSpecOptions natural => new NaturalDirectionalComboState(natural.MaType, natural.Length, natural.SmoothLength),
             NaturalDirectionalIndexSpecOptions natural => new NaturalDirectionalIndexState(natural.MaType, natural.Length, natural.SmoothLength),
             NaturalStochasticIndicatorSpecOptions natural => new NaturalStochasticIndicatorState(natural.MaType, natural.Length, natural.SmoothLength),

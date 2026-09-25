@@ -469,7 +469,19 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is NaturalDirectionalCombo or
+        var includeNumericalExtremes = probe is ElderImpulseSystem or
+            GannHiLoActivator or
+            LinearChannels or
+            LinearTrailingStop or
+            SupportResistance or
+            TimePriceIndicator or
+            TrendExhaustionIndicator or
+            VanillaABCDPattern or
+            VixTradingSystem or
+            VostroIndicator or
+            UhlMaCrossoverSystem or
+            RelativeDifferenceOfSquaresOscillator or
+            NaturalDirectionalCombo or
             NaturalDirectionalIndex or
             NaturalStochasticIndicator or
             NaturalMarketMirror or
