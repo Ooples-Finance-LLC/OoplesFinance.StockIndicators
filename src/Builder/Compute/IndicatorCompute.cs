@@ -14011,10 +14011,11 @@ internal static partial class IndicatorCompute
         // CalculateDetrendedSyntheticPrice averages the two-bar high and the two-bar low, then subtracts an
         // exponential average at half the smoothing constant from one at the full constant. Both averages are
         // seeded with the first price rather than zero, which is where the core routine this replaced drifted.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var highs = SpanCompat.AsReadOnlySpan(highList);
+        var lows = SpanCompat.AsReadOnlySpan(lowList);
         var count = data.Count;
-        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
+        var alpha = length > 2 ? (double)2 / (length + 1d) : 0.67;
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
@@ -14024,15 +14025,15 @@ internal static partial class IndicatorCompute
         {
             var prevHigh = i >= 1 ? highs[i - 1] : 0;
             var prevLow = i >= 1 ? lows[i - 1] : 0;
-            var price = (Math.Max(highs[i], prevHigh) + Math.Min(lows[i], prevLow)) / 2;
+            var price = PriceMean.Of(Math.Max(highs[i], prevHigh), Math.Min(lows[i], prevLow));
             if (i == 0)
             {
                 prevEma1 = price;
                 prevEma2 = price;
             }
 
-            var ema1 = (alpha * price) + ((1 - alpha) * prevEma1);
-            var ema2 = (alpha / 2 * price) + ((1 - (alpha / 2)) * prevEma2);
+            var ema1 = VidyaBlend.Compute(prevEma1, price, alpha);
+            var ema2 = VidyaBlend.Compute(prevEma2, price, alpha / 2);
             output[i] = ema1 - ema2;
             prevEma1 = ema1;
             prevEma2 = ema2;

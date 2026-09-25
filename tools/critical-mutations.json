@@ -3919,5 +3919,59 @@
     "before": "new TrendForceHistogramState(trendForce.Length)",
     "after": "new TrendForceHistogramState()",
     "filter": "FullyQualifiedName~TrendForceNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-core-empty-index",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedSyntheticPrice",
+    "before": "if (high.IsEmpty) return;",
+    "after": "// Fault: no empty-input guard.",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.EveryRouteMatchesIndependentRoundedFilterStages"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-core-wrong-seed",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedSyntheticPrice",
+    "before": "double prevHigh = 0, prevLow = 0;",
+    "after": "double prevHigh = high[0], prevLow = low[0];",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.EveryRouteMatchesIndependentRoundedFilterStages"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-core-gain-integer-overflow",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedSyntheticPrice",
+    "before": "2.0 / (length + 1d)",
+    "after": "2.0 / (length + 1)",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.EveryRouteMatchesIndependentRoundedFilterStages"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-batch-premature-blend-rounding",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateDetrendedSyntheticPrice",
+    "before": "VidyaBlend.Compute(prevEma1, price, alpha)",
+    "after": "alpha * price + (1 - alpha) * prevEma1",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.EveryRouteMatchesIndependentRoundedFilterStages"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-core-midpoint-overflow",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DetrendedSyntheticPrice",
+    "before": "var price = PriceMean.Of(h, l);",
+    "after": "var price = (h + l) / 2;",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.EveryRouteMatchesIndependentRoundedFilterStages"
+  },
+  {
+    "module": "synthetic-price-numerical",
+    "id": "synthetic-fast-ignores-custom-ranges",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDetrendedSyntheticPriceFast",
+    "before": "var highs = SpanCompat.AsReadOnlySpan(highList);",
+    "after": "var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);",
+    "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.HighLowInputPreservesPublicAndLegacyProjectionRules"
   }
 ]
