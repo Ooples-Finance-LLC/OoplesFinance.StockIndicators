@@ -3433,5 +3433,50 @@
     "id": "mirrored-core-artificial-sign-flip",
     "before": "output[i] = RoundedPercentageChange.Of(closeMean[i], openMean[i]);",
     "after": "output[i] = Math.Abs(RoundedPercentageChange.Of(closeMean[i], openMean[i]));"
+  },
+  {
+    "module": "linda-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LindaRaschke3_10OscillatorState",
+    "filter": "FullyQualifiedName~LindaNumericalTests.EveryRouteMatchesSixIndependentOutputs",
+    "id": "linda-unrounded-fast-mean",
+    "before": "_fastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));",
+    "after": "_fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));"
+  },
+  {
+    "module": "linda-numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculateLindaRaschke3_10Oscillator",
+    "filter": "FullyQualifiedName~LindaNumericalTests.EveryRouteMatchesSixIndependentOutputs",
+    "id": "linda-premature-percentage-overflow",
+    "before": "var ppo = RoundedPercentageChange.Of(sma3, sma10);",
+    "after": "var ppo = sma10 != 0 ? (sma3 - sma10) / sma10 * 100 : 0;"
+  },
+  {
+    "module": "linda-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLindaRaschke310OscillatorFast",
+    "filter": "FullyQualifiedName~LindaNumericalTests.FourCustomerAveragesKeepTheirPublishedOrder",
+    "id": "linda-swapped-customer-signals",
+    "before": "StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finiteMacd), macdSignal.WritableSpan);\n        StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finitePpo), ppoSignal.WritableSpan);",
+    "after": "StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finitePpo), ppoSignal.WritableSpan);\n        StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finiteMacd), macdSignal.WritableSpan);"
+  },
+  {
+    "module": "linda-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void LindaRaschke310Oscillator",
+    "filter": "FullyQualifiedName~LindaNumericalTests.CorePublishesRawDifferenceAndHandlesEmptyMaximumPeriods",
+    "id": "linda-core-publishes-signal",
+    "before": "// The primary series is the raw mean difference; signalLength affects only the separate signal output.",
+    "after": "var raw = output.Slice(0, input.Length).ToArray();\n            BollingerArithmetic.Mean(raw, output, signalLength);"
+  },
+  {
+    "module": "linda-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LindaRaschke3_10OscillatorState",
+    "filter": "FullyQualifiedName~LindaNumericalTests.RatioOverflowDoesNotPoisonDifferenceSignalOrCommitPreview",
+    "id": "linda-preview-poisons-signal",
+    "before": "if (isFinal)\n        {\n            _macdSignalInvalid = invalidMacdSignal;",
+    "after": "if (true)\n        {\n            _macdSignalInvalid = invalidMacdSignal;"
   }
 ]
