@@ -8147,7 +8147,7 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeNormalizedMacdFast(StockData data, ComputeContext context, int fastLength = 12, int slowLength = 26)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         OscillatorCore.NormalizedMacd(close, buffer.WritableSpan, fastLength, slowLength);
         return buffer;

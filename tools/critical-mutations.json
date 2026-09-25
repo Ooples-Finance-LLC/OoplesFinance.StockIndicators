@@ -3182,5 +3182,32 @@
     "id": "macd-numerical-dropped-signal-length",
     "before": "new MovingAverageConvergenceDivergenceState(signal.FastLength, signal.SlowLength, signal.SignalLength)",
     "after": "new MovingAverageConvergenceDivergenceState(signal.FastLength, signal.SlowLength)"
+  },
+  {
+    "module": "normalized-macd-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "public sealed class NormalizedMacdState",
+    "filter": "FullyQualifiedName~NormalizedMacdNumericalTests",
+    "id": "normalized-macd-intermediate-overflow",
+    "before": "RoundedPercentageChange.Of(fastEma, slowEma)",
+    "after": "slowEma == 0 ? 0 : (fastEma - slowEma) / slowEma * 100"
+  },
+  {
+    "module": "normalized-macd-numerical",
+    "file": "src/Helpers/RoundedSeededEma.cs",
+    "scope": "internal static double Next",
+    "filter": "FullyQualifiedName~NormalizedMacdNumericalTests",
+    "id": "normalized-macd-wrong-retention",
+    "before": "sum.Add(previous, length - 1);",
+    "after": "sum.Add(previous, length);"
+  },
+  {
+    "module": "normalized-macd-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNormalizedMacdFast",
+    "filter": "FullyQualifiedName~NormalizedMacdNumericalTests",
+    "id": "normalized-macd-ignored-selected-input",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices"
   }
 ]

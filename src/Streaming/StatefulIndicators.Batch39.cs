@@ -379,8 +379,8 @@ public sealed class SmoothedWilliamsRState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("NormalizedMacd")]
 public sealed class NormalizedMacdState : IStreamingIndicatorState
 {
-    private readonly double _fastK;
-    private readonly double _slowK;
+    private readonly int _fastLength;
+    private readonly int _slowLength;
     private readonly StreamingInputResolver _input;
     private double _fastEma;
     private double _slowEma;
@@ -388,8 +388,8 @@ public sealed class NormalizedMacdState : IStreamingIndicatorState
 
     public NormalizedMacdState(int fastLength = 12, int slowLength = 26)
     {
-        _fastK = 2.0 / (Math.Max(1, fastLength) + 1);
-        _slowK = 2.0 / (Math.Max(1, slowLength) + 1);
+        _fastLength = Math.Max(1, fastLength);
+        _slowLength = Math.Max(1, slowLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -407,18 +407,18 @@ public sealed class NormalizedMacdState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
 
         double macd = 0;
-        var fastEma = _barIndex == 0 ? value : (value * _fastK) + (_fastEma * (1 - _fastK));
-        var slowEma = _barIndex == 0 ? value : (value * _slowK) + (_slowEma * (1 - _slowK));
+        var fastEma = _barIndex == 0 ? value : RoundedSeededEma.Next(value, _fastEma, _fastLength);
+        var slowEma = _barIndex == 0 ? value : RoundedSeededEma.Next(value, _slowEma, _slowLength);
         if (_barIndex >= 1)
         {
-            macd = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+            macd = RoundedPercentageChange.Of(fastEma, slowEma);
         }
 
         if (isFinal)
         {
             _fastEma = fastEma;
             _slowEma = slowEma;
-            _barIndex++;
+            _barIndex = 1;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;

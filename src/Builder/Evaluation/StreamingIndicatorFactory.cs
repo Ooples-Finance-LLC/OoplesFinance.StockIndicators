@@ -47,6 +47,7 @@ internal static class StreamingIndicatorFactory
                 => new OnBalanceVolumeState(obvExpanded.Length, obvExpanded.MaType),
             IndicatorName.VolumeZoneOscillator when spec.Options is VolumeZoneOscillatorSpecOptions zone
                 => new VolumeZoneOscillatorState(zone.Length),
+            IndicatorName.NormalizedMacd when spec.Options is NormalizedMacdSpecOptions normalizedMacd => new NormalizedMacdState(normalizedMacd.FastLength, normalizedMacd.SlowLength),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PvoSpecOptions pvo => new PercentageVolumeOscillatorState(pvo.MaType, pvo.Length, 26, pvo.SignalLength),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PercentageVolumeOscillatorSpecOptions pvo2 => new PercentageVolumeOscillatorState(pvo2.MaType, pvo2.FastLength, pvo2.SlowLength, pvo2.SignalLength),

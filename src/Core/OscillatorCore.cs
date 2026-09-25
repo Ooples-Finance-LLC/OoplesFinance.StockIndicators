@@ -3498,8 +3498,6 @@ internal static class OscillatorCore
 
         if (input.Length == 0) return;
 
-        var fastK = 2.0 / (fastLength + 1);
-        var slowK = 2.0 / (slowLength + 1);
         double fastEma = input[0];
         double slowEma = input[0];
 
@@ -3511,9 +3509,9 @@ internal static class OscillatorCore
             }
             else
             {
-                fastEma = input[i] * fastK + fastEma * (1 - fastK);
-                slowEma = input[i] * slowK + slowEma * (1 - slowK);
-                output[i] = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+                fastEma = RoundedSeededEma.Next(input[i], fastEma, fastLength);
+                slowEma = RoundedSeededEma.Next(input[i], slowEma, slowLength);
+                output[i] = RoundedPercentageChange.Of(fastEma, slowEma);
             }
         }
     }
