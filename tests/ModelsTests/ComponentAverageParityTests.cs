@@ -37,6 +37,27 @@ public sealed class ComponentAverageParityTests
         }
     }
 
+    // Awesome's composed means promise one rounding of the exact window. A compensated
+    // floating-point SMA is not a bitwise mirror of that contract.
+    private sealed class ExactCustomerSma(int length) : IndicatorBase, IMovingAverage
+    {
+        public override int WarmupBars => length;
+        protected internal override object? CreateState() => new State(length);
+        private sealed class State(int length) : IIndicatorState
+        {
+            private readonly Queue<double> _values = new();
+            private OoplesFinance.StockIndicators.Validation.ReferenceFraction _sum = new(0);
+            public void Reset() { _values.Clear(); _sum = new(0); }
+            public double Update(in Bar bar)
+            {
+                _values.Enqueue(bar.Close);
+                _sum += OoplesFinance.StockIndicators.Validation.ReferenceFraction.FromDouble(bar.Close);
+                if (_values.Count > length) _sum -= OoplesFinance.StockIndicators.Validation.ReferenceFraction.FromDouble(_values.Dequeue());
+                return _values.Count < length ? 0 : (_sum / new OoplesFinance.StockIndicators.Validation.ReferenceFraction(length)).ToDouble();
+            }
+        }
+    }
+
     private sealed class MirrorWma(int length) : IndicatorBase, IMovingAverage
     {
         public override int WarmupBars => length;
@@ -488,7 +509,7 @@ public sealed class ComponentAverageParityTests
         // it one average answers both and makes it a difference of an average with itself, which is zero;
         // handing it the two it actually asks for has to reproduce naming the simple average exactly.
         var named = Run(new AwesomeOscillator(), bars);
-        var supplied = Run(new AwesomeOscillator(5, new MirrorSma(5), new MirrorSma(34)), bars);
+        var supplied = Run(new AwesomeOscillator(5, new ExactCustomerSma(5), new ExactCustomerSma(34)), bars);
 
         named.Should().NotBeNull();
         supplied.Should().NotBeNull();
