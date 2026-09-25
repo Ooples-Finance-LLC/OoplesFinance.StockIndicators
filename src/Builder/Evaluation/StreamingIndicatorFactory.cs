@@ -14,6 +14,26 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
+        if (spec.Options is ConditionalAccumulatorSpecOptions or
+            ContractHighSpecOptions or
+            ContractLowSpecOptions or
+            DemarkReversalPointsSpecOptions or
+            DemarkSetupIndicatorSpecOptions or
+            FractalChaosOscillatorSpecOptions or
+            Dema2LinesSpecOptions or
+            KeltnerChannelMiddleSpecOptions or
+            SpearmanIndicatorSpecOptions or
+            PriceVolumeRankSpecOptions or
+            EhlersNoiseEliminationTechnologySpecOptions or
+            EhlersSpearmanRankIndicatorSpecOptions or
+            SentimentZoneOscillatorSpecOptions or
+            TotalPowerIndicatorSpecOptions or
+            TrendPersistenceRateSpecOptions or
+            GuppyCountBackLineSpecOptions or
+            GOscillatorSpecOptions or
+            MultiVoteOnBalanceVolumeSpecOptions)
+            return StatefulIndicatorFactory.Create(spec);
+
         return spec.Name switch
         {
             IndicatorName.ReverseMovingAverageConvergenceDivergence when spec.Options is ReverseMovingAverageConvergenceDivergenceSpecOptions reverse => new ReverseMovingAverageConvergenceDivergenceState(fastLength: reverse.FastLength, slowLength: reverse.SlowLength, macdLevel: reverse.MacdLevel),
@@ -250,6 +270,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.QuadraticMovingAverage when spec.Options is QuadraticMovingAverageSpecOptions quadraticMean => new QuadraticMovingAverageState(quadraticMean.Length),
             IndicatorName.GeometricMovingAverage when spec.Options is GeoMaSpecOptions geometric => new GeometricMovingAverageState(geometric.Length),
             IndicatorName.GeometricMeanMovingAverage when spec.Options is GeometricMeanMovingAverageSpecOptions positiveGeometric => new GeometricMeanMovingAverageState(positiveGeometric.Length),
+            IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),
             IndicatorName.SimpleMovingAverage => new SimpleMovingAverageState(((SmaSpecOptions)spec.Options).Length),
             IndicatorName.ExponentialMovingAverage => new ExponentialMovingAverageState(((EmaSpecOptions)spec.Options).Length),
             IndicatorName.RelativeStrengthIndex => new RelativeStrengthIndexState(((RsiSpecOptions)spec.Options).Length),

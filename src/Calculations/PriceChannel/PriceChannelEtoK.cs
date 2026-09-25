@@ -851,7 +851,7 @@ public static partial class Calculations
             lowerChannelList.Add(lowerChannel);
 
             var prevMidChannel = GetLastOrDefault(midChannelList);
-            var midChannel = (upperChannel + lowerChannel) / 2;
+            var midChannel = currentEma20Day;
             midChannelList.Add(midChannel);
 
             var signal = GetCompareSignal(currentValue - midChannel, prevValue - prevMidChannel);

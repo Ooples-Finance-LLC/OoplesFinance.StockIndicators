@@ -4054,5 +4054,68 @@
     "before": "prefix += values[i];",
     "after": "prefix = values[i];",
     "filter": "FullyQualifiedName~SharedAverageReferenceTests"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-factory-discards-dema-periods",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new Dema2LinesState(ordinal.MaType, ordinal.FastLength, ordinal.SlowLength)",
+    "after": "new Dema2LinesState()",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-contract-preview-commits",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ContractHighLowState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-demark-accepts-partial-pattern",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DemarkSetupIndicatorState",
+    "before": "dCount == _length ? 1 : uCount == _length ? -1 : 0",
+    "after": "dCount > 0 ? 1 : uCount > 0 ? -1 : 0",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-price-volume-swaps-slow-signal",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PriceVolumeRankState",
+    "before": "{ \"SlowSignal\", slow }",
+    "after": "{ \"SlowSignal\", fast }",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-keltner-middle-evaluates-atr",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "{ MiddleOnly = true }",
+    "after": "{ MiddleOnly = false }",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-keltner-middle-overflows-endpoints",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "scope": "public static StockData CalculateKeltnerChannels",
+    "before": "var midChannel = currentEma20Day;",
+    "after": "var midChannel = (upperChannel + lowerChannel) / 2;",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.FullKeltnerMiddleDoesNotReconstructItsMeanFromOverflowingEndpoints"
+  },
+  {
+    "module": "ordinal-family-numerical",
+    "id": "ordinal-live-wma-discards-period",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),",
+    "after": "IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(1),",
+    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.WeightedComponentHasPublicLiveRouteWithRequestedPeriod"
   }
 ]
