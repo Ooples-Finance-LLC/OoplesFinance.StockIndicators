@@ -330,12 +330,18 @@ public sealed class OscarIndicatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("OscOscillator")]
 public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthAverage? _roundedFast, _roundedSlow;
     private readonly IMovingAverageSmoother _fastSmoother;
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly StreamingInputResolver _input;
 
     public OscOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 7, int slowLength = 14)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _roundedFast = new StrengthAverage(maType, fastLength);
+            _roundedSlow = new StrengthAverage(maType, slowLength);
+        }
         _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -345,6 +351,7 @@ public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _roundedFast?.Reset(); _roundedSlow?.Reset();
         _fastSmoother.Reset();
         _slowSmoother.Reset();
     }
@@ -352,8 +359,8 @@ public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fast = _fastSmoother.Next(value, isFinal);
-        var slow = _slowSmoother.Next(value, isFinal);
+        var fast = _roundedFast is null ? _fastSmoother.Next(value, isFinal) : _roundedFast.Next(new StrengthValue(value), isFinal).Mantissa;
+        var slow = _roundedSlow is null ? _slowSmoother.Next(value, isFinal) : _roundedSlow.Next(new StrengthValue(value), isFinal).Mantissa;
         var osc = slow - fast;
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -370,6 +377,7 @@ public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _roundedFast?.Dispose(); _roundedSlow?.Dispose();
         _fastSmoother.Dispose();
         _slowSmoother.Dispose();
     }

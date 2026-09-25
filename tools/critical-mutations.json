@@ -4836,5 +4836,56 @@
     "after": "var inputList = data.InputValues;",
     "filter": "FullyQualifiedName~WamiNumericalTests.WideDifferencesCancelBeforePublicationAcrossAllRoutes",
     "scope": "internal static ComputeBuffer ComputeWamiOscillatorFast"
+  },
+  {
+    "id": "osc-wrong-short-period-map",
+    "module": "numerical",
+    "file": "src/Builder/Compute/BuilderArmTargets.cs",
+    "before": "[typeof(OscOscillatorSpecOptions)] = new(IndicatorName.OscOscillator, null, new BuilderArgument(\"Length\", \"fastLength\", v => v is int n ? Math.Max(1, n / 2) : v)",
+    "after": "[typeof(OscOscillatorSpecOptions)] = new(IndicatorName.OscOscillator, null, new BuilderArgument(\"Length\", \"fastLength\", v => v is int n ? Math.Max(2, n / 2) : v)",
+    "filter": "FullyQualifiedName~OscNumericalTests.EveryPublishedOutputRejectsAnInjectedValueFault"
+  },
+  {
+    "id": "osc-core-adds-means",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "slow.Next(new StrengthValue(close[i]), true).Mantissa - fast.Next(new StrengthValue(close[i]), true).Mantissa",
+    "after": "slow.Next(new StrengthValue(close[i]), true).Mantissa + fast.Next(new StrengthValue(close[i]), true).Mantissa",
+    "filter": "FullyQualifiedName~OscNumericalTests.PublishedDifferencePreservesStartupSignAndExtremeMeans",
+    "scope": "internal static void OscOscillator("
+  },
+  {
+    "id": "osc-native-loses-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new OscOscillatorState(osc.MaType, Math.Max(1, osc.Length / 2), osc.Length)",
+    "after": "new OscOscillatorState(osc.MaType, osc.Length, osc.Length)",
+    "filter": "FullyQualifiedName~OscNumericalTests.PublishedDifferencePreservesStartupSignAndExtremeMeans"
+  },
+  {
+    "id": "osc-raw-ignores-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~OscNumericalTests.PublishedDifferencePreservesStartupSignAndExtremeMeans",
+    "scope": "internal static ComputeBuffer ComputeOscOscillatorFast"
+  },
+  {
+    "id": "osc-bypasses-customer-means",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~OscNumericalTests.PublicDifferenceHonorsBothCustomerMeans",
+    "scope": "internal static ComputeBuffer ComputeOscOscillatorFast"
+  },
+  {
+    "id": "osc-reset-retains-fast-mean",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "_roundedFast?.Reset(); _roundedSlow?.Reset();",
+    "after": "_roundedSlow?.Reset();",
+    "filter": "FullyQualifiedName~OscNumericalTests.PublishedDifferencePreservesStartupSignAndExtremeMeans"
   }
 ]

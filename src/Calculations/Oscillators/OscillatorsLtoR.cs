@@ -1030,8 +1030,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+        var fastSmaList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(inputList, maType, fastLength)
+            : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowSmaList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(inputList, maType, slowLength)
+            : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
