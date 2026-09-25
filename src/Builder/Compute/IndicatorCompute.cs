@@ -27323,7 +27323,7 @@ internal static partial class IndicatorCompute
 
         // Apply EMA to b values
         var result = context.Rent(count);
-        MovingAverage(data, maType, length2, bBuffer.Span, result.WritableSpan);
+        StochasticSmooth(data, maType, length2, bBuffer.Span, result.WritableSpan);
 
         bBuffer.Dispose();
         return result;

@@ -376,6 +376,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TrendImpulseFilter)
+        {
+            var impulseOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedTrendImpulseReference(bars, impulseOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DetrendedSyntheticPrice)
         {
             var period = Integer(builtIn.CreateOptions(), "Length", 14);

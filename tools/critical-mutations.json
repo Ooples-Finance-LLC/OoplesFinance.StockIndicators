@@ -3973,5 +3973,50 @@
     "before": "var highs = SpanCompat.AsReadOnlySpan(highList);",
     "after": "var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);",
     "filter": "FullyQualifiedName~SyntheticPriceNumericalTests.HighLowInputPreservesPublicAndLegacyProjectionRules"
+  },
+  {
+    "module": "trend-impulse-numerical",
+    "id": "trend-impulse-forgets-held-price",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateTrendImpulseFilter",
+    "before": "var b = (a * currentValue) + ((1 - a) * prevB);",
+    "after": "var b = currentValue;",
+    "filter": "FullyQualifiedName~TrendImpulseNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-impulse-numerical",
+    "id": "trend-impulse-ignores-downside-breakouts",
+    "file": "src/Calculations/Trend/TrendStoZ.cs",
+    "scope": "public static StockData CalculateTrendImpulseFilter",
+    "before": "double a = currentValue > highest || currentValue < lowest ? 1 : 0;",
+    "after": "double a = currentValue > highest ? 1 : 0;",
+    "filter": "FullyQualifiedName~TrendImpulseNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-impulse-numerical",
+    "id": "trend-impulse-fast-discards-smoothing-period",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrendImpulseFilterFast",
+    "before": "StochasticSmooth(data, maType, length2, bBuffer.Span, result.WritableSpan);",
+    "after": "StochasticSmooth(data, maType, length1, bBuffer.Span, result.WritableSpan);",
+    "filter": "FullyQualifiedName~TrendImpulseNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-impulse-numerical",
+    "id": "trend-impulse-preview-commits",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "scope": "public sealed class TrendImpulseFilterState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TrendImpulseNumericalTests.BatchAndStreamingMatchIndependentEventCounts"
+  },
+  {
+    "module": "trend-impulse-numerical",
+    "id": "trend-impulse-fast-ignores-selected-source",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrendImpulseFilterFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~TrendImpulseNumericalTests.SelectedInputControlsHeldBreakouts"
   }
 ]
