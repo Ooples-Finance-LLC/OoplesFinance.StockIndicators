@@ -1244,6 +1244,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
     private readonly RsiState _rsi;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _smoother;
 
     public EhlersInverseFisherTransformState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
@@ -1253,6 +1254,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
         var resolvedLength2 = Math.Max(1, length2);
         _input = new StreamingInputResolver(InputName.Close, null);
         _rsi = new RsiState(maType, resolvedLength1);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, resolvedLength2);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
     }
 
@@ -1260,6 +1262,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _rsi.Reset();
         _smoother.Reset();
     }
@@ -1269,11 +1272,8 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
         var v1 = 0.1 * (rsi - 50);
-        var v2 = _smoother.Next(v1, isFinal);
-        var bottom = MathHelper.Exp(2 * v2) + 1;
-        var inverseFisherTransform = bottom != 0
-            ? MathHelper.MinOrMax((MathHelper.Exp(2 * v2) - 1) / bottom, 1, -1)
-            : 0;
+        var v2 = _exactAverage is null ? _smoother.Next(v1, isFinal) : _exactAverage.Next(new StrengthValue(v1), isFinal).Mantissa;
+        var inverseFisherTransform = Math.Tanh(v2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1289,6 +1289,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _rsi.Dispose();
         _smoother.Dispose();
     }

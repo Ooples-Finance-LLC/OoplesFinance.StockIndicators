@@ -28,6 +28,28 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
         var power = exponent == 0 ? -1074 : exponent - 1075;
         return power >= 0 ? new(significand << power, BigInteger.One) : new(significand, BigInteger.One << -power);
     }
+    internal double TanhToDouble()
+    {
+        var magnitude = BigInteger.Abs(_numerator);
+        // Below 2^-27, |x - tanh(x)| < |x|^3/3 is below half a binary64 ulp.
+        if ((magnitude << 27) < _denominator) return ToDouble();
+        if (magnitude >= 20 * _denominator) return Sign;
+        // Independent 192-bit fixed-point exp(2|x|/16), followed by four squarings.
+        // With |x|<20, 80 Taylor terms leave a remainder below 2^-280;
+        // fixed-point truncation after squaring stays below 2^-120.
+        const int precision = 192;
+        var scale = BigInteger.One << precision;
+        var argument = magnitude * scale / (8 * _denominator);
+        var term = scale; var exponential = scale;
+        for (var n = 1; n <= 80; n++)
+        {
+            term = term * argument / (scale * n);
+            exponential += term;
+        }
+        for (var n = 0; n < 4; n++) exponential = exponential * exponential / scale;
+        return new ReferenceFraction(Sign * (exponential - scale), exponential + scale).ToDouble();
+    }
+
     // Independent fixed-point atanh series. Reduction gives z in [0, 1/3].
     // At 192 fractional bits and 80 terms, truncation/rounding error stays below
     // 2^-168 even after scaling ln(2) by any finite binary64 quotient exponent.

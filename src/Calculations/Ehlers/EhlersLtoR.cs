@@ -1324,15 +1324,20 @@ public static partial class Calculations
             v1List.Add(v1);
         }
 
-        var v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
+        List<double> v2List;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var average = new StrengthAverage(maType, signalLength, v1List.Count);
+            v2List = v1List.Select(v => average.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var v2 = v2List[i];
-            var expValue = Exp(2 * v2);
             var prevIfish1 = i >= 1 ? iFishList[i - 1] : 0;
             var prevIfish2 = i >= 2 ? iFishList[i - 2] : 0;
 
-            var iFish = expValue + 1 != 0 ? MinOrMax((expValue - 1) / (expValue + 1), 1, -1) : 0;
+            var iFish = Math.Tanh(v2);
             iFishList.Add(iFish);
 
             var signal = GetRsiSignal(iFish - prevIfish1, prevIfish1 - prevIfish2, iFish, prevIfish1, 0.5, -0.5);

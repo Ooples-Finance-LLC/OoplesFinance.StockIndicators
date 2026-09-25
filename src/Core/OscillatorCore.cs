@@ -7561,20 +7561,18 @@ internal static class OscillatorCore
     /// <param name="input">Input values (typically normalized RSI or other oscillator).</param>
     /// <param name="output">Output span for results.</param>
     /// <param name="length">Period for scaling.</param>
-    internal static void InverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    internal static void InverseFisherTransform(ReadOnlySpan<double> input, Span<double> output, int length = 5, int smoothLength = 9,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var rsi = new RsiState(maType, length);
+        using var average = StrengthWindow.Supports(maType) ? new StrengthAverage(maType, smoothLength, input.Length) : null;
+        using var fallback = average is null ? MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength)) : null;
         for (var i = 0; i < input.Length; i++)
         {
-            var x = input[i];
-            // Normalize to -5 to 5 range for better transform behavior
-            var normalized = x * 0.1;
-            var exp2x = Math.Exp(2 * normalized);
-            output[i] = (exp2x - 1) / (exp2x + 1);
+            var scaled = .1 * (rsi.Next(input[i], true) - 50);
+            var value = average is null ? fallback!.Next(scaled, true) : average.Next(new StrengthValue(scaled), true).Mantissa;
+            output[i] = Math.Tanh(value);
         }
     }
 

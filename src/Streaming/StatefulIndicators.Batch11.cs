@@ -166,6 +166,7 @@ public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisp
 public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable
 {
     private readonly RsiState _rsi;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
 
@@ -173,6 +174,7 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14, int signalLength = 9)
     {
         _rsi = new RsiState(maType, length);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, signalLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -181,6 +183,7 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _rsi.Reset();
         _signalSmoother.Reset();
     }
@@ -190,9 +193,8 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
         var v1 = 0.1 * (rsi - 50);
-        var v2 = _signalSmoother.Next(v1, isFinal);
-        var expValue = MathHelper.Exp(2 * v2);
-        var iFish = expValue + 1 != 0 ? MathHelper.MinOrMax((expValue - 1) / (expValue + 1), 1, -1) : 0;
+        var v2 = _exactAverage is null ? _signalSmoother.Next(v1, isFinal) : _exactAverage.Next(new StrengthValue(v1), isFinal).Mantissa;
+        var iFish = Math.Tanh(v2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -208,6 +210,7 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _rsi.Dispose();
         _signalSmoother.Dispose();
     }

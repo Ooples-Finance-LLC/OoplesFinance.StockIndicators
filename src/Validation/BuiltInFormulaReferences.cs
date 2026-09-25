@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersInverseFisherTransform or IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform
+            && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.EhlersInverseFisherTransform ? "Eift" : "Eiftrsi";
+            yield return IndicatorValidationRule.Reference(0, bars => RsiInverseFisherOutputs(bars, builtIn)[key], RsiInverseFisherBudget);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.QuasiWhiteNoise && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
             var noiseKeys = new[] { "WhiteNoise", "WhiteNoiseMa", "WhiteNoiseStdDev", "WhiteNoiseVariance" };
