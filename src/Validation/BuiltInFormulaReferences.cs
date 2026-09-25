@@ -336,6 +336,20 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.MirroredMovingAverageConvergenceDivergence or IndicatorName.MirroredPercentagePriceOscillator)
+        {
+            var mirroredOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.MirroredPercentagePriceOscillator;
+            var stem = percentage ? "Ppo" : "Macd";
+            var mirroredKeys = new[] { stem, "Signal", "Histogram", "Mirror" + stem, "MirrorSignal", "MirrorHistogram" };
+            for (var slot = 0; slot < mirroredKeys.Length; slot++)
+            {
+                var key = mirroredKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedMirrored(bars, mirroredOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DidiIndex)
         {
             var didiOptions = builtIn.CreateOptions();

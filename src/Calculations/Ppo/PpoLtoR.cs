@@ -204,25 +204,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
 
-        var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
-        var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
+        var emaOpenList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(openList, length) : GetMovingAverageList(stockData, maType, length, openList);
+        var emaCloseList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var mao = emaOpenList[i];
             var mac = emaCloseList[i];
-            var macd = mac - mao;
-            var macdMirror = mao - mac;
 
-            var ppo = mao != 0 ? macd / mao * 100 : 0;
+            var ppo = RoundedPercentageChange.Of(mac, mao);
             ppoList.Add(ppo);
 
-            var ppoMirror = mac != 0 ? macdMirror / mac * 100 : 0;
+            var ppoMirror = RoundedPercentageChange.Of(mao, mac);
             ppoMirrorList.Add(ppoMirror);
         }
 
-        var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
-        var ppoMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoMirrorList);
+        var ppoInput = FiniteSignalInput.Create(ppoList, out var ppoFiniteCount);
+        var ppoSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(ppoInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, ppoInput);
+        for (var i = ppoFiniteCount; i < ppoSignalLineList.Count; i++) ppoSignalLineList[i] = double.NaN;
+        var ppoMirrorInput = FiniteSignalInput.Create(ppoMirrorList, out var ppoMirrorFiniteCount);
+        var ppoMirrorSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(ppoMirrorInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, ppoMirrorInput);
+        for (var i = ppoMirrorFiniteCount; i < ppoMirrorSignalLineList.Count; i++) ppoMirrorSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];

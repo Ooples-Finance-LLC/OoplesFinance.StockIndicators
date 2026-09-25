@@ -5528,37 +5528,27 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Mirrored Percentage Price Oscillator.
     /// </summary>
-    internal static void MirroredPercentagePriceOscillator(ReadOnlySpan<double> input, Span<double> output, int shortLength = 12, int longLength = 26)
+    internal static void MirroredPercentagePriceOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> close,
+        Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (open.Length != close.Length) throw new ArgumentException("Open and close spans must have equal lengths.", nameof(open));
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
-        var shortEmaArray = pool.Rent(input.Length);
-        var longEmaArray = pool.Rent(input.Length);
-
+        var openArray = pool.Rent(close.Length);
+        var closeArray = pool.Rent(close.Length);
         try
         {
-            var shortEma = shortEmaArray.AsSpan(0, input.Length);
-            var longEma = longEmaArray.AsSpan(0, input.Length);
-
-            // Calculate EMAs
-            MovingAverageCore.ExponentialMovingAverage(input, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(input, longEma, longLength);
-
-            // Calculate mirrored PPO: invert sign when crossing zero
-            for (var i = 0; i < input.Length; i++)
-            {
-                var ppo = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-                output[i] = i > 0 && output[i - 1] * ppo < 0 ? -ppo : ppo;
-            }
+            var openMean = openArray.AsSpan(0, close.Length);
+            var closeMean = closeArray.AsSpan(0, close.Length);
+            MovingAverageCore.ExponentialMovingAverage(open, openMean, length);
+            MovingAverageCore.ExponentialMovingAverage(close, closeMean, length);
+            for (var i = 0; i < close.Length; i++) output[i] = RoundedPercentageChange.Of(closeMean[i], openMean[i]);
         }
         finally
         {
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
+            pool.Return(openArray);
+            pool.Return(closeArray);
         }
     }
 

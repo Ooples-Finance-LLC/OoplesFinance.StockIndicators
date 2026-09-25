@@ -379,6 +379,7 @@ internal static class BuilderVerifiedArms
         typeof(MidpointOscillatorSpecOptions),
         typeof(MidpointSpecOptions),
         typeof(MidpriceSpecOptions),
+        typeof(MirroredMovingAverageConvergenceDivergenceSpecOptions),
         typeof(MirroredPercentagePriceOscillatorSpecOptions),
         typeof(MobilityOscillatorSpecOptions),
         typeof(ModifiedGannHiloActivatorSpecOptions),

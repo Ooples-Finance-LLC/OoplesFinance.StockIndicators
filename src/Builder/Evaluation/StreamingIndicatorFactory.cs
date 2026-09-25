@@ -53,6 +53,8 @@ internal static class StreamingIndicatorFactory
             IndicatorName.ElliottWaveOscillator when spec.Options is ElliottWaveOscillatorSpecOptions elliott => new ElliottWaveOscillatorState(elliott.MaType, elliott.FastLength, elliott.SlowLength),
             IndicatorName.ErgodicMovingAverageConvergenceDivergence when spec.Options is ErgodicMovingAverageConvergenceDivergenceSpecOptions ergodic => new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2, ergodic.Length3),
             IndicatorName.ErgodicPercentagePriceOscillator when spec.Options is ErgodicPercentagePriceOscillatorSpecOptions ergodicPpo => new ErgodicPercentagePriceOscillatorState(ergodicPpo.MaType, length2: ergodicPpo.Length),
+            IndicatorName.MirroredMovingAverageConvergenceDivergence when spec.Options is MirroredMovingAverageConvergenceDivergenceSpecOptions mirrorMacd => new MirroredMovingAverageConvergenceDivergenceState(mirrorMacd.MaType, mirrorMacd.Length, mirrorMacd.SignalLength),
+            IndicatorName.MirroredPercentagePriceOscillator when spec.Options is MirroredPercentagePriceOscillatorSpecOptions mirrorPpo => new MirroredPercentagePriceOscillatorState(mirrorPpo.MaType, mirrorPpo.Length, mirrorPpo.SignalLength),
             IndicatorName.DidiIndex when spec.Options is DidiIndexSpecOptions didi => new DidiIndexState(didi.MaType, didi.ShortLength, didi.MediumLength, didi.LongLength),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PvoSpecOptions pvo => new PercentageVolumeOscillatorState(pvo.MaType, pvo.Length, 26, pvo.SignalLength),
