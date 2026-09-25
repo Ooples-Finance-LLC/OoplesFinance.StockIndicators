@@ -469,7 +469,8 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is JapaneseCorrelationCoefficient or
+        var includeNumericalExtremes = probe is HistoricalVolatilityPercentile or
+            JapaneseCorrelationCoefficient or
             OceanIndicator or
             MayerMultiple or
             HybridConvolutionFilter or

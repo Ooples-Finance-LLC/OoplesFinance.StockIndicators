@@ -4985,8 +4985,8 @@ public sealed class HistoricalVolatilityPercentileState : IStreamingIndicatorSta
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var temp = prevValue != 0 ? value / prevValue : 0;
-        var tempLog = temp > 0 ? Math.Log(temp) : 0;
+        var tempLog = value != 0 && prevValue != 0 && Math.Sign(value) == Math.Sign(prevValue)
+            ? StableLogRatio.Of(Math.Abs(value), Math.Abs(prevValue)) : 0;
 
         int tempCount;
         var tempSum = isFinal ? _tempLogSum.Add(tempLog, out tempCount) : _tempLogSum.Preview(tempLog, out tempCount);

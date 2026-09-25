@@ -4423,5 +4423,49 @@
     "before": "IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))",
     "after": "IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(1e-9, 1e-9))",
     "filter": "FullyQualifiedName~MeanRatioNumericalTests.RatioContractsRejectErasingTinyNonzeroOutputs"
+  },
+  {
+    "module": "historical-percentile-numerical",
+    "filter": "FullyQualifiedName~HistoricalPercentileNumericalTests.RanksPreserveExtremeReturnsAndSameSignNegativePrices",
+    "id": "historical-rank-batch-divides-before-log",
+    "file": "src/Calculations/Volatility/VolatilityEtoK.cs",
+    "before": "StableLogRatio.Of(Math.Abs(currentValue), Math.Abs(prevValue))",
+    "after": "Math.Log(currentValue / prevValue)",
+    "scope": "public static StockData CalculateHistoricalVolatilityPercentile"
+  },
+  {
+    "module": "historical-percentile-numerical",
+    "filter": "FullyQualifiedName~HistoricalPercentileNumericalTests.RanksPreserveExtremeReturnsAndSameSignNegativePrices",
+    "id": "historical-rank-fast-divides-before-log",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StableLogRatio.Of(Math.Abs(values[i]), Math.Abs(previous))",
+    "after": "Math.Log(values[i] / previous)",
+    "scope": "private static ComputeBuffer ComputeHistoricalVolatilityRanks"
+  },
+  {
+    "module": "historical-percentile-numerical",
+    "filter": "FullyQualifiedName~HistoricalPercentileNumericalTests.RanksPreserveExtremeReturnsAndSameSignNegativePrices",
+    "id": "historical-rank-native-divides-before-log",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StableLogRatio.Of(Math.Abs(value), Math.Abs(prevValue))",
+    "after": "Math.Log(value / prevValue)",
+    "scope": "public sealed class HistoricalVolatilityPercentileState"
+  },
+  {
+    "module": "historical-percentile-numerical",
+    "filter": "FullyQualifiedName~HistoricalPercentileNumericalTests.RanksPreserveExtremeReturnsAndSameSignNegativePrices",
+    "id": "historical-rank-loses-negative-returns",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StableLogRatio.Of(Math.Abs(value), Math.Abs(prevValue))",
+    "after": "StableLogRatio.Of(value, prevValue)",
+    "scope": "public sealed class HistoricalVolatilityPercentileState"
+  },
+  {
+    "module": "historical-percentile-numerical",
+    "filter": "FullyQualifiedName~HistoricalPercentileNumericalTests.RanksPreserveExtremeReturnsAndSameSignNegativePrices",
+    "id": "historical-rank-reference-divides-before-log",
+    "file": "src/Validation/BuiltInFormulaReferences.RelativeMotion.cs",
+    "before": "(ReferenceFraction.FromDouble(Math.Abs(b.Close)) / ReferenceFraction.FromDouble(Math.Abs(bars[i - 1].Close))).LogToDouble()",
+    "after": "Math.Log(b.Close / bars[i - 1].Close)"
   }
 ]

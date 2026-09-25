@@ -277,10 +277,10 @@ public static partial class Calculations
             var currentEma = emaList[i];
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var temp = prevValue != 0 ? currentValue / prevValue : 0;
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
-            var tempLog = temp > 0 ? Math.Log(temp) : 0;
+            var tempLog = currentValue != 0 && prevValue != 0 && Math.Sign(currentValue) == Math.Sign(prevValue)
+                ? StableLogRatio.Of(Math.Abs(currentValue), Math.Abs(prevValue)) : 0;
             tempLogList.Add(tempLog);
             tempLogSumWindow.Add(tempLog);
 
