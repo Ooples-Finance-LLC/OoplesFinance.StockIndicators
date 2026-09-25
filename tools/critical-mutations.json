@@ -3076,5 +3076,49 @@
     "id": "disparity-wrong-denominator",
     "before": "RoundedPercentageChange.Of(value, sma)",
     "after": "RoundedPercentageChange.Of(sma, value)"
+  },
+  {
+    "module": "ppo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~PpoNumericalTests",
+    "id": "ppo-numerical-intermediate-overflow",
+    "before": "var ppo = RoundedPercentageChange.Of(fast, slow);",
+    "after": "var ppo = slow == 0 ? 0 : 100 * (fast - slow) / slow;",
+    "scope": "public sealed class PercentagePriceOscillatorState"
+  },
+  {
+    "module": "ppo-numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "filter": "FullyQualifiedName~PpoNumericalTests",
+    "id": "ppo-numerical-dropped-signal-length",
+    "before": "PpoSpecOptions ppo => new PercentagePriceOscillatorState(ppo.MaType, ppo.FastLength, ppo.SlowLength, ppo.SignalLength),",
+    "after": "PpoSpecOptions ppo => new PercentagePriceOscillatorState(ppo.MaType, ppo.FastLength, ppo.SlowLength),"
+  },
+  {
+    "module": "ppo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "filter": "FullyQualifiedName~PpoNumericalTests",
+    "id": "ppo-numerical-reversed-histogram",
+    "before": "var histogram = ppo - signal;",
+    "after": "var histogram = signal - ppo;",
+    "scope": "public sealed class PercentagePriceOscillatorState"
+  },
+  {
+    "module": "ppo-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "filter": "FullyQualifiedName~PpoNumericalTests",
+    "id": "ppo-numerical-reversed-ratio",
+    "before": "RoundedPercentageChange.Of(fast.Span[i], slow.Span[i])",
+    "after": "RoundedPercentageChange.Of(slow.Span[i], fast.Span[i])",
+    "scope": "internal static ComputeBuffer ComputePpoFast"
+  },
+  {
+    "module": "ppo-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class PercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~PpoNumericalTests",
+    "id": "ppo-numerical-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signal.Next(ppo, isFinal);",
+    "after": "var signal = _signal.Next(ppo, isFinal);"
   }
 ]
