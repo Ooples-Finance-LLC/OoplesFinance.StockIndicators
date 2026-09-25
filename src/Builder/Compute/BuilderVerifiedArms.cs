@@ -20,6 +20,8 @@ internal static class BuilderVerifiedArms
 {
     public static readonly HashSet<Type> Arms = new()
     {
+        typeof(_4MovingAverageConvergenceDivergenceSpecOptions),
+        typeof(_4PercentagePriceOscillatorSpecOptions),
         typeof(AbsolutePriceOscillatorSpecOptions),
         typeof(AbsoluteStrengthIndexSpecOptions),
         typeof(AbsoluteStrengthMTFIndicatorSpecOptions),

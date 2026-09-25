@@ -847,6 +847,12 @@ internal static partial class IndicatorCompute
             },
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length,
                 series: spec.OutputKey == "Signal" ? MacdSeries.Signal : spec.OutputKey == "Histogram" ? MacdSeries.Histogram : MacdSeries.Line),
+            _4MovingAverageConvergenceDivergenceSpecOptions fourMacd => ComputeFourOscillatorFast(data, context,
+                new[] { fourMacd.Length1, fourMacd.Length2, fourMacd.Length3, fourMacd.Length4, fourMacd.Length5, fourMacd.Length6 },
+                fourMacd.MaType, false, spec.OutputKey ?? "Macd1"),
+            _4PercentagePriceOscillatorSpecOptions fourPpo => ComputeFourOscillatorFast(data, context,
+                new[] { fourPpo.Length1, fourPpo.Length2, fourPpo.Length3, fourPpo.Length4, fourPpo.Length5, fourPpo.Length6 },
+                fourPpo.MaType, true, spec.OutputKey ?? "Ppo1"),
             MirroredMovingAverageConvergenceDivergenceSpecOptions mirroredMacd => ComputeMirroredOscillatorFast(data, context,
                 mirroredMacd.Length, mirroredMacd.MaType, mirroredMacd.SignalLength, false, spec.OutputKey ?? "Macd"),
             MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context,
@@ -10017,6 +10023,49 @@ internal static partial class IndicatorCompute
         MirroredPpoSeries series = MirroredPpoSeries.Ppo)
     {
         return ComputeMirroredOscillatorFast(data, context, length, maType, signalLength, true, series.ToString());
+    }
+
+    internal static ComputeBuffer ComputeFourOscillatorFast(StockData data, ComputeContext context,
+        int[] lengths, MovingAvgType maType, bool percentage, string key)
+    {
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(values);
+        var means = new double[6][];
+        // Retain all ten customer stages even though only the fourth and second oscillators are published.
+        for (var stage = 0; stage < means.Length; stage++)
+        {
+            means[stage] = new double[values.Count];
+            StochasticSmooth(data, maType, lengths[stage], input, means[stage]);
+        }
+        var numerators = new[] { 3, 3, 2, 0 };
+        var denominators = new[] { 4, 1, 5, 2 };
+        var result = context.Rent(values.Count);
+        try
+        {
+            for (var stage = 0; stage < 4; stage++)
+            {
+                var line = new List<double>(values.Count);
+                for (var i = 0; i < values.Count; i++)
+                {
+                    var numerator = means[numerators[stage]][i];
+                    var denominator = means[denominators[stage]][i];
+                    line.Add(percentage ? RoundedPercentageChange.Of(numerator, denominator) : numerator - denominator);
+                }
+                var finite = FiniteSignalInput.Create(line, out var finiteCount);
+                using var signal = context.Rent(values.Count);
+                StochasticSmooth(data, maType, lengths[0], SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);
+                var requestedStage = key.EndsWith("2", StringComparison.Ordinal) ? 1 : 3;
+                if (stage != requestedStage) continue;
+                for (var i = 0; i < values.Count; i++)
+                {
+                    var smoothed = i < finiteCount ? signal.Span[i] : double.NaN;
+                    result.WritableSpan[i] = key.StartsWith("Signal", StringComparison.Ordinal) ? smoothed
+                        : key.StartsWith("Histogram", StringComparison.Ordinal) ? line[i] - smoothed : line[i];
+                }
+            }
+            return result;
+        }
+        catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeMirroredOscillatorFast(StockData data, ComputeContext context, int length,

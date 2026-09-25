@@ -8565,22 +8565,23 @@ public sealed class _4MovingAverageConvergenceDivergenceState : IStreamingIndica
     private readonly double _blueMult;
     private readonly double _yellowMult;
     private readonly StreamingInputResolver _input;
+    private readonly bool[] _signalInvalid = new bool[4];
 
     public _4MovingAverageConvergenceDivergenceState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 5,
         int length2 = 8, int length3 = 10, int length4 = 17, int length5 = 14, int length6 = 16,
         double blueMult = 4.3, double yellowMult = 1.4)
     {
         var resolved1 = Math.Max(1, length1);
-        _ema5 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _ema8 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _ema10 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _ema17 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _ema14 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
-        _ema16 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
-        _signal1 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal2 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal3 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal4 = MovingAverageSmootherFactory.Create(maType, resolved1);
+        _ema5 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _ema8 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _ema10 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length3)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
+        _ema17 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length4)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
+        _ema14 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length5)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
+        _ema16 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length6)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
+        _signal1 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal2 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal3 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal4 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
         _blueMult = blueMult;
         _yellowMult = yellowMult;
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -8600,6 +8601,7 @@ public sealed class _4MovingAverageConvergenceDivergenceState : IStreamingIndica
         _signal2.Reset();
         _signal3.Reset();
         _signal4.Reset();
+        Array.Clear(_signalInvalid, 0, _signalInvalid.Length);
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -8617,10 +8619,18 @@ public sealed class _4MovingAverageConvergenceDivergenceState : IStreamingIndica
         var macd3 = ema10 - ema16;
         var macd4 = ema5 - ema10;
 
-        var macd1Signal = _signal1.Next(macd1, isFinal);
-        var macd2Signal = _signal2.Next(macd2, isFinal);
-        var macd3Signal = _signal3.Next(macd3, isFinal);
-        var macd4Signal = _signal4.Next(macd4, isFinal);
+        var invalid1 = _signalInvalid[0] || double.IsInfinity(macd1);
+        var macd1Signal = invalid1 ? double.NaN : _signal1.Next(macd1, isFinal);
+        if (isFinal) _signalInvalid[0] = invalid1;
+        var invalid2 = _signalInvalid[1] || double.IsInfinity(macd2);
+        var macd2Signal = invalid2 ? double.NaN : _signal2.Next(macd2, isFinal);
+        if (isFinal) _signalInvalid[1] = invalid2;
+        var invalid3 = _signalInvalid[2] || double.IsInfinity(macd3);
+        var macd3Signal = invalid3 ? double.NaN : _signal3.Next(macd3, isFinal);
+        if (isFinal) _signalInvalid[2] = invalid3;
+        var invalid4 = _signalInvalid[3] || double.IsInfinity(macd4);
+        var macd4Signal = invalid4 ? double.NaN : _signal4.Next(macd4, isFinal);
+        if (isFinal) _signalInvalid[3] = invalid4;
 
         var macd1Histogram = macd1 - macd1Signal;
         var macd2Histogram = macd2 - macd2Signal;
@@ -8677,22 +8687,23 @@ public sealed class _4PercentagePriceOscillatorState : IStreamingIndicatorState,
     private readonly double _blueMult;
     private readonly double _yellowMult;
     private readonly StreamingInputResolver _input;
+    private readonly bool[] _signalInvalid = new bool[4];
 
     public _4PercentagePriceOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 5,
         int length2 = 8, int length3 = 10, int length4 = 17, int length5 = 14, int length6 = 16,
         double blueMult = 4.3, double yellowMult = 1.4)
     {
         var resolved1 = Math.Max(1, length1);
-        _ema5 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _ema8 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _ema10 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _ema17 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _ema14 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
-        _ema16 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
-        _signal1 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal2 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal3 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _signal4 = MovingAverageSmootherFactory.Create(maType, resolved1);
+        _ema5 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _ema8 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _ema10 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length3)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
+        _ema17 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length4)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
+        _ema14 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length5)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length5));
+        _ema16 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length6)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length6));
+        _signal1 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal2 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal3 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
+        _signal4 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);
         _blueMult = blueMult;
         _yellowMult = yellowMult;
         _input = new StreamingInputResolver(InputName.Close, null);
@@ -8712,6 +8723,7 @@ public sealed class _4PercentagePriceOscillatorState : IStreamingIndicatorState,
         _signal2.Reset();
         _signal3.Reset();
         _signal4.Reset();
+        Array.Clear(_signalInvalid, 0, _signalInvalid.Length);
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -8724,20 +8736,24 @@ public sealed class _4PercentagePriceOscillatorState : IStreamingIndicatorState,
         var ema14 = _ema14.Next(value, isFinal);
         var ema16 = _ema16.Next(value, isFinal);
 
-        var macd1 = ema17 - ema14;
-        var macd2 = ema17 - ema8;
-        var macd3 = ema10 - ema16;
-        var macd4 = ema5 - ema10;
 
-        var ppo1 = ema14 != 0 ? macd1 / ema14 * 100 : 0;
-        var ppo2 = ema8 != 0 ? macd2 / ema8 * 100 : 0;
-        var ppo3 = ema16 != 0 ? macd3 / ema16 * 100 : 0;
-        var ppo4 = ema10 != 0 ? macd4 / ema10 * 100 : 0;
+        var ppo1 = RoundedPercentageChange.Of(ema17, ema14);
+        var ppo2 = RoundedPercentageChange.Of(ema17, ema8);
+        var ppo3 = RoundedPercentageChange.Of(ema10, ema16);
+        var ppo4 = RoundedPercentageChange.Of(ema5, ema10);
 
-        var ppo1Signal = _signal1.Next(ppo1, isFinal);
-        var ppo2Signal = _signal2.Next(ppo2, isFinal);
-        var ppo3Signal = _signal3.Next(ppo3, isFinal);
-        var ppo4Signal = _signal4.Next(ppo4, isFinal);
+        var invalid1 = _signalInvalid[0] || double.IsInfinity(ppo1);
+        var ppo1Signal = invalid1 ? double.NaN : _signal1.Next(ppo1, isFinal);
+        if (isFinal) _signalInvalid[0] = invalid1;
+        var invalid2 = _signalInvalid[1] || double.IsInfinity(ppo2);
+        var ppo2Signal = invalid2 ? double.NaN : _signal2.Next(ppo2, isFinal);
+        if (isFinal) _signalInvalid[1] = invalid2;
+        var invalid3 = _signalInvalid[2] || double.IsInfinity(ppo3);
+        var ppo3Signal = invalid3 ? double.NaN : _signal3.Next(ppo3, isFinal);
+        if (isFinal) _signalInvalid[2] = invalid3;
+        var invalid4 = _signalInvalid[3] || double.IsInfinity(ppo4);
+        var ppo4Signal = invalid4 ? double.NaN : _signal4.Next(ppo4, isFinal);
+        if (isFinal) _signalInvalid[3] = invalid4;
 
         var ppo1Histogram = ppo1 - ppo1Signal;
         var ppo2Histogram = ppo2 - ppo2Signal;

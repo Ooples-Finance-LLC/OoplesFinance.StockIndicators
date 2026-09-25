@@ -3478,5 +3478,50 @@
     "id": "linda-preview-poisons-signal",
     "before": "if (isFinal)\n        {\n            _macdSignalInvalid = invalidMacdSignal;",
     "after": "if (true)\n        {\n            _macdSignalInvalid = invalidMacdSignal;"
+  },
+  {
+    "module": "four-oscillator-numerical",
+    "file": "src/Calculations/Ppo/PpoAtoD.cs",
+    "scope": "public static StockData Calculate4PercentagePriceOscillator",
+    "filter": "FullyQualifiedName~FourOscillatorNumericalTests.EveryRouteMatchesSixIndependentOutputs",
+    "id": "four-ppo-premature-ratio-overflow",
+    "before": "var ppo4 = RoundedPercentageChange.Of(ema5, ema10);",
+    "after": "var ppo4 = ema10 != 0 ? (ema5 - ema10) / ema10 * 100 : 0;"
+  },
+  {
+    "module": "four-oscillator-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class _4MovingAverageConvergenceDivergenceState",
+    "filter": "FullyQualifiedName~FourOscillatorNumericalTests.ArithmeticMeanAndEmptyRoutes",
+    "id": "four-macd-unrounded-mean",
+    "before": "_ema5 = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved1) : MovingAverageSmootherFactory.Create(maType, resolved1);",
+    "after": "_ema5 = MovingAverageSmootherFactory.Create(maType, resolved1);"
+  },
+  {
+    "module": "four-oscillator-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFourOscillatorFast",
+    "filter": "FullyQualifiedName~FourOscillatorNumericalTests.AllTenCustomerStagesRetainTheirPublishedOrder",
+    "id": "four-customer-stage-order",
+    "before": "for (var stage = 0; stage < 4; stage++)",
+    "after": "for (var stage = 3; stage >= 0; stage--)"
+  },
+  {
+    "module": "four-oscillator-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class _4PercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~FourOscillatorNumericalTests.OverflowPreviewDoesNotPoisonIndependentPublishedPair",
+    "id": "four-ppo-preview-poisons-state",
+    "before": "if (isFinal) _signalInvalid[3] = invalid4;",
+    "after": "_signalInvalid[3] = invalid4;"
+  },
+  {
+    "module": "four-oscillator-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFourOscillatorFast",
+    "filter": "FullyQualifiedName~FourOscillatorNumericalTests.SelectedInputControlsPublishedPairs",
+    "id": "four-fast-ignores-selected-input",
+    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var values = data.ClosePrices;"
   }
 ]
