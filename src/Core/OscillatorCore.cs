@@ -2293,51 +2293,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DirectionalTrendIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var upMoveArray = pool.Rent(close.Length);
-        var downMoveArray = pool.Rent(close.Length);
-        var plusDiArray = pool.Rent(close.Length);
-        var minusDiArray = pool.Rent(close.Length);
-
-        try
-        {
-            var upMove = upMoveArray.AsSpan(0, close.Length);
-            var downMove = downMoveArray.AsSpan(0, close.Length);
-            var plusDi = plusDiArray.AsSpan(0, close.Length);
-            var minusDi = minusDiArray.AsSpan(0, close.Length);
-
-            upMove[0] = 0;
-            downMove[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var upMovement = high[i] - high[i - 1];
-                var downMovement = low[i - 1] - low[i];
-
-                upMove[i] = upMovement > downMovement && upMovement > 0 ? upMovement : 0;
-                downMove[i] = downMovement > upMovement && downMovement > 0 ? downMovement : 0;
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(upMove, plusDi, length);
-            MovingAverageCore.ExponentialMovingAverage(downMove, minusDi, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var sum = plusDi[i] + minusDi[i];
-                output[i] = sum != 0 ? ((plusDi[i] - minusDi[i]) / sum) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(upMoveArray);
-            pool.Return(downMoveArray);
-            pool.Return(plusDiArray);
-            pool.Return(minusDiArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must cover the input.");
+        if (close.IsEmpty) return;
+        using var window = new DirectionalStrengthWindow(MovingAvgType.ExponentialMovingAverage, length, capacityHint: close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>

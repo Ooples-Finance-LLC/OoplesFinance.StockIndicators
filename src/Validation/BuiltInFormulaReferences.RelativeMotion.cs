@@ -1067,6 +1067,7 @@ internal static partial class BuiltInFormulaReferences
                         (fast.Take(i + 1).Min() + Math.Max(0, fast.Take(i + 1).Max())) / 2 + v - slow[i], 0, 100)).ToArray()));
                 });
             case IndicatorName.DirectionalTrendIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Dti", new[] { "Dti" }, bars => DirectionalStrengthOutputs(bars, indicator));
                 return new("Dti", new[] { "Dti" }, bars =>
                 {
                     var changes = bars.Select((b, i) => Math.Max(0, b.High - (i == 0 ? 0 : bars[i - 1].High))

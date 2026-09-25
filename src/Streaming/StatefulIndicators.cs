@@ -7910,6 +7910,7 @@ public sealed class DampingIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Dti")]
 public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly DirectionalStrengthWindow? _wide;
     private readonly IMovingAverageSmoother _diffEma1;
     private readonly IMovingAverageSmoother _absDiffEma1;
     private readonly IMovingAverageSmoother _diffEma2;
@@ -7922,6 +7923,7 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 
     public DirectionalTrendIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14, int length2 = 10, int length3 = 5)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new DirectionalStrengthWindow(maType, length1, length2, length3);
         _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _diffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
@@ -7934,6 +7936,7 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
+        _wide?.Reset();
         _diffEma1.Reset();
         _absDiffEma1.Reset();
         _diffEma2.Reset();
@@ -7948,20 +7951,26 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var hmu = bar.High - prevHigh > 0 ? bar.High - prevHigh : 0;
-        var lmd = bar.Low - prevLow < 0 ? (bar.Low - prevLow) * -1 : 0;
-        var diff = hmu - lmd;
-        var absDiff = Math.Abs(diff);
+        double dti;
+        if (_wide is not null) dti = _wide.Next(bar.High, bar.Low, isFinal);
+        else
+        {
+            var prevHigh = _hasPrev ? _prevHigh : 0;
+            var prevLow = _hasPrev ? _prevLow : 0;
+            var hmu = bar.High - prevHigh > 0 ? bar.High - prevHigh : 0;
+            var lmd = bar.Low - prevLow < 0 ? (bar.Low - prevLow) * -1 : 0;
+            var diff = hmu - lmd;
+            var absDiff = Math.Abs(diff);
 
-        var diffEma1 = _diffEma1.Next(diff, isFinal);
-        var absDiffEma1 = _absDiffEma1.Next(absDiff, isFinal);
-        var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
-        var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
-        var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
-        var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
-        var dti = absDiffEma3 != 0 ? MathHelper.MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
+            var diffEma1 = _diffEma1.Next(diff, isFinal);
+            var absDiffEma1 = _absDiffEma1.Next(absDiff, isFinal);
+            var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
+            var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
+            var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
+            var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
+            dti = absDiffEma3 != 0 ? MathHelper.MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
+
+        }
 
         if (isFinal)
         {
@@ -7984,6 +7993,7 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _diffEma1.Dispose();
         _absDiffEma1.Dispose();
         _diffEma2.Dispose();

@@ -1898,40 +1898,53 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        if (StrengthWindow.Supports(maType))
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var hmu = currentHigh - prevHigh > 0 ? currentHigh - prevHigh : 0;
-            var lmd = currentLow - prevLow < 0 ? (currentLow - prevLow) * -1 : 0;
-
-            var diff = hmu - lmd;
-            diffList.Add(diff);
-
-            var absDiff = Math.Abs(diff);
-            absDiffList.Add(absDiff);
+            using var window = new DirectionalStrengthWindow(maType, length1, length2, length3, stockData.Count);
+            for (var i = 0; i < stockData.Count; i++) dtiList.Add(window.Next(highList[i], lowList[i], true));
         }
-        
-        var diffEma1List = GetMovingAverageList(stockData, maType, length1, diffList);
-        var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absDiffList);
-        var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
-        var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
-        var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
-        var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
+        else
+        {
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentHigh = highList[i];
+                var currentLow = lowList[i];
+                var prevHigh = i >= 1 ? highList[i - 1] : 0;
+                var prevLow = i >= 1 ? lowList[i - 1] : 0;
+                var hmu = currentHigh - prevHigh > 0 ? currentHigh - prevHigh : 0;
+                var lmd = currentLow - prevLow < 0 ? (currentLow - prevLow) * -1 : 0;
+
+                var diff = hmu - lmd;
+                diffList.Add(diff);
+
+                var absDiff = Math.Abs(diff);
+                absDiffList.Add(absDiff);
+            }
+
+            var diffEma1List = GetMovingAverageList(stockData, maType, length1, diffList);
+            var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absDiffList);
+            var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
+            var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
+            var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
+            var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var diffEma3 = diffEma3List[i];
+                var absDiffEma3 = absDiffEma3List[i];
+
+                var dti = absDiffEma3 != 0 ? MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
+                dtiList.Add(dti);
+
+            }
+
+        }
+
         for (var i = 0; i < stockData.Count; i++)
         {
-            var diffEma3 = diffEma3List[i];
-            var absDiffEma3 = absDiffEma3List[i];
+            var dti = dtiList[i];
             var prevDti1 = i >= 1 ? dtiList[i - 1] : 0;
             var prevDti2 = i >= 2 ? dtiList[i - 2] : 0;
-
-            var dti = absDiffEma3 != 0 ? MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
-            dtiList.Add(dti);
-
-            var signal = GetRsiSignal(dti - prevDti1, prevDti1 - prevDti2, dti, prevDti1, 25, -25);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetRsiSignal(dti - prevDti1, prevDti1 - prevDti2, dti, prevDti1, 25, -25));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

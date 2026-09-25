@@ -5750,6 +5750,14 @@ internal static partial class IndicatorCompute
         var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
         var count = highList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new DirectionalStrengthWindow(maType, length1, length2, length3, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(highList[i], lowList[i], true);
+            return stable;
+        }
+
         using var netBuffer = context.Rent(count);
         using var magnitudeBuffer = context.Rent(count);
         var net = netBuffer.WritableSpan;

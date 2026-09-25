@@ -4887,5 +4887,71 @@
     "before": "_roundedFast?.Reset(); _roundedSlow?.Reset();",
     "after": "_roundedSlow?.Reset();",
     "filter": "FullyQualifiedName~OscNumericalTests.PublishedDifferencePreservesStartupSignAndExtremeMeans"
+  },
+  {
+    "id": "directional-loses-zero-origin",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "if (high > _high)",
+    "after": "if (_high != 0 && high > _high)",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.WideCandleMovesKeepThePublishedRatioBounded"
+  },
+  {
+    "id": "directional-discards-downward-moves",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "StrengthValue.Round(down, 1).AddTo(ref net, -1);",
+    "after": "StrengthValue.Round(down, 1).AddTo(ref net, 0);",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.WideCandleMovesKeepThePublishedRatioBounded"
+  },
+  {
+    "id": "directional-overflows-upward-move",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "StrengthValue.Round(up, 1).AddTo(ref net);",
+    "after": "new StrengthValue(high > _high ? high - _high : 0).AddTo(ref net);",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.WideCandleMovesKeepThePublishedRatioBounded"
+  },
+  {
+    "id": "directional-preview-commits-candle",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "if (final) { _high = high; _low = low; }",
+    "after": "{ _high = high; _low = low; }",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.WideCandleMovesKeepThePublishedRatioBounded"
+  },
+  {
+    "id": "directional-reset-retains-candle",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "_strength.Reset(); _high = _low = 0;",
+    "after": "_strength.Reset();",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.WideCandleMovesKeepThePublishedRatioBounded"
+  },
+  {
+    "id": "directional-native-uses-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_wide.Next(bar.High, bar.Low, isFinal)",
+    "after": "_wide.Next(bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields",
+    "scope": "public sealed class DirectionalTrendIndexState"
+  },
+  {
+    "id": "directional-bypasses-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.PublicDirectionalRatioUsesAllSixCustomerStages",
+    "scope": "internal static ComputeBuffer ComputeDirectionalTrendIndexFast"
+  },
+  {
+    "id": "directional-loses-third-period",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalStrengthWindow.cs",
+    "before": "new[] { length1, length2, length3 }",
+    "after": "new[] { length1, length2, length2 }",
+    "filter": "FullyQualifiedName~DirectionalStrengthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
   }
 ]
