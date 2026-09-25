@@ -36,6 +36,9 @@ var header = JsonSerializer.Serialize(new
 {
     kind = "scan", version = 3, purpose = "diagnostic-only", mode,
     assemblySha256 = Hash(assembly.Location), scannerSha256 = Hash(typeof(Program).Assembly.Location),
+    runtime = System.Runtime.InteropServices.RuntimeInformation.FrameworkDescription,
+    os = System.Runtime.InteropServices.RuntimeInformation.OSDescription,
+    architecture = System.Runtime.InteropServices.RuntimeInformation.ProcessArchitecture.ToString(),
     selection = work.Select(c => c.ToString()).ToArray(),
     fixtureNames = fixtures.Select(f => f.Name).ToArray(), minimumBars = 256, postWarmupBars = 32, maximumBars = 8192, calendarDayStride = 7, seed = 244,
     requireFormulaReference = true, requireMathematicalContract = true

@@ -5,7 +5,7 @@ import subprocess
 import tempfile
 import unittest
 
-SCANNER = Path(__file__).resolve().parents[1] / 'NumericalBacklogScanner/bin/Release/net10.0/NumericalBacklogScanner.dll'
+SCANNER = Path(__file__).resolve().parents[1] / 'bin/Release/net10.0/NumericalBacklogScanner.dll'
 
 class BacklogScannerTests(unittest.TestCase):
     def setUp(self):
