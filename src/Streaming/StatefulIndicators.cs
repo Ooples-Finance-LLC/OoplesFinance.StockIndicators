@@ -4061,6 +4061,7 @@ public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("StochRsi")]
 public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthAverage? _exactFast, _exactSlow;
     private readonly int _length;
     private readonly RsiState _rsi;
     private readonly RollingWindowMax _maxWindow;
@@ -4072,6 +4073,11 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
     public StochasticRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14,
         int smoothLength1 = 3, int smoothLength2 = 3, int? stochLength = null)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _exactFast = new StrengthAverage(maType, smoothLength1);
+            _exactSlow = new StrengthAverage(maType, smoothLength2);
+        }
         _length = Math.Max(1, length);
         // The stochastic's own lookback over the RSI, as the batch method's stochLength: the RSI's length unless set.
         var stochWindow = Math.Max(1, stochLength ?? length);
@@ -4087,6 +4093,7 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
 
     public void Reset()
     {
+        _exactFast?.Reset(); _exactSlow?.Reset();
         _rsi.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
@@ -4100,11 +4107,10 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
         var rsi = _rsi.Next(value, isFinal);
         var highest = isFinal ? _maxWindow.Add(rsi, out _) : _maxWindow.Preview(rsi, out _);
         var lowest = isFinal ? _minWindow.Add(rsi, out _) : _minWindow.Preview(rsi, out _);
-        var range = highest - lowest;
-        var fastK = range != 0 ? MathHelper.MinOrMax((rsi - lowest) / range * 100, 100, 0) : 0;
+        var fastK = ClampedRangePosition.Percent(rsi, lowest, highest);
 
-        var fastD = _fastSmoother.Next(fastK, isFinal);
-        var slowD = _slowSmoother.Next(fastD, isFinal);
+        var fastD = _exactFast is null ? _fastSmoother.Next(fastK, isFinal) : _exactFast.Next(new StrengthValue(fastK), isFinal).Mantissa;
+        var slowD = _exactSlow is null ? _slowSmoother.Next(fastD, isFinal) : _exactSlow.Next(new StrengthValue(fastD), isFinal).Mantissa;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -4121,6 +4127,7 @@ public sealed class StochasticRelativeStrengthIndexState : IStreamingIndicatorSt
 
     public void Dispose()
     {
+        _exactFast?.Dispose(); _exactSlow?.Dispose();
         _rsi.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();

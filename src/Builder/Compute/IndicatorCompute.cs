@@ -21294,12 +21294,16 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             extrema.Add(rsiValues[i]);
-            var range = extrema.Max - extrema.Min;
-            stochastic.WritableSpan[i] = range == 0 ? 0 : 100 * (rsiValues[i] - extrema.Min) / range;
+            stochastic.WritableSpan[i] = ClampedRangePosition.Percent(rsiValues[i], extrema.Min, extrema.Max);
         }
 
         var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength1, stochastic.Span, buffer.WritableSpan);
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var smoothing = new StrengthAverage(maType, smoothLength1, count);
+            for (var i = 0; i < count; i++) buffer.WritableSpan[i] = smoothing.Next(new StrengthValue(stochastic.Span[i]), true).Mantissa;
+        }
+        else MovingAverage(data, maType, smoothLength1, stochastic.Span, buffer.WritableSpan);
 
         return buffer;
     }
@@ -21327,7 +21331,12 @@ internal static partial class IndicatorCompute
         // that wrote nothing would hand that back - which is how the primary series came to look like the
         // signal in the first place.
         buffer.WritableSpan.Clear();
-        MovingAverage(data, maType, smoothLength2, source, buffer.WritableSpan);
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var smoothing = new StrengthAverage(maType, smoothLength2, source.Length);
+            for (var i = 0; i < source.Length; i++) buffer.WritableSpan[i] = smoothing.Next(new StrengthValue(source[i]), true).Mantissa;
+        }
+        else MovingAverage(data, maType, smoothLength2, source, buffer.WritableSpan);
         return buffer;
     }
 

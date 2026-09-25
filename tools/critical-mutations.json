@@ -6023,5 +6023,67 @@
     "after": "StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~ApirineRsiNumericalTests",
     "scope": "internal static ComputeBuffer ComputeApirineSlowRsiFast("
+  },
+  {
+    "id": "stochastic-rsi-core-loses-range-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new OoplesFinance.StockIndicators.Streaming.RollingWindowMax(Math.Max(1, stochLength))",
+    "after": "new OoplesFinance.StockIndicators.Streaming.RollingWindowMax(Math.Max(1, rsiLength))",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "internal static void StochasticRsi("
+  },
+  {
+    "id": "stochastic-rsi-preview-commits-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_maxWindow.Preview(rsi, out _)",
+    "after": "_maxWindow.Add(rsi, out _)",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "public sealed class StochasticRelativeStrengthIndexState"
+  },
+  {
+    "id": "stochastic-rsi-reset-keeps-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "        _minWindow.Reset();",
+    "after": "        // injected retained low window",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "public sealed class StochasticRelativeStrengthIndexState"
+  },
+  {
+    "id": "stochastic-rsi-raw-signal-is-primary",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan[i] = smoothing.Next(new StrengthValue(source[i]), true).Mantissa;",
+    "after": "buffer.WritableSpan[i] = source[i];",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeStochasticRsiSignalFast("
+  },
+  {
+    "id": "stochastic-rsi-batch-centers-range",
+    "module": "numerical",
+    "file": "src/Calculations/Rsi/RsiStoZ.cs",
+    "before": "ClampedRangePosition.Percent(rsiList[i], low, high)",
+    "after": "ClampedRangePosition.Percent(50, low, high)",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "public static StockData CalculateStochasticRelativeStrengthIndex("
+  },
+  {
+    "id": "stochastic-rsi-native-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new StochasticRelativeStrengthIndexState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, stochastic.SmoothLength2)",
+    "after": "new StochasticRelativeStrengthIndexState(stochastic.MaType, stochastic.Length, stochastic.SmoothLength1, stochastic.SmoothLength1)",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests"
+  },
+  {
+    "id": "stochastic-rsi-accepts-partial-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeStochasticRsiFast("
   }
 ]

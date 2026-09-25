@@ -221,10 +221,21 @@ public static partial class Calculations
                 low = Math.Min(low, rsiList[j]);
                 high = Math.Max(high, rsiList[j]);
             }
-            raw.Add(high == low ? 0 : 100 * (rsiList[i] - low) / (high - low)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+            raw.Add(ClampedRangePosition.Percent(rsiList[i], low, high)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
         }
-        var stochRsiList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
-        var stochRsiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, stochRsiList);
+        List<double> stochRsiList, stochRsiSignalList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var fast = new StrengthAverage(maType, smoothLength1, stockData.Count);
+            using var slow = new StrengthAverage(maType, smoothLength2, stockData.Count);
+            stochRsiList = raw.Select(v => fast.Next(new StrengthValue(v), true).Mantissa).ToList();
+            stochRsiSignalList = stochRsiList.Select(v => slow.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else
+        {
+            stochRsiList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+            stochRsiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, stochRsiList);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
