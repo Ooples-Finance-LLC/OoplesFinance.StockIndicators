@@ -2201,7 +2201,7 @@ internal static partial class IndicatorCompute
                     _ => QuasiWhiteNoiseSeries.WhiteNoise
                 }),
             RapidRelativeStrengthIndexSpecOptions rrsi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeRapidRsiFast(data, context, rrsi.Length), rrsi.Length, rrsi.MaType)
+                ? SmoothStrength(data, context, ComputeRapidRsiFast(data, context, rrsi.Length), rrsi.Length, rrsi.MaType)
                 : ComputeRapidRsiFast(data, context, rrsi.Length),
             ReallySimpleIndicatorSpecOptions rsi2 => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType), rsi2.SmoothLength, rsi2.MaType)
@@ -7273,25 +7273,8 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        var upCountSum = new RollingSum();
-        double upSum = 0, downSum = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var roc = prevValue != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / prevValue * 100 : 0;
-
-            upCountSum.Add(roc >= 0 ? 1 : 0);
-            var upCount = upCountSum.Sum(length);
-            var upAlpha = upCount != 0 ? 1 / upCount : 0;
-            var downCount = length - upCount;
-            var downAlpha = downCount != 0 ? 1 / downCount : 0;
-
-            upSum = (upAlpha * (roc > 0 ? roc : 0)) + ((1 - upAlpha) * upSum);
-            downSum = (downAlpha * (roc < 0 ? Math.Abs(roc) : 0)) + ((1 - downAlpha) * downSum);
-
-            var ars = downSum != 0 ? upSum / downSum : 0;
-            output[i] = downSum == 0 ? 100 : upSum == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ars)), 100, 0);
-        }
+        using var window = new AsymmetricGainLossWindow(length, count);
+        for (var i = 0; i < count; i++) output[i] = window.Next(input[i], true);
 
         return buffer;
     }
@@ -26140,23 +26123,8 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
 
-        var upChgSumWindow = new RollingSum();
-        var downChgSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var chg = CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue);
-
-            upChgSumWindow.Add(i >= 1 && chg > 0 ? chg : 0);
-            downChgSumWindow.Add(i >= 1 && chg < 0 ? Math.Abs(chg) : 0);
-
-            var upChgSum = upChgSumWindow.Sum(length);
-            var downChgSum = downChgSumWindow.Sum(length);
-            var rs = downChgSum != 0 ? upChgSum / downChgSum : 0;
-
-            output[i] = downChgSum == 0 ? 100 : upChgSum == 0 ? 0
-                : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        }
+        using var window = new RapidGainLossWindow(length, count);
+        for (var i = 0; i < count; i++) output[i] = window.Next(input[i], true);
 
         return buffer;
     }

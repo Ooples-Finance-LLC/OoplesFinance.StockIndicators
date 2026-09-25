@@ -7,73 +7,25 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Rrsi")]
 public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _upSum;
-    private readonly RollingWindowSum _downSum;
+    private readonly RapidGainLossWindow _window;
+    private readonly StrengthAverage? _wideSignal;
     private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public RapidRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14)
+    public RapidRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        var resolved = Math.Max(1, length);
-        _upSum = new RollingWindowSum(resolved);
-        _downSum = new RollingWindowSum(resolved);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _window = new(length);
+        if (StrengthWindow.Supports(maType)) _wideSignal = new StrengthAverage(maType, length);
+        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
-
     public IndicatorName Name => IndicatorName.RapidRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _upSum.Reset();
-        _downSum.Reset();
-        _signal.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset(); _wideSignal?.Reset(); _signal.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var chg = _hasPrev ? value - prevValue : 0;
-        var upChg = _hasPrev && chg > 0 ? chg : 0;
-        var downChg = _hasPrev && chg < 0 ? Math.Abs(chg) : 0;
-
-        var upSum = isFinal ? _upSum.Add(upChg, out _) : _upSum.Preview(upChg, out _);
-        var downSum = isFinal ? _downSum.Add(downChg, out _) : _downSum.Preview(downChg, out _);
-        var rs = downSum != 0 ? upSum / downSum : 0;
-        var rrsi = downSum == 0 ? 100 : upSum == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        var signal = _signal.Next(rrsi, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Rrsi", rrsi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rrsi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        var signal = _wideSignal is null ? _signal.Next(value, isFinal) : _wideSignal.Next(new StrengthValue(value), isFinal).Mantissa;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rrsi", value }, { "Signal", signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _upSum.Dispose();
-        _downSum.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); _wideSignal?.Dispose(); _signal.Dispose(); }
 }
 
 [PrimaryOutput("Rochla")]

@@ -730,23 +730,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Aaen", result));
                 });
             case IndicatorName.AsymmetricalRelativeStrengthIndex:
-                length = Integer(options, "UpLength", length);
-                return new("Arsi", new[] { "Arsi" }, bars =>
-                {
-                    var returns = bars.Select((b, i) => i == 0 || bars[i - 1].Close == 0 ? 0
-                        : 100 * (b.Close - bars[i - 1].Close) / bars[i - 1].Close).ToArray();
-                    var result = new double[bars.Count];
-                    double positive = 0, negative = 0;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var upCount = Window(returns, i, length).Count(v => v >= 0);
-                        var downCount = length - upCount;
-                        if (upCount > 0) positive += (Math.Max(returns[i], 0) - positive) / upCount;
-                        if (downCount > 0) negative += (Math.Max(-returns[i], 0) - negative) / downCount;
-                        result[i] = negative == 0 ? 100 : 100 * positive / (positive + negative);
-                    }
-                    return Outputs(("Arsi", result));
-                });
+                return new("Arsi", new[] { "Arsi" }, bars => AdaptiveGainLossOutputs(bars, indicator));
             case IndicatorName.ApirineSlowRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
                 if (kind == 0) return null;

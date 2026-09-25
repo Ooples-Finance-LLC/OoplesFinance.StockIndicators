@@ -194,37 +194,14 @@ public static partial class Calculations
     public static StockData CalculateRapidRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> upChgList = new(stockData.Count);
-        List<double> downChgList = new(stockData.Count);
         List<double> rapidRsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum upChgSumWindow = new();
-        RollingSum downChgSumWindow = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new RapidGainLossWindow(length, stockData.Count);
+        foreach (var price in inputList) rapidRsiList.Add(window.Next(price, true));
 
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var chg = MinPastValues(i, 1, currentValue - prevValue);
-
-            var upChg = i >= 1 && chg > 0 ? chg : 0;
-            upChgList.Add(upChg);
-            upChgSumWindow.Add(upChg);
-
-            var downChg = i >= 1 && chg < 0 ? Math.Abs(chg) : 0;
-            downChgList.Add(downChg);
-            downChgSumWindow.Add(downChg);
-
-            var upChgSum = upChgSumWindow.Sum(length);
-            var downChgSum = downChgSumWindow.Sum(length);
-            var rs = downChgSum != 0 ? upChgSum / downChgSum : 0;
-
-            var rapidRsi = downChgSum == 0 ? 100 : upChgSum == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-            rapidRsiList.Add(rapidRsi);
-        }
-
-        var rrsiEmaList = GetMovingAverageList(stockData, maType, length, rapidRsiList);
+        var rrsiEmaList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(rapidRsiList, maType, length)
+            : GetMovingAverageList(stockData, maType, length, rapidRsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var rapidRsi = rrsiEmaList[i];

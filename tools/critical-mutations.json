@@ -5591,5 +5591,166 @@
     "before": "|| p.Name.IndexOf(\"momentum\", StringComparison.OrdinalIgnoreCase) >= 0",
     "after": "|| false",
     "filter": "FullyQualifiedName~DiscoveryVariesMomentumHorizonsForBuiltInsAndCustomers"
+  },
+  {
+    "id": "rapid-rsi-loses-first-price-sentinel",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class RapidGainLossWindow : IDisposable",
+    "before": "_hasPrevious ? _previous : price",
+    "after": "_hasPrevious ? _previous : 0",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "rapid-rsi-preview-commits-window",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class RapidGainLossWindow : IDisposable",
+    "before": "_previous : price, final, 100",
+    "after": "_previous : price, true, 100",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "rapid-rsi-reset-retains-previous-flag",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class RapidGainLossWindow : IDisposable",
+    "before": "_hasPrevious = false;",
+    "after": "/* injected stale flag */",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "rapid-rsi-loses-flat-convention",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class RapidGainLossWindow : IDisposable",
+    "before": "_previous : price, final, 100",
+    "after": "_previous : price, final, 0",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-loses-negative-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "new RocBankValue(-change.Mantissa, change.UpperShift)",
+    "after": "new RocBankValue(-change.Mantissa)",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-stops-counting-zero-returns",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "change.Mantissa >= 0",
+    "after": "change.Mantissa > 0",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-retains-expired-flags",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "if (_flags.Count == _length && _flags[0]) count--;",
+    "after": "/* injected expired flags */",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-drops-quiet-leg",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "if (count == 0) return previous;",
+    "after": "if (count == 0) return default;",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-loses-startup-count-padding",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": " : default, _length - count);",
+    "after": " : default, Math.Min(_length, _flags.Count + 1) - count);",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-preview-commits-state",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "if (final) { _up = up;",
+    "after": "{ _up = up;",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-reset-retains-leg-values",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveGainLossWindow.cs",
+    "scope": "internal sealed class AsymmetricGainLossWindow : IDisposable",
+    "before": "_up = _down = default;",
+    "after": "/* injected stale legs */",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "asymmetric-rsi-core-alias-loses-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void AsymmetricalRsi",
+    "before": "AsymmetricalRelativeStrengthIndex(close, output, upLength);",
+    "after": "AsymmetricalRelativeStrengthIndex(close, output, 14);",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "gain-loss-selected-ComputeRapidRsiFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRapidRsiFast",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "gain-loss-selected-ComputeAsymmetricalRsiFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAsymmetricalRsiFast",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "gain-loss-selected-ComputeAsymmetricalRelativeStrengthIndexFast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAsymmetricalRelativeStrengthIndexFast",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "adaptive-gain-loss-input-RapidRelativeStrengthIndexState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected skipped validation",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "adaptive-gain-loss-input-AsymmetricalRelativeStrengthIndexState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AsymmetricalRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected skipped validation",
+    "filter": "FullyQualifiedName~AdaptiveGainLossNumericalTests"
+  },
+  {
+    "id": "rapid-rsi-discards-customer-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "? SmoothStrength(data, context, ComputeRapidRsiFast(data, context, rrsi.Length), rrsi.Length, rrsi.MaType)",
+    "after": "? ComputeRapidRsiFast(data, context, rrsi.Length)",
+    "filter": "FullyQualifiedName~RapidPublicAndRawSignalHonorTheCustomerAverage"
   }
 ]
