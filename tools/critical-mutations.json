@@ -6391,5 +6391,70 @@
     "after": "!StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~RsiInverseFisherNumericalTests.AllThreeCustomerStagesAreHonored",
     "scope": "private static ComputeBuffer SmoothStrength("
+  },
+  {
+    "id": "commodity-loses-mad-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "numerator.Add(1d, n * residual);",
+    "after": "numerator.Add(1d, residual);",
+    "filter": "FullyQualifiedName~CommodityIndexWindowTests.SubnormalWindowRetainsNonzeroClassicalDeviation"
+  },
+  {
+    "id": "commodity-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~CommodityIndexWindowTests.MatchesIndependentMeanDeviationDefinitionsWithPreviewResetAndWideResiduals"
+  },
+  {
+    "id": "commodity-reset-retains-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "_sum = default;",
+    "after": "/* injected retained sum */",
+    "filter": "FullyQualifiedName~CommodityIndexWindowTests.MatchesIndependentMeanDeviationDefinitionsWithPreviewResetAndWideResiduals"
+  },
+  {
+    "id": "commodity-loses-wide-residual",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "var residualValue = StrengthValue.Round(difference, 1);",
+    "after": "var residualValue = new StrengthValue(value - mean);",
+    "filter": "FullyQualifiedName~CommodityIndexWindowTests.MatchesIndependentMeanDeviationDefinitionsWithPreviewResetAndWideResiduals"
+  },
+  {
+    "id": "commodity-ignores-selected-prices",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "if (data.ChainedValues.Count > 0) return data.ChainedValues;",
+    "after": "// injected selected input omission",
+    "filter": "FullyQualifiedName~CommodityNumericalTests.AllRoutesPreserveTypicalPricesSelectedInputsAndEveryPeriod"
+  },
+  {
+    "id": "commodity-woodie-loses-slow-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new WoodieCommodityChannelIndexState(woodie.MaType, woodie.FastLength, woodie.SlowLength)",
+    "after": "new WoodieCommodityChannelIndexState(woodie.MaType, woodie.FastLength, woodie.FastLength)",
+    "filter": "FullyQualifiedName~CommodityNumericalTests.AllRoutesPreserveTypicalPricesSelectedInputsAndEveryPeriod"
+  },
+  {
+    "id": "commodity-inverse-erases-tiny-transform",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "Math.Tanh(result.Span[i])",
+    "after": "(Math.Exp(2 * result.Span[i]) - 1) / (Math.Exp(2 * result.Span[i]) + 1)",
+    "filter": "FullyQualifiedName~CommodityNumericalTests.AllThreeInverseCustomerStagesAreHonored",
+    "scope": "private static ComputeBuffer ComputeOscillatorInverseFisherFast("
+  },
+  {
+    "id": "commodity-accepts-invalid-constant",
+    "module": "numerical",
+    "file": "src/Helpers/CommodityIndexWindow.cs",
+    "before": "if (constant == 0 || double.IsNaN(constant) || double.IsInfinity(constant))",
+    "after": "if (constant == 0)",
+    "filter": "FullyQualifiedName~CommodityNumericalTests.InvalidConstantsAreRejectedEvenForEmptyInputs"
   }
 ]

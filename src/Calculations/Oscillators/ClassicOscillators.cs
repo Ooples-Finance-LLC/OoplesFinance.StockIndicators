@@ -17,12 +17,29 @@ public static partial class Calculations
     public static StockData CalculateCommodityChannelIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double constant = 0.015)
     {
+        CommodityIndexWindow.ValidateConstant(constant);
         length = Math.Max(1, length);
         List<double> cciList = new(stockData.Count);
         List<double> tpDevDiffList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        var inputList = CommodityIndexWindow.Prices(stockData);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var window = new CommodityIndexWindow(maType, length, constant, inputList.Count);
+            for (var i = 0; i < inputList.Count; i++)
+            {
+                var value = window.Next(inputList[i], true);
+                var previous = i > 0 ? cciList[i - 1] : 0;
+                var older = i > 1 ? cciList[i - 2] : 0;
+                signalsList?.Add(GetRsiSignal(value - previous, previous - older, value, previous, 100, -100));
+                cciList.Add(value);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cci", cciList } });
+            stockData.SetSignals(signalsList); stockData.SetCustomValues(cciList);
+            stockData.IndicatorName = IndicatorName.CommodityChannelIndex;
+            return stockData;
+        }
         var tpSmaList = maType == MovingAvgType.SimpleMovingAverage
             ? new List<double>(new double[stockData.Count])
             : GetMovingAverageList(stockData, maType, length, inputList);

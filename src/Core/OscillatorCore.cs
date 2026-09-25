@@ -123,40 +123,10 @@ internal static class OscillatorCore
     /// <param name="length">Period (default 20).</param>
     internal static void CommodityChannelIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        const double constant = 0.015;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1) { output[i] = 0; continue; }
-            // Typical Price
-            var tp = (high[i] + low[i] + close[i]) / 3;
-
-            // Calculate SMA of TP
-            var first = i - length + 1;
-            var anchor = (high[first] + low[first] + close[first]) / 3;
-            double tpSum = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                tpSum += (high[j] + low[j] + close[j]) / 3 - anchor;
-            }
-            var smaTP = anchor + tpSum / length;
-
-            // Calculate Mean Deviation
-            double meanDev = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                meanDev += Math.Abs((high[j] + low[j] + close[j]) / 3 - smaTP);
-            }
-            meanDev /= length;
-
-            output[i] = meanDev != 0 ? (tp - smaTP) / (constant * meanDev) : 0;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length)
+            throw new ArgumentException("Input and output spans must cover every close.");
+        using var window = new CommodityIndexWindow(MovingAvgType.SimpleMovingAverage, length, .015, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(CommodityIndexWindow.TypicalPrice(high[i], low[i], close[i]), true);
     }
 
     /// <summary>

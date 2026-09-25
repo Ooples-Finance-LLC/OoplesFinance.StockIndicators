@@ -2874,9 +2874,18 @@ internal static partial class IndicatorCompute
         // the mean absolute deviation of that same window, and it reads the caller's chained series in place of
         // the typical price whenever one is chained.
 
-        var (inputList, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
+        CommodityIndexWindow.ValidateConstant(constant);
+        length = Math.Max(1, length);
+        var inputList = CommodityIndexWindow.Prices(data);
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var window = new CommodityIndexWindow(maType, length, constant, count);
+            var exact = context.Rent(count);
+            for (var i = 0; i < count; i++) exact.WritableSpan[i] = window.Next(input[i], true);
+            return exact;
+        }
 
         if (maType == MovingAvgType.SimpleMovingAverage)
         {
@@ -21818,11 +21827,10 @@ internal static partial class IndicatorCompute
         int length, int signalLength, MovingAvgType kind, bool cci, double constant)
     {
         if (!cci) return ComputeEhlersInverseFisherTransformFast(data, context, length, signalLength, kind);
-        using var source = cci ? ComputeCciFast(data, context, length, kind, constant)
+        var source = cci ? ComputeCciFast(data, context, length, kind, constant)
             : ComputeRsiFast(data, context, length, kind);
         for (var i = 0; i < data.Count; i++) source.WritableSpan[i] = .1 * (source.Span[i] - 50);
-        var result = context.Rent(data.Count);
-        MovingAverage(data, kind, signalLength, source.Span, result.WritableSpan);
+        var result = SmoothStrength(data, context, source, signalLength, kind);
         for (var i = 0; i < data.Count; i++) result.WritableSpan[i] = Math.Tanh(result.Span[i]);
         return result;
     }
