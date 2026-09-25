@@ -246,14 +246,35 @@ internal static partial class BuiltInFormulaReferences
         return variance.SqrtToDouble();
     }).ToArray();
 
-    private static double[] ExactDeviationSignal(IReadOnlyList<double> values, int length, int kind) => values.Select((_, i) =>
+    private static double[] ExactDeviationSignal(IReadOnlyList<double> values, int length, int kind)
     {
-        if (kind == 1 && i + 1 < length) return 0;
+        // Preserve the prior per-window rejection/startup behavior for nonfinite upstream stages.
+        if (values.Any(value => double.IsNaN(value) || double.IsInfinity(value)))
+            return values.Select((_, i) =>
+            {
+                if (kind == 1 && i + 1 < length) return 0;
+                var exact = new ReferenceFraction(0);
+                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
+                    exact += ReferenceFraction.FromDouble(values[j]) * new ReferenceFraction(kind == 2 ? length - i + j : 1);
+                return (exact / new ReferenceFraction(kind == 2 ? (long)length * (length + 1L) / 2 : length)).ToDouble();
+            }).ToArray();
+        var result = new double[values.Count];
         var sum = new ReferenceFraction(0);
-        for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            sum += ReferenceFraction.FromDouble(values[j]) * new ReferenceFraction(kind == 2 ? length - i + j : 1);
-        return (sum / new ReferenceFraction(kind == 2 ? (long)length * (length + 1L) / 2 : length)).ToDouble();
-    }).ToArray();
+        var weighted = new ReferenceFraction(0);
+        var denominator = new ReferenceFraction(kind == 2 ? (long)length * (length + 1L) / 2 : length);
+        for (var i = 0; i < values.Count; i++)
+        {
+            var current = ReferenceFraction.FromDouble(values[i]);
+            // Shift every previous weight down by one; the expired weight becomes zero.
+            // These sums remain exact across eviction and are rounded only on publication.
+            if (kind == 2) weighted += new ReferenceFraction(length) * current - sum;
+            sum += current;
+            if (i >= length) sum -= ReferenceFraction.FromDouble(values[i - length]);
+            if (kind == 1 && i + 1 < length) continue;
+            result[i] = ((kind == 2 ? weighted : sum) / denominator).ToDouble();
+        }
+        return result;
+    }
 
     private static double[] PopulationVariance(IReadOnlyList<double> prices, int length) => prices.Select((_, i) =>
     {
