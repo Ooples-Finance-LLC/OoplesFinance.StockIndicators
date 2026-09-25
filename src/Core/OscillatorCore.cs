@@ -7464,66 +7464,21 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Stochastic Moving Average Convergence Divergence Oscillator.
     /// </summary>
-    internal static void StochasticMacdOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26, int signalLength = 9, int stochLength = 14)
+    internal static void StochasticMacdOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12,
+        int slowLength = 26, int signalLength = 9, int stochLength = 45)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        var fast = new double[close.Length];
+        var slow = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(close, fast, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(close, slow, slowLength);
+        var window = new RollingMinMax(Math.Max(1, stochLength));
+        // This close-only overload treats each input as a bar with high=low=close.
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var macdLineArray = pool.Rent(close.Length);
-        var stochMacdArray = pool.Rent(close.Length);
-
-        try
-        {
-            var macdLine = macdLineArray.AsSpan(0, close.Length);
-            var stochMacd = stochMacdArray.AsSpan(0, close.Length);
-
-            // Calculate MACD line
-            var fastEma = pool.Rent(close.Length);
-            var slowEma = pool.Rent(close.Length);
-            try
-            {
-                MovingAverageCore.ExponentialMovingAverage(close, fastEma.AsSpan(0, close.Length), fastLength);
-                MovingAverageCore.ExponentialMovingAverage(close, slowEma.AsSpan(0, close.Length), slowLength);
-                for (var i = 0; i < close.Length; i++)
-                {
-                    macdLine[i] = fastEma[i] - slowEma[i];
-                }
-            }
-            finally
-            {
-                pool.Return(fastEma);
-                pool.Return(slowEma);
-            }
-
-            // Calculate Stochastic of MACD
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < stochLength - 1)
-                {
-                    output[i] = 50;
-                }
-                else
-                {
-                    var highest = macdLine[i];
-                    var lowest = macdLine[i];
-                    for (var j = i - stochLength + 1; j <= i; j++)
-                    {
-                        if (macdLine[j] > highest) highest = macdLine[j];
-                        if (macdLine[j] < lowest) lowest = macdLine[j];
-                    }
-
-                    var range = highest - lowest;
-                    output[i] = range != 0 ? (macdLine[i] - lowest) / range * 100 : 50;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(macdLineArray);
-            pool.Return(stochMacdArray);
+            window.Add(close[i]);
+            output[i] = RoundedStochasticMacd.Of(fast[i], slow[i], window.Max, window.Min);
         }
     }
 

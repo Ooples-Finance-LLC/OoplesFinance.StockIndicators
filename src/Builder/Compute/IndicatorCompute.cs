@@ -12213,13 +12213,16 @@ internal static partial class IndicatorCompute
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
+        using var highSeries = context.Rent(count);
+        using var lowSeries = context.Rent(count);
+        CustomRange(data, input, highSeries.WritableSpan, lowSeries.WritableSpan);
+        var highs = highSeries.Span;
+        var lows = lowSeries.Span;
 
         using var fastAverage = context.Rent(count);
         using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
+        StochasticSmooth(data, maType, fastLength, input, fastAverage.WritableSpan);
+        StochasticSmooth(data, maType, slowLength, input, slowAverage.WritableSpan);
         var fastEma = fastAverage.Span;
         var slowEma = slowAverage.Span;
 
@@ -12233,17 +12236,15 @@ internal static partial class IndicatorCompute
             highWindow.Add(highs[i]);
             lowWindow.Add(lows[i]);
 
-            var ll = lowWindow.Min;
-            var range = highWindow.Max - ll;
-            var fastStochastic = range != 0 ? (fastEma[i] - ll) / range : 0;
-            var slowStochastic = range != 0 ? (slowEma[i] - ll) / range : 0;
-            output[i] = 10 * (fastStochastic - slowStochastic);
+            output[i] = RoundedStochasticMacd.Of(fastEma[i], slowEma[i], highWindow.Max, lowWindow.Min);
         }
 
         if (outputKey is "Signal" or "Histogram")
         {
             using var signal = context.Rent(count);
-            MovingAverage(data, maType, 9, buffer.Span, signal.WritableSpan);
+            var finite = FiniteSignalInput.Create(buffer.ToArray(), out var finiteCount);
+            StochasticSmooth(data, maType, 9, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);
+            for (var i = finiteCount; i < count; i++) signal.WritableSpan[i] = double.NaN;
             for (var i = 0; i < count; i++)
                 output[i] = outputKey == "Signal" ? signal.Span[i] : output[i] - signal.Span[i];
         }

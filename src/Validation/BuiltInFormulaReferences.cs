@@ -376,6 +376,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.StochasticMovingAverageConvergenceDivergenceOscillator)
+        {
+            var stochasticOptions = builtIn.CreateOptions();
+            var stochasticKeys = new[] { "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < stochasticKeys.Length; slot++)
+            {
+                var key = stochasticKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedStochasticMacdReference(bars, stochasticOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.TFSMboIndicator or IndicatorName.TFSMboPercentagePriceOscillator)
         {
             var tfsOptions = builtIn.CreateOptions();
