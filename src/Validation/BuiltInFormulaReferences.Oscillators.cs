@@ -639,6 +639,7 @@ internal static partial class BuiltInFormulaReferences
                     return value;
                 }).ToArray())));
             case IndicatorName.CCTStochRelativeStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Type1", new[] { "Type1", "Type2", "Type3", "Type4", "Type5", "Type6", "TypeCustom", "Signal" }, bars => CctRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var cctPeriods = new[] { Integer(options, "Length1", 5), Integer(options, "Length2", 8),
                     Integer(options, "Length3", 13), Integer(options, "Length4", 14), Integer(options, "Length5", 21) };

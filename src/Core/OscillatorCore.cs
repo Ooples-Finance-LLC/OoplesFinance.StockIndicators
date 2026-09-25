@@ -4079,30 +4079,18 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes CCT Stoch RSI (CCT version of Stochastic RSI).
     /// </summary>
-    internal static void CCTStochRsi(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 14, int stochLength = 5, int smaLength = 3)
+    internal static void CCTStochRsi(ReadOnlySpan<double> input, Span<double> output, int rsiLength = 21,
+        int numeratorLength = 8, int rangeLength = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
+        using var rsi = new OoplesFinance.StockIndicators.Streaming.RsiState(maType, rsiLength);
+        var numerator = new RollingMinMax(Math.Max(1, numeratorLength));
+        var range = new RollingMinMax(Math.Max(1, rangeLength));
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        var stochArray = pool.Rent(input.Length);
-
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            var stoch = stochArray.AsSpan(0, input.Length);
-
-            RelativeStrengthIndex(input, rsi, rsiLength);
-            StochasticKOnValues(rsi, stoch, stochLength);
-            MovingAverageCore.SimpleMovingAverage(stoch, output, smaLength);
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(stochArray);
+            var value = rsi.Next(input[i], true); numerator.Add(value); range.Add(value);
+            output[i] = CctRsiRatio.Percent(value, numerator.Min, range.Min, range.Max);
         }
     }
 

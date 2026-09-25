@@ -9213,10 +9213,9 @@ internal static partial class IndicatorCompute
             numeratorWindow.Add(strength[i]);
             lowWindow.Add(strength[i]);
             highWindow.Add(strength[i]);
-            var width = highWindow.Max - lowWindow.Min;
-            output[i] = width == 0 ? 0 : 100 * (strength[i] - numeratorWindow.Min) / width;
+            output[i] = CctRsiRatio.Percent(strength[i], numeratorWindow.Min, lowWindow.Min, highWindow.Max);
         }
-        return smoothing > 0 ? SmoothPublished(data, context, buffer, smoothing, maType) : buffer;
+        return smoothing > 0 ? SmoothStrength(data, context, buffer, smoothing, maType) : buffer;
     }
 
     /// <summary>

@@ -6085,5 +6085,66 @@
     "after": "StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~StochasticRsiNumericalTests",
     "scope": "internal static ComputeBuffer ComputeStochasticRsiFast("
+  },
+  {
+    "id": "cct-rsi-clamps-distinct-windows",
+    "module": "numerical",
+    "file": "src/Helpers/CctRsiRatio.cs",
+    "before": "return top.Ratio(bottom);",
+    "after": "return Math.Clamp(top.Ratio(bottom), 0, 100);",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.DifferentNumeratorAndDenominatorWindowsMustNotClampTheRatio"
+  },
+  {
+    "id": "cct-rsi-core-loses-numerator-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new RollingMinMax(Math.Max(1, numeratorLength))",
+    "after": "new RollingMinMax(Math.Max(1, rangeLength))",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.DifferentNumeratorAndDenominatorWindowsMustNotClampTheRatio",
+    "scope": "internal static void CCTStochRsi("
+  },
+  {
+    "id": "cct-rsi-native-preview-commits-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_rsi21Len2Min.Preview(rsi21, out _)",
+    "after": "_rsi21Len2Min.Add(rsi21, out _)",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
+    "scope": "public sealed class CCTStochRelativeStrengthIndexState"
+  },
+  {
+    "id": "cct-rsi-native-reset-keeps-smoothers",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "if (_exactMeans is not null) foreach (var mean in _exactMeans) mean.Reset();",
+    "after": "// injected retained smoothing state",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
+    "scope": "public sealed class CCTStochRelativeStrengthIndexState"
+  },
+  {
+    "id": "cct-rsi-batch-type4-loses-period",
+    "module": "numerical",
+    "file": "src/Calculations/Rsi/RsiAtoD.cs",
+    "before": "CctRsiRatio.Smooth(type4List, maType, smoothLength2)",
+    "after": "CctRsiRatio.Smooth(type4List, maType, smoothLength1)",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod"
+  },
+  {
+    "id": "cct-rsi-raw-selected-input-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
+    "scope": "internal static ComputeBuffer ComputeRsiFast("
+  },
+  {
+    "id": "cct-rsi-native-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "smoothLength1, signalLength }",
+    "after": "smoothLength1, smoothLength1 }",
+    "filter": "FullyQualifiedName~CctRsiNumericalTests.RawAllOutputsUseSelectedPricesAndNativeSignalRetainsItsOwnPeriod",
+    "scope": "public sealed class CCTStochRelativeStrengthIndexState"
   }
 ]

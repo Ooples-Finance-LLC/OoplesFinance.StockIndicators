@@ -612,33 +612,38 @@ public static partial class Calculations
             var lowestCustom = rsi8Len2Window.Min;
             var highestCustom = rsi8Len2Window.Max;
 
-            var stochRSI1 = highestY1 - lowestZ1 != 0 ? (currentRSI21 - lowestX1) / (highestY1 - lowestZ1) * 100 : 0;
+            var stochRSI1 = CctRsiRatio.Percent(currentRSI21, lowestX1, lowestZ1, highestY1);
             type1List.Add(stochRSI1);
 
-            var stochRSI2 = highestY2 - lowestZ2 != 0 ? (currentRSI21 - lowestX2) / (highestY2 - lowestZ2) * 100 : 0;
+            var stochRSI2 = CctRsiRatio.Percent(currentRSI21, lowestX2, lowestZ2, highestY2);
             type2List.Add(stochRSI2);
 
-            var stochRSI3 = highestY3 - lowestZ3 != 0 ? (currentRSI14 - lowestX3) / (highestY3 - lowestZ3) * 100 : 0;
+            var stochRSI3 = CctRsiRatio.Percent(currentRSI14, lowestX3, lowestZ3, highestY3);
             type3List.Add(stochRSI3);
 
-            var stochRSI4 = highestY4 - lowestZ4 != 0 ? (currentRSI21 - lowestX4) / (highestY4 - lowestZ4) * 100 : 0;
+            var stochRSI4 = CctRsiRatio.Percent(currentRSI21, lowestX4, lowestZ4, highestY4);
             type4List.Add(stochRSI4);
 
-            var stochRSI5 = highestY5 - lowestZ5 != 0 ? (currentRSI5 - lowestX5) / (highestY5 - lowestZ5) * 100 : 0;
+            var stochRSI5 = CctRsiRatio.Percent(currentRSI5, lowestX5, lowestZ5, highestY5);
             type5List.Add(stochRSI5);
 
-            var stochRSI6 = highestY6 - lowestZ6 != 0 ? (currentRSI13 - lowestX6) / (highestY6 - lowestZ6) * 100 : 0;
+            var stochRSI6 = CctRsiRatio.Percent(currentRSI13, lowestX6, lowestZ6, highestY6);
             type6List.Add(stochRSI6);
 
-            var stochCustom = highestCustom - lowestCustom != 0 ? (currentRSI8 - lowestCustom) / (highestCustom - lowestCustom) * 100 : 0;
+            var stochCustom = CctRsiRatio.Percent(currentRSI8, lowestCustom, lowestCustom, highestCustom);
             typeCustomList.Add(stochCustom);
         }
 
-        var rsiEma4List = GetMovingAverageList(stockData, maType, smoothLength2, type4List);
-        var rsiEma5List = GetMovingAverageList(stockData, maType, smoothLength1, type5List);
-        var rsiEma6List = GetMovingAverageList(stockData, maType, smoothLength1, type6List);
-        var rsiEmaCustomList = GetMovingAverageList(stockData, maType, smoothLength1, typeCustomList);
-        var rsiSignalList = GetMovingAverageList(stockData, maType, signalLength, type1List);
+        var rsiEma4List = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            ? CctRsiRatio.Smooth(type4List, maType, smoothLength2) : GetMovingAverageList(stockData, maType, smoothLength2, type4List);
+        var rsiEma5List = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            ? CctRsiRatio.Smooth(type5List, maType, smoothLength1) : GetMovingAverageList(stockData, maType, smoothLength1, type5List);
+        var rsiEma6List = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            ? CctRsiRatio.Smooth(type6List, maType, smoothLength1) : GetMovingAverageList(stockData, maType, smoothLength1, type6List);
+        var rsiEmaCustomList = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            ? CctRsiRatio.Smooth(typeCustomList, maType, smoothLength1) : GetMovingAverageList(stockData, maType, smoothLength1, typeCustomList);
+        var rsiSignalList = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+            ? CctRsiRatio.Smooth(type1List, maType, signalLength) : GetMovingAverageList(stockData, maType, signalLength, type1List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsi = type1List[i];

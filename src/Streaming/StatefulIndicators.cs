@@ -11493,6 +11493,7 @@ public sealed class CamarillaPivotPointsState : IStreamingIndicatorState
 [PrimaryOutput("Type1")]
 public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthAverage[]? _exactMeans;
     private readonly RsiState _rsi5;
     private readonly RsiState _rsi8;
     private readonly RsiState _rsi13;
@@ -11523,6 +11524,8 @@ public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorStat
         int length1 = 5, int length2 = 8, int length3 = 13, int length4 = 14, int length5 = 21,
         int smoothLength1 = 3, int smoothLength2 = 8, int signalLength = 9)
     {
+        if (StrengthWindow.Supports(maType)) _exactMeans = new[] { smoothLength2, smoothLength1, smoothLength1, smoothLength1, signalLength }
+            .Select(n => new StrengthAverage(maType, n)).ToArray();
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
         var resolved3 = Math.Max(1, length3);
@@ -11559,6 +11562,7 @@ public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorStat
 
     public void Reset()
     {
+        if (_exactMeans is not null) foreach (var mean in _exactMeans) mean.Reset();
         _rsi5.Reset();
         _rsi8.Reset();
         _rsi13.Reset();
@@ -11611,26 +11615,19 @@ public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorStat
         var rsi8Len2Min = isFinal ? _rsi8Len2Min.Add(rsi8, out _) : _rsi8Len2Min.Preview(rsi8, out _);
         var rsi8Len2Max = isFinal ? _rsi8Len2Max.Add(rsi8, out _) : _rsi8Len2Max.Preview(rsi8, out _);
 
-        var range1 = rsi21Len3Max - rsi21Len3Min;
-        var type1 = range1 != 0 ? (rsi21 - rsi21Len2Min) / range1 * 100 : 0;
-        var range2 = rsi21Len5Max - rsi21Len5Min;
-        var type2 = range2 != 0 ? (rsi21 - rsi21Len5Min) / range2 * 100 : 0;
-        var range3 = rsi14Len4Max - rsi14Len4Min;
-        var type3 = range3 != 0 ? (rsi14 - rsi14Len4Min) / range3 * 100 : 0;
-        var range4 = rsi21Len2Max - rsi21Len3Min;
-        var type4Raw = range4 != 0 ? (rsi21 - rsi21Len3Min) / range4 * 100 : 0;
-        var range5 = rsi5Len1Max - rsi5Len1Min;
-        var type5Raw = range5 != 0 ? (rsi5 - rsi5Len1Min) / range5 * 100 : 0;
-        var range6 = rsi13Len3Max - rsi13Len3Min;
-        var type6Raw = range6 != 0 ? (rsi13 - rsi13Len3Min) / range6 * 100 : 0;
-        var rangeCustom = rsi8Len2Max - rsi8Len2Min;
-        var customRaw = rangeCustom != 0 ? (rsi8 - rsi8Len2Min) / rangeCustom * 100 : 0;
+        var type1 = CctRsiRatio.Percent(rsi21, rsi21Len2Min, rsi21Len3Min, rsi21Len3Max);
+        var type2 = CctRsiRatio.Percent(rsi21, rsi21Len5Min, rsi21Len5Min, rsi21Len5Max);
+        var type3 = CctRsiRatio.Percent(rsi14, rsi14Len4Min, rsi14Len4Min, rsi14Len4Max);
+        var type4Raw = CctRsiRatio.Percent(rsi21, rsi21Len3Min, rsi21Len3Min, rsi21Len2Max);
+        var type5Raw = CctRsiRatio.Percent(rsi5, rsi5Len1Min, rsi5Len1Min, rsi5Len1Max);
+        var type6Raw = CctRsiRatio.Percent(rsi13, rsi13Len3Min, rsi13Len3Min, rsi13Len3Max);
+        var customRaw = CctRsiRatio.Percent(rsi8, rsi8Len2Min, rsi8Len2Min, rsi8Len2Max);
 
-        var type4 = _type4Smoother.Next(type4Raw, isFinal);
-        var type5 = _type5Smoother.Next(type5Raw, isFinal);
-        var type6 = _type6Smoother.Next(type6Raw, isFinal);
-        var typeCustom = _customSmoother.Next(customRaw, isFinal);
-        var signal = _signalSmoother.Next(type1, isFinal);
+        var type4 = _exactMeans is null ? _type4Smoother.Next(type4Raw, isFinal) : _exactMeans[0].Next(new StrengthValue(type4Raw), isFinal).Mantissa;
+        var type5 = _exactMeans is null ? _type5Smoother.Next(type5Raw, isFinal) : _exactMeans[1].Next(new StrengthValue(type5Raw), isFinal).Mantissa;
+        var type6 = _exactMeans is null ? _type6Smoother.Next(type6Raw, isFinal) : _exactMeans[2].Next(new StrengthValue(type6Raw), isFinal).Mantissa;
+        var typeCustom = _exactMeans is null ? _customSmoother.Next(customRaw, isFinal) : _exactMeans[3].Next(new StrengthValue(customRaw), isFinal).Mantissa;
+        var signal = _exactMeans is null ? _signalSmoother.Next(type1, isFinal) : _exactMeans[4].Next(new StrengthValue(type1), isFinal).Mantissa;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -11653,6 +11650,7 @@ public sealed class CCTStochRelativeStrengthIndexState : IStreamingIndicatorStat
 
     public void Dispose()
     {
+        if (_exactMeans is not null) foreach (var mean in _exactMeans) mean.Dispose();
         _rsi5.Dispose();
         _rsi8.Dispose();
         _rsi13.Dispose();
