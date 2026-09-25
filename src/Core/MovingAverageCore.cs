@@ -2222,18 +2222,9 @@ internal static class MovingAverageCore
                 continue;
             }
 
-            var sum = 0.0;
-            var count = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var val = input[i - j];
-                if (val != 0)
-                {
-                    sum += 1.0 / val;
-                    count++;
-                }
-            }
-            output[i] = count > 0 && sum != 0 ? count / sum : 0;
+            var sum = new ExactReciprocalSum();
+            for (var j = 0; j < length; j++) sum.Add(input[i - j]);
+            output[i] = sum.Mean;
         }
     }
 

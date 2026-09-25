@@ -13674,7 +13674,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeHarmonicMeanMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         MovingAverageCore.HarmonicMeanMovingAverage(close, buffer.WritableSpan, length);
         return buffer;

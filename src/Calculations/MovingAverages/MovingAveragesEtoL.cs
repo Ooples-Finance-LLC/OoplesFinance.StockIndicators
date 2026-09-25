@@ -122,19 +122,9 @@ public static partial class Calculations
             }
             else
             {
-                var sum = 0.0;
-                var used = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var value = inputList[i - j];
-                    if (value != 0)
-                    {
-                        sum += 1.0 / value;
-                        used++;
-                    }
-                }
-
-                hmma = used > 0 && sum != 0 ? used / sum : 0;
+                var sum = new ExactReciprocalSum();
+                for (var j = 0; j < length; j++) sum.Add(inputList[i - j]);
+                hmma = sum.Mean;
             }
 
             hmmaList.Add(hmma);

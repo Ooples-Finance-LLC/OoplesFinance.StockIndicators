@@ -110,25 +110,10 @@ public sealed class HarmonicMeanMovingAverageState : IStreamingIndicatorState, I
         else
         {
             var start = _window.Count - (_length - 1);
-            var sum = 0.0;
-            var used = 0;
-            if (value != 0)
-            {
-                sum += 1.0 / value;
-                used++;
-            }
-
-            for (var i = _window.Count - 1; i >= start; i--)
-            {
-                var windowValue = _window[i];
-                if (windowValue != 0)
-                {
-                    sum += 1.0 / windowValue;
-                    used++;
-                }
-            }
-
-            hmma = used > 0 && sum != 0 ? used / sum : 0;
+            var sum = new ExactReciprocalSum();
+            sum.Add(value);
+            for (var i = _window.Count - 1; i >= start; i--) sum.Add(_window[i]);
+            hmma = sum.Mean;
         }
 
         if (isFinal)
