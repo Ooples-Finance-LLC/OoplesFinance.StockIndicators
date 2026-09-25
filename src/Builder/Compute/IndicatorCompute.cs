@@ -10510,6 +10510,14 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new WamiWindow(maType, length1, length2, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(input[i], true);
+            return stable;
+        }
+
         using var difference = context.Rent(count);
         var diff = difference.WritableSpan;
         for (var i = 0; i < count; i++)
@@ -10519,7 +10527,7 @@ internal static partial class IndicatorCompute
         }
 
         using var weighted = context.Rent(count);
-        MovingAverage(data, MovingAvgType.WeightedMovingAverage, length2, difference.Span, weighted.WritableSpan);
+        MovingAverageCore.WeightedMovingAverage(difference.Span, weighted.WritableSpan, length2);
 
         using var smoothed = context.Rent(count);
         MovingAverage(data, maType, length1, weighted.Span, smoothed.WritableSpan);

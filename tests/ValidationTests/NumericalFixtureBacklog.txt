@@ -3822,11 +3822,6 @@ OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/minimum-fastLength
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/minimum-periods
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.WaddahAttarExplosion/shorter-periods
-OoplesFinance.StockIndicators.Indicators.WamiOscillator/default
-OoplesFinance.StockIndicators.Indicators.WamiOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.WamiOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.WamiOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.WamiOscillator/weighted-average
 OoplesFinance.StockIndicators.Indicators.WaveTrendOscillator/default
 OoplesFinance.StockIndicators.Indicators.WaveTrendOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.WaveTrendOscillator/minimum-periods

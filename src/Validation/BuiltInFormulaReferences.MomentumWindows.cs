@@ -42,6 +42,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.WamiOscillator:
                 var wamiKind = AverageKind(options, 3);
                 if (wamiKind == 0) return null;
+                if (wamiKind is 1 or 2 or 3 or 6) return new("Wami", new[] { "Wami" }, bars => WamiOutputs(bars, indicator));
                 return new("Wami", new[] { "Wami" }, bars =>
                 {
                     var differences = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
