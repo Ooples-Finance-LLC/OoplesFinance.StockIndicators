@@ -681,7 +681,7 @@ public static partial class Calculations
         List<double> avgList = new(stockData.Count);
         List<double> oscList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double avgSum = 0;
+        var avgSum = new ExactMeanAccumulator();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
@@ -715,8 +715,8 @@ public static partial class Calculations
             var avg = (c + d) / 2;
             avgList.Add(avg);
 
-            avgSum += avg;
-            var rmean = avgSum / (i + 1);
+            avgSum.Add(avg);
+            var rmean = avgSum.Mean(i + 1);
             var osc = avg - rmean;
             oscList.Add(osc);
 

@@ -26,6 +26,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.ImpulsePercentagePriceOscillator when spec.Options is ImpulsePercentagePriceOscillatorSpecOptions impulse => new ImpulsePercentagePriceOscillatorState(length: impulse.Length),
             IndicatorName.AwesomeOscillator when spec.Options is AwesomeOscillatorSpecOptions awesome => new AwesomeOscillatorState(fastLength: awesome.Length, maType: awesome.MaType),
             IndicatorName.AcceleratorOscillator when spec.Options is AcceleratorOscillatorSpecOptions accelerator => new AcceleratorOscillatorState(fastLength: accelerator.Length, maType: accelerator.MaType),
+            IndicatorName.TrendForceHistogram when spec.Options is TrendForceHistogramSpecOptions trendForce => new TrendForceHistogramState(trendForce.Length),
             IndicatorName.MarketFacilitationIndex => new MarketFacilitationIndexState(),
             IndicatorName.TrueRange => new TrueRangeState(),
             IndicatorName.Range => new RangeState(),

@@ -19,7 +19,7 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
     private double _prevB;
     private double _prevC;
     private double _prevD;
-    private double _avgSum;
+    private ExactMeanAccumulator _avgSum;
     private int _index;
     private bool _hasPrev;
 
@@ -43,7 +43,7 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
         _prevB = 0;
         _prevC = 0;
         _prevD = 0;
-        _avgSum = 0;
+        _avgSum = default;
         _index = 0;
         _hasPrev = false;
     }
@@ -58,8 +58,9 @@ public sealed class TrendForceHistogramState : IStreamingIndicatorState, IDispos
         var c = a == 1d ? _prevC + 1 : b - _prevB == 1d ? 0 : _prevC;
         var d = b == 1d ? _prevD + 1 : a - _prevA == 1d ? 0 : _prevD;
         var avg = (c + d) / 2;
-        var avgSum = _avgSum + avg;
-        var rmean = avgSum / (_index + 1);
+        var avgSum = _avgSum;
+        avgSum.Add(avg);
+        var rmean = avgSum.Mean(_index + 1);
         var osc = avg - rmean;
 
         if (isFinal)
