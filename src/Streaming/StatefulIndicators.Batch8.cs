@@ -1226,11 +1226,14 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
 public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _cciState;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _signalSmoother;
 
     public EhlersCommodityChannelIndexInverseFisherTransformState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20, int signalLength = 9,
         double constant = 0.015)
     {
+        CommodityIndexWindow.ValidateConstant(constant);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, signalLength);
         _cciState = new CommodityChannelIndexState(maType, Math.Max(1, length), constant);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
@@ -1246,6 +1249,7 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _cciState.Reset();
         _signalSmoother.Reset();
     }
@@ -1255,9 +1259,8 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
         StreamingInputValidation.Validate(bar);
         var cci = _cciState.Update(bar, isFinal, includeOutputs: false).Value;
         var v1 = 0.1 * (cci - 50);
-        var v2 = _signalSmoother.Next(v1, isFinal);
-        var expValue = MathHelper.Exp(2 * v2);
-        var iFish = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
+        var v2 = _exactAverage is null ? _signalSmoother.Next(v1, isFinal) : _exactAverage.Next(new StrengthValue(v1), isFinal).Mantissa;
+        var iFish = Math.Tanh(v2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1273,6 +1276,7 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _cciState.Dispose();
         _signalSmoother.Dispose();
     }

@@ -3981,81 +3981,43 @@ public sealed class WilliamsRState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Cci")]
 public sealed class CommodityChannelIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother _priceSmoother;
-    private readonly IMovingAverageSmoother _meanDevSmoother;
-    private StreamingInputResolver _input;
+    private readonly CommodityIndexWindow? _exact;
+    private readonly IMovingAverageSmoother? _priceSmoother, _meanDevSmoother;
+    private readonly StreamingInputResolver _input;
+    private bool _readClose;
     private readonly double _constant;
-    private readonly int _length;
-    private readonly PooledRingBuffer<double>? _standardWindow;
 
     public CommodityChannelIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double constant = 0.015)
     {
-        _priceSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _meanDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
-        _constant = constant;
-        _length = Math.Max(1, length);
-        if (maType == MovingAvgType.SimpleMovingAverage) _standardWindow = new PooledRingBuffer<double>(_length);
-    }
-
-    public IndicatorName Name => IndicatorName.CommodityChannelIndex;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _priceSmoother.Reset();
-        _meanDevSmoother.Reset();
-        _standardWindow?.Clear();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var sma = _standardWindow is null ? _priceSmoother.Next(value, isFinal) : 0;
-        double meanDev;
-        if (_standardWindow is null)
-            meanDev = _meanDevSmoother.Next(Math.Abs(value - sma), isFinal);
+        CommodityIndexWindow.ValidateConstant(constant);
+        if (StrengthWindow.Supports(maType)) _exact = new CommodityIndexWindow(maType, length, constant);
         else
         {
-            double deviation = 0;
-            var nextCount = Math.Min(_length, _standardWindow.Count + 1);
-            if (isFinal) _standardWindow.TryAdd(value, out _);
-            if (nextCount == _length)
-            {
-                var start = !isFinal && _standardWindow.Count == _length ? 1 : 0;
-                var anchor = start < _standardWindow.Count ? _standardWindow[start] : value;
-                double offsetSum = 0;
-                for (var j = start; j < _standardWindow.Count; j++) offsetSum += _standardWindow[j] - anchor;
-                if (!isFinal) offsetSum += value - anchor;
-                sma = anchor + offsetSum / _length;
-                for (var j = start; j < _standardWindow.Count; j++)
-                    deviation += Math.Abs(_standardWindow[j] - sma);
-                if (!isFinal) deviation += Math.Abs(value - sma);
-            }
-            meanDev = deviation / _length;
+            _priceSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+            _meanDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
         }
-        var cci = meanDev != 0 ? (value - sma) / (_constant * meanDev) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
+        _input = new StreamingInputResolver(InputName.Close, null);
+        _constant = constant;
+    }
+    public IndicatorName Name => IndicatorName.CommodityChannelIndex;
+    void ICustomInputConsumer.ReadCloseAsInput() => _readClose = true;
+    public void Reset() { _exact?.Reset(); _priceSmoother?.Reset(); _meanDevSmoother?.Reset(); }
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
+    {
+        var close = _input.GetValue(bar);
+        var value = _readClose ? close : CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, close);
+        double cci;
+        if (_exact is not null) cci = _exact.Next(value, isFinal);
+        else
         {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cci", cci }
-            };
+            var mean = _priceSmoother!.Next(value, isFinal);
+            var deviation = _meanDevSmoother!.Next(Math.Abs(value - mean), isFinal);
+            cci = deviation == 0 ? 0 : (value - mean) / (_constant * deviation);
         }
-
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Cci", cci } } : null;
         return new StreamingIndicatorStateResult(cci, outputs);
     }
-
-    public void Dispose()
-    {
-        _priceSmoother.Dispose();
-        _meanDevSmoother.Dispose();
-        _standardWindow?.Dispose();
-    }
+    public void Dispose() { _exact?.Dispose(); _priceSmoother?.Dispose(); _meanDevSmoother?.Dispose(); }
 }
 
 [PrimaryOutput("StochRsi")]

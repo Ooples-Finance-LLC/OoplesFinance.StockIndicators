@@ -529,6 +529,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("FastK", position), ("FastD", fastD), ("SlowD", Average(fastD, smooth2, kind)));
                 });
             case IndicatorName.CommodityChannelIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Cci", new[] { "Cci" }, bars => CommodityOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var constant = Number(options, .015, "Constant");
                 if (kind != 1)
@@ -543,6 +544,7 @@ internal static partial class BuiltInFormulaReferences
                     return deviation == 0 ? 0 : (typical[typical.Length - 1] - mean) / (constant * deviation);
                 }).ToArray())));
             case IndicatorName.WoodieCommodityChannelIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("FastCci", new[] { "FastCci", "SlowCci", "Histogram" }, bars => CommodityOutputs(bars, indicator));
                 if (kind == 0) return null;
                 return new("FastCci", new[] { "FastCci", "SlowCci", "Histogram" }, bars =>
                 {

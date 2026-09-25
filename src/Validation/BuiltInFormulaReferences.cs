@@ -17,6 +17,19 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.CommodityChannelIndex or IndicatorName.WoodieCommodityChannelIndex or IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform
+            && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform ? 2 : 1) is 1 or 2 or 3 or 6)
+        {
+            var inverse = builtIn.BatchName == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform;
+            var commodityKeys = inverse ? new[] { "Eiftcci" } : builtIn.BatchName == IndicatorName.WoodieCommodityChannelIndex
+                ? new[] { "FastCci", "SlowCci", "Histogram" } : new[] { "Cci" };
+            for (var slot = 0; slot < commodityKeys.Length; slot++)
+            {
+                var key = commodityKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => CommodityOutputs(bars, builtIn)[key], inverse ? RsiInverseFisherBudget : IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersInverseFisherTransform or IndicatorName.EhlersRelativeStrengthIndexInverseFisherTransform
             && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
         {

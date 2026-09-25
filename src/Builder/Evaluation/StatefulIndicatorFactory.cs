@@ -60,6 +60,7 @@ internal static partial class StatefulIndicatorFactory
             McClellanOscillatorSpecOptions breadth => new McClellanOscillatorState(breadth.MaType),
             DecisionPointBreadthSwenlinTradingOscillatorSpecOptions breadth => new DecisionPointBreadthSwenlinTradingOscillatorState(length: breadth.Length),
             TickLineMomentumOscillatorSpecOptions breadth => new TickLineMomentumOscillatorState(breadth.MaType, breadth.Length),
+            WoodieCommodityChannelIndexSpecOptions woodie => new WoodieCommodityChannelIndexState(woodie.MaType, woodie.FastLength, woodie.SlowLength),
             EhlersInverseFisherTransformSpecOptions fisher => new EhlersInverseFisherTransformState(fisher.MaType, fisher.Length),
             InverseFisherTransformCoreSpecOptions => new EhlersInverseFisherTransformState(),
             QuasiWhiteNoiseSpecOptions noise => new QuasiWhiteNoiseState(noise.MaType, noise.Length, noise.NoiseLength, noise.Divisor),

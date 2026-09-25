@@ -2347,15 +2347,17 @@ public static partial class Calculations
             v1List.Add(v1);
         }
 
-        var v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
+        List<double> v2List;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+            v2List = StrengthWindow.Smooth(v1List, maType, signalLength);
+        else v2List = GetMovingAverageList(stockData, maType, signalLength, v1List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var v2 = v2List[i];
-            var expValue = Exp(2 * v2);
             var prevIFish1 = i >= 1 ? iFishList[i - 1] : 0;
             var prevIFish2 = i >= 2 ? iFishList[i - 2] : 0;
 
-            var iFish = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
+            var iFish = Math.Tanh(v2);
             iFishList.Add(iFish);
 
             var signal = GetRsiSignal(iFish - prevIFish1, prevIFish1 - prevIFish2, iFish, prevIFish1, 0.5, -0.5);
