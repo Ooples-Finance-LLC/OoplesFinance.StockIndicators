@@ -945,12 +945,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dsp", result));
                 });
             case IndicatorName.ChandeIntradayMomentumIndex:
-                return new("Cimi", new[] { "Cimi" }, bars => Outputs(("Cimi", bars.Select((_, i) =>
-                {
-                    var changes = Window(bars, i, length).Select(b => b.Close - b.Open).ToArray();
-                    var magnitude = changes.Sum(v => Math.Abs(v));
-                    return magnitude == 0 ? 0 : 50 * (1 + changes.Sum() / magnitude);
-                }).ToArray())));
+                return new("Cimi", new[] { "Cimi" }, bars => GainLossOutputs(bars, indicator));
             case IndicatorName.EhlersCenterofGravityOscillator:
                 return new("Ecog", new[] { "Ecog" }, bars => Outputs(("Ecog", bars.Select((_, i) =>
                 {
@@ -1082,6 +1077,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.RelativeMomentumIndex:
                 kind = AverageKind(options, 6);
+                if (kind is 1 or 2 or 3 or 6) return new("Rmi", new[] { "Rmi", "Signal", "Histogram" }, bars => GainLossOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var momentumPeriod = Integer(options, "Momentum", 3);
                 return new("Rmi", new[] { "Rmi", "Signal", "Histogram" }, bars =>

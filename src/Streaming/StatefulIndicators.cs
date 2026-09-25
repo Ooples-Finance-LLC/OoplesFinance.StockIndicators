@@ -11902,35 +11902,17 @@ public sealed class ChandeForecastOscillatorState : IStreamingIndicatorState, ID
 [PrimaryOutput("Cimi")]
 public sealed class ChandeIntradayMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _gainsSum;
-    private readonly RollingWindowSum _lossesSum;
-
-    public ChandeIntradayMomentumIndexState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _gainsSum = new RollingWindowSum(resolved);
-        _lossesSum = new RollingWindowSum(resolved);
-    }
+    private readonly IntradayGainLossWindow _window;
+    public ChandeIntradayMomentumIndexState(int length = 14) => _window = new(length);
 
     public IndicatorName Name => IndicatorName.ChandeIntradayMomentumIndex;
 
-    public void Reset()
-    {
-        _gainsSum.Reset();
-        _lossesSum.Reset();
-    }
+    public void Reset() => _window.Reset();
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var currentClose = bar.Close;
-        var currentOpen = bar.Open;
-        var gains = currentClose > currentOpen ? currentClose - currentOpen : 0;
-        var losses = currentClose < currentOpen ? currentOpen - currentClose : 0;
-        var gainsSum = isFinal ? _gainsSum.Add(gains, out _) : _gainsSum.Preview(gains, out _);
-        var lossesSum = isFinal ? _lossesSum.Add(losses, out _) : _lossesSum.Preview(losses, out _);
-        var total = gainsSum + lossesSum;
-        var imi = total != 0 ? MathHelper.MinOrMax(100 * gainsSum / total, 100, 0) : 0;
+        var imi = _window.Next(bar.Close, bar.Open, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -11944,11 +11926,7 @@ public sealed class ChandeIntradayMomentumIndexState : IStreamingIndicatorState,
         return new StreamingIndicatorStateResult(imi, outputs);
     }
 
-    public void Dispose()
-    {
-        _gainsSum.Dispose();
-        _lossesSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ckrsi")]

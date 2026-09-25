@@ -5367,5 +5367,122 @@
     "before": "        StreamingInputValidation.Validate(bar);",
     "after": "        // injected: bypass finite input validation",
     "filter": "FullyQualifiedName~NativeRoutesRejectNonfiniteFieldsBeforeChangingState"
+  },
+  {
+    "id": "gain-loss-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal static class GainLossShare",
+    "before": "return StrengthValue.Round(sum, 1);",
+    "after": "return new StrengthValue(current - previous);",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "intraday-gains-retain-evicted-candle",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class IntradayGainLossWindow : IDisposable",
+    "before": "old.AddTo(ref numerator, -100);",
+    "after": "old.AddTo(ref numerator, 0);",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "intraday-total-retains-evicted-candle",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class IntradayGainLossWindow : IDisposable",
+    "before": "old.Absolute.AddTo(ref total, -1);",
+    "after": "old.Absolute.AddTo(ref total, 0);",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "intraday-preview-commits-candle",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class IntradayGainLossWindow : IDisposable",
+    "before": "if (final) { _numerator = numerator;",
+    "after": "{ _numerator = numerator;",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-loses-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class RelativeMomentumWindow : IDisposable",
+    "before": "GainLossShare.Change(price, _prices[0])",
+    "after": "GainLossShare.Change(price, _prices[_prices.Count - 1])",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-loses-empty-convention",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class RelativeMomentumWindow : IDisposable",
+    "before": "GainLossShare.Of(numerator, total, 100)",
+    "after": "GainLossShare.Of(numerator, total, 0)",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class RelativeMomentumWindow : IDisposable",
+    "before": "_signal = new(kind, length, capacityHint);",
+    "after": "_signal = new(kind, 1, capacityHint);",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-reset-retains-losses",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossWindow.cs",
+    "scope": "internal sealed class RelativeMomentumWindow : IDisposable",
+    "before": "_losses.Reset();",
+    "after": "/* injected retained losses */",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-arm-ignores-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRelativeMomentumIndexFast",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "intraday-chande-arm-loses-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeIntradayMomentumIndexFast",
+    "before": "window.Next(inputList[i], openList[i], true)",
+    "after": "window.Next(inputList[i], inputList[i], true)",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-discards-customer-averages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRelativeMomentumIndexFast",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~PublicRelativeMomentumPreservesThreeCustomerAverageStages|FullyQualifiedName~RawHistogramHonorsEveryCustomerStage"
+  },
+  {
+    "id": "relative-momentum-native-skips-input-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RelativeMomentumIndexState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected skipped input validation",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "relative-momentum-core-loses-startup",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void RelativeMomentumIndex",
+    "before": "output[i] = window.Next(input[i], true).Value;",
+    "after": "output[i] = i < momentum ? 0 : window.Next(input[i], true).Value;",
+    "filter": "FullyQualifiedName~GainLossNumericalTests"
   }
 ]
