@@ -376,6 +376,19 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.DiNapoliMovingAverageConvergenceDivergence or IndicatorName.DiNapoliPercentagePriceOscillator)
+        {
+            var diNapoliOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.DiNapoliPercentagePriceOscillator;
+            var diNapoliKeys = percentage ? new[] { "Ppo", "Signal", "Histogram" } : new[] { "FastS", "SlowS", "Macd", "Signal", "Histogram" };
+            for (var slot = 0; slot < diNapoliKeys.Length; slot++)
+            {
+                var key = diNapoliKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedDiNapoliOscillator(bars, diNapoliOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DidiIndex)
         {
             var didiOptions = builtIn.CreateOptions();

@@ -835,6 +835,8 @@ internal static partial class IndicatorCompute
                 : ComputeFastSlowRsiOscillatorFast(data, context),
 
             // Batch 6 - DiNapoli/Ergodic oscillators
+            DiNapoliMovingAverageConvergenceDivergenceSpecOptions diNapoliMacd => ComputeDiNapoliOscillatorFast(data, context,
+                diNapoliMacd.Lc, diNapoliMacd.Sc, diNapoliMacd.Sp, false, spec.OutputKey ?? "Macd"),
             DiNapoliPercentagePriceOscillatorSpecOptions => ComputeDiNapoliPercentagePriceOscillatorFast(data, context,
                 series: spec.OutputKey switch { "Signal" => MacdSeries.Signal, "Histogram" => MacdSeries.Histogram, _ => MacdSeries.Line }),
             ErgodicPercentagePriceOscillatorSpecOptions eppo => spec.OutputKey switch
@@ -9362,31 +9364,35 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDiNapoliPercentagePriceOscillatorFast(StockData data, ComputeContext context, double lc = 17.5185,
         double sc = 8.3896, MacdSeries series = MacdSeries.Line)
     {
-        // CalculateDiNapoliPercentagePriceOscillator divides the DiNapoli MACD - the difference of two
-        // exponential averages at the short and long constants - by the long average, as a percentage. Its
-        // periods are the DiNapoli constants, not the 3 and 7 the core routine this replaced used. The
-        // signal uses its own fractional-period, zero-seeded recurrence.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
+        return ComputeDiNapoliOscillatorFast(data, context, lc, sc, 9.0503, true,
+            series switch { MacdSeries.Signal => "Signal", MacdSeries.Histogram => "Histogram", _ => "Ppo" });
+    }
 
-        var scAlpha = 2 / (1 + sc);
-        var lcAlpha = 2 / (1 + lc);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double fs = 0, ss = 0, signal = 0;
-        for (var i = 0; i < count; i++)
+    internal static ComputeBuffer ComputeDiNapoliOscillatorFast(StockData data, ComputeContext context,
+        double lc, double sc, double sp, bool percentage, string key)
+    {
+        var fastCoefficient = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        var slowCoefficient = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        var signalCoefficient = RoundedFractionalEma.Coefficient(sp, nameof(sp));
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(values.Count);
+        double fast = 0, slow = 0, signal = 0;
+        for (var i = 0; i < values.Count; i++)
         {
-            fs += scAlpha * (input[i] - fs);
-            ss += lcAlpha * (input[i] - ss);
-            var line = ss != 0 ? 100 * (fs - ss) / ss : 0;
-            if (series != MacdSeries.Line) signal += 2 / (1 + 9.0503) * (line - signal);
-            output[i] = series switch { MacdSeries.Signal => signal, MacdSeries.Histogram => line - signal, _ => line };
+            fast = RoundedFractionalEma.Next(values[i], fast, fastCoefficient);
+            slow = RoundedFractionalEma.Next(values[i], slow, slowCoefficient);
+            var line = percentage ? RoundedFractionalEma.Percentage(fast, slow) : fast - slow;
+            signal = RoundedFractionalEma.Next(line, signal, signalCoefficient);
+            result.WritableSpan[i] = key switch
+            {
+                "FastS" => fast,
+                "SlowS" => slow,
+                "Signal" => signal,
+                "Histogram" => line - signal,
+                _ => line
+            };
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

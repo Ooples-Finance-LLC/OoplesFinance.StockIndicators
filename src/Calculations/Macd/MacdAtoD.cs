@@ -136,27 +136,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var scAlpha = 2 / (1 + sc);
-        var lcAlpha = 2 / (1 + lc);
-        var spAlpha = 2 / (1 + sp);
+        var scAlpha = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        var lcAlpha = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        var spAlpha = RoundedFractionalEma.Coefficient(sp, nameof(sp));
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
 
             var prevFs = i >= 1 ? fsList[i - 1] : 0;
-            var fs = prevFs + (scAlpha * (currentValue - prevFs));
+            var fs = RoundedFractionalEma.Next(currentValue, prevFs, scAlpha);
             fsList.Add(fs);
 
             var prevSs = i >= 1 ? ssList[i - 1] : 0;
-            var ss = prevSs + (lcAlpha * (currentValue - prevSs));
+            var ss = RoundedFractionalEma.Next(currentValue, prevSs, lcAlpha);
             ssList.Add(ss);
 
             var r = fs - ss;
             rList.Add(r);
 
             var prevS = i >= 1 ? sList[i - 1] : 0;
-            var s = prevS + (spAlpha * (r - prevS));
+            var s = RoundedFractionalEma.Next(r, prevS, spAlpha);
             sList.Add(s);
 
             var prevH = i >= 1 ? hList[i - 1] : 0;

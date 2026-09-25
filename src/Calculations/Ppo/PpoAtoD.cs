@@ -140,20 +140,20 @@ public static partial class Calculations
 
         var dinapoliMacdList = CalculateDiNapoliMovingAverageConvergenceDivergence(stockData, lc, sc, sp);
         var ssList = dinapoliMacdList.ChainedOutputs["SlowS"];
-        var rList = dinapoliMacdList.ChainedOutputs["Macd"];
+        var fsList = dinapoliMacdList.ChainedOutputs["FastS"];
 
-        var spAlpha = 2 / (1 + sp);
+        var spAlpha = RoundedFractionalEma.Coefficient(sp, nameof(sp));
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var ss = ssList[i];
-            var r = rList[i];
+            var fs = fsList[i];
 
-            var ppo = ss != 0 ? 100 * r / ss : 0;
+            var ppo = RoundedFractionalEma.Percentage(fs, ss);
             ppoList.Add(ppo);
 
             var prevS = GetLastOrDefault(sList);
-            var s = prevS + (spAlpha * (ppo - prevS));
+            var s = RoundedFractionalEma.Next(ppo, prevS, spAlpha);
             sList.Add(s);
 
             var prevH = GetLastOrDefault(hList);

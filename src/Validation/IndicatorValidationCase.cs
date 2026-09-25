@@ -115,6 +115,7 @@ public static partial class IndicatorValidationDiscovery
             result.AddRange(BollingerCompositionCases(type));
             result.AddRange(PriceChannelCompositionCases(type));
             result.AddRange(EnvelopeCompositionCases(type));
+            result.AddRange(DiNapoliPeriodCases(type));
 
             void Add(string name, double scale, bool weighted) => result.Add(new IndicatorValidationCase(type, name,
                 () => (IIndicator)ctor.Invoke(parameters.Select((p, i) => Argument(type, p, i, scale, weighted)).ToArray())));

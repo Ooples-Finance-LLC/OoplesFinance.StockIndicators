@@ -637,9 +637,9 @@ public sealed class DiNapoliMovingAverageConvergenceDivergenceState : IStreaming
 
     public DiNapoliMovingAverageConvergenceDivergenceState(double lc = 17.5185, double sc = 8.3896, double sp = 9.0503)
     {
-        _scAlpha = 2 / (1 + sc);
-        _lcAlpha = 2 / (1 + lc);
-        _spAlpha = 2 / (1 + sp);
+        _scAlpha = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        _lcAlpha = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        _spAlpha = RoundedFractionalEma.Coefficient(sp, nameof(sp));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -655,10 +655,10 @@ public sealed class DiNapoliMovingAverageConvergenceDivergenceState : IStreaming
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fast = _fast + (_scAlpha * (value - _fast));
-        var slow = _slow + (_lcAlpha * (value - _slow));
+        var fast = RoundedFractionalEma.Next(value, _fast, _scAlpha);
+        var slow = RoundedFractionalEma.Next(value, _slow, _lcAlpha);
         var macd = fast - slow;
-        var signal = _signal + (_spAlpha * (macd - _signal));
+        var signal = RoundedFractionalEma.Next(macd, _signal, _spAlpha);
         var histogram = macd - signal;
 
         if (isFinal)
@@ -698,9 +698,9 @@ public sealed class DiNapoliPercentagePriceOscillatorState : IStreamingIndicator
 
     public DiNapoliPercentagePriceOscillatorState(double lc = 17.5185, double sc = 8.3896, double sp = 9.0503)
     {
-        _scAlpha = 2 / (1 + sc);
-        _lcAlpha = 2 / (1 + lc);
-        _spAlpha = 2 / (1 + sp);
+        _scAlpha = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        _lcAlpha = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        _spAlpha = RoundedFractionalEma.Coefficient(sp, nameof(sp));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -716,11 +716,10 @@ public sealed class DiNapoliPercentagePriceOscillatorState : IStreamingIndicator
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var fast = _fast + (_scAlpha * (value - _fast));
-        var slow = _slow + (_lcAlpha * (value - _slow));
-        var macd = fast - slow;
-        var ppo = slow != 0 ? 100 * macd / slow : 0;
-        var signal = _signal + (_spAlpha * (ppo - _signal));
+        var fast = RoundedFractionalEma.Next(value, _fast, _scAlpha);
+        var slow = RoundedFractionalEma.Next(value, _slow, _lcAlpha);
+        var ppo = RoundedFractionalEma.Percentage(fast, slow);
+        var signal = RoundedFractionalEma.Next(ppo, _signal, _spAlpha);
         var histogram = ppo - signal;
 
         if (isFinal)
