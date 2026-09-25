@@ -603,6 +603,7 @@ internal static partial class StatefulIndicatorFactory
             AwesomeOscillatorSpecOptions ao => new AwesomeOscillatorState(fastLength: ao.Length, maType: ao.MaType),
             AcceleratorOscillatorSpecOptions aco => new AcceleratorOscillatorState(fastLength: aco.Length, maType: aco.MaType),
             FisherTransformSpecOptions ft => new EhlersFisherTransformState(length: ft.Length),
+            EhlersFisherTransformSpecOptions eft => new EhlersFisherTransformState(length: eft.Length),
             ConnorsRsiSpecOptions crsi => new ConnorsRelativeStrengthIndexState(length2: crsi.Length),
             PriceMomentumOscillatorSpecOptions priceMomentum => new PriceMomentumOscillatorState(priceMomentum.MaType, priceMomentum.Length1,
                 priceMomentum.Length2, priceMomentum.SignalLength),

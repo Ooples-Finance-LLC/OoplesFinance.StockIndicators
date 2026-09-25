@@ -9119,7 +9119,7 @@ internal static class OscillatorCore
                 minMax.Add(close[i]);
                 var maxH = minMax.Max;
                 var minL = minMax.Min;
-                var ratio = maxH - minL != 0 ? (close[i] - minL) / (maxH - minL) : .5;
+                var ratio = FisherArithmetic.Position(close[i], minL, maxH);
                 var prevNValue = i >= 1 ? nValue[i - 1] : 0;
                 var prevFisher = i >= 1 ? output[i - 1] : 0;
 
@@ -9127,7 +9127,7 @@ internal static class OscillatorCore
                 var nVal = (0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue);
                 nValue[i] = Math.Max(-0.999, Math.Min(0.999, nVal));
 
-                output[i] = (0.5 * Math.Log((1 + nValue[i]) / (1 - nValue[i]))) + (0.5 * prevFisher);
+                output[i] = FisherArithmetic.Transform(nValue[i]) + (0.5 * prevFisher);
             }
         }
         finally

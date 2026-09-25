@@ -6456,5 +6456,74 @@
     "before": "if (constant == 0 || double.IsNaN(constant) || double.IsInfinity(constant))",
     "after": "if (constant == 0)",
     "filter": "FullyQualifiedName~CommodityNumericalTests.InvalidConstantsAreRejectedEvenForEmptyInputs"
+  },
+  {
+    "id": "fisher-range-overflows",
+    "module": "numerical",
+    "file": "src/Helpers/FisherArithmetic.cs",
+    "before": "ExactRangePosition.Fraction(value, lower, upper)",
+    "after": "(value - lower) / (upper - lower)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState"
+  },
+  {
+    "id": "fisher-tiny-transform-cancels",
+    "module": "numerical",
+    "file": "src/Helpers/FisherArithmetic.cs",
+    "before": "if (Math.Abs(value) < .125)",
+    "after": "if (Math.Abs(value) < 0)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.TinySignalsAndClampEndpointsMatchIndependentLogarithms"
+  },
+  {
+    "id": "fisher-preview-commits",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState",
+    "scope": "public sealed class EhlersFisherTransformState"
+  },
+  {
+    "id": "fisher-reset-keeps-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "before": "_maxWindow.Reset();",
+    "after": "// injected retained extrema",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState",
+    "scope": "public sealed class EhlersFisherTransformState"
+  },
+  {
+    "id": "fisher-core-wrong-retention",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "(0.67 * prevNValue)",
+    "after": "(0.34 * prevNValue)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState",
+    "scope": "internal static void EhlersFisherTransform("
+  },
+  {
+    "id": "fisher-typed-loses-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "EhlersFisherTransformSpecOptions eft => new EhlersFisherTransformState(length: eft.Length)",
+    "after": "EhlersFisherTransformSpecOptions eft => new EhlersFisherTransformState(length: 10)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState"
+  },
+  {
+    "id": "fisher-batch-loses-feedback",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "before": "(0.5 * prevFisherTransform1)",
+    "after": "(0 * prevFisherTransform1)",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DirectRoutesPreserveRangePeriodsSelectedPricesAndRecursiveState",
+    "scope": "public static StockData CalculateEhlersFisherTransform("
+  },
+  {
+    "id": "fisher-batch-erases-decay",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "before": "FisherArithmetic.Transform(nValue)",
+    "after": "(0.5 * Math.Log((1 + nValue) / (1 - nValue)))",
+    "filter": "FullyQualifiedName~FisherNumericalTests.DecayingSignalsRemainNonzeroAcrossBatchRawCoreAndNative",
+    "scope": "public static StockData CalculateEhlersFisherTransform("
   }
 ]

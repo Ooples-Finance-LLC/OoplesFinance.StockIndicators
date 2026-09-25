@@ -285,25 +285,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ervi", line), ("Signal", Average(line, vigorSignal, kind)));
                 });
             case IndicatorName.EhlersFisherTransform:
-                return new("Eft", new[] { "Eft" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var transformed = new double[bars.Count];
-                    double normalized = 0;
-                    for (var i = 0; i < transformed.Length; i++)
-                    {
-                        var window = Window(prices, i, length).ToArray();
-                        var low = window.Min();
-                        var high = window.Max();
-                        var position = high == low ? 0 : 2 * (prices[i] - low) / (high - low) - 1; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                        normalized = Math.Max(-.999, Math.Min(.999, normalized + .33 * (position - normalized)));
-                        transformed[i] = .5 * (Math.Log(1 + normalized) - Math.Log(1 - normalized));
-                    }
-                    // The final one-pole stage has a geometric impulse response, seeded at zero.
-                    var line = transformed.Select((_, i) => Enumerable.Range(0, i + 1)
-                        .Sum(j => Math.Pow(.5, i - j) * transformed[j])).ToArray();
-                    return Outputs(("Eft", line));
-                });
+                return new("Eft", new[] { "Eft" }, bars => Outputs(("Eft", FisherValues(Closes(bars), length))));
             case IndicatorName.EhlersInverseFisherTransform:
                 kind = AverageKind(options, 2);
                 if (kind is 1 or 2 or 3 or 6) return new("Eift", new[] { "Eift" }, bars => RsiInverseFisherOutputs(bars, indicator));
