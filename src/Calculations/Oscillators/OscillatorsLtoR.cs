@@ -492,12 +492,19 @@ public static partial class Calculations
             signalsList?.Add(signal);
         }
 
-        var whiteNoiseSmaList = GetMovingAverageList(stockData, maType, noiseLength, whiteNoiseList);
+        List<double> whiteNoiseSmaList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var average = new StrengthAverage(maType, noiseLength, whiteNoiseList.Count);
+            whiteNoiseSmaList = whiteNoiseList.Select(v => average.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else whiteNoiseSmaList = GetMovingAverageList(stockData, maType, noiseLength, whiteNoiseList);
         // WhiteNoiseVariance below is this squared, so it has to be the deviation of the noise window about
         // its own mean. Squaring CalculateStandardDeviationVolatility recovers the mean squared residual
         // from a moving average, which is not the variance the published output name promises. Both series
         // are published, so the mismatch was visible to callers. See issue #223.
-        var whiteNoiseStdDevList = GetStandardDeviationList(whiteNoiseList, noiseLength);
+        using var deviation = new ExactPopulationWindow(noiseLength);
+        var whiteNoiseStdDevList = whiteNoiseList.Select(v => deviation.Next(v, true)).ToList();
         for (var i = 0; i < stockData.Count; i++)
         {
             var whiteNoiseStdDev = whiteNoiseStdDevList[i];

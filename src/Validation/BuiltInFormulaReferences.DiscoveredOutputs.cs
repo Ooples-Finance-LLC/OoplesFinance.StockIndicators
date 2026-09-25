@@ -63,6 +63,7 @@ internal static partial class BuiltInFormulaReferences
                 kind = AverageKind(options, 6);
                 if (kind == 0) return null;
                 var noise = indicator.BatchName == IndicatorName.QuasiWhiteNoise;
+                if (noise && kind is 1 or 2 or 3 or 6) return new("WhiteNoise", new[] { "WhiteNoise", "WhiteNoiseMa", "WhiteNoiseStdDev", "WhiteNoiseVariance" }, bars => QuasiWhiteNoiseOutputs(bars, indicator));
                 if (!noise && kind is 1 or 2 or 3 or 6)
                     return new(indicator.BatchName == IndicatorName.ConnorsRelativeStrengthIndex ? "ConnorsRsi" : "SaRsi",
                         indicator.BatchName == IndicatorName.ConnorsRelativeStrengthIndex ? new[] { "Rsi", "PctRank", "StreakRsi", "ConnorsRsi" } : new[] { "SaRsi", "Signal" }, bars => ConnorsOutputs(bars, indicator));

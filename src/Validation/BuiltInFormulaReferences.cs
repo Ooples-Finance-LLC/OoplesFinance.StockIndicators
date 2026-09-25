@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.QuasiWhiteNoise && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var noiseKeys = new[] { "WhiteNoise", "WhiteNoiseMa", "WhiteNoiseStdDev", "WhiteNoiseVariance" };
+            for (var slot = 0; slot < noiseKeys.Length; slot++)
+            {
+                var key = noiseKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => QuasiWhiteNoiseOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.ConnorsRelativeStrengthIndex or IndicatorName.StochasticConnorsRelativeStrengthIndex
             && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
