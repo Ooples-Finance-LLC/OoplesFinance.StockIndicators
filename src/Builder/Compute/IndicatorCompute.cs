@@ -24786,9 +24786,7 @@ internal static partial class IndicatorCompute
 
             var highest = highWindow.Max;
             var lowest = lowWindow.Min;
-            var cChg = c[i] - (i >= length ? c[i - length] : 0);
-
-            output[i] = highest - lowest != 0 ? cChg / (highest - lowest) : 0;
+            output[i] = ExactDifferenceRatio.Of(c[i], i >= length ? c[i - length] : 0, highest, lowest);
         }
 
         return buffer;

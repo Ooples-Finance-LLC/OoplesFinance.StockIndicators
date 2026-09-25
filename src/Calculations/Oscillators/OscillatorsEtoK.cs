@@ -77,9 +77,7 @@ public static partial class Calculations
             var lowest = lowestList[i];
             var prevJo1 = i >= 1 ? joList[i - 1] : 0;
             var prevJo2 = i >= 2 ? joList[i - 2] : 0;
-            var cChg = c - prevC;
-
-            var jo = highest - lowest != 0 ? cChg / (highest - lowest) : 0;
+            var jo = ExactDifferenceRatio.Of(c, prevC, highest, lowest);
             joList.Add(jo);
 
             var signal = GetCompareSignal(jo - prevJo1, prevJo1 - prevJo2);
