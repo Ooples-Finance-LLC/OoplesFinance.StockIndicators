@@ -311,7 +311,7 @@ public static partial class Calculations
             bList.Add(b);
         }
 
-        var bEmaList = GetMovingAverageList(stockData, maType, length2, bList);
+        var bEmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(bList, length2) : GetMovingAverageList(stockData, maType, length2, bList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

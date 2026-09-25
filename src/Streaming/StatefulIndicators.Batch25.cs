@@ -112,7 +112,7 @@ public sealed class TrendImpulseFilterState : IStreamingIndicatorState, IDisposa
     {
         _maxWindow = new RollingWindowMax(Math.Max(2, length1));
         _minWindow = new RollingWindowMin(Math.Max(2, length1));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _signalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
