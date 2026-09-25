@@ -126,6 +126,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.MomentaRelativeStrengthIndex:
                 var momentaKind = AverageKind(options, 3);
+                if (momentaKind is 1 or 2 or 3 or 6) return new("Mrsi", new[] { "Mrsi", "Signal" }, bars => RangeGainLossOutputs(bars, indicator));
                 if (momentaKind == 0) return null;
                 return new("Mrsi", new[] { "Mrsi", "Signal" }, bars =>
                 {

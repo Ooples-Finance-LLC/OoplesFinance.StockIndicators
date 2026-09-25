@@ -815,10 +815,9 @@ internal static partial class IndicatorCompute
             TFSVolumeOscillatorSpecOptions tfsvo => ComputeTFSVolumeOscillatorFast(data, context, tfsvo.Length),
 
             // Batch 6 - RSI variants
-            DoubleSmoothedRelativeStrengthIndexSpecOptions => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context),
-                    25, MovingAvgType.ExponentialMovingAverage)
-                : ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context),
+            DoubleSmoothedRelativeStrengthIndexSpecOptions => ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context, outputKey: spec.OutputKey ?? "Dsrsi"),
+            MomentaRelativeStrengthIndexSpecOptions rangeRsi => ComputeMomentaRelativeStrengthIndexFast(data, context,
+                rangeRsi.Length1, rangeRsi.Length2, rangeRsi.MaType, spec.OutputKey ?? "Mrsi"),
             FastSlowRsiOscillatorSpecOptions => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeFastSlowRsiOscillatorFast(data, context),
                     6, MovingAvgType.WeightedMovingAverage)
@@ -9007,50 +9006,45 @@ internal static partial class IndicatorCompute
     /// Computes Double Smoothed Relative Strength Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeDoubleSmoothedRelativeStrengthIndexFast(StockData data, ComputeContext context, int length1 = 2,
-        int length2 = 5, int length3 = 25, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 5, int length3 = 25, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string outputKey = "Dsrsi") =>
+        ComputeRangeGainLossFast(data, context, maType, Math.Max(2, length1), new[] { length2, length3 }, length3, outputKey);
+
+    internal static ComputeBuffer ComputeMomentaRelativeStrengthIndexFast(StockData data, ComputeContext context, int length1 = 2,
+        int length2 = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string outputKey = "Mrsi") =>
+        ComputeRangeGainLossFast(data, context, maType, Math.Max(1, length1), new[] { length2 }, length2, outputKey);
+
+    private static ComputeBuffer ComputeRangeGainLossFast(StockData data, ComputeContext context, MovingAvgType kind,
+        int lookback, int[] periods, int signalLength, string outputKey)
     {
-        // CalculateDoubleSmoothedRelativeStrengthIndex measures how far the chained series sits above the
-        // lowest low and below the highest high of a length1 window, double-smooths each leg by length2 then
-        // length3, and turns the ratio into an RSI. The arm this replaced delegated to
-        // OscillatorCore.DoubleSmoothedRelativeStrengthIndex, a different derivation. The spec's only option
-        // is [Obsolete] and sets nothing, so every length keeps its batch default.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var aboveLow = context.Rent(count);
-        using var belowHigh = context.Rent(count);
-        var srcLc = aboveLow.WritableSpan;
-        var hcSrc = belowHigh.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length1, 2));
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(input[i]);
-            srcLc[i] = input[i] - window.Min;
-            hcSrc[i] = window.Max - input[i];
-        }
-
-        using var topFirst = context.Rent(count);
-        using var topSecond = context.Rent(count);
-        MovingAverage(data, maType, length2, aboveLow.Span, topFirst.WritableSpan);
-        MovingAverage(data, maType, length3, topFirst.Span, topSecond.WritableSpan);
-
-        using var botFirst = context.Rent(count);
-        using var botSecond = context.Rent(count);
-        MovingAverage(data, maType, length2, belowHigh.Span, botFirst.WritableSpan);
-        MovingAverage(data, maType, length3, botFirst.Span, botSecond.WritableSpan);
-
-        var top = topSecond.Span;
-        var bot = botSecond.Span;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var count = input.Count;
         var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
+        if (StrengthWindow.Supports(kind) && !ComponentAverage.HasOverrides)
+        {
+            using var window = new RangeGainLossWindow(kind, lookback, periods, signalLength, count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = window.Next(input[i], true);
+                buffer.WritableSpan[i] = outputKey == "Signal" ? next.Signal : next.Value;
+            }
+            return buffer;
+        }
+        var up = new double[count]; var down = new double[count];
+        var range = new RollingMinMax(lookback);
         for (var i = 0; i < count; i++)
         {
-            output[i] = bot[i] == 0 ? 100 : top[i] == 0 ? 0 : MathHelper.MinOrMax(100 * top[i] / (top[i] + bot[i]), 100, 0);
+            range.Add(input[i]); up[i] = input[i] - range.Min; down[i] = range.Max - input[i];
         }
-
-        return buffer;
+        foreach (var period in periods)
+        {
+            var next = new double[count]; MovingAverage(data, kind, period, up, next); up = next;
+        }
+        foreach (var period in periods)
+        {
+            var next = new double[count]; MovingAverage(data, kind, period, down, next); down = next;
+        }
+        for (var i = 0; i < count; i++) buffer.WritableSpan[i] = down[i] == 0 ? 100 : up[i] == 0 ? 0 : Math.Max(0, Math.Min(100, 100 * up[i] / (up[i] + down[i])));
+        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, signalLength, kind) : buffer;
     }
 
     /// <summary>

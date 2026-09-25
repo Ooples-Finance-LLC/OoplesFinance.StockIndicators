@@ -154,6 +154,7 @@ internal static class BuilderVerifiedArms
         typeof(DoubleExponentialSmoothingSpecOptions),
         typeof(DoubleSmoothedMomentaSpecOptions),
         typeof(DoubleSmoothedRelativeStrengthIndexSpecOptions),
+        typeof(MomentaRelativeStrengthIndexSpecOptions),
         typeof(DoubleSmoothedStochasticSpecOptions),
         typeof(DoubleStochasticOscillatorSpecOptions),
         typeof(DpoSpecOptions),

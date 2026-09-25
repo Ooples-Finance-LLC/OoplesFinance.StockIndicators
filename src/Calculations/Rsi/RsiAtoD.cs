@@ -397,6 +397,24 @@ public static partial class Calculations
     public static StockData CalculateDoubleSmoothedRelativeStrengthIndex(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 5, int length3 = 25)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new RangeGainLossWindow(maType, Math.Max(2, length1), new[] { length2, length3 }, length3, stockData.Count);
+            double previous = 0, previousSignal = 0;
+            foreach (var price in prices)
+            {
+                var next = window.Next(price, true); line.Add(next.Value); signal.Add(next.Signal);
+                events?.Add(GetRsiSignal(next.Value - next.Signal, previous - previousSignal, next.Value, previous, 80, 20));
+                previous = next.Value; previousSignal = next.Signal;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dsrsi", line }, { "Signal", signal } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DoubleSmoothedRelativeStrengthIndex;
+            return stockData;
+        }
+
         List<double> rsiList = new(stockData.Count);
         List<double> srcLcList = new(stockData.Count);
         List<double> hcSrcList = new(stockData.Count);

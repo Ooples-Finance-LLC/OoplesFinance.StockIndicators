@@ -1228,6 +1228,7 @@ public sealed class ModularFilterState : IStreamingIndicatorState
 [PrimaryOutput("Mrsi")]
 public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RangeGainLossWindow? _wide;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _topSmoother;
@@ -1238,6 +1239,7 @@ public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState
     public MomentaRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 2, int length2 = 14)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new RangeGainLossWindow(maType, Math.Max(1, length1), new[] { length2 }, length2);
         _maxWindow = new RollingWindowMax(Math.Max(1, length1));
         _minWindow = new RollingWindowMin(Math.Max(1, length1));
         _topSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
@@ -1250,6 +1252,7 @@ public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState
 
     public void Reset()
     {
+        _wide?.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _topSmoother.Reset();
@@ -1259,6 +1262,13 @@ public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs ? new Dictionary<string, double>
+                { { "Mrsi", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var value = _input.GetValue(bar);
         var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
         var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
@@ -1284,6 +1294,7 @@ public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _topSmoother.Dispose();

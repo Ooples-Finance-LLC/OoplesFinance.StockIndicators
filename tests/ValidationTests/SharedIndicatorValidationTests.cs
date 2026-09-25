@@ -271,6 +271,35 @@ public sealed partial class SharedIndicatorValidationTests
         public (int, int, int) Periods { get; }
     }
 
+    [Fact]
+    public void DiscoveryVariesMomentumHorizonsForBuiltInsAndCustomers()
+    {
+        var cases = IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly, typeof(Identity).Assembly });
+        foreach (var type in new[] { typeof(RelativeMomentumIndex), typeof(CustomerWithMomentumHorizon) })
+        foreach (var (name, expected) in new[]
+        {
+            ("default", (14, 3)), ("minimum-periods", (1, 1)), ("shorter-periods", (7, 2)), ("longer-periods", (21, 4)),
+            ("minimum-length", (1, 3)), ("longer-length", (21, 3)), ("minimum-momentum", (14, 1)), ("longer-momentum", (14, 4))
+        })
+        {
+            var instance = Assert.Single(cases, c => c.IndicatorType == type && c.Name == name).Factory();
+            var actual = instance is CustomerWithMomentumHorizon customer ? (customer.Length, customer.Momentum) : BuiltInPeriods((IBuiltInIndicator)instance);
+            Assert.Equal(expected, actual);
+        }
+        static (int, int) BuiltInPeriods(IBuiltInIndicator indicator)
+        {
+            var options = (OoplesFinance.StockIndicators.Builder.Specs.RelativeMomentumIndexSpecOptions)indicator.CreateOptions();
+            return (options.Length, options.Momentum);
+        }
+    }
+
+    public sealed class CustomerWithMomentumHorizon : Identity
+    {
+        public CustomerWithMomentumHorizon(int length = 14, int momentum = 3) { Length = length; Momentum = momentum; }
+        public int Length { get; }
+        public int Momentum { get; }
+    }
+
     public sealed class CustomerWithPeriods : Identity
     {
         public CustomerWithPeriods(int length = 14, int signalPeriod = 5)

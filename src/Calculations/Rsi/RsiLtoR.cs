@@ -340,6 +340,24 @@ public static partial class Calculations
     public static StockData CalculateMomentaRelativeStrengthIndex(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new RangeGainLossWindow(maType, Math.Max(1, length1), new[] { length2 }, length2, stockData.Count);
+            double previous = 0, previousSignal = 0;
+            foreach (var price in prices)
+            {
+                var next = window.Next(price, true); line.Add(next.Value); signal.Add(next.Signal);
+                events?.Add(GetRsiSignal(next.Value - next.Signal, previous - previousSignal, next.Value, previous, 80, 20));
+                previous = next.Value; previousSignal = next.Signal;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mrsi", line }, { "Signal", signal } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MomentaRelativeStrengthIndex;
+            return stockData;
+        }
+
         List<double> rsiList = new(stockData.Count);
         List<double> srcLcList = new(stockData.Count);
         List<double> hcSrcList = new(stockData.Count);

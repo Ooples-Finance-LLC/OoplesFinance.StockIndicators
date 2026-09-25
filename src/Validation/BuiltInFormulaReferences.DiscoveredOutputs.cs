@@ -130,16 +130,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Fk", line), ("Signal", Average(line, 3, 2)));
                 });
             case IndicatorName.DoubleSmoothedRelativeStrengthIndex:
-                return new("Dsrsi", new[] { "Dsrsi", "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var up = prices.Select((v, i) => v - Window(prices, i, 2).Min()).ToArray();
-                    var down = prices.Select((v, i) => Window(prices, i, 2).Max() - v).ToArray();
-                    var numerator = Average(Average(up, 5, 3), 25, 3);
-                    var opposite = Average(Average(down, 5, 3), 25, 3);
-                    var line = numerator.Select((v, i) => opposite[i] == 0 ? 100 : 100 * v / (v + opposite[i])).ToArray();
-                    return Outputs(("Dsrsi", line), ("Signal", Average(line, 25, 3)));
-                });
+                return new("Dsrsi", new[] { "Dsrsi", "Signal" }, bars => RangeGainLossOutputs(bars, indicator));
             case IndicatorName.DemandOscillator:
                 if (kind == 0) return null;
                 return new("Do", new[] { "Do", "Signal" }, bars =>
