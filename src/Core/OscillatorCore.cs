@@ -1164,41 +1164,9 @@ internal static class OscillatorCore
     internal static void PriceMomentumOscillator(ReadOnlySpan<double> input, Span<double> output, int firstLength = 35, int secondLength = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(input.Length);
-        var ema1Array = pool.Rent(input.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, input.Length);
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-
-            // ROC
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i == 0)
-                {
-                    roc[i] = 0;
-                }
-                else
-                {
-                    roc[i] = input[i - 1] != 0 ? ((input[i] / input[i - 1]) - 1) * 100 : 0;
-                }
-            }
-
-            // Double EMA
-            MovingAverageCore.ExponentialMovingAverage(roc, ema1, firstLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, output, secondLength);
-        }
-        finally
-        {
-            pool.Return(rocArray);
-            pool.Return(ema1Array);
-        }
+        using var window = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, firstLength, secondLength, 10, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -1209,60 +1177,10 @@ internal static class OscillatorCore
         int sma1 = 10, int sma2 = 10, int sma3 = 10, int sma4 = 15)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocA = pool.Rent(input.Length);
-        var rocB = pool.Rent(input.Length);
-        var rocC = pool.Rent(input.Length);
-        var rocD = pool.Rent(input.Length);
-        var smaA = pool.Rent(input.Length);
-        var smaB = pool.Rent(input.Length);
-        var smaC = pool.Rent(input.Length);
-        var smaD = pool.Rent(input.Length);
-
-        try
-        {
-            var rocASpan = rocA.AsSpan(0, input.Length);
-            var rocBSpan = rocB.AsSpan(0, input.Length);
-            var rocCSpan = rocC.AsSpan(0, input.Length);
-            var rocDSpan = rocD.AsSpan(0, input.Length);
-            var smaASpan = smaA.AsSpan(0, input.Length);
-            var smaBSpan = smaB.AsSpan(0, input.Length);
-            var smaCSpan = smaC.AsSpan(0, input.Length);
-            var smaDSpan = smaD.AsSpan(0, input.Length);
-
-            // Calculate ROCs
-            RateOfChange(input, rocASpan, roc1);
-            RateOfChange(input, rocBSpan, roc2);
-            RateOfChange(input, rocCSpan, roc3);
-            RateOfChange(input, rocDSpan, roc4);
-
-            // Smooth ROCs with SMAs
-            MovingAverageCore.SimpleMovingAverage(rocASpan, smaASpan, sma1);
-            MovingAverageCore.SimpleMovingAverage(rocBSpan, smaBSpan, sma2);
-            MovingAverageCore.SimpleMovingAverage(rocCSpan, smaCSpan, sma3);
-            MovingAverageCore.SimpleMovingAverage(rocDSpan, smaDSpan, sma4);
-
-            // KST = weighted sum
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = smaASpan[i] + (smaBSpan[i] * 2) + (smaCSpan[i] * 3) + (smaDSpan[i] * 4);
-            }
-        }
-        finally
-        {
-            pool.Return(rocA);
-            pool.Return(rocB);
-            pool.Return(rocC);
-            pool.Return(rocD);
-            pool.Return(smaA);
-            pool.Return(smaB);
-            pool.Return(smaC);
-            pool.Return(smaD);
-        }
+        using var bank = new RocBankWindow(MovingAvgType.SimpleMovingAverage, new[] { roc1, roc2, roc3, roc4 },
+            new[] { sma1, sma2, sma3, sma4 }, new[] { 1, 2, 3, 4 }, 9, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = bank.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -1629,39 +1547,9 @@ internal static class OscillatorCore
     internal static void CoppockCurve(ReadOnlySpan<double> input, Span<double> output, int longRocLength = 14, int shortRocLength = 11, int wmaLength = 10)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocSumArray = pool.Rent(input.Length);
-
-        try
-        {
-            var rocSum = rocSumArray.AsSpan(0, input.Length);
-
-            // Calculate sum of long and short ROC
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < longRocLength)
-                {
-                    rocSum[i] = 0;
-                }
-                else
-                {
-                    var longRoc = input[i - longRocLength] != 0 ? (input[i] - input[i - longRocLength]) / input[i - longRocLength] * 100 : 0;
-                    var shortRoc = i >= shortRocLength && input[i - shortRocLength] != 0 ? (input[i] - input[i - shortRocLength]) / input[i - shortRocLength] * 100 : 0;
-                    rocSum[i] = longRoc + shortRoc;
-                }
-            }
-
-            // WMA of ROC sum
-            MovingAverageCore.WeightedMovingAverage(rocSum, output, wmaLength);
-        }
-        finally
-        {
-            pool.Return(rocSumArray);
-        }
+        using var window = new RocBankWindow(MovingAvgType.WeightedMovingAverage, new[] { shortRocLength, longRocLength }, new[] { 1, 1 }, new[] { 1, 1 }, wmaLength, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Signal;
     }
 
     /// <summary>
@@ -2131,132 +2019,12 @@ internal static class OscillatorCore
     internal static void SpecialK(ReadOnlySpan<double> input, Span<double> output)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var roc10Array = pool.Rent(input.Length);
-        var roc15Array = pool.Rent(input.Length);
-        var roc20Array = pool.Rent(input.Length);
-        var roc30Array = pool.Rent(input.Length);
-        var roc50Array = pool.Rent(input.Length);
-        var roc65Array = pool.Rent(input.Length);
-        var roc75Array = pool.Rent(input.Length);
-        var roc100Array = pool.Rent(input.Length);
-        var roc195Array = pool.Rent(input.Length);
-        var roc265Array = pool.Rent(input.Length);
-        var roc390Array = pool.Rent(input.Length);
-        var roc530Array = pool.Rent(input.Length);
-
-        try
-        {
-            var roc10 = roc10Array.AsSpan(0, input.Length);
-            var roc15 = roc15Array.AsSpan(0, input.Length);
-            var roc20 = roc20Array.AsSpan(0, input.Length);
-            var roc30 = roc30Array.AsSpan(0, input.Length);
-            var roc50 = roc50Array.AsSpan(0, input.Length);
-            var roc65 = roc65Array.AsSpan(0, input.Length);
-            var roc75 = roc75Array.AsSpan(0, input.Length);
-            var roc100 = roc100Array.AsSpan(0, input.Length);
-            var roc195 = roc195Array.AsSpan(0, input.Length);
-            var roc265 = roc265Array.AsSpan(0, input.Length);
-            var roc390 = roc390Array.AsSpan(0, input.Length);
-            var roc530 = roc530Array.AsSpan(0, input.Length);
-
-            RateOfChange(input, roc10, 10);
-            RateOfChange(input, roc15, 15);
-            RateOfChange(input, roc20, 20);
-            RateOfChange(input, roc30, 30);
-            RateOfChange(input, roc50, 50);
-            RateOfChange(input, roc65, 65);
-            RateOfChange(input, roc75, 75);
-            RateOfChange(input, roc100, 100);
-            RateOfChange(input, roc195, 195);
-            RateOfChange(input, roc265, 265);
-            RateOfChange(input, roc390, 390);
-            RateOfChange(input, roc530, 530);
-
-            var pool2 = ArrayPool<double>.Shared;
-            var sma10Array = pool2.Rent(input.Length);
-            var sma15Array = pool2.Rent(input.Length);
-            var sma20Array = pool2.Rent(input.Length);
-            var sma50Array = pool2.Rent(input.Length);
-            var sma65Array = pool2.Rent(input.Length);
-            var sma75Array = pool2.Rent(input.Length);
-            var sma100Array = pool2.Rent(input.Length);
-            var sma130Array = pool2.Rent(input.Length);
-            var sma195Array = pool2.Rent(input.Length);
-            var sma265Array = pool2.Rent(input.Length);
-            var sma390Array = pool2.Rent(input.Length);
-            var sma530Array = pool2.Rent(input.Length);
-
-            try
-            {
-                var sma10 = sma10Array.AsSpan(0, input.Length);
-                var sma15 = sma15Array.AsSpan(0, input.Length);
-                var sma20 = sma20Array.AsSpan(0, input.Length);
-                var sma50 = sma50Array.AsSpan(0, input.Length);
-                var sma65 = sma65Array.AsSpan(0, input.Length);
-                var sma75 = sma75Array.AsSpan(0, input.Length);
-                var sma100 = sma100Array.AsSpan(0, input.Length);
-                var sma130 = sma130Array.AsSpan(0, input.Length);
-                var sma195 = sma195Array.AsSpan(0, input.Length);
-                var sma265 = sma265Array.AsSpan(0, input.Length);
-                var sma390 = sma390Array.AsSpan(0, input.Length);
-                var sma530 = sma530Array.AsSpan(0, input.Length);
-
-                MovingAverageCore.SimpleMovingAverage(roc10, sma10, 10);
-                MovingAverageCore.SimpleMovingAverage(roc15, sma15, 10);
-                MovingAverageCore.SimpleMovingAverage(roc20, sma20, 10);
-                MovingAverageCore.SimpleMovingAverage(roc30, sma50, 15);
-                MovingAverageCore.SimpleMovingAverage(roc50, sma65, 50);
-                MovingAverageCore.SimpleMovingAverage(roc65, sma75, 65);
-                MovingAverageCore.SimpleMovingAverage(roc75, sma100, 75);
-                MovingAverageCore.SimpleMovingAverage(roc100, sma130, 100);
-                MovingAverageCore.SimpleMovingAverage(roc195, sma195, 130);
-                MovingAverageCore.SimpleMovingAverage(roc265, sma265, 130);
-                MovingAverageCore.SimpleMovingAverage(roc390, sma390, 195);
-                MovingAverageCore.SimpleMovingAverage(roc530, sma530, 265);
-
-                for (var i = 0; i < input.Length; i++)
-                {
-                    output[i] = sma10[i] + sma15[i] * 2 + sma20[i] * 3 + sma50[i] * 4 +
-                                sma65[i] + sma75[i] * 2 + sma100[i] * 3 + sma130[i] * 4 +
-                                sma195[i] + sma265[i] * 2 + sma390[i] * 3 + sma530[i] * 4;
-                }
-            }
-            finally
-            {
-                pool2.Return(sma10Array);
-                pool2.Return(sma15Array);
-                pool2.Return(sma20Array);
-                pool2.Return(sma50Array);
-                pool2.Return(sma65Array);
-                pool2.Return(sma75Array);
-                pool2.Return(sma100Array);
-                pool2.Return(sma130Array);
-                pool2.Return(sma195Array);
-                pool2.Return(sma265Array);
-                pool2.Return(sma390Array);
-                pool2.Return(sma530Array);
-            }
-        }
-        finally
-        {
-            pool.Return(roc10Array);
-            pool.Return(roc15Array);
-            pool.Return(roc20Array);
-            pool.Return(roc30Array);
-            pool.Return(roc50Array);
-            pool.Return(roc65Array);
-            pool.Return(roc75Array);
-            pool.Return(roc100Array);
-            pool.Return(roc195Array);
-            pool.Return(roc265Array);
-            pool.Return(roc390Array);
-            pool.Return(roc530Array);
-        }
+        using var bank = new RocBankWindow(MovingAvgType.SimpleMovingAverage,
+            new[] { 10, 15, 20, 30, 40, 65, 75, 100, 195, 265, 390, 530 },
+            new[] { 10, 10, 10, 15, 50, 65, 75, 100, 130, 130, 130, 195 },
+            new[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }, 10, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = bank.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -2502,26 +2270,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Smoothed Rate of Change.
     /// </summary>
-    internal static void SmoothedRateOfChange(ReadOnlySpan<double> input, Span<double> output, int rocLength = 12, int smoothLength = 3)
+    internal static void SmoothedRateOfChange(ReadOnlySpan<double> input, Span<double> output, int rocLength = 21, int smoothLength = 13)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(input.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, input.Length);
-            RateOfChange(input, roc, rocLength);
-            MovingAverageCore.ExponentialMovingAverage(roc, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(rocArray);
-        }
+        using var window = new SmoothedReturnWindow(MovingAvgType.ExponentialMovingAverage, rocLength, smoothLength, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -7417,40 +7171,9 @@ internal static class OscillatorCore
     internal static void DecisionPointPriceMomentumOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 35, int signalLength = 20)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rocArray = pool.Rent(close.Length);
-        var smoothArray = pool.Rent(close.Length);
-        var smoothedArray = pool.Rent(close.Length);
-
-        try
-        {
-            var roc = rocArray.AsSpan(0, close.Length);
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var smoothed = smoothedArray.AsSpan(0, close.Length);
-
-            // Calculate ROC
-            RateOfChange(close, roc, 1);
-
-            // Double smoothing with EMA
-            MovingAverageCore.ExponentialMovingAverage(roc, smooth, length);
-            MovingAverageCore.ExponentialMovingAverage(smooth, smoothed, signalLength);
-
-            // Scale by 10 for readability
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothed[i] * 10;
-            }
-        }
-        finally
-        {
-            pool.Return(rocArray);
-            pool.Return(smoothArray);
-            pool.Return(smoothedArray);
-        }
+        using var window = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, length, signalLength, 10, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>

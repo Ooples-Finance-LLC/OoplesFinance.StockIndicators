@@ -578,6 +578,7 @@ public sealed class KlingerVolumeOscillatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Kst")]
 public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RocBankWindow? _wide;
     private readonly double _weight1;
     private readonly double _weight2;
     private readonly double _weight3;
@@ -597,6 +598,7 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
         int rocLength4 = 30, int signalLength = 9, double weight1 = 1, double weight2 = 2, double weight3 = 3,
         double weight4 = 4)
     {
+        if (StrengthWindow.Supports(maType) && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4) _wide = new RocBankWindow(maType, new[] { rocLength1, rocLength2, rocLength3, rocLength4 }, new[] { length1, length2, length3, length4 }, new[] { 1, 2, 3, 4 }, signalLength);
         _weight1 = weight1;
         _weight2 = weight2;
         _weight3 = weight3;
@@ -616,6 +618,7 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _wide?.Reset();
         _roc1.Reset();
         _roc2.Reset();
         _roc3.Reset();
@@ -630,6 +633,12 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs
+                ? new Dictionary<string, double> { { "Kst", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var roc1 = _roc1.Update(bar, isFinal, includeOutputs: false).Value;
         var roc2 = _roc2.Update(bar, isFinal, includeOutputs: false).Value;
         var roc3 = _roc3.Update(bar, isFinal, includeOutputs: false).Value;
@@ -658,6 +667,7 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _roc1.Dispose();
         _roc2.Dispose();
         _roc3.Dispose();

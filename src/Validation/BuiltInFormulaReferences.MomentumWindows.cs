@@ -117,6 +117,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.SmoothedRateOfChange:
                 var rocKind = AverageKind(options, 3);
+                if (rocKind is 1 or 2 or 3 or 6) return new("Sroc", new[] { "Sroc" }, bars => RocPipelineOutputs(bars, indicator));
                 if (rocKind == 0) return null;
                 return new("Sroc", new[] { "Sroc" }, bars =>
                 {

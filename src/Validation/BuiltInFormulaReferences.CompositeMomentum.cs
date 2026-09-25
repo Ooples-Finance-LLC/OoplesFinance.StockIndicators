@@ -154,6 +154,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("PerformanceIndex", new[] { "PerformanceIndex" }, bars =>
                     Outputs(("PerformanceIndex", PercentageReturn(Closes(bars), length))));
             case IndicatorName.KnowSureThing:
+                if (kind is 1 or 2 or 3 or 6) return new("Kst", new[] { "Kst", "Signal" }, bars => RocBankOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var rocPeriods = new[] { 10, 15, 20, 30 }.Select((period, i) => Integer(options, "RocLength" + (i + 1), period)).ToArray();
                 var smoothPeriods = new[] { Integer(options, "Length1", Integer(options, "Length", 10)),
@@ -166,6 +167,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Kst", line), ("Signal", Average(line, Integer(options, "SignalLength", 9), kind)));
                 });
             case IndicatorName.PringSpecialK:
+                if (kind is 1 or 2 or 3 or 6) return new("PringSpecialK", new[] { "PringSpecialK", "Signal" }, bars => RocBankOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var periods = new[] { 10, 15, 20, 30, 40, 50, 65, 75, 100, 130, 195, 265, 390, 530 }
                     .Select((period, i) => Integer(options, "Length" + (i + 1), period)).ToArray();

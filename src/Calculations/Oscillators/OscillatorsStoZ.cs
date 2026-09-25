@@ -3302,6 +3302,24 @@ public static partial class Calculations
     public static StockData CalculateSmoothedRateOfChange(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21, 
         int smoothingLength = 13)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, _, _, _, _) = GetInputValuesList(stockData);
+            var stableLine = new List<double>(stockData.Count);
+            var stableSignals = CreateSignalsList(stockData);
+            using var stableWindow = new SmoothedReturnWindow(maType, length, smoothingLength, stockData.Count);
+            double previous = 0;
+            foreach (var price in stableInput)
+            {
+                var next = stableWindow.Next(price, true);
+                stableLine.Add(next); stableSignals?.Add(GetCompareSignal(next, previous)); previous = next;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sroc", stableLine } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(stableLine);
+            stockData.IndicatorName = IndicatorName.SmoothedRateOfChange;
+            return stockData;
+        }
+
         List<double> srocList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
@@ -3315,7 +3333,7 @@ public static partial class Calculations
             var mom = currentMa - prevMa;
 
             var prevSroc = GetLastOrDefault(srocList);
-            var sroc = prevMa != 0 ? 100 * mom / prevMa : 100;
+            var sroc = prevMa != 0 ? RoundedPercentageChange.Of(currentMa, prevMa) : 100;
             srocList.Add(sroc);
 
             var signal = GetCompareSignal(sroc, prevSroc);

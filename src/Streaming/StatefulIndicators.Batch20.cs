@@ -162,6 +162,7 @@ public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Pmo")]
 public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly PriceMomentumWindow? _wide;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
     private readonly double _sc1;
@@ -174,6 +175,7 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
     public PriceMomentumOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 35,
         int length2 = 20, int signalLength = 10)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new PriceMomentumWindow(maType, length1, length2, signalLength);
         var resolvedLength1 = Math.Max(1, length1);
         var resolvedLength2 = Math.Max(1, length2);
         _sc1 = 2d / resolvedLength1;
@@ -186,6 +188,7 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
 
     public void Reset()
     {
+        _wide?.Reset();
         _signalSmoother.Reset();
         _prevValue = 0;
         _prevRocMa = 0;
@@ -195,6 +198,13 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs
+                ? new Dictionary<string, double> { { "Pmo", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var roc = prevValue != 0 ? (value - prevValue) / prevValue * 100 : 0;
@@ -225,6 +235,7 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _signalSmoother.Dispose();
     }
 }
@@ -647,6 +658,7 @@ public sealed class PrimeNumberOscillatorState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("PringSpecialK")]
 public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RocBankWindow? _wide;
     private readonly RateOfChangeState _roc10;
     private readonly RateOfChangeState _roc15;
     private readonly RateOfChangeState _roc20;
@@ -678,6 +690,9 @@ public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
         int length9 = 100, int length10 = 130, int length11 = 195, int length12 = 265, int length13 = 390, int length14 = 530,
         int smoothLength = 10)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new RocBankWindow(maType, new[] { length1, length2, length3, length4, length5, length7, length8, length9, length11, length12, length13, length14 },
+                new[] { length1, length1, length1, length2, length6, length7, length8, length9, length10, length10, length10, length11 },
+                new[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }, smoothLength);
         var len1 = Math.Max(1, length1);
         var len2 = Math.Max(1, length2);
         var len3 = Math.Max(1, length3);
@@ -723,6 +738,7 @@ public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _wide?.Reset();
         _roc10.Reset();
         _roc15.Reset();
         _roc20.Reset();
@@ -753,6 +769,12 @@ public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs
+                ? new Dictionary<string, double> { { "PringSpecialK", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var roc10 = _roc10.Update(bar, isFinal, includeOutputs: false).Value;
         var roc15 = _roc15.Update(bar, isFinal, includeOutputs: false).Value;
         var roc20 = _roc20.Update(bar, isFinal, includeOutputs: false).Value;
@@ -797,6 +819,7 @@ public sealed class PringSpecialKState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _roc10.Dispose();
         _roc15.Dispose();
         _roc20.Dispose();

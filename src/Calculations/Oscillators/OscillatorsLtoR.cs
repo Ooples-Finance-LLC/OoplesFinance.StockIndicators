@@ -1727,63 +1727,81 @@ public static partial class Calculations
 
         // Each component reads the prices; each Calculate call leaves its own output on CustomValuesList.
         var callerSeries = stockData.CaptureInputSeries();
-        var rocList = CalculateRateOfChange(stockData, length1).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc15List = CalculateRateOfChange(stockData, length2).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc20List = CalculateRateOfChange(stockData, length3).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc30List = CalculateRateOfChange(stockData, length4).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc40List = CalculateRateOfChange(stockData, length5).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc65List = CalculateRateOfChange(stockData, length7).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc75List = CalculateRateOfChange(stockData, length8).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc100List = CalculateRateOfChange(stockData, length9).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc195List = CalculateRateOfChange(stockData, length11).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc265List = CalculateRateOfChange(stockData, length12).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc390List = CalculateRateOfChange(stockData, length13).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var roc530List = CalculateRateOfChange(stockData, length14).ChainedValues;
-        var roc10SmaList = GetMovingAverageList(stockData, maType, length1, rocList);
-        var roc15SmaList = GetMovingAverageList(stockData, maType, length1, roc15List);
-        var roc20SmaList = GetMovingAverageList(stockData, maType, length1, roc20List);
-        var roc30SmaList = GetMovingAverageList(stockData, maType, length2, roc30List);
-        var roc40SmaList = GetMovingAverageList(stockData, maType, length6, roc40List);
-        var roc65SmaList = GetMovingAverageList(stockData, maType, length7, roc65List);
-        var roc75SmaList = GetMovingAverageList(stockData, maType, length8, roc75List);
-        var roc100SmaList = GetMovingAverageList(stockData, maType, length9, roc100List);
-        var roc195SmaList = GetMovingAverageList(stockData, maType, length10, roc195List);
-        var roc265SmaList = GetMovingAverageList(stockData, maType, length10, roc265List);
-        var roc390SmaList = GetMovingAverageList(stockData, maType, length10, roc390List);
-        var roc530SmaList = GetMovingAverageList(stockData, maType, length11, roc530List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> specialKSignalList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var roc10Sma = roc10SmaList[i];
-            var roc15Sma = roc15SmaList[i];
-            var roc20Sma = roc20SmaList[i];
-            var roc30Sma = roc30SmaList[i];
-            var roc40Sma = roc40SmaList[i];
-            var roc65Sma = roc65SmaList[i];
-            var roc75Sma = roc75SmaList[i];
-            var roc100Sma = roc100SmaList[i];
-            var roc195Sma = roc195SmaList[i];
-            var roc265Sma = roc265SmaList[i];
-            var roc390Sma = roc390SmaList[i];
-            var roc530Sma = roc530SmaList[i];
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            specialKSignalList = new(stockData.Count);
+            using var bank = new RocBankWindow(maType, new[] { length1, length2, length3, length4, length5, length7, length8, length9, length11, length12, length13, length14 },
+                new[] { length1, length1, length1, length2, length6, length7, length8, length9, length10, length10, length10, length11 },
+                new[] { 1, 2, 3, 4, 1, 2, 3, 4, 1, 2, 3, 4 }, smoothLength, stockData.Count);
+            foreach (var price in prices)
+            {
+                var next = bank.Next(price, true);
+                specialKList.Add(next.Value); specialKSignalList.Add(next.Signal);
+            }
+        }
+        else
+        {
+            var rocList = CalculateRateOfChange(stockData, length1).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc15List = CalculateRateOfChange(stockData, length2).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc20List = CalculateRateOfChange(stockData, length3).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc30List = CalculateRateOfChange(stockData, length4).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc40List = CalculateRateOfChange(stockData, length5).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc65List = CalculateRateOfChange(stockData, length7).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc75List = CalculateRateOfChange(stockData, length8).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc100List = CalculateRateOfChange(stockData, length9).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc195List = CalculateRateOfChange(stockData, length11).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc265List = CalculateRateOfChange(stockData, length12).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc390List = CalculateRateOfChange(stockData, length13).ChainedValues;
+            stockData.RestoreInputSeries(callerSeries);
+            var roc530List = CalculateRateOfChange(stockData, length14).ChainedValues;
+            var roc10SmaList = GetMovingAverageList(stockData, maType, length1, rocList);
+            var roc15SmaList = GetMovingAverageList(stockData, maType, length1, roc15List);
+            var roc20SmaList = GetMovingAverageList(stockData, maType, length1, roc20List);
+            var roc30SmaList = GetMovingAverageList(stockData, maType, length2, roc30List);
+            var roc40SmaList = GetMovingAverageList(stockData, maType, length6, roc40List);
+            var roc65SmaList = GetMovingAverageList(stockData, maType, length7, roc65List);
+            var roc75SmaList = GetMovingAverageList(stockData, maType, length8, roc75List);
+            var roc100SmaList = GetMovingAverageList(stockData, maType, length9, roc100List);
+            var roc195SmaList = GetMovingAverageList(stockData, maType, length10, roc195List);
+            var roc265SmaList = GetMovingAverageList(stockData, maType, length10, roc265List);
+            var roc390SmaList = GetMovingAverageList(stockData, maType, length10, roc390List);
+            var roc530SmaList = GetMovingAverageList(stockData, maType, length11, roc530List);
 
-            var specialK = (roc10Sma * 1) + (roc15Sma * 2) + (roc20Sma * 3) + (roc30Sma * 4) + (roc40Sma * 1) + (roc65Sma * 2) + (roc75Sma * 3) +
-                           (roc100Sma * 4) + (roc195Sma * 1) + (roc265Sma * 2) + (roc390Sma * 3) + (roc530Sma * 4);
-            specialKList.Add(specialK);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var roc10Sma = roc10SmaList[i];
+                var roc15Sma = roc15SmaList[i];
+                var roc20Sma = roc20SmaList[i];
+                var roc30Sma = roc30SmaList[i];
+                var roc40Sma = roc40SmaList[i];
+                var roc65Sma = roc65SmaList[i];
+                var roc75Sma = roc75SmaList[i];
+                var roc100Sma = roc100SmaList[i];
+                var roc195Sma = roc195SmaList[i];
+                var roc265Sma = roc265SmaList[i];
+                var roc390Sma = roc390SmaList[i];
+                var roc530Sma = roc530SmaList[i];
+
+                var specialK = (roc10Sma * 1) + (roc15Sma * 2) + (roc20Sma * 3) + (roc30Sma * 4) + (roc40Sma * 1) + (roc65Sma * 2) + (roc75Sma * 3) +
+                               (roc100Sma * 4) + (roc195Sma * 1) + (roc265Sma * 2) + (roc390Sma * 3) + (roc530Sma * 4);
+                specialKList.Add(specialK);
+            }
+
+            specialKSignalList = GetMovingAverageList(stockData, maType, smoothLength, specialKList);
         }
 
-        var specialKSignalList = GetMovingAverageList(stockData, maType, smoothLength, specialKList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var specialK = specialKList[i];
