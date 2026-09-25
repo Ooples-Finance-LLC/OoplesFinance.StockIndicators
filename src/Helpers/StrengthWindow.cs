@@ -91,7 +91,12 @@ internal sealed class StrengthWindow : IDisposable
     {
         var change = new ExactMeanAccumulator();
         if (_hasPrevious) { change.Add(price); change.Add(_previous, -1); }
-        var signed = StrengthValue.Round(change, 1);
+        var result = NextChange(StrengthValue.Round(change, 1), final);
+        if (final) { _previous = price; _hasPrevious = true; }
+        return result;
+    }
+    internal double NextChange(StrengthValue signed, bool final)
+    {
         var absolute = signed.Absolute;
         for (var i = 0; i < _signed.Length; i++)
         {
@@ -101,7 +106,6 @@ internal sealed class StrengthWindow : IDisposable
         var numerator = new ExactMeanAccumulator(); signed.AddTo(ref numerator, 100);
         var denominator = new ExactMeanAccumulator(); absolute.AddTo(ref denominator);
         var result = Math.Max(-100, Math.Min(100, numerator.Ratio(denominator)));
-        if (final) { _previous = price; _hasPrevious = true; }
         return result;
     }
     internal static double[] Compute(IReadOnlyList<double> values, MovingAvgType kind, params int[] lengths)
