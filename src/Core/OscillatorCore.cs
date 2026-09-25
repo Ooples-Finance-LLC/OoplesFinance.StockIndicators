@@ -3960,36 +3960,9 @@ internal static class OscillatorCore
     {
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        var pool = ArrayPool<double>.Shared;
-        var topArray = pool.Rent(input.Length);
-        var bottomArray = pool.Rent(input.Length);
-        var scratchArray = pool.Rent(input.Length);
-        try
-        {
-            var top = topArray.AsSpan(0, input.Length);
-            var bottom = bottomArray.AsSpan(0, input.Length);
-            var scratch = scratchArray.AsSpan(0, input.Length);
-            var range = new RollingMinMax(Math.Max(2, length1));
-            for (var i = 0; i < input.Length; i++)
-            {
-                range.Add(input[i]);
-                top[i] = input[i] - range.Min;
-                bottom[i] = range.Max - input[i];
-            }
-            MovingAverageCore.ExponentialMovingAverage(top, scratch, length2);
-            MovingAverageCore.ExponentialMovingAverage(scratch, top, length3);
-            MovingAverageCore.ExponentialMovingAverage(bottom, scratch, length2);
-            MovingAverageCore.ExponentialMovingAverage(scratch, bottom, length3);
-            for (var i = 0; i < input.Length; i++)
-                output[i] = bottom[i] == 0 ? 100 : top[i] == 0 ? 0 :
-                    Math.Max(0, Math.Min(100, 100 * top[i] / (top[i] + bottom[i])));
-        }
-        finally
-        {
-            pool.Return(topArray);
-            pool.Return(bottomArray);
-            pool.Return(scratchArray);
-        }
+        using var window = new RangeGainLossWindow(MovingAvgType.ExponentialMovingAverage, Math.Max(2, length1), new[] { length2, length3 }, length3, input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
+
     }
 
     /// <summary>

@@ -1074,6 +1074,7 @@ public sealed class DoubleExponentialSmoothingState : IStreamingIndicatorState
 [PrimaryOutput("Dsrsi")]
 public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly RangeGainLossWindow? _wide;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _topSmoother1;
@@ -1086,6 +1087,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
     public DoubleSmoothedRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 2, int length2 = 5, int length3 = 25)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new RangeGainLossWindow(maType, Math.Max(2, length1), new[] { length2, length3 }, length3);
         var resolved1 = Math.Max(2, length1);
         var resolved2 = Math.Max(1, length2);
         var resolved3 = Math.Max(1, length3);
@@ -1103,6 +1105,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
 
     public void Reset()
     {
+        _wide?.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _topSmoother1.Reset();
@@ -1114,6 +1117,13 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(bar.Close, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs ? new Dictionary<string, double>
+                { { "Dsrsi", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var value = _input.GetValue(bar);
         var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
         var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
@@ -1142,6 +1152,7 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _topSmoother1.Dispose();

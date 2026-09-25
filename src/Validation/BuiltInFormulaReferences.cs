@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.DoubleSmoothedRelativeStrengthIndex || builtIn.BatchName == IndicatorName.MomentaRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var rangeKeys = new[] { builtIn.BatchName == IndicatorName.DoubleSmoothedRelativeStrengthIndex ? "Dsrsi" : "Mrsi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++)
+            {
+                var key = rangeKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => RangeGainLossOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersRestoringPullIndicator)
         {
             var pullOptions = builtIn.CreateOptions();

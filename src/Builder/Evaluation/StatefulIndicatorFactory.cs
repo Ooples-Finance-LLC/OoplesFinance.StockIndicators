@@ -99,6 +99,7 @@ internal static partial class StatefulIndicatorFactory
             UpsidePotentialRatioSpecOptions upr => new UpsidePotentialRatioState(upr.Length, upr.Bmk),
             TreynorRatioSpecOptions treynor => new TreynorRatioState(treynor.Length, treynor.Beta, treynor.Bmk),
             KendallRankCorrelationCoefficientSpecOptions kendall => new KendallRankCorrelationCoefficientState(kendall.Length),
+            DoubleSmoothedRelativeStrengthIndexSpecOptions => new DoubleSmoothedRelativeStrengthIndexState(),
             MomentaRelativeStrengthIndexSpecOptions mrsi => new MomentaRelativeStrengthIndexState(mrsi.MaType, mrsi.Length1, mrsi.Length2),
             EhlersSpectrumDerivedFilterBankSpecOptions bank => new EhlersSpectrumDerivedFilterBankState(bank.MinLength, bank.MaxLength, bank.Length1, bank.Length2),
             ProjectionBandsSpecOptions projection => new ProjectionBandsState(projection.Length),

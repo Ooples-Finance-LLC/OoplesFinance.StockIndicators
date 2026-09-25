@@ -686,7 +686,8 @@ public static partial class IndicatorValidationDiscovery
         && (p.Name!.IndexOf("length", StringComparison.OrdinalIgnoreCase) >= 0
             || p.Name.IndexOf("period", StringComparison.OrdinalIgnoreCase) >= 0
             || p.Name.IndexOf("lookback", StringComparison.OrdinalIgnoreCase) >= 0
-            || p.Name.IndexOf("smooth", StringComparison.OrdinalIgnoreCase) >= 0);
+            || p.Name.IndexOf("smooth", StringComparison.OrdinalIgnoreCase) >= 0
+            || p.Name.IndexOf("momentum", StringComparison.OrdinalIgnoreCase) >= 0);
 
     private static bool CanSupply(Type type, ParameterInfo p) => p.IsOptional || SpecDefault(type, p) is not null || IsPeriod(p)
         || p.ParameterType == typeof(IMovingAverage) || p.ParameterType == typeof(MovingAvgType);

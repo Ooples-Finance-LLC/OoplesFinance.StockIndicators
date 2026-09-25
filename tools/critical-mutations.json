@@ -5484,5 +5484,112 @@
     "before": "output[i] = window.Next(input[i], true).Value;",
     "after": "output[i] = i < momentum ? 0 : window.Next(input[i], true).Value;",
     "filter": "FullyQualifiedName~GainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-loses-lower-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "GainLossShare.Change(price, low)",
+    "after": "GainLossShare.Change(price, high)",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-loses-opposite-distance",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "var down = GainLossShare.Change(high, price);",
+    "after": "var down = default(StrengthValue);",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-loses-second-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "stage < _gains.Length",
+    "after": "stage < 1",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-loses-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "_signal = new(kind, signal, capacityHint);",
+    "after": "_signal = new(kind, 1, capacityHint);",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-preview-commits-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "_maximum.Preview(price, out _)",
+    "after": "_maximum.Add(price, out _)",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-reset-retains-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/RangeGainLossWindow.cs",
+    "scope": "internal sealed class RangeGainLossWindow : IDisposable",
+    "before": "_minimum.Reset();",
+    "after": "/* injected stale minimum */",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-arm-ignores-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeRangeGainLossFast",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.InputValues;",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-discards-customer-averages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeRangeGainLossFast",
+    "before": "StrengthWindow.Supports(kind) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(kind)",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-input-MomentaRelativeStrengthIndexState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MomentaRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected skipped validation",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-input-DoubleSmoothedRelativeStrengthIndexState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected skipped validation",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "range-rsi-core-loses-minimum-window",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DoubleSmoothedRelativeStrengthIndex",
+    "before": "Math.Max(2, length1)",
+    "after": "Math.Max(1, length1)",
+    "filter": "FullyQualifiedName~RangeGainLossNumericalTests"
+  },
+  {
+    "id": "discovery-omits-momentum-horizon",
+    "module": "validation",
+    "file": "src/Validation/IndicatorValidationCase.cs",
+    "before": "|| p.Name.IndexOf(\"momentum\", StringComparison.OrdinalIgnoreCase) >= 0",
+    "after": "|| false",
+    "filter": "FullyQualifiedName~DiscoveryVariesMomentumHorizonsForBuiltInsAndCustomers"
   }
 ]
