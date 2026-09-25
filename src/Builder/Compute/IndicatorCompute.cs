@@ -8577,6 +8577,18 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var stableWindow = new MomentaRangeWindow(maType, length1, length2, length3, count);
+            for (var i = 0; i < count; i++)
+            {
+                var next = stableWindow.Next(inputList[i], true);
+                stable.WritableSpan[i] = outputKey == "Signal" ? next.Signal : next.Value;
+            }
+            return stable;
+        }
+
         using var topBuffer = context.Rent(count);
         using var bottomBuffer = context.Rent(count);
         using var smoothedTopBuffer = context.Rent(count);
@@ -8593,8 +8605,8 @@ internal static partial class IndicatorCompute
         }
 
         MovingAverage(data, maType, length2, top, smoothedTopBuffer.WritableSpan);
-        MovingAverage(data, maType, length2, bottom, smoothedBottomBuffer.WritableSpan);
         MovingAverage(data, maType, length3, smoothedTopBuffer.Span, top);
+        MovingAverage(data, maType, length2, bottom, smoothedBottomBuffer.WritableSpan);
         MovingAverage(data, maType, length3, smoothedBottomBuffer.Span, bottom);
 
         var buffer = context.Rent(count);
@@ -10950,6 +10962,14 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
         length = Math.Max(length, 1);
+
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stable = context.Rent(count);
+            using var window = new SmoothedDeltaWindow(maType, length, count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] = window.Next(inputList[i], true);
+            return stable;
+        }
 
         using var average = context.Rent(count);
         MovingAverage(data, maType, length, input, average.WritableSpan);

@@ -32,6 +32,7 @@ public static partial class IndicatorValidationDiscovery
 {
     /// <summary>
     /// Creates default, minimum-period, shorter-period, longer-period, and alternate-average cases where applicable.
+    /// Integer constructor parameters containing length, period, lookback, or smooth are varied as periods.
     /// Includes promoted built-in component combinations with independent numerical contracts.
     /// Registrations replace automatic cases for their type and handle dependencies or special parameters.
     /// A type that cannot be constructed becomes a failing case; it is never silently skipped.
@@ -684,7 +685,8 @@ public static partial class IndicatorValidationDiscovery
     private static bool IsPeriod(ParameterInfo p) => p.ParameterType == typeof(int)
         && (p.Name!.IndexOf("length", StringComparison.OrdinalIgnoreCase) >= 0
             || p.Name.IndexOf("period", StringComparison.OrdinalIgnoreCase) >= 0
-            || p.Name.IndexOf("lookback", StringComparison.OrdinalIgnoreCase) >= 0);
+            || p.Name.IndexOf("lookback", StringComparison.OrdinalIgnoreCase) >= 0
+            || p.Name.IndexOf("smooth", StringComparison.OrdinalIgnoreCase) >= 0);
 
     private static bool CanSupply(Type type, ParameterInfo p) => p.IsOptional || SpecDefault(type, p) is not null || IsPeriod(p)
         || p.ParameterType == typeof(IMovingAverage) || p.ParameterType == typeof(MovingAvgType);

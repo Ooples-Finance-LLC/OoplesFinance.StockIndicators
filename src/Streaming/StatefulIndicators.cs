@@ -7679,6 +7679,7 @@ public sealed class DemandOscillatorState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Dsm")]
 public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisposable
 {
+    private readonly MomentaRangeWindow? _wide;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _topSmoother1;
@@ -7691,7 +7692,8 @@ public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisp
     public DoubleSmoothedMomentaState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 5,
         int length3 = 25)
     {
-        var resolved1 = Math.Max(1, length1);
+        if (StrengthWindow.Supports(maType)) _wide = new MomentaRangeWindow(maType, length1, length2, length3);
+        var resolved1 = Math.Max(2, length1);
         _maxWindow = new RollingWindowMax(resolved1);
         _minWindow = new RollingWindowMin(resolved1);
         _topSmoother1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
@@ -7706,6 +7708,7 @@ public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
+        _wide?.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _topSmoother1.Reset();
@@ -7718,6 +7721,12 @@ public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisp
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var currentValue = _input.GetValue(bar);
+        if (_wide is not null)
+        {
+            var next = _wide.Next(currentValue, isFinal);
+            return new StreamingIndicatorStateResult(next.Value, includeOutputs
+                ? new Dictionary<string, double> { { "Dsm", next.Value }, { "Signal", next.Signal } } : null);
+        }
         var high = isFinal ? _maxWindow.Add(currentValue, out _) : _maxWindow.Preview(currentValue, out _);
         var low = isFinal ? _minWindow.Add(currentValue, out _) : _minWindow.Preview(currentValue, out _);
         var srcLc = currentValue - low;
@@ -7744,6 +7753,7 @@ public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _topSmoother1.Dispose();

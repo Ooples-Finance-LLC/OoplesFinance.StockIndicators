@@ -1672,39 +1672,54 @@ public static partial class Calculations
         int length2 = 5, int length3 = 25)
     {
         List<double> momList = new(stockData.Count);
-        List<double> srcLcList = new(stockData.Count);
-        List<double> hcLcList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length1);
 
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> momEmaList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var hc = highestList[i];
-            var lc = lowestList[i];
+            momEmaList = new(stockData.Count);
+            using var window = new MomentaRangeWindow(maType, length1, length2, length3, stockData.Count);
+            foreach (var price in inputList)
+            {
+                var next = window.Next(price, true);
+                momList.Add(next.Value); momEmaList.Add(next.Signal);
+            }
+        }
+        else
+        {
+            List<double> srcLcList = new(stockData.Count);
+            List<double> hcLcList = new(stockData.Count);
+            var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, Math.Max(2, length1));
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var hc = highestList[i];
+                var lc = lowestList[i];
 
-            var srcLc = currentValue - lc;
-            srcLcList.Add(srcLc);
+                var srcLc = currentValue - lc;
+                srcLcList.Add(srcLc);
 
-            var hcLc = hc - lc;
-            hcLcList.Add(hcLc);
+                var hcLc = hc - lc;
+                hcLcList.Add(hcLc);
+            }
+
+            var topEma1List = GetMovingAverageList(stockData, maType, length2, srcLcList);
+            var topEma2List = GetMovingAverageList(stockData, maType, length3, topEma1List);
+            var botEma1List = GetMovingAverageList(stockData, maType, length2, hcLcList);
+            var botEma2List = GetMovingAverageList(stockData, maType, length3, botEma1List);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var top = topEma2List[i];
+                var bot = botEma2List[i];
+
+                var mom = bot != 0 ? MinOrMax(100 * top / bot, 100, 0) : 0;
+                momList.Add(mom);
+            }
+
+            momEmaList = GetMovingAverageList(stockData, maType, length3, momList);
         }
 
-        var topEma1List = GetMovingAverageList(stockData, maType, length2, srcLcList);
-        var topEma2List = GetMovingAverageList(stockData, maType, length3, topEma1List);
-        var botEma1List = GetMovingAverageList(stockData, maType, length2, hcLcList);
-        var botEma2List = GetMovingAverageList(stockData, maType, length3, botEma1List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var top = topEma2List[i];
-            var bot = botEma2List[i];
-
-            var mom = bot != 0 ? MinOrMax(100 * top / bot, 100, 0) : 0;
-            momList.Add(mom);
-        }
-
-        var momEmaList = GetMovingAverageList(stockData, maType, length3, momList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var mom = momList[i];
