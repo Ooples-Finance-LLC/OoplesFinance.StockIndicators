@@ -3560,8 +3560,6 @@ internal static class OscillatorCore
 
         if (volume.Length == 0) return;
 
-        var shortK = 2.0 / (shortLength + 1);
-        var longK = 2.0 / (longLength + 1);
         double shortEma = volume[0];
         double longEma = volume[0];
 
@@ -3573,9 +3571,9 @@ internal static class OscillatorCore
             }
             else
             {
-                shortEma = volume[i] * shortK + shortEma * (1 - shortK);
-                longEma = volume[i] * longK + longEma * (1 - longK);
-                output[i] = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+                shortEma = RoundedSeededEma.Next(volume[i], shortEma, shortLength);
+                longEma = RoundedSeededEma.Next(volume[i], longEma, longLength);
+                output[i] = RoundedPercentageChange.Of(shortEma, longEma);
             }
         }
     }

@@ -5607,7 +5607,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeVolumeOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var volume = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes);
         var buffer = context.Rent(data.Count);
         VolumeCore.VolumeOscillator(volume, buffer.WritableSpan, 5, length);
         return buffer;
@@ -8180,7 +8180,7 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVolumeMomentumOscillatorFast(StockData data, ComputeContext context, int shortLength = 5, int longLength = 20)
     {
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
+        var volume = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes);
         var buffer = context.Rent(data.Count);
         OscillatorCore.VolumeMomentumOscillator(volume, buffer.WritableSpan, shortLength, longLength);
         return buffer;

@@ -3209,5 +3209,59 @@
     "id": "normalized-macd-ignored-selected-input",
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices"
+  },
+  {
+    "module": "volume-oscillator-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class VolumeOscillatorState",
+    "filter": "FullyQualifiedName~VolumeOscillatorNumericalTests",
+    "id": "volume-oscillator-intermediate-overflow",
+    "before": "RoundedPercentageChange.Of(fastSma, slowSma)",
+    "after": "slowSma == 0 ? 0 : (fastSma - slowSma) / slowSma * 100"
+  },
+  {
+    "module": "volume-oscillator-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch34.cs",
+    "scope": "public sealed class VolumeOscillatorState",
+    "filter": "FullyQualifiedName~VolumeOscillatorNumericalTests",
+    "id": "volume-oscillator-committed-preview",
+    "before": "_fast.Next(volume, isFinal)",
+    "after": "_fast.Next(volume, true)"
+  },
+  {
+    "module": "volume-oscillator-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeOscillatorFast",
+    "filter": "FullyQualifiedName~VolumeOscillatorNumericalTests",
+    "id": "volume-oscillator-ignored-selected-input",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes",
+    "after": "data.Volumes"
+  },
+  {
+    "module": "volume-momentum-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class VolumeMomentumOscillatorState",
+    "filter": "FullyQualifiedName~VolumeMomentumOscillatorNumericalTests",
+    "id": "volume-momentum-intermediate-overflow",
+    "before": "RoundedPercentageChange.Of(shortEma, longEma)",
+    "after": "longEma == 0 ? 0 : (shortEma - longEma) / longEma * 100"
+  },
+  {
+    "module": "volume-momentum-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class VolumeMomentumOscillatorState",
+    "filter": "FullyQualifiedName~VolumeMomentumOscillatorNumericalTests",
+    "id": "volume-momentum-committed-preview",
+    "before": "if (isFinal)",
+    "after": "if (true)"
+  },
+  {
+    "module": "volume-momentum-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeMomentumOscillatorFast",
+    "filter": "FullyQualifiedName~VolumeMomentumOscillatorNumericalTests",
+    "id": "volume-momentum-ignored-selected-input",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes",
+    "after": "data.Volumes"
   }
 ]

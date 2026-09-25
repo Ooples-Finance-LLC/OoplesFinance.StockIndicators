@@ -110,7 +110,8 @@ public static partial class Calculations
     {
         fastLength = Math.Max(fastLength, 1);
         slowLength = Math.Max(slowLength, 1);
-        var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var (inputList, _, _, _, volumes) = GetInputValuesList(stockData);
+        var volumeList = stockData.ChainedValues.Count > 0 ? inputList : volumes;
         var count = volumeList.Count;
         List<double> volumeOscillatorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
@@ -118,13 +119,13 @@ public static partial class Calculations
         var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
         var fastBuffer = SpanCompat.CreateOutputBuffer(count);
         var slowBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.SimpleMovingAverage(volumeSpan, fastBuffer.Span, fastLength);
-        MovingAverageCore.SimpleMovingAverage(volumeSpan, slowBuffer.Span, slowLength);
+        BollingerArithmetic.Mean(volumeSpan, fastBuffer.Span, fastLength);
+        BollingerArithmetic.Mean(volumeSpan, slowBuffer.Span, slowLength);
 
         for (var i = 0; i < count; i++)
         {
             var slowSma = slowBuffer.Span[i];
-            var volumeOscillator = slowSma != 0 ? (fastBuffer.Span[i] - slowSma) / slowSma * 100 : 0;
+            var volumeOscillator = RoundedPercentageChange.Of(fastBuffer.Span[i], slowSma);
             volumeOscillatorList.Add(volumeOscillator);
 
             var prevOscillator1 = i >= 1 ? volumeOscillatorList[i - 1] : 0;
@@ -161,13 +162,12 @@ public static partial class Calculations
     {
         shortLength = Math.Max(shortLength, 1);
         longLength = Math.Max(longLength, 1);
-        var (_, _, _, _, volumeList) = GetInputValuesList(stockData);
+        var (inputList, _, _, _, volumes) = GetInputValuesList(stockData);
+        var volumeList = stockData.ChainedValues.Count > 0 ? inputList : volumes;
         var count = volumeList.Count;
         List<double> oscillatorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        var shortK = 2.0 / (shortLength + 1);
-        var longK = 2.0 / (longLength + 1);
         var shortEma = count > 0 ? volumeList[0] : 0;
         var longEma = count > 0 ? volumeList[0] : 0;
 
@@ -176,9 +176,9 @@ public static partial class Calculations
             double oscillator = 0;
             if (i >= 1)
             {
-                shortEma = (volumeList[i] * shortK) + (shortEma * (1 - shortK));
-                longEma = (volumeList[i] * longK) + (longEma * (1 - longK));
-                oscillator = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+                shortEma = RoundedSeededEma.Next(volumeList[i], shortEma, shortLength);
+                longEma = RoundedSeededEma.Next(volumeList[i], longEma, longLength);
+                oscillator = RoundedPercentageChange.Of(shortEma, longEma);
             }
 
             oscillatorList.Add(oscillator);
