@@ -1877,11 +1877,6 @@ OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/longer-periods
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/weighted-average
-OoplesFinance.StockIndicators.Indicators.HistoricalVolatility/default
-OoplesFinance.StockIndicators.Indicators.HistoricalVolatility/longer-periods
-OoplesFinance.StockIndicators.Indicators.HistoricalVolatility/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HistoricalVolatility/shorter-periods
-OoplesFinance.StockIndicators.Indicators.HistoricalVolatility/weighted-average
 OoplesFinance.StockIndicators.Indicators.Hma/default
 OoplesFinance.StockIndicators.Indicators.Hma/longer-periods
 OoplesFinance.StockIndicators.Indicators.Hma/minimum-periods
@@ -2068,10 +2063,6 @@ OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV2/longer-periods
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV2/minimum-periods
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV2/shorter-periods
 OoplesFinance.StockIndicators.Indicators.KasePeakOscillatorV2/weighted-average
-OoplesFinance.StockIndicators.Indicators.KaseSerialDependencyIndex/default
-OoplesFinance.StockIndicators.Indicators.KaseSerialDependencyIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.KaseSerialDependencyIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KaseSerialDependencyIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.KaufmanAdaptiveBands/default
 OoplesFinance.StockIndicators.Indicators.KaufmanAdaptiveBands/longer-periods
 OoplesFinance.StockIndicators.Indicators.KaufmanAdaptiveBands/minimum-periods

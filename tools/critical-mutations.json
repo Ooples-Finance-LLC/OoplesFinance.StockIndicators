@@ -4467,5 +4467,56 @@
     "file": "src/Validation/BuiltInFormulaReferences.RelativeMotion.cs",
     "before": "(ReferenceFraction.FromDouble(Math.Abs(b.Close)) / ReferenceFraction.FromDouble(Math.Abs(bars[i - 1].Close))).LogToDouble()",
     "after": "Math.Log(b.Close / bars[i - 1].Close)"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "signed-log-divides-before-log",
+    "file": "src/Helpers/StableLogRatio.cs",
+    "before": "? Of(Math.Abs(current), Math.Abs(previous)) : 0;",
+    "after": "? Math.Log(current / previous) : 0;",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ExtremeReturnHasFiniteDeviationAndDependency"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "signed-log-drops-negative-prices",
+    "file": "src/Helpers/StableLogRatio.cs",
+    "before": "? Of(Math.Abs(current), Math.Abs(previous)) : 0;",
+    "after": "? Of(current, previous) : 0;",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ExtremeReturnHasFiniteDeviationAndDependency"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "kase-batch-divides-numerator-before-log",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "StableLogRatio.OfSameSign(currentHigh, prevLow)",
+    "after": "prevLow == 0 ? 0 : Math.Log(currentHigh / prevLow)",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ExtremeReturnHasFiniteDeviationAndDependency",
+    "scope": "public static StockData CalculateKaseSerialDependencyIndex"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "kase-fast-divides-numerator-before-log",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StableLogRatio.OfSameSign(key == \"KsdiDn\" ? lows.Span[i] : highs.Span[i], prior)",
+    "after": "prior == 0 ? 0 : Math.Log((key == \"KsdiDn\" ? lows.Span[i] : highs.Span[i]) / prior)",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ExtremeReturnHasFiniteDeviationAndDependency",
+    "scope": "private static ComputeBuffer ComputeKaseSerialDependencyFast"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "kase-native-divides-numerator-before-log",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "before": "StableLogRatio.OfSameSign(bar.High, prevLow)",
+    "after": "prevLow == 0 ? 0 : Math.Log(bar.High / prevLow)",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ExtremeReturnHasFiniteDeviationAndDependency",
+    "scope": "public sealed class KaseSerialDependencyIndexState"
+  },
+  {
+    "module": "log-volatility-numerical",
+    "id": "log-volatility-erases-small-outputs",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "before": "? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))",
+    "after": "? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(1e-9, 1e-9))",
+    "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ContractsRejectErasingAdjacentPriceMovement"
   }
 ]

@@ -14,7 +14,8 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
-        if (spec.Options is HistoricalVolatilityPercentileSpecOptions or
+        if (spec.Options is HistoricalVolatilitySpecOptions or KaseSerialDependencyIndexSpecOptions or
+            HistoricalVolatilityPercentileSpecOptions or
             JapaneseCorrelationCoefficientSpecOptions or
             OceanIndicatorSpecOptions or
             MayerMultipleSpecOptions or

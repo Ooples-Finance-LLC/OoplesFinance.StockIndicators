@@ -2,6 +2,10 @@ namespace OoplesFinance.StockIndicators.Helpers;
 
 internal static class StableLogRatio
 {
+    internal static double OfSameSign(double current, double previous) =>
+        current != 0 && previous != 0 && Math.Sign(current) == Math.Sign(previous)
+            ? Of(Math.Abs(current), Math.Abs(previous)) : 0;
+
     internal static double Of(double current, double previous)
     {
         if (current <= 0 || previous <= 0) return 0;

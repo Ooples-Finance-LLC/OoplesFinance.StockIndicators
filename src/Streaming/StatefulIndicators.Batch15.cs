@@ -1730,16 +1730,13 @@ public sealed class KaseSerialDependencyIndexState : IStreamingIndicatorState, I
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var temp = prevValue != 0 ? value / prevValue : 0;
-        _tempLog = temp > 0 ? Math.Log(temp) : 0;
+        _tempLog = StableLogRatio.OfSameSign(value, prevValue);
         var volatility = _stdDev.Next(_tempLog, isFinal);
 
         var prevHigh = EhlersStreamingWindow.GetOffsetValue(_highValues, bar.High, _length);
         var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, bar.Low, _length);
-        var ksdiUpTemp = prevLow != 0 ? bar.High / prevLow : 0;
-        var ksdiDownTemp = prevHigh != 0 ? bar.Low / prevHigh : 0;
-        var ksdiUpLog = ksdiUpTemp > 0 ? Math.Log(ksdiUpTemp) : 0;
-        var ksdiDownLog = ksdiDownTemp > 0 ? Math.Log(ksdiDownTemp) : 0;
+        var ksdiUpLog = StableLogRatio.OfSameSign(bar.High, prevLow);
+        var ksdiDownLog = StableLogRatio.OfSameSign(bar.Low, prevHigh);
         var ksdiUp = volatility != 0 ? ksdiUpLog / volatility : 0;
         var ksdiDown = volatility != 0 ? ksdiDownLog / volatility : 0;
 
