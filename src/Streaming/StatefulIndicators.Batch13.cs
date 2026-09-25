@@ -1081,7 +1081,8 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
 {
     private readonly int _length;
     private readonly RsiState _rsi;
-    private readonly RollingWindowSum _absSum;
+    private readonly FoldedRsiSum _absSum;
+    private readonly StrengthAverage? _exactSignal;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
 
@@ -1090,7 +1091,8 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
     {
         _length = Math.Max(1, length);
         _rsi = new RsiState(maType, _length);
-        _absSum = new RollingWindowSum(_length);
+        _absSum = new FoldedRsiSum(_length);
+        if (StrengthWindow.Supports(maType)) _exactSignal = new StrengthAverage(maType, _length);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1099,6 +1101,7 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
 
     public void Reset()
     {
+        _exactSignal?.Reset();
         _rsi.Reset();
         _absSum.Reset();
         _signalSmoother.Reset();
@@ -1108,9 +1111,8 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        var absRsi = 2 * Math.Abs(rsi - 50);
-        var frsi = isFinal ? _absSum.Add(absRsi, out _) : _absSum.Preview(absRsi, out _);
-        var signal = _signalSmoother.Next(frsi, isFinal);
+        var frsi = _absSum.Next(rsi, isFinal);
+        var signal = _exactSignal is null ? _signalSmoother.Next(frsi, isFinal) : _exactSignal.Next(new StrengthValue(frsi), isFinal).Mantissa;
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1127,6 +1129,7 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
 
     public void Dispose()
     {
+        _exactSignal?.Dispose();
         _rsi.Dispose();
         _absSum.Dispose();
         _signalSmoother.Dispose();

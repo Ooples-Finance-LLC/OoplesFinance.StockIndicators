@@ -1701,7 +1701,7 @@ internal static partial class IndicatorCompute
                 _ => ComputeDeltaMovingAverageFast(data, context, dma.Length2)
             },
             FoldedRelativeStrengthIndexSpecOptions frsi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType), frsi.Length, frsi.MaType)
+                ? SmoothStrength(data, context, ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType), frsi.Length, frsi.MaType)
                 : ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType),
             EnhancedWilliamsRSpecOptions ewr => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType), ewr.SignalLength, ewr.MaType)
@@ -21127,11 +21127,10 @@ internal static partial class IndicatorCompute
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
-        var absRsiSum = new RollingSum();
+        using var absRsiSum = new FoldedRsiSum(length);
         for (var i = 0; i < count; i++)
         {
-            absRsiSum.Add(2 * Math.Abs(rsi[i] - 50));
-            output[i] = absRsiSum.Sum(length);
+            output[i] = absRsiSum.Next(rsi[i], true);
         }
 
         return buffer;
@@ -21653,7 +21652,7 @@ internal static partial class IndicatorCompute
         // CalculateAdaptiveRelativeStrengthIndex is an exponential average of the price whose weight is how
         // far the relative strength index has travelled from its midpoint, so it needs that index itself
         // rather than a pair of lengths the batch indicator never had.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
         var input = SpanCompat.AsReadOnlySpan(inputList);
 
@@ -21664,11 +21663,10 @@ internal static partial class IndicatorCompute
 
         for (var i = 0; i < count; i++)
         {
-            var alpha = 2 * Math.Abs((rsi.Span[i] / 100) - 0.5);
 
             // There is no earlier value to carry on the first bar.
             var previous = i >= 1 ? output[i - 1] : 0;
-            output[i] = (alpha * input[i]) + ((1 - alpha) * previous);
+            output[i] = AdaptiveRsiBlend.Next(input[i], previous, rsi.Span[i]);
         }
 
         return buffer;
@@ -28538,12 +28536,18 @@ internal static partial class IndicatorCompute
 
         if (series == SelfAdjustingRsiSeries.Signal)
         {
-            MovingAverage(data, maType, smoothingLength, index.Span, buffer.WritableSpan);
+            if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+            {
+                using var signal = new StrengthAverage(maType, smoothingLength, count);
+                for (var i = 0; i < count; i++) buffer.WritableSpan[i] = signal.Next(new StrengthValue(index.Span[i]), true).Mantissa;
+            }
+            else MovingAverage(data, maType, smoothingLength, index.Span, buffer.WritableSpan);
             return buffer;
         }
 
         using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(index.Span, deviation.WritableSpan, length);
+        using var population = new ExactPopulationWindow(length);
+        for (var i = 0; i < count; i++) deviation.WritableSpan[i] = population.Next(index.Span[i], true);
 
         var output = buffer.WritableSpan;
         var stdDev = deviation.Span;

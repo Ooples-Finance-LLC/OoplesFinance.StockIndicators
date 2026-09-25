@@ -17,6 +17,27 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SelfAdjustingRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var selfAdjustingKeys = new[] { "SaRsi", "Signal", "ObLevel", "OsLevel" };
+            for (var slot = 0; slot < selfAdjustingKeys.Length; slot++)
+            {
+                var key = selfAdjustingKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => SelfAdjustingRsiOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AdaptiveRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => AdaptiveRsiOutputs(bars, builtIn)["Arsi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.FoldedRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => FoldedRsiOutputs(bars, builtIn)["Frsi"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => FoldedRsiOutputs(bars, builtIn)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
             var rsiKeys = new[] { "Rsi", "Signal", "Histogram" };

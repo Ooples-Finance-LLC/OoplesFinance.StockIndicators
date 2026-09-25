@@ -5818,5 +5818,152 @@
     "after": "var inputList = data.InputValues;",
     "filter": "FullyQualifiedName~PriceRsiNumericalTests",
     "scope": "internal static ComputeBuffer ComputeRsiFast("
+  },
+  {
+    "id": "folded-rsi-publishes-mean",
+    "module": "numerical",
+    "file": "src/Helpers/FoldedRsiSum.cs",
+    "before": "return sum.Mean(1);",
+    "after": "return sum.Mean(_window.Capacity);",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests"
+  },
+  {
+    "id": "folded-rsi-does-not-evict",
+    "module": "numerical",
+    "file": "src/Helpers/FoldedRsiSum.cs",
+    "before": "sum.Add(_window[0], -1);",
+    "after": "sum.Add(_window[0], 0);",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests"
+  },
+  {
+    "id": "folded-rsi-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/FoldedRsiSum.cs",
+    "before": "if (final) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests"
+  },
+  {
+    "id": "folded-rsi-reset-keeps-sum",
+    "module": "numerical",
+    "file": "src/Helpers/FoldedRsiSum.cs",
+    "before": "_sum = default; _window.Clear();",
+    "after": "_window.Clear();",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests"
+  },
+  {
+    "id": "folded-rsi-core-wrong-average",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "MovingAvgType.ExponentialMovingAverage, length, input.Length",
+    "after": "MovingAvgType.WildersSmoothingMethod, length, input.Length",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests",
+    "scope": "internal static void FoldedRelativeStrengthIndex("
+  },
+  {
+    "id": "adaptive-price-rsi-loses-fold-factor",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiBlend.cs",
+    "before": "var alpha = 2 * Math.Abs(rsi / 100 - 0.5);",
+    "after": "var alpha = Math.Abs(rsi / 100 - 0.5);",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests"
+  },
+  {
+    "id": "adaptive-price-rsi-rounds-products-early",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiBlend.cs",
+    "before": "return sum.Mean(1);",
+    "after": "return alpha * price + (1 - alpha) * previous;",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests"
+  },
+  {
+    "id": "adaptive-price-rsi-raw-selected-input-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveRsiFast("
+  },
+  {
+    "id": "adaptive-price-rsi-preview-commits",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "        if (isFinal)",
+    "after": "        if (true)",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests",
+    "scope": "public sealed class AdaptiveRelativeStrengthIndexState"
+  },
+  {
+    "id": "adaptive-price-rsi-reset-keeps-rsi",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "        _rsi.Reset();",
+    "after": "        // injected retained RSI state",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests",
+    "scope": "public sealed class AdaptiveRelativeStrengthIndexState"
+  },
+  {
+    "id": "adaptive-price-rsi-core-uses-obsolete-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "MovingAvgType.WildersSmoothingMethod, 14, close.Length",
+    "after": "MovingAvgType.WildersSmoothingMethod, minLength, close.Length",
+    "filter": "FullyQualifiedName~AdaptiveRsiNumericalTests",
+    "scope": "internal static void AdaptiveRsi("
+  },
+  {
+    "id": "self-adjusting-rsi-deviation-wrong-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "new ExactPopulationWindow(resolvedLength)",
+    "after": "new ExactPopulationWindow(smoothingLength)",
+    "filter": "FullyQualifiedName~SelfAdjustingRsiNumericalTests",
+    "scope": "public sealed class SelfAdjustingRelativeStrengthIndexState"
+  },
+  {
+    "id": "self-adjusting-rsi-reset-retains-deviation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "        _stdDev.Reset();",
+    "after": "        // injected retained deviation",
+    "filter": "FullyQualifiedName~SelfAdjustingRsiNumericalTests",
+    "scope": "public sealed class SelfAdjustingRelativeStrengthIndexState"
+  },
+  {
+    "id": "self-adjusting-rsi-preview-commits",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "_stdDev.Next(rsi, isFinal)",
+    "after": "_stdDev.Next(rsi, true)",
+    "filter": "FullyQualifiedName~SelfAdjustingRsiNumericalTests",
+    "scope": "public sealed class SelfAdjustingRelativeStrengthIndexState"
+  },
+  {
+    "id": "self-adjusting-rsi-selected-input-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~SelfAdjustingRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeSelfAdjustingRsiFast("
+  },
+  {
+    "id": "self-adjusting-rsi-loses-band-multiplier",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var adjusting = mult * stdDev[i];",
+    "after": "var adjusting = stdDev[i];",
+    "filter": "FullyQualifiedName~SelfAdjustingRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeSelfAdjustingRsiFast("
+  },
+  {
+    "id": "rsi-resolver-skips-candle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "internal readonly struct StreamingInputResolver",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected omitted candle validation",
+    "filter": "FullyQualifiedName~FoldedRsiNumericalTests|FullyQualifiedName~AdaptiveRsiNumericalTests|FullyQualifiedName~SelfAdjustingRsiNumericalTests"
   }
 ]

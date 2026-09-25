@@ -2922,42 +2922,11 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        // The public alias retains obsolete min/max options; its underlying price filter uses Wilder(14).
+        using var rsi = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, 14, close.Length);
+        double previous = 0;
         for (var i = 0; i < close.Length; i++)
-        {
-            if (i < maxLength)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            // Calculate efficiency ratio to adapt period
-            var change = Math.Abs(close[i] - close[i - maxLength]);
-            double volatility = 0;
-            for (var j = i - maxLength + 1; j <= i; j++)
-            {
-                volatility += Math.Abs(close[j] - close[j - 1]);
-            }
-
-            var er = volatility > 0 ? change / volatility : 0;
-
-            // Higher efficiency = shorter period
-            var adaptivePeriod = (int)(maxLength - er * (maxLength - minLength));
-            adaptivePeriod = Math.Max(minLength, Math.Min(maxLength, adaptivePeriod));
-
-            // Calculate RSI with adaptive period
-            double sumGain = 0, sumLoss = 0;
-            for (var j = i - adaptivePeriod + 1; j <= i; j++)
-            {
-                var delta = close[j] - close[j - 1];
-                if (delta > 0)
-                    sumGain += delta;
-                else
-                    sumLoss -= delta;
-            }
-
-            var rs = sumLoss > 0 ? sumGain / sumLoss : 100;
-            output[i] = 100 - 100 / (1 + rs);
-        }
+            output[i] = previous = AdaptiveRsiBlend.Next(close[i], previous, rsi.Next(close[i], true));
     }
 
     #region Additional Batch 8
@@ -10724,23 +10693,9 @@ internal static class OscillatorCore
 
         if (input.Length == 0) return;
 
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            RelativeStrengthIndex(input, rsi, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Fold RSI at 50 - values above 50 stay, values below 50 are mirrored
-                output[i] = rsi[i] >= 50 ? rsi[i] : 100 - rsi[i];
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-        }
+        using var rsi = new PriceRsiWindow(MovingAvgType.ExponentialMovingAverage, length, input.Length);
+        using var sum = new FoldedRsiSum(length);
+        for (var i = 0; i < input.Length; i++) output[i] = sum.Next(rsi.Next(input[i], true), true);
     }
 
     /// <summary>

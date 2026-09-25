@@ -9239,9 +9239,8 @@ public sealed class AdaptiveRelativeStrengthIndexState : IStreamingIndicatorStat
     {
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
-        var alpha = 2 * Math.Abs((rsi / 100) - 0.5);
         var prevArsi = _hasPrev ? _prevArsi : 0;
-        var arsi = (alpha * value) + ((1 - alpha) * prevArsi);
+        var arsi = AdaptiveRsiBlend.Next(value, prevArsi, rsi);
 
         if (isFinal)
         {

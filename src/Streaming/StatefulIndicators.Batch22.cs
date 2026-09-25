@@ -682,7 +682,8 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
     private readonly IMovingAverageSmoother _signalSmoother;
 
     // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly ExactPopulationWindow _stdDev;
+    private readonly StrengthAverage? _exactSignal;
     private readonly StreamingInputResolver _input;
 
     public SelfAdjustingRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
@@ -693,7 +694,8 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
         _rsi = new RsiState(maType, resolvedLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothingLength));
         // No moving-average type, and no selector: the index is passed to Next directly.
-        _stdDev = new RollingStandardDeviation(resolvedLength);
+        _stdDev = new ExactPopulationWindow(resolvedLength);
+        if (StrengthWindow.Supports(maType)) _exactSignal = new StrengthAverage(maType, smoothingLength);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -701,6 +703,7 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
 
     public void Reset()
     {
+        _exactSignal?.Reset();
         _rsi.Reset();
         _signalSmoother.Reset();
         _stdDev.Reset();
@@ -713,7 +716,7 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
 
         // Fed the relative strength index, which is the series this measures.
         var stdDev = _stdDev.Next(rsi, isFinal);
-        var signal = _signalSmoother.Next(rsi, isFinal);
+        var signal = _exactSignal is null ? _signalSmoother.Next(rsi, isFinal) : _exactSignal.Next(new StrengthValue(rsi), isFinal).Mantissa;
         var adjustingStdDev = _mult * stdDev;
         var obLevel = 50 + adjustingStdDev;
         var osLevel = 50 - adjustingStdDev;
@@ -735,6 +738,7 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
 
     public void Dispose()
     {
+        _exactSignal?.Dispose();
         _rsi.Dispose();
         _signalSmoother.Dispose();
         _stdDev.Dispose();

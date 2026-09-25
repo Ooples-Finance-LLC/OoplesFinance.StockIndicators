@@ -462,6 +462,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Fco", result));
                 });
             case IndicatorName.FoldedRelativeStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Frsi", new[] { "Frsi", "Signal" }, bars => FoldedRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 return new("Frsi", new[] { "Frsi", "Signal" }, bars =>
                 {
@@ -769,6 +770,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.AdaptiveRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
+                if (kind is 1 or 2 or 3 or 6) return new("Arsi", new[] { "Arsi" }, bars => AdaptiveRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 return new("Arsi", new[] { "Arsi" }, bars =>
                 {
