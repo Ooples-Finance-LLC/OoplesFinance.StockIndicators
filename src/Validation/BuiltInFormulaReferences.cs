@@ -376,6 +376,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ReverseMovingAverageConvergenceDivergence)
+        {
+            var reverseOptions = builtIn.CreateOptions();
+            var reverseKeys = new[] { "Rmacd", "Signal", "Histogram" };
+            for (var slot = 0; slot < reverseKeys.Length; slot++)
+            {
+                var key = reverseKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedReverseMacdReference(bars, reverseOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.DiNapoliMovingAverageConvergenceDivergence or IndicatorName.DiNapoliPercentagePriceOscillator)
         {
             var diNapoliOptions = builtIn.CreateOptions();

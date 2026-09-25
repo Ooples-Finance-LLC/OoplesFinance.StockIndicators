@@ -5551,8 +5551,11 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var fastAlpha = 2.0 / (1 + fastLength);
-        var slowAlpha = 2.0 / (1 + slowLength);
+        if (input.IsEmpty) return;
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+        var fastAlpha = 2.0 / (1d + fastLength);
+        var slowAlpha = 2.0 / (1d + slowLength);
 
         var pool = ArrayPool<double>.Shared;
         var fastEmaArray = pool.Rent(input.Length);
@@ -5571,9 +5574,7 @@ internal static class MovingAverageCore
                 var prevFastEma = i >= 1 ? fastEma[i - 1] : 0;
                 var prevSlowEma = i >= 1 ? slowEma[i - 1] : 0;
 
-                var pMacdEq = fastAlpha - slowAlpha != 0
-                    ? ((prevFastEma * fastAlpha) - (prevSlowEma * slowAlpha)) / (fastAlpha - slowAlpha)
-                    : prevFastEma;
+                var pMacdEq = RoundedReverseMacd.Equilibrium(prevFastEma, prevSlowEma, fastAlpha, slowAlpha);
                 output[i] = pMacdEq;
             }
         }
