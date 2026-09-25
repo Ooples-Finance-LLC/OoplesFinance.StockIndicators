@@ -321,8 +321,7 @@ internal static partial class BuiltInFormulaReferences
                 {
                     var cycles = SpectrumCycles(bars, bankMinimum, bankMaximum, bankCutoff, bankMedian);
                     if (!restoring) return Outputs(("Esdfb", cycles));
-                    var pull = bars.Select((b, i) => b.Volume * Math.Pow(2 * Math.PI / cycles[i], 2)).ToArray();
-                    return Outputs(("Rpi", pull), ("Signal", Average(pull, bankMinimum, pullKind)));
+                    return RestoringPullOutputs(bars, options);
                 });
             case IndicatorName.EhlersLeadingIndicator:
                 return new("Eli", new[] { "Eli" }, bars => Outputs(("Eli", bars.Select((_, i) =>

@@ -469,7 +469,11 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is ElderImpulseSystem or
+        var includeNumericalExtremes = probe is EhlersSpectrumDerivedFilterBank or
+            EhlersRestoringPullIndicator or
+            EhlersGaussianFilter or
+            EhlersFMDemodulatorIndicator or
+            ElderImpulseSystem or
             GannHiLoActivator or
             LinearChannels or
             LinearTrailingStop or

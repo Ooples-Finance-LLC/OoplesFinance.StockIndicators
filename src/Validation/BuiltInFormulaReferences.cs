@@ -17,6 +17,18 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersRestoringPullIndicator)
+        {
+            var pullOptions = builtIn.CreateOptions();
+            var pullKeys = new[] { "Rpi", "Signal" };
+            for (var slot = 0; slot < pullKeys.Length; slot++)
+            {
+                var key = pullKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RestoringPullOutputs(bars, pullOptions)[key], new IndicatorErrorBudget(1e-9, 1e-9));
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.WeightedMovingAverage or IndicatorName.LinearWeightedMovingAverage or IndicatorName.SimplifiedWeightedMovingAverage)
         {
             var period = Integer(builtIn.CreateOptions(), "Length");

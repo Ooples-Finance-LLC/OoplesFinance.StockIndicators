@@ -26497,14 +26497,22 @@ internal static partial class IndicatorCompute
     {
         // The core bank keeps each period's recurrence separate and bounds the cycle to the
         // scanned band. Signal is the requested moving average of the volume-scaled pull.
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.ClosePrices);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var count = data.Count;
 
         var buffer = context.Rent(count);
         OscillatorCore.EhlersRestoringPullIndicator(close, volume, buffer.WritableSpan,
             minLength, maxLength, length1, length2);
-        return signal ? SmoothPublished(data, context, buffer, Math.Max(1, minLength), maType) : buffer;
+        if (!signal) return buffer;
+        using (buffer)
+        {
+            var finite = FiniteSignalInput.Create(buffer.ToArray(), out var finiteCount);
+            var smoothed = context.Rent(count);
+            MovingAverage(data, maType, Math.Max(1, minLength), SpanCompat.AsReadOnlySpan(finite), smoothed.WritableSpan);
+            for (var i = finiteCount; i < count; i++) smoothed.WritableSpan[i] = double.NaN;
+            return smoothed;
+        }
     }
 
     internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10,

@@ -1642,6 +1642,7 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
     private readonly PooledRingBuffer<double> _dcValues;
     private readonly double[] _medianScratch;
     private double _prevValue;
+    private double _priceScale;
     private int _index;
 
     public EhlersSpectrumDerivedFilterBankEngine(int minLength, int maxLength, int length1, int length2)
@@ -1662,26 +1663,33 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
         _medianScratch = new double[_length2];
     }
 
+    internal double PreviousSmoothedHighPass { get; private set; }
     internal double SmoothedHighPass => EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 1);
 
     public double Next(double value, bool isFinal)
     {
-        var prevValue = _index >= 1 ? _prevValue : 0;
+        // Cycle selection is homogeneous in price. Keep the entire linear bank in
+        // a common finite scale before forming differences and channel powers.
+        // A preview reads rescaled history without committing the scale change.
+        var priceScale = Math.Max(_priceScale, Math.Abs(value));
+        var rescale = priceScale == 0 ? 1 : _priceScale / priceScale;
+        value = priceScale == 0 ? 0 : value / priceScale;
+        var prevValue = _index >= 1 ? _prevValue * rescale : 0;
         var delta = Math.Max((-0.015 * _index) + 0.5, 0.15);
-        var prevHp1 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 1);
-        var prevHp2 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 2);
-        var prevHp3 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 3);
-        var prevHp4 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 4);
-        var prevHp5 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 5);
+        var prevHp1 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 1) * rescale;
+        var prevHp2 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 2) * rescale;
+        var prevHp3 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 3) * rescale;
+        var prevHp4 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 4) * rescale;
+        var prevHp5 = EhlersStreamingWindow.GetOffsetValue(_hpValues, 5) * rescale;
 
         var hp = _index < 7 ? value : (0.5 * (1 + _alpha1) * (value - prevValue)) + (_alpha1 * prevHp1);
-        var prevSmoothHp = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 1);
+        var prevSmoothHp = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 1) * rescale;
         var smoothHp = _index < 7
             ? value - prevValue
             : (hp + (2 * prevHp1) + (3 * prevHp2) + (3 * prevHp3) + (2 * prevHp4) + prevHp5) / 12;
 
-        var smoothTwoBack = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 2);
-        var smoothThreeBack = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 3);
+        var smoothTwoBack = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 2) * rescale;
+        var smoothThreeBack = EhlersStreamingWindow.GetOffsetValue(_smoothHpValues, 3) * rescale;
         double maxPower = 0;
         for (var period = _minLength; period <= _maxLength; period++)
         {
@@ -1693,14 +1701,14 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
             var quadrature = scale * (smoothHp - prevSmoothHp);
             var priorQuadrature = scale * (smoothTwoBack - smoothThreeBack);
             var real = .5 * (1 - alpha) * (smoothHp - smoothTwoBack)
-                + beta * (1 + alpha) * _realPrev1[period] - alpha * _realPrev2[period];
+                + beta * (1 + alpha) * (_realPrev1[period] * rescale) - alpha * (_realPrev2[period] * rescale);
             var imag = .5 * (1 - alpha) * (quadrature - priorQuadrature)
-                + beta * (1 + alpha) * _imagPrev1[period] - alpha * _imagPrev2[period];
+                + beta * (1 + alpha) * (_imagPrev1[period] * rescale) - alpha * (_imagPrev2[period] * rescale);
             if (isFinal)
             {
-                _realPrev2[period] = _realPrev1[period];
+                _realPrev2[period] = _realPrev1[period] * rescale;
                 _realPrev1[period] = real;
-                _imagPrev2[period] = _imagPrev1[period];
+                _imagPrev2[period] = _imagPrev1[period] * rescale;
                 _imagPrev1[period] = imag;
             }
             _power[period] = real * real + imag * imag;
@@ -1729,6 +1737,13 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
 
         if (isFinal)
         {
+            if (rescale != 1)
+            {
+                RescaleHistory(_hpValues, rescale);
+                RescaleHistory(_smoothHpValues, rescale);
+            }
+            PreviousSmoothedHighPass = prevSmoothHp;
+            _priceScale = priceScale;
             _hpValues.TryAdd(hp, out _);
             _smoothHpValues.TryAdd(smoothHp, out _);
 
@@ -1738,6 +1753,15 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
         }
 
         return domCyc;
+    }
+
+    private static void RescaleHistory(PooledRingBuffer<double> history, double factor)
+    {
+        var count = history.Count;
+        Span<double> values = stackalloc double[count];
+        history.CopyTo(values);
+        history.Clear();
+        for (var i = 0; i < count; i++) history.TryAdd(values[i] * factor, out _);
     }
 
     public void Reset()
@@ -1751,6 +1775,8 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
         Array.Clear(_power, 0, _power.Length);
         _dcValues.Clear();
         _prevValue = 0;
+        _priceScale = 0;
+        PreviousSmoothedHighPass = 0;
         _index = 0;
     }
 

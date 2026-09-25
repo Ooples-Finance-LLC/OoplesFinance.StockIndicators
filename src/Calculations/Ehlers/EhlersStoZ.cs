@@ -301,9 +301,8 @@ public static partial class Calculations
         using var bank = new EhlersSpectrumDerivedFilterBankEngine(minLength, maxLength, length1, length2);
         foreach (var price in inputList)
         {
-            var previous = bank.SmoothedHighPass;
             cycles.Add(bank.Next(price, true));
-            signals?.Add(GetCompareSignal(bank.SmoothedHighPass, previous));
+            signals?.Add(GetCompareSignal(bank.SmoothedHighPass, bank.PreviousSmoothedHighPass));
         }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Esdfb", cycles } });
         stockData.SetSignals(signals);

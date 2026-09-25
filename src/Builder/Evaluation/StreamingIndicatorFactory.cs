@@ -14,7 +14,11 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
-        if (spec.Options is ElderImpulseSystemSpecOptions or
+        if (spec.Options is EhlersSpectrumDerivedFilterBankSpecOptions or
+            EhlersRestoringPullIndicatorSpecOptions or
+            EhlersGaussianFilterSpecOptions or
+            EhlersFMDemodulatorIndicatorSpecOptions or
+            ElderImpulseSystemSpecOptions or
             GannHiLoActivatorSpecOptions or
             LinearChannelsSpecOptions or
             LinearTrailingStopSpecOptions or

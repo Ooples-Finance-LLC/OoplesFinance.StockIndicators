@@ -1,4 +1,5 @@
 import importlib.util
+import json
 from pathlib import Path
 import tempfile
 import unittest
@@ -46,6 +47,34 @@ class MutationEvidenceTests(unittest.TestCase):
             with self.assertRaises(ValueError):
                 mutations.mutate(source, entry)
         self.assertEqual("new", mutations.mutate("old", entry))
+
+    def test_selected_run_rejects_stale_unselected_site_before_build(self):
+        with tempfile.TemporaryDirectory() as directory:
+            root = Path(directory)
+            (root / "tools").mkdir()
+            (root / "source.cs").write_text("old", encoding="utf-8")
+            entries = [{"id": name, "module": "test", "file": "source.cs", "before": before,
+                        "after": "new", "filter": "Example"}
+                       for name, before in [("selected", "old"), ("unselected", "missing")]]
+            (root / "tools/critical-mutations.json").write_text(json.dumps(entries), encoding="utf-8")
+            with patch.object(mutations, "__file__", str(root / "tools/run_critical_mutations.py")), \
+                 patch("sys.argv", ["mutations", "--output", str(root / "evidence"), "--only", "selected"]), \
+                 patch.object(mutations.subprocess, "check_output", return_value=b"source.cs\0"), \
+                 patch.object(mutations.subprocess, "run") as restore, \
+                 patch.object(mutations, "run_tests") as run:
+                with self.assertRaisesRegex(ValueError, "unselected: expected one mutation site"):
+                    mutations.main()
+                restore.assert_not_called()
+                run.assert_not_called()
+
+    def test_every_current_manifest_site_applies_uniquely(self):
+        repo = Path(__file__).resolve().parents[2]
+        entries = json.loads((repo / "tools/critical-mutations.json").read_text(encoding="utf-8"))
+        sources = {entry["file"]: (repo / entry["file"]).read_text(encoding="utf-8") for entry in entries}
+        for entry in entries:
+            with self.subTest(mutation=entry["id"]):
+                changed = mutations.mutate(sources[entry["file"]], entry)
+                self.assertNotEqual(sources[entry["file"]], changed)
 
     def test_selected_faults_cannot_claim_full_campaign_completion(self):
         entries = [{"id": "a"}, {"id": "b"}]

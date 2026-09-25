@@ -536,7 +536,9 @@ public static partial class Calculations
             rpiList.Add(rpi);
         }
 
-        var rpiEmaList = GetMovingAverageList(stockData, maType, minLength, rpiList);
+        var signalInput = FiniteSignalInput.Create(rpiList, out var finiteCount);
+        var rpiEmaList = GetMovingAverageList(stockData, maType, minLength, signalInput);
+        for (var i = finiteCount; i < rpiEmaList.Count; i++) rpiEmaList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var rpi = rpiList[i];
