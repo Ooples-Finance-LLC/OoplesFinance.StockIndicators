@@ -309,8 +309,8 @@
     "id": "customer-numerical-fixtures-bypass",
     "module": "validation",
     "file": "src/Validation/IndicatorValidation.cs",
-    "before": "var includeNumericalExtremes = CustomerStateValidation.RequiresCheck(probe) ||",
-    "after": "var includeNumericalExtremes = false ||",
+    "before": "CustomerStateValidation.RequiresCheck(probe)",
+    "after": "false",
     "filter": "FullyQualifiedName~CustomerDiscoveryAutomaticallyDetectsErasedTinyInputs",
     "scope": "internal static bool IncludesNumericalFixtures("
   },
@@ -4243,5 +4243,104 @@
     "before": "new VostroIndicatorState(vostro.MaType, vostro.Length1, vostro.Length2, vostro.Level)",
     "after": "new VostroIndicatorState(vostro.MaType, vostro.Length1, vostro.Length2, 0)",
     "filter": "FullyQualifiedName~TrendPatternNumericalTests.VostroFactoriesPreserveTheConfiguredThreshold"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "spectrum-drops-price-normalization",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSpectrumDerivedFilterBankEngine",
+    "before": "value = priceScale == 0 ? 0 : value / priceScale;",
+    "after": "value = priceScale == 0 ? 0 : value;",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.SpectrumPreservesCycleAcrossPriceScales"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "spectrum-history-keeps-old-scale",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSpectrumDerivedFilterBankEngine",
+    "before": "_realPrev2[period] = _realPrev1[period] * rescale;",
+    "after": "_realPrev2[period] = _realPrev1[period];",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.ScaleChangesAndExtremePreviewsPreserveTheCommittedSpectrum"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "spectrum-preview-commits-channel",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSpectrumDerivedFilterBankEngine",
+    "before": "if (isFinal)\n            {\n                _realPrev2[period]",
+    "after": "if (true)\n            {\n                _realPrev2[period]",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.ScaleChangesAndExtremePreviewsPreserveTheCommittedSpectrum"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "spectrum-reset-retains-scale",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSpectrumDerivedFilterBankEngine",
+    "before": "_priceScale = 0;",
+    "after": "_priceScale = 1;",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.ScaleChangesAndExtremePreviewsPreserveTheCommittedSpectrum"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "spectrum-signal-compares-mixed-scale",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSpectrumDerivedFilterBank",
+    "before": "cycles.Add(bank.Next(price, true));\n            signals?.Add(GetCompareSignal(bank.SmoothedHighPass, bank.PreviousSmoothedHighPass));",
+    "after": "var previous = bank.SmoothedHighPass;\n            cycles.Add(bank.Next(price, true));\n            signals?.Add(GetCompareSignal(bank.SmoothedHighPass, previous));",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.SpectrumSignalsCompareSuccessiveValuesInTheSameScale"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "ehlers-gaussian-factory-drops-poles",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new EhlersGaussianFilterState(gaussian.Length, gaussian.Poles)",
+    "after": "new EhlersGaussianFilterState(gaussian.Length, 3)",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.GaussianFactoriesHonorThePrimaryPole"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "ehlers-demodulator-factory-drops-gain",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new EhlersFMDemodulatorIndicatorState(demodulator.MaType, demodulator.FastLength, demodulator.SlowLength)",
+    "after": "new EhlersFMDemodulatorIndicatorState(demodulator.MaType, 1, demodulator.SlowLength)",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.DemodulatorFactoryPreservesUnsaturatedGain"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "restoring-pull-preview-invalidates-signal",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersRestoringPullIndicatorState",
+    "before": "if (isFinal) _signalInvalid = invalid;",
+    "after": "_signalInvalid = invalid;",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.PullOverflowPreviewDoesNotInvalidateCommittedSignal"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "restoring-pull-loses-overflow-rejection",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "if (builtIn.BatchName == IndicatorName.EhlersRestoringPullIndicator)",
+    "before": "IndicatorValidationRule.ReferenceWithOverflowRejection(slot,",
+    "after": "IndicatorValidationRule.Reference(slot,",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.PublicConfigurationsPassEveryNumericalClass"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "restoring-pull-fast-ignores-selected-price",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast",
+    "before": "var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.ClosePrices);",
+    "after": "var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.RestoringPullFastRouteUsesTheSelectedPrice"
+  },
+  {
+    "module": "ehlers-bank-numerical",
+    "id": "restoring-pull-fast-smooths-infinity",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast",
+    "before": "var finite = FiniteSignalInput.Create(buffer.ToArray(), out var finiteCount);",
+    "after": "var finite = buffer.ToArray().ToList(); var finiteCount = finite.Count;",
+    "filter": "FullyQualifiedName~EhlersBankNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
   }
 ]

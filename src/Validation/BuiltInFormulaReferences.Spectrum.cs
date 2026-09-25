@@ -5,6 +5,22 @@ namespace OoplesFinance.StockIndicators.Validation;
 
 internal static partial class BuiltInFormulaReferences
 {
+    internal static IReadOnlyDictionary<string, double[]> RestoringPullOutputs(IReadOnlyList<Bar> bars, object options)
+    {
+        var minimum = Integer(options, "MinLength", 8);
+        var cycles = SpectrumCycles(bars, minimum, Integer(options, "MaxLength", 50),
+            Integer(options, "Length1", 40), Integer(options, "Length2", 10));
+        var pull = bars.Select((bar, i) =>
+        {
+            var frequencySquared = Math.Pow(2 * Math.PI / cycles[i], 2);
+            return (ReferenceFraction.FromDouble(bar.Volume) * ReferenceFraction.FromDouble(frequencySquared)).ToDouble();
+        }).ToArray();
+        var finiteCount = pull.TakeWhile(v => !double.IsInfinity(v) && !double.IsNaN(v)).Count();
+        var signal = Average(pull.Take(finiteCount).ToArray(), minimum, AverageKind(options, 3))
+            .Concat(Enumerable.Repeat(double.NaN, pull.Length - finiteCount)).ToArray();
+        return Outputs(("Rpi", pull), ("Signal", signal));
+    }
+
     // Direct channel trajectories, rather than the production per-bar mutable filter bank.
     internal static double[] SpectrumCycles(IReadOnlyList<Bar> bars, int minimum, int maximum, int cutoff, int medianLength)
     {
@@ -12,6 +28,13 @@ internal static partial class BuiltInFormulaReferences
         maximum = Math.Max(minimum, maximum);
         cutoff = Math.Max(3, cutoff);
         medianLength = Math.Max(1, medianLength);
+        // Each trajectory sample carries its own prefix scale; bring prior samples
+        // into the current unit before evaluating the independent complex recurrence.
+        var scales = new double[bars.Count];
+        for (var i = 0; i < scales.Length; i++)
+            scales[i] = Math.Max(i == 0 ? 0 : scales[i - 1], Math.Abs(bars[i].Close));
+        double Factor(int from, int to) => scales[to] == 0 ? 1 : scales[from] / scales[to];
+        double Price(int i, int at) => i < 0 || scales[at] == 0 ? 0 : bars[i].Close / scales[at];
         var highPass = new double[bars.Count];
         var smooth = new double[bars.Count];
         var angle = 2 * Math.PI / cutoff;
@@ -19,26 +42,26 @@ internal static partial class BuiltInFormulaReferences
         var taps = new[] { 1d, 2, 3, 3, 2, 1 };
         for (var i = 0; i < bars.Count; i++)
         {
-            var change = bars[i].Close - (i == 0 ? 0 : bars[i - 1].Close);
-            highPass[i] = i < 7 ? bars[i].Close : highPassPole * highPass[i - 1] + (1 + highPassPole) * change / 2;
-            smooth[i] = i < 7 ? change : taps.Select((weight, lag) => weight * highPass[i - lag]).Sum() / 12;
+            var change = Price(i, i) - Price(i - 1, i);
+            highPass[i] = i < 7 ? Price(i, i) : highPassPole * highPass[i - 1] * Factor(i - 1, i) + (1 + highPassPole) * change / 2;
+            smooth[i] = i < 7 ? change : taps.Select((weight, lag) => weight * highPass[i - lag] * Factor(i - lag, i)).Sum() / 12;
         }
-        double Smoothed(int i) => i < 0 ? 0 : smooth[i];
+        double Smoothed(int i, int at) => i < 0 ? 0 : smooth[i] * Factor(i, at);
         var powers = new double[maximum - minimum + 1][];
         for (var period = minimum; period <= maximum; period++)
         {
             var trajectory = new Complex[bars.Count];
             var power = new double[bars.Count];
             var phase = 2 * Math.PI / period;
-            Complex Input(int i) => i < 0 ? Complex.Zero : new Complex(smooth[i], (Smoothed(i) - Smoothed(i - 1)) / phase);
+            Complex Input(int i, int at) => i < 0 ? Complex.Zero : new Complex(Smoothed(i, at), (Smoothed(i, at) - Smoothed(i - 1, at)) / phase);
             for (var i = 0; i < bars.Count; i++)
             {
                 var bandwidth = Math.Max(.15, .5 - .015 * i);
                 var secant = 1 / Math.Cos(2 * phase * bandwidth);
                 var pole = 1 / (secant + Math.Sign(secant) * Math.Sqrt(Math.Max(0, secant * secant - 1)));
-                var previous = i == 0 ? Complex.Zero : trajectory[i - 1];
-                var prior = i < 2 ? Complex.Zero : trajectory[i - 2];
-                trajectory[i] = (1 - pole) / 2 * (Input(i) - Input(i - 2))
+                var previous = i == 0 ? Complex.Zero : trajectory[i - 1] * Factor(i - 1, i);
+                var prior = i < 2 ? Complex.Zero : trajectory[i - 2] * Factor(i - 2, i);
+                trajectory[i] = (1 - pole) / 2 * (Input(i, i) - Input(i - 2, i))
                     + Math.Cos(phase) * (1 + pole) * previous - pole * prior;
                 power[i] = trajectory[i].Real * trajectory[i].Real + trajectory[i].Imaginary * trajectory[i].Imaginary;
             }

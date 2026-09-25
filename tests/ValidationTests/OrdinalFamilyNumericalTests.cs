@@ -135,6 +135,10 @@ public sealed class OrdinalFamilyNumericalTests
 
     [Theory, MemberData(nameof(Routes))]
     public void AllRoutesMatchIndependentFormulasIncludingPreviewAndReset(IndicatorValidationCase testCase, string route)
+        => CheckRoutes(testCase, route);
+
+    internal void CheckRoutes(IndicatorValidationCase testCase, string route,
+        Func<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>? overflowReference = null)
     {
         var indicator = testCase.Factory();
         var builtIn = (IBuiltInIndicator)indicator;
@@ -192,6 +196,19 @@ public sealed class OrdinalFamilyNumericalTests
             }
             void Check()
             {
+                if (overflowReference is not null)
+                {
+                    var expected = overflowReference(bars);
+                    var budget = new IndicatorErrorBudget(1e-9, 1e-9);
+                    for (var slot = 0; slot < keys.Length; slot++)
+                    for (var i = 0; i < bars.Count; i++)
+                    {
+                        var value = expected[keys[slot]][i];
+                        if (!double.IsFinite(value)) Assert.Equal(value, output[slot][i]);
+                        else Assert.True(budget.Accepts(value, output[slot][i]), $"{route}/{fixture.Name}/{keys[slot]}/{i}: expected {value:R}, got {output[slot][i]:R}");
+                    }
+                    return;
+                }
                 Assert.All(output.SelectMany(values => values), value => Assert.True(double.IsFinite(value), fixture.Name));
                 foreach (var rule in rules) rule.Check(new IndicatorValidationContext(route + "/" + fixture.Name, bars, output, 0));
             }

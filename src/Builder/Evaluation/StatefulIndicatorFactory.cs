@@ -45,6 +45,8 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            EhlersGaussianFilterSpecOptions gaussian => new EhlersGaussianFilterState(gaussian.Length, gaussian.Poles),
+            EhlersRestoringPullIndicatorSpecOptions pull => new EhlersRestoringPullIndicatorState(pull.MaType, pull.MinLength, pull.MaxLength, pull.Length1, pull.Length2),
             GannHiLoActivatorSpecOptions trend => new GannHiLoActivatorState(trend.MaType, trend.Length),
             SupportResistanceSpecOptions trend => new SupportResistanceState(trend.MaType, trend.Length),
             TrendExhaustionIndicatorSpecOptions trend => new TrendExhaustionIndicatorState(trend.MaType, trend.Length),

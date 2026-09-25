@@ -169,7 +169,7 @@ def main():
                 bundle.write(worktree / source_file["path"], source_file["path"])
         evidence["sourceArchiveSha256"] = hashlib.sha256(archive.read_bytes()).hexdigest()
         # Validate every site before spending time compiling. A stale site is an error, not an exclusion.
-        for entry in entries:
+        for entry in all_entries:
             path = (worktree / entry["file"]).resolve()
             if not path.is_relative_to(worktree):
                 raise ValueError("Mutation path escapes the isolated workspace.")

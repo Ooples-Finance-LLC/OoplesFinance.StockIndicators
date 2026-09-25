@@ -272,6 +272,7 @@ public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState
     private readonly EhlersSpectrumDerivedFilterBankEngine _sdfb;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public EhlersRestoringPullIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int minLength = 8, int maxLength = 50, int length1 = 40, int length2 = 10)
@@ -289,6 +290,7 @@ public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState
     {
         _sdfb.Reset();
         _signalSmoother.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -296,7 +298,9 @@ public sealed class EhlersRestoringPullIndicatorState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
         var domCyc = _sdfb.Next(value, isFinal);
         var rpi = bar.Volume * MathHelper.Pow(2 * Math.PI / domCyc, 2);
-        var rpiEma = _signalSmoother.Next(rpi, isFinal);
+        var invalid = _signalInvalid || double.IsInfinity(rpi) || double.IsNaN(rpi);
+        if (isFinal) _signalInvalid = invalid;
+        var rpiEma = invalid ? double.NaN : _signalSmoother.Next(rpi, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
