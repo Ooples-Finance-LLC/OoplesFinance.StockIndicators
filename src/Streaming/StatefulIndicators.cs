@@ -7742,9 +7742,9 @@ public sealed class DidiIndexState : IStreamingIndicatorState, IDisposable
 
     public DidiIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 3, int length2 = 8, int length3 = 20)
     {
-        _shortSma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _mediumSma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _longSma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
+        _shortSma = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length1)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
+        _mediumSma = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        _longSma = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length3)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 

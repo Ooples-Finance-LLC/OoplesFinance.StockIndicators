@@ -3343,5 +3343,41 @@
     "id": "ergodic-macd-dropped-signal-length",
     "before": "new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2, ergodic.Length3)",
     "after": "new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2)"
+  },
+  {
+    "module": "didi-numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void DidiIndex",
+    "filter": "FullyQualifiedName~DidiNumericalTests",
+    "id": "didi-core-offset-primary",
+    "before": "output[i] = middle == 0 ? 0 : first / middle;",
+    "after": "output[i] = middle == 0 ? 0 : first / middle - 1;"
+  },
+  {
+    "module": "didi-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DidiIndexState",
+    "filter": "FullyQualifiedName~DidiNumericalTests",
+    "id": "didi-reversed-short-ratio",
+    "before": "shortSma / mediumSma",
+    "after": "mediumSma / shortSma"
+  },
+  {
+    "module": "didi-numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DidiIndexState",
+    "filter": "FullyQualifiedName~DidiNumericalTests",
+    "id": "didi-unrounded-medium",
+    "before": "_mediumSma = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length2)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));",
+    "after": "_mediumSma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));"
+  },
+  {
+    "module": "didi-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDidiIndexFast",
+    "filter": "FullyQualifiedName~DidiNumericalTests",
+    "id": "didi-swapped-customer-stages",
+    "before": "StochasticSmooth(data, maType, length2, input, medium.WritableSpan);\n        StochasticSmooth(data, maType, length1, input, first.WritableSpan);",
+    "after": "StochasticSmooth(data, maType, length1, input, first.WritableSpan);\n        StochasticSmooth(data, maType, length2, input, medium.WritableSpan);"
   }
 ]

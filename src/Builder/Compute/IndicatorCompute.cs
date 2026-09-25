@@ -1610,9 +1610,8 @@ internal static partial class IndicatorCompute
                 atrts.Length, atrts.Multiplier, atrts.MaType),
             WellesWilderSummationSpecOptions wws => ComputeWellesWilderSummationFast(data, context, wws.Length),
             DampingIndexSpecOptions di => ComputeDampingIndexFast(data, context, di.Length, di.MaType),
-            DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context,
-                spec.OutputKey == "Longa" ? didi.LongLength : spec.OutputKey == "Media" ? didi.MediumLength : didi.ShortLength,
-                didi.MediumLength, didi.MaType),
+            DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength,
+                didi.MediumLength, didi.MaType, didi.LongLength, spec.OutputKey),
             VerticalHorizontalFilterSpecOptions vhf => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeVerticalHorizontalFilterFast(data, context, vhf.Length), 6, vhf.MaType)
                 : ComputeVerticalHorizontalFilterFast(data, context, vhf.Length),
@@ -20395,29 +20394,22 @@ internal static partial class IndicatorCompute
     /// Computes Didi Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeDidiIndexFast(StockData data, ComputeContext context, int length1 = 3,
-        int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length3 = 20, string? outputKey = null)
     {
-        // Each selected average is measured relative to the medium average.
         var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
         var count = inputList.Count;
         var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var shortBuffer = context.Rent(count);
-        using var mediumBuffer = context.Rent(count);
-        var shortAverage = shortBuffer.WritableSpan;
-        var mediumAverage = mediumBuffer.WritableSpan;
-        MovingAverage(data, maType, length1, input, shortAverage);
-        MovingAverage(data, maType, length2, input, mediumAverage);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = mediumAverage[i] != 0 ? shortAverage[i] / mediumAverage[i] : 0;
-        }
-
-        return buffer;
+        using var medium = context.Rent(count);
+        using var first = context.Rent(count);
+        using var last = context.Rent(count);
+        // Component substitution follows the published medium, short, long request order.
+        StochasticSmooth(data, maType, length2, input, medium.WritableSpan);
+        StochasticSmooth(data, maType, length1, input, first.WritableSpan);
+        StochasticSmooth(data, maType, length3, input, last.WritableSpan);
+        var result = context.Rent(count);
+        for (var i = 0; i < count; i++) result.WritableSpan[i] = medium.Span[i] == 0 ? 0
+            : outputKey == "Media" ? 1 : (outputKey == "Longa" ? last.Span[i] : first.Span[i]) / medium.Span[i];
+        return result;
     }
 
     /// <summary>
