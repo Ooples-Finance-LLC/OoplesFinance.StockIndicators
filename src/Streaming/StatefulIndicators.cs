@@ -6010,6 +6010,8 @@ public sealed class ChaikinOscillatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Tsi")]
 public sealed class TrueStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthWindow? _strength;
+    private readonly StrengthAverage? _stableSignal;
     private readonly IMovingAverageSmoother _pcSmoother1;
     private readonly IMovingAverageSmoother _pcSmoother2;
     private readonly IMovingAverageSmoother _absSmoother1;
@@ -6022,10 +6024,12 @@ public sealed class TrueStrengthIndexState : IStreamingIndicatorState, IDisposab
     public TrueStrengthIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 25,
         int length2 = 13, int signalLength = 7)
     {
+        if (StrengthWindow.Supports(maType)) _strength = new StrengthWindow(maType, new[] { length1, length2 });
         _pcSmoother1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _pcSmoother2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _absSmoother1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absSmoother2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
+        if (StrengthWindow.Supports(maType)) _stableSignal = new StrengthAverage(maType, signalLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -6034,6 +6038,8 @@ public sealed class TrueStrengthIndexState : IStreamingIndicatorState, IDisposab
 
     public void Reset()
     {
+        _strength?.Reset();
+        _stableSignal?.Reset();
         _pcSmoother1.Reset();
         _pcSmoother2.Reset();
         _absSmoother1.Reset();
@@ -6046,16 +6052,22 @@ public sealed class TrueStrengthIndexState : IStreamingIndicatorState, IDisposab
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var pc = _hasPrev ? value - prevValue : 0;
-        var absPc = Math.Abs(pc);
+        double tsi;
+        if (_strength is not null) tsi = _strength.Next(value, isFinal);
+        else
+        {
+            var prevValue = _hasPrev ? _prevValue : 0;
+            var pc = _hasPrev ? value - prevValue : 0;
+            var absPc = Math.Abs(pc);
 
-        var pcSmooth1 = _pcSmoother1.Next(pc, isFinal);
-        var pcSmooth2 = _pcSmoother2.Next(pcSmooth1, isFinal);
-        var absSmooth1 = _absSmoother1.Next(absPc, isFinal);
-        var absSmooth2 = _absSmoother2.Next(absSmooth1, isFinal);
-        var tsi = absSmooth2 != 0 ? MathHelper.MinOrMax(100 * pcSmooth2 / absSmooth2, 100, -100) : 0;
-        var signal = _signalSmoother.Next(tsi, isFinal);
+            var pcSmooth1 = _pcSmoother1.Next(pc, isFinal);
+            var pcSmooth2 = _pcSmoother2.Next(pcSmooth1, isFinal);
+            var absSmooth1 = _absSmoother1.Next(absPc, isFinal);
+            var absSmooth2 = _absSmoother2.Next(absSmooth1, isFinal);
+            tsi = absSmooth2 != 0 ? MathHelper.MinOrMax(100 * pcSmooth2 / absSmooth2, 100, -100) : 0;
+        }
+        var signal = _stableSignal is null ? _signalSmoother.Next(tsi, isFinal)
+            : _stableSignal.Next(new StrengthValue(tsi), isFinal).Mantissa;
 
         if (isFinal)
         {
@@ -6078,6 +6090,8 @@ public sealed class TrueStrengthIndexState : IStreamingIndicatorState, IDisposab
 
     public void Dispose()
     {
+        _strength?.Dispose();
+        _stableSignal?.Dispose();
         _pcSmoother1.Dispose();
         _pcSmoother2.Dispose();
         _absSmoother1.Dispose();

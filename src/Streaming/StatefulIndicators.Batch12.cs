@@ -1050,6 +1050,8 @@ public sealed class ErgodicPercentagePriceOscillatorState : IStreamingIndicatorS
 [PrimaryOutput("Etsi")]
 public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthWindow? _strength;
+    private readonly StrengthAverage? _stableSignal;
     private readonly IMovingAverageSmoother _diffEma1;
     private readonly IMovingAverageSmoother _absDiffEma1;
     private readonly IMovingAverageSmoother _diffEma2;
@@ -1064,12 +1066,14 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
     public ErgodicTrueStrengthIndexV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 4, int length2 = 8, int length3 = 6, int signalLength = 3)
     {
+        if (StrengthWindow.Supports(maType)) _strength = new StrengthWindow(maType, new[] { length1, length2, length3 });
         _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _diffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _absDiffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
         _diffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
         _absDiffEma3 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
+        if (StrengthWindow.Supports(maType)) _stableSignal = new StrengthAverage(maType, signalLength);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
@@ -1078,6 +1082,8 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
 
     public void Reset()
     {
+        _strength?.Reset();
+        _stableSignal?.Reset();
         _diffEma1.Reset();
         _absDiffEma1.Reset();
         _diffEma2.Reset();
@@ -1092,18 +1098,24 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priceDiff = _hasPrev ? value - prevValue : 0;
-        var absPriceDiff = Math.Abs(priceDiff);
+        double etsi;
+        if (_strength is not null) etsi = _strength.Next(value, isFinal);
+        else
+        {
+            var prevValue = _hasPrev ? _prevValue : 0;
+            var priceDiff = _hasPrev ? value - prevValue : 0;
+            var absPriceDiff = Math.Abs(priceDiff);
 
-        var diffEma1 = _diffEma1.Next(priceDiff, isFinal);
-        var absDiffEma1 = _absDiffEma1.Next(absPriceDiff, isFinal);
-        var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
-        var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
-        var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
-        var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
-        var etsi = absDiffEma3 != 0 ? MathHelper.MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
-        var signal = _signalSmoother.Next(etsi, isFinal);
+            var diffEma1 = _diffEma1.Next(priceDiff, isFinal);
+            var absDiffEma1 = _absDiffEma1.Next(absPriceDiff, isFinal);
+            var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
+            var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
+            var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
+            var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
+            etsi = absDiffEma3 != 0 ? MathHelper.MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
+        }
+        var signal = _stableSignal is null ? _signalSmoother.Next(etsi, isFinal)
+            : _stableSignal.Next(new StrengthValue(etsi), isFinal).Mantissa;
 
         if (isFinal)
         {
@@ -1126,6 +1138,8 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
 
     public void Dispose()
     {
+        _strength?.Dispose();
+        _stableSignal?.Dispose();
         _diffEma1.Dispose();
         _absDiffEma1.Dispose();
         _diffEma2.Dispose();
@@ -1139,6 +1153,8 @@ public sealed class ErgodicTrueStrengthIndexV1State : IStreamingIndicatorState, 
 [PrimaryOutput("Etsi2")]
 public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, IDisposable
 {
+    private readonly StrengthWindow? _strength1, _strength2;
+    private readonly StrengthAverage? _stableSignal;
     private readonly IMovingAverageSmoother _diffEma1;
     private readonly IMovingAverageSmoother _absDiffEma1;
     private readonly IMovingAverageSmoother _diffEma2;
@@ -1160,6 +1176,12 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
         int length1 = 21, int length2 = 9, int length3 = 9, int length4 = 17, int length5 = 6,
         int length6 = 2, int signalLength = 2)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _strength1 = new StrengthWindow(maType, new[] { length1, length2, length3 });
+            _strength2 = new StrengthWindow(maType, new[] { length4, length5, length6 });
+            _stableSignal = new StrengthAverage(maType, signalLength);
+        }
         _diffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _absDiffEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _diffEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
@@ -1180,6 +1202,7 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
 
     public void Reset()
     {
+        _strength1?.Reset(); _strength2?.Reset(); _stableSignal?.Reset();
         _diffEma1.Reset();
         _absDiffEma1.Reset();
         _diffEma2.Reset();
@@ -1200,25 +1223,35 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priceDiff = _hasPrev ? value - prevValue : 0;
-        var absPriceDiff = Math.Abs(priceDiff);
+        double etsi1, etsi2;
+        if (_strength1 is not null && _strength2 is not null)
+        {
+            etsi1 = _strength1.Next(value, isFinal);
+            etsi2 = _strength2.Next(value, isFinal);
+        }
+        else
+        {
+            var prevValue = _hasPrev ? _prevValue : 0;
+            var priceDiff = _hasPrev ? value - prevValue : 0;
+            var absPriceDiff = Math.Abs(priceDiff);
 
-        var diffEma1 = _diffEma1.Next(priceDiff, isFinal);
-        var absDiffEma1 = _absDiffEma1.Next(absPriceDiff, isFinal);
-        var diffEma4 = _diffEma4.Next(priceDiff, isFinal);
-        var absDiffEma4 = _absDiffEma4.Next(absPriceDiff, isFinal);
-        var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
-        var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
-        var diffEma5 = _diffEma5.Next(diffEma4, isFinal);
-        var absDiffEma5 = _absDiffEma5.Next(absDiffEma4, isFinal);
-        var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
-        var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
-        var diffEma6 = _diffEma6.Next(diffEma5, isFinal);
-        var absDiffEma6 = _absDiffEma6.Next(absDiffEma5, isFinal);
-        var etsi1 = absDiffEma3 != 0 ? MathHelper.MinOrMax(diffEma3 / absDiffEma3 * 100, 100, -100) : 0;
-        var etsi2 = absDiffEma6 != 0 ? MathHelper.MinOrMax(diffEma6 / absDiffEma6 * 100, 100, -100) : 0;
-        var signal = _signalSmoother.Next(etsi2, isFinal);
+            var diffEma1 = _diffEma1.Next(priceDiff, isFinal);
+            var absDiffEma1 = _absDiffEma1.Next(absPriceDiff, isFinal);
+            var diffEma4 = _diffEma4.Next(priceDiff, isFinal);
+            var absDiffEma4 = _absDiffEma4.Next(absPriceDiff, isFinal);
+            var diffEma2 = _diffEma2.Next(diffEma1, isFinal);
+            var absDiffEma2 = _absDiffEma2.Next(absDiffEma1, isFinal);
+            var diffEma5 = _diffEma5.Next(diffEma4, isFinal);
+            var absDiffEma5 = _absDiffEma5.Next(absDiffEma4, isFinal);
+            var diffEma3 = _diffEma3.Next(diffEma2, isFinal);
+            var absDiffEma3 = _absDiffEma3.Next(absDiffEma2, isFinal);
+            var diffEma6 = _diffEma6.Next(diffEma5, isFinal);
+            var absDiffEma6 = _absDiffEma6.Next(absDiffEma5, isFinal);
+            etsi1 = absDiffEma3 != 0 ? MathHelper.MinOrMax(diffEma3 / absDiffEma3 * 100, 100, -100) : 0;
+            etsi2 = absDiffEma6 != 0 ? MathHelper.MinOrMax(diffEma6 / absDiffEma6 * 100, 100, -100) : 0;
+        }
+        var signal = _stableSignal is null ? _signalSmoother.Next(etsi2, isFinal)
+            : _stableSignal.Next(new StrengthValue(etsi2), isFinal).Mantissa;
 
         if (isFinal)
         {
@@ -1242,6 +1275,7 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
 
     public void Dispose()
     {
+        _strength1?.Dispose(); _strength2?.Dispose(); _stableSignal?.Dispose();
         _diffEma1.Dispose();
         _absDiffEma1.Dispose();
         _diffEma2.Dispose();

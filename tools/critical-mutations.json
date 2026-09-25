@@ -4720,5 +4720,71 @@
     "after": "var values = data.InputValues;",
     "filter": "FullyQualifiedName~AffineAverageNumericalTests.SharedMovingAverageRoutesPreservePublishedWeights",
     "scope": "internal static ComputeBuffer ComputeEndPointMovingAverageFast"
+  },
+  {
+    "id": "strength-drops-wide-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/StrengthWindow.cs",
+    "before": "(Doubled ? 2 : 1)",
+    "after": "1",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.SmoothedDenominatorCanExceedBinary64WhileRatioRemainsFinite"
+  },
+  {
+    "id": "strength-rounds-change-to-infinity",
+    "module": "numerical",
+    "file": "src/Helpers/StrengthWindow.cs",
+    "before": "return double.IsInfinity(value) ? new(sum.Mean(checked(2 * divisor)), true) : new(value);",
+    "after": "return new(value);",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.BoundedRatioSurvivesUnboundedDifferencesAndTinyChanges"
+  },
+  {
+    "id": "strength-ema-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/StrengthWindow.cs",
+    "before": "result = StrengthValue.Round(sum, _count + 1);",
+    "after": "result = StrengthValue.Round(sum, _length);",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.NativePreviewAndReplayMatchRationalStages"
+  },
+  {
+    "id": "strength-preview-commits-price",
+    "module": "numerical",
+    "file": "src/Helpers/StrengthWindow.cs",
+    "before": "if (final) { _previous = price; _hasPrevious = true; }",
+    "after": "{ _previous = price; _hasPrevious = true; }",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.NativePreviewAndReplayMatchRationalStages"
+  },
+  {
+    "id": "strength-reset-retains-stage",
+    "module": "numerical",
+    "file": "src/Helpers/StrengthWindow.cs",
+    "before": "_sum = _weighted = default; _previous = default; _count = 0; _window?.Clear();",
+    "after": "_sum = _weighted = default; _previous = default; _window?.Clear();",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.NativePreviewAndReplayMatchRationalStages"
+  },
+  {
+    "id": "strength-second-bank-periods",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "pair.Length4, pair.Length5, pair.Length6, pair.SignalLength",
+    "after": "pair.Length1, pair.Length2, pair.Length3, pair.SignalLength",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.NativePreviewAndReplayMatchRationalStages"
+  },
+  {
+    "id": "strength-raw-ignores-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.BoundedRatioSurvivesUnboundedDifferencesAndTinyChanges",
+    "scope": "internal static ComputeBuffer ComputeTrueStrengthIndexFast"
+  },
+  {
+    "id": "strength-bypasses-customer-averages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~TrueStrengthNumericalTests.PublicTrueStrengthUsesAllFiveCustomerComponents",
+    "scope": "internal static ComputeBuffer ComputeTrueStrengthIndexFast"
   }
 ]

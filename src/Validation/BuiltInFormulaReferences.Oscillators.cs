@@ -216,6 +216,10 @@ internal static partial class BuiltInFormulaReferences
                     var line = Average(Average(residual, meanSecond, kind), meanThird, kind);
                     return Outputs(("Emdi", line), ("Signal", Average(line, meanSignal, kind)));
                 });
+            case IndicatorName.ErgodicTrueStrengthIndexV2 when kind is 1 or 2 or 3 or 6:
+                return new("Etsi2", new[] { "Etsi1", "Etsi2", "Signal" }, bars => StrengthOutputs(bars, indicator));
+            case IndicatorName.ErgodicTrueStrengthIndexV1 when kind is 1 or 2 or 3 or 6:
+                return new("Etsi", new[] { "Etsi", "Signal" }, bars => StrengthOutputs(bars, indicator));
             case IndicatorName.ErgodicTrueStrengthIndexV1:
             case IndicatorName.ErgodicTrueStrengthIndexV2:
                 if (kind == 0) return null;
@@ -1112,6 +1116,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Cc", Average(sum, length, kind)));
                 });
             case IndicatorName.TrueStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Tsi", new[] { "Tsi", "Signal" }, bars => StrengthOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var longPeriod = Integer(options, "Length1", Integer(options, "LongLength", 25));
                 var shortPeriod = Integer(options, "Length2", Integer(options, "ShortLength", 13));

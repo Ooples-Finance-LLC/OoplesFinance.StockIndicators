@@ -3106,34 +3106,41 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        if (StrengthWindow.Supports(maType))
+            etsiList.AddRange(StrengthWindow.Compute(inputList, maType, length1, length2, length3));
+        else
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var priceDiff = MinPastValues(i, 1, currentValue - prevValue);
-            priceDiffList.Add(priceDiff);
+                var priceDiff = MinPastValues(i, 1, currentValue - prevValue);
+                priceDiffList.Add(priceDiff);
 
-            var absPriceDiff = Math.Abs(priceDiff);
-            absPriceDiffList.Add(absPriceDiff);
+                var absPriceDiff = Math.Abs(priceDiff);
+                absPriceDiffList.Add(absPriceDiff);
+            }
+
+            var diffEma1List = GetMovingAverageList(stockData, maType, length1, priceDiffList);
+            var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absPriceDiffList);
+            var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
+            var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
+            var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
+            var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var diffEma3 = diffEma3List[i];
+                var absDiffEma3 = absDiffEma3List[i];
+
+                var etsi = absDiffEma3 != 0 ? MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
+                etsiList.Add(etsi);
+            }
+
         }
 
-        var diffEma1List = GetMovingAverageList(stockData, maType, length1, priceDiffList);
-        var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absPriceDiffList);
-        var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
-        var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
-        var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
-        var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var diffEma3 = diffEma3List[i];
-            var absDiffEma3 = absDiffEma3List[i];
-
-            var etsi = absDiffEma3 != 0 ? MinOrMax(100 * diffEma3 / absDiffEma3, 100, -100) : 0;
-            etsiList.Add(etsi);
-        }
-
-        var etsiSignalList = GetMovingAverageList(stockData, maType, signalLength, etsiList);
+        var etsiSignalList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(etsiList, maType, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, etsiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var etsi = etsiList[i];
@@ -3181,45 +3188,55 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        if (StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            etsi1List.AddRange(StrengthWindow.Compute(inputList, maType, length1, length2, length3));
+            etsi2List.AddRange(StrengthWindow.Compute(inputList, maType, length4, length5, length6));
+        }
+        else
+        {
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var priceDiff = MinPastValues(i, 1, currentValue - prevValue);
-            priceDiffList.Add(priceDiff);
+                var priceDiff = MinPastValues(i, 1, currentValue - prevValue);
+                priceDiffList.Add(priceDiff);
 
-            var absPriceDiff = Math.Abs(priceDiff);
-            absPriceDiffList.Add(absPriceDiff);
+                var absPriceDiff = Math.Abs(priceDiff);
+                absPriceDiffList.Add(absPriceDiff);
+            }
+
+            var diffEma1List = GetMovingAverageList(stockData, maType, length1, priceDiffList);
+            var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absPriceDiffList);
+            var diffEma4List = GetMovingAverageList(stockData, maType, length4, priceDiffList);
+            var absDiffEma4List = GetMovingAverageList(stockData, maType, length4, absPriceDiffList);
+            var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
+            var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
+            var diffEma5List = GetMovingAverageList(stockData, maType, length5, diffEma4List);
+            var absDiffEma5List = GetMovingAverageList(stockData, maType, length5, absDiffEma4List);
+            var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
+            var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
+            var diffEma6List = GetMovingAverageList(stockData, maType, length6, diffEma5List);
+            var absDiffEma6List = GetMovingAverageList(stockData, maType, length6, absDiffEma5List);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var diffEma6 = diffEma6List[i];
+                var absDiffEma6 = absDiffEma6List[i];
+                var diffEma3 = diffEma3List[i];
+                var absDiffEma3 = absDiffEma3List[i];
+
+                var etsi1 = absDiffEma3 != 0 ? MinOrMax(diffEma3 / absDiffEma3 * 100, 100, -100) : 0;
+                etsi1List.Add(etsi1);
+
+                var etsi2 = absDiffEma6 != 0 ? MinOrMax(diffEma6 / absDiffEma6 * 100, 100, -100) : 0;
+                etsi2List.Add(etsi2);
+            }
+
         }
 
-        var diffEma1List = GetMovingAverageList(stockData, maType, length1, priceDiffList);
-        var absDiffEma1List = GetMovingAverageList(stockData, maType, length1, absPriceDiffList);
-        var diffEma4List = GetMovingAverageList(stockData, maType, length4, priceDiffList);
-        var absDiffEma4List = GetMovingAverageList(stockData, maType, length4, absPriceDiffList);
-        var diffEma2List = GetMovingAverageList(stockData, maType, length2, diffEma1List);
-        var absDiffEma2List = GetMovingAverageList(stockData, maType, length2, absDiffEma1List);
-        var diffEma5List = GetMovingAverageList(stockData, maType, length5, diffEma4List);
-        var absDiffEma5List = GetMovingAverageList(stockData, maType, length5, absDiffEma4List);
-        var diffEma3List = GetMovingAverageList(stockData, maType, length3, diffEma2List);
-        var absDiffEma3List = GetMovingAverageList(stockData, maType, length3, absDiffEma2List);
-        var diffEma6List = GetMovingAverageList(stockData, maType, length6, diffEma5List);
-        var absDiffEma6List = GetMovingAverageList(stockData, maType, length6, absDiffEma5List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var diffEma6 = diffEma6List[i];
-            var absDiffEma6 = absDiffEma6List[i];
-            var diffEma3 = diffEma3List[i];
-            var absDiffEma3 = absDiffEma3List[i];
-
-            var etsi1 = absDiffEma3 != 0 ? MinOrMax(diffEma3 / absDiffEma3 * 100, 100, -100) : 0;
-            etsi1List.Add(etsi1);
-
-            var etsi2 = absDiffEma6 != 0 ? MinOrMax(diffEma6 / absDiffEma6 * 100, 100, -100) : 0;
-            etsi2List.Add(etsi2);
-        }
-
-        var etsi2SignalList = GetMovingAverageList(stockData, maType, signalLength, etsi2List);
+        var etsi2SignalList = StrengthWindow.Supports(maType) ? StrengthWindow.Smooth(etsi2List, maType, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, etsi2List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var etsi2 = etsi2List[i];
