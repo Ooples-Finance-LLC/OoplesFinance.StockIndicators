@@ -21,8 +21,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var mob1List = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var mob2List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var mob1List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var mob2List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -33,7 +33,10 @@ public static partial class Calculations
             tfsMobList.Add(tfsMob);
         }
 
-        var tfsMobSignalLineList = GetMovingAverageList(stockData, maType, signalLength, tfsMobList);
+        var finite = FiniteSignalInput.Create(tfsMobList, out var finiteCount);
+        var tfsMobSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finite);
+        for (var i = finiteCount; i < tfsMobSignalLineList.Count; i++) tfsMobSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var tfsMob = tfsMobList[i];

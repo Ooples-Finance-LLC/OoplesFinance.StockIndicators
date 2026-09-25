@@ -871,14 +871,7 @@ internal static partial class IndicatorCompute
                 leader.Length, MovingAvgType.ExponentialMovingAverage, true, spec.OutputKey ?? "Ppo"),
             MovingAverageConvergenceDivergenceLeaderSpecOptions leader => ComputeLeaderOscillatorFast(data, context, leader.FastLength,
                 leader.SlowLength, leader.SignalLength, leader.MaType, false, spec.OutputKey ?? "Macd"),
-            TFSMboPercentagePriceOscillatorSpecOptions tfsppo => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputeTFSMboPercentagePriceOscillatorFast(data, context, maType: tfsppo.MaType), 18, tfsppo.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
-                    ComputeTFSMboPercentagePriceOscillatorFast(data, context, maType: tfsppo.MaType), 18, tfsppo.MaType),
-                _ => ComputeTFSMboPercentagePriceOscillatorFast(data, context, maType: tfsppo.MaType)
-            },
+            TFSMboPercentagePriceOscillatorSpecOptions tfsppo => ComputeTfsOscillatorFast(data, context, 25, 200, 18, tfsppo.MaType, true, spec.OutputKey ?? "Ppo"),
 
             // Batch 6 - Kurtosis/Degree oscillators
             FastSlowKurtosisOscillatorSpecOptions fsko => spec.OutputKey == "Signal"
@@ -2483,14 +2476,7 @@ internal static partial class IndicatorCompute
                     tr.RsiLength, tr.StochLength1, tr.StochLength2, series: TechnicalRatingSeries.MovingAverages),
                 _ => null
             },
-            TFSMboIndicatorSpecOptions tfsm => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType), tfsm.SignalLength, tfsm.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
-                    ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType), tfsm.SignalLength, tfsm.MaType),
-                _ => ComputeTFSMboIndicatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType)
-            },
+            TFSMboIndicatorSpecOptions tfsm => ComputeTfsOscillatorFast(data, context, tfsm.FastLength, tfsm.SlowLength, tfsm.SignalLength, tfsm.MaType, false, spec.OutputKey ?? "TfsMob"),
             TheRangeIndicatorSpecOptions tri => ComputeTheRangeIndicatorFast(data, context, tri.Length, tri.MaType),
 
             // Batch 34 - Remaining Indicators (Part 3)
@@ -12632,31 +12618,31 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTFSMboPercentagePriceOscillatorFast(StockData data, ComputeContext context,
         int fastLength = 25, int slowLength = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        => ComputeTfsOscillatorFast(data, context, fastLength, slowLength, 18, maType, true, "Ppo");
+
+    internal static ComputeBuffer ComputeTfsOscillatorFast(StockData data, ComputeContext context, int fastLength,
+        int slowLength, int signalLength, MovingAvgType maType, bool percentage, string key)
     {
-        // CalculateTFSMboPercentagePriceOscillator divides the gap between two moving averages of the chained
-        // series by the slower of them. Its fast and slow lengths are fixed at the batch defaults - the spec's
-        // obsolete Length reaches neither, which is what makes it a no-effect option - and the arm this
-        // replaces derived both of them from it, so every length but the fallback produced a different pair.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(fastLength, 1), input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, Math.Max(slowLength, 1), input, slowAverage.WritableSpan);
-        var mob1 = fastAverage.Span;
-        var mob2 = slowAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(values);
+        using var fast = context.Rent(values.Count);
+        using var slow = context.Rent(values.Count);
+        StochasticSmooth(data, maType, fastLength, input, fast.WritableSpan);
+        StochasticSmooth(data, maType, slowLength, input, slow.WritableSpan);
+        var line = new List<double>(values.Count);
+        for (var i = 0; i < values.Count; i++) line.Add(percentage ? RoundedPercentageChange.Of(fast.Span[i], slow.Span[i]) : fast.Span[i] - slow.Span[i]);
+        var finite = FiniteSignalInput.Create(line, out var finiteCount);
+        using var signal = context.Rent(values.Count);
+        StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);
+        var result = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++)
         {
-            output[i] = mob2[i] != 0 ? (mob1[i] - mob2[i]) / mob2[i] * 100 : 0;
+            var average = i < finiteCount ? signal.Span[i] : double.NaN;
+            result.WritableSpan[i] = key == "Signal" ? average : key == "Histogram" ? line[i] - average : line[i];
         }
-
-        return buffer;
+        return result;
     }
+
 
     /// <summary>
     /// Computes TFS Volume Oscillator using zero-allocation fast path.
@@ -29485,32 +29471,9 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25, int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
-    {
-        // V1 Algorithm: Fast MA - Slow MA = mob
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        int count = data.Count;
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-
-        // Compute fast and slow MAs
-        var fastMaBuffer = context.Rent(count);
-        var slowMaBuffer = context.Rent(count);
-        maCore.Compute(close, fastMaBuffer.WritableSpan, fastLength);
-        maCore.Compute(close, slowMaBuffer.WritableSpan, slowLength);
-
-        // Compute mob = fast - slow
-        var mobBuffer = context.Rent(count);
-        for (int i = 0; i < count; i++)
-        {
-            mobBuffer.WritableSpan[i] = fastMaBuffer.Span[i] - slowMaBuffer.Span[i];
-        }
-
-        fastMaBuffer.Dispose();
-        slowMaBuffer.Dispose();
-
-        // Return mob (primary output is the mob line, not the histogram)
-        return mobBuffer;
-    }
+    internal static ComputeBuffer ComputeTFSMboIndicatorFast(StockData data, ComputeContext context, int fastLength = 25,
+        int slowLength = 200, int signalLength = 18, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        => ComputeTfsOscillatorFast(data, context, fastLength, slowLength, signalLength, maType, false, "TfsMob");
 
     internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
