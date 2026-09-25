@@ -3622,5 +3622,59 @@
     "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
     "after": "var values = data.ClosePrices;",
     "filter": "FullyQualifiedName~ReverseMacdNumericalTests.SelectedInputControlsEveryOutput"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-premature-percentage-overflow",
+    "file": "src/Calculations/Ppo/PpoLtoR.cs",
+    "scope": "public static StockData CalculatePercentagePriceOscillatorLeader",
+    "before": "var ppo = RoundedFractionalEma.Percentage(i1, i2);",
+    "after": "var ppo = i2 == 0 ? 0 : 100 * (i1 - i2) / i2;",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.EveryRouteMatchesIndependentLeaderStages"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-core-omits-residual",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PercentagePriceOscillatorLeader",
+    "before": "RoundedFractionalEma.Percentage(fast[i] + first[i], slow[i] + second[i])",
+    "after": "RoundedFractionalEma.Percentage(fast[i], slow[i])",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.CoreUsesSmoothedResidualsAndMatchesRoundedStageReference"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-factory-discards-periods",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new MovingAverageConvergenceDivergenceLeaderState(leader.MaType, leader.FastLength, leader.SlowLength, leader.SignalLength)",
+    "after": "new MovingAverageConvergenceDivergenceLeaderState()",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.EveryRouteMatchesIndependentLeaderStages"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-preview-poisons-residual",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentagePriceOscillatorLeaderState",
+    "before": "if (isFinal) _invalid[slot] = invalid;",
+    "after": "_invalid[slot] = invalid;",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.ResidualOverflowPreviewIsIsolatedAndResetRestoresState"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-fast-ignores-input",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLeaderOscillatorFast",
+    "before": "var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var values = data.ClosePrices;",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.SelectedInputControlsEveryOutput"
+  },
+  {
+    "module": "leader-oscillator-numerical",
+    "id": "leader-customer-residual-stage-swapped",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLeaderOscillatorFast",
+    "before": "var first = fast.Select((v, i) => v + fastDistance[i]).ToArray();",
+    "after": "var first = fast.Select((v, i) => v + slowDistance[i]).ToArray();",
+    "filter": "FullyQualifiedName~LeaderOscillatorNumericalTests.CustomerAveragesReceiveFastSlowResidualResidualSignalOrder"
   }
 ]

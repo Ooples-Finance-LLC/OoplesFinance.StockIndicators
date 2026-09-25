@@ -152,13 +152,15 @@ public static partial class Calculations
         {
             var i1 = i1List[i];
             var i2 = i2List[i];
-            var macd = i1 - i2;
 
-            var ppo = i2 != 0 ? macd / i2 * 100 : 0;
+            var ppo = RoundedFractionalEma.Percentage(i1, i2);
             ppoList.Add(ppo);
         }
 
-        var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
+        var finite = FiniteSignalInput.Create(ppoList, out var count);
+        var ppoSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finite);
+        for (var i = count; i < ppoSignalLineList.Count; i++) ppoSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];

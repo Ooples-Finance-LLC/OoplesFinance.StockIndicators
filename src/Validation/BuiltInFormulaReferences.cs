@@ -376,6 +376,19 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.MovingAverageConvergenceDivergenceLeader or IndicatorName.PercentagePriceOscillatorLeader)
+        {
+            var leaderOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName.PercentagePriceOscillatorLeader;
+            var leaderKeys = percentage ? new[] { "Ppo", "Signal", "Histogram" } : new[] { "Macd", "I1", "I2" };
+            for (var slot = 0; slot < leaderKeys.Length; slot++)
+            {
+                var key = leaderKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLeaderOscillator(bars, leaderOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ReverseMovingAverageConvergenceDivergence)
         {
             var reverseOptions = builtIn.CreateOptions();
