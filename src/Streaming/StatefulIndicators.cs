@@ -5032,65 +5032,30 @@ public sealed class HistoricalVolatilityPercentileState : IStreamingIndicatorSta
 [PrimaryOutput("Fzs")]
 public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly LinearRegressionState _linregLong;
-    private readonly LinearRegressionState _linregShort;
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly StandardizedScoreWindow _score;
+    private readonly StrengthAverage? _exact;
+    private readonly IMovingAverageSmoother? _fallback;
     private readonly StreamingInputResolver _input;
-    private double _maValue;
-
+    private readonly bool _simple;
     public FastZScoreState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 200)
     {
-        var resolved = Math.Max(1, length);
-        var length2 = MathHelper.MinOrMax((int)Math.Ceiling((double)resolved / 2));
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _linregLong = new LinearRegressionState(resolved, _ => _maValue);
-        _linregShort = new LinearRegressionState(length2, _ => _maValue);
-        _stdDev = new RollingStandardDeviation(resolved);
+        _score = new StandardizedScoreWindow(length, true);
+        if (StrengthWindow.Supports(maType)) _exact = new StrengthAverage(maType, length);
+        else _fallback = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
+        _simple = maType == MovingAvgType.SimpleMovingAverage;
         _input = new StreamingInputResolver(InputName.Close, null);
     }
-
     public IndicatorName Name => IndicatorName.FastZScore;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _linregLong.Reset();
-        _linregShort.Reset();
-        _stdDev.Reset();
-        _maValue = 0;
-    }
-
+    public void Reset() { _score.Reset(); _exact?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var ma = _smoother.Next(value, isFinal);
-        _maValue = ma;
-
-        var linreg = _linregLong.Update(bar, isFinal, includeOutputs: false).Value;
-        var linreg2 = _linregShort.Update(bar, isFinal, includeOutputs: false).Value;
-        var stdDev = _stdDev.Next(_maValue, isFinal);
-        var gs = stdDev != 0 ? (linreg2 - linreg) / stdDev / 2 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Fzs", gs }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(gs, outputs);
+        var mean = _exact is null ? _fallback!.Next(value, isFinal) : _exact.Next(new StrengthValue(value), isFinal).Mantissa;
+        var score = _score.Next(value, mean, _simple, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Fzs", score } } : null;
+        return new StreamingIndicatorStateResult(score, outputs);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _linregLong.Dispose();
-        _linregShort.Dispose();
-        _stdDev.Dispose();
-    }
+    public void Dispose() { _score.Dispose(); _exact?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Ci")]

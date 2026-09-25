@@ -6525,5 +6525,103 @@
     "after": "(0.5 * Math.Log((1 + nValue) / (1 - nValue)))",
     "filter": "FullyQualifiedName~FisherNumericalTests.DecayingSignalsRemainNonzeroAcrossBatchRawCoreAndNative",
     "scope": "public static StockData CalculateEhlersFisherTransform("
+  },
+  {
+    "id": "zscore-rounds-subnormal-deviation-to-zero",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "|| variance.IsZero ? 0",
+    "after": "|| variance.IsZero || (_window.Count >= _window.Capacity - 1 && ExactPopulationDeviation.RootRatio(variance, n * n) == 0) ? 0",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "zscore-rounds-classical-mean-too-soon",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "var numerator = exactSimpleMean ?",
+    "after": "var numerator = exactSimpleMean && _window.Capacity < 0 ?",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "zscore-uses-wrong-population-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "variance * denominator * denominator",
+    "after": "2 * variance * denominator * denominator",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "zscore-fast-loses-short-period",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "new ExactLinearFitWindow(MathHelper.MinOrMax((int)Math.Ceiling(length / 2d)))",
+    "after": "new ExactLinearFitWindow(length)",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "zscore-preview-commits-window",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "if (commit) { _window.TryAdd",
+    "after": "if (true) { _window.TryAdd",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
+  },
+  {
+    "id": "zscore-reset-retains-moments",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "_sum = _squares = default;",
+    "after": "/* injected retained moments */",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.AllConvexMeansMatchIndependentNormalizationIncludingOverflow"
+  },
+  {
+    "id": "zscore-fast-uses-raw-price-variance",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "var value = ExactVarianceWindow.Units(_long is null ? price : average);",
+    "after": "var value = ExactVarianceWindow.Units(price);",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.CustomerAverageIsUsedExactlyOnceAndKeepsTheOriginalVarianceSeries"
+  },
+  {
+    "id": "zscore-logistic-erases-negative-tail",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "return 100 * e / (1 + e);",
+    "after": "return 50 * (1 + Math.Tanh(score));",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.InverseTransformsPreserveTinySignalsAndNegativeLogisticTails"
+  },
+  {
+    "id": "zscore-fast-transform-erases-tiny-signal",
+    "module": "numerical",
+    "file": "src/Helpers/StandardizedScoreWindow.cs",
+    "before": "return Math.Tanh(5 * score);",
+    "after": "return (Math.Exp(10 * score) - 1) / (Math.Exp(10 * score) + 1);",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.InverseTransformsPreserveTinySignalsAndNegativeLogisticTails"
+  },
+  {
+    "id": "zscore-raw-bypasses-customer-mean",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(kind) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(kind)",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.CustomerAverageIsUsedExactlyOnceAndKeepsTheOriginalVarianceSeries",
+    "scope": "private static ComputeBuffer ComputeStandardizedScore("
+  },
+  {
+    "id": "zscore-batch-selects-wrong-mean-policy",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "exact && maType == MovingAvgType.SimpleMovingAverage",
+    "after": "exact && maType == MovingAvgType.ExponentialMovingAverage",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs",
+    "scope": "public static StockData CalculateZScore("
+  },
+  {
+    "id": "zscore-typed-loses-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new FastZScoreState(scoreFastZScore.MaType, scoreFastZScore.Length)",
+    "after": "new FastZScoreState(scoreFastZScore.MaType, 200)",
+    "filter": "FullyQualifiedName~ZScoreNumericalTests.DirectRoutesPreserveExactNormalizationPeriodsAndSelectedInputs"
   }
 ]

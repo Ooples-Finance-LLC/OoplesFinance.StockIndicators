@@ -432,36 +432,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZScore(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> zScorePopulationList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
+        length = Math.Max(1, length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
+        var exact = StrengthWindow.Supports(maType);
+        var means = exact ? StrengthWindow.Smooth(inputList, maType, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var state = new StandardizedScoreWindow(length, false);
+        var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var dev = currentValue - sma;
-            var stdDevPopulation = stdDevList[i];
-
-            var prevZScorePopulation = GetLastOrDefault(zScorePopulationList);
-            var zScorePopulation = stdDevPopulation != 0 ? dev / stdDevPopulation : 0;
-            zScorePopulationList.Add(zScorePopulation);
-
-            var signal = GetCompareSignal(zScorePopulation, prevZScorePopulation);
-            signalsList?.Add(signal);
+            var score = state.Next(inputList[i], means[i], exact && maType == MovingAvgType.SimpleMovingAverage, true);
+            var previous = i > 0 ? values[i - 1] : 0;
+            var older = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetCompareSignal(score, previous)); values.Add(score);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Zscore", zScorePopulationList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zScorePopulationList);
-        stockData.IndicatorName = IndicatorName.ZScore;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Zscore", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values);
+        stockData.IndicatorName = IndicatorName.ZScore; return stockData;
     }
 
 

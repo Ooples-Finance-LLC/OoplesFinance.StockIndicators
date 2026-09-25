@@ -38,6 +38,15 @@ internal sealed class ExactLinearFitWindow : IDisposable
         private double At(BigInteger twiceCenteredPosition) => _n.IsOne
             ? ExactMeanAccumulator.UnitRatio(_sum, BigInteger.One)
             : ExactMeanAccumulator.UnitRatio(_sum * _spread + 3 * _covariance * twiceCenteredPosition, _n * _spread);
+        // Exact endpoint gap, retained as minimum-unit numerator / denominator for normalization.
+        internal (BigInteger Numerator, BigInteger Denominator) Difference(Fit other)
+        {
+            var denominator = _n.IsOne ? BigInteger.One : _n * _spread;
+            var numerator = _n.IsOne ? _sum : _sum * _spread + 3 * _covariance * (_n - 1);
+            var otherDenominator = other._n.IsOne ? BigInteger.One : other._n * other._spread;
+            var otherNumerator = other._n.IsOne ? other._sum : other._sum * other._spread + 3 * other._covariance * (other._n - 1);
+            return (numerator * otherDenominator - otherNumerator * denominator, denominator * otherDenominator);
+        }
         internal int Count => (int)_n;
         internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.UnitRatio(6 * _covariance, _n * _spread);
         internal double Last => At(_n - 1);

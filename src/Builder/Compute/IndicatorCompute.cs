@@ -14162,31 +14162,32 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Z-Score using zero-allocation fast path.
     /// </summary>
+    private static ComputeBuffer ComputeStandardizedScore(StockData data, ComputeContext context, int length, MovingAvgType kind, bool fast, bool inverse)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length);
+        var exact = StrengthWindow.Supports(kind) && !ComponentAverage.HasOverrides;
+        using var average = context.Rent(input.Count);
+        if (exact)
+        {
+            using var smoother = new StrengthAverage(kind, length, input.Count);
+            for (var i = 0; i < input.Count; i++) average.WritableSpan[i] = smoother.Next(new StrengthValue(input[i]), true).Mantissa;
+        }
+        else MovingAverage(data, kind, length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+        using var state = new StandardizedScoreWindow(length, fast);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var score = state.Next(input[i], average.Span[i], exact && kind == MovingAvgType.SimpleMovingAverage, true);
+            output.WritableSpan[i] = inverse ? StandardizedScoreWindow.Inverse(score, fast) : score;
+        }
+        return output;
+    }
+
     internal static ComputeBuffer ComputeZScoreFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateZScore standardises the chained series against its own moving average and population
-        // standard deviation. OscillatorCore.ZScore read the close and offered no moving average type.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var averages = context.Rent(count);
-        MovingAverage(data, maType, length, input, averages.WritableSpan);
-        var average = averages.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, Math.Max(1, length));
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = stdDev[i] != 0 ? (input[i] - average[i]) / stdDev[i] : 0;
-        }
-
-        return buffer;
+        return ComputeStandardizedScore(data, context, length, maType, false, false);
     }
 
     /// <summary>
@@ -14195,45 +14196,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFastZScoreFast(StockData data, ComputeContext context, int length = 200,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateFastZScore does not standardise the price at all: it standardises the gap between two linear
-        // regressions of the moving average, one over the length and one over half of it, against the deviation
-        // of that same average, and halves the result.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var length2 = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(sma, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        using var fullFit = context.Rent(count);
-        var linreg = fullFit.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                linreg[i] = regression.Next(sma[i], isFinal: true).Last;
-            }
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length2))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                var linreg2 = regression.Next(sma[i], isFinal: true).Last;
-                output[i] = stdDev[i] != 0 ? (linreg2 - linreg[i]) / stdDev[i] / 2 : 0;
-            }
-        }
-
-        return buffer;
+        return ComputeStandardizedScore(data, context, length, maType, true, false);
     }
 
     /// <summary>
@@ -24643,39 +24606,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeInverseFisherFastZScoreFast(StockData data, ComputeContext context, int length = 50,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateInverseFisherFastZScore publishes the inverse Fisher transform of the fast z-score: the gap
-        // between the half length and full length linear regressions of the smoothed chained series, scaled by
-        // the standard deviation of that smoothed series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-        var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(average.Span, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using var fullRegression = new ExactLinearFitWindow(length);
-        using var halfRegression = new ExactLinearFitWindow(length1);
-        for (var i = 0; i < count; i++)
-        {
-            var linreg1 = fullRegression.Next(sma[i], isFinal: true).Last;
-            var linreg2 = halfRegression.Next(sma[i], isFinal: true).Last;
-
-            var fz = stdDev[i] != 0 ? (linreg2 - linreg1) / stdDev[i] / 2 : 0;
-            var expValue = MathHelper.Exp(10 * fz);
-            output[i] = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
-        }
-
-        return buffer;
+        return ComputeStandardizedScore(data, context, length, maType, true, true);
     }
 
     /// <summary>
@@ -24685,32 +24616,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeInverseFisherZScoreFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateInverseFisherZScore standardises the chained series against its own average and windowed
-        // deviation, then squashes that score onto nought to a hundred. The switch this replaced returned the
-        // moving average of the close and applied no transform at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var z = stdDev[i] != 0 ? (input[i] - sma[i]) / stdDev[i] : 0;
-            var expZ = MathHelper.Exp(2 * z);
-
-            output[i] = expZ + 1 != 0 ? MathHelper.MinOrMax((((expZ - 1) / (expZ + 1)) + 1) * 50, 100, 0) : 0;
-        }
-
-        return buffer;
+        return ComputeStandardizedScore(data, context, length, maType, false, true);
     }
 
     /// <summary>
