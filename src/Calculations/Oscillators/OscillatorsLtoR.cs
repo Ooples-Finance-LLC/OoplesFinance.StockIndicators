@@ -28,8 +28,6 @@ public static partial class Calculations
         List<double> macdList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        var fastK = 2.0 / (fastLength + 1);
-        var slowK = 2.0 / (slowLength + 1);
         var fastEma = count > 0 ? inputList[0] : 0;
         var slowEma = count > 0 ? inputList[0] : 0;
 
@@ -38,9 +36,9 @@ public static partial class Calculations
             double macd = 0;
             if (i >= 1)
             {
-                fastEma = (inputList[i] * fastK) + (fastEma * (1 - fastK));
-                slowEma = (inputList[i] * slowK) + (slowEma * (1 - slowK));
-                macd = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
+                fastEma = RoundedSeededEma.Next(inputList[i], fastEma, fastLength);
+                slowEma = RoundedSeededEma.Next(inputList[i], slowEma, slowLength);
+                macd = RoundedPercentageChange.Of(fastEma, slowEma);
             }
 
             macdList.Add(macd);

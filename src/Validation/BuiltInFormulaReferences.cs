@@ -336,6 +336,13 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.NormalizedMacd)
+        {
+            var normalizedOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedNormalizedMacd(bars, normalizedOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MovingAverageConvergenceDivergence)
         {
             var macdOptions = builtIn.CreateOptions();
