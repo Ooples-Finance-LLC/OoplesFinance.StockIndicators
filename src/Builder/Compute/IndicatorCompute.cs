@@ -4480,7 +4480,7 @@ internal static partial class IndicatorCompute
         // CalculateAwesomeOscillator is the gap between two averages of the median price, both of whichever
         // type it was given. GetDerivedSeriesList is the same median the indicator reads, including the rule
         // that follows the high and low around a chained close.
-        var median = CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hl2);
+        var (median, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
         var count = median.Count;
         var medianSpan = SpanCompat.AsReadOnlySpan(median);
 
@@ -4488,8 +4488,8 @@ internal static partial class IndicatorCompute
         using var slowBuffer = context.Rent(count);
         var fast = fastBuffer.WritableSpan;
         var slow = slowBuffer.WritableSpan;
-        MovingAverage(data, maType, fastLength, medianSpan, fast);
-        MovingAverage(data, maType, slowLength, medianSpan, slow);
+        StochasticSmooth(data, maType, fastLength, medianSpan, fast);
+        StochasticSmooth(data, maType, slowLength, medianSpan, slow);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
@@ -4514,13 +4514,14 @@ internal static partial class IndicatorCompute
 
         using var smoothedBuffer = context.Rent(count);
         var smoothed = smoothedBuffer.WritableSpan;
-        MovingAverage(data, maType, smoothLength, awesome.Span, smoothed);
+        var finite = FiniteSignalInput.Create(awesome.Span.ToArray(), out var finiteCount);
+        StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finite), smoothed);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = awesome.Span[i] - smoothed[i];
+            output[i] = i < finiteCount ? awesome.Span[i] - smoothed[i] : double.NaN;
         }
 
         return buffer;

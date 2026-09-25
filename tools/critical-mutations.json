@@ -3829,5 +3829,59 @@
     "before": "new ImpulseMovingAverageConvergenceDivergenceState(impulse.MaType, impulse.Length, impulse.SignalLength)",
     "after": "new ImpulseMovingAverageConvergenceDivergenceState()",
     "filter": "FullyQualifiedName~ImpulseOscillatorNumericalTests.EveryRouteMatchesIndependentImpulseStages"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "awesome-core-median-overflow",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void AwesomeOscillator",
+    "before": "median[i] = PriceMean.Of(high[i], low[i]);",
+    "after": "median[i] = (high[i] + low[i]) / 2;",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.CoreUsesFiniteMedianAndFullWindowMeans"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "awesome-fast-ignores-selected-input",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAwesomeOscillatorFast",
+    "before": "var (median, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);",
+    "after": "var median = CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hl2);",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.SelectedInputReplacesMedianForPublicAndFastRoutes"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "awesome-reversed-subtraction",
+    "file": "src/Calculations/Oscillators/ClassicOscillators.cs",
+    "scope": "public static StockData CalculateAwesomeOscillator",
+    "before": "var ao = fastSma - slowSma;",
+    "after": "var ao = slowSma - fastSma;",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.EveryRouteMatchesIndependentMedianAndAverageStages"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "accelerator-adds-signal",
+    "file": "src/Calculations/Oscillators/ClassicOscillators.cs",
+    "scope": "public static StockData CalculateAcceleratorOscillator",
+    "before": "var ac = i < finiteCount ? ao - aoSma : double.NaN;",
+    "after": "var ac = i < finiteCount ? ao + aoSma : double.NaN;",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.EveryRouteMatchesIndependentMedianAndAverageStages"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "accelerator-preview-poisons-state",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AcceleratorOscillatorState",
+    "before": "if (isFinal) _signalInvalid = invalid;",
+    "after": "_signalInvalid = invalid;",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.OverflowPreviewDoesNotCommitInvalidAcceleration"
+  },
+  {
+    "module": "awesome-oscillator-numerical",
+    "id": "awesome-factory-discards-options",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState",
+    "before": "new AwesomeOscillatorState(fastLength: awesome.Length, maType: awesome.MaType)",
+    "after": "new AwesomeOscillatorState()",
+    "filter": "FullyQualifiedName~AwesomeOscillatorNumericalTests.EveryRouteMatchesIndependentMedianAndAverageStages"
   }
 ]

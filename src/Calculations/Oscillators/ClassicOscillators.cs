@@ -92,8 +92,8 @@ public static partial class Calculations
         var count = inputList.Count;
         var aoList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var fastSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         double prevAo = 0;
         for (var i = 0; i < count; i++)
@@ -136,7 +136,8 @@ public static partial class Calculations
         var count = awesomeOscList.Count;
         var acList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var awesomeOscMaList = GetMovingAverageList(stockData, maType, smoothLength, awesomeOscList);
+        var finite = FiniteSignalInput.Create(awesomeOscList, out var finiteCount);
+        var awesomeOscMaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, smoothLength) : GetMovingAverageList(stockData, maType, smoothLength, finite);
 
         double prevAc = 0;
         for (var i = 0; i < count; i++)
@@ -144,7 +145,7 @@ public static partial class Calculations
             var ao = awesomeOscList[i];
             var aoSma = awesomeOscMaList[i];
 
-            var ac = ao - aoSma;
+            var ac = i < finiteCount ? ao - aoSma : double.NaN;
             acList.Add(ac);
 
             var signal = GetCompareSignal(ac, prevAc);

@@ -8254,8 +8254,8 @@ public sealed class AwesomeOscillatorState : IStreamingIndicatorState, IDisposab
     public AwesomeOscillatorState(int fastLength = 5, int slowLength = 34,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
         _input = new StreamingInputResolver(InputName.MedianPrice, null);
     }
 
@@ -8303,14 +8303,15 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
     private readonly IMovingAverageSmoother _slow;
     private readonly IMovingAverageSmoother _smooth;
     private StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     // The awesome oscillator less its own average, on simple averages as the batch indicator defaults to.
     public AcceleratorOscillatorState(int fastLength = 5, int slowLength = 34, int smoothLength = 5,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        _fast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _smooth = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _fast = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slow = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _smooth = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(InputName.MedianPrice, null);
     }
 
@@ -8324,6 +8325,7 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
         _fast.Reset();
         _slow.Reset();
         _smooth.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -8333,7 +8335,9 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
         var slowSma = _slow.Next(value, isFinal);
         var ao = fastSma - slowSma;
 
-        var aoSma = _smooth.Next(ao, isFinal);
+        var invalid = _signalInvalid || double.IsNaN(ao) || double.IsInfinity(ao);
+        var aoSma = invalid ? double.NaN : _smooth.Next(ao, isFinal);
+        if (isFinal) _signalInvalid = invalid;
         var ac = ao - aoSma;
 
         IReadOnlyDictionary<string, double>? outputs = null;

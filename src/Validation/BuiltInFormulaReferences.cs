@@ -376,6 +376,14 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.AwesomeOscillator or IndicatorName.AcceleratorOscillator)
+        {
+            var awesomeOptions = builtIn.CreateOptions();
+            var accelerator = builtIn.BatchName == IndicatorName.AcceleratorOscillator;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedAwesomeReference(bars, awesomeOptions, accelerator), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.ImpulseMovingAverageConvergenceDivergence or IndicatorName.ImpulsePercentagePriceOscillator)
         {
             var impulseOptions = builtIn.CreateOptions();
