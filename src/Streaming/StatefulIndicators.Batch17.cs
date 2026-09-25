@@ -757,15 +757,17 @@ public sealed class MirroredMovingAverageConvergenceDivergenceState : IStreaming
     private readonly IMovingAverageSmoother _closeMa;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly IMovingAverageSmoother _mirrorSignalSmoother;
+    private bool _signalInvalid;
+    private bool _mirrorSignalInvalid;
 
     public MirroredMovingAverageConvergenceDivergenceState(MovingAvgType maType =
         MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9)
     {
         var resolved = Math.Max(1, length);
-        _openMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _closeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _mirrorSignalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _openMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _closeMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _signalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _mirrorSignalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
     public IndicatorName Name => IndicatorName.MirroredMovingAverageConvergenceDivergence;
@@ -776,6 +778,8 @@ public sealed class MirroredMovingAverageConvergenceDivergenceState : IStreaming
         _closeMa.Reset();
         _signalSmoother.Reset();
         _mirrorSignalSmoother.Reset();
+        _signalInvalid = false;
+        _mirrorSignalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -785,8 +789,15 @@ public sealed class MirroredMovingAverageConvergenceDivergenceState : IStreaming
         var emaClose = _closeMa.Next(bar.Close, isFinal);
         var macd = emaClose - emaOpen;
         var mirrorMacd = emaOpen - emaClose;
-        var signal = _signalSmoother.Next(macd, isFinal);
-        var mirrorSignal = _mirrorSignalSmoother.Next(mirrorMacd, isFinal);
+        var invalidSignal = _signalInvalid || double.IsInfinity(macd);
+        var invalidMirrorSignal = _mirrorSignalInvalid || double.IsInfinity(mirrorMacd);
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(macd, isFinal);
+        var mirrorSignal = invalidMirrorSignal ? double.NaN : _mirrorSignalSmoother.Next(mirrorMacd, isFinal);
+        if (isFinal)
+        {
+            _signalInvalid = invalidSignal;
+            _mirrorSignalInvalid = invalidMirrorSignal;
+        }
         var histogram = macd - signal;
         var mirrorHistogram = mirrorMacd - mirrorSignal;
 
@@ -823,15 +834,17 @@ public sealed class MirroredPercentagePriceOscillatorState : IStreamingIndicator
     private readonly IMovingAverageSmoother _closeMa;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly IMovingAverageSmoother _mirrorSignalSmoother;
+    private bool _signalInvalid;
+    private bool _mirrorSignalInvalid;
 
     public MirroredPercentagePriceOscillatorState(MovingAvgType maType =
         MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9)
     {
         var resolved = Math.Max(1, length);
-        _openMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _closeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _mirrorSignalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _openMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _closeMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _signalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _mirrorSignalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
 
     public IndicatorName Name => IndicatorName.MirroredPercentagePriceOscillator;
@@ -842,6 +855,8 @@ public sealed class MirroredPercentagePriceOscillatorState : IStreamingIndicator
         _closeMa.Reset();
         _signalSmoother.Reset();
         _mirrorSignalSmoother.Reset();
+        _signalInvalid = false;
+        _mirrorSignalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -849,12 +864,17 @@ public sealed class MirroredPercentagePriceOscillatorState : IStreamingIndicator
         StreamingInputValidation.Validate(bar);
         var emaOpen = _openMa.Next(bar.Open, isFinal);
         var emaClose = _closeMa.Next(bar.Close, isFinal);
-        var macd = emaClose - emaOpen;
-        var mirrorMacd = emaOpen - emaClose;
-        var ppo = emaOpen != 0 ? macd / emaOpen * 100 : 0;
-        var mirrorPpo = emaClose != 0 ? mirrorMacd / emaClose * 100 : 0;
-        var signal = _signalSmoother.Next(ppo, isFinal);
-        var mirrorSignal = _mirrorSignalSmoother.Next(mirrorPpo, isFinal);
+        var ppo = RoundedPercentageChange.Of(emaClose, emaOpen);
+        var mirrorPpo = RoundedPercentageChange.Of(emaOpen, emaClose);
+        var invalidSignal = _signalInvalid || double.IsInfinity(ppo);
+        var invalidMirrorSignal = _mirrorSignalInvalid || double.IsInfinity(mirrorPpo);
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(ppo, isFinal);
+        var mirrorSignal = invalidMirrorSignal ? double.NaN : _mirrorSignalSmoother.Next(mirrorPpo, isFinal);
+        if (isFinal)
+        {
+            _signalInvalid = invalidSignal;
+            _mirrorSignalInvalid = invalidMirrorSignal;
+        }
         var histogram = ppo - signal;
         var mirrorHistogram = mirrorPpo - mirrorSignal;
 

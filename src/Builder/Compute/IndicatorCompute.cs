@@ -847,6 +847,8 @@ internal static partial class IndicatorCompute
             },
             ImpulsePercentagePriceOscillatorSpecOptions ippo => ComputeImpulsePercentagePriceOscillatorFast(data, context, ippo.Length,
                 series: spec.OutputKey == "Signal" ? MacdSeries.Signal : spec.OutputKey == "Histogram" ? MacdSeries.Histogram : MacdSeries.Line),
+            MirroredMovingAverageConvergenceDivergenceSpecOptions mirroredMacd => ComputeMirroredOscillatorFast(data, context,
+                mirroredMacd.Length, mirroredMacd.MaType, mirroredMacd.SignalLength, false, spec.OutputKey ?? "Macd"),
             MirroredPercentagePriceOscillatorSpecOptions mppo => ComputeMirroredPercentagePriceOscillatorFast(data, context,
                 mppo.Length, mppo.MaType, mppo.SignalLength, spec.OutputKey switch
                 {
@@ -10027,58 +10029,48 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int signalLength = 9,
         MirroredPpoSeries series = MirroredPpoSeries.Ppo)
     {
-        // CalculateMirroredPercentagePriceOscillator compares the moving average of the chained series with
-        // the moving average of the opens. The two oscillators are that gap as a percentage of the opens'
-        // average and, mirrored, of the closes', each smoothed again for a signal and differenced for a
-        // histogram - six series in all, of which only the first was produced.
+        return ComputeMirroredOscillatorFast(data, context, length, maType, signalLength, true, series.ToString());
+    }
+
+    internal static ComputeBuffer ComputeMirroredOscillatorFast(StockData data, ComputeContext context, int length,
+        MovingAvgType maType, int signalLength, bool percentage, string key)
+    {
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
-
-        using var openAverage = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), openAverage.WritableSpan);
-        using var closeAverage = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), closeAverage.WritableSpan);
-
-        var mirrored = series is MirroredPpoSeries.MirrorPpo or MirroredPpoSeries.MirrorSignal
-            or MirroredPpoSeries.MirrorHistogram;
-
-        using var oscillator = context.Rent(count);
-        var osc = oscillator.WritableSpan;
+        using var open = context.Rent(count);
+        using var close = context.Rent(count);
+        // Component order is open, selected input, signal, mirror signal for every requested output.
+        StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), open.WritableSpan);
+        StochasticSmooth(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), close.WritableSpan);
+        var line = new List<double>(count);
+        var mirror = new List<double>(count);
         for (var i = 0; i < count; i++)
         {
-            var mao = openAverage.Span[i];
-            var mac = closeAverage.Span[i];
-            osc[i] = mirrored
-                ? mac != 0 ? (mao - mac) / mac * 100 : 0
-                : mao != 0 ? (mac - mao) / mao * 100 : 0;
+            line.Add(percentage ? RoundedPercentageChange.Of(close.Span[i], open.Span[i]) : close.Span[i] - open.Span[i]);
+            mirror.Add(percentage ? RoundedPercentageChange.Of(open.Span[i], close.Span[i]) : open.Span[i] - close.Span[i]);
         }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        if (series is MirroredPpoSeries.Ppo or MirroredPpoSeries.MirrorPpo)
-        {
-            oscillator.Span.CopyTo(output);
-            return buffer;
-        }
-
-        using var signalLine = context.Rent(count);
-        MovingAverage(data, maType, signalLength, oscillator.Span, signalLine.WritableSpan);
-
-        if (series is MirroredPpoSeries.Signal or MirroredPpoSeries.MirrorSignal)
-        {
-            signalLine.Span.CopyTo(output);
-            return buffer;
-        }
-
-        var oscSpan = oscillator.Span;
-        var signalSpan = signalLine.Span;
+        var finite = FiniteSignalInput.Create(line, out var finiteCount);
+        var mirrorFinite = FiniteSignalInput.Create(mirror, out var mirrorFiniteCount);
+        using var signal = context.Rent(count);
+        using var mirrorSignal = context.Rent(count);
+        StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);
+        StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(mirrorFinite), mirrorSignal.WritableSpan);
+        var result = context.Rent(count);
         for (var i = 0; i < count; i++)
         {
-            output[i] = oscSpan[i] - signalSpan[i];
+            var normalSignal = i < finiteCount ? signal.Span[i] : double.NaN;
+            var reflectedSignal = i < mirrorFiniteCount ? mirrorSignal.Span[i] : double.NaN;
+            result.WritableSpan[i] = key switch
+            {
+                "Signal" => normalSignal,
+                "Histogram" => line[i] - normalSignal,
+                "MirrorMacd" or "MirrorPpo" => mirror[i],
+                "MirrorSignal" => reflectedSignal,
+                "MirrorHistogram" => mirror[i] - reflectedSignal,
+                _ => line[i]
+            };
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

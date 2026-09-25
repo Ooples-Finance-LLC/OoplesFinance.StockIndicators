@@ -3379,5 +3379,59 @@
     "id": "didi-swapped-customer-stages",
     "before": "StochasticSmooth(data, maType, length2, input, medium.WritableSpan);\n        StochasticSmooth(data, maType, length1, input, first.WritableSpan);",
     "after": "StochasticSmooth(data, maType, length1, input, first.WritableSpan);\n        StochasticSmooth(data, maType, length2, input, medium.WritableSpan);"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Calculations/Ppo/PpoLtoR.cs",
+    "scope": "public static StockData CalculateMirroredPercentagePriceOscillator",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.EveryRouteMatchesSixIndependentOutputs",
+    "id": "mirrored-premature-percentage-overflow",
+    "before": "var ppo = RoundedPercentageChange.Of(mac, mao);",
+    "after": "var ppo = mao == 0 ? 0 : (mac - mao) / mao * 100;"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMirroredOscillatorFast",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.SelectedInputPreservesOriginalOpen",
+    "id": "mirrored-fast-ignores-selected-input",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.ClosePrices;"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMirroredOscillatorFast",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.FourCustomerAveragesKeepTheirPublishedOrder",
+    "id": "mirrored-wrong-customer-signal-stage",
+    "before": "StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);\n        StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(mirrorFinite), mirrorSignal.WritableSpan);",
+    "after": "StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(mirrorFinite), mirrorSignal.WritableSpan);\n        StochasticSmooth(data, maType, signalLength, SpanCompat.AsReadOnlySpan(finite), signal.WritableSpan);"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MirroredPercentagePriceOscillatorState",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.OverflowPreviewDoesNotCommitAndMirrorSignalIsIndependent",
+    "id": "mirrored-preview-poisons-committed-signal",
+    "before": "if (isFinal)\n        {\n            _signalInvalid = invalidSignal;",
+    "after": "if (true)\n        {\n            _signalInvalid = invalidSignal;"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "scope": "public sealed class MirroredMovingAverageConvergenceDivergenceState",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.ArithmeticMeansMatchEveryRoute",
+    "id": "mirrored-macd-unrounded-open-mean",
+    "before": "_openMa = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);",
+    "after": "_openMa = MovingAverageSmootherFactory.Create(maType, resolved);"
+  },
+  {
+    "module": "mirrored-numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void MirroredPercentagePriceOscillator",
+    "filter": "FullyQualifiedName~MirroredNumericalTests.CoreUsesOpenAndCloseMeansWithoutArtificialSignFlips",
+    "id": "mirrored-core-artificial-sign-flip",
+    "before": "output[i] = RoundedPercentageChange.Of(closeMean[i], openMean[i]);",
+    "after": "output[i] = Math.Abs(RoundedPercentageChange.Of(closeMean[i], openMean[i]));"
   }
 ]

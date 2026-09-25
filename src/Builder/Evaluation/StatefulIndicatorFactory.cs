@@ -419,6 +419,7 @@ internal static partial class StatefulIndicatorFactory
             ElliottWaveOscillatorSpecOptions elliott => new ElliottWaveOscillatorState(elliott.MaType, elliott.FastLength, elliott.SlowLength),
             ErgodicMovingAverageConvergenceDivergenceSpecOptions ergodic => new ErgodicMovingAverageConvergenceDivergenceState(ergodic.MaType, ergodic.Length1, ergodic.Length2, ergodic.Length3),
             ErgodicPercentagePriceOscillatorSpecOptions ergodicPpo => new ErgodicPercentagePriceOscillatorState(ergodicPpo.MaType, length2: ergodicPpo.Length),
+            MirroredPercentagePriceOscillatorSpecOptions mirror => new MirroredPercentagePriceOscillatorState(mirror.MaType, mirror.Length, mirror.SignalLength),
             DidiIndexSpecOptions didi => new DidiIndexState(didi.MaType, didi.ShortLength, didi.MediumLength, didi.LongLength),
             MacdSpecOptions macd => CreateMacdState(macd),
             MacdLineSpecOptions macdl => new MovingAverageConvergenceDivergenceState(macdl.FastLength, macdl.SlowLength),

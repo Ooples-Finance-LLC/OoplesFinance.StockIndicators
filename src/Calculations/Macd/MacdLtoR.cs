@@ -308,12 +308,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
 
-        var emaOpenList = GetMovingAverageList(stockData, maType, length, openList);
-        var emaCloseList = GetMovingAverageList(stockData, maType, length, inputList);
+        var emaOpenList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(openList, length) : GetMovingAverageList(stockData, maType, length, openList);
+        var emaCloseList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
         var macdList = GetDifferenceList(emaCloseList, emaOpenList);
         var macdMirrorList = GetDifferenceList(emaOpenList, emaCloseList);
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
-        var macdMirrorSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdMirrorList);
+        var macdInput = FiniteSignalInput.Create(macdList, out var macdFiniteCount);
+        var macdSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, macdInput);
+        for (var i = macdFiniteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
+        var macdMirrorInput = FiniteSignalInput.Create(macdMirrorList, out var macdMirrorFiniteCount);
+        var macdMirrorSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdMirrorInput, signalLength) : GetMovingAverageList(stockData, maType, signalLength, macdMirrorInput);
+        for (var i = macdMirrorFiniteCount; i < macdMirrorSignalLineList.Count; i++) macdMirrorSignalLineList[i] = double.NaN;
         var macdHistogramList = GetDifferenceList(macdList, macdSignalLineList);
         var macdMirrorHistogramList = GetDifferenceList(macdMirrorList, macdMirrorSignalLineList);
         for (var i = 0; i < stockData.Count; i++)
