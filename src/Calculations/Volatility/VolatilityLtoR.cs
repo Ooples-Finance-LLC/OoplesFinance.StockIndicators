@@ -36,7 +36,7 @@ public static partial class Calculations
                 double sum = 0;
                 for (var j = i - length + 1; j <= i; j++)
                 {
-                    var logRatio = lowList[j] != 0 ? Log(highList[j] / lowList[j]) : 0;
+                    var logRatio = lowList[j] != 0 ? StableLogRatio.OfSameSign(highList[j], lowList[j]) : 0;
                     sum += logRatio * logRatio;
                 }
 
@@ -92,10 +92,10 @@ public static partial class Calculations
                 {
                     var currentClose = inputList[j];
                     var currentOpen = openList[j];
-                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
-                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
-                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
-                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    var logHc = currentClose != 0 ? StableLogRatio.OfSameSign(highList[j], currentClose) : 0;
+                    var logHo = currentOpen != 0 ? StableLogRatio.OfSameSign(highList[j], currentOpen) : 0;
+                    var logLc = currentClose != 0 ? StableLogRatio.OfSameSign(lowList[j], currentClose) : 0;
+                    var logLo = currentOpen != 0 ? StableLogRatio.OfSameSign(lowList[j], currentOpen) : 0;
                     sum += (logHc * logHo) + (logLc * logLo);
                 }
 

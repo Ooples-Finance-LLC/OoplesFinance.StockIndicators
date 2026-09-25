@@ -58,13 +58,13 @@ public sealed class YangZhangVolatilityState : IStreamingIndicatorState, IDispos
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var overnight = _hasPrev && _prevClose != 0 ? Log(bar.Open / _prevClose) : double.NaN;
-        var openToClose = bar.Open != 0 ? Log(value / bar.Open) : double.NaN;
+        var overnight = _hasPrev && _prevClose != 0 ? StableLogRatio.OfSameSign(bar.Open, _prevClose) : double.NaN;
+        var openToClose = bar.Open != 0 ? StableLogRatio.OfSameSign(value, bar.Open) : double.NaN;
 
-        var logHc = value != 0 ? Log(bar.High / value) : 0;
-        var logHo = bar.Open != 0 ? Log(bar.High / bar.Open) : 0;
-        var logLc = value != 0 ? Log(bar.Low / value) : 0;
-        var logLo = bar.Open != 0 ? Log(bar.Low / bar.Open) : 0;
+        var logHc = value != 0 ? StableLogRatio.OfSameSign(bar.High, value) : 0;
+        var logHo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Open) : 0;
+        var logLc = value != 0 ? StableLogRatio.OfSameSign(bar.Low, value) : 0;
+        var logLo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.Low, bar.Open) : 0;
         var rogersSatchell = (logHc * logHo) + (logLc * logLo);
 
         double volatility = 0;

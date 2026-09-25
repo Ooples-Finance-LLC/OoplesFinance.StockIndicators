@@ -161,7 +161,7 @@ public static partial class Calculations
         for (var i = 1; i < count; i++)
         {
             var prevValue = inputList[i - 1];
-            returns[i] = prevValue != 0 ? Log(inputList[i] / prevValue) : 0;
+            returns[i] = prevValue != 0 ? StableLogRatio.OfSameSign(inputList[i], prevValue) : 0;
         }
 
         for (var i = 0; i < count; i++)

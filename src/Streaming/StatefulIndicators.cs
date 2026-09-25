@@ -4845,8 +4845,8 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var currentClose = _input.GetValue(bar);
-        var logHl = bar.Low != 0 ? Math.Log(bar.High / bar.Low) : 0;
-        var logCo = bar.Open != 0 ? Math.Log(currentClose / bar.Open) : 0;
+        var logHl = bar.Low != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Low) : 0;
+        var logCo = bar.Open != 0 ? StableLogRatio.OfSameSign(currentClose, bar.Open) : 0;
         var log = (0.5 * MathHelper.Pow(logHl, 2)) - (_logCoeff * MathHelper.Pow(logCo, 2));
 
         var nextCount = Math.Min(_length, _terms.Count + 1);

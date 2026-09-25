@@ -6100,7 +6100,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeCloseToCloseVolatilityFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         VolatilityCore.CloseToCloseVolatility(close, buffer.WritableSpan, length);
         return buffer;
@@ -7761,7 +7761,7 @@ internal static partial class IndicatorCompute
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         VolatilityCore.RogersSatchellVolatility(open, high, low, close, buffer.WritableSpan, length);
         return buffer;
@@ -7775,7 +7775,7 @@ internal static partial class IndicatorCompute
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         VolatilityCore.YangZhangVolatility(open, high, low, close, buffer.WritableSpan, length);
         return buffer;

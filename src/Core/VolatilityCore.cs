@@ -620,7 +620,7 @@ internal static class VolatilityCore
             returns[0] = 0;
             for (var i = 1; i < close.Length; i++)
             {
-                returns[i] = close[i - 1] != 0 ? Math.Log(close[i] / close[i - 1]) : 0;
+                returns[i] = close[i - 1] != 0 ? StableLogRatio.OfSameSign(close[i], close[i - 1]) : 0;
             }
 
             StandardDeviation(returns, output, length);
@@ -664,7 +664,7 @@ internal static class VolatilityCore
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logRatio = low[j] != 0 ? Math.Log(high[j] / low[j]) : 0;
+                var logRatio = low[j] != 0 ? StableLogRatio.OfSameSign(high[j], low[j]) : 0;
                 sum += logRatio * logRatio;
             }
 
@@ -692,14 +692,14 @@ internal static class VolatilityCore
             double sum = 0;
             for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
-                var logHL = low[j] != 0 ? Math.Log(high[j] / low[j]) : 0;
-                var logCO = open[j] != 0 ? Math.Log(close[j] / open[j]) : 0;
+                var logHL = low[j] != 0 ? StableLogRatio.OfSameSign(high[j], low[j]) : 0;
+                var logCO = open[j] != 0 ? StableLogRatio.OfSameSign(close[j], open[j]) : 0;
 
                 var term = 0.5 * logHL * logHL - (2 * Math.Log(2) - 1) * logCO * logCO;
                 sum += term;
             }
 
-            output[i] = Math.Sqrt(sum / length) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, sum / length)) * sqrtFactor;
         }
     }
 
@@ -729,15 +729,15 @@ internal static class VolatilityCore
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
-                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
-                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
-                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+                var logHC = close[j] != 0 ? StableLogRatio.OfSameSign(high[j], close[j]) : 0;
+                var logHO = open[j] != 0 ? StableLogRatio.OfSameSign(high[j], open[j]) : 0;
+                var logLC = close[j] != 0 ? StableLogRatio.OfSameSign(low[j], close[j]) : 0;
+                var logLO = open[j] != 0 ? StableLogRatio.OfSameSign(low[j], open[j]) : 0;
 
                 sum += logHC * logHO + logLC * logLO;
             }
 
-            output[i] = Math.Sqrt(sum / length) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, sum / length)) * sqrtFactor;
         }
     }
 
@@ -772,7 +772,7 @@ internal static class VolatilityCore
             {
                 if (j > 0 && close[j - 1] != 0)
                 {
-                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    var logOC = StableLogRatio.OfSameSign(open[j], close[j - 1]);
                     overnightMean += logOC;
                 }
             }
@@ -782,7 +782,7 @@ internal static class VolatilityCore
             {
                 if (j > 0 && close[j - 1] != 0)
                 {
-                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    var logOC = StableLogRatio.OfSameSign(open[j], close[j - 1]);
                     overnightSum += (logOC - overnightMean) * (logOC - overnightMean);
                 }
             }
@@ -795,7 +795,7 @@ internal static class VolatilityCore
             {
                 if (open[j] != 0)
                 {
-                    var logCO = Math.Log(close[j] / open[j]);
+                    var logCO = StableLogRatio.OfSameSign(close[j], open[j]);
                     ocMean += logCO;
                 }
             }
@@ -805,7 +805,7 @@ internal static class VolatilityCore
             {
                 if (open[j] != 0)
                 {
-                    var logCO = Math.Log(close[j] / open[j]);
+                    var logCO = StableLogRatio.OfSameSign(close[j], open[j]);
                     ocSum += (logCO - ocMean) * (logCO - ocMean);
                 }
             }
@@ -815,17 +815,17 @@ internal static class VolatilityCore
             double rsSum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
-                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
-                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
-                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+                var logHC = close[j] != 0 ? StableLogRatio.OfSameSign(high[j], close[j]) : 0;
+                var logHO = open[j] != 0 ? StableLogRatio.OfSameSign(high[j], open[j]) : 0;
+                var logLC = close[j] != 0 ? StableLogRatio.OfSameSign(low[j], close[j]) : 0;
+                var logLO = open[j] != 0 ? StableLogRatio.OfSameSign(low[j], open[j]) : 0;
                 rsSum += logHC * logHO + logLC * logLO;
             }
             var rsVar = rsSum / length;
 
             // Yang-Zhang formula
             var yzVar = overnightVar + k * openToCloseVar + (1 - k) * rsVar;
-            output[i] = Math.Sqrt(yzVar) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, yzVar)) * sqrtFactor;
         }
     }
 

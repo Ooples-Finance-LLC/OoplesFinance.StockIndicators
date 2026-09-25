@@ -15,6 +15,7 @@ internal static class StableLogRatio
             // Sterbenz subtraction is exact here. Correct the rounded 1+r argument
             // so adjacent prices retain their small nonzero logarithmic return.
             var relative = (current - previous) / previous;
+            if (Math.Abs(relative) <= 1e-8) return RoundedNearUnityLog.Of(current, previous);
             var argument = 1 + relative;
             return argument == 1 ? relative : Math.Log(argument) * (relative / (argument - 1)); // NOSONAR: S1244 - Detect exact rounding to one before dividing by argument minus one.
         }

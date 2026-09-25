@@ -96,12 +96,19 @@ internal static partial class BuiltInFormulaReferences
                         break;
                     default:
                         var weight = .34 / (1.34 + (length + 1d) / (length - 1));
-                        variance = CenteredVariance(Window(overnight, i, length).ToArray(), true)
-                            + weight * CenteredVariance(Window(intraday, i, length).ToArray(), true)
+                        // A zero denominator omits the residual, retaining the full-window divisors.
+                        double MaskedVariance(double[] values, Func<int, bool> included)
+                        {
+                            var positions = Enumerable.Range(i - length + 1, length).Where(included).ToArray();
+                            var mean = positions.Sum(j => values[j]) / length;
+                            return positions.Sum(j => Math.Pow(values[j] - mean, 2)) / (length - 1);
+                        }
+                        variance = MaskedVariance(overnight, j => j > 0 && bars[j - 1].Close != 0)
+                            + weight * MaskedVariance(intraday, j => bars[j].Open != 0)
                             + (1 - weight) * Window(rs, i, length).Average();
                         break;
                 }
-                line[i] = Math.Sqrt(252 * variance);
+                line[i] = Math.Sqrt(252 * Math.Max(0, variance));
             }
             return name == IndicatorName.GarmanKlassVolatility
                 ? Outputs((key, line), ("Signal", Average(line, 7, kind))) : Outputs((key, line));
@@ -109,7 +116,7 @@ internal static partial class BuiltInFormulaReferences
     }
 
     private static double LogRatio(double numerator, double denominator) =>
-        numerator > 0 && denominator > 0 ? Math.Log(numerator / denominator) : 0;
+        ReferenceSameSignLogRatio(numerator, denominator);
 
     private static double CenteredVariance(double[] values, bool sample)
     {
