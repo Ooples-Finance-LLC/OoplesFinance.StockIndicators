@@ -3981,8 +3981,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var prevValue = i >= 1 ? input[i - 1] : 0;
-            var ratio = prevValue != 0 ? input[i] / prevValue : 0;
-            logReturns[i] = ratio > 0 ? Math.Log(ratio) : 0;
+            logReturns[i] = StableLogRatio.OfSameSign(input[i], prevValue);
         }
 
         using var deviation = context.Rent(count);
@@ -24893,8 +24892,7 @@ internal static partial class IndicatorCompute
         using var returns = context.Rent(data.Count);
         for (var i = 0; i < data.Count; i++)
         {
-            var ratio = i == 0 || input[i - 1] == 0 ? 0 : input[i] / input[i - 1];
-            returns.WritableSpan[i] = ratio > 0 ? Math.Log(ratio) : 0;
+            returns.WritableSpan[i] = i == 0 ? 0 : StableLogRatio.OfSameSign(input[i], input[i - 1]);
         }
         using var deviation = context.Rent(data.Count);
         VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
@@ -24902,8 +24900,8 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < data.Count; i++)
         {
             var prior = i < length ? 0 : key == "KsdiDn" ? highs.Span[i - length] : lows.Span[i - length];
-            var ratio = prior == 0 ? 0 : (key == "KsdiDn" ? lows.Span[i] : highs.Span[i]) / prior;
-            result.WritableSpan[i] = ratio > 0 && deviation.Span[i] != 0 ? Math.Log(ratio) / deviation.Span[i] : 0;
+            var log = StableLogRatio.OfSameSign(key == "KsdiDn" ? lows.Span[i] : highs.Span[i], prior);
+            result.WritableSpan[i] = deviation.Span[i] != 0 ? log / deviation.Span[i] : 0;
         }
         return result;
     }

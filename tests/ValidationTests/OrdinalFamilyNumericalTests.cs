@@ -152,7 +152,7 @@ public sealed class OrdinalFamilyNumericalTests
         {
             var bars = fixture.Bars;
             var output = keys.Select(_ => new double[bars.Count]).ToArray();
-            if (route is "batch" or "fast")
+            if (route is "batch" or "fast" or "arm")
             {
                 for (var slot = 0; slot < keys.Length; slot++)
                 {
@@ -161,7 +161,8 @@ public sealed class OrdinalFamilyNumericalTests
                     else
                     {
                         using var context = new ComputeContext();
-                        using var buffer = IndicatorCompute.TryComputeFast(Data(bars), outputSpec, context);
+                        using var buffer = route == "arm" ? IndicatorCompute.ComputeArm(Data(bars), outputSpec, context)
+                            : IndicatorCompute.TryComputeFast(Data(bars), outputSpec, context);
                         Assert.NotNull(buffer);
                         output[slot] = buffer.Value.ToArray();
                     }

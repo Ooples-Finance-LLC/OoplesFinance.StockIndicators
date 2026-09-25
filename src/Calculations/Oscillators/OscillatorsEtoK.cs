@@ -2215,9 +2215,7 @@ public static partial class Calculations
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var temp = prevValue != 0 ? currentValue / prevValue : 0;
-
-            var tempLog = temp > 0 ? Math.Log(temp) : 0;
+            var tempLog = StableLogRatio.OfSameSign(currentValue, prevValue);
             tempList.Add(tempLog);
         }
 
@@ -2230,10 +2228,8 @@ public static partial class Calculations
             var volatility = stdDevList[i];
             var prevHigh = i >= length ? highList[i - length] : 0;
             var prevLow = i >= length ? lowList[i - length] : 0;
-            var ksdiUpTemp = prevLow != 0 ? currentHigh / prevLow : 0;
-            var ksdiDownTemp = prevHigh != 0 ? currentLow / prevHigh : 0;
-            var ksdiUpLog = ksdiUpTemp > 0 ? Math.Log(ksdiUpTemp) : 0;
-            var ksdiDownLog = ksdiDownTemp > 0 ? Math.Log(ksdiDownTemp) : 0;
+            var ksdiUpLog = StableLogRatio.OfSameSign(currentHigh, prevLow);
+            var ksdiDownLog = StableLogRatio.OfSameSign(currentLow, prevHigh);
 
             var prevKsdiUp = GetLastOrDefault(ksdiUpList);
             var ksdiUp = volatility != 0 ? ksdiUpLog / volatility : 0;

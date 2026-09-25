@@ -1175,15 +1175,13 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.KaseSerialDependencyIndex:
                 return new("KsdiUp", new[] { "KsdiUp", "KsdiDn" }, bars =>
                 {
-                    var logs = bars.Select((b, i) => i == 0 || bars[i - 1].Close == 0 || b.Close / bars[i - 1].Close <= 0
-                        ? 0 : Math.Log(b.Close / bars[i - 1].Close)).ToArray();
+                    var logs = bars.Select((b, i) => i == 0 ? 0 : ReferenceSameSignLogRatio(b.Close, bars[i - 1].Close)).ToArray();
                     var variance = PopulationVariance(logs, length);
                     double[] Side(bool up) => bars.Select((b, i) =>
                     {
                         if (i < length || variance[i] == 0) return 0;
                         var prior = up ? bars[i - length].Low : bars[i - length].High;
-                        var ratio = prior == 0 ? 0 : (up ? b.High : b.Low) / prior;
-                        return ratio <= 0 ? 0 : Math.Log(ratio) / Math.Sqrt(variance[i]);
+                        return ReferenceSameSignLogRatio(up ? b.High : b.Low, prior) / Math.Sqrt(variance[i]);
                     }).ToArray();
                     return Outputs(("KsdiUp", Side(true)), ("KsdiDn", Side(false)));
                 });

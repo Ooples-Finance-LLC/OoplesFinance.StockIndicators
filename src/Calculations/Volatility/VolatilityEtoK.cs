@@ -84,9 +84,7 @@ public static partial class Calculations
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var temp = prevValue != 0 ? currentValue / prevValue : 0;
-
-            var tempLog = temp > 0 ? Math.Log(temp) : 0;
+            var tempLog = StableLogRatio.OfSameSign(currentValue, prevValue);
             tempLogList.Add(tempLog);
         }
 

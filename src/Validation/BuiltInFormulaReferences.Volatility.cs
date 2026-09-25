@@ -66,7 +66,8 @@ internal static partial class BuiltInFormulaReferences
             // Independent OHLC estimators. HV is percent, annualized on 365 days;
             // the range estimators are fractional volatility annualized on 252 days.
             var overnight = bars.Select((b, i) => i == 0 ? 0 : LogRatio(b.Open, bars[i - 1].Close)).ToArray();
-            var returns = bars.Select((b, i) => i == 0 ? 0 : LogRatio(b.Close, bars[i - 1].Close)).ToArray();
+            var returns = bars.Select((b, i) => i == 0 ? 0 : name == IndicatorName.HistoricalVolatility
+                ? ReferenceSameSignLogRatio(b.Close, bars[i - 1].Close) : LogRatio(b.Close, bars[i - 1].Close)).ToArray();
             var intraday = bars.Select(b => LogRatio(b.Close, b.Open)).ToArray();
             var ranges = bars.Select(b => Math.Pow(LogRatio(b.High, b.Low), 2)).ToArray();
             var rs = bars.Select(b => LogRatio(b.High, b.Close) * LogRatio(b.High, b.Open)

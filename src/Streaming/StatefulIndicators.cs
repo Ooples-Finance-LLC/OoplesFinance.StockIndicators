@@ -4783,8 +4783,7 @@ public sealed class HistoricalVolatilityState : IStreamingIndicatorState, IDispo
     {
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
-        var temp = prevValue != 0 ? value / prevValue : 0;
-        _logReturn = temp > 0 ? Math.Log(temp) : 0;
+        _logReturn = StableLogRatio.OfSameSign(value, prevValue);
 
         // The first bar's log return is a fabricated zero, so it is kept out of the window entirely rather
         // than counted as an observation. The window then fills one bar later, at index length, which is
