@@ -2186,12 +2186,18 @@ public sealed class FormulaContractCoverageTests
             new[] { 0d, 0, 5d / 9, 1 },
             new[] { 0d, 0, 5d / 18, 2d / 9 }
         });
-        Check(new Ppo(2, 3, signalLength: 2), new[]
-        {
-            new[] { 0d, 0, 250d / 7, 2200d / 93 },
-            new[] { 0d, 0, 500d / 21, 46300d / 1953 },
-            new[] { 0d, 0, 250d / 21, -100d / 1953 }
-        });
+        // The two means and signal round at their published stages before the next equation.
+        var fast = new[] { 1d, 1.5, (new ReferenceFraction(19) / new ReferenceFraction(6)).ToDouble(), 0 };
+        fast[3] = ((new ReferenceFraction(16) + ReferenceFraction.FromDouble(fast[2])) / new ReferenceFraction(3)).ToDouble();
+        var slow = new[] { 1d, 1.5, (new ReferenceFraction(7) / new ReferenceFraction(3)).ToDouble(), 0 };
+        slow[3] = ((new ReferenceFraction(8) + ReferenceFraction.FromDouble(slow[2])) / new ReferenceFraction(2)).ToDouble();
+        var line = fast.Select((value, i) => (new ReferenceFraction(100) *
+            (ReferenceFraction.FromDouble(value) / ReferenceFraction.FromDouble(slow[i]) - new ReferenceFraction(1))).ToDouble()).ToArray();
+        var signal = new double[4];
+        for (var i = 2; i < 4; i++) signal[i] = ((new ReferenceFraction(2) * ReferenceFraction.FromDouble(line[i]) +
+            ReferenceFraction.FromDouble(signal[i - 1])) / new ReferenceFraction(3)).ToDouble();
+        var histogram = line.Select((value, i) => (ReferenceFraction.FromDouble(value) - ReferenceFraction.FromDouble(signal[i])).ToDouble()).ToArray();
+        Check(new Ppo(2, 3, signalLength: 2), new[] { line, signal, histogram });
 
         void Check(IIndicator indicator, double[][] expected)
         {

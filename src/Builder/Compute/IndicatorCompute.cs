@@ -3120,7 +3120,7 @@ internal static partial class IndicatorCompute
         var osc = oscillator.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            osc[i] = slow.Span[i] != 0 ? 100 * (fast.Span[i] - slow.Span[i]) / slow.Span[i] : 0;
+            osc[i] = RoundedPercentageChange.Of(fast.Span[i], slow.Span[i]);
         }
 
         var buffer = context.Rent(count);
@@ -3133,7 +3133,10 @@ internal static partial class IndicatorCompute
         }
 
         using var signalLine = context.Rent(count);
-        MovingAverage(data, maType, signalLength, oscillator.Span, signalLine.WritableSpan);
+        var signalCount = 0;
+        while (signalCount < count && !double.IsInfinity(osc[signalCount])) signalCount++;
+        MovingAverage(data, maType, signalLength, oscillator.Span.Slice(0, signalCount), signalLine.WritableSpan.Slice(0, signalCount));
+        signalLine.WritableSpan.Slice(signalCount).Fill(double.NaN);
 
         if (series == MacdSeries.Signal)
         {

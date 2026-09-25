@@ -29,11 +29,15 @@ public static partial class Calculations
             var fastEma = fastEmaList[i];
             var slowEma = slowEmaList[i];
 
-            var ppo = slowEma != 0 ? 100 * (fastEma - slowEma) / slowEma : 0;
+            var ppo = RoundedPercentageChange.Of(fastEma, slowEma);
             ppoList.Add(ppo);
         }
 
-        var ppoSignalList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
+        var signalCount = ppoList.FindIndex(double.IsInfinity);
+        if (signalCount < 0) signalCount = ppoList.Count;
+        var ppoSignalList = GetMovingAverageList(stockData, maType, signalLength,
+            signalCount == ppoList.Count ? ppoList : ppoList.GetRange(0, signalCount));
+        for (var i = signalCount; i < ppoList.Count; i++) ppoSignalList.Add(double.NaN);
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];
