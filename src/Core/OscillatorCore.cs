@@ -7897,13 +7897,13 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var alpha = length > 2 ? 2.0 / (length + 1) : 0.67;
+        if (high.IsEmpty) return;
+        var alpha = length > 2 ? 2.0 / (length + 1d) : 0.67;
         var alpha2 = alpha / 2;
 
-        // Initialize with first price
-        var prevHigh = high.Length > 0 ? high[0] : 0;
-        var prevLow = low.Length > 0 ? low[0] : 0;
-        var price0 = (Math.Max(high[0], prevHigh) + Math.Min(low[0], prevLow)) / 2;
+        // The absent prior bar contributes zero to the first two-bar range.
+        double prevHigh = 0, prevLow = 0;
+        var price0 = PriceMean.Of(Math.Max(high[0], prevHigh), Math.Min(low[0], prevLow));
         var ema1 = price0;
         var ema2 = price0;
         output[0] = 0;
@@ -7916,10 +7916,10 @@ internal static class OscillatorCore
             prevLow = low[i - 1];
             var h = Math.Max(currentHigh, prevHigh);
             var l = Math.Min(currentLow, prevLow);
-            var price = (h + l) / 2;
+            var price = PriceMean.Of(h, l);
 
-            ema1 = (alpha * price) + ((1 - alpha) * ema1);
-            ema2 = (alpha2 * price) + ((1 - alpha2) * ema2);
+            ema1 = VidyaBlend.Compute(ema1, price, alpha);
+            ema2 = VidyaBlend.Compute(ema2, price, alpha2);
             output[i] = ema1 - ema2;
         }
     }

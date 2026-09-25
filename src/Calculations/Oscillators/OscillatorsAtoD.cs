@@ -1496,7 +1496,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
 
-        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
+        var alpha = length > 2 ? (double)2 / (length + 1d) : 0.67;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1506,14 +1506,14 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var high = Math.Max(currentHigh, prevHigh);
             var low = Math.Min(currentLow, prevLow);
-            var price = (high + low) / 2;
+            var price = PriceMean.Of(high, low);
             var prevEma1 = i >= 1 ? ema1List[i - 1] : price;
             var prevEma2 = i >= 1 ? ema2List[i - 1] : price;
 
-            var ema1 = (alpha * price) + ((1 - alpha) * prevEma1);
+            var ema1 = VidyaBlend.Compute(prevEma1, price, alpha);
             ema1List.Add(ema1);
 
-            var ema2 = (alpha / 2 * price) + ((1 - (alpha / 2)) * prevEma2);
+            var ema2 = VidyaBlend.Compute(prevEma2, price, alpha / 2);
             ema2List.Add(ema2);
 
             var prevDsp = GetLastOrDefault(dspList);

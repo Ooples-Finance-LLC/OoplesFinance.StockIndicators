@@ -7457,7 +7457,7 @@ public sealed class DetrendedSyntheticPriceState : IStreamingIndicatorState
 
     public DetrendedSyntheticPriceState(int length = 14)
     {
-        _alpha = length > 2 ? (double)2 / (Math.Max(1, length) + 1) : 0.67;
+        _alpha = length > 2 ? (double)2 / (Math.Max(1, length) + 1d) : 0.67;
     }
 
     public IndicatorName Name => IndicatorName.DetrendedSyntheticPrice;
@@ -7479,11 +7479,11 @@ public sealed class DetrendedSyntheticPriceState : IStreamingIndicatorState
         var prevLow = _hasPrev ? _prevLow : 0;
         var high = Math.Max(bar.High, prevHigh);
         var low = Math.Min(bar.Low, prevLow);
-        var price = (high + low) / 2;
+        var price = PriceMean.Of(high, low);
         var prevEma1 = _hasEma ? _ema1 : price;
         var prevEma2 = _hasEma ? _ema2 : price;
-        var ema1 = (_alpha * price) + ((1 - _alpha) * prevEma1);
-        var ema2 = ((_alpha / 2) * price) + ((1 - (_alpha / 2)) * prevEma2);
+        var ema1 = VidyaBlend.Compute(prevEma1, price, _alpha);
+        var ema2 = VidyaBlend.Compute(prevEma2, price, _alpha / 2);
         var dsp = ema1 - ema2;
 
         if (isFinal)
