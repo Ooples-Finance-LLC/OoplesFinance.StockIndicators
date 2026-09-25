@@ -230,6 +230,23 @@ public static partial class Calculations
     public static StockData CalculateApirineSlowRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14, int smoothLength = 6)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var events = CreateSignalsList(stockData);
+            using var window = new ApirineRsiWindow(maType, length, smoothLength, stockData.Count);
+            double previous = 0, beforePrevious = 0;
+            foreach (var price in prices)
+            {
+                var value = window.Next(price, true); line.Add(value);
+                events?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 70, 30));
+                beforePrevious = previous; previous = value;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Asrsi", line } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ApirineSlowRelativeStrengthIndex;
+            return stockData;
+        }
+
         List<double> r2List = new(stockData.Count);
         List<double> r3List = new(stockData.Count);
         List<double> rrList = new(stockData.Count);

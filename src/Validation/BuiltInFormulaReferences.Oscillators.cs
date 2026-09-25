@@ -734,6 +734,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Arsi", new[] { "Arsi" }, bars => AdaptiveGainLossOutputs(bars, indicator));
             case IndicatorName.ApirineSlowRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
+                if (kind is 1 or 2 or 3 or 6) return new("Asrsi", new[] { "Asrsi" }, bars => ApirineRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 return new("Asrsi", new[] { "Asrsi" }, bars =>
                 {

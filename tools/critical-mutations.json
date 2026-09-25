@@ -5965,5 +5965,63 @@
     "before": "        StreamingInputValidation.Validate(bar);",
     "after": "        // injected omitted candle validation",
     "filter": "FullyQualifiedName~FoldedRsiNumericalTests|FullyQualifiedName~AdaptiveRsiNumericalTests|FullyQualifiedName~SelfAdjustingRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-premature-wide-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ApirineRsiWindow.cs",
+    "before": "change.AddTo(ref total);",
+    "after": "total.Add(change.Publish());",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-drops-residual-history",
+    "module": "numerical",
+    "file": "src/Helpers/ApirineRsiWindow.cs",
+    "before": "_residual.AddTo(ref total);",
+    "after": "// injected residual history omitted\n            ",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-gain-wrong-period",
+    "module": "numerical",
+    "file": "src/Helpers/ApirineRsiWindow.cs",
+    "before": "_gain = new(kind, length, capacityHint);",
+    "after": "_gain = new(kind, smoothLength, capacityHint);",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/ApirineRsiWindow.cs",
+    "before": "if (final) { _residual = residual;",
+    "after": "if (true) { _residual = residual;",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-reset-keeps-residual",
+    "module": "numerical",
+    "file": "src/Helpers/ApirineRsiWindow.cs",
+    "before": "_residual = default; _previousPrice = 0;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests"
+  },
+  {
+    "id": "apirine-rsi-raw-selected-input-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeApirineSlowRsiFast("
+  },
+  {
+    "id": "apirine-rsi-bypasses-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ApirineRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeApirineSlowRsiFast("
   }
 ]

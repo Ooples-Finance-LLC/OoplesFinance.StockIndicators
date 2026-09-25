@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ApirineSlowRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => ApirineRsiOutputs(bars, builtIn)["Asrsi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SelfAdjustingRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             var selfAdjustingKeys = new[] { "SaRsi", "Signal", "ObLevel", "OsLevel" };
