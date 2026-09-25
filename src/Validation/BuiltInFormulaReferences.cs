@@ -362,6 +362,20 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName._4MovingAverageConvergenceDivergence or IndicatorName._4PercentagePriceOscillator)
+        {
+            var fourOptions = builtIn.CreateOptions();
+            var percentage = builtIn.BatchName == IndicatorName._4PercentagePriceOscillator;
+            var stem = percentage ? "Ppo" : "Macd";
+            var fourKeys = new[] { stem + "1", "Signal1", "Histogram1", stem + "2", "Signal2", "Histogram2" };
+            for (var slot = 0; slot < fourKeys.Length; slot++)
+            {
+                var key = fourKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedFourOscillator(bars, fourOptions, percentage)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DidiIndex)
         {
             var didiOptions = builtIn.CreateOptions();
