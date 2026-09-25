@@ -11388,6 +11388,16 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         var input = SpanCompat.AsReadOnlySpan(inputList);
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var shortMean = new StrengthAverage(maType, Math.Max(1, length / 2), count);
+            using var longMean = new StrengthAverage(maType, length, count);
+            var stable = context.Rent(count);
+            for (var i = 0; i < count; i++) stable.WritableSpan[i] =
+                longMean.Next(new StrengthValue(input[i]), true).Mantissa - shortMean.Next(new StrengthValue(input[i]), true).Mantissa;
+            return stable;
+        }
+
         using var fastAverages = context.Rent(count);
         using var slowAverages = context.Rent(count);
         MovingAverage(data, maType, Math.Max(1, length / 2), input, fastAverages.WritableSpan);

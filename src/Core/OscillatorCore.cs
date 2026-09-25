@@ -6630,43 +6630,14 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Osc Oscillator (general purpose oscillator).
     /// </summary>
-    internal static void OscOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 5, int slowLength = 10)
+    internal static void OscOscillator(ReadOnlySpan<double> close, Span<double> output, int fastLength = 7, int slowLength = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastMaArray = pool.Rent(close.Length);
-        var slowMaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastMa = fastMaArray.AsSpan(0, close.Length);
-            var slowMa = slowMaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastMa, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowMa, slowLength);
-
-            // Oscillator = (fast - slow) / slow * 100
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (slowMa[i] != 0)
-                {
-                    output[i] = (fastMa[i] - slowMa[i]) / slowMa[i] * 100;
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(fastMaArray);
-            pool.Return(slowMaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var fast = new StrengthAverage(MovingAvgType.SimpleMovingAverage, fastLength, close.Length);
+        using var slow = new StrengthAverage(MovingAvgType.SimpleMovingAverage, slowLength, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] =
+            slow.Next(new StrengthValue(close[i]), true).Mantissa - fast.Next(new StrengthValue(close[i]), true).Mantissa;
     }
 
     #endregion

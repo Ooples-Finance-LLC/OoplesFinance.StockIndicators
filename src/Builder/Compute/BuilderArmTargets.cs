@@ -651,7 +651,7 @@ internal static class BuilderArmTargets
         [typeof(OneLCLeastSquaresMovingAverageSpecOptions)] = new(IndicatorName._1LCLeastSquaresMovingAverage),
         [typeof(OptimalWeightedMovingAverageSpecOptions)] = new(IndicatorName.OptimalWeightedMovingAverage),
         [typeof(OptimizedTrendTrackerSpecOptions)] = new(IndicatorName.OptimizedTrendTracker),
-        [typeof(OscOscillatorSpecOptions)] = new(IndicatorName.OscOscillator, null, new BuilderArgument("Length", "fastLength", v => v is int n ? n / 2 : v), new BuilderArgument("Length", "slowLength")),
+        [typeof(OscOscillatorSpecOptions)] = new(IndicatorName.OscOscillator, null, new BuilderArgument("Length", "fastLength", v => v is int n ? Math.Max(1, n / 2) : v), new BuilderArgument("Length", "slowLength")),
         [typeof(OscarIndicatorSpecOptions)] = new(IndicatorName.OscarIndicator),
         [typeof(OvershootReductionMovingAverageSpecOptions)] = new(IndicatorName.OvershootReductionMovingAverage),
         [typeof(ParabolicSarSpecOptions)] = new(IndicatorName.ParabolicSAR),
