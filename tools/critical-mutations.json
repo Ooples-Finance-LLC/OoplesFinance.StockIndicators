@@ -4117,5 +4117,68 @@
     "before": "IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),",
     "after": "IndicatorName.WeightedMovingAverage when spec.Options is WmaSpecOptions wma => new WeightedMovingAverageState(1),",
     "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.WeightedComponentHasPublicLiveRouteWithRequestedPeriod"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-stochastic-batch-overflow-ratio",
+    "file": "src/Calculations/Stochastic/StochasticLtoR.cs",
+    "scope": "public static StockData CalculateNaturalStochasticIndicator",
+    "before": "ExactRangePosition.Fraction(c, ll, hh)",
+    "after": "hh == ll ? 0 : (c - ll) / (hh - ll)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.NaturalStochasticPreservesRepresentablePositionsAcrossScale"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-stochastic-fast-overflow-ratio",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNaturalStochasticIndicatorFast",
+    "before": "ExactRangePosition.Fraction(c, low, high)",
+    "after": "high == low ? 0 : (c - low) / (high - low)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.NaturalStochasticPreservesRepresentablePositionsAcrossScale"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-stochastic-native-overflow-ratio",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NaturalStochasticIndicatorState",
+    "before": "ExactRangePosition.Fraction(c, ll, hh)",
+    "after": "hh == ll ? 0 : (c - ll) / (hh - ll)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.NaturalStochasticPreservesRepresentablePositionsAcrossScale"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-stochastic-factory-wrong-smoothing",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new NaturalStochasticIndicatorState(natural.MaType, natural.Length, natural.SmoothLength)",
+    "after": "new NaturalStochasticIndicatorState(natural.MaType, natural.Length, natural.Length)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-stochastic-preview-commits",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class NaturalStochasticIndicatorState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "breadth-mcclellan-uses-obsolete-length",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new McClellanOscillatorState(breadth.MaType)",
+    "after": "new McClellanOscillatorState(breadth.MaType, fastLength: (int)breadth.GetType().GetProperty(\"Length\")!.GetValue(breadth)!)",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "natural-breadth-numerical",
+    "id": "natural-range-clamps-selected-price",
+    "file": "src/Helpers/ExactRangePosition.cs",
+    "scope": "internal static double Fraction",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return Math.Max(0, Math.Min(1, numerator.Ratio(denominator)));",
+    "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.SelectedPricesOutsideTheCandleRangeAreNotSilentlyClamped"
   }
 ]

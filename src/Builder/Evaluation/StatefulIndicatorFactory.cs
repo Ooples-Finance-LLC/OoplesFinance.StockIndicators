@@ -45,6 +45,12 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            NaturalDirectionalComboSpecOptions natural => new NaturalDirectionalComboState(natural.MaType, natural.Length, natural.SmoothLength),
+            NaturalDirectionalIndexSpecOptions natural => new NaturalDirectionalIndexState(natural.MaType, natural.Length, natural.SmoothLength),
+            NaturalStochasticIndicatorSpecOptions natural => new NaturalStochasticIndicatorState(natural.MaType, natural.Length, natural.SmoothLength),
+            McClellanOscillatorSpecOptions breadth => new McClellanOscillatorState(breadth.MaType),
+            DecisionPointBreadthSwenlinTradingOscillatorSpecOptions breadth => new DecisionPointBreadthSwenlinTradingOscillatorState(length: breadth.Length),
+            TickLineMomentumOscillatorSpecOptions breadth => new TickLineMomentumOscillatorState(breadth.MaType, breadth.Length),
             ConditionalAccumulatorSpecOptions ordinal => new ConditionalAccumulatorState(ordinal.MaType, ordinal.Length),
             ContractHighSpecOptions => new ContractHighLowState(),
             ContractLowSpecOptions => new ContractHighLowState(),

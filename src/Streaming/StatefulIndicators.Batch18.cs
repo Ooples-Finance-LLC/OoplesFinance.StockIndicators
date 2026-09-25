@@ -1025,8 +1025,7 @@ public sealed class NaturalStochasticIndicatorState : IStreamingIndicatorState, 
             var hh = EhlersStreamingWindow.GetOffsetValue(_highestValues, pendingHighest, j);
             var ll = EhlersStreamingWindow.GetOffsetValue(_lowestValues, pendingLowest, j);
             var c = EhlersStreamingWindow.GetOffsetValue(_inputValues, close, j);
-            var range = hh - ll;
-            var frac = range != 0 ? (c - ll) / range : 0;
+            var frac = ExactRangePosition.Fraction(c, ll, hh);
             var ratio = 1 / MathHelper.Sqrt(j + 1);
             weightSum += frac * ratio;
             denomSum += ratio;

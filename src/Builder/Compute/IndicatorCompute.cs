@@ -25613,8 +25613,7 @@ internal static partial class IndicatorCompute
                 var high = i >= j ? hh[i - j] : 0;
                 var low = i >= j ? ll[i - j] : 0;
                 var c = i >= j ? input[i - j] : 0;
-                var range = high - low;
-                var frac = range != 0 ? (c - low) / range : 0;
+                var frac = ExactRangePosition.Fraction(c, low, high);
                 var ratio = 1 / MathHelper.Sqrt(j + 1);
                 weightSum += frac * ratio;
                 denomSum += ratio;
