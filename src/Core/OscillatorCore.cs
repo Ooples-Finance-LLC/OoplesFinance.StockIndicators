@@ -446,37 +446,15 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(input.Length);
-
-        try
+        using var rsi = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, rsiLength, input.Length);
+        using var high = new OoplesFinance.StockIndicators.Streaming.RollingWindowMax(Math.Max(1, stochLength));
+        using var low = new OoplesFinance.StockIndicators.Streaming.RollingWindowMin(Math.Max(1, stochLength));
+        using var smoothing = new StrengthAverage(MovingAvgType.WildersSmoothingMethod, 3, input.Length);
+        for (var i = 0; i < input.Length; i++)
         {
-            var rsi = rsiArray.AsSpan(0, input.Length);
-            RelativeStrengthIndex(input, rsi, rsiLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < rsiLength + stochLength - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
-                var highestRsi = double.MinValue;
-                var lowestRsi = double.MaxValue;
-                for (var j = i - stochLength + 1; j <= i; j++)
-                {
-                    if (rsi[j] > highestRsi) highestRsi = rsi[j];
-                    if (rsi[j] < lowestRsi) lowestRsi = rsi[j];
-                }
-
-                var range = highestRsi - lowestRsi;
-                output[i] = range != 0 ? 100 * (rsi[i] - lowestRsi) / range : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
+            var value = rsi.Next(input[i], true);
+            var upper = high.Add(value, out _); var lower = low.Add(value, out _);
+            output[i] = smoothing.Next(new StrengthValue(ClampedRangePosition.Percent(value, lower, upper)), true).Mantissa;
         }
     }
 

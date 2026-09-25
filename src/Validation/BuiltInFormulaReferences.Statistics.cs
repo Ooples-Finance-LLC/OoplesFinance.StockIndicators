@@ -394,6 +394,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Cfo", new[] { "Cfo" }, bars => Outputs(("Cfo", RoundedForecastOscillator(bars, length))));
             case IndicatorName.StochasticRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
+                if (kind is 1 or 2 or 3 or 6) return new("StochRsi", new[] { "StochRsi", "Signal" }, bars => StochasticRsiOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var rsiLength = Integer(options, "RsiLength", length);
                 var stochLength = Integer(options, "StochLength", rsiLength);
