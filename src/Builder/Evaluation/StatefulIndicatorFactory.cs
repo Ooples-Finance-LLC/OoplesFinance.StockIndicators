@@ -45,6 +45,20 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            ConditionalAccumulatorSpecOptions ordinal => new ConditionalAccumulatorState(ordinal.MaType, ordinal.Length),
+            ContractHighSpecOptions => new ContractHighLowState(),
+            ContractLowSpecOptions => new ContractHighLowState(),
+            FractalChaosOscillatorSpecOptions => new FractalChaosOscillatorState(),
+            Dema2LinesSpecOptions ordinal => new Dema2LinesState(ordinal.MaType, ordinal.FastLength, ordinal.SlowLength),
+            KeltnerChannelMiddleSpecOptions ordinal => new KeltnerChannelsState(ordinal.MaType, ordinal.Length) { MiddleOnly = true },
+            PriceVolumeRankSpecOptions ordinal => new PriceVolumeRankState(ordinal.MaType, ordinal.FastLength, ordinal.SlowLength),
+            EhlersNoiseEliminationTechnologySpecOptions ordinal => new EhlersNoiseEliminationTechnologyState(ordinal.Length),
+            EhlersSpearmanRankIndicatorSpecOptions ordinal => new EhlersSpearmanRankIndicatorState(ordinal.Length),
+            TotalPowerIndicatorSpecOptions ordinal => new TotalPowerIndicatorState(ordinal.MaType, ordinal.Length1, ordinal.Length2),
+            TrendPersistenceRateSpecOptions ordinal => new TrendPersistenceRateState(length: ordinal.Length),
+            GuppyCountBackLineSpecOptions ordinal => new GuppyCountBackLineState(ordinal.Length),
+            GOscillatorSpecOptions ordinal => new GOscillatorState(ordinal.Length),
+            MultiVoteOnBalanceVolumeSpecOptions ordinal => new MultiVoteOnBalanceVolumeState(ordinal.MaType, ordinal.Length),
             MidpointOscillatorSpecOptions midpoint => new MidpointOscillatorState(midpoint.MaType, midpoint.Length),
             GuppyDistanceIndicatorSpecOptions gdi => new GuppyDistanceIndicatorState(gdi.MaType, gdi.Length1, gdi.Length2, gdi.Length3, gdi.Length4, gdi.Length5, gdi.Length6, gdi.Length7, gdi.Length8, gdi.Length9, gdi.Length10, gdi.Length11, gdi.Length12),
             GuppyMultipleMovingAverageSpecOptions gmma => new GuppyMultipleMovingAverageState(gmma.MaType, gmma.Length1, gmma.Length2, gmma.Length3, gmma.Length4, gmma.Length5, gmma.Length6, gmma.Length7, gmma.Length8, gmma.Length9, gmma.Length10, gmma.Length11, gmma.Length12, gmma.Length13, gmma.Length14, gmma.Length15, gmma.Length16, gmma.Length17, gmma.Length18, gmma.Length19, gmma.Length20, gmma.Length21, gmma.Length22, gmma.Length23, gmma.Length24, gmma.Length25, gmma.Length26, gmma.Length27),

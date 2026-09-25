@@ -72,6 +72,12 @@ internal static class BuilderArmBinding
             bars.InputValues = new List<double>(data.InputValues);
         }
 
+        // A middle-only request must not evaluate unrequested ATR/bands: their range
+        // can overflow while the bounded moving average remains representable.
+        if (spec.Options is KeltnerChannelMiddleSpecOptions middle
+            && (spec.OutputKey ?? target.OutputKey) == "MiddleBand")
+            return CalculationsHelper.GetMovingAverageList(bars, middle.MaType, middle.Length);
+
         var parameters = method.GetParameters();
         var map = ArgumentMaps.GetOrAdd((spec.Options.GetType(), target.Name), key => MapArguments(key.Options, target, parameters));
         var args = new object?[parameters.Length];

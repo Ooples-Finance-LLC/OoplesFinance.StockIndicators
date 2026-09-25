@@ -3518,6 +3518,8 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
     }
 
 
+    internal bool MiddleOnly { get; set; }
+
     public IndicatorName Name => IndicatorName.KeltnerChannels;
 
     public void Reset()
@@ -3531,6 +3533,13 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
+        if (MiddleOnly)
+        {
+            var middleOnly = _middleSmoother.Next(value, isFinal);
+            IReadOnlyDictionary<string, double>? middleOutput = includeOutputs
+                ? new Dictionary<string, double> { ["MiddleBand"] = middleOnly } : null;
+            return new StreamingIndicatorStateResult(middleOnly, middleOutput);
+        }
         // On the very first bar there is no previous close. Seeding it with 0 made the true range
         // max(high-low, |high-0|, |low-0|) - the bar's PRICE rather than its range - which on AAPL made
         // the opening ATR 18.2880 instead of 0.5170 and put the first upper band at 218.59 instead of
