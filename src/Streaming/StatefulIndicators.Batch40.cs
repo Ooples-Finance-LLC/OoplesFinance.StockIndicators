@@ -380,23 +380,25 @@ public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 /// kept here rather than borrowed.
 /// </remarks>
 [PrimaryOutput("Vmo")]
-public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
+public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState, ICustomInputConsumer
 {
-    private readonly double _shortK;
-    private readonly double _longK;
-    private readonly StreamingInputResolver _input;
+    private readonly int _shortLength;
+    private readonly int _longLength;
+    private StreamingInputResolver _input;
     private double _shortEma;
     private double _longEma;
     private int _barIndex;
 
     public VolumeMomentumOscillatorState(int shortLength = 5, int longLength = 20)
     {
-        _shortK = 2.0 / (Math.Max(1, shortLength) + 1);
-        _longK = 2.0 / (Math.Max(1, longLength) + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _shortLength = Math.Max(1, shortLength);
+        _longLength = Math.Max(1, longLength);
+        _input = new StreamingInputResolver(InputName.Volume, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeMomentumOscillator;
+
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
 
     public void Reset()
     {
@@ -407,22 +409,21 @@ public sealed class VolumeMomentumOscillatorState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var volume = bar.Volume;
+        var volume = _input.GetValue(bar);
 
         double oscillator = 0;
-        var shortEma = _barIndex == 0 ? volume : (volume * _shortK) + (_shortEma * (1 - _shortK));
-        var longEma = _barIndex == 0 ? volume : (volume * _longK) + (_longEma * (1 - _longK));
+        var shortEma = _barIndex == 0 ? volume : RoundedSeededEma.Next(volume, _shortEma, _shortLength);
+        var longEma = _barIndex == 0 ? volume : RoundedSeededEma.Next(volume, _longEma, _longLength);
         if (_barIndex >= 1)
         {
-            oscillator = longEma != 0 ? (shortEma - longEma) / longEma * 100 : 0;
+            oscillator = RoundedPercentageChange.Of(shortEma, longEma);
         }
 
         if (isFinal)
         {
             _shortEma = shortEma;
             _longEma = longEma;
-            _barIndex++;
+            _barIndex = 1;
         }
 
         IReadOnlyDictionary<string, double>? outputs = null;

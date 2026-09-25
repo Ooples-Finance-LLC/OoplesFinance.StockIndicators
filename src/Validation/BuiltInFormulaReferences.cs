@@ -336,6 +336,20 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.VolumeMomentumOscillator)
+        {
+            var volumeMomentumOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedVolumeMomentumOscillator(bars, volumeMomentumOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.VolumeOscillator)
+        {
+            var volumeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,
+                bars => RoundedVolumeOscillator(bars, volumeOptions), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.NormalizedMacd)
         {
             var normalizedOptions = builtIn.CreateOptions();

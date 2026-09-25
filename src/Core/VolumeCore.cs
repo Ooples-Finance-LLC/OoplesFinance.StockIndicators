@@ -461,12 +461,12 @@ internal static class VolumeCore
             var fastSma = fastSmaArray.AsSpan(0, volume.Length);
             var slowSma = slowSmaArray.AsSpan(0, volume.Length);
 
-            MovingAverageCore.SimpleMovingAverage(volume, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(volume, slowSma, slowLength);
+            BollingerArithmetic.Mean(volume, fastSma, fastLength);
+            BollingerArithmetic.Mean(volume, slowSma, slowLength);
 
             for (var i = 0; i < volume.Length; i++)
             {
-                output[i] = slowSma[i] != 0 ? ((fastSma[i] - slowSma[i]) / slowSma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(fastSma[i], slowSma[i]);
             }
         }
         finally

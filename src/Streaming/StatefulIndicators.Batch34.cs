@@ -256,41 +256,35 @@ public sealed class NormalizedVolumeState : IStreamingIndicatorState, IDisposabl
 /// The streaming twin of <c>Calculations.CalculateVolumeOscillator</c>, as a percentage of the long average.
 /// </remarks>
 [PrimaryOutput("Vo")]
-public sealed class VolumeOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class VolumeOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly int _fastLength;
-    private readonly int _slowLength;
-    private readonly RollingWindowSum _fastSum;
-    private readonly RollingWindowSum _slowSum;
-    private readonly StreamingInputResolver _input;
+    private readonly RoundedSimpleMovingAverageSmoother _fast;
+    private readonly RoundedSimpleMovingAverageSmoother _slow;
+    private StreamingInputResolver _input;
 
     public VolumeOscillatorState(int fastLength = 5, int slowLength = 20)
     {
-        _fastLength = Math.Max(1, fastLength);
-        _slowLength = Math.Max(1, slowLength);
-        _fastSum = new RollingWindowSum(_fastLength);
-        _slowSum = new RollingWindowSum(_slowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _fast = new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength));
+        _slow = new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength));
+        _input = new StreamingInputResolver(InputName.Volume, null);
     }
 
     public IndicatorName Name => IndicatorName.VolumeOscillator;
 
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
+
     public void Reset()
     {
-        _fastSum.Reset();
-        _slowSum.Reset();
+        _fast.Reset();
+        _slow.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var fastTotal = isFinal ? _fastSum.Add(volume, out var fastCount) : _fastSum.Preview(volume, out fastCount);
-        var slowTotal = isFinal ? _slowSum.Add(volume, out var slowCount) : _slowSum.Preview(volume, out slowCount);
-
-        var fastSma = fastCount >= _fastLength ? fastTotal / _fastLength : 0;
-        var slowSma = slowCount >= _slowLength ? slowTotal / _slowLength : 0;
-        var volumeOscillator = slowSma != 0 ? (fastSma - slowSma) / slowSma * 100 : 0;
+        var volume = _input.GetValue(bar);
+        var fastSma = _fast.Next(volume, isFinal);
+        var slowSma = _slow.Next(volume, isFinal);
+        var volumeOscillator = RoundedPercentageChange.Of(fastSma, slowSma);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -303,8 +297,8 @@ public sealed class VolumeOscillatorState : IStreamingIndicatorState, IDisposabl
 
     public void Dispose()
     {
-        _fastSum.Dispose();
-        _slowSum.Dispose();
+        _fast.Dispose();
+        _slow.Dispose();
     }
 }
 
