@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersFisherTransform)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => FisherValues(Closes(bars), Integer(builtIn.CreateOptions(), "Length", 10)), FisherBudget);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.CommodityChannelIndex or IndicatorName.WoodieCommodityChannelIndex or IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform
             && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.EhlersCommodityChannelIndexInverseFisherTransform ? 2 : 1) is 1 or 2 or 3 or 6)
         {

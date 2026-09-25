@@ -1268,7 +1268,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var maxH = maxList[i];
             var minL = minList[i];
-            var ratio = maxH - minL != 0 ? (currentValue - minL) / (maxH - minL) : .5;
+            var ratio = FisherArithmetic.Position(currentValue, minL, maxH);
             var prevFisherTransform1 = i >= 1 ? fisherTransformList[i - 1] : 0;
             var prevFisherTransform2 = i >= 2 ? fisherTransformList[i - 2] : 0;
 
@@ -1276,7 +1276,7 @@ public static partial class Calculations
             var nValue = MinOrMax((0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue), 0.999, -0.999);
             nValueList.Add(nValue);
 
-            var fisherTransform = (0.5 * Math.Log((1 + nValue) / (1 - nValue))) + (0.5 * prevFisherTransform1);
+            var fisherTransform = FisherArithmetic.Transform(nValue) + (0.5 * prevFisherTransform1);
             fisherTransformList.Add(fisherTransform);
 
             var signal = GetCompareSignal(fisherTransform - prevFisherTransform1, prevFisherTransform1 - prevFisherTransform2);

@@ -1024,11 +1024,11 @@ public sealed class EhlersFisherTransformState : IStreamingIndicatorState, IDisp
         var value = _input.GetValue(bar);
         var maxH = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
         var minL = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
-        var ratio = maxH - minL != 0 ? (value - minL) / (maxH - minL) : .5;
+        var ratio = FisherArithmetic.Position(value, minL, maxH);
         var prevNValue = _hasPrev ? _prevNValue : 0;
         var nValue = MathHelper.MinOrMax((0.33 * 2 * (ratio - 0.5)) + (0.67 * prevNValue), 0.999, -0.999);
         var prevFisher = _hasPrev ? _prevFisher : 0;
-        var fisher = (0.5 * Math.Log((1 + nValue) / (1 - nValue))) + (0.5 * prevFisher);
+        var fisher = FisherArithmetic.Transform(nValue) + (0.5 * prevFisher);
 
         if (isFinal)
         {
