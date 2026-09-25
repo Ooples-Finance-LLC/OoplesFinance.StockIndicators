@@ -336,6 +336,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ElliottWaveOscillator)
+        {
+            var elliottOptions = builtIn.CreateOptions();
+            var elliottKeys = new[] { "Ewo", "Signal", "Histogram" };
+            for (var slot = 0; slot < elliottKeys.Length; slot++)
+            {
+                var key = elliottKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedElliott(bars, elliottOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VolumeMomentumOscillator)
         {
             var volumeMomentumOptions = builtIn.CreateOptions();

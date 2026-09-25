@@ -2639,8 +2639,8 @@ internal static class OscillatorCore
             var fastEma = fastEmaArray.AsSpan(0, close.Length);
             var slowEma = slowEmaArray.AsSpan(0, close.Length);
 
-            MovingAverageCore.SimpleMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(close, slowEma, slowLength);
+            BollingerArithmetic.Mean(close, fastEma, fastLength);
+            BollingerArithmetic.Mean(close, slowEma, slowLength);
 
             for (var i = 0; i < close.Length; i++)
             {

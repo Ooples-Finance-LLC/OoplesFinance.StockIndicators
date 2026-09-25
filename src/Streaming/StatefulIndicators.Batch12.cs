@@ -292,13 +292,14 @@ public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisp
     private readonly IMovingAverageSmoother _slowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private bool _signalInvalid;
 
     public ElliottWaveOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5,
         int slowLength = 34)
     {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _fastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _signalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -309,6 +310,7 @@ public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisp
         _fastSmoother.Reset();
         _slowSmoother.Reset();
         _signalSmoother.Reset();
+        _signalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -317,7 +319,9 @@ public sealed class ElliottWaveOscillatorState : IStreamingIndicatorState, IDisp
         var fast = _fastSmoother.Next(value, isFinal);
         var slow = _slowSmoother.Next(value, isFinal);
         var ewo = fast - slow;
-        var signal = _signalSmoother.Next(ewo, isFinal);
+        var invalidSignal = _signalInvalid || double.IsInfinity(ewo);
+        var signal = invalidSignal ? double.NaN : _signalSmoother.Next(ewo, isFinal);
+        if (isFinal) _signalInvalid = invalidSignal;
         var histogram = ewo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

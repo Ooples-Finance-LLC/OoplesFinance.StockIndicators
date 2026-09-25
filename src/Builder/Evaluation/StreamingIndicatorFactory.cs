@@ -50,6 +50,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.NormalizedMacd when spec.Options is NormalizedMacdSpecOptions normalizedMacd => new NormalizedMacdState(normalizedMacd.FastLength, normalizedMacd.SlowLength),
             IndicatorName.VolumeOscillator when spec.Options is VolumeOscillatorSpecOptions volumeOscillator => new VolumeOscillatorState(slowLength: volumeOscillator.Length),
             IndicatorName.VolumeMomentumOscillator when spec.Options is VolumeMomentumOscillatorSpecOptions volumeMomentum => new VolumeMomentumOscillatorState(volumeMomentum.ShortLength, volumeMomentum.LongLength),
+            IndicatorName.ElliottWaveOscillator when spec.Options is ElliottWaveOscillatorSpecOptions elliott => new ElliottWaveOscillatorState(elliott.MaType, elliott.FastLength, elliott.SlowLength),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PvoSpecOptions pvo => new PercentageVolumeOscillatorState(pvo.MaType, pvo.Length, 26, pvo.SignalLength),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PercentageVolumeOscillatorSpecOptions pvo2 => new PercentageVolumeOscillatorState(pvo2.MaType, pvo2.FastLength, pvo2.SlowLength, pvo2.SignalLength),

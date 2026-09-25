@@ -2982,8 +2982,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var sma34List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var sma34List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2994,7 +2994,9 @@ public static partial class Calculations
             ewoList.Add(ewo);
         }
 
-        var ewoSignalLineList = GetMovingAverageList(stockData, maType, fastLength, ewoList);
+        var finiteInput = FiniteSignalInput.Create(ewoList, out var finiteCount);
+        var ewoSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finiteInput, fastLength) : GetMovingAverageList(stockData, maType, fastLength, finiteInput);
+        for (var i = finiteCount; i < ewoSignalLineList.Count; i++) ewoSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ewo = ewoList[i];
