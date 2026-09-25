@@ -4786,5 +4786,55 @@
     "after": "StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~TrueStrengthNumericalTests.PublicTrueStrengthUsesAllFiveCustomerComponents",
     "scope": "internal static ComputeBuffer ComputeTrueStrengthIndexFast"
+  },
+  {
+    "id": "wami-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/WamiWindow.cs",
+    "before": "StrengthValue.Round(difference, 1)",
+    "after": "new StrengthValue(_hasPrevious ? price - _previous : 0)",
+    "filter": "FullyQualifiedName~WamiNumericalTests.WideDifferencesCancelBeforePublicationAcrossAllRoutes"
+  },
+  {
+    "id": "wami-drops-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/WamiWindow.cs",
+    "before": "var value = _second.Next(_first.Next(_weighted.Next(StrengthValue.Round(difference, 1), final), final), final);",
+    "after": "var value = _first.Next(_weighted.Next(StrengthValue.Round(difference, 1), final), final);",
+    "filter": "FullyQualifiedName~WamiNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "wami-preview-commits-price",
+    "module": "numerical",
+    "file": "src/Helpers/WamiWindow.cs",
+    "before": "if (final) { _previous = price; _hasPrevious = true; }",
+    "after": "{ _previous = price; _hasPrevious = true; }",
+    "filter": "FullyQualifiedName~WamiNumericalTests.WideDifferencesCancelBeforePublicationAcrossAllRoutes"
+  },
+  {
+    "id": "wami-reset-retains-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/WamiWindow.cs",
+    "before": "_weighted.Reset(); _first.Reset(); _second.Reset();",
+    "after": "_weighted.Reset(); _first.Reset();",
+    "filter": "FullyQualifiedName~WamiNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "wami-replaces-fixed-weighted-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverageCore.WeightedMovingAverage(difference.Span, weighted.WritableSpan, length2);",
+    "after": "MovingAverage(data, MovingAvgType.WeightedMovingAverage, length2, difference.Span, weighted.WritableSpan);",
+    "filter": "FullyQualifiedName~WamiNumericalTests.PublicComponentsLeaveTheFixedWeightedStageIntact",
+    "scope": "internal static ComputeBuffer ComputeWamiOscillatorFast"
+  },
+  {
+    "id": "wami-raw-ignores-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~WamiNumericalTests.WideDifferencesCancelBeforePublicationAcrossAllRoutes",
+    "scope": "internal static ComputeBuffer ComputeWamiOscillatorFast"
   }
 ]

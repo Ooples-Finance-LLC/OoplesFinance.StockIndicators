@@ -5883,44 +5883,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void WamiOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adArray = pool.Rent(close.Length);
-        var emaAdArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ad = adArray.AsSpan(0, close.Length);
-            var emaAd = emaAdArray.AsSpan(0, close.Length);
-
-            // Calculate Williams %AD
-            for (var i = 0; i < close.Length; i++)
-            {
-                var trueHigh = i > 0 ? Math.Max(high[i], close[i - 1]) : high[i];
-                var trueLow = i > 0 ? Math.Min(low[i], close[i - 1]) : low[i];
-                var range = trueHigh - trueLow;
-
-                ad[i] = range != 0 ? (close[i] - trueLow) - (trueHigh - close[i]) : 0;
-            }
-
-            // Apply EMA
-            MovingAverageCore.ExponentialMovingAverage(ad, emaAd, length);
-
-            // Output
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = emaAd[i];
-            }
-        }
-        finally
-        {
-            pool.Return(adArray);
-            pool.Return(emaAdArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        using var window = new WamiWindow(MovingAvgType.ExponentialMovingAverage, length, capacityHint: close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

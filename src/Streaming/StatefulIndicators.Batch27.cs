@@ -713,6 +713,7 @@ public sealed class WaddahAttarExplosionState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Wami")]
 public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
 {
+    private readonly WamiWindow? _wide;
     private readonly IMovingAverageSmoother _diffWma;
     private readonly IMovingAverageSmoother _ema1;
     private readonly IMovingAverageSmoother _ema2;
@@ -723,6 +724,7 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
     public WamiOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 13,
         int length2 = 4)
     {
+        if (StrengthWindow.Supports(maType)) _wide = new WamiWindow(maType, length1, length2);
         _diffWma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, length2));
         _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
         _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
@@ -733,6 +735,7 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
+        _wide?.Reset();
         _diffWma.Reset();
         _ema1.Reset();
         _ema2.Reset();
@@ -743,12 +746,18 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
+        double wami;
+        if (_wide is not null) wami = _wide.Next(value, isFinal);
+        else
+        {
+            var prevValue = _hasPrev ? _prevValue : 0;
+            var diff = _hasPrev ? value - prevValue : 0;
 
-        var wma = _diffWma.Next(diff, isFinal);
-        var ema1 = _ema1.Next(wma, isFinal);
-        var wami = _ema2.Next(ema1, isFinal);
+            var wma = _diffWma.Next(diff, isFinal);
+            var ema1 = _ema1.Next(wma, isFinal);
+            wami = _ema2.Next(ema1, isFinal);
+
+        }
 
         if (isFinal)
         {
@@ -770,6 +779,7 @@ public sealed class WamiOscillatorState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _diffWma.Dispose();
         _ema1.Dispose();
         _ema2.Dispose();

@@ -889,18 +889,24 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> wamiList;
+        if (StrengthWindow.Supports(maType)) wamiList = WamiWindow.Compute(inputList, maType, length1, length2);
+        else
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var currentValue = inputList[i];
+                var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var diff = MinPastValues(i, 1, currentValue - prevValue);
-            diffList.Add(diff);
+                var diff = MinPastValues(i, 1, currentValue - prevValue);
+                diffList.Add(diff);
+            }
+
+            var wma1List = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length2, diffList);
+            var ema2List = GetMovingAverageList(stockData, maType, length1, wma1List);
+            wamiList = GetMovingAverageList(stockData, maType, length1, ema2List);
         }
 
-        var wma1List = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length2, diffList);
-        var ema2List = GetMovingAverageList(stockData, maType, length1, wma1List);
-        var wamiList = GetMovingAverageList(stockData, maType, length1, ema2List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var wami = wamiList[i];
