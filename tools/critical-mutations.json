@@ -4180,5 +4180,68 @@
     "before": "return numerator.Ratio(denominator);",
     "after": "return Math.Max(0, Math.Min(1, numerator.Ratio(denominator)));",
     "filter": "FullyQualifiedName~NaturalBreadthNumericalTests.SelectedPricesOutsideTheCandleRangeAreNotSilentlyClamped"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-exhaustion-loses-minimum-window",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrendExhaustionIndicatorState",
+    "before": "_highWindow = new RollingWindowMax(Math.Max(2, resolved));",
+    "after": "_highWindow = new RollingWindowMax(resolved);",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.MinimumPeriodExhaustionUsesTheTwoBarBreakoutWindow"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-gann-discards-average",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new GannHiLoActivatorState(trend.MaType, trend.Length)",
+    "after": "new GannHiLoActivatorState(MovingAvgType.SimpleMovingAverage, trend.Length)",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-gann-preview-commits",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class GannHiLoActivatorState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-support-swaps-secondary",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class SupportResistanceState",
+    "before": "{ \"Resistance\", res }",
+    "after": "{ \"Resistance\", supp }",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-relative-squares-ignores-ties",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RelativeDifferenceOfSquaresOscillatorState",
+    "before": "var total = aSum + dSum + nSum;",
+    "after": "var total = aSum + dSum;",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-vanilla-publishes-regime",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VanillaABCDPatternState",
+    "before": "var dos = os - prevOs;",
+    "after": "var dos = os;",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "trend-pattern-numerical",
+    "id": "trend-vostro-factory-discards-level",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new VostroIndicatorState(vostro.MaType, vostro.Length1, vostro.Length2, vostro.Level)",
+    "after": "new VostroIndicatorState(vostro.MaType, vostro.Length1, vostro.Length2, 0)",
+    "filter": "FullyQualifiedName~TrendPatternNumericalTests.VostroFactoriesPreserveTheConfiguredThreshold"
   }
 ]

@@ -14,7 +14,19 @@ internal static class StreamingIndicatorFactory
     /// </summary>
     public static IStreamingIndicatorState? CreateState(IndicatorSpec spec)
     {
-        if (spec.Options is NaturalDirectionalComboSpecOptions or
+        if (spec.Options is ElderImpulseSystemSpecOptions or
+            GannHiLoActivatorSpecOptions or
+            LinearChannelsSpecOptions or
+            LinearTrailingStopSpecOptions or
+            SupportResistanceSpecOptions or
+            TimePriceIndicatorSpecOptions or
+            TrendExhaustionIndicatorSpecOptions or
+            VanillaABCDPatternSpecOptions or
+            VixTradingSystemSpecOptions or
+            VostroIndicatorSpecOptions or
+            UhlMaCrossoverSystemSpecOptions or
+            RelativeDifferenceOfSquaresOscillatorSpecOptions or
+            NaturalDirectionalComboSpecOptions or
             NaturalDirectionalIndexSpecOptions or
             NaturalStochasticIndicatorSpecOptions or
             NaturalMarketMirrorSpecOptions or
