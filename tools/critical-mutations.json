@@ -4608,5 +4608,68 @@
     "before": "if (Math.Abs(relative) <= 1e-8) return RoundedNearUnityLog.Of(current, previous);",
     "after": "if (Math.Abs(relative) < 0) return RoundedNearUnityLog.Of(current, previous);",
     "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.NearUnityLogsAreCorrectlyRoundedBeforeVariance"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-rounds-reciprocal-before-summing",
+    "file": "src/Helpers/ExactReciprocalSum.cs",
+    "scope": "internal void Add",
+    "before": "var units = ExactVarianceWindow.Units(value);",
+    "after": "var units = ExactVarianceWindow.Units(1.0 / (1.0 / value));",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-counts-zero-input",
+    "file": "src/Helpers/ExactReciprocalSum.cs",
+    "scope": "internal void Add",
+    "before": "if (value == 0) return;",
+    "after": "if (value == 0) { _count++; return; }",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-core-erases-startup",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void HarmonicMeanMovingAverage",
+    "before": "output[i] = input[i];",
+    "after": "output[i] = 0;",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-native-omits-current-input",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class HarmonicMeanMovingAverageState",
+    "before": "sum.Add(value);",
+    "after": "sum.Add(0);",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-fast-ignores-selected-price",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHarmonicMeanMovingAverageFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-reference-discards-negative-input",
+    "file": "src/Validation/BuiltInFormulaReferences.Harmonic.cs",
+    "scope": "internal static double[] HarmonicMeanReference",
+    "before": "if (bars[j].Close == 0) continue;",
+    "after": "if (bars[j].Close <= 0) continue;",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.ExactReciprocalsPreserveCancellationAndZeroConventions"
+  },
+  {
+    "module": "harmonic-mean-numerical",
+    "id": "harmonic-removes-proven-overflow-contract",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "internal static IEnumerable<IndicatorValidationRule> For",
+    "before": "builtIn.BatchName == IndicatorName.HarmonicMeanMovingAverage",
+    "after": "builtIn.BatchName == (IndicatorName)(-1)",
+    "filter": "FullyQualifiedName~HarmonicMeanNumericalTests.PublishedOverflowHasIndependentRejectionEvidence"
   }
 ]

@@ -891,21 +891,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.GeometricMeanMovingAverage:
                 return new("Gmma", new[] { "Gmma" }, bars => Outputs(("Gmma", RoundedGeometricMean(bars, length, positiveOnly: true))));
             case IndicatorName.HarmonicMeanMovingAverage:
-                return new("Hmma", new[] { "Hmma" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        if (i < length - 1) { result[i] = prices[i]; continue; }
-                        var values = Window(prices, i, length).Where(v => v != 0).ToArray();
-                        if (values.Length == 0) continue;
-                        var scale = values.Max(v => Math.Abs(v));
-                        var reciprocals = values.Sum(v => scale / v);
-                        result[i] = reciprocals == 0 ? 0 : scale * (values.Length / reciprocals);
-                    }
-                    return Outputs(("Hmma", result));
-                });
+                return new("Hmma", new[] { "Hmma" }, bars => Outputs(("Hmma", HarmonicMeanReference(bars, length))));
             case IndicatorName.LeoMovingAverage:
                 return new("Lma", new[] { "Lma" }, bars =>
                 {
