@@ -9793,76 +9793,17 @@ public sealed class ApirineSlowRelativeStrengthIndexState : IStreamingIndicatorS
 [PrimaryOutput("Arsi")]
 public sealed class AsymmetricalRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _upCountSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevUpSum;
-    private double _prevDownSum;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public AsymmetricalRelativeStrengthIndexState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _upCountSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AsymmetricGainLossWindow _window;
+    public AsymmetricalRelativeStrengthIndexState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.AsymmetricalRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _upCountSum.Reset();
-        _prevUpSum = 0;
-        _prevDownSum = 0;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var roc = prevValue != 0 ? (value - prevValue) / prevValue * 100 : 0;
-        var upFlag = roc >= 0 ? 1 : 0;
-        int countAfter;
-        var upCount = isFinal ? _upCountSum.Add(upFlag, out countAfter) : _upCountSum.Preview(upFlag, out countAfter);
-        var upAlpha = upCount != 0 ? 1 / upCount : 0;
-        var posRoc = roc > 0 ? roc : 0;
-        var negRoc = roc < 0 ? Math.Abs(roc) : 0;
-        var prevUpSum = _hasPrev ? _prevUpSum : 0;
-        var upSum = (upAlpha * posRoc) + ((1 - upAlpha) * prevUpSum);
-        var downCount = _length - upCount;
-        var downAlpha = downCount != 0 ? 1 / downCount : 0;
-        var prevDownSum = _hasPrev ? _prevDownSum : 0;
-        var downSum = (downAlpha * negRoc) + ((1 - downAlpha) * prevDownSum);
-        var ars = downSum != 0 ? upSum / downSum : 0;
-        var arsi = downSum == 0 ? 100 : upSum == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ars)), 100, 0);
-
-        if (isFinal)
-        {
-            _prevUpSum = upSum;
-            _prevDownSum = downSum;
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Arsi", arsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(arsi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Arsi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _upCountSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Afp")]

@@ -17,7 +17,7 @@ internal sealed class IntradayGainLossWindow : IDisposable
     private ExactMeanAccumulator _numerator, _total;
     internal IntradayGainLossWindow(int length, int capacityHint = int.MaxValue) =>
         _changes = new(Math.Min(Math.Max(1, length), Math.Max(1, capacityHint)));
-    internal double Next(double close, double open, bool final)
+    internal double Next(double close, double open, bool final, double empty = 0)
     {
         var change = GainLossShare.Change(close, open);
         var numerator = _numerator; var total = _total;
@@ -29,7 +29,7 @@ internal sealed class IntradayGainLossWindow : IDisposable
         }
         if (change.Mantissa > 0) change.AddTo(ref numerator, 100);
         change.Absolute.AddTo(ref total);
-        var value = GainLossShare.Of(numerator, total, 0);
+        var value = GainLossShare.Of(numerator, total, empty);
         if (final) { _numerator = numerator; _total = total; _changes.TryAdd(change, out _); }
         return value;
     }

@@ -315,6 +315,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rsi", line), ("Signal", Average(line, Integer(options, "SmoothLength", 10), kind)));
                 });
             case IndicatorName.RapidRelativeStrengthIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Rrsi", new[] { "Rrsi", "Signal" }, bars => AdaptiveGainLossOutputs(bars, indicator));
                 return new("Rrsi", new[] { "Rrsi", "Signal" }, bars =>
                 {
                     var change = bars.Select((bar, i) => i == 0 ? 0 : bar.Close - bars[i - 1].Close).ToArray();

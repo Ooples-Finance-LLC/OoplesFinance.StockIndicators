@@ -2880,44 +2880,10 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var gainsArray = pool.Rent(close.Length);
-        var lossesArray = pool.Rent(close.Length);
-        var avgGainArray = pool.Rent(close.Length);
-        var avgLossArray = pool.Rent(close.Length);
+        // The public alias retains an obsolete downLength; the formula has one count window.
+        _ = downLength;
+        AsymmetricalRelativeStrengthIndex(close, output, upLength);
 
-        try
-        {
-            var gains = gainsArray.AsSpan(0, close.Length);
-            var losses = lossesArray.AsSpan(0, close.Length);
-            var avgGain = avgGainArray.AsSpan(0, close.Length);
-            var avgLoss = avgLossArray.AsSpan(0, close.Length);
-
-            gains[0] = 0;
-            losses[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                gains[i] = change > 0 ? change : 0;
-                losses[i] = change < 0 ? -change : 0;
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(gains, avgGain, upLength);
-            MovingAverageCore.ExponentialMovingAverage(losses, avgLoss, downLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var rs = avgLoss[i] > 0 ? avgGain[i] / avgLoss[i] : 100;
-                output[i] = 100 - 100 / (1 + rs);
-            }
-        }
-        finally
-        {
-            pool.Return(gainsArray);
-            pool.Return(lossesArray);
-            pool.Return(avgGainArray);
-            pool.Return(avgLossArray);
-        }
     }
 
     /// <summary>
@@ -8699,31 +8665,9 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        length = Math.Max(1, length);
-        var upCountSum = new RollingSum();
-        double upSum = 0, downSum = 0;
+        using var window = new AsymmetricGainLossWindow(length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevValue = i >= 1 ? close[i - 1] : 0;
-            var roc = prevValue != 0 ? (close[i] - prevValue) / prevValue * 100 : 0;
-
-            var upFlag = roc >= 0 ? 1.0 : 0.0;
-            upCountSum.Add(upFlag);
-            var upCount = upCountSum.Sum(length);
-            var upAlpha = upCount != 0 ? 1 / upCount : 0;
-            var posRoc = roc > 0 ? roc : 0;
-            var negRoc = roc < 0 ? Math.Abs(roc) : 0;
-
-            upSum = (upAlpha * posRoc) + ((1 - upAlpha) * upSum);
-
-            var downCount = length - upCount;
-            var downAlpha = downCount != 0 ? 1 / downCount : 0;
-            downSum = (downAlpha * negRoc) + ((1 - downAlpha) * downSum);
-
-            var ars = downSum != 0 ? upSum / downSum : 0;
-            output[i] = downSum == 0 ? 100 : upSum == 0 ? 0 : Math.Min(Math.Max(100 - (100 / (1 + ars)), 0), 100);
-        }
     }
 
     /// <summary>

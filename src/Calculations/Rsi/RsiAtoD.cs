@@ -92,44 +92,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAsymmetricalRelativeStrengthIndex(this StockData stockData, int length = 14)
     {
-        List<double> rocList = new(stockData.Count);
-        List<double> upSumList = new(stockData.Count);
-        List<double> downSumList = new(stockData.Count);
         List<double> arsiList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum upCountSum = new();
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new AsymmetricGainLossWindow(length, stockData.Count);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevArsi1 = i >= 1 ? arsiList[i - 1] : 0;
             var prevArsi2 = i >= 2 ? arsiList[i - 2] : 0;
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var roc = prevValue != 0 ? MinPastValues(i, 1, currentValue - prevValue) / prevValue * 100 : 0;
-            rocList.Add(roc);
-
-            var upFlag = roc >= 0 ? 1 : 0;
-            upCountSum.Add(upFlag);
-            double upCount = upCountSum.Sum(length);
-            var upAlpha = upCount != 0 ? 1 / upCount : 0;
-            var posRoc = roc > 0 ? roc : 0;
-            var negRoc = roc < 0 ? Math.Abs(roc) : 0;
-
-            var prevUpSum = GetLastOrDefault(upSumList);
-            var upSum = (upAlpha * posRoc) + ((1 - upAlpha) * prevUpSum);
-            upSumList.Add(upSum);
-
-            var downCount = length - upCount;
-            var downAlpha = downCount != 0 ? 1 / downCount : 0;
-
-            var prevDownSum = GetLastOrDefault(downSumList);
-            var downSum = (downAlpha * negRoc) + ((1 - downAlpha) * prevDownSum);
-            downSumList.Add(downSum);
-
-            var ars = downSum != 0 ? upSum / downSum : 0;
-            var arsi = downSum == 0 ? 100 : upSum == 0 ? 0 : MinOrMax(100 - (100 / (1 + ars)), 100, 0);
+            var arsi = window.Next(inputList[i], true);
             arsiList.Add(arsi);
 
             var signal = GetRsiSignal(arsi - prevArsi1, prevArsi1 - prevArsi2, arsi, prevArsi1, 70, 30);
