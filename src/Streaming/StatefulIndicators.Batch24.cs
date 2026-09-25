@@ -708,93 +708,19 @@ public sealed class TotalPowerIndicatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Tpx")]
 public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _bullSmoother;
-    private readonly IMovingAverageSmoother _bearSmoother;
-    private readonly IMovingAverageSmoother _netSmoother;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-
-    public TraderPressureIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 7,
-        int length2 = 2, int smoothLength = 3)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _highWindow = new RollingWindowMax(resolved2);
-        _lowWindow = new RollingWindowMin(resolved2);
-        _bullSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _bearSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _netSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-    }
-
+    private readonly TraderPressureWindow _window;
+    public TraderPressureIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 7, int length2 = 2, int smoothLength = 3) =>
+        _window = new TraderPressureWindow(maType, length1, length2, smoothLength);
     public IndicatorName Name => IndicatorName.TraderPressureIndex;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _bullSmoother.Reset();
-        _bearSmoother.Reset();
-        _netSmoother.Reset();
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var hiup = Math.Max(high - prevHigh, 0);
-        var loup = Math.Max(low - prevLow, 0);
-        var hidn = Math.Min(high - prevHigh, 0);
-        var lodn = Math.Min(low - prevLow, 0);
-
-        var highest = isFinal ? _highWindow.Add(high, out _) : _highWindow.Preview(high, out _);
-        var lowest = isFinal ? _lowWindow.Add(low, out _) : _lowWindow.Preview(low, out _);
-        var range = highest - lowest;
-        var bulls = range != 0 ? Math.Min((hiup + loup) / range, 1) * 100 : 0;
-        var bears = range != 0 ? Math.Max((hidn + lodn) / range, -1) * -100 : 0;
-
-        var avgBulls = _bullSmoother.Next(bulls, isFinal);
-        var avgBears = _bearSmoother.Next(bears, isFinal);
-        var net = avgBulls - avgBears;
-        var tpx = _netSmoother.Next(net, isFinal);
-
-        if (isFinal)
-        {
-            _prevHigh = high;
-            _prevLow = low;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Tpx", tpx },
-                { "Bulls", avgBulls },
-                { "Bears", avgBears }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tpx, outputs);
+        var value = _window.Next(bar.High, bar.Low, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Tpx", value.Net }, { "Bulls", value.Bulls }, { "Bears", value.Bears } } : null;
+        return new StreamingIndicatorStateResult(value.Net, outputs);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _bullSmoother.Dispose();
-        _bearSmoother.Dispose();
-    _netSmoother.Dispose();
-}
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tdi")]

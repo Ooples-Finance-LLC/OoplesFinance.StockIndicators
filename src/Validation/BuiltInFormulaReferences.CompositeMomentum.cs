@@ -97,17 +97,7 @@ internal static partial class BuiltInFormulaReferences
                         + (i < Period("SmaLength") ? 0 : dpoBuy[i - Period("SmaLength")] + dpoSell[i - Period("SmaLength")])).ToArray()));
                 });
             case IndicatorName.EmaWaveIndicator:
-                return new("Wa", new[] { "Wa", "Wb", "Wc" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    double[] Wave(int period)
-                    {
-                        var average = Average(prices, period, 3);
-                        return Average(prices.Select((v, i) => v - average[i]).ToArray(), Integer(options, "SmoothLength", 4), 1);
-                    }
-                    return Outputs(("Wa", Wave(Integer(options, "Length1", 5))),
-                        ("Wb", Wave(Integer(options, "Length2", 25))), ("Wc", Wave(Integer(options, "Length3", 50))));
-                });
+                return new("Wa", new[] { "Wa", "Wb", "Wc" }, bars => ResidualPressureOutputs(bars, indicator));
             case IndicatorName.FunctionToCandles:
                 var candleKind = AverageKind(options, 6);
                 if (candleKind == 0) return null;

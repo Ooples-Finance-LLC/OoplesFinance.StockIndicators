@@ -204,6 +204,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Emt", expansion), ("Signal", Average(expansion, length, kind)));
                 });
             case IndicatorName.ErgodicMeanDeviationIndicator:
+                if (kind is 1 or 2 or 3 or 6) return new("Emdi", new[] { "Emdi", "Signal" }, bars => ResidualPressureOutputs(bars, indicator));
                 if (kind == 0) return null;
                 var meanFirst = Integer(options, "Length1", 32);
                 var meanSecond = Integer(options, "Length2", 5);

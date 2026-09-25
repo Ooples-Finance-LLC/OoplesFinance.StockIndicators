@@ -2321,6 +2321,20 @@ public static partial class Calculations
     public static StockData CalculateTraderPressureIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length1 = 7, int length2 = 2, int smoothLength = 3)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            using var window = new TraderPressureWindow(maType, length1, length2, smoothLength);
+            var line = new List<double>(stockData.Count); var bulls = new List<double>(stockData.Count); var bears = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], true);
+                signals?.Add(GetCompareSignal(value.Net, i > 0 ? line[i - 1] : 0));
+                line.Add(value.Net); bulls.Add(value.Bulls); bears.Add(value.Bears);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tpx", line }, { "Bulls", bulls }, { "Bears", bears } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(line);
+            stockData.IndicatorName = IndicatorName.TraderPressureIndex; return stockData;
+        }
         List<double> bullsList = new(stockData.Count);
         List<double> bearsList = new(stockData.Count);
         List<double> netList = new(stockData.Count);

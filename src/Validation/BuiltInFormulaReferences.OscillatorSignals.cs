@@ -108,6 +108,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Uto", line), ("Signal", Average(line, 4, kind)));
                 });
             case IndicatorName.TraderPressureIndex:
+                if (kind is 1 or 2 or 3 or 6) return new("Tpx", new[] { "Tpx", "Bulls", "Bears" }, bars => ResidualPressureOutputs(bars, indicator));
                 return new("Tpx", new[] { "Tpx", "Bulls", "Bears" }, bars =>
                 {
                     var period = Integer(options, "Length1", 7);

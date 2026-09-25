@@ -3369,56 +3369,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEmaWaveIndicator(this StockData stockData, int length1 = 5, int length2 = 25, int length3 = 50, int smoothLength = 4)
     {
-        List<double> emaADiffList = new(stockData.Count);
-        List<double> emaBDiffList = new(stockData.Count);
-        List<double> emaCDiffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var emaAList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length1, inputList);
-        var emaBList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length2, inputList);
-        var emaCList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length3, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> Wave(int length)
         {
-            var currentValue = inputList[i];
-            var emaA = emaAList[i];
-            var emaB = emaBList[i];
-            var emaC = emaCList[i];
-
-            var emaADiff = currentValue - emaA;
-            emaADiffList.Add(emaADiff);
-
-            var emaBDiff = currentValue - emaB;
-            emaBDiffList.Add(emaBDiff);
-
-            var emaCDiff = currentValue - emaC;
-            emaCDiffList.Add(emaCDiff);
+            using var window = new ResidualAverageWindow(MovingAvgType.ExponentialMovingAverage, length, MovingAvgType.SimpleMovingAverage, smoothLength);
+            return input.Select(value => window.Next(value, true).Value).ToList();
         }
-
-        var waList = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, smoothLength, emaADiffList);
-        var wbList = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, smoothLength, emaBDiffList);
-        var wcList = GetMovingAverageList(stockData, MovingAvgType.SimpleMovingAverage, smoothLength, emaCDiffList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var wa = waList[i];
-            var wb = wbList[i];
-            var wc = wcList[i];
-
-            var signal = GetConditionSignal(wa > 0 && wb > 0 && wc > 0, wa < 0 && wb < 0 && wc < 0);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wa", waList },
-            { "Wb", wbList },
-            { "Wc", wcList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EmaWaveIndicator;
-
-        return stockData;
+        var a = Wave(length1); var b = Wave(length2); var c = Wave(length3); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetConditionSignal(a[i] > 0 && b[i] > 0 && c[i] > 0, a[i] < 0 && b[i] < 0 && c[i] < 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wa", a }, { "Wb", b }, { "Wc", c } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
+        stockData.IndicatorName = IndicatorName.EmaWaveIndicator; return stockData;
     }
 
 
@@ -3436,6 +3397,21 @@ public static partial class Calculations
     public static StockData CalculateErgodicMeanDeviationIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 32, int length2 = 5, int length3 = 5, int signalLength = 5)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            using var window = new ResidualAverageWindow(maType, length1, maType, length2, length3, signalLength);
+            var line = new List<double>(stockData.Count); var signalLine = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < prices.Count; i++)
+            {
+                var value = window.Next(prices[i], true);
+                signals?.Add(GetCompareSignal(value.Value - value.Signal, i > 0 ? line[i - 1] - signalLine[i - 1] : 0));
+                line.Add(value.Value); signalLine.Add(value.Signal);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Emdi", line }, { "Signal", signalLine } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(line);
+            stockData.IndicatorName = IndicatorName.ErgodicMeanDeviationIndicator; return stockData;
+        }
         List<double> ma1List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
