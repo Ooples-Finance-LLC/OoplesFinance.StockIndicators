@@ -842,17 +842,18 @@ public sealed class PercentagePriceOscillatorLeaderState : IStreamingIndicatorSt
     private readonly IMovingAverageSmoother _diffSlowSmoother;
     private readonly IMovingAverageSmoother _signalSmoother;
     private readonly StreamingInputResolver _input;
+    private readonly bool[] _invalid = new bool[3];
 
     public PercentagePriceOscillatorLeaderState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 12,
         int slowLength = 26, int signalLength = 9)
     {
         var resolvedFast = Math.Max(1, fastLength);
         var resolvedSlow = Math.Max(1, slowLength);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _diffFastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _diffSlowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        _fastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedFast) : MovingAverageSmootherFactory.Create(maType, resolvedFast);
+        _slowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedSlow) : MovingAverageSmootherFactory.Create(maType, resolvedSlow);
+        _diffFastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedFast) : MovingAverageSmootherFactory.Create(maType, resolvedFast);
+        _diffSlowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolvedSlow) : MovingAverageSmootherFactory.Create(maType, resolvedSlow);
+        _signalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -865,22 +866,28 @@ public sealed class PercentagePriceOscillatorLeaderState : IStreamingIndicatorSt
         _diffFastSmoother.Reset();
         _diffSlowSmoother.Reset();
         _signalSmoother.Reset();
+        Array.Clear(_invalid, 0, _invalid.Length);
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        double Smooth(IMovingAverageSmoother smoother, double input, int slot)
+        {
+            var invalid = _invalid[slot] || double.IsNaN(input) || double.IsInfinity(input);
+            if (isFinal) _invalid[slot] = invalid;
+            return invalid ? double.NaN : smoother.Next(input, isFinal);
+        }
         var value = _input.GetValue(bar);
         var emaFast = _fastSmoother.Next(value, isFinal);
         var emaSlow = _slowSmoother.Next(value, isFinal);
         var diffFast = value - emaFast;
         var diffSlow = value - emaSlow;
-        var diffFastMa = _diffFastSmoother.Next(diffFast, isFinal);
-        var diffSlowMa = _diffSlowSmoother.Next(diffSlow, isFinal);
+        var diffFastMa = Smooth(_diffFastSmoother, diffFast, 0);
+        var diffSlowMa = Smooth(_diffSlowSmoother, diffSlow, 1);
         var i1 = emaFast + diffFastMa;
         var i2 = emaSlow + diffSlowMa;
-        var macd = i1 - i2;
-        var ppo = i2 != 0 ? macd / i2 * 100 : 0;
-        var signal = _signalSmoother.Next(ppo, isFinal);
+        var ppo = RoundedFractionalEma.Percentage(i1, i2);
+        var signal = Smooth(_signalSmoother, ppo, 2);
         var histogram = ppo - signal;
 
         IReadOnlyDictionary<string, double>? outputs = null;

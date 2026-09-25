@@ -70,8 +70,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var emaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var ema26List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var emaListInput = FiniteSignalInput.Create(inputList, out var emaListCount);
+        var emaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(emaListInput, fastLength)
+            : GetMovingAverageList(stockData, maType, fastLength, emaListInput);
+        for (var i = emaListCount; i < emaList.Count; i++) emaList[i] = double.NaN;
+        var ema26ListInput = FiniteSignalInput.Create(inputList, out var ema26ListCount);
+        var ema26List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(ema26ListInput, slowLength)
+            : GetMovingAverageList(stockData, maType, slowLength, ema26ListInput);
+        for (var i = ema26ListCount; i < ema26List.Count; i++) ema26List[i] = double.NaN;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -86,8 +92,14 @@ public static partial class Calculations
             diff26List.Add(diff26);
         }
 
-        var diff12EmaList = GetMovingAverageList(stockData, maType, fastLength, diff12List);
-        var diff26EmaList = GetMovingAverageList(stockData, maType, slowLength, diff26List);
+        var diff12EmaListInput = FiniteSignalInput.Create(diff12List, out var diff12EmaListCount);
+        var diff12EmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(diff12EmaListInput, fastLength)
+            : GetMovingAverageList(stockData, maType, fastLength, diff12EmaListInput);
+        for (var i = diff12EmaListCount; i < diff12EmaList.Count; i++) diff12EmaList[i] = double.NaN;
+        var diff26EmaListInput = FiniteSignalInput.Create(diff26List, out var diff26EmaListCount);
+        var diff26EmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(diff26EmaListInput, slowLength)
+            : GetMovingAverageList(stockData, maType, slowLength, diff26EmaListInput);
+        for (var i = diff26EmaListCount; i < diff26EmaList.Count; i++) diff26EmaList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ema12 = emaList[i];
@@ -105,7 +117,10 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, signalLength, macdList);
+        var macdSignalLineListInput = FiniteSignalInput.Create(macdList, out var macdSignalLineListCount);
+        var macdSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdSignalLineListInput, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, macdSignalLineListInput);
+        for (var i = macdSignalLineListCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macd = macdList[i];

@@ -7371,57 +7371,29 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PercentagePriceOscillatorLeader(ReadOnlySpan<double> close, Span<double> output, int fastLength = 12, int slowLength = 26)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (close.IsEmpty) return;
+        var fast = new double[close.Length];
+        var slow = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(close, fast, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(close, slow, slowLength);
+        var fastDistance = new List<double>(close.Length);
+        var slowDistance = new List<double>(close.Length);
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+            fastDistance.Add(close[i] - fast[i]);
+            slowDistance.Add(close[i] - slow[i]);
         }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-        var fastSlopeArray = pool.Rent(close.Length);
-        var slowSlopeArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-            var fastSlope = fastSlopeArray.AsSpan(0, close.Length);
-            var slowSlope = slowSlopeArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(close, slowEma, slowLength);
-
-            // Calculate slopes
-            for (var i = 1; i < close.Length; i++)
-            {
-                fastSlope[i] = fastEma[i] - fastEma[i - 1];
-                slowSlope[i] = slowEma[i] - slowEma[i - 1];
-            }
-
-            // Leader = PPO + scaled slope difference
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (slowEma[i] != 0)
-                {
-                    var ppo = (fastEma[i] - slowEma[i]) / slowEma[i] * 100;
-                    var slopeDiff = (fastSlope[i] - slowSlope[i]) / (Math.Abs(slowEma[i]) / 100 + 0.001);
-                    output[i] = ppo + slopeDiff;
-                }
-                else
-                {
-                    output[i] = 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-            pool.Return(fastSlopeArray);
-            pool.Return(slowSlopeArray);
-        }
+        var firstFinite = FiniteSignalInput.Create(fastDistance, out var firstCount);
+        var secondFinite = FiniteSignalInput.Create(slowDistance, out var secondCount);
+        var first = new double[close.Length];
+        var second = new double[close.Length];
+        MovingAverageCore.ExponentialMovingAverage(Compatibility.SpanCompat.AsReadOnlySpan(firstFinite), first, fastLength);
+        MovingAverageCore.ExponentialMovingAverage(Compatibility.SpanCompat.AsReadOnlySpan(secondFinite), second, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = i >= firstCount || i >= secondCount ? double.NaN
+            : RoundedFractionalEma.Percentage(fast[i] + first[i], slow[i] + second[i]);
     }
+
 
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator.

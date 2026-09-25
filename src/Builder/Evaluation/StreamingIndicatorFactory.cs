@@ -17,6 +17,8 @@ internal static class StreamingIndicatorFactory
         return spec.Name switch
         {
             IndicatorName.ReverseMovingAverageConvergenceDivergence when spec.Options is ReverseMovingAverageConvergenceDivergenceSpecOptions reverse => new ReverseMovingAverageConvergenceDivergenceState(fastLength: reverse.FastLength, slowLength: reverse.SlowLength, macdLevel: reverse.MacdLevel),
+            IndicatorName.MovingAverageConvergenceDivergenceLeader when spec.Options is MovingAverageConvergenceDivergenceLeaderSpecOptions leader => new MovingAverageConvergenceDivergenceLeaderState(leader.MaType, leader.FastLength, leader.SlowLength, leader.SignalLength),
+            IndicatorName.PercentagePriceOscillatorLeader when spec.Options is PercentagePriceOscillatorLeaderSpecOptions leader => new PercentagePriceOscillatorLeaderState(signalLength: leader.Length),
             IndicatorName.MarketFacilitationIndex => new MarketFacilitationIndexState(),
             IndicatorName.TrueRange => new TrueRangeState(),
             IndicatorName.Range => new RangeState(),

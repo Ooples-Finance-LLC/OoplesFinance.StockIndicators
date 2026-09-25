@@ -867,14 +867,10 @@ internal static partial class IndicatorCompute
                     "MirrorHistogram" => MirroredPpoSeries.MirrorHistogram,
                     _ => MirroredPpoSeries.Ppo
                 }),
-            PercentagePriceOscillatorLeaderSpecOptions leader => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputePercentagePriceOscillatorLeaderFast(data, context), leader.Length, MovingAvgType.ExponentialMovingAverage),
-                "Histogram" => DifferenceFromSmoothing(data, context,
-                    ComputePercentagePriceOscillatorLeaderFast(data, context), leader.Length, MovingAvgType.ExponentialMovingAverage),
-                _ => ComputePercentagePriceOscillatorLeaderFast(data, context)
-            },
+            PercentagePriceOscillatorLeaderSpecOptions leader => ComputeLeaderOscillatorFast(data, context, 12, 26,
+                leader.Length, MovingAvgType.ExponentialMovingAverage, true, spec.OutputKey ?? "Ppo"),
+            MovingAverageConvergenceDivergenceLeaderSpecOptions leader => ComputeLeaderOscillatorFast(data, context, leader.FastLength,
+                leader.SlowLength, leader.SignalLength, leader.MaType, false, spec.OutputKey ?? "Macd"),
             TFSMboPercentagePriceOscillatorSpecOptions tfsppo => spec.OutputKey switch
             {
                 "Signal" => SmoothPublished(data, context,
@@ -12068,50 +12064,39 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePercentagePriceOscillatorLeaderFast(StockData data, ComputeContext context,
         int fastLength = 12, int slowLength = 26, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        => ComputeLeaderOscillatorFast(data, context, fastLength, slowLength, 9, maType, true, "Ppo");
+
+    internal static ComputeBuffer ComputeLeaderOscillatorFast(StockData data, ComputeContext context, int fastLength,
+        int slowLength, int signalLength, MovingAvgType maType, bool percentage, string key)
     {
-        // CalculatePercentagePriceOscillatorLeader divides the leading MACD by its own slow leg. Each leg
-        // leads its moving average by adding back the average of the series' distance from it, which is what
-        // makes this a leader rather than an ordinary percentage price oscillator. The signal length reaches
-        // only the "Signal" and "Histogram" outputs, so it has no part in the primary series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
-        var fastMa = fastAverage.Span;
-        var slowMa = slowAverage.Span;
-
-        using var fastDistance = context.Rent(count);
-        using var slowDistance = context.Rent(count);
-        var fastDiff = fastDistance.WritableSpan;
-        var slowDiff = slowDistance.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        double[] Smooth(IReadOnlyList<double> input, int period)
         {
-            fastDiff[i] = input[i] - fastMa[i];
-            slowDiff[i] = input[i] - slowMa[i];
+            var finite = FiniteSignalInput.Create(input, out var count);
+            var output = new double[finite.Count];
+            StochasticSmooth(data, maType, period, SpanCompat.AsReadOnlySpan(finite), output);
+            for (var i = count; i < output.Length; i++) output[i] = double.NaN;
+            return output;
         }
-
-        using var fastDistanceAverage = context.Rent(count);
-        using var slowDistanceAverage = context.Rent(count);
-        MovingAverage(data, maType, fastLength, fastDistance.Span, fastDistanceAverage.WritableSpan);
-        MovingAverage(data, maType, slowLength, slowDistance.Span, slowDistanceAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var fast = Smooth(values, fastLength);
+        var slow = Smooth(values, slowLength);
+        var fastDistance = Smooth(values.Select((v, i) => v - fast[i]).ToArray(), fastLength);
+        var slowDistance = Smooth(values.Select((v, i) => v - slow[i]).ToArray(), slowLength);
+        var first = fast.Select((v, i) => v + fastDistance[i]).ToArray();
+        var second = slow.Select((v, i) => v + slowDistance[i]).ToArray();
+        var macd = first.Select((v, i) => v - second[i]).ToArray();
+        // The MACD signal is an unpublished customer stage, also consumed by PPO's batch composition.
+        _ = Smooth(macd, signalLength);
+        var line = percentage ? first.Select((v, i) => RoundedFractionalEma.Percentage(v, second[i])).ToArray() : macd;
+        var signal = percentage ? Smooth(line, signalLength) : Array.Empty<double>();
+        var result = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) result.WritableSpan[i] = key switch
         {
-            var i1 = fastMa[i] + fastDistanceAverage.Span[i];
-            var i2 = slowMa[i] + slowDistanceAverage.Span[i];
-            output[i] = i2 != 0 ? (i1 - i2) / i2 * 100 : 0;
-        }
-
-        return buffer;
+            "I1" => first[i], "I2" => second[i], "Signal" => signal[i], "Histogram" => line[i] - signal[i], _ => line[i]
+        };
+        return result;
     }
+
 
     /// <summary>
     /// Computes Kaufman Adaptive Correlation Oscillator using zero-allocation fast path.
