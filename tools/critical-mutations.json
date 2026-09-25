@@ -1317,8 +1317,8 @@
     "module": "component-substitution",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "private static void RelativeStrengthIndex(",
-    "before": "maType == MovingAvgType.WildersSmoothingMethod && !ComponentAverage.HasOverrides",
-    "after": "maType == MovingAvgType.WildersSmoothingMethod",
+    "before": "StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides",
+    "after": "StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~ComponentAverageParityTests.RsiCannotSilentlyApplyItsCustomerAverageOnlyToSignal"
   },
   {
@@ -5752,5 +5752,71 @@
     "before": "? SmoothStrength(data, context, ComputeRapidRsiFast(data, context, rrsi.Length), rrsi.Length, rrsi.MaType)",
     "after": "? ComputeRapidRsiFast(data, context, rrsi.Length)",
     "filter": "FullyQualifiedName~RapidPublicAndRawSignalHonorTheCustomerAverage"
+  },
+  {
+    "id": "price-rsi-flat-ratio-lost",
+    "module": "numerical",
+    "file": "src/Helpers/PriceRsiWindow.cs",
+    "before": "_preserveFlat && _hasPrevious && price == _previous",
+    "after": "false && _hasPrevious && price == _previous",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-preview-commits",
+    "module": "numerical",
+    "file": "src/Helpers/PriceRsiWindow.cs",
+    "before": "if (final) { _previous = price;",
+    "after": "if (true) { _previous = price;",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-reset-keeps-history",
+    "module": "numerical",
+    "file": "src/Helpers/PriceRsiWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-empty-is-zero",
+    "module": "numerical",
+    "file": "src/Helpers/PriceRsiWindow.cs",
+    "before": "GainLossShare.Of(numerator, total, 100)",
+    "after": "GainLossShare.Of(numerator, total, 0)",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-difference-overflows",
+    "module": "numerical",
+    "file": "src/Helpers/PriceRsiWindow.cs",
+    "before": "GainLossShare.Change(price, _previous)",
+    "after": "new StrengthValue(price - _previous)",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-streaming-average-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "maType: ((RsiSpecOptions)spec.Options).MaType",
+    "after": "maType: MovingAvgType.WildersSmoothingMethod",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests"
+  },
+  {
+    "id": "price-rsi-native-input-unchecked",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "        StreamingInputValidation.Validate(bar);",
+    "after": "        // injected omitted input guard",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests",
+    "scope": "public sealed class RelativeStrengthIndexState :"
+  },
+  {
+    "id": "price-rsi-raw-selected-input-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var inputList = data.InputValues;",
+    "filter": "FullyQualifiedName~PriceRsiNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeRsiFast("
   }
 ]

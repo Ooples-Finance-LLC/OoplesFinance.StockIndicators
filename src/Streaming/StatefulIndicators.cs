@@ -3755,6 +3755,8 @@ public sealed class MovingAverageChannelState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Rsi")]
 public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly PriceRsiWindow? _wide;
+    private readonly StrengthAverage? _wideSignal;
     private readonly IMovingAverageSmoother _avgGain;
     private readonly IMovingAverageSmoother _avgLoss;
     private readonly IMovingAverageSmoother _signal;
@@ -3768,6 +3770,11 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
     public RelativeStrengthIndexState(int length = 14, int signalLength = 3,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _wide = new PriceRsiWindow(maType, length);
+            _wideSignal = new StrengthAverage(maType, signalLength);
+        }
         var resolved = Math.Max(1, length);
         _preserveFlatRatio = resolved > 1 && (maType == MovingAvgType.WildersSmoothingMethod || maType == MovingAvgType.ExponentialMovingAverage);
         _avgGain = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -3780,6 +3787,8 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
+        _wide?.Reset();
+        _wideSignal?.Reset();
         _avgGain.Reset();
         _avgLoss.Reset();
         _signal.Reset();
@@ -3790,6 +3799,14 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        if (_wide is not null)
+        {
+            var value = _wide.Next(bar.Close, isFinal);
+            var mean = _wideSignal!.Next(new StrengthValue(value), isFinal).Mantissa;
+            return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double>
+                { { "Rsi", value }, { "Signal", mean }, { "Histogram", value - mean } } : null);
+        }
         var currentValue = _input.GetValue(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
         var priceChg = _hasPrev ? currentValue - prevClose : 0;
@@ -3827,6 +3844,8 @@ public sealed class RelativeStrengthIndexState : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
+        _wide?.Dispose();
+        _wideSignal?.Dispose();
         _avgGain.Dispose();
         _avgLoss.Dispose();
         _signal.Dispose();
@@ -13885,6 +13904,7 @@ internal sealed class AdaptiveAutonomousRecursiveMovingAverageEngine : IDisposab
 
 internal sealed class RsiState : IDisposable
 {
+    private readonly PriceRsiWindow? _wide;
     private readonly IMovingAverageSmoother _avgGain;
     private readonly IMovingAverageSmoother _avgLoss;
     private double _prevValue;
@@ -13894,6 +13914,10 @@ internal sealed class RsiState : IDisposable
 
     public RsiState(MovingAvgType maType, int length)
     {
+        if (StrengthWindow.Supports(maType))
+        {
+            _wide = new PriceRsiWindow(maType, length);
+        }
         var resolved = Math.Max(1, length);
         _preserveFlatRatio = resolved > 1 && (maType == MovingAvgType.WildersSmoothingMethod || maType == MovingAvgType.ExponentialMovingAverage);
         _avgGain = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -13902,6 +13926,7 @@ internal sealed class RsiState : IDisposable
 
     public double Next(double value, bool isFinal)
     {
+        if (_wide is not null) return _wide.Next(value, isFinal);
         var prevValue = _hasPrev ? _prevValue : 0;
         var priceChg = _hasPrev ? value - prevValue : 0;
         var gain = priceChg > 0 ? priceChg : 0;
@@ -13925,6 +13950,7 @@ internal sealed class RsiState : IDisposable
 
     public void Reset()
     {
+        _wide?.Reset();
         _avgGain.Reset();
         _avgLoss.Reset();
         _prevValue = 0;
@@ -13934,6 +13960,7 @@ internal sealed class RsiState : IDisposable
 
     public void Dispose()
     {
+        _wide?.Dispose();
         _avgGain.Dispose();
         _avgLoss.Dispose();
     }

@@ -17,6 +17,27 @@ public static partial class Calculations
     public static StockData CalculateRelativeStrengthIndex(this StockData stockData, MovingAvgType movingAvgType = MovingAvgType.WildersSmoothingMethod,
         int length = 14, int signalLength = 3)
     {
+        if (StrengthWindow.Supports(movingAvgType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count); var histogram = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new PriceRsiWindow(movingAvgType, length, stockData.Count);
+            using var signalWindow = new StrengthAverage(movingAvgType, signalLength, stockData.Count);
+            double previous = 0, previousHistogram = 0;
+            foreach (var price in prices)
+            {
+                var value = window.Next(price, true); var mean = signalWindow.Next(new StrengthValue(value), true).Mantissa;
+                var difference = value - mean;
+                line.Add(value); signal.Add(mean); histogram.Add(difference);
+                events?.Add(GetRsiSignal(difference, previousHistogram, value, previous, 70, 30));
+                previous = value; previousHistogram = difference;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsi", line }, { "Signal", signal }, { "Histogram", histogram } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RelativeStrengthIndex;
+            return stockData;
+        }
+
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var count = inputList.Count;
         List<double> rsiList;

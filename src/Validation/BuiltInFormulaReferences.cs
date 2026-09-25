@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var rsiKeys = new[] { "Rsi", "Signal", "Histogram" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++)
+            {
+                var key = rsiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => PriceRsiOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AsymmetricalRelativeStrengthIndex || builtIn.BatchName == IndicatorName.RapidRelativeStrengthIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var adaptiveKeys = builtIn.BatchName == IndicatorName.AsymmetricalRelativeStrengthIndex ? new[] { "Arsi" } : new[] { "Rrsi", "Signal" };
