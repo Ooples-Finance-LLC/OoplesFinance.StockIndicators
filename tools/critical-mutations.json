@@ -3263,5 +3263,41 @@
     "id": "volume-momentum-ignored-selected-input",
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.Volumes",
     "after": "data.Volumes"
+  },
+  {
+    "module": "elliott-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ElliottWaveOscillatorState",
+    "filter": "FullyQualifiedName~ElliottNumericalTests",
+    "id": "elliott-unrounded-simple-mean",
+    "before": "_fastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));",
+    "after": "_fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));"
+  },
+  {
+    "module": "elliott-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ElliottWaveOscillatorState",
+    "filter": "FullyQualifiedName~ElliottNumericalTests",
+    "id": "elliott-overflow-fed-to-signal",
+    "before": "var signal = invalidSignal ? double.NaN : _signalSmoother.Next(ewo, isFinal);",
+    "after": "var signal = _signalSmoother.Next(ewo, isFinal);"
+  },
+  {
+    "module": "elliott-numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ElliottWaveOscillatorState",
+    "filter": "FullyQualifiedName~ElliottNumericalTests",
+    "id": "elliott-reversed-histogram",
+    "before": "var histogram = ewo - signal;",
+    "after": "var histogram = signal - ewo;"
+  },
+  {
+    "module": "elliott-numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeElliottWaveOscillatorFast",
+    "filter": "FullyQualifiedName~ElliottNumericalTests",
+    "id": "elliott-ignored-selected-input",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices"
   }
 ]

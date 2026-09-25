@@ -458,9 +458,9 @@ internal static partial class IndicatorCompute
             // Batch 3 - Complex oscillators
             ElliottWaveOscillatorSpecOptions ewo => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context,
+                "Signal" => SmoothFinitePublished(data, context,
                     ComputeElliottWaveOscillatorFast(data, context, ewo.FastLength, ewo.SlowLength, ewo.MaType), ewo.FastLength, ewo.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context,
+                "Histogram" => DifferenceFromFiniteSmoothing(data, context,
                     ComputeElliottWaveOscillatorFast(data, context, ewo.FastLength, ewo.SlowLength, ewo.MaType), ewo.FastLength, ewo.MaType),
                 _ => ComputeElliottWaveOscillatorFast(data, context, ewo.FastLength, ewo.SlowLength, ewo.MaType)
             },
@@ -6290,15 +6290,15 @@ internal static partial class IndicatorCompute
     {
         // OscillatorCore's routine takes a simple average whatever it is asked for, which is this oscillator's
         // own default but not what a caller asking for another average gets from the batch.
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var count = data.Count;
 
         using var fastBuffer = context.Rent(count);
         using var slowBuffer = context.Rent(count);
         fastBuffer.WritableSpan.Clear();
         slowBuffer.WritableSpan.Clear();
-        MovingAverage(data, maType, fastLength, close, fastBuffer.WritableSpan);
-        MovingAverage(data, maType, slowLength, close, slowBuffer.WritableSpan);
+        StochasticSmooth(data, maType, fastLength, close, fastBuffer.WritableSpan);
+        StochasticSmooth(data, maType, slowLength, close, slowBuffer.WritableSpan);
 
         var buffer = context.Rent(count);
         var output = buffer.WritableSpan;

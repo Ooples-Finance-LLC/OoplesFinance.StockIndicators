@@ -416,6 +416,7 @@ internal static partial class StatefulIndicatorFactory
             UltimateOscillatorSpecOptions uo => new UltimateOscillatorState(length1: uo.Length1, length2: uo.Length2, length3: uo.Length3),
 
             // MACD variants
+            ElliottWaveOscillatorSpecOptions elliott => new ElliottWaveOscillatorState(elliott.MaType, elliott.FastLength, elliott.SlowLength),
             MacdSpecOptions macd => CreateMacdState(macd),
             MacdLineSpecOptions macdl => new MovingAverageConvergenceDivergenceState(macdl.FastLength, macdl.SlowLength),
             MacdSignalSpecOptions macds => new MovingAverageConvergenceDivergenceState(macds.FastLength, macds.SlowLength, macds.SignalLength),

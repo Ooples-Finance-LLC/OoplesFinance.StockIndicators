@@ -2375,7 +2375,11 @@ public sealed class FormulaContractCoverageTests
         Check(new NormalizedVolume(2), bars, new[] { 0d, 4d / 3, .4 });
         Check(new MarketFacilitationIndex(1), bars, new[] { .03, .015, .08 });
         Check(new TFSVolumeOscillator(2), bars, new[] { 50d, 150, 75 });
-        Check(new VolumeMomentumOscillator(1, 2), bars, new[] { 0d, 20, -43.75 });
+        var volumeSlow1 = (new ReferenceFraction(500) / new ReferenceFraction(3)).ToDouble();
+        var volumeSlow2 = ((new ReferenceFraction(100) + ReferenceFraction.FromDouble(volumeSlow1)) / new ReferenceFraction(3)).ToDouble();
+        Check(new VolumeMomentumOscillator(1, 2), bars, new[] { 0d,
+            (new ReferenceFraction(100) * (new ReferenceFraction(200) / ReferenceFraction.FromDouble(volumeSlow1) - new ReferenceFraction(1))).ToDouble(),
+            (new ReferenceFraction(100) * (new ReferenceFraction(50) / ReferenceFraction.FromDouble(volumeSlow2) - new ReferenceFraction(1))).ToDouble() });
         Check(new AverageDayRange(2), bars, new[] { 0d, 3, 3.5 });
         Check(new HighestHigh(2), bars, new[] { 12d, 17, 17 });
         Check(new LowestLow(2), bars, new[] { 9d, 9, 10 });
