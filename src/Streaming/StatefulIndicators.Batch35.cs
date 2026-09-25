@@ -40,7 +40,7 @@ public sealed class CloseToCloseVolatilityState : IStreamingIndicatorState, IDis
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var currentReturn = _hasPrev && _prevValue != 0 ? Log(value / _prevValue) : 0;
+        var currentReturn = _hasPrev && _prevValue != 0 ? StableLogRatio.OfSameSign(value, _prevValue) : 0;
 
         double volatility = 0;
         if (_returns.Count + 1 >= _length)
@@ -125,7 +125,7 @@ public sealed class ParkinsonVolatilityState : IStreamingIndicatorState, IDispos
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         _ = _input.GetValue(bar);
-        var logRatio = bar.Low != 0 ? Log(bar.High / bar.Low) : 0;
+        var logRatio = bar.Low != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Low) : 0;
         var squared = logRatio * logRatio;
 
         double volatility = 0;
@@ -196,10 +196,10 @@ public sealed class RogersSatchellVolatilityState : IStreamingIndicatorState, ID
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var logHc = value != 0 ? Log(bar.High / value) : 0;
-        var logHo = bar.Open != 0 ? Log(bar.High / bar.Open) : 0;
-        var logLc = value != 0 ? Log(bar.Low / value) : 0;
-        var logLo = bar.Open != 0 ? Log(bar.Low / bar.Open) : 0;
+        var logHc = value != 0 ? StableLogRatio.OfSameSign(bar.High, value) : 0;
+        var logHo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.High, bar.Open) : 0;
+        var logLc = value != 0 ? StableLogRatio.OfSameSign(bar.Low, value) : 0;
+        var logLo = bar.Open != 0 ? StableLogRatio.OfSameSign(bar.Low, bar.Open) : 0;
         var term = (logHc * logHo) + (logLc * logLo);
 
         double volatility = 0;

@@ -396,7 +396,7 @@ public static partial class Calculations
                 {
                     if (j > 0 && inputList[j - 1] != 0)
                     {
-                        overnightMean += Log(openList[j] / inputList[j - 1]);
+                        overnightMean += StableLogRatio.OfSameSign(openList[j], inputList[j - 1]);
                     }
                 }
 
@@ -406,7 +406,7 @@ public static partial class Calculations
                 {
                     if (j > 0 && inputList[j - 1] != 0)
                     {
-                        var logOc = Log(openList[j] / inputList[j - 1]);
+                        var logOc = StableLogRatio.OfSameSign(openList[j], inputList[j - 1]);
                         overnightSum += (logOc - overnightMean) * (logOc - overnightMean);
                     }
                 }
@@ -418,7 +418,7 @@ public static partial class Calculations
                 {
                     if (openList[j] != 0)
                     {
-                        openToCloseMean += Log(inputList[j] / openList[j]);
+                        openToCloseMean += StableLogRatio.OfSameSign(inputList[j], openList[j]);
                     }
                 }
 
@@ -428,7 +428,7 @@ public static partial class Calculations
                 {
                     if (openList[j] != 0)
                     {
-                        var logCo = Log(inputList[j] / openList[j]);
+                        var logCo = StableLogRatio.OfSameSign(inputList[j], openList[j]);
                         openToCloseSum += (logCo - openToCloseMean) * (logCo - openToCloseMean);
                     }
                 }
@@ -440,10 +440,10 @@ public static partial class Calculations
                 {
                     var currentClose = inputList[j];
                     var currentOpen = openList[j];
-                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
-                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
-                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
-                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    var logHc = currentClose != 0 ? StableLogRatio.OfSameSign(highList[j], currentClose) : 0;
+                    var logHo = currentOpen != 0 ? StableLogRatio.OfSameSign(highList[j], currentOpen) : 0;
+                    var logLc = currentClose != 0 ? StableLogRatio.OfSameSign(lowList[j], currentClose) : 0;
+                    var logLo = currentOpen != 0 ? StableLogRatio.OfSameSign(lowList[j], currentOpen) : 0;
                     rogersSatchellSum += (logHc * logHo) + (logLc * logLo);
                 }
 

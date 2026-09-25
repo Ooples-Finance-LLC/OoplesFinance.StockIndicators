@@ -4518,5 +4518,95 @@
     "before": "? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))",
     "after": "? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(1e-9, 1e-9))",
     "filter": "FullyQualifiedName~LogVolatilityNumericalTests.ContractsRejectErasingAdjacentPriceMovement"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-parkinson-batch-divides-before-log",
+    "file": "src/Calculations/Volatility/VolatilityLtoR.cs",
+    "scope": "public static StockData CalculateParkinsonVolatility",
+    "before": "StableLogRatio.OfSameSign(highList[j], lowList[j])",
+    "after": "Math.Log(highList[j] / lowList[j])",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.OhlcEstimatorsHaveIndependentRangeExamples"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-garman-core-divides-before-log",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void GarmanKlassVolatility",
+    "before": "StableLogRatio.OfSameSign(high[j], low[j])",
+    "after": "Math.Log(high[j] / low[j])",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.OhlcEstimatorsHaveIndependentRangeExamples"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-rogers-native-divides-before-log",
+    "file": "src/Streaming/StatefulIndicators.Batch35.cs",
+    "scope": "public sealed class RogersSatchellVolatilityState",
+    "before": "StableLogRatio.OfSameSign(bar.Low, value)",
+    "after": "Math.Log(bar.Low / value)",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.OhlcEstimatorsHaveIndependentRangeExamples"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-close-core-divides-before-log",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void CloseToCloseVolatility",
+    "before": "StableLogRatio.OfSameSign(close[i], close[i - 1])",
+    "after": "Math.Log(close[i] / close[i - 1])",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.CloseReturnsSurviveExtremeQuotientsAndIncludeTheStartupZero"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-yang-reference-counts-undefined-residual",
+    "file": "src/Validation/BuiltInFormulaReferences.Volatility.cs",
+    "scope": "private static FormulaDefinition? Volatility",
+    "before": "Enumerable.Range(i - length + 1, length).Where(included).ToArray()",
+    "after": "Enumerable.Range(i - length + 1, length).ToArray()",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.YangZhangOmitsUndefinedResidualWithoutChangingDivisors"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-garman-core-loses-negative-variance-clamp",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void GarmanKlassVolatility",
+    "before": "Math.Sqrt(Math.Max(0, sum / length))",
+    "after": "Math.Sqrt(sum / length)",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.GarmanKlassClampsNegativeVarianceForSignedCandles"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-close-arm-ignores-selected-price",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCloseToCloseVolatilityFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.RawArmPreservesSelectedCloseAndOriginalCandleFields"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-rogers-arm-ignores-selected-price",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRogersSatchellVolatilityFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.RawArmPreservesSelectedCloseAndOriginalCandleFields"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-yang-arm-ignores-selected-price",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeYangZhangVolatilityFast",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.RawArmPreservesSelectedCloseAndOriginalCandleFields"
+  },
+  {
+    "module": "ohlc-volatility-numerical",
+    "id": "ohlc-near-unity-log-rounds-too-early",
+    "file": "src/Helpers/StableLogRatio.cs",
+    "scope": "internal static double Of(double current, double previous)",
+    "before": "if (Math.Abs(relative) <= 1e-8) return RoundedNearUnityLog.Of(current, previous);",
+    "after": "if (Math.Abs(relative) < 0) return RoundedNearUnityLog.Of(current, previous);",
+    "filter": "FullyQualifiedName~OhlcVolatilityNumericalTests.NearUnityLogsAreCorrectlyRoundedBeforeVariance"
   }
 ]

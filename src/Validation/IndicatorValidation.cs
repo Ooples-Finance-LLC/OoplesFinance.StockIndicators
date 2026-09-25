@@ -469,7 +469,9 @@ public static class IndicatorValidation
     // Shared by execution and the per-configuration migration backlog check.
     internal static bool IncludesNumericalFixtures(IIndicator probe)
     {
-        var includeNumericalExtremes = probe is HistoricalVolatility or KaseSerialDependencyIndex or
+        var includeNumericalExtremes = probe is CloseToCloseVolatility or ParkinsonVolatility or
+            GarmanKlassVolatility or RogersSatchellVolatility or YangZhangVolatility or
+            HistoricalVolatility or KaseSerialDependencyIndex or
             HistoricalVolatilityPercentile or
             JapaneseCorrelationCoefficient or
             OceanIndicator or

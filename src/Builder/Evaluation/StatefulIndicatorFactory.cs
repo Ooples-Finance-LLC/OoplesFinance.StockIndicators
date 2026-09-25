@@ -476,6 +476,7 @@ internal static partial class StatefulIndicatorFactory
             StdDevSpecOptions std => new StandardDeviationState(length: std.Length),
             StandardDeviationVolatilitySpecOptions stdVol => new StandardDeviationVolatilityState(stdVol.MaType, stdVol.Length),
             VarianceSpecOptions variance => new VarianceState(length: variance.Length),
+            GarmanKlassVolatilitySpecOptions gk => new GarmanKlassVolatilityState(gk.MaType, gk.Length),
             HistoricalVolatilitySpecOptions hv => new HistoricalVolatilityState(maType: hv.MaType, length: hv.Length),
             ChaikinVolatilitySpecOptions cv => new ChaikinVolatilityState(maType: cv.MaType, length1: cv.Length),
             UlcerIndexSpecOptions ui => new UlcerIndexState(length: ui.Length),

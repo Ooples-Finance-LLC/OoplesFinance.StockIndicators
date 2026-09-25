@@ -149,8 +149,8 @@ public static partial class Calculations
             var currentLow = lowList[i];
             var currentOpen = openList[i];
             var currentClose = inputList[i];
-            var logHl = currentLow != 0 ? Math.Log(currentHigh / currentLow) : 0;
-            var logCo = currentOpen != 0 ? Math.Log(currentClose / currentOpen) : 0;
+            var logHl = currentLow != 0 ? StableLogRatio.OfSameSign(currentHigh, currentLow) : 0;
+            var logCo = currentOpen != 0 ? StableLogRatio.OfSameSign(currentClose, currentOpen) : 0;
 
             var log = (0.5 * Pow(logHl, 2)) - (((2 * Math.Log(2)) - 1) * Pow(logCo, 2));
             logList.Add(log);
