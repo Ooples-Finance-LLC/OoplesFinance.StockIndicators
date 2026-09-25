@@ -4342,5 +4342,86 @@
     "before": "var finite = FiniteSignalInput.Create(buffer.ToArray(), out var finiteCount);",
     "after": "var finite = buffer.ToArray().ToList(); var finiteCount = finite.Count;",
     "filter": "FullyQualifiedName~EhlersBankNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "japanese-batch-overflows-range",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateJapaneseCorrelationCoefficient",
+    "before": "ExactDifferenceRatio.Of(c, prevC, highest, lowest)",
+    "after": "highest == lowest ? 0 : (c - prevC) / (highest - lowest)",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.JapaneseRatioPreservesFiniteChangesAcrossOverflowingRanges"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "japanese-fast-overflows-range",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeJapaneseCorrelationCoefficientFast",
+    "before": "ExactDifferenceRatio.Of(c[i], i >= length ? c[i - length] : 0, highest, lowest)",
+    "after": "highest == lowest ? 0 : (c[i] - (i >= length ? c[i - length] : 0)) / (highest - lowest)",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.JapaneseRatioPreservesFiniteChangesAcrossOverflowingRanges"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "japanese-native-overflows-range",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class JapaneseCorrelationCoefficientState",
+    "before": "ExactDifferenceRatio.Of(closeMa, prevC, highest, lowest)",
+    "after": "highest == lowest ? 0 : (closeMa - prevC) / (highest - lowest)",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.JapaneseRatioPreservesFiniteChangesAcrossOverflowingRanges"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "difference-ratio-clamps-selected-input",
+    "file": "src/Helpers/ExactDifferenceRatio.cs",
+    "scope": "internal static double Of",
+    "before": "return numerator.Ratio(denominator);",
+    "after": "return Math.Max(-1, Math.Min(1, numerator.Ratio(denominator)));",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.DifferenceRatioPreservesUnboundedSelectedInputsAndZeroRangeContract"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "mayer-factory-discards-period",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
+    "before": "new MayerMultipleState(mayer.MaType, mayer.Length, mayer.Threshold)",
+    "after": "new MayerMultipleState(mayer.MaType, 1, mayer.Threshold)",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "mayer-removes-proven-overflow-contract",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "internal static IEnumerable<IndicatorValidationRule> For",
+    "before": ": builtIn.BatchName is IndicatorName.MayerMultiple or IndicatorName.JapaneseCorrelationCoefficient",
+    "after": ": builtIn.BatchName is IndicatorName.JapaneseCorrelationCoefficient",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.MayerOverflowHasIndependentRejectionEvidence"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "ocean-preview-commits-history",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class OceanIndicatorState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "hybrid-forgets-first-price-seed",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HybridConvolutionFilterState",
+    "before": "var prevOutput = _hasPrev ? _prevOutput : value;",
+    "after": "var prevOutput = _hasPrev ? _prevOutput : 0;",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "module": "mean-ratio-numerical",
+    "id": "ratio-contract-erases-tiny-values",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "scope": "internal static IEnumerable<IndicatorValidationRule> For",
+    "before": "IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))",
+    "after": "IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(1e-9, 1e-9))",
+    "filter": "FullyQualifiedName~MeanRatioNumericalTests.RatioContractsRejectErasingTinyNonzeroOutputs"
   }
 ]

@@ -1921,10 +1921,6 @@ OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.HybridConvolutionFilter/default
-OoplesFinance.StockIndicators.Indicators.HybridConvolutionFilter/longer-periods
-OoplesFinance.StockIndicators.Indicators.HybridConvolutionFilter/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HybridConvolutionFilter/shorter-periods
 OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/default
 OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/longer-periods
 OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/minimum-periods
@@ -2002,11 +1998,6 @@ OoplesFinance.StockIndicators.Indicators.InverseFisherZScore/longer-periods
 OoplesFinance.StockIndicators.Indicators.InverseFisherZScore/minimum-periods
 OoplesFinance.StockIndicators.Indicators.InverseFisherZScore/shorter-periods
 OoplesFinance.StockIndicators.Indicators.InverseFisherZScore/weighted-average
-OoplesFinance.StockIndicators.Indicators.JapaneseCorrelationCoefficient/default
-OoplesFinance.StockIndicators.Indicators.JapaneseCorrelationCoefficient/longer-periods
-OoplesFinance.StockIndicators.Indicators.JapaneseCorrelationCoefficient/minimum-periods
-OoplesFinance.StockIndicators.Indicators.JapaneseCorrelationCoefficient/shorter-periods
-OoplesFinance.StockIndicators.Indicators.JapaneseCorrelationCoefficient/weighted-average
 OoplesFinance.StockIndicators.Indicators.Jma/default
 OoplesFinance.StockIndicators.Indicators.Jma/longer-periods
 OoplesFinance.StockIndicators.Indicators.Jma/minimum-periods
@@ -2301,11 +2292,6 @@ OoplesFinance.StockIndicators.Indicators.MassThrustOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.MassThrustOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.MassThrustOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.MassThrustOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.MayerMultiple/default
-OoplesFinance.StockIndicators.Indicators.MayerMultiple/longer-periods
-OoplesFinance.StockIndicators.Indicators.MayerMultiple/minimum-periods
-OoplesFinance.StockIndicators.Indicators.MayerMultiple/shorter-periods
-OoplesFinance.StockIndicators.Indicators.MayerMultiple/weighted-average
 OoplesFinance.StockIndicators.Indicators.McGinleyDynamic/default
 OoplesFinance.StockIndicators.Indicators.McGinleyDynamic/longer-periods
 OoplesFinance.StockIndicators.Indicators.McGinleyDynamic/minimum-periods
@@ -2458,11 +2444,6 @@ OoplesFinance.StockIndicators.Indicators.OCHistogram/longer-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/minimum-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/shorter-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/weighted-average
-OoplesFinance.StockIndicators.Indicators.OceanIndicator/default
-OoplesFinance.StockIndicators.Indicators.OceanIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.OceanIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.OceanIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.OceanIndicator/weighted-average
 OoplesFinance.StockIndicators.Indicators.OmegaRatio/default
 OoplesFinance.StockIndicators.Indicators.OmegaRatio/longer-periods
 OoplesFinance.StockIndicators.Indicators.OmegaRatio/minimum-periods

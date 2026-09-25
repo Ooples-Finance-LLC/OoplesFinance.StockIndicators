@@ -924,7 +924,9 @@ internal static partial class BuiltInFormulaReferences
                         or IndicatorName.GeometricMeanMovingAverage or IndicatorName.GeometricMovingAverage or IndicatorName.QuadraticMovingAverage or IndicatorName.KaufmanAdaptiveMovingAverage or IndicatorName.Midpoint or IndicatorName.Midprice or IndicatorName.IchimokuCloud or IndicatorName.IchimokuChikouSpan or IndicatorName.MedianValue or IndicatorName.HighestHigh or IndicatorName.LowestLow or IndicatorName.RollingMax or IndicatorName.RollingMin or IndicatorName.PercentRank
                                 || builtIn.BatchName == IndicatorName.Trimean && key != "Trimean"
                                 ? IndicatorErrorBudget.Exact : new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
-                        : FullReference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key]);
+                        : builtIn.BatchName is IndicatorName.MayerMultiple or IndicatorName.JapaneseCorrelationCoefficient
+                            ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
+                            : FullReference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key]);
             }
             yield break;
         }

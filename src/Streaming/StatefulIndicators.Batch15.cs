@@ -673,7 +673,7 @@ public sealed class JapaneseCorrelationCoefficientState : IStreamingIndicatorSta
         var highest = isFinal ? _highest.Add(highMa, out _) : _highest.Preview(highMa, out _);
         var lowest = isFinal ? _lowest.Add(lowMa, out _) : _lowest.Preview(lowMa, out _);
         var prevC = EhlersStreamingWindow.GetOffsetValue(_closeValues, closeMa, _length);
-        var jo = highest - lowest != 0 ? (closeMa - prevC) / (highest - lowest) : 0;
+        var jo = ExactDifferenceRatio.Of(closeMa, prevC, highest, lowest);
 
         if (isFinal)
         {

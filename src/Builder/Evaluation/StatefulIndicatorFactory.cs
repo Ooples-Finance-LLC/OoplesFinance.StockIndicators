@@ -45,6 +45,9 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            JapaneseCorrelationCoefficientSpecOptions ratio => new JapaneseCorrelationCoefficientState(ratio.MaType, ratio.Length),
+            OceanIndicatorSpecOptions ocean => new OceanIndicatorState(ocean.MaType, ocean.Length),
+            MayerMultipleSpecOptions mayer => new MayerMultipleState(mayer.MaType, mayer.Length, mayer.Threshold),
             EhlersGaussianFilterSpecOptions gaussian => new EhlersGaussianFilterState(gaussian.Length, gaussian.Poles),
             EhlersRestoringPullIndicatorSpecOptions pull => new EhlersRestoringPullIndicatorState(pull.MaType, pull.MinLength, pull.MaxLength, pull.Length1, pull.Length2),
             GannHiLoActivatorSpecOptions trend => new GannHiLoActivatorState(trend.MaType, trend.Length),

@@ -109,8 +109,11 @@ internal static partial class BuiltInFormulaReferences
                     var closes = Average(Closes(bars), half, japaneseKind);
                     return Outputs(("Jo", closes.Select((v, i) =>
                     {
-                        var range = Window(highs, i, half).Max() - Window(lows, i, half).Min();
-                        return range == 0 ? 0 : (v - (i < length ? 0 : closes[i - length])) / range;
+                        var high = ReferenceFraction.FromDouble(Window(highs, i, half).Max());
+                        var low = ReferenceFraction.FromDouble(Window(lows, i, half).Min());
+                        var range = high - low;
+                        var change = ReferenceFraction.FromDouble(v) - ReferenceFraction.FromDouble(i < length ? 0 : closes[i - length]);
+                        return range.CompareTo(new ReferenceFraction(0)) == 0 ? 0 : (change / range).ToDouble();
                     }).ToArray()));
                 });
             case IndicatorName.FastSlowDegreeOscillator:
