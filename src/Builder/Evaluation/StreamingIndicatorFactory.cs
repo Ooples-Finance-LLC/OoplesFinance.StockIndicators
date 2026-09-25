@@ -55,6 +55,7 @@ internal static class StreamingIndicatorFactory
             IndicatorName.ErgodicPercentagePriceOscillator when spec.Options is ErgodicPercentagePriceOscillatorSpecOptions ergodicPpo => new ErgodicPercentagePriceOscillatorState(ergodicPpo.MaType, length2: ergodicPpo.Length),
             IndicatorName.MirroredMovingAverageConvergenceDivergence when spec.Options is MirroredMovingAverageConvergenceDivergenceSpecOptions mirrorMacd => new MirroredMovingAverageConvergenceDivergenceState(mirrorMacd.MaType, mirrorMacd.Length, mirrorMacd.SignalLength),
             IndicatorName.MirroredPercentagePriceOscillator when spec.Options is MirroredPercentagePriceOscillatorSpecOptions mirrorPpo => new MirroredPercentagePriceOscillatorState(mirrorPpo.MaType, mirrorPpo.Length, mirrorPpo.SignalLength),
+            IndicatorName.LindaRaschke3_10Oscillator when spec.Options is LindaRaschke310OscillatorSpecOptions linda => new LindaRaschke3_10OscillatorState(linda.MaType, linda.FastLength, linda.SlowLength, linda.SmoothLength),
             IndicatorName.DidiIndex when spec.Options is DidiIndexSpecOptions didi => new DidiIndexState(didi.MaType, didi.ShortLength, didi.MediumLength, didi.LongLength),
             IndicatorName.CumulativeSum => new CumulativeSumState(),
             IndicatorName.PercentageVolumeOscillator when spec.Options is PvoSpecOptions pvo => new PercentageVolumeOscillatorState(pvo.MaType, pvo.Length, 26, pvo.SignalLength),

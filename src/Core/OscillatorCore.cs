@@ -5465,35 +5465,32 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (input.IsEmpty) return;
         var pool = ArrayPool<double>.Shared;
         var fastSmaArray = pool.Rent(input.Length);
         var slowSmaArray = pool.Rent(input.Length);
-        var diffArray = pool.Rent(input.Length);
 
         try
         {
             var fastSma = fastSmaArray.AsSpan(0, input.Length);
             var slowSma = slowSmaArray.AsSpan(0, input.Length);
-            var diff = diffArray.AsSpan(0, input.Length);
 
             // Calculate SMAs
-            MovingAverageCore.SimpleMovingAverage(input, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(input, slowSma, slowLength);
+            BollingerArithmetic.Mean(input, fastSma, fastLength);
+            BollingerArithmetic.Mean(input, slowSma, slowLength);
 
             // Calculate difference
             for (var i = 0; i < input.Length; i++)
             {
-                diff[i] = fastSma[i] - slowSma[i];
+                output[i] = fastSma[i] - slowSma[i];
             }
 
-            // Apply signal smoothing
-            MovingAverageCore.SimpleMovingAverage(diff, output, signalLength);
+            // The primary series is the raw mean difference; signalLength affects only the separate signal output.
         }
         finally
         {
             pool.Return(fastSmaArray);
             pool.Return(slowSmaArray);
-            pool.Return(diffArray);
         }
     }
 

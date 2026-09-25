@@ -713,23 +713,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var fastSmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowSmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var fastSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var slowSmaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var sma3 = fastSmaList[i];
             var sma10 = slowSmaList[i];
 
-            var ppo = sma10 != 0 ? (sma3 - sma10) / sma10 * 100 : 0;
+            var ppo = RoundedPercentageChange.Of(sma3, sma10);
             ppoList.Add(ppo);
 
             var macd = sma3 - sma10;
             macdList.Add(macd);
         }
 
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, smoothLength, macdList);
-        var ppoSignalLineList = GetMovingAverageList(stockData, maType, smoothLength, ppoList);
+        var macdInput = FiniteSignalInput.Create(macdList, out var macdFiniteCount);
+        var macdSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macdInput, smoothLength) : GetMovingAverageList(stockData, maType, smoothLength, macdInput);
+        for (var i = macdFiniteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
+        var ppoInput = FiniteSignalInput.Create(ppoList, out var ppoFiniteCount);
+        var ppoSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(ppoInput, smoothLength) : GetMovingAverageList(stockData, maType, smoothLength, ppoInput);
+        for (var i = ppoFiniteCount; i < ppoSignalLineList.Count; i++) ppoSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];

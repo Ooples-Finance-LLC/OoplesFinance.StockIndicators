@@ -350,6 +350,18 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.LindaRaschke3_10Oscillator)
+        {
+            var lindaOptions = builtIn.CreateOptions();
+            var lindaKeys = new[] { "LindaMacd", "LindaMacdSignal", "LindaMacdHistogram", "LindaPpo", "LindaPpoSignal", "LindaPpoHistogram" };
+            for (var slot = 0; slot < lindaKeys.Length; slot++)
+            {
+                var key = lindaKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,
+                    bars => RoundedLinda(bars, lindaOptions)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DidiIndex)
         {
             var didiOptions = builtIn.CreateOptions();

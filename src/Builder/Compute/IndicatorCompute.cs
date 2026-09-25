@@ -9913,56 +9913,43 @@ internal static partial class IndicatorCompute
         int slowLength = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 16,
         LindaRaschkeSeries series = LindaRaschkeSeries.Macd)
     {
-        // CalculateLindaRaschke3_10Oscillator takes the fast average of the chained series less the slow one
-        // and publishes it twice over - as that difference and as the same gap in percent of the slow
-        // average - each smoothed by smoothLength for a signal and differenced against it for a histogram.
-        // Only the first of the six was produced, so five keys carried it and smoothLength reached nothing.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
-
         using var fast = context.Rent(count);
         using var slow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
-
-        var percent = series is LindaRaschkeSeries.Ppo or LindaRaschkeSeries.PpoSignal
-            or LindaRaschkeSeries.PpoHistogram;
-
-        using var oscillator = context.Rent(count);
-        var osc = oscillator.WritableSpan;
+        StochasticSmooth(data, maType, fastLength, input, fast.WritableSpan);
+        StochasticSmooth(data, maType, slowLength, input, slow.WritableSpan);
+        var macd = new List<double>(count);
+        var ppo = new List<double>(count);
         for (var i = 0; i < count; i++)
         {
-            var gap = fast.Span[i] - slow.Span[i];
-            osc[i] = percent ? (slow.Span[i] != 0 ? gap / slow.Span[i] * 100 : 0) : gap;
+            macd.Add(fast.Span[i] - slow.Span[i]);
+            ppo.Add(RoundedPercentageChange.Of(fast.Span[i], slow.Span[i]));
         }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        if (series is LindaRaschkeSeries.Macd or LindaRaschkeSeries.Ppo)
-        {
-            oscillator.Span.CopyTo(output);
-            return buffer;
-        }
-
-        using var signalLine = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, oscillator.Span, signalLine.WritableSpan);
-
-        if (series is LindaRaschkeSeries.MacdSignal or LindaRaschkeSeries.PpoSignal)
-        {
-            signalLine.Span.CopyTo(output);
-            return buffer;
-        }
-
-        var oscSpan = oscillator.Span;
-        var signalSpan = signalLine.Span;
+        var finiteMacd = FiniteSignalInput.Create(macd, out var macdCount);
+        var finitePpo = FiniteSignalInput.Create(ppo, out var ppoCount);
+        using var macdSignal = context.Rent(count);
+        using var ppoSignal = context.Rent(count);
+        // The third customer average belongs to MACD; the fourth belongs to PPO.
+        StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finiteMacd), macdSignal.WritableSpan);
+        StochasticSmooth(data, maType, smoothLength, SpanCompat.AsReadOnlySpan(finitePpo), ppoSignal.WritableSpan);
+        var result = context.Rent(count);
         for (var i = 0; i < count; i++)
         {
-            output[i] = oscSpan[i] - signalSpan[i];
+            var ms = i < macdCount ? macdSignal.Span[i] : double.NaN;
+            var ps = i < ppoCount ? ppoSignal.Span[i] : double.NaN;
+            result.WritableSpan[i] = series switch
+            {
+                LindaRaschkeSeries.MacdSignal => ms,
+                LindaRaschkeSeries.MacdHistogram => macd[i] - ms,
+                LindaRaschkeSeries.Ppo => ppo[i],
+                LindaRaschkeSeries.PpoSignal => ps,
+                LindaRaschkeSeries.PpoHistogram => ppo[i] - ps,
+                _ => macd[i]
+            };
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

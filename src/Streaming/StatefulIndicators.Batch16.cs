@@ -1082,14 +1082,16 @@ public sealed class LindaRaschke3_10OscillatorState : IStreamingIndicatorState, 
     private readonly IMovingAverageSmoother _macdSignalSmoother;
     private readonly IMovingAverageSmoother _ppoSignalSmoother;
     private readonly StreamingInputResolver _input;
+    private bool _macdSignalInvalid;
+    private bool _ppoSignalInvalid;
 
     public LindaRaschke3_10OscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 3, int slowLength = 10, int smoothLength = 16)
     {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _macdSignalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _ppoSignalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _fastSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, fastLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
+        _slowSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, slowLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
+        _macdSignalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _ppoSignalSmoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -1101,6 +1103,8 @@ public sealed class LindaRaschke3_10OscillatorState : IStreamingIndicatorState, 
         _slowSmoother.Reset();
         _macdSignalSmoother.Reset();
         _ppoSignalSmoother.Reset();
+        _macdSignalInvalid = false;
+        _ppoSignalInvalid = false;
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1108,10 +1112,17 @@ public sealed class LindaRaschke3_10OscillatorState : IStreamingIndicatorState, 
         var value = _input.GetValue(bar);
         var fast = _fastSmoother.Next(value, isFinal);
         var slow = _slowSmoother.Next(value, isFinal);
-        var ppo = slow != 0 ? (fast - slow) / slow * 100 : 0;
+        var ppo = RoundedPercentageChange.Of(fast, slow);
         var macd = fast - slow;
-        var macdSignal = _macdSignalSmoother.Next(macd, isFinal);
-        var ppoSignal = _ppoSignalSmoother.Next(ppo, isFinal);
+        var invalidMacdSignal = _macdSignalInvalid || double.IsInfinity(macd);
+        var invalidPpoSignal = _ppoSignalInvalid || double.IsInfinity(ppo);
+        var macdSignal = invalidMacdSignal ? double.NaN : _macdSignalSmoother.Next(macd, isFinal);
+        var ppoSignal = invalidPpoSignal ? double.NaN : _ppoSignalSmoother.Next(ppo, isFinal);
+        if (isFinal)
+        {
+            _macdSignalInvalid = invalidMacdSignal;
+            _ppoSignalInvalid = invalidPpoSignal;
+        }
         var macdHistogram = macd - macdSignal;
         var ppoHistogram = ppo - ppoSignal;
 
