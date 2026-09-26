@@ -190,50 +190,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveAutonomousRecursiveMovingAverage(this StockData stockData, int length = 14, double gamma = 3)
     {
-        List<double> ma1List = new(stockData.Count);
-        List<double> ma2List = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        List<double> dList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double absDiffSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new AdaptiveAutonomousWindow(length, gamma);
+        List<double> line = new(input.Count), deviation = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var er = erList[i];
-            var prevMa2 = i >= 1 ? ma2List[i - 1] : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var absDiff = Math.Abs(currentValue - prevMa2);
-            absDiffList.Add(absDiff);
-
-            absDiffSum += absDiff;
-            var d = i != 0 ? absDiffSum / i * gamma : 0;
-            dList.Add(d);
-
-            var c = currentValue > prevMa2 + d ? currentValue + d : currentValue < prevMa2 - d ? currentValue - d : prevMa2;
-            var prevMa1 = i >= 1 ? ma1List[i - 1] : currentValue;
-            var ma1 = (er * c) + ((1 - er) * prevMa1);
-            ma1List.Add(ma1);
-
-            var ma2 = (er * ma1) + ((1 - er) * prevMa2);
-            ma2List.Add(ma2);
-
-            var signal = GetCompareSignal(currentValue - ma2, prevValue - prevMa2);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? input[i] : line[i - 1]; var value = window.Next(input[i], true);
+            line.Add(value.Average); deviation.Add(value.Deviation);
+            signals?.Add(GetCompareSignal(input[i] - value.Average, (i > 0 ? input[i - 1] : 0) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "D", dList },
-            { "Aarma", ma2List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ma2List);
-        stockData.IndicatorName = IndicatorName.AdaptiveAutonomousRecursiveMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "D", deviation }, { "Aarma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AdaptiveAutonomousRecursiveMovingAverage;
         return stockData;
     }
 

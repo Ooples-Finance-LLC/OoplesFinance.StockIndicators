@@ -17445,5 +17445,137 @@
     "after": "SpanCompat.AsReadOnlySpan(line), length + 1",
     "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs",
     "scope": "public static StockData CalculateAccumulativeSwingIndex("
+  },
+  {
+    "id": "autonomous-wrong-efficiency-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "new(Math.Max(1, length))",
+    "after": "new(Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-wrong-seed",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "_count == 0 ? price : _second",
+    "after": "_count == 0 ? BigInteger.Zero : _second",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-drops-error-history",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "Round(_sum + error)",
+    "after": "Round(error)",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-wrong-error-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "new BigInteger(_count)",
+    "after": "new BigInteger(_count + 1)",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-ignores-gamma",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "_gamma = ExactVarianceWindow.Units(gamma)",
+    "after": "_gamma = ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-reversed-upper-target",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "? Round(price + deviation)",
+    "after": "? Round(price - deviation)",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-wrong-second-input",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "Blend(previous, first, efficiency)",
+    "after": "Blend(previous, target, efficiency)",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-wrong-stop-side",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "var stop = rising ? lower : upper;",
+    "after": "var stop = rising ? upper : lower;",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-wrong-lower-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "price < _lower ? false",
+    "after": "price > _lower ? false",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-premature-deviation-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "var target = price > previous + deviation",
+    "after": "deviation = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(deviation, BigInteger.One)); var target = price > previous + deviation",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "var efficiency = ExactVarianceWindow.Units",
+    "after": "commit = true; var efficiency = ExactVarianceWindow.Units",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-stale-error-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveAutonomousWindow.cs",
+    "before": "_first = _second = _sum = _upper = _lower = default",
+    "after": "_first = _second = _upper = _lower = default",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "autonomous-invalid-average-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.\n        ",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AdaptiveAutonomousRecursiveMovingAverageState :"
+  },
+  {
+    "id": "autonomous-invalid-stop-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.\n        ",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AdaptiveAutonomousRecursiveTrailingStopState :"
+  },
+  {
+    "id": "autonomous-selected-average-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveMovingAverageFast("
+  },
+  {
+    "id": "autonomous-selected-stop-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast("
   }
 ]

@@ -1584,37 +1584,9 @@ internal static class TrendCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double lambda = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sum = 0;
-        double sumSq = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            sum += currentValue;
-            sumSq += currentValue * currentValue;
-
-            if (i == 0)
-            {
-                output[i] = currentValue;
-                continue;
-            }
-
-            var n = i + 1;
-            var mean = sum / n;
-            var variance = (sumSq / n) - (mean * mean);
-            var stdDev = Math.Sqrt(Math.Max(0, variance));
-
-            var prevArma = output[i - 1];
-            var diff = Math.Abs(currentValue - prevArma);
-            var adaptiveK = diff / (diff + (lambda * stdDev) + 1e-10);
-
-            output[i] = prevArma + adaptiveK * (currentValue - prevArma);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, lambda);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>

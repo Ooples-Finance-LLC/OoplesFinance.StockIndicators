@@ -16848,30 +16848,8 @@ internal static partial class IndicatorCompute
     private static void AdaptiveAutonomousRecursiveMovingAverage(ComputeContext context, ReadOnlySpan<double> input,
         int length, double gamma, Span<double> average, Span<double> deviation)
     {
-        var count = input.Length;
-
-        using var efficiency = context.Rent(count);
-        EfficiencyRatio(input, length, efficiency.WritableSpan);
-        var er = efficiency.Span;
-
-        double absDiffSum = 0;
-        double ma1 = 0;
-        double ma2 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevMa1 = i >= 1 ? ma1 : currentValue;
-            var prevMa2 = i >= 1 ? ma2 : currentValue;
-
-            absDiffSum += Math.Abs(currentValue - prevMa2);
-            var d = i != 0 ? absDiffSum / i * gamma : 0;
-            deviation[i] = d;
-
-            var c = currentValue > prevMa2 + d ? currentValue + d : currentValue < prevMa2 - d ? currentValue - d : prevMa2;
-            ma1 = (er[i] * c) + ((1 - er[i]) * prevMa1);
-            ma2 = (er[i] * ma1) + ((1 - er[i]) * prevMa2);
-            average[i] = ma2;
-        }
+        using var window = new AdaptiveAutonomousWindow(length, gamma);
+        for (var i = 0; i < input.Length; i++) { var value = window.Next(input[i], true); average[i] = value.Average; deviation[i] = value.Deviation; }
     }
 
     /// <summary>
@@ -18988,39 +18966,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast(StockData data, ComputeContext context,
         int length = 14, double gamma = 3)
     {
-        // CalculateAdaptiveAutonomousRecursiveTrailingStop bands the adaptive autonomous recursive moving
-        // average by that indicator's own D series and flips side when the price closes beyond the previous
-        // band. The published Ts is whichever band the current side names, not an average of the two.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var averages = context.Rent(count);
-        using var deviations = context.Rent(count);
-        AdaptiveAutonomousRecursiveMovingAverage(context, input, length, gamma, averages.WritableSpan,
-            deviations.WritableSpan);
-        var average = averages.Span;
-        var deviation = deviations.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousUpper = 0;
-        double previousLower = 0;
-        double side = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var upper = average[i] + deviation[i];
-            var lower = average[i] - deviation[i];
-
-            side = input[i] > previousUpper ? 1 : input[i] < previousLower ? 0 : side;
-            output[i] = (side * lower) + ((1 - side) * upper);
-
-            previousUpper = upper;
-            previousLower = lower;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count); using var window = new AdaptiveAutonomousWindow(length, gamma);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Stop;
+        return result;
     }
 
     /// <summary>

@@ -79,51 +79,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveAutonomousRecursiveTrailingStop(this StockData stockData, int length = 14, double gamma = 3)
     {
-        List<double> tsList = new(stockData.Count);
-        List<double> osList = new(stockData.Count);
-        List<double> upperList = new(stockData.Count);
-        List<double> lowerList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var aamaList = CalculateAdaptiveAutonomousRecursiveMovingAverage(stockData, length, gamma);
-        var ma2List = aamaList.ChainedValues;
-        var dList = aamaList.ChainedOutputs["D"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new AdaptiveAutonomousWindow(length, gamma);
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ma2 = ma2List[i];
-            var d = dList[i];
-
-            var prevUpper = GetLastOrDefault(upperList);
-            var upper = ma2 + d;
-            upperList.Add(upper);
-
-            var prevLower = GetLastOrDefault(lowerList);
-            var lower = ma2 - d;
-            lowerList.Add(lower);
-
-            var prevOs = GetLastOrDefault(osList);
-            var os = currentValue > prevUpper ? 1 : currentValue < prevLower ? 0 : prevOs;
-            osList.Add(os);
-
-            var prevTs = GetLastOrDefault(tsList);
-            var ts = (os * lower) + ((1 - os) * upper);
-            tsList.Add(ts);
-
-            var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true).Stop; line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i > 0 ? input[i - 1] : 0) - (i > 0 ? line[i - 1] : 0)));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ts", tsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsList);
-        stockData.IndicatorName = IndicatorName.AdaptiveAutonomousRecursiveTrailingStop;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ts", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AdaptiveAutonomousRecursiveTrailingStop;
         return stockData;
     }
 
