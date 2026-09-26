@@ -1298,105 +1298,17 @@ public sealed class PolarizedFractalEfficiencyState : IStreamingIndicatorState, 
 [PrimaryOutput("Plsma")]
 public sealed class PolynomialLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public PolynomialLeastSquaresMovingAverageState(int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PolynomialCellWindow _window;
+    public PolynomialLeastSquaresMovingAverageState(int length = 100) => _window = new(length);
     public IndicatorName Name => IndicatorName.PolynomialLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double x1Pow1Sum;
-        double x2Pow1Sum;
-        double x1Pow2Sum;
-        double x2Pow2Sum;
-        double x1Pow3Sum;
-        double x2Pow3Sum;
-        double wPow1;
-        double wPow2;
-        double wPow3;
-        double sumPow1 = 0;
-        double sumPow2 = 0;
-        double sumPow3 = 0;
-
-        for (var j = 1; j <= _length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
-            var x1 = (double)j / _length;
-            var x2 = (double)(j - 1) / _length;
-            var ax1 = x1 * x1;
-            var ax2 = x2 * x2;
-
-            double b1Pow1Sum = 0;
-            double b2Pow1Sum = 0;
-            double b1Pow2Sum = 0;
-            double b2Pow2Sum = 0;
-            double b1Pow3Sum = 0;
-            double b2Pow3Sum = 0;
-            for (var k = 1; k <= 3; k++)
-            {
-                var b1 = (double)1 / k * Math.Sin(x1 * k * Math.PI);
-                var b2 = (double)1 / k * Math.Sin(x2 * k * Math.PI);
-
-                b1Pow1Sum += k == 1 ? b1 : 0;
-                b2Pow1Sum += k == 1 ? b2 : 0;
-                b1Pow2Sum += k <= 2 ? b1 : 0;
-                b2Pow2Sum += k <= 2 ? b2 : 0;
-                b1Pow3Sum += k <= 3 ? b1 : 0;
-                b2Pow3Sum += k <= 3 ? b2 : 0;
-            }
-
-            x1Pow1Sum = ax1 + b1Pow1Sum;
-            x2Pow1Sum = ax2 + b2Pow1Sum;
-            wPow1 = x1Pow1Sum - x2Pow1Sum;
-            sumPow1 += prevValue * wPow1;
-            x1Pow2Sum = ax1 + b1Pow2Sum;
-            x2Pow2Sum = ax2 + b2Pow2Sum;
-            wPow2 = x1Pow2Sum - x2Pow2Sum;
-            sumPow2 += prevValue * wPow2;
-            x1Pow3Sum = ax1 + b1Pow3Sum;
-            x2Pow3Sum = ax2 + b2Pow3Sum;
-            wPow3 = x1Pow3Sum - x2Pow3Sum;
-            sumPow3 += prevValue * wPow3;
-        }
-
-        _ = sumPow1;
-        _ = sumPow2;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Plsma", sumPow3 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sumPow3, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Plsma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Pvi")]

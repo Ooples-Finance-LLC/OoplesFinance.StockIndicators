@@ -15106,5 +15106,103 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-drops-third-harmonic",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "harmonic <= 3",
+    "after": "harmonic <= 2",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-wrong-lower-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "(j - 1) / _length",
+    "after": "j / _length",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-drops-quadratic",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "upper * upper + upperSine",
+    "after": "upperSine",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-reverses-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "(upper * upper + upperSine) - (lower * lower + lowerSine)",
+    "after": "(lower * lower + lowerSine) - (upper * upper + upperSine)",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-overflows-product",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "sum.AddProduct(price, _weights[0]);",
+    "after": "sum.Add(price * _weights[0]);",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-drops-history",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "sum.AddProduct(_prices[index], _weights[lag]);",
+    "after": "sum.AddProduct(0, _weights[lag]);",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-wrong-history-index",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "_next - lag + _prices.Count",
+    "after": "_next - lag + 1 + _prices.Count",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "sum.Mean(_length == 2 ? 12 : 1)",
+    "after": "sum.Mean(_length)",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-stale-history-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PolynomialCellWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PolynomialLeastSquaresMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-cell-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

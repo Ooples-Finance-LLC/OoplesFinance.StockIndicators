@@ -15187,49 +15187,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePolynomialLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 100)
     {
-        // CalculatePolynomialLeastSquaresMovingAverage weights each bar of the window by the difference between
-        // two points of a quadratic plus its first three sine harmonics. MovingAverageCore.PolynomialLeastSquares-
-        // MovingAverage fitted something else entirely.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        // A weight depends only on its position in the window and on the length, so the batch recomputes the
-        // same three sines for every bar of every window. Lifting them out is the same arithmetic in the same
-        // order - the window is still accumulated from the current bar backwards - for a third of the work.
-        using var weights = context.Rent(length);
-        var w = weights.WritableSpan;
-        for (var j = 1; j <= length; j++)
-        {
-            var x1 = (double)j / length;
-            var x2 = (double)(j - 1) / length;
-
-            double b1 = 0, b2 = 0;
-            for (var k = 1; k <= 3; k++)
-            {
-                b1 += (double)1 / k * Math.Sin(x1 * k * Math.PI);
-                b2 += (double)1 / k * Math.Sin(x2 * k * Math.PI);
-            }
-
-            w[j - 1] = ((x1 * x1) + b1) - ((x2 * x2) + b2);
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double sum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var previousValue = i >= j - 1 ? input[i - (j - 1)] : 0;
-                sum += previousValue * w[j - 1];
-            }
-
-            output[i] = sum;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new PolynomialCellWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>
