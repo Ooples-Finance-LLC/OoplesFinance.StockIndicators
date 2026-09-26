@@ -2666,79 +2666,17 @@ public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class SmoothedVolatilityBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _maSmoother;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _deviation;
-    private readonly double _bandAdjust;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public SmoothedVolatilityBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20,
-        int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var atrPeriod = Math.Max(1, (resolved1 * 2) - 1);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, atrPeriod);
-        _maSmoother = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _deviation = deviation;
-        _bandAdjust = bandAdjust;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SmoothedVolatilityWindow _window;
+    public SmoothedVolatilityBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = .9)
+    { _window = new(maType, length1, length2, deviation, bandAdjust); }
     public IndicatorName Name => IndicatorName.SmoothedVolatilityBands;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _maSmoother.Reset();
-        _middleSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var ma = _maSmoother.Next(value, isFinal);
-        var middle = _middleSmoother.Next(value, isFinal);
-        var atrBuf = atr * _deviation;
-        var upper = value != 0 ? ma + (ma * atrBuf / value) : ma;
-        var lower = value != 0 ? ma - (ma * atrBuf * _bandAdjust / value) : ma;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _maSmoother.Dispose();
-        _middleSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

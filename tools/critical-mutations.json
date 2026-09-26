@@ -19723,5 +19723,146 @@
     "after": "",
     "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother",
     "scope": "internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast("
+  },
+  {
+    "id": "smoothed-volatility-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "2L * Math.Max(1, length1) - 1",
+    "after": "2L * Math.Max(1, length1)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-basis-period",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "new(kind, length1, period, kind, capacityHint)",
+    "after": "new(kind, length2, period, kind, capacityHint)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-middle-period",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "new(kind, length2, capacityHint)",
+    "after": "new(kind, length1, capacityHint)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-derived-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "if (period > int.MaxValue)",
+    "after": "if (period < 0)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-zero-close",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "if (close == 0) return basis.Publish();",
+    "after": "if (close == 0) return 0;",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-denominator-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "denominator.Sign < 0 ? -numerator : numerator",
+    "after": "numerator",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-adjustment",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "var factor = ExactVarianceWindow.Units(adjustment);",
+    "after": "var factor = ExactVarianceWindow.Units(1);",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-lower-direction",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "offset, _adjustment, -1",
+    "after": "offset, _adjustment, 1",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-early-offset-publish",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "var offset = stages.Item2.Multiply(_deviation);",
+    "after": "var offset = new RocBankValue(stages.Item2.Multiply(_deviation).Publish());",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-range-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "_range!.Next(high, low, close, commit)",
+    "after": "_range!.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-middle-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "_middle.Next(new RocBankValue(close), commit)",
+    "after": "_middle.Next(new RocBankValue(close), true)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedVolatilityWindow.cs",
+    "before": "_range?.Reset(); _middle?.Reset(); _fallback?.Reset();",
+    "after": "_fallback?.Reset();",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages"
+  },
+  {
+    "id": "smoothed-volatility-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
+    "scope": "internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast("
+  },
+  {
+    "id": "smoothed-volatility-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), period)",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), length1)",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
+    "scope": "public static StockData CalculateSmoothedVolatilityBands("
+  },
+  {
+    "id": "smoothed-volatility-customer-middle-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length2))",
+    "after": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
+    "scope": "public static StockData CalculateSmoothedVolatilityBands("
+  },
+  {
+    "id": "smoothed-volatility-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
+    "scope": "public sealed class SmoothedVolatilityBandsState :"
+  },
+  {
+    "id": "smoothed-volatility-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
+    "scope": "internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast("
   }
 ]

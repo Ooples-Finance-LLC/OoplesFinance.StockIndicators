@@ -1130,50 +1130,25 @@ public static partial class Calculations
     public static StockData CalculateSmoothedVolatilityBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 20, int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9)
     {
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrPeriod = (length1 * 2) - 1;
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrPeriod).ChainedValues;
-        var maList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var middleBandList = GetMovingAverageList(stockData, maType, length2, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var period = SmoothedVolatilityWindow.AtrPeriod(length1);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); List<double>? atr = null, basis = null, center = null;
+        if (external)
         {
-            var atr = atrList[i];
-            var middleBand = middleBandList[i];
-            var ma = maList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevMiddleBand = i >= 1 ? middleBandList[i - 1] : 0;
-            var atrBuf = atr * deviation;
-
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = currentValue != 0 ? ma + (ma * atrBuf / currentValue) : ma;
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = currentValue != 0 ? ma - (ma * atrBuf * bandAdjust / currentValue) : ma;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue,
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), period)?.ToList() ?? GetMovingAverageList(stockData, maType, period, ranges);
+            basis = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
+            center = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, length2, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.SmoothedVolatilityBands;
-
-        return stockData;
+        using var window = new SmoothedVolatilityWindow(maType, length1, length2, deviation, bandAdjust, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr![i]) : null, external ? new RocBankValue(basis![i]) : null, external ? new RocBankValue(center![i]) : null);
+            signals?.Add(GetBollingerBandsSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, point.Upper, i > 0 ? upper[i - 1] : 0, point.Lower, i > 0 ? lower[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.SmoothedVolatilityBands; return stockData;
     }
 
 }

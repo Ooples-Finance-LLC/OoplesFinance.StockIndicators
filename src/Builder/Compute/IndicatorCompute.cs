@@ -21470,17 +21470,22 @@ internal static partial class IndicatorCompute
         int length2 = 21, double deviation = 2.4, double bandAdjust = 0.9,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(input.Length);
-        MovingAverage(data, maType, band == ChannelBand.Middle ? length2 : length1, input, buffer.WritableSpan);
-        if (band == ChannelBand.Middle) return buffer;
-        using var atr = ComputeAtrFast(data, context, 2 * length1 - 1, maType);
-        var output = buffer.WritableSpan;
-        var multiplier = band == ChannelBand.Upper ? deviation : -deviation * bandAdjust;
-        for (var i = 0; i < output.Length; i++)
-            if (input[i] != 0) output[i] += output[i] * atr.Span[i] * multiplier / input[i];
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count; var period = SmoothedVolatilityWindow.AtrPeriod(length1);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var atr = context.Rent(count); using var basis = context.Rent(count); using var center = context.Rent(count);
+        if (external)
+        {
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length1), SpanCompat.AsReadOnlySpan(input), basis.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length2), SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
+        }
+        var result = context.Rent(count); using var window = new SmoothedVolatilityWindow(maType, length1, length2, deviation, bandAdjust, external, Math.Max(1, count));
+        for (var i = 0; i < count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr.Span[i]) : null, external ? new RocBankValue(basis.Span[i]) : null, external ? new RocBankValue(center.Span[i]) : null);
+            result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
+        }
+        return result;
     }
 
     /// <summary>
