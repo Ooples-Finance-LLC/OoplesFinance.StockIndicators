@@ -20329,5 +20329,119 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class GChannelsState :"
+  },
+  {
+    "id": "d-envelope-smoothing-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "value.AddTo(ref sum, 2)",
+    "after": "value.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-feedback-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "previous.AddTo(ref sum, _length - 1L)",
+    "after": "previous.AddTo(ref sum, _length)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-correction-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "first.AddTo(ref sum, 2L * _length)",
+    "after": "first.AddTo(ref sum, _length)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-correction-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "count: _length - 1L",
+    "after": "count: _length + 1L",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-length-one-history",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "fallback.Add(_previousClose, -1)",
+    "after": "fallback.Add(_previousClose * 0, -1)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-absolute-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "if (deviation.Mantissa < 0)",
+    "after": "if (deviation.Mantissa > 0)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-deviation-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "Smooth(deviation, _firstDeviation)",
+    "after": "Smooth(deviation, _first)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-width-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "_firstDeviation.AddTo(ref widthFallback, -1)",
+    "after": "firstDeviation.AddTo(ref widthFallback, -1)",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-width-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "if (width.Mantissa < 0) width = default;",
+    "after": "/* omit nonnegative clamp */",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-early-deviation-state",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "_firstDeviation = firstDeviation;",
+    "after": "_firstDeviation = new RocBankValue(firstDeviation.Publish());",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "if (commit) { _first = first;",
+    "after": "{ _first = first;",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DEnvelopeWindow.cs",
+    "before": "_first = _second = _firstDeviation = _secondDeviation = default;",
+    "after": "_first = _second = default;",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "d-envelope-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeDEnvelopeFast("
+  },
+  {
+    "id": "d-envelope-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class DEnvelopeState :"
   }
 ]

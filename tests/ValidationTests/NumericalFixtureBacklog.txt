@@ -233,10 +233,6 @@ OoplesFinance.StockIndicators.Indicators.CorrectedMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.CorrectedMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.CorrectedMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.CorrectedMovingAverage/weighted-average
-OoplesFinance.StockIndicators.Indicators.DEnvelope/default
-OoplesFinance.StockIndicators.Indicators.DEnvelope/longer-periods
-OoplesFinance.StockIndicators.Indicators.DEnvelope/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DEnvelope/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DMIStochastic/default
 OoplesFinance.StockIndicators.Indicators.DMIStochastic/longer-periods
 OoplesFinance.StockIndicators.Indicators.DMIStochastic/minimum-periods

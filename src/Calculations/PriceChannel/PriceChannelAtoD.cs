@@ -220,79 +220,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDEnvelope(this StockData stockData, int length = 20, double devFactor = 2)
     {
-        length = Math.Max(1, length);
-        List<double> mtList = new(stockData.Count);
-        List<double> utList = new(stockData.Count);
-        List<double> dtList = new(stockData.Count);
-        List<double> mt2List = new(stockData.Count);
-        List<double> ut2List = new(stockData.Count);
-        List<double> butList = new(stockData.Count);
-        List<double> bltList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alp = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new DEnvelopeWindow(length, devFactor);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevMt = GetLastOrDefault(mtList);
-            var mt = (alp * currentValue) + ((1 - alp) * prevMt);
-            mtList.Add(mt);
-
-            var prevUt = GetLastOrDefault(utList);
-            var ut = (alp * mt) + ((1 - alp) * prevUt);
-            utList.Add(ut);
-
-            var prevDt = GetLastOrDefault(dtList);
-
-            // McNicholl's zero-lag form, which everywhere else in this library is written
-            // ((2 - alpha) * ema1 - ema2) / (1 - alpha) - see CalculateMcNichollMovingAverage and
-            // MovingAverageCore.McNichollMovingAverage. Grouped instead as (2 - alp) * (mt - ut) it is a
-            // different quantity altogether: at a constant price mt and ut are both that price, so the
-            // centre line came out as 0 rather than the price. A de-lagged average has to reproduce a
-            // constant, and this one could not. On the AAPL fixture it published a middle band of -13.86
-            // for a stock trading at 145.
-            var dt = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 2 * currentValue - prevValue;
-            dtList.Add(dt);
-
-            var prevMt2 = GetLastOrDefault(mt2List);
-            var mt2 = (alp * Math.Abs(currentValue - dt)) + ((1 - alp) * prevMt2);
-            mt2List.Add(mt2);
-
-            var prevUt2 = GetLastOrDefault(ut2List);
-            var ut2 = (alp * mt2) + ((1 - alp) * prevUt2);
-            ut2List.Add(ut2);
-
-            // The same de-lagging, applied to the mean absolute deviation rather than to price. The old
-            // grouping drove this to zero as well, and it is what set the width of both bands - so the
-            // width went negative whenever the deviation was falling, inverting the bands on 112 of the
-            // 251 fixture bars.
-            var dt2 = Math.Max(0, 1 - alp != 0 ? (((2 - alp) * mt2) - ut2) / (1 - alp) : 2 * Math.Abs(currentValue - dt) - prevMt2);
-            var prevBut = GetLastOrDefault(butList);
-            var but = dt + (devFactor * dt2);
-            butList.Add(but);
-
-            var prevBlt = GetLastOrDefault(bltList);
-            var blt = dt - (devFactor * dt2);
-            bltList.Add(blt);
-
-            var signal = GetBollingerBandsSignal(currentValue - dt, prevValue - prevDt, currentValue, prevValue, but, prevBut, blt, prevBlt);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetBollingerBandsSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, point.Upper, i > 0 ? upper[i - 1] : 0, point.Lower, i > 0 ? lower[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", butList },
-            { "MiddleBand", dtList },
-            { "LowerBand", bltList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.DEnvelope;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.DEnvelope; return stockData;
     }
 
 }

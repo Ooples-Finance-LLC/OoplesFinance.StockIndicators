@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            DEnvelopeSpecOptions envelope => ComputeDEnvelopeFast(data, context, envelope.Length, envelope.DevFactor, spec.OutputKey),
             GChannelsSpecOptions channel => ComputeGChannelsFast(data, context, channel.Length, spec.OutputKey),
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType, spec.OutputKey),
 
@@ -21999,6 +22000,14 @@ internal static partial class IndicatorCompute
         }
 
         return buffer;
+    }
+
+    /// <summary>Computes the selected de-lagged envelope boundary or midpoint.</summary>
+    internal static ComputeBuffer ComputeDEnvelopeFast(StockData data, ComputeContext context, int length = 20, double devFactor = 2, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); var window = new DEnvelopeWindow(length, devFactor);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        return result;
     }
 
     /// <summary>Computes the selected G Channel boundary or midpoint.</summary>

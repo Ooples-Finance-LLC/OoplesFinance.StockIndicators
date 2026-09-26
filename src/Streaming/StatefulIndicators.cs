@@ -2896,69 +2896,14 @@ public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class DEnvelopeState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _devFactor;
-    private readonly StreamingInputResolver _input;
-    private double _mt;
-    private double _ut;
-    private double _dt;
-    private double _mt2;
-    private double _ut2;
-
-    public DEnvelopeState(int length = 20, double devFactor = 2)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = (double)2 / (resolved + 1);
-        _devFactor = devFactor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DEnvelopeWindow _window;
+    public DEnvelopeState(int length = 20, double devFactor = 2) { _window = new(length, devFactor); }
     public IndicatorName Name => IndicatorName.DEnvelope;
-
-    public void Reset()
-    {
-        _mt = 0;
-        _ut = 0;
-        _dt = 0;
-        _mt2 = 0;
-        _ut2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var oneMinus = 1 - _alpha;
-        var mt = (_alpha * value) + (oneMinus * _mt);
-        var ut = (_alpha * mt) + (oneMinus * _ut);
-        // McNicholl's zero-lag form; see the batch calculation for why the grouping matters.
-        var dt = oneMinus != 0 ? (((2 - _alpha) * mt) - ut) / oneMinus : 2 * value - _mt;
-        var mt2 = (_alpha * Math.Abs(value - dt)) + (oneMinus * _mt2);
-        var ut2 = (_alpha * mt2) + (oneMinus * _ut2);
-        var dt2 = Math.Max(0, oneMinus != 0 ? (((2 - _alpha) * mt2) - ut2) / oneMinus : 2 * Math.Abs(value - dt) - _mt2);
-        var upper = dt + (_devFactor * dt2);
-        var lower = dt - (_devFactor * dt2);
-
-        if (isFinal)
-        {
-            _mt = mt;
-            _ut = ut;
-            _dt = dt;
-            _mt2 = mt2;
-            _ut2 = ut2;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", dt },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dt, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
 }
 
