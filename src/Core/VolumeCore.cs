@@ -181,22 +181,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void PriceVolumeTrend(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 0;
-        for (var i = 1; i < close.Length; i++)
-        {
-            var roc = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
-            output[i] = output[i - 1] + (volume[i] * roc);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new PriceVolumeTrendTotal();
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -597,25 +584,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void VolumePriceTrend(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        double vpt = 0;
-        output[0] = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var pctChange = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
-            vpt += volume[i] * pctChange;
-            output[i] = vpt;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new PriceVolumeTrendTotal();
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>

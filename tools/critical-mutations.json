@@ -8682,5 +8682,105 @@
     "after": "",
     "filter": "FullyQualifiedName~EaseNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EaseOfMovementState"
+  },
+  {
+    "id": "pvt-wrong-return-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "numerator.AddProduct(_previous, volume, -1)",
+    "after": "numerator.AddProduct(_previous, volume, 1)",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-wrong-modified-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "_modified ? 50000 : 1",
+    "after": "_modified ? 5000 : 1",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-wrong-zero-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "_modified && _previous == 0",
+    "after": "_previous == 0",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-modified-retains-zero-history",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "_modified && _previous == 0",
+    "after": "_modified && price == 0",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "if (commit) { _total",
+    "after": "if (volume != 0) { _total",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-stale-total-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "_total = default; _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-premature-product-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "numerator.AddProduct(price, volume); numerator.AddProduct(_previous, volume, -1);",
+    "after": "numerator.Add((price - _previous) * volume);",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/PriceVolumeTrendWindow.cs",
+    "before": "new RocBankAverage(kind, length, int.MaxValue)",
+    "after": "new RocBankAverage(kind, 1, int.MaxValue)",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "pvt-raw-discards-selected-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.ExactContributionsPreserveAliasesSelectionAndState",
+    "scope": "internal static ComputeBuffer ComputePriceVolumeTrendFast("
+  },
+  {
+    "id": "pvt-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "line.Span, means.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), means.WritableSpan",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.CustomerSignalReceivesCumulativeLineForEveryOutputRequest",
+    "scope": "internal static ComputeBuffer ComputePriceVolumeTrendFast("
+  },
+  {
+    "id": "pvt-pricevolumetrend-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PriceVolumeTrendState"
+  },
+  {
+    "id": "pvt-modifiedpricevolumetrend-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ModifiedPriceVolumeTrendState"
   }
 ]

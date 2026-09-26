@@ -1050,62 +1050,19 @@ public sealed class ModifiedGannHiloActivatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Mpvt")]
 public sealed class ModifiedPriceVolumeTrendState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevMpvt;
-    private bool _hasPrev;
-
-    public ModifiedPriceVolumeTrendState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 23)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PriceVolumeTrendWindow _window;
+    public ModifiedPriceVolumeTrendState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 23)
+        => _window = new PriceVolumeTrendWindow(maType, length, true);
     public IndicatorName Name => IndicatorName.ModifiedPriceVolumeTrend;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _prevMpvt = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var rv = bar.Volume / 50000d;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var mpvt = prevValue != 0 ? _prevMpvt + (rv * diff / prevValue) : 0;
-        var signal = _signalSmoother.Next(mpvt, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevMpvt = mpvt;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mpvt", mpvt },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mpvt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Mpvt", value.Line }, { "Signal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mf")]

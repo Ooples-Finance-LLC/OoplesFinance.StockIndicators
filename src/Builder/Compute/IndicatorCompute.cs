@@ -310,7 +310,7 @@ internal static partial class IndicatorCompute
             PvtSpecOptions pvt => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt.Length, pvt.MaType),
-                _ => ComputePvtFast(data, context, pvt.Length)
+                _ => ComputePvtFast(data, context, pvt.Length, pvt.MaType)
             },
             ChaikinOscillatorSpecOptions co => ComputeChaikinOscillatorFast(data, context, co.FastLength, co.SlowLength, co.MaType),
             EmvSpecOptions => ComputeEmvFast(data, context),
@@ -589,7 +589,7 @@ internal static partial class IndicatorCompute
             VolumePriceTrendSpecOptions vpt => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, vpt.Length, vpt.MaType),
-                _ => ComputeVolumePriceTrendFast(data, context, vpt.Length)
+                _ => ComputeVolumePriceTrendFast(data, context, vpt.Length, vpt.MaType)
             },
             ElderRayBullPowerSpecOptions erbp => ComputeElderRayBullPowerFast(data, context, erbp.Length),
             ElderRayBearPowerSpecOptions erbrp => ComputeElderRayBearPowerFast(data, context, erbrp.Length),
@@ -1678,7 +1678,7 @@ internal static partial class IndicatorCompute
             PriceVolumeTrendSpecOptions pvt2 => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt2.Length, pvt2.MaType),
-                _ => ComputePriceVolumeTrendFast(data, context)
+                _ => ComputePriceVolumeTrendFast(data, context, pvt2.Length, pvt2.MaType)
             },
             PriceZoneOscillatorSpecOptions pzo2 => ComputePriceZoneOscillatorFast(data, context, pzo2.Length, pzo2.MaType),
             RelativeVigorIndexSpecOptions rvi2 => spec.OutputKey switch
@@ -2123,9 +2123,7 @@ internal static partial class IndicatorCompute
                 : ComputeMassThrustIndicatorFast(data, context, mti.Length),
             ModifiedGannHiloActivatorSpecOptions mgha => ComputeModifiedGannHiloActivatorFast(data, context, mgha.Length,
                 maType: mgha.MaType),
-            ModifiedPriceVolumeTrendSpecOptions mpvt => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeModifiedPriceVolumeTrendFast(data, context), mpvt.Length, mpvt.MaType)
-                : ComputeModifiedPriceVolumeTrendFast(data, context),
+            ModifiedPriceVolumeTrendSpecOptions mpvt => ComputeModifiedPriceVolumeTrendFast(data, context, mpvt.Length, mpvt.MaType, spec.OutputKey),
             MultiVoteOnBalanceVolumeSpecOptions mvo => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeMultiVoteOnBalanceVolumeFast(data, context), mvo.Length, mvo.MaType)
                 : ComputeMultiVoteOnBalanceVolumeFast(data, context),
@@ -3597,21 +3595,9 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePvtFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePvtFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        _ = length;
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.PriceVolumeTrend(close, volume, buffer.WritableSpan);
-        return buffer;
+        return ComputePriceVolumeTrendFast(data, context, length, maType);
     }
 
     /// <summary>
@@ -6788,13 +6774,9 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Volume Price Trend using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVolumePriceTrendFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeVolumePriceTrendFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.VolumePriceTrend(close, volume, buffer.WritableSpan);
-        return buffer;
+        return ComputePriceVolumeTrendFast(data, context, length, maType);
     }
 
     /// <summary>
@@ -20683,28 +20665,27 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePriceVolumeTrendSignalFast(StockData data, ComputeContext context,
         int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        using var trend = ComputePriceVolumeTrendFast(data, context);
-        var buffer = context.Rent(trend.Span.Length);
-        buffer.WritableSpan.Clear();
-        MovingAverage(data, maType, length, trend.Span, buffer.WritableSpan);
-
-        return buffer;
+        return ComputePriceVolumeTrendFast(data, context, length, maType, "Signal");
     }
 
-    internal static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePriceVolumeTrendFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null, bool modified = false)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            using var line = context.Rent(input.Count); var cumulative = new PriceVolumeTrendTotal(modified);
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(input[i], data.Volumes[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, means.WritableSpan);
         }
-        var buffer = context.Rent(count);
-        VolumeCore.PriceVolumeTrend(close, volume, buffer.WritableSpan);
-        return buffer;
+        using var window = new PriceVolumeTrendWindow(maType, length, modified); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
+        }
+        return output;
     }
 
     /// <summary>
@@ -24898,32 +24879,9 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Modified Price Volume Trend using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeModifiedPriceVolumeTrendFast(StockData data, ComputeContext context, int length = 23, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateModifiedPriceVolumeTrend accumulates the return on the chained series weighted by volume in
-        // fifty-thousand lots. Nothing about it is a moving average: the length and the average type reach only
-        // the separate signal series, so neither appears here.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var rv = volumes[i] / 50000;
-            var prevMpvt = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = prevValue != 0
-                ? prevMpvt + (rv * CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) / prevValue)
-                : 0;
-        }
-
-        return buffer;
+        return ComputePriceVolumeTrendFast(data, context, length, maType, outputKey, modified: true);
     }
 
     /// <summary>
