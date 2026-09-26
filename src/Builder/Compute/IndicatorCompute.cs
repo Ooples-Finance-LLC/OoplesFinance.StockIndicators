@@ -4002,27 +4002,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeNormalizedAtrFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateNormalizedAverageTrueRange divides Wilder's average true range by the chained series and
-        // reports it as a percentage. The arm this replaced rebuilt the price spans from the ticker list and
-        // normalised against the close, so a chained series never reached it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        var trueRange = CalculationsHelper.GetTrueRangeList(data);
-        using var averageTrueRange = context.Rent(count);
-        MovingAverageCore.WellesWilderMovingAverage(SpanCompat.AsReadOnlySpan(trueRange), averageTrueRange.WritableSpan,
-            Math.Max(1, length));
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = input[i] != 0 ? atr[i] / input[i] * 100 : 0;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+        using var window = new AtrDerivedWindow(length, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) { var atr = window.Next(high[i], low[i], input[i], true); result.WritableSpan[i] = AtrDerivedWindow.Percent(atr, input[i]); }
+        return result;
     }
 
     /// <summary>
@@ -7546,25 +7529,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAtrChannelWidthFast(StockData data, ComputeContext context, int length = 14,
         double multiplier = 2)
     {
-        // CalculateAtrChannelWidth is the full span of a channel drawn a multiple of Wilder's average true
-        // range either side of its centre, which is twice that multiple. VolatilityCore.AtrChannelWidth
-        // measured a different average and read the close directly.
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var trueRange = CalculationsHelper.GetTrueRangeList(data);
-        using var averageTrueRange = context.Rent(count);
-        MovingAverageCore.WellesWilderMovingAverage(SpanCompat.AsReadOnlySpan(trueRange), averageTrueRange.WritableSpan, length);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = 2 * multiplier * atr[i];
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+        using var window = new AtrDerivedWindow(length, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) { var atr = window.Next(high[i], low[i], input[i], true); result.WritableSpan[i] = AtrDerivedWindow.Width(atr, multiplier); }
+        return result;
     }
 
     /// <summary>

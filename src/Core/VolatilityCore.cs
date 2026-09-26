@@ -328,28 +328,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void NormalizedAtr(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = close[i] != 0 ? (atr[i] / close[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new AtrDerivedWindow(length, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) { var atr = window.Next(high[i], low[i], close[i], true); output[i] = AtrDerivedWindow.Percent(atr, close[i]); }
     }
 
     /// <summary>
@@ -853,28 +834,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void AtrChannelWidth(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = 2 * multiplier * atr[i];
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new AtrDerivedWindow(length, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) { var atr = window.Next(high[i], low[i], close[i], true); output[i] = AtrDerivedWindow.Width(atr, multiplier); }
     }
 
     /// <summary>

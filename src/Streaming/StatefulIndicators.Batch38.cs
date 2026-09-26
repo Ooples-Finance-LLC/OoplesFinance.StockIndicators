@@ -162,50 +162,23 @@ public sealed class AroonDownState : IStreamingIndicatorState, IDisposable
 /// How wide a channel a multiple of the average true range either side of the price would be, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateAtrChannelWidth</c>. It wraps
-/// <see cref="AverageTrueRangeState"/> rather than averaging a range of its own, so the range it doubles is
-/// the one the batch engine averages.
+/// Scales the same zero-seeded Wilder average used by the batch engine, keeping
+/// an extended exponent until the final channel width is published.
 /// </remarks>
 [PrimaryOutput("Acw")]
 public sealed class AtrChannelWidthState : IStreamingIndicatorState, IDisposable
 {
+    private readonly AtrDerivedWindow _window;
     private readonly double _multiplier;
-    private readonly AverageTrueRangeState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-
-    public AtrChannelWidthState(int length = 14, double multiplier = 2)
-    {
-        _multiplier = multiplier;
-        _averageTrueRange = new AverageTrueRangeState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public AtrChannelWidthState(int length = 14, double multiplier = 2) { _window = new(length); _multiplier = multiplier; }
     public IndicatorName Name => IndicatorName.AtrChannelWidth;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var atr = _averageTrueRange.Update(bar, isFinal, includeOutputs: false).Value;
-        var width = 2 * _multiplier * atr;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Acw", width } };
-        }
-
-        return new StreamingIndicatorStateResult(width, outputs);
+        StreamingInputValidation.Validate(bar); var atr = _window.Next(bar.High, bar.Low, bar.Close, isFinal); var value = AtrDerivedWindow.Width(atr, _multiplier);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Acw", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _averageTrueRange.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>

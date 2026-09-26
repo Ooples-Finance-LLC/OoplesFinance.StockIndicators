@@ -26,10 +26,6 @@ OoplesFinance.StockIndicators.Indicators.Atr/longer-periods
 OoplesFinance.StockIndicators.Indicators.Atr/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Atr/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Atr/weighted-average
-OoplesFinance.StockIndicators.Indicators.AtrChannelWidth/default
-OoplesFinance.StockIndicators.Indicators.AtrChannelWidth/longer-periods
-OoplesFinance.StockIndicators.Indicators.AtrChannelWidth/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AtrChannelWidth/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/default
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/longer-periods
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/minimum-periods
@@ -46,10 +42,6 @@ OoplesFinance.StockIndicators.Indicators.AtrFilteredExponentialMovingAverage/min
 OoplesFinance.StockIndicators.Indicators.AtrFilteredExponentialMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AtrFilteredExponentialMovingAverage/minimum-stdDevLength
 OoplesFinance.StockIndicators.Indicators.AtrFilteredExponentialMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AtrPercent/default
-OoplesFinance.StockIndicators.Indicators.AtrPercent/longer-periods
-OoplesFinance.StockIndicators.Indicators.AtrPercent/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AtrPercent/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AtrTrailingStops/default
 OoplesFinance.StockIndicators.Indicators.AtrTrailingStops/longer-periods
 OoplesFinance.StockIndicators.Indicators.AtrTrailingStops/minimum-periods
@@ -1664,10 +1656,6 @@ OoplesFinance.StockIndicators.Indicators.NarrowSidewaysChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.NarrowSidewaysChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.NarrowSidewaysChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.NarrowSidewaysChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.Natr/default
-OoplesFinance.StockIndicators.Indicators.Natr/longer-periods
-OoplesFinance.StockIndicators.Indicators.Natr/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Natr/shorter-periods
 OoplesFinance.StockIndicators.Indicators.NegativeVolumeDisparityIndicator/default
 OoplesFinance.StockIndicators.Indicators.NegativeVolumeDisparityIndicator/longer-length
 OoplesFinance.StockIndicators.Indicators.NegativeVolumeDisparityIndicator/longer-periods

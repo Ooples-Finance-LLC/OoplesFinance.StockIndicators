@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.NormalizedAverageTrueRange or IndicatorName.AtrChannelWidth)
+        {
+            var key = builtIn.BatchName == IndicatorName.AtrChannelWidth ? "Acw" : "Natr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrDerivedOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.KeltnerChannels or IndicatorName.KeltnerChannelWidth)
         {
             var keltnerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

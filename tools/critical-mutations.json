@@ -18683,5 +18683,139 @@
     "after": "",
     "scope": "private static ComputeBuffer ComputeKeltnerChannelBand(",
     "filter": "FullyQualifiedName~KeltnerNumericalTests.BatchOnlyAveragesRemainAvailableForBothChannelStages"
+  },
+  {
+    "id": "atr-derived-wrong-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "1, length, capacityHint: capacityHint",
+    "after": "1, length + 1, capacityHint: capacityHint",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-wrong-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "close, commit).Atr",
+    "after": "close, commit).Middle",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "high, low, close, commit",
+    "after": "high, low, close, true",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "internal void Reset() => _range.Reset();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-half-width",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "atr.Mantissa, multiplier, 2",
+    "after": "atr.Mantissa, multiplier, 1",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-missing-percent",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "atr.AddTo(ref numerator, 100)",
+    "after": "atr.AddTo(ref numerator, 1)",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-lost-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "product.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "product.ScaleByPowerOfTwo(0);",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-early-atr-publish",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "atr.AddTo(ref numerator, 100)",
+    "after": "numerator.Add(atr.Publish(), 100)",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-absolute-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "denominator.Add(close)",
+    "after": "denominator.Add(Math.Abs(close))",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-zero-close-contract",
+    "module": "numerical",
+    "file": "src/Helpers/AtrDerivedWindow.cs",
+    "before": "if (close == 0) return 0",
+    "after": "if (close == 0) return 1",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-derived-selected-width-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAtrChannelWidthFast("
+  },
+  {
+    "id": "atr-derived-selected-percent-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeNormalizedAtrFast("
+  },
+  {
+    "id": "atr-derived-core-normalizedatr",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "before": "new AtrDerivedWindow(length, Math.Max(1, close.Length))",
+    "after": "new AtrDerivedWindow(length + 1, Math.Max(1, close.Length))",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static void NormalizedAtr("
+  },
+  {
+    "id": "atr-derived-core-atrchannelwidth",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "before": "new AtrDerivedWindow(length, Math.Max(1, close.Length))",
+    "after": "new AtrDerivedWindow(length + 1, Math.Max(1, close.Length))",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static void AtrChannelWidth("
+  },
+  {
+    "id": "atr-derived-invalid-normalizedaveragetruerange",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch36.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class NormalizedAverageTrueRangeState :"
+  },
+  {
+    "id": "atr-derived-invalid-atrchannelwidth",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch38.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class AtrChannelWidthState :"
   }
 ]

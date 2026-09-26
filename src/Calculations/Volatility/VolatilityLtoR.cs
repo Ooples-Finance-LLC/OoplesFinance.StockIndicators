@@ -135,37 +135,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNormalizedAverageTrueRange(this StockData stockData, int length = 14)
     {
-        length = Math.Max(length, 1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> natrList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        var trList = GetTrueRangeList(stockData);
-        var trSpan = SpanCompat.AsReadOnlySpan(trList);
-        var atrBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.WellesWilderMovingAverage(trSpan, atrBuffer.Span, length);
-
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        using var window = new AtrDerivedWindow(length, Math.Max(1, input.Count));
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var natr = currentValue != 0 ? atrBuffer.Span[i] / currentValue * 100 : 0;
-            natrList.Add(natr);
-
-            var prevNatr1 = i >= 1 ? natrList[i - 1] : 0;
-            var prevNatr2 = i >= 2 ? natrList[i - 2] : 0;
-            var signal = GetCompareSignal(natr - prevNatr1, prevNatr1 - prevNatr2);
-            signalsList?.Add(signal);
+            var atr = window.Next(high[i], low[i], input[i], true); var value = AtrDerivedWindow.Percent(atr, input[i]);
+            signals?.Add(GetCompareSignal(value - (i > 0 ? values[i - 1] : 0), (i > 0 ? values[i - 1] : 0) - (i > 1 ? values[i - 2] : 0))); values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Natr", natrList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(natrList);
-        stockData.IndicatorName = IndicatorName.NormalizedAverageTrueRange;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Natr", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.NormalizedAverageTrueRange; return stockData;
     }
 
     /// <summary>
