@@ -8598,5 +8598,89 @@
     "after": "",
     "filter": "FullyQualifiedName~PriceForceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ForceIndexState"
+  },
+  {
+    "id": "ease-wrong-previous-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "h + l - _previousHigh - _previousLow",
+    "after": "h + l - _previousHigh + _previousLow",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-wrong-midpoint-factor",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "1075 + shift",
+    "after": "1074 + shift",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-unsigned-volume",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "_divisor * v.Sign",
+    "after": "_divisor",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-unsigned-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "_divisor = ExactVarianceWindow.Units(divisor)",
+    "after": "_divisor = ExactVarianceWindow.Units(Math.Abs(divisor))",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "if (commit) { _previousHigh",
+    "after": "if (volume != 0) { _previousHigh",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-stale-state-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EaseWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery"
+  },
+  {
+    "id": "ease-raw-uses-close-as-high",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(data.HighPrices[i], data.LowPrices[i]",
+    "after": "window.Next(data.ClosePrices[i], data.LowPrices[i]",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery",
+    "scope": "internal static ComputeBuffer ComputeEaseOfMovementFast("
+  },
+  {
+    "id": "ease-core-ignores-divisor",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "before": "new EaseWindow(divisor)",
+    "after": "new EaseWindow(1000000)",
+    "filter": "FullyQualifiedName~EaseNumericalTests.ExactMidpointRangeVolumeQuotientPreservesFiniteRecovery",
+    "scope": "internal static void EaseOfMovement("
+  },
+  {
+    "id": "ease-skips-second-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, Math.Max(1, length), first.Span, second.WritableSpan);",
+    "after": "",
+    "filter": "FullyQualifiedName~EaseNumericalTests.CustomerSignalStagesExecuteInOrderWithoutChangingRawEom",
+    "scope": "internal static ComputeBuffer ComputeEaseOfMovementFast("
+  },
+  {
+    "id": "ease-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EaseNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EaseOfMovementState"
   }
 ]

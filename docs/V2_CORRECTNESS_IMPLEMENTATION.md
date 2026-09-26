@@ -1000,3 +1000,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Nine configurations / two types now use fused force products and selected smoothing across batch, raw, core, native and live routes. Customer averages receive the force series. Extreme finite products recover through averaging; preview, reset, selected prices and invalid inputs are covered.
 - **79/79** checks passed (`price-force.trx`); campaign268 passed its baseline and caught **9/9** injected faults. All 14 staged files match its archive. **1,006** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `9201a16f921117eb705c1527d3735b6ce7ab5cda3820fe6cfbf9cea8217c53c2` / `fc5f790977fc6db1f828f0cc52c638506f1d6fa7a77299dc7bb6b6b095b2fa8b`.
 - Inventory: **3,823/7,131**, **3,308** omissions across **585** types; no construction failures. DLL SHA256 `949A719FA9A0C75902380D4E68E701916BD610A055D13835B9AF5C11DA2A996E`. Fifty-four grouped batches cover **993 configurations / 160 types**. Full coverage remains incomplete.
+
+
+### Ease of Movement numerical contracts
+
+- Nine configurations / two types use the exact midpoint-change times range/divisor formula across batch, raw, core, native and live routes. Signed volume/divisor and zero range/volume are covered. Both customer signal stages execute in order while Eom remains the raw output. Preview, reset and invalid inputs are covered.
+- **79/79** checks passed (`ease.trx`); campaign269 passed its baseline and caught **10/10** injected faults. All 13 staged files match its archive. **1,016** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `2bca94cdb5c620ab8554d49c053579fa8bc9947e9c7205590c1dac03ad0ba7ed` / `5e0d0289e52af462fe842272c76ab95a53c933370d1d76e2b73d92298ed0e94d`.
+- Inventory: **3,832/7,131**, **3,299** omissions across **583** types; no construction failures. DLL SHA256 `F18814FBB44395DCBBC3F93153EB8B63575A580B93612A0F08D787E4F64DB4CC`. Fifty-five grouped batches cover **1,002 configurations / 162 types**. Full coverage remains incomplete.

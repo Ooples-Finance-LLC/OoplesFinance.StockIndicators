@@ -545,6 +545,7 @@ internal static partial class StatefulIndicatorFactory
             PviSpecOptions pvi => new PositiveVolumeIndexState(maType: pvi.MaType),
             ChaikinOscillatorSpecOptions co => new ChaikinOscillatorState(maType: co.MaType, fastLength: co.FastLength, slowLength: co.SlowLength),
             // The state has no averaging length of its own; its divisor is the batch indicator's, not the length.
+            EaseOfMovementSpecOptions ease => new EaseOfMovementState(ease.Divisor),
             EmvSpecOptions _ => new EaseOfMovementState(),
             KvoSpecOptions kvo => new KlingerVolumeOscillatorState(fastLength: kvo.Length),
             MassIndexSpecOptions mi => new MassIndexState(maType: mi.MaType, length1: mi.EmaLength, length2: mi.EmaLength, length3: mi.SumLength),
