@@ -250,6 +250,7 @@ internal static partial class StatefulIndicatorFactory
             UpsideDownsideVolumeSpecOptions volumeUpsideDownsideVolume => new UpsideDownsideVolumeState(volumeUpsideDownsideVolume.Length),
             TFSVolumeOscillatorSpecOptions volumeTFSVolumeOscillator => new TFSVolumeOscillatorState(volumeTFSVolumeOscillator.Length),
             VolumeAccumulationOscillatorSpecOptions volumeVolumeAccumulationOscillator => new VolumeAccumulationOscillatorState(volumeVolumeAccumulationOscillator.Length),
+            RelativeVolumeIndicatorSpecOptions relativeVolume => new RelativeVolumeIndicatorState(relativeVolume.MaType, relativeVolume.Length),
             ReversalPointsSpecOptions reversals => new ReversalPointsState(reversals.MaType, reversals.Length),
             SimpleCycleSpecOptions simpleCycle => new SimpleCycleState(simpleCycle.Length),
             RatioOchlAveragerSpecOptions => new RatioOCHLAveragerState(),

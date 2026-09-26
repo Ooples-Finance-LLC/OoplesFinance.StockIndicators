@@ -1250,71 +1250,18 @@ public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, I
 [PrimaryOutput("Rvi")]
 public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly RollingStandardDeviation _volumeStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevDpl;
-    private bool _hasPrev;
-    private bool _hasPrevDpl;
-
-    public RelativeVolumeIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 60)
-    {
-        var resolved = Math.Max(1, length);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _volumeStdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RelativeVolumeWindow _window;
+    public RelativeVolumeIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 60)
+        => _window = new RelativeVolumeWindow(maType, length);
     public IndicatorName Name => IndicatorName.RelativeVolumeIndicator;
-
-    public void Reset()
-    {
-        _volumeMa.Reset();
-        _volumeStdDev.Reset();
-        _prevValue = 0;
-        _prevDpl = 0;
-        _hasPrev = false;
-        _hasPrevDpl = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var avgVolume = _volumeMa.Next(bar.Volume, isFinal);
-        var sdVolume = _volumeStdDev.Next(bar.Volume, isFinal);
-        var relVol = sdVolume != 0 ? (bar.Volume - avgVolume) / sdVolume : 0;
-        var prevDpl = _hasPrevDpl ? _prevDpl : 0;
-        var dpl = relVol >= 2 ? prevValue : _hasPrevDpl ? prevDpl : value;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevDpl = dpl;
-            _hasPrev = true;
-            _hasPrevDpl = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Rvi", relVol },
-                { "Dpl", dpl }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(relVol, outputs);
+        StreamingInputValidation.Validate(bar);
+        var (score, demand) = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(score, includeOutputs ? new Dictionary<string, double> { { "Rvi", score }, { "Dpl", demand } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeMa.Dispose();
-        _volumeStdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Repulse")]

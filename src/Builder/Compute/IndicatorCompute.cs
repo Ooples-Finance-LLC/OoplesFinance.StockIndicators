@@ -28248,43 +28248,18 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeRelativeVolumeIndicatorFast(StockData data, ComputeContext context, int length = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool demandPrice = false)
     {
-        // V1 Algorithm: Relative Volume Indicator
-        // 1. Calculate MA of volume
-        // 2. Calculate StdDev of volume
-        // 3. relVol = (currentVolume - avg) / stdDev
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        int count = data.Count;
-
-        // Calculate MA of volume
-        var volMaBuffer = context.Rent(count);
-        MovingAverage(data, maType, length, volume, volMaBuffer.WritableSpan);
-
-        // Calculate StdDev of volume
-        var stdDevBuffer = context.Rent(count);
-        VolatilityCore.StandardDeviation(volume, stdDevBuffer.WritableSpan, length);
-
-        // Calculate relative volume: (volume - avg) / stdDev
-        var result = context.Rent(count);
-        var resultSpan = result.WritableSpan;
-        var volMaSpan = volMaBuffer.Span;
-        var stdDevSpan = stdDevBuffer.Span;
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        double previousDemand = 0;
-        for (int i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(data.Count);
+        if (custom) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), means.WritableSpan);
+        var output = context.Rent(data.Count);
+        using var window = new RelativeVolumeWindow(maType, length);
+        for (var i = 0; i < data.Count; i++)
         {
-            double sd = stdDevSpan[i];
-            var score = sd != 0 ? (volume[i] - volMaSpan[i]) / sd : 0;
-            if (demandPrice)
-            {
-                previousDemand = score >= 2 ? (i == 0 ? 0 : inputList[i - 1]) : i == 0 ? inputList[i] : previousDemand;
-                resultSpan[i] = previousDemand;
-            }
-            else resultSpan[i] = score;
+            var (score, demand) = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            output.WritableSpan[i] = demandPrice ? demand : score;
         }
-
-        volMaBuffer.Dispose();
-        stdDevBuffer.Dispose();
-        return result;
+        return output;
     }
 
     /// <summary>
