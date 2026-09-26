@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.UpsideDownsideVolume or IndicatorName.TFSVolumeOscillator or IndicatorName.VolumeAccumulationOscillator)
+        {
+            var key = builtIn.BatchName == IndicatorName.UpsideDownsideVolume ? "Udv" : builtIn.BatchName == IndicatorName.TFSVolumeOscillator ? "Tfsvo" : "Vao";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolumeBalanceOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.TreynorRatio or IndicatorName.OmegaRatio or IndicatorName.UpsidePotentialRatio)
         {
             var key = builtIn.BatchName == IndicatorName.TreynorRatio ? "Tr" : builtIn.BatchName == IndicatorName.OmegaRatio ? "Or" : "Upr";

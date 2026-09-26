@@ -962,50 +962,17 @@ public sealed class TradingMadeMoreSimplerOscillatorState : IStreamingIndicatorS
 [PrimaryOutput("Tfsvo")]
 public sealed class TFSVolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _totvSum;
-    private readonly StreamingInputResolver _input;
-
-    public TFSVolumeOscillatorState(int length = 7)
-    {
-        _length = Math.Max(1, length);
-        _totvSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeBalanceWindow _window;
+    public TFSVolumeOscillatorState(int length = 7) => _window = new VolumeBalanceWindow(length, VolumeBalanceKind.Tfs);
     public IndicatorName Name => IndicatorName.TFSVolumeOscillator;
-
-    public void Reset()
-    {
-        _totvSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var open = bar.Open;
-        var volume = bar.Volume;
-
-        var totv = close > open ? volume : close < open ? -volume : 0;
-        var totvSum = isFinal ? _totvSum.Add(totv, out _) : _totvSum.Preview(totv, out _);
-        var tfsvo = _length != 0 ? totvSum / _length : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tfsvo", tfsvo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tfsvo, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Tfsvo", value } } : null);
     }
-
-public void Dispose()
-{
-    _totvSum.Dispose();
-}
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tri")]

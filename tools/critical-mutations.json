@@ -7479,5 +7479,96 @@
     "after": "",
     "filter": "FullyQualifiedName~TreynorNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TreynorRatioState"
+  },
+  {
+    "id": "volume-balance-wrong-downside-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "down.Add(value.Volume, -weight)",
+    "after": "down.Add(value.Volume, weight)",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-tfs-uses-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "_kind == VolumeBalanceKind.UpsideDownside ? _previous : open",
+    "after": "_previous",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-drops-high-side",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "up.AddProduct(value.High, value.Volume, -weight);",
+    "after": "up.AddProduct(value.High, value.Volume, 0);",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-premature-product",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "up.AddProduct(value.Price, value.Volume, 2 * weight);",
+    "after": "up.Add(value.Price * value.Volume, 2 * weight);",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-keeps-expired-contributions",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "if (_window.Count == _window.Capacity)",
+    "after": "if (_window.Count > _window.Capacity)",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-tfs-partial-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "VolumeBalanceKind.Tfs ? _window.Capacity : 2L * count",
+    "after": "VolumeBalanceKind.Tfs ? count : 2L * count",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-accumulation-full-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "VolumeBalanceKind.Tfs ? _window.Capacity : 2L * count",
+    "after": "VolumeBalanceKind.Tfs ? _window.Capacity : 2L * _window.Capacity",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeBalanceWindow.cs",
+    "before": "if (commit) { _window.TryAdd",
+    "after": "if (_window.Capacity > 0) { _window.TryAdd",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction"
+  },
+  {
+    "id": "volume-balance-core-tfs-wrong-formula",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "VolumeBalanceKind.Tfs",
+    "after": "VolumeBalanceKind.UpsideDownside",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction",
+    "scope": "internal static void TFSVolumeOscillator("
+  },
+  {
+    "id": "volume-balance-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.ExactSignedVolumesAndProductsSurviveCancellationAndEviction",
+    "scope": "internal static ComputeBuffer ComputeUpsideDownsideVolumeFast("
+  },
+  {
+    "id": "volume-balance-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TFSVolumeOscillatorState"
   }
 ]
