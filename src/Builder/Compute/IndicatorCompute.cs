@@ -15187,42 +15187,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEquityMovingAverageFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateEquityMovingAverage builds an equity curve from trading the chained series' side of its own
-        // moving average: the cumulative result of that system sets the smoothing factor against the result of
-        // the last window, so the average tracks the series closely while the system is winning. It never
-        // reads volume, which the core this replaced did.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var windowedChange = new RollingSum();
-        double cumulativeChange = 0;
-        double previousSide = 0;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var window = new EquityWindow(maType, length, initializeFallback: false);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevEqma = i >= 1 ? output[i - 1] : currentValue;
-            var change = CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue);
-
-            double side = Math.Sign(currentValue - sma[i]);
-            windowedChange.Add(change * previousSide);
-            cumulativeChange += change * side;
-            previousSide = side;
-
-            var alpha = cumulativeChange != 0
-                ? MathHelper.MinOrMax(windowedChange.Sum(length) / cumulativeChange, 0.99, 0.01)
-                : 0.99;
-            output[i] = (alpha * currentValue) + ((1 - alpha) * prevEqma);
+            using var average = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.NextWithAverage(input[i], average.Span[i], true);
         }
-
+        else for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

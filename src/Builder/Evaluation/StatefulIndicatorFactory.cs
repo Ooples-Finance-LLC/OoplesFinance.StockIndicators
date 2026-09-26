@@ -416,6 +416,7 @@ internal static partial class StatefulIndicatorFactory
             WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),
             DemaSpecOptions dema => new DoubleExponentialMovingAverageState(length: dema.Length),
             TemaSpecOptions tema => new TripleExponentialMovingAverageState(length: tema.Length),
+            EquityMovingAverageSpecOptions equity => new EquityMovingAverageState(equity.MaType, equity.Length),
             EhlersLaguerreFilterSpecOptions laguerre => new EhlersLaguerreFilterState(2d / (laguerre.Length + 1d)),
             EhlersOptimumEllipticFilterSpecOptions => new EhlersOptimumEllipticFilterState(),
             EhlersModifiedOptimumEllipticFilterSpecOptions => new EhlersModifiedOptimumEllipticFilterState(),

@@ -4548,50 +4548,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EquityMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var buyPowerArray = pool.Rent(price.Length);
-        var totalPowerArray = pool.Rent(price.Length);
-
-        try
-        {
-            var buyPower = buyPowerArray.AsSpan(0, price.Length);
-            var totalPower = totalPowerArray.AsSpan(0, price.Length);
-
-            double buyPowerSum = 0, totalPowerSum = 0;
-
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentVolume = volume[i];
-                var prevPrice = i >= 1 ? price[i - 1] : price[i];
-                var change = price[i] - prevPrice;
-
-                var bp = change > 0 ? currentVolume * change : 0;
-                var tp = currentVolume * Math.Abs(change);
-
-                buyPowerSum += bp;
-                totalPowerSum += tp;
-
-                if (i >= length)
-                {
-                    var oldChange = price[i - length + 1] - (i >= length ? price[i - length] : price[i - length + 1]);
-                    var oldBp = oldChange > 0 ? volume[i - length + 1] * oldChange : 0;
-                    var oldTp = volume[i - length + 1] * Math.Abs(oldChange);
-                    buyPowerSum -= oldBp;
-                    totalPowerSum -= oldTp;
-                }
-
-                var emv = totalPowerSum != 0 ? (2 * buyPowerSum / totalPowerSum) - 1 : 0;
-                output[i] = emv;
-            }
-        }
-        finally
-        {
-            pool.Return(buyPowerArray);
-            pool.Return(totalPowerArray);
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EquityWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], true);
     }
 
     /// <summary>
