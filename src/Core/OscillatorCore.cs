@@ -7895,48 +7895,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrendTriggerFactor(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 15)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-
-        var pool = ArrayPool<double>.Shared;
-        var highestArray = pool.Rent(high.Length);
-        var lowestArray = pool.Rent(high.Length);
-
-        try
-        {
-            // First pass: compute highest and lowest values at each point
-            for (var i = 0; i < high.Length; i++)
-            {
-                highWindow.Add(high[i]);
-                lowWindow.Add(low[i]);
-                highestArray[i] = highWindow.Max;
-                lowestArray[i] = lowWindow.Min;
-            }
-
-            // Second pass: compute TTF
-            for (var i = 0; i < high.Length; i++)
-            {
-                var highest = highestArray[i];
-                var lowest = lowestArray[i];
-                var prevHighest = i >= length ? highestArray[i - length] : 0;
-                var prevLowest = i >= length ? lowestArray[i - length] : 0;
-                var buyPower = highest - prevLowest;
-                var sellPower = prevHighest - lowest;
-
-                output[i] = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(highestArray);
-            pool.Return(lowestArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendTriggerWindow(length);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>

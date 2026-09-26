@@ -431,72 +431,17 @@ public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Ttf")]
 public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly PooledRingBuffer<double> _highestValues;
-    private readonly PooledRingBuffer<double> _lowestValues;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public TrendTriggerFactorState(int length = 15)
-    {
-        _length = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _highestValues = new PooledRingBuffer<double>(_length);
-        _lowestValues = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendTriggerWindow _window;
+    public TrendTriggerFactorState(int length = 15) => _window = new(length);
     public IndicatorName Name => IndicatorName.TrendTriggerFactor;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _highestValues.Clear();
-        _lowestValues.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var prevHighest = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_highestValues, highest, _length) : 0;
-        var prevLowest = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_lowestValues, lowest, _length) : 0;
-        var buyPower = highest - prevLowest;
-        var sellPower = prevHighest - lowest;
-        var ttf = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
-
-        if (isFinal)
-        {
-            _highestValues.TryAdd(highest, out _);
-            _lowestValues.TryAdd(lowest, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ttf", ttf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ttf, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ttf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _highestValues.Dispose();
-        _lowestValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tr")]
