@@ -12382,5 +12382,120 @@
     "after": "",
     "filter": "FullyQualifiedName~RepulsionNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class RepulsionMovingAverageState"
+  },
+  {
+    "id": "compound-ratio-wrong-geometric-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "1d / (length - 1) - 1",
+    "after": "1d / length - 1",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-wrong-geometric-basis",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "1 + 2 * ratio",
+    "after": "1 + ratio",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-reverses-weights",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "Math.Pow(basis, length - j)",
+    "after": "Math.Pow(basis, j + 1)",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-truncates-smoothing-period",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "Math.Round(Math.Sqrt(Math.Max(1, length)))",
+    "after": "Math.Floor(Math.Sqrt(Math.Max(1, length)))",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-rounds-product-before-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "top.AddProduct(j == 0 ? price : _prices[_prices.Count - j], _weights[j])",
+    "after": "top.Add((j == 0 ? price : _prices[_prices.Count - j]) * _weights[j])",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-uses-count-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "top.Ratio(_denominator)",
+    "after": "top.Mean(_weights.Length)",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-bypasses-final-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "_average.Next(new RocBankValue(raw), commit).Publish()",
+    "after": "raw",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-commits-raw-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "if (commit) _prices.TryAdd",
+    "after": "if (true) _prices.TryAdd",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "_average.Next(new RocBankValue(raw), commit)",
+    "after": "_average.Next(new RocBankValue(raw), true)",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-stale-prices-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/CompoundRatioWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "compound-ratio-customer-gets-original",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "CompoundRatioWindow.SmoothPeriod(length), raw.Span, buffer.WritableSpan",
+    "after": "CompoundRatioWindow.SmoothPeriod(length), SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CustomerAverageReceivesTheRawKernelAndBatchOnlyAveragesRemainUsable",
+    "scope": "internal static ComputeBuffer ComputeCompoundRatioMovingAverageFast("
+  },
+  {
+    "id": "compound-ratio-eagerly-constructs-batch-fallback",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "before": "initializeFallback: false",
+    "after": "initializeFallback: true",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.CustomerAverageReceivesTheRawKernelAndBatchOnlyAveragesRemainUsable",
+    "scope": "public static StockData CalculateCompoundRatioMovingAverage("
+  },
+  {
+    "id": "compound-ratio-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~CompoundRatioNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class CompoundRatioMovingAverageState"
   }
 ]

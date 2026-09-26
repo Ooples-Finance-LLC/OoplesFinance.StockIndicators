@@ -7443,39 +7443,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeCompoundRatioMovingAverageFast(StockData data, ComputeContext context,
         int length = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateCompoundRatioMovingAverage weights the window by a compounding ratio rather than by
-        // position, and then smooths that raw wave over the square root of the length with whichever average
-        // it was given. The series the spec is bound to is the smoothed one.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        var r = MathHelper.Pow(length, ((double)1 / (length - 1)) - 1);
-        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
-        var bas = 1 + (r * 2);
-
-        using var rawBuffer = context.Rent(count);
-        var raw = rawBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var window = new CompoundRatioWindow(maType, length, initializeFallback: false);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = MathHelper.Pow(bas, length - j);
-
-                // Bars before the start of the series count as zero, which is what the batch does.
-                var previousValue = i >= j ? inputList[i - j] : 0;
-
-                sum += previousValue * weight;
-                weightedSum += weight;
-            }
-
-            raw[i] = weightedSum != 0 ? sum / weightedSum : 0;
+            using var raw = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Raw(input[i], true);
+            MovingAverage(data, maType, CompoundRatioWindow.SmoothPeriod(length), raw.Span, buffer.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, raw, buffer.WritableSpan);
-
+        else for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 
