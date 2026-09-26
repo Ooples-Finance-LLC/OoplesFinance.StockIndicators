@@ -14541,32 +14541,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeIIRLeastSquaresEstimateFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateIIRLeastSquaresEstimate carries its own estimate forward and corrects it by the chained
-        // value less the exponential average of that estimate taken over half the length, both scaled by the
-        // same rate. The estimate is seeded from the first chained value rather than from zero.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var a = (double)4 / (length + 2);
-        var halfLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double prevSEma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevS = i >= 1 ? output[i - 1] : currentValue;
-
-            var sEma = CalculationsHelper.CalculateEMA(prevS, prevSEma, halfLength);
-            prevSEma = sEma;
-
-            output[i] = (a * currentValue) + prevS - (a * sEma);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.IIRLeastSquaresEstimate(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 

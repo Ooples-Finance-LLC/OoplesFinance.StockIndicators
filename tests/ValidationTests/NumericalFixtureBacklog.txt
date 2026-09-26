@@ -1549,10 +1549,6 @@ OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HurstCycleChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/default
-OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/longer-periods
-OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/minimum-periods
-OoplesFinance.StockIndicators.Indicators.IIRLeastSquaresEstimate/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Inertia/default
 OoplesFinance.StockIndicators.Indicators.Inertia/longer-periods
 OoplesFinance.StockIndicators.Indicators.Inertia/longer-rviLength

@@ -11557,5 +11557,102 @@
     "after": "",
     "filter": "FullyQualifiedName~HullEstimateNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class HullEstimateState"
+  },
+  {
+    "id": "iir-least-squares-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "_hasPrevious ? _previous : current",
+    "after": "_hasPrevious ? _previous : default",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-wrong-gain",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "4d / (length + 2d)",
+    "after": "2d / (length + 2d)",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-integer-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "length + 2d",
+    "after": "length + 2",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-wrong-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "Math.Ceiling(length / 2d)",
+    "after": "Math.Floor(length / 2d)",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-missing-ema-floor",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "Math.Max(.01,",
+    "after": "Math.Max(0,",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-wrong-correction-sign",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "ema.Multiply(_gain), -1",
+    "after": "ema.Multiply(_gain), 1",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-forgets-computed-average",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "_ema = ema;",
+    "after": "_ema = default;",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-premature-estimate-publication",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "_ema = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/IirLeastSquaresWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "iir-least-squares-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class IIRLeastSquaresEstimateState"
   }
 ]

@@ -3938,27 +3938,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void IIRLeastSquaresEstimate(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // IIR filter with least squares fitting
-        var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            // Preserve this regression-based variant's partial-window fit.
-            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
-
-            var alpha = 2.0 / (length + 1);
-            for (var i = 0; i < input.Length; i++)
-            {
-                var prevIir = i >= 1 ? output[i - 1] : lsmaBuffer[i];
-                output[i] = (alpha * lsmaBuffer[i]) + ((1 - alpha) * prevIir);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(lsmaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new IirLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
