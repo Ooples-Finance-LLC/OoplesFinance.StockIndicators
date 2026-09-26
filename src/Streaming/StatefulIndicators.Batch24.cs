@@ -1083,62 +1083,17 @@ public sealed class TickLineMomentumOscillatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Ie2")]
 public sealed class TillsonIE2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma;
-    private readonly LinearRegressionState _linReg;
-    private readonly StreamingInputResolver _input;
-    private double _prevLinReg;
-    private bool _hasPrev;
-
-    public TillsonIE2State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 15)
-    {
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _linReg = new LinearRegressionState(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TillsonIe2Window _window;
+    public TillsonIE2State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 15) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.TillsonIE2;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _linReg.Reset();
-        _prevLinReg = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevLinReg = _hasPrev ? _prevLinReg : 0;
-        var m = linReg - prevLinReg + sma;
-        var ie2 = (m + linReg) / 2;
-
-        if (isFinal)
-        {
-            _prevLinReg = linReg;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ie2", ie2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ie2, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ie2", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _linReg.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("T3")]

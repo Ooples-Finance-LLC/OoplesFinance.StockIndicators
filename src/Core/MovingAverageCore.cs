@@ -2572,32 +2572,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void TillsonIE2(ReadOnlySpan<double> input, Span<double> output, int length = 15, double vFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
-            var ema2 = ema2Buffer.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var dema = (2 * ema1[i]) - ema2[i];
-                output[i] = ((1 - vFactor) * ema1[i]) + (vFactor * dema);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(ema1Buffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        // The public IE2 contract uses SMA plus regression; the legacy volume-factor argument is unused.
+        using var window = new TillsonIe2Window(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

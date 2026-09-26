@@ -13217,5 +13217,119 @@
     "before": "new TillsonWindow(maType, length, vFactor)",
     "after": "new TillsonWindow(maType, length, 0)",
     "filter": "FullyQualifiedName~TillsonNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "tillson-ie2-wrong-endpoint-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "2 * fit - _previous",
+    "after": "fit - _previous",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-wrong-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "2 * fit - _previous",
+    "after": "2 * fit + _previous",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-wrong-output-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "new BigInteger(2)",
+    "after": "new BigInteger(3)",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-omits-average",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "+ ExactVarianceWindow.Units(mean)",
+    "after": "+ System.Numerics.BigInteger.Zero",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-premature-endpoint-publication",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_fit.Next(price, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_fit.Next(price, commit).Last)",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-commits-fit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_fit.Next(price, commit)",
+    "after": "_fit.Next(price, true)",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_average.Next(new RocBankValue(price), commit)",
+    "after": "_average.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-commits-previous-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "if (commit) _previous = fit;",
+    "after": "_previous = fit;",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-stale-fit-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_fit.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.RegressionChangesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-ie2-eagerly-constructs-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonIe2Window.cs",
+    "before": "if (externalAverage) return;",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.CustomerAverageReceivesPricesAndPreservesRegression"
+  },
+  {
+    "id": "tillson-ie2-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TillsonIE2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "tillson-ie2-customer-average-ignored",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTillsonIE2Fast(",
+    "before": "true, average.Span[i]",
+    "after": "true, input[i]",
+    "filter": "FullyQualifiedName~TillsonIe2NumericalTests.CustomerAverageReceivesPricesAndPreservesRegression"
   }
 ]
