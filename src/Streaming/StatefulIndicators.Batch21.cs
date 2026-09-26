@@ -493,50 +493,15 @@ public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Rema")]
 public sealed class RegularizedExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _lambda;
-    private readonly StreamingInputResolver _input;
-    private double _prevRema1;
-    private double _prevRema2;
-
-    public RegularizedExponentialMovingAverageState(int length = 14, double lambda = 0.5)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = 2d / (resolved + 1);
-        _lambda = lambda;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RegularizedWindow _window;
+    public RegularizedExponentialMovingAverageState(int length = 14, double lambda = .5) => _window = new(length, lambda);
     public IndicatorName Name => IndicatorName.RegularizedExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _prevRema1 = 0;
-        _prevRema2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var rema = (_prevRema1 + (_alpha * (value - _prevRema1)) + (_lambda * ((2 * _prevRema1) - _prevRema2)))
-            / (_lambda + 1);
-
-        if (isFinal)
-        {
-            _prevRema2 = _prevRema1;
-            _prevRema1 = rema;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rema", rema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rema", value } } : null);
     }
 }
 

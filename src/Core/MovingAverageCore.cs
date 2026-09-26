@@ -760,35 +760,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RegularizedEma(ReadOnlySpan<double> input, Span<double> output, int length = 14, double lambda = 0.5)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var k = 2.0 / (length + 1);
-        double rema = 0;
-        double prevRema = 0;
-        double prevPrevRema = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i == 0)
-            {
-                rema = input[i];
-                output[i] = rema;
-                prevPrevRema = rema;
-                prevRema = rema;
-                continue;
-            }
-
-            // Standard EMA with regularization term
-            var ema = (k * input[i]) + ((1 - k) * prevRema);
-            rema = ema + lambda * (2 * prevRema - prevPrevRema - ema);
-
-            output[i] = rema;
-            prevPrevRema = prevRema;
-            prevRema = rema;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new RegularizedWindow(length, lambda);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -5175,27 +5175,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRegularizedEmaFast(StockData data, ComputeContext context, int length = 14,
         double lambda = 0.5)
     {
-        // CalculateRegularizedExponentialMovingAverage pulls an exponential average towards the straight line
-        // carried on from its own last two values, with lambda setting how hard it is pulled.
-        // MovingAverageCore.RegularizedEma seeds its first bar with the input rather than starting from
-        // nothing, so the two series never meet.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var rema = buffer.WritableSpan;
-
-        var alpha = (double)2 / (length + 1);
-        for (var i = 0; i < count; i++)
-        {
-            var previousRema1 = i >= 1 ? rema[i - 1] : 0;
-            var previousRema2 = i >= 2 ? rema[i - 2] : 0;
-            rema[i] = (previousRema1 + (alpha * (input[i] - previousRema1)) + (lambda * ((2 * previousRema1) - previousRema2)))
-                / (lambda + 1);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new RegularizedWindow(length, lambda);
+        var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

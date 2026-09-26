@@ -11182,5 +11182,102 @@
     "before": "else if (initializeFallback)",
     "after": "else",
     "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
+  },
+  {
+    "id": "regularized-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "private RocBankValue _previous, _prior;",
+    "after": "private RocBankValue _previous = new(1), _prior;",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "regularized-wrong-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "RocBankValue.Round(sum, _lambda + 1)",
+    "after": "RocBankValue.Round(sum, _lambda + 2)",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.SignedRegularizationFactorsPreserveTheRecurrence"
+  },
+  {
+    "id": "regularized-wrong-projection-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "_prior, -1",
+    "after": "_prior, 1",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.SignedRegularizationFactorsPreserveTheRecurrence"
+  },
+  {
+    "id": "regularized-wrong-level-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "_previous, -1",
+    "after": "_previous, 1",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.SignedRegularizationFactorsPreserveTheRecurrence"
+  },
+  {
+    "id": "regularized-integer-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "regularized-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "regularized-premature-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.SignedRegularizationFactorsPreserveTheRecurrence"
+  },
+  {
+    "id": "regularized-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "regularized-stale-prior-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "_prior = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "regularized-accepts-undefined-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": " || lambda == -1",
+    "after": "",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.InvalidRegularizationRejectsUndefinedNormalization"
+  },
+  {
+    "id": "regularized-accepts-nonfinite-factor",
+    "module": "numerical",
+    "file": "src/Helpers/RegularizedWindow.cs",
+    "before": "double.IsNaN(lambda) || double.IsInfinity(lambda) || ",
+    "after": "",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.InvalidRegularizationRejectsUndefinedNormalization"
+  },
+  {
+    "id": "regularized-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~RegularizedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class RegularizedExponentialMovingAverageState"
   }
 ]
