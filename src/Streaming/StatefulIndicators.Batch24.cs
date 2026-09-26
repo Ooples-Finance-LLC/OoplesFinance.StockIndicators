@@ -802,65 +802,19 @@ public sealed class TradersDynamicIndexState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Tvi")]
 public sealed class TradeVolumeIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _minTickValue;
-    private double _prevPrice;
-    private double _prevTvi;
-    private bool _hasPrev;
-
-    public TradeVolumeIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double minTickValue = 0.5)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _minTickValue = minTickValue;
-    }
-
+    private readonly TradeVolumeWindow _window;
+    public TradeVolumeIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double minTickValue = 0.5)
+        => _window = new TradeVolumeWindow(maType, length, minTickValue);
     public IndicatorName Name => IndicatorName.TradeVolumeIndex;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevPrice = 0;
-        _prevTvi = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var price = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevPrice = _hasPrev ? _prevPrice : 0;
-        var priceChange = price - prevPrice;
-        var tvi = priceChange > _minTickValue ? _prevTvi + volume :
-            priceChange < -_minTickValue ? _prevTvi - volume : _prevTvi;
-        var signal = _signalSmoother.Next(tvi, isFinal);
-
-        if (isFinal)
-        {
-            _prevPrice = price;
-            _prevTvi = tvi;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Tvi", tvi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tvi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Tvi", value.Line }, { "Signal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tmmso")]

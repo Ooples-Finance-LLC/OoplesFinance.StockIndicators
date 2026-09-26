@@ -518,7 +518,7 @@ internal static partial class IndicatorCompute
             // Batch 4 - Volume indicators
             TradeVolumeIndexSpecOptions tvi => spec.OutputKey switch
             {
-                null or "Tvi" => ComputeTradeVolumeIndexFast(data, context),
+                null or "Tvi" => ComputeTradeVolumeIndexFast(data, context, tvi.Length, tvi.MaType),
                 "Signal" => ComputeTradeVolumeSignalFast(data, context, tvi.Length, tvi.MaType),
                 _ => throw new ArgumentOutOfRangeException(nameof(spec.OutputKey))
             },
@@ -5519,37 +5519,27 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTradeVolumeSignalFast(StockData data, ComputeContext context, int length, MovingAvgType maType)
     {
-        using var line = ComputeTradeVolumeIndexFast(data, context);
-        var signal = context.Rent(data.Count);
-        MovingAverage(data, maType, length, line.Span, signal.WritableSpan);
-        return signal;
+        return ComputeTradeVolumeIndexFast(data, context, length, maType, "Signal");
     }
 
-    internal static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeTradeVolumeIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateTradeVolumeIndex publishes "Tvi": volume accumulated in the direction of any price move
-        // larger than the minimum tick. Neither the length nor the moving average type reaches that series, and
-        // the minimum tick is fixed by the batch call, so the arm takes no parameters.
-        const double minTickValue = 0.5;
-
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var priceChange = input[i] - prevValue;
-            var prevTvi = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = priceChange > minTickValue ? prevTvi + volumes[i]
-                : priceChange < -minTickValue ? prevTvi - volumes[i] : prevTvi;
+            using var line = context.Rent(input.Count); var cumulative = new TradeVolumeTotal();
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(input[i], data.Volumes[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, means.WritableSpan);
         }
-
-        return buffer;
+        using var window = new TradeVolumeWindow(maType, length); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
+        }
+        return output;
     }
 
     /// <summary>
