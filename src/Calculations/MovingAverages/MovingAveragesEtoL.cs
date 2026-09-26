@@ -589,38 +589,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateLinearExtrapolation(this StockData stockData, int length = 500)
     {
-        List<double> extList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new LinearExtrapolationWindow(length); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevY = i >= 1 ? inputList[i - 1] : 0;
-            var priorY = i >= length ? inputList[i - length] : 0;
-            var priorY2 = i >= length * 2 ? inputList[i - (length * 2)] : 0;
-            var priorX = i >= length ? xList[i - length] : 0;
-            var priorX2 = i >= length * 2 ? xList[i - (length * 2)] : 0;
-
-            double x = i;
-            xList.Add(i);
-
-            var prevExt = GetLastOrDefault(extList);
-            var ext = priorX2 - priorX != 0 && priorY2 - priorY != 0 ? priorY + ((x - priorX) / (priorX2 - priorX) * (priorY2 - priorY)) : priorY;
-            extList.Add(ext);
-
-            var signal = GetCompareSignal(currentValue - ext, prevY - prevExt);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "LinExt", extList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(extList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "LinExt", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.LinearExtrapolation;
-
         return stockData;
     }
 

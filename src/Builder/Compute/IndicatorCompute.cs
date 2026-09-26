@@ -14604,29 +14604,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLinearExtrapolationFast(StockData data, ComputeContext context, int length = 500)
     {
-        // CalculateLinearExtrapolation projects the current bar index along the line through the values length
-        // and twice length bars back, falling back to the value one window back when that line is degenerate.
-        // MovingAverageCore.LinearExtrapolation fitted a regression instead, which is a different series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var priorY = i >= length ? input[i - length] : 0;
-            var priorY2 = i >= length * 2 ? input[i - (length * 2)] : 0;
-            double priorX = i >= length ? i - length : 0;
-            double priorX2 = i >= length * 2 ? i - (length * 2) : 0;
-
-            output[i] = priorX2 - priorX != 0 && priorY2 - priorY != 0
-                ? priorY + ((i - priorX) / (priorX2 - priorX) * (priorY2 - priorY))
-                : priorY;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.LinearExtrapolation(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>

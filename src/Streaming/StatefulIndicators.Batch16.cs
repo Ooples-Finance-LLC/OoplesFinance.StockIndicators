@@ -1100,60 +1100,17 @@ public sealed class LindaRaschke3_10OscillatorState : IStreamingIndicatorState, 
 [PrimaryOutput("LinExt")]
 public sealed class LinearExtrapolationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public LinearExtrapolationState(int length = 500)
-    {
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(Math.Max(1, _length * 2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LinearExtrapolationWindow _window;
+    public LinearExtrapolationState(int length = 500) => _window = new(length);
     public IndicatorName Name => IndicatorName.LinearExtrapolation;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var index = (double)_index;
-        var priorY = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var priorY2 = EhlersStreamingWindow.GetOffsetValue(_values, value, _length * 2);
-        var priorX = _index >= _length ? index - _length : 0;
-        var priorX2 = _index >= _length * 2 ? index - (_length * 2) : 0;
-        var ext = priorX2 - priorX != 0 && priorY2 - priorY != 0
-            ? priorY + ((index - priorX) / (priorX2 - priorX) * (priorY2 - priorY))
-            : priorY;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "LinExt", ext }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ext, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "LinExt", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Lqcdo")]

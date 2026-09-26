@@ -15321,5 +15321,103 @@
     "before": "new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(length)",
     "after": "new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(14)",
     "filter": "FullyQualifiedName~PolynomialComponentNumericalTests"
+  },
+  {
+    "id": "linear-extrapolation-wrong-first-lag",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "Lag(_length)",
+    "after": "Lag(1)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-wrong-second-lag",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "Lag(2L * _length)",
+    "after": "Lag(_length)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "Lag(2L * _length)",
+    "after": "Lag(2 * _length)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-drops-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "_count == _length",
+    "after": "_count < _length",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-wrong-startup-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "new BigInteger(_count)",
+    "after": "new BigInteger(_length)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-wrong-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "divisor = _count - _length",
+    "after": "divisor = _count",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-wrong-full-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "total.Add(first, 2)",
+    "after": "total.Add(first)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-overflowing-first-term",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "total.Add(first, 2)",
+    "after": "total.Add(first * 2)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LinearExtrapolationWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LinearExtrapolationState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "linear-extrapolation-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLinearExtrapolationFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]
