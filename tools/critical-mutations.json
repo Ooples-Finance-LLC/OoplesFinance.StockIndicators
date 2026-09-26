@@ -9358,5 +9358,87 @@
     "after": "",
     "filter": "FullyQualifiedName~TrendTriggerNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TrendTriggerFactorState"
+  },
+  {
+    "id": "trend-detection-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "_prices.Count == _short",
+    "after": "_prices.Count > 0",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-wrong-momentum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "_prices[0]",
+    "after": "_prices[_prices.Count - 1]",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-wrong-absolute-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "Math.Abs(value.Mantissa)",
+    "after": "value.Mantissa",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-wrong-short-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "_momenta[_momenta.Count - _short]",
+    "after": "_momenta[_momenta.Count - 1]",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-premature-direction-publication",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "var negativeMagnitude = direction;",
+    "after": "var negativeMagnitude = new ExactMeanAccumulator(); negativeMagnitude.Add(direction.Mean(1));",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-clamps-legacy-long-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "_long = Math.Max(1, longLength)",
+    "after": "_long = Math.Max(_short, longLength)",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "if (commit)",
+    "after": "if (price != 0)",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-stale-absolute-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendDetectionWindow.cs",
+    "before": "_shortAbsolute = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation"
+  },
+  {
+    "id": "trend-detection-core-discards-direction",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i] = direction ? value.Direction : value.Line",
+    "after": "output[i] = value.Line",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.ExactRollingMomentumTotalsRecoverAfterExtremeCancellation",
+    "scope": "internal static void TrendDetectionIndex("
+  },
+  {
+    "id": "trend-detection-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendDetectionNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrendDetectionIndexState"
   }
 ]
