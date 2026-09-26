@@ -7,11 +7,11 @@ internal sealed class McNichollWindow : IDisposable
     private readonly RocBankAverage? _first, _second;
     private readonly IMovingAverageSmoother? _firstFallback, _secondFallback;
     private readonly int _length;
-    internal McNichollWindow(MovingAvgType kind, int length)
+    internal McNichollWindow(MovingAvgType kind, int length, bool initializeFallback = true)
     {
         length = Math.Max(2, length); _length = length;
         if (StrengthWindow.Supports(kind)) { _first = new(kind, length, int.MaxValue); _second = new(kind, length, int.MaxValue); }
-        else { _firstFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); _secondFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); }
+        else if (initializeFallback) { _firstFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); _secondFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); }
     }
     internal double Next(double price, bool commit, double? customerFirst = null, double? customerSecond = null)
     {

@@ -1447,9 +1447,10 @@ public static partial class Calculations
         int length = 14)
     {
         var (input, _, _, _, _) = GetInputValuesList(stockData);
-        using var window = new EhlersZeroLagWindow(maType, length);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new EhlersZeroLagWindow(maType, length, initializeFallback: !custom);
         List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
-        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        if (custom)
         {
             var corrected = input.Select(price => window.Correct(price, true).Publish()).ToList();
             line = GetMovingAverageList(stockData, maType, length, corrected);

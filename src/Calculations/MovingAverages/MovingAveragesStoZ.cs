@@ -583,7 +583,7 @@ public static partial class Calculations
         var (input, _, _, _, _) = GetInputValuesList(stockData);
         var custom = Builder.Compute.ComponentAverage.HasOverrides || (maType != MovingAvgType.TripleExponentialMovingAverage && !StrengthWindow.Supports(maType));
         List<double>? first = null, second = null;
-        using var window = new ZeroLagTripleWindow(maType, length);
+        using var window = new ZeroLagTripleWindow(maType, length, initializeFallback: !custom);
         if (custom)
         {
             first = GetMovingAverageList(stockData, maType, length, input);

@@ -3292,7 +3292,7 @@ internal static partial class IndicatorCompute
             MovingAverage(data, maType, length, first.Span, second.WritableSpan);
             MovingAverage(data, maType, length, second.Span, third.WritableSpan);
         }
-        var result = context.Rent(input.Count); using var window = new TrixWindow(maType, length);
+        var result = context.Rent(input.Count); using var window = new TrixWindow(maType, length, initializeFallback: !custom);
         for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null, custom ? third.Span[i] : null).Publish();
         if (ComponentAverage.HasOverrides)
         {
@@ -13042,9 +13042,10 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        using var window = new EhlersZeroLagWindow(maType, length);
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new EhlersZeroLagWindow(maType, length, initializeFallback: !custom);
         var buffer = context.Rent(input.Count);
-        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        if (custom)
         {
             using var corrected = context.Rent(input.Count);
             for (var i = 0; i < input.Count; i++) corrected.WritableSpan[i] = window.Correct(input[i], true).Publish();
@@ -13279,7 +13280,7 @@ internal static partial class IndicatorCompute
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var window = new GeneralizedDoubleWindow(maType, length, factor);
+        using var window = new GeneralizedDoubleWindow(maType, length, factor, initializeFallback: !custom);
         using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
         if (custom)
         {
@@ -14841,7 +14842,7 @@ internal static partial class IndicatorCompute
         length = Math.Max(2, length);
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
-        using var window = new McNichollWindow(maType, length);
+        using var window = new McNichollWindow(maType, length, initializeFallback: !custom);
         using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
         if (custom)
         {

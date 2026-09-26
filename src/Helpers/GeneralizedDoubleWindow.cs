@@ -7,12 +7,12 @@ internal sealed class GeneralizedDoubleWindow : IDisposable
     private readonly RocBankAverage? _first, _second;
     private readonly IMovingAverageSmoother? _firstFallback, _secondFallback;
     private readonly double _factor;
-    internal GeneralizedDoubleWindow(MovingAvgType kind, int length, double factor)
+    internal GeneralizedDoubleWindow(MovingAvgType kind, int length, double factor, bool initializeFallback = true)
     {
         if (double.IsNaN(factor) || double.IsInfinity(factor)) throw new ArgumentOutOfRangeException(nameof(factor));
         _factor = factor;
         if (StrengthWindow.Supports(kind)) { _first = new(kind, length, int.MaxValue); _second = new(kind, length, int.MaxValue); }
-        else { _firstFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); _secondFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); }
+        else if (initializeFallback) { _firstFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); _secondFallback = MovingAverageSmootherFactory.Create(kind, Math.Max(1, length)); }
     }
     internal double Next(double price, bool commit, double? customerFirst = null, double? customerSecond = null)
     {
