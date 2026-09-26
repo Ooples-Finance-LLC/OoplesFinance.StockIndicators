@@ -1275,50 +1275,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShapeshiftingMovingAverage(this StockData stockData, int length = 50)
     {
-        length = Math.Max(2, length);
-        List<double> filtXList = new(stockData.Count);
-        List<double> filtNList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ShapeshiftingWindow(length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sumX = 0, weightedSumX = 0, sumN = 0, weightedSumN = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var x = (double)j / (length - 1);
-                var n = -1 + (x * 2);
-                var wx = 1 - (2 * x / (Pow(x, 4) + 1));
-                var wn = 1 - (2 * Pow(n, 2) / (Pow(n, 4 - (4 % 2)) + 1));
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sumX += prevValue * wx;
-                weightedSumX += wx;
-                sumN += prevValue * wn;
-                weightedSumN += wn;
-            }
-
-            var prevFiltX = GetLastOrDefault(filtXList);
-            var filtX = weightedSumX != 0 ? sumX / weightedSumX : 0;
-            filtXList.Add(filtX);
-
-            var filtN = weightedSumN != 0 ? sumN / weightedSumN : 0;
-            filtNList.Add(filtN);
-
-            var signal = GetCompareSignal(currentValue - filtX, prevVal - prevFiltX);
-            signalsList?.Add(signal);
+            var previous = i > 0 ? line[i - 1] : 0;
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i > 0 ? input[i - 1] : 0) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sma", filtXList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtXList);
-        stockData.IndicatorName = IndicatorName.ShapeshiftingMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ShapeshiftingMovingAverage;
         return stockData;
     }
 

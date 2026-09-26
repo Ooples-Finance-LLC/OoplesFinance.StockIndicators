@@ -2746,23 +2746,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ShapeshiftingMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50, double factor = 0.5)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevSsma = i >= 1 ? output[i - 1] : currentValue;
-
-            // Adaptive factor based on volatility
-            var change = Math.Abs(currentValue - prevSsma);
-            var adaptiveFactor = factor * (1 + change / (Math.Abs(prevSsma) + 0.00001));
-
-            var ssma = (alpha * adaptiveFactor * currentValue) + ((1 - alpha * adaptiveFactor) * prevSsma);
-            output[i] = ssma;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ShapeshiftingWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
