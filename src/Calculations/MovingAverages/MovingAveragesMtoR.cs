@@ -1022,37 +1022,23 @@ public static partial class Calculations
     public static StockData CalculateRepulsionMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 100)
     {
-        List<double> maList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var sma1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var sma2List = GetMovingAverageList(stockData, maType, length * 2, inputList);
-        var sma3List = GetMovingAverageList(stockData, maType, length * 3, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma1 = sma1List[i];
-            var sma2 = sma2List[i];
-            var sma3 = sma3List[i];
-
-            var prevMa = GetLastOrDefault(maList);
-            var ma = sma3 + sma2 - sma1;
-            maList.Add(ma);
-
-            var signal = GetCompareSignal(currentValue - ma, prevValue - prevMa);
-            signalsList?.Add(signal);
+            var first = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), RepulsionWindow.Period(length, 1))?.ToList() ?? GetMovingAverageList(stockData, maType, RepulsionWindow.Period(length, 1), input);
+            var second = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), RepulsionWindow.Period(length, 2))?.ToList() ?? GetMovingAverageList(stockData, maType, RepulsionWindow.Period(length, 2), input);
+            var third = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), RepulsionWindow.Period(length, 3))?.ToList() ?? GetMovingAverageList(stockData, maType, RepulsionWindow.Period(length, 3), input);
+            line = first.Select((v, i) => RepulsionWindow.Combine(v, second[i], third[i])).ToList();
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rma", maList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maList);
-        stockData.IndicatorName = IndicatorName.RepulsionMovingAverage;
-
+        else
+        {
+            using var window = new RepulsionWindow(maType, length);
+            foreach (var price in input) line.Add(window.Next(price, true));
+        }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RepulsionMovingAverage;
         return stockData;
     }
 

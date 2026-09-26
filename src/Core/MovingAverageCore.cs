@@ -1273,39 +1273,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RepulsionMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        var sma2Array = pool.Rent(input.Length);
-        var sma3Array = pool.Rent(input.Length);
-
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-            var sma2 = sma2Array.AsSpan(0, input.Length);
-            var sma3 = sma3Array.AsSpan(0, input.Length);
-
-            // SMA periods: length, length*2, length*3
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(input, sma2, length * 2);
-            SimpleMovingAverage(input, sma3, length * 3);
-
-            // RMA = sma3 + sma2 - sma1
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = sma3[i] + sma2[i] - sma1[i];
-            }
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-            pool.Return(sma2Array);
-            pool.Return(sma3Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RepulsionWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

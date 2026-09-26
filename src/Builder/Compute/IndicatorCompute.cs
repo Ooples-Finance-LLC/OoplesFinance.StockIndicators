@@ -12570,30 +12570,21 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRepulsionMovingAverageFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRepulsionMovingAverage adds the average over three times the window to the average over
-        // twice it and subtracts the average over the window itself.
-        // MovingAverageCore.RepulsionMovingAverage took the close and used one window.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var first = context.Rent(count);
-        using var second = context.Rent(count);
-        MovingAverage(data, maType, length, input, first.WritableSpan);
-        MovingAverage(data, maType, length * 2, input, second.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length * 3, input, output);
-
-        var sma1 = first.Span;
-        var sma2 = second.Span;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            output[i] += sma2[i] - sma1[i];
+            using var first = context.Rent(input.Count); using var second = context.Rent(input.Count); using var third = context.Rent(input.Count);
+            MovingAverage(data, maType, RepulsionWindow.Period(length, 1), SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, maType, RepulsionWindow.Period(length, 2), SpanCompat.AsReadOnlySpan(input), second.WritableSpan);
+            MovingAverage(data, maType, RepulsionWindow.Period(length, 3), SpanCompat.AsReadOnlySpan(input), third.WritableSpan);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = RepulsionWindow.Combine(first.Span[i], second.Span[i], third.Span[i]);
         }
-
+        else
+        {
+            using var window = new RepulsionWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        }
         return buffer;
     }
 

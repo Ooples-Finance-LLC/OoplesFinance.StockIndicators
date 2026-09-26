@@ -1272,55 +1272,17 @@ public sealed class RepulseState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Rma")]
 public sealed class RepulsionMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma1;
-    private readonly IMovingAverageSmoother _sma2;
-    private readonly IMovingAverageSmoother _sma3;
-    private readonly StreamingInputResolver _input;
-
-    public RepulsionMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _sma1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _sma2 = MovingAverageSmootherFactory.Create(maType, resolved * 2);
-        _sma3 = MovingAverageSmootherFactory.Create(maType, resolved * 3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RepulsionWindow _window;
+    public RepulsionMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.RepulsionMovingAverage;
-
-    public void Reset()
-    {
-        _sma1.Reset();
-        _sma2.Reset();
-        _sma3.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma1 = _sma1.Next(value, isFinal);
-        var sma2 = _sma2.Next(value, isFinal);
-        var sma3 = _sma3.Next(value, isFinal);
-        var ma = sma3 + sma2 - sma1;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rma", ma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma1.Dispose();
-        _sma2.Dispose();
-        _sma3.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Raf")]
