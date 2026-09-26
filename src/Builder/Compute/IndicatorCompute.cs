@@ -1713,10 +1713,7 @@ internal static partial class IndicatorCompute
                     srsi2.SmoothLength1, srsi2.SmoothLength2, srsi2.MaType),
                 _ => null
             },
-            StochasticMomentumIndexSpecOptions smi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.Length2,
-                    smi.SmoothLength1, smi.MaType), smi.SmoothLength2, smi.MaType)
-                : ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.Length2, smi.SmoothLength1, smi.MaType),
+            StochasticMomentumIndexSpecOptions smi => ComputeStochasticMomentumIndexFast(data, context, smi.Length1, smi.Length2, smi.SmoothLength1, smi.MaType, smi.SmoothLength2, spec.OutputKey),
 
             // Batch 7 - Additional oscillators and power indicators
             CCTStochRSISpecOptions cctsr => ComputeCCTStochRelativeStrengthIndexFast(data, context, cctsr.Length2,
@@ -20952,55 +20949,38 @@ internal static partial class IndicatorCompute
     /// Computes Stochastic Momentum Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeStochasticMomentumIndexFast(StockData data, ComputeContext context, int length1 = 2, int length2 = 8,
-        int smoothLength1 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int smoothLength1 = 5, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength2 = 5, string? outputKey = null)
     {
-        // CalculateStochasticMomentumIndex measures the close against the midpoint of the length1 high-low
-        // range and divides it by half that range, each double-smoothed by length2 then smoothLength1. Its
-        // smoothLength2 only smooths the separate "Signal" series, so it reaches nothing here. The arm had
-        // the wrong parameters bound and never saw length2 or maType at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-
-        using var distance = context.Rent(count);
-        using var range = context.Rent(count);
-        var d = distance.WritableSpan;
-        var hl = range.WritableSpan;
-
-        var highWindow = new RollingMinMax(length1);
-        var lowWindow = new RollingMinMax(length1);
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
         {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var highestHigh = highWindow.Max;
-            var lowestLow = lowWindow.Min;
-            d[i] = input[i] - ((highestHigh + lowestLow) / 2);
-            hl[i] = highestHigh - lowestLow;
+            using var window = new StochasticMomentumWindow(maType, length1, length2, smoothLength1, smoothLength2);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true);
+                output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
+            }
+            return output;
         }
-
-        using var distanceAverage = context.Rent(count);
-        using var rangeAverage = context.Rent(count);
-        MovingAverage(data, maType, length2, distance.Span, distanceAverage.WritableSpan);
-        MovingAverage(data, maType, length2, range.Span, rangeAverage.WritableSpan);
-
-        using var smoothedDistance = context.Rent(count);
-        using var smoothedRange = context.Rent(count);
-        MovingAverage(data, maType, smoothLength1, distanceAverage.Span, smoothedDistance.WritableSpan);
-        MovingAverage(data, maType, smoothLength1, rangeAverage.Span, smoothedRange.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        using var distance = context.Rent(input.Count); using var range = context.Rent(input.Count);
+        using var high = new RollingWindowMax(Math.Max(1, length1)); using var low = new RollingWindowMin(Math.Max(1, length1));
+        for (var i = 0; i < input.Count; i++)
         {
-            var hl2 = smoothedRange.Span[i] / 2;
-            output[i] = hl2 != 0 ? MathHelper.MinOrMax(100 * smoothedDistance.Span[i] / hl2, 100, -100) : 0;
+            var value = StochasticMomentumWindow.Components(input[i], high.Add(data.HighPrices[i], out _), low.Add(data.LowPrices[i], out _));
+            distance.WritableSpan[i] = value.Distance.Publish(); range.WritableSpan[i] = value.Range.Publish();
         }
-
-        return buffer;
+        using var firstDistance = context.Rent(input.Count); using var firstRange = context.Rent(input.Count);
+        using var secondDistance = context.Rent(input.Count); using var secondRange = context.Rent(input.Count);
+        MovingAverage(data, maType, length2, distance.Span, firstDistance.WritableSpan);
+        MovingAverage(data, maType, length2, range.Span, firstRange.WritableSpan);
+        MovingAverage(data, maType, smoothLength1, firstDistance.Span, secondDistance.WritableSpan);
+        MovingAverage(data, maType, smoothLength1, firstRange.Span, secondRange.WritableSpan);
+        using var line = context.Rent(input.Count); using var signal = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = StochasticMomentumWindow.Ratio(new(secondDistance.Span[i]), new(secondRange.Span[i]));
+        MovingAverage(data, maType, smoothLength2, line.Span, signal.WritableSpan);
+        (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(output.WritableSpan);
+        return output;
     }
 
     /// <summary>

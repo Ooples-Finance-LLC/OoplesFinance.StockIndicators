@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.StochasticMomentumIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var smiKeys = new[] { "Smi", "Signal" };
+            for (var slot = 0; slot < smiKeys.Length; slot++)
+            {
+                var key = smiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => StochasticMomentumOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MarketMeannessIndex && (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6 || ((Builder.Specs.MarketMeannessIndexSpecOptions)builtIn.CreateOptions()).MaType == MovingAvgType.EhlersNoiseEliminationTechnology))
         {
             var meannessKeys = new[] { "Mmi", "MmiSmoothed" };
