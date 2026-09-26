@@ -1834,7 +1834,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var dvol = Math.Sign(MinPastValues(i, 1, currentValue - prevValue)) * currentValue;
+            var dvol = i == 0 ? 0 : currentValue.CompareTo(prevValue) * currentValue;
             dvolList.Add(dvol);
         }
 
@@ -1846,7 +1846,7 @@ public static partial class Calculations
             var prevPzo1 = i >= 1 ? pzoList[i - 1] : 0;
             var prevPzo2 = i >= 2 ? pzoList[i - 2] : 0;
 
-            var pzo = vma != 0 ? MinOrMax(100 * dvma / vma, 100, -100) : 0;
+            var pzo = PriceZoneWindow.Ratio(dvma, vma);
             pzoList.Add(pzo);
 
             var signal = GetRsiSignal(pzo - prevPzo1, prevPzo1 - prevPzo2, pzo, prevPzo1, 40, -40);

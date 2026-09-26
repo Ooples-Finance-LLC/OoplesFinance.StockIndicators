@@ -1633,64 +1633,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PriceZoneOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaCloseArray = pool.Rent(close.Length);
-        var sumRArray = pool.Rent(close.Length);
-        var sumSArray = pool.Rent(close.Length);
-
-        try
-        {
-            var emaClose = emaCloseArray.AsSpan(0, close.Length);
-            MovingAverageCore.ExponentialMovingAverage(close, emaClose, length);
-
-            var sumR = sumRArray.AsSpan(0, close.Length);
-            var sumS = sumSArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var cp = close[i];
-                var tc = emaClose[i];
-
-                sumR[i] = cp > tc ? cp - tc : 0;
-                sumS[i] = cp < tc ? tc - cp : 0;
-            }
-
-            var pool2 = ArrayPool<double>.Shared;
-            var emaSumRArray = pool2.Rent(close.Length);
-            var emaSumSArray = pool2.Rent(close.Length);
-
-            try
-            {
-                var emaSumR = emaSumRArray.AsSpan(0, close.Length);
-                var emaSumS = emaSumSArray.AsSpan(0, close.Length);
-
-                MovingAverageCore.ExponentialMovingAverage(sumR, emaSumR, length);
-                MovingAverageCore.ExponentialMovingAverage(sumS, emaSumS, length);
-
-                for (var i = 0; i < close.Length; i++)
-                {
-                    var r = emaSumR[i];
-                    var s = emaSumS[i];
-                    output[i] = r + s != 0 ? 100 * r / (r + s) : 50;
-                }
-            }
-            finally
-            {
-                pool2.Return(emaSumRArray);
-                pool2.Return(emaSumSArray);
-            }
-        }
-        finally
-        {
-            pool.Return(emaCloseArray);
-            pool.Return(sumRArray);
-            pool.Return(sumSArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PriceZoneWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

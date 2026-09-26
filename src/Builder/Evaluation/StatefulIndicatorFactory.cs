@@ -658,6 +658,7 @@ internal static partial class StatefulIndicatorFactory
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
             PzoSpecOptions pzo => new PriceZoneOscillatorState(length: pzo.Length),
+            PriceZoneOscillatorSpecOptions pzoNamed => new PriceZoneOscillatorState(pzoNamed.MaType, pzoNamed.Length),
             PgoSpecOptions pgo => new PrettyGoodOscillatorState(length: pgo.Length),
             VortexPlusSpecOptions vpAlias => new VortexIndicatorState(vpAlias.Length),
             VortexMinusSpecOptions vmAlias => new VortexIndicatorState(vmAlias.Length),

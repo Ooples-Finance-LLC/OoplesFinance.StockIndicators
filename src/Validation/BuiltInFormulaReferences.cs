@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.PriceZoneOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PriceZoneOutputs(bars, builtIn)["Pzo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.NegativeVolumeIndex or IndicatorName.PositiveVolumeIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var primary = builtIn.BatchName == IndicatorName.PositiveVolumeIndex ? "Pvi" : "Nvi";
