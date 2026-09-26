@@ -16334,39 +16334,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateVolumeWeightedMovingAverage divides the average of price times volume by the moving average
-        // of volume - two separate averages, not one ratio of windowed sums - and the price average is taken
-        // over the bars seen so far while the volume average is whichever type was asked for.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
-        {
-            var exactBuffer = context.Rent(count);
-            MovingAverageCore.VolumeWeightedMovingAverage(input, volumes, exactBuffer.WritableSpan, length);
-            return exactBuffer;
-        }
-
-        using var smoothedVolume = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
-        var volumeSma = smoothedVolume.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var volumePriceSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            volumePriceSum.Add(input[i] * volumes[i]);
-
-            var volumePriceSma = volumePriceSum.Average(length);
-            output[i] = volumeSma[i] != 0 ? volumePriceSma / volumeSma[i] : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new VolumeWeightedWindow(maType, length, false);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var mean = context.Rent(input.Count);
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), mean.WritableSpan);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = external
+            ? window.NextWithAverage(input[i], data.Volumes[i], mean.Span[i], true) : window.Next(input[i], data.Volumes[i], true);
+        return output;
     }
 
     /// <summary>
