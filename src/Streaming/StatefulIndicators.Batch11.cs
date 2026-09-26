@@ -851,59 +851,15 @@ public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSta
 [PrimaryOutput("Eli")]
 public sealed class EhlersLeadingIndicatorState : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly double _alpha2;
-    private readonly StreamingInputResolver _input;
-    private double _prevLead;
-    private double _prevLeadIndicator;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public EhlersLeadingIndicatorState(double alpha1 = 0.25, double alpha2 = 0.33)
-    {
-        _alpha1 = alpha1;
-        _alpha2 = alpha2;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LeadingWindow _window;
+    public EhlersLeadingIndicatorState(double alpha1 = .25, double alpha2 = .33) => _window = new(alpha1, alpha2);
     public IndicatorName Name => IndicatorName.EhlersLeadingIndicator;
-
-    public void Reset()
-    {
-        _prevLead = 0;
-        _prevLeadIndicator = 0;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevLead = _hasPrev ? _prevLead : 0;
-        var prevLeadIndicator = _hasPrev ? _prevLeadIndicator : 0;
-
-        var lead = (2 * value) + ((_alpha1 - 2) * prevValue) + ((1 - _alpha1) * prevLead);
-        var leadIndicator = (_alpha2 * lead) + ((1 - _alpha2) * prevLeadIndicator);
-
-        if (isFinal)
-        {
-            _prevLead = lead;
-            _prevLeadIndicator = leadIndicator;
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eli", leadIndicator }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(leadIndicator, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Eli", value } } : null);
     }
 }
 

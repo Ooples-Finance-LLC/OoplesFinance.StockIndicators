@@ -1921,24 +1921,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, double alpha1 = 0.25, double alpha2 = 0.33)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        Span<double> lead = stackalloc double[input.Length];
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevLead = i >= 1 ? lead[i - 1] : 0;
-
-            lead[i] = (2 * currentValue) + ((alpha1 - 2) * prevValue) + ((1 - alpha1) * prevLead);
-
-            var prevLeadIndicator = i >= 1 ? output[i - 1] : 0;
-            output[i] = (alpha2 * lead[i]) + ((1 - alpha2) * prevLeadIndicator);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LeadingWindow(alpha1, alpha2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3748,27 +3733,8 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(emaBuffer.AsSpan(0, input.Length), ema2Buffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Leading indicator: 2*EMA - EMA of EMA
-                output[i] = (2 * emaBuffer[i]) - ema2Buffer[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(emaBuffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-        }
+        // The legacy Length option has no effect on this fixed-coefficient filter.
+        EhlersLeadingIndicator(input, output, .25, .33);
     }
 
     /// <summary>
