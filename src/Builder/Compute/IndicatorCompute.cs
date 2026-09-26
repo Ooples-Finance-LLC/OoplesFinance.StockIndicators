@@ -8049,26 +8049,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeBollingerBandsAtrFast(StockData data, ComputeContext context, int length = 55,
         double stdDevMult = 2, int atrLength = 22, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateBollingerBandsAvgTrueRange divides the average true range by the span between the bands and
-        // publishes nothing while that span is still closed, which is the whole of the opening window.
-        var count = data.Count;
-
-        using var upperBand = BollingerBand(data, context, length, stdDevMult, maType);
-        using var lowerBand = BollingerBand(data, context, length, -stdDevMult, maType);
-        using var averageTrueRange = ComputeAtrFast(data, context, Math.Max(atrLength, 1), maType);
-        var upper = upperBand.Span;
-        var lower = lowerBand.Span;
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var bbDiff = upper[i] - lower[i];
-            output[i] = bbDiff != 0 ? atr[i] / bbDiff : 0;
-        }
-
-        return buffer;
+        return ComputeBollingerBandsAvgTrueRangeFast(data, context, atrLength, length, maType, stdDevMult);
     }
 
     #endregion
@@ -20166,36 +20147,18 @@ internal static partial class IndicatorCompute
         int atrLength = 22, int length = 55, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         double stdDevMult = 2)
     {
-        // CalculateBollingerBandsAvgTrueRange measures the average true range against the width of the
-        // Bollinger band, and both the band and the range take whichever average they were given. The bands
-        // are rebuilt here rather than differenced as twice the deviation so that the arm rounds exactly the
-        // way the batch indicator does.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var basisBuffer = context.Rent(count);
-        using var deviationBuffer = context.Rent(count);
-        var basis = basisBuffer.WritableSpan;
-        var deviation = deviationBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, basis);
-        VolatilityCore.StandardDeviation(input, deviation, Math.Max(1, length));
-
-        using var atr = ComputeAtrFast(data, context, atrLength, maType);
-        var trueRange = atr.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var atr = context.Rent(count);
+        if (external)
         {
-            var upperBand = basis[i] + (deviation[i] * stdDevMult);
-            var lowerBand = basis[i] - (deviation[i] * stdDevMult);
-            var bbDiff = upperBand - lowerBand;
-            output[i] = bbDiff != 0 ? trueRange[i] / bbDiff : 0;
+            _ = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, length));
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, Math.Max(1, atrLength), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(count); using var window = new BollingerAtrWindow(maType, atrLength, length, stdDevMult, external, Math.Max(1, count));
+        for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr.Span[i]) : null).Value;
+        return result;
     }
 
     /// <summary>

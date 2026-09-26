@@ -255,49 +255,26 @@ public static partial class Calculations
     public static StockData CalculateBollingerBandsAvgTrueRange(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int atrLength = 22, int length = 55, double stdDevMult = 2)
     {
-        List<double> atrDevList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var callerSeries = stockData.CaptureInputSeries();
-
-        var bollingerBands = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bollingerBands.ChainedOutputs["UpperBand"];
-        var lowerBandList = bollingerBands.ChainedOutputs["LowerBand"];
-        var emaList = GetMovingAverageList(stockData, maType, atrLength, inputList);
-        // Bollinger Bands publish no single series, and an ATR asked to read one refuses. Hand it the
-        // caller's series, which is what its true range is a range of.
-        stockData.RestoreInputSeries(callerSeries);
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).ChainedValues;
-
-        double prevAtrDev = 0;
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? atr = null, signalCenter = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var currentEma = emaList[i];
-            var currentAtr = atrList[i];
-            var upperBand = upperBandList[i];
-            var lowerBand = lowerBandList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var bbDiff = upperBand - lowerBand;
-
-            var atrDev = bbDiff != 0 ? currentAtr / bbDiff : 0;
-            atrDevList.Add(atrDev);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, atrDev, prevAtrDev);
-            signalsList?.Add(signal);
-
-            prevAtrDev = atrDev;
+            // Preserve the component slots: Bollinger basis first, then ATR. The basis
+            // cancels from the width and must not affect the ratio through rounding.
+            _ = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length));
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, atrLength))?.ToList() ?? GetMovingAverageList(stockData, maType, atrLength, ranges);
+            signalCenter = GetMovingAverageList(stockData, maType, atrLength, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "AtrDev", atrDevList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(atrDevList);
-        stockData.IndicatorName = IndicatorName.BollingerBandsAverageTrueRange;
-
-        return stockData;
+        using var window = new BollingerAtrWindow(maType, atrLength, length, stdDevMult, external, Math.Max(1, input.Count));
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData); double previousCenter = 0;
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr![i]) : null, external ? signalCenter![i] : 0);
+            signals?.Add(GetVolatilitySignal(input[i] - point.SignalCenter, (i > 0 ? input[i - 1] : 0) - previousCenter, point.Value, i > 0 ? values[i - 1] : 0));
+            values.Add(point.Value); previousCenter = point.SignalCenter;
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "AtrDev", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.BollingerBandsAverageTrueRange; return stockData;
     }
 
 }

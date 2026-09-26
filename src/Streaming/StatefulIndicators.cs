@@ -9264,75 +9264,17 @@ public sealed class BilateralStochasticOscillatorState : IStreamingIndicatorStat
 [PrimaryOutput("AtrDev")]
 public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _stdDevMult;
-    private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public BollingerBandsAverageTrueRangeState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int atrLength = 22,
-        int length = 55, double stdDevMult = 2)
-    {
-        _stdDevMult = stdDevMult;
-        _basisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BollingerAtrWindow _window;
+    public BollingerBandsAverageTrueRangeState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int atrLength = 22, int length = 55, double stdDevMult = 2)
+    { _window = new(maType, atrLength, length, stdDevMult); }
     public IndicatorName Name => IndicatorName.BollingerBandsAverageTrueRange;
-
-    public void Reset()
-    {
-        _basisSmoother.Reset();
-        _stdDev.Reset();
-        _atrSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var basis = _basisSmoother.Next(value, isFinal);
-        var stdDev = _stdDev.Next(value, isFinal);
-        var upper = basis + (stdDev * _stdDevMult);
-        var lower = basis - (stdDev * _stdDevMult);
-        // The true range of the bars, against the previous close (the bar's own on the first bar, as
-        // AverageTrueRange does). It was measured against the previous moving average, copying a batch
-        // that read the average left on CustomValuesList as its close.
-        var prevClose = _hasPrev ? _prevClose : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var bbDiff = upper - lower;
-        var atrDev = bbDiff != 0 ? atr / bbDiff : 0;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "AtrDev", atrDev }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(atrDev, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "AtrDev", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _basisSmoother.Dispose();
-        _stdDev.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

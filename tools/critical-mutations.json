@@ -19108,5 +19108,140 @@
     "after": "",
     "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
     "scope": "internal static ComputeBuffer ComputeStollerAverageRangeChannelsFast("
+  },
+  {
+    "id": "bollinger-atr-wrong-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "new(kind, atrLength, atrLength, kind, capacityHint)",
+    "after": "new(kind, atrLength, atrLength + 1, kind, capacityHint)",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-wrong-deviation-period",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "_deviation = new(length)",
+    "after": "_deviation = new(length + 1)",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-half-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "deviation, _multiplier, 2",
+    "after": "deviation, _multiplier, 1",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-early-range-publish",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "stages.Item2.AddTo(ref numerator)",
+    "after": "numerator.Add(stages.Item2.Publish())",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-deviation-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "_deviation.Next(close, commit)",
+    "after": "_deviation.Next(close, true)",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-range-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "_range!.Next(high, low, close, commit)",
+    "after": "_range!.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-stale-range-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "_range?.Reset();",
+    "after": "/* retain range */",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-stale-deviation-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "_deviation.Reset();",
+    "after": "/* retain deviation */",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-reconstructed-width",
+    "module": "numerical",
+    "file": "src/Helpers/BollingerAtrWindow.cs",
+    "before": "return (numerator.Ratio(denominator), stages.Item1.Publish());",
+    "after": "var center = stages.Item1.Publish(); var width = (center + deviation * _multiplier) - (center - deviation * _multiplier); return (width == 0 ? 0 : stages.Item2.Publish() / width, center);",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable"
+  },
+  {
+    "id": "bollinger-atr-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsAvgTrueRangeFast("
+  },
+  {
+    "id": "bollinger-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart1.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, atrLength))",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, atrLength + 1))",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "public static StockData CalculateBollingerBandsAvgTrueRange("
+  },
+  {
+    "id": "bollinger-atr-alias-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "context, atrLength, length, maType, stdDevMult",
+    "after": "context, atrLength, length + 1, maType, stdDevMult",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsAtrFast("
+  },
+  {
+    "id": "bollinger-atr-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "public sealed class BollingerBandsAverageTrueRangeState :"
+  },
+  {
+    "id": "bollinger-atr-batch-legacy-average",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart1.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "public static StockData CalculateBollingerBandsAvgTrueRange("
+  },
+  {
+    "id": "bollinger-atr-raw-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsAvgTrueRangeFast("
+  },
+  {
+    "id": "bollinger-atr-customer-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, atrLength))",
+    "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsAvgTrueRangeFast("
   }
 ]

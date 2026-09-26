@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.BollingerBandsAverageTrueRange)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BollingerAtrOutputs(bars, builtIn)["AtrDev"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.AverageTrueRangeChannel or IndicatorName.StollerAverageRangeChannels)
         {
             var channelKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
