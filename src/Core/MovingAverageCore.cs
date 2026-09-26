@@ -3853,45 +3853,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Compute efficiency ratio for adaptation
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevAarma = i >= 1 ? output[i - 1] : currentValue;
-
-                // Calculate efficiency ratio
-                var n = Math.Min(i + 1, length);
-                var change = i >= n - 1 ? Math.Abs(input[i] - input[i - n + 1]) : 0;
-
-                double volatility = 0;
-                for (var j = 1; j < n; j++)
-                {
-                    volatility += Math.Abs(input[i - j + 1] - input[i - j]);
-                }
-
-                var er = volatility > 0 ? change / volatility : 0;
-
-                // Autonomous adaptation
-                var fastSc = 2.0 / 3.0;
-                var slowSc = 2.0 / 31.0;
-                var sc = er * (fastSc - slowSc) + slowSc;
-                var alpha = sc * sc;
-
-                output[i] = prevAarma + (alpha * (currentValue - prevAarma));
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>
@@ -4568,44 +4532,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double lambda = 1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var armaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var arma = armaArray.AsSpan(0, close.Length);
-            TrendCore.AdaptiveAutonomousRecursiveMovingAverage(close, arma, length, lambda);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentArma = arma[i];
-                var prevArma = i > 0 ? arma[i - 1] : currentArma;
-                var currentHigh = high[i];
-                var currentLow = low[i];
-
-                if (currentArma > prevArma)
-                {
-                    output[i] = currentLow;
-                }
-                else if (currentArma < prevArma)
-                {
-                    output[i] = currentHigh;
-                }
-                else
-                {
-                    output[i] = i > 0 ? output[i - 1] : close[i];
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(armaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, lambda);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Stop;
     }
 
     /// <summary>

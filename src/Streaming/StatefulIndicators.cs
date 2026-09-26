@@ -8090,44 +8090,16 @@ public sealed class AdaptiveExponentialMovingAverageState : IStreamingIndicatorS
 [PrimaryOutput("Aarma")]
 public sealed class AdaptiveAutonomousRecursiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveAutonomousRecursiveMovingAverageEngine _engine;
-    private readonly StreamingInputResolver _input;
-
-    public AdaptiveAutonomousRecursiveMovingAverageState(int length = 14, double gamma = 3)
-    {
-        _engine = new AdaptiveAutonomousRecursiveMovingAverageEngine(length, gamma);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AdaptiveAutonomousWindow _window;
+    public AdaptiveAutonomousRecursiveMovingAverageState(int length = 14, double gamma = 3) => _window = new(length, gamma);
     public IndicatorName Name => IndicatorName.AdaptiveAutonomousRecursiveMovingAverage;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var aarma = _engine.Next(value, isFinal, out var d);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "D", d },
-                { "Aarma", aarma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(aarma, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value.Average, includeOutputs ? new Dictionary<string, double> { { "D", value.Deviation }, { "Aarma", value.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Als")]
@@ -8467,66 +8439,16 @@ public sealed class AdaptiveTrailingStopState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ts")]
 public sealed class AdaptiveAutonomousRecursiveTrailingStopState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveAutonomousRecursiveMovingAverageEngine _engine;
-    private readonly StreamingInputResolver _input;
-    private double _prevUpper;
-    private double _prevLower;
-    private double _prevOs;
-    private bool _hasPrev;
-
-    public AdaptiveAutonomousRecursiveTrailingStopState(int length = 14, double gamma = 3)
-    {
-        _engine = new AdaptiveAutonomousRecursiveMovingAverageEngine(length, gamma);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AdaptiveAutonomousWindow _window;
+    public AdaptiveAutonomousRecursiveTrailingStopState(int length = 14, double gamma = 3) => _window = new(length, gamma);
     public IndicatorName Name => IndicatorName.AdaptiveAutonomousRecursiveTrailingStop;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _prevUpper = 0;
-        _prevLower = 0;
-        _prevOs = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ma2 = _engine.Next(value, isFinal, out var d);
-        var upper = ma2 + d;
-        var lower = ma2 - d;
-        var prevUpper = _hasPrev ? _prevUpper : 0;
-        var prevLower = _hasPrev ? _prevLower : 0;
-        var prevOs = _hasPrev ? _prevOs : 0;
-        var os = value > prevUpper ? 1 : value < prevLower ? 0 : prevOs;
-        var ts = (os * lower) + ((1 - os) * upper);
-
-        if (isFinal)
-        {
-            _prevUpper = upper;
-            _prevLower = lower;
-            _prevOs = os;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ts", ts }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ts, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Stop;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ts", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ahma")]
@@ -12664,58 +12586,11 @@ internal sealed class EfficiencyRatioState : IDisposable
 
 internal sealed class AdaptiveAutonomousRecursiveMovingAverageEngine : IDisposable
 {
-    private readonly double _gamma;
-    private readonly EfficiencyRatioState _er;
-    private double _ma1;
-    private double _ma2;
-    private double _absDiffSum;
-    private int _index;
-    private bool _hasPrev;
-
-    public AdaptiveAutonomousRecursiveMovingAverageEngine(int length, double gamma)
-    {
-        _gamma = gamma;
-        _er = new EfficiencyRatioState(length);
-    }
-
-    public double Next(double value, bool isFinal, out double d)
-    {
-        var er = _er.Next(value, isFinal);
-        var prevMa2 = _hasPrev ? _ma2 : value;
-        var prevMa1 = _hasPrev ? _ma1 : value;
-        var absDiff = Math.Abs(value - prevMa2);
-        var absDiffSum = _absDiffSum + absDiff;
-        d = _index != 0 ? (absDiffSum / _index) * _gamma : 0;
-        var c = value > prevMa2 + d ? value + d : value < prevMa2 - d ? value - d : prevMa2;
-        var ma1 = (er * c) + ((1 - er) * prevMa1);
-        var ma2 = (er * ma1) + ((1 - er) * prevMa2);
-
-        if (isFinal)
-        {
-            _ma1 = ma1;
-            _ma2 = ma2;
-            _absDiffSum = absDiffSum;
-            _index++;
-            _hasPrev = true;
-        }
-
-        return ma2;
-    }
-
-    public void Reset()
-    {
-        _er.Reset();
-        _ma1 = 0;
-        _ma2 = 0;
-        _absDiffSum = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    private readonly AdaptiveAutonomousWindow _window;
+    public AdaptiveAutonomousRecursiveMovingAverageEngine(int length, double gamma) => _window = new(length, gamma);
+    public double Next(double value, bool isFinal, out double d) { var result = _window.Next(value, isFinal); d = result.Deviation; return result.Average; }
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class RsiState : IDisposable
