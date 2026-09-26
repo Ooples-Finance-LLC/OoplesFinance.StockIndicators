@@ -62,36 +62,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrendTriggerFactor(this StockData stockData, int length = 15)
     {
-        List<double> ttfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
+        List<double> output = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new TrendTriggerWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var prevHighest = i >= length ? highestList[i - length] : 0;
-            var prevLowest = i >= length ? lowestList[i - length] : 0;
-            var buyPower = highest - prevLowest;
-            var sellPower = prevHighest - lowest;
-            var prevTtf1 = i >= 1 ? ttfList[i - 1] : 0;
-            var prevTtf2 = i >= 2 ? ttfList[i - 2] : 0;
-
-            var ttf = buyPower + sellPower != 0 ? 200 * (buyPower - sellPower) / (buyPower + sellPower) : 0;
-            ttfList.Add(ttf);
-
-            var signal = GetRsiSignal(ttf - prevTtf1, prevTtf1 - prevTtf2, ttf, prevTtf1, 100, -100);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], true);
+            var previous = i >= 1 ? output[i - 1] : 0; var before = i >= 2 ? output[i - 2] : 0;
+            output.Add(value); signals?.Add(GetRsiSignal(value - previous, previous - before, value, previous, 100, -100));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ttf", ttfList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ttfList);
-        stockData.IndicatorName = IndicatorName.TrendTriggerFactor;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ttf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.TrendTriggerFactor;
         return stockData;
     }
 

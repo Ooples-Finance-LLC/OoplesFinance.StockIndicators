@@ -9293,5 +9293,70 @@
     "after": "",
     "filter": "FullyQualifiedName~StochasticCustomNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class StochasticCustomOscillatorState"
+  },
+  {
+    "id": "trend-trigger-wrong-lagged-high-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "numerator.Add(oldHigh, -200)",
+    "after": "numerator.Add(oldHigh, 200)",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "_highest[0]",
+    "after": "_highest[_highest.Count - 1]",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "_highest.Count == _length",
+    "after": "_highest.Count > 0",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-premature-denominator-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "denominator.Add(highest); denominator.Add(oldLow, -1); denominator.Add(oldHigh); denominator.Add(lowest, -1);",
+    "after": "denominator.Add(highest - oldLow + oldHigh - lowest);",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-wrong-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "numerator.Add(highest, 200)",
+    "after": "numerator.Add(highest, 100)",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-commits-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "_high.Preview(high, out _)",
+    "after": "_high.Add(high, out _)",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTriggerWindow.cs",
+    "before": "_highest.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.ExactLaggedRangeRatioPreservesWarmupAndOriginalCandles"
+  },
+  {
+    "id": "trend-trigger-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendTriggerNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrendTriggerFactorState"
   }
 ]
