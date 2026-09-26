@@ -309,33 +309,39 @@ public static partial class Calculations
     public static StockData CalculateChaikinOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 3, int slowLength = 10)
     {
-        List<double> chaikinOscillatorList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var adlList = CalculateAccumulationDistributionLine(stockData, maType, fastLength).ChainedValues;
-        var adl3EmaList = GetMovingAverageList(stockData, maType, fastLength, adlList);
-        var adl10EmaList = GetMovingAverageList(stockData, maType, slowLength, adlList);
-
+        List<double> line = new(stockData.Count), first = new(stockData.Count), second = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var cumulative = new MoneyFlowAccumulationWindow();
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var firstAverage = standard ? new RocBankAverage(maType, fastLength, stockData.Count) : null;
+        using var secondAverage = standard && true ? new RocBankAverage(maType, slowLength, stockData.Count) : null;
+        List<double> output = new(stockData.Count);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var adl3Ema = adl3EmaList[i];
-            var adl10Ema = adl10EmaList[i];
-
-            var prevChaikinOscillator = GetLastOrDefault(chaikinOscillatorList);
-            var chaikinOscillator = adl3Ema - adl10Ema;
-            chaikinOscillatorList.Add(chaikinOscillator);
-
-            var signal = GetCompareSignal(chaikinOscillator, prevChaikinOscillator);
-            signalsList?.Add(signal);
+            var value = cumulative.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            line.Add(value.Publish());
+            if (standard)
+            {
+                var mean = firstAverage!.Next(value, true);
+                var difference = new ExactMeanAccumulator(); mean.AddTo(ref difference);
+                secondAverage!.Next(value, true).AddTo(ref difference, -1);
+                output.Add(difference.Mean(1));
+            }
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "ChaikinOsc", chaikinOscillatorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(chaikinOscillatorList);
+        if (!standard)
+        {
+            first = GetMovingAverageList(stockData, maType, fastLength, line);
+            second = GetMovingAverageList(stockData, maType, slowLength, line);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var difference = new ExactMeanAccumulator(); difference.Add(first[i]); difference.Add(second[i], -1); output.Add(difference.Mean(1));
+            }
+        }
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i], i == 0 ? 0 : output[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "ChaikinOsc", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.ChaikinOscillator;
-
         return stockData;
     }
 
