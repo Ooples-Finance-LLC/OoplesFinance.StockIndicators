@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 using OoplesFinance.StockIndicators.Helpers;
@@ -14,16 +14,44 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (length == 1) { input.CopyTo(output); return; }
+
         double sum = 0;
+        var exactRequired = false;
+        double roundoff = 0;
         for (var i = 0; i < input.Length; i++)
         {
+            var previousSum = sum;
             sum += input[i];
+            roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+            exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, input[i], sum);
             if (i >= length)
             {
+                previousSum = sum;
                 sum -= input[i - length];
+                roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, -input[i - length], sum);
+                // If eviction cancels a much larger accumulator, its low-order values were
+                // already rounded away. Rebuild before publishing, not on a later periodic bar.
+                if (Math.Abs(sum) <= 1e-4 * Math.Max(Math.Abs(input[i - length]), Math.Abs(input[i])))
+                {
+                    sum = 0;
+                    roundoff = 0;
+                    for (var j = i - length + 1; j <= i; j++)
+                    {
+                        sum += input[j];
+                        roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                    }
+                }
             }
 
             output[i] = i >= length - 1 ? sum / length : 0;
+            if (i >= length - 1 && (exactRequired || MeanRoundoff.RequiresExact(sum, length, roundoff)))
+            {
+                var exact = new ExactMeanAccumulator();
+                for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);
+                output[i] = exact.Mean(length);
+            }
 
             // Rebuilt from its window every length bars, once the bar's value is taken. A running sum otherwise
             // keeps the rounding error of every value it has ever held: after prices near 100,000 it was still
@@ -31,9 +59,14 @@ internal static class MovingAverageCore
             if (length > 0 && (i + 1) % length == 0)
             {
                 sum = 0;
+                exactRequired = false;
+                roundoff = 0;
                 for (var j = i - length + 1; j <= i; j++)
                 {
+                    previousSum = sum;
                     sum += input[j];
+                    roundoff = MeanRoundoff.AfterAddition(roundoff, sum);
+                    exactRequired |= ExactMeanAccumulator.SevereCancellation(previousSum, input[j], sum);
                 }
             }
         }
@@ -102,37 +135,17 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double numerator = 0;
-        double windowSum = 0;
-        var weightedSumDenominator = (double)length * (length + 1) / 2;
-
+        length = Math.Max(1, length);
+        var numerator = new ExactMeanAccumulator();
+        var sum = new ExactMeanAccumulator();
+        var denominator = (long)length * (length + 1L) / 2;
         for (var i = 0; i < input.Length; i++)
         {
-            var currentValue = input[i];
-            numerator += length * currentValue - windowSum;
-            windowSum += currentValue;
-
-            if (i >= length)
-            {
-                windowSum -= input[i - length];
-            }
-
-            output[i] = numerator / weightedSumDenominator;
-
-            // Rebuilt from the window every length bars, once the bar's value is taken, as SimpleMovingAverage
-            // rebuilds its sum: the running numerator otherwise carried a relative error of 1e-6 from prices near
-            // 100,000 into prices near 10.
-            if (length > 0 && (i + 1) % length == 0)
-            {
-                numerator = 0;
-                windowSum = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var windowValue = input[i - length + 1 + j];
-                    numerator += (j + 1) * windowValue;
-                    windowSum += windowValue;
-                }
-            }
+            numerator.Subtract(sum);
+            numerator.Add(input[i], length);
+            sum.Add(input[i]);
+            if (i >= length) sum.Add(input[i - length], -1);
+            output[i] = numerator.Mean(denominator);
         }
     }
 
@@ -143,27 +156,9 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var k = Math.Min(Math.Max((double)2 / (length + 1), 0.01), 0.99);
-        double sum = 0;
-        double prevEma = 0;
-
+        var state = new Streaming.EmaState(length);
         for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            if (i < length)
-            {
-                sum += currentValue;
-                var ema = sum / (i + 1);
-                output[i] = ema;
-                prevEma = ema;
-            }
-            else
-            {
-                var ema = (currentValue * k) + (prevEma * (1 - k));
-                output[i] = ema;
-                prevEma = ema;
-            }
-        }
+            output[i] = state.GetNext(input[i], commit: true);
     }
 
     internal static void WellesWilderMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
@@ -173,12 +168,12 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var k = (double)1 / length;
+        length = Math.Max(1, length);
         double prevWwma = 0;
 
         for (var i = 0; i < input.Length; i++)
         {
-            var wwma = (input[i] * k) + (prevWwma * (1 - k));
+            var wwma = RoundedWilder.Next(input[i], prevWwma, length);
             output[i] = wwma;
             prevWwma = wwma;
         }
@@ -211,7 +206,7 @@ internal static class MovingAverageCore
             // DEMA = 2*EMA - EMA(EMA)
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * ema1[i]) - ema2[i];
+                output[i] = ExponentialExtrapolation.Double(ema1[i], ema2[i]);
             }
         }
         finally
@@ -253,7 +248,7 @@ internal static class MovingAverageCore
             // TEMA = 3*EMA - 3*EMA(EMA) + EMA(EMA(EMA))
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (3 * ema1[i]) - (3 * ema2[i]) + ema3[i];
+                output[i] = ExponentialExtrapolation.Triple(ema1[i], ema2[i], ema3[i]);
             }
         }
         finally
@@ -269,45 +264,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HullMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var halfLength = Math.Max(length / 2, 1);
-        var sqrtLength = Math.Max((int)Math.Sqrt(length), 1);
-
-        var pool = ArrayPool<double>.Shared;
-        var wmaHalfArray = pool.Rent(input.Length);
-        var wmaFullArray = pool.Rent(input.Length);
-        var diffArray = pool.Rent(input.Length);
-        try
-        {
-            var wmaHalf = wmaHalfArray.AsSpan(0, input.Length);
-            var wmaFull = wmaFullArray.AsSpan(0, input.Length);
-            var diff = diffArray.AsSpan(0, input.Length);
-
-            // WMA with half period
-            WeightedMovingAverage(input, wmaHalf, halfLength);
-
-            // WMA with full period
-            WeightedMovingAverage(input, wmaFull, length);
-
-            // 2*WMA(n/2) - WMA(n)
-            for (var i = 0; i < input.Length; i++)
-            {
-                diff[i] = (2 * wmaHalf[i]) - wmaFull[i];
-            }
-
-            // Final WMA with sqrt period
-            WeightedMovingAverage(diff, output, sqrtLength);
-        }
-        finally
-        {
-            pool.Return(wmaHalfArray);
-            pool.Return(wmaFullArray);
-            pool.Return(diffArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new HullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -320,22 +279,10 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-
-            // First SMA with full length
-            SimpleMovingAverage(input, sma1, length);
-
-            // Second SMA (SMA of SMA) with full length
-            SimpleMovingAverage(sma1, output, length);
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-        }
+        using var first = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        using var second = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = second.Next(first.Next(input[i], true), true);
     }
 
     /// <summary>
@@ -348,26 +295,11 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double pvSum = 0;
-        double vSum = 0;
-
+        if (volume.Length < price.Length)
+            throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        using var mean = new RollingVolumeMean(length);
         for (var i = 0; i < price.Length; i++)
-        {
-            pvSum += price[i] * volume[i];
-            vSum += volume[i];
-
-            if (i >= length)
-            {
-                pvSum -= price[i - length] * volume[i - length];
-                vSum -= volume[i - length];
-            }
-
-            // CalculateVolumeWeightedMovingAverage divides by a simple moving average of volume, which is
-            // zero until its window fills, so the whole ratio is zero through the run-in. Dividing the
-            // partial sums by each other here published a volume-weighted price over a window that had not
-            // arrived yet, and the two only met from the length'th bar onwards.
-            output[i] = i >= length - 1 && vSum != 0 ? pvSum / vSum : 0;
-        }
+            output[i] = mean.Next(price[i], volume[i], true);
     }
 
     /// <summary>
@@ -381,8 +313,8 @@ internal static class MovingAverageCore
         }
 
         // The line through the trailing window, x counted from its first value: running sums over the bar index
-        // cancel catastrophically and drift, see RollingLeastSquares. A one-value window returns the value.
-        using var regression = new RollingLeastSquares(length);
+        // cancel catastrophically and drift, see ExactLinearFitWindow. A one-value window returns the value.
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
             output[i] = regression.Next(input[i], isFinal: true).Last;
@@ -394,39 +326,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void KaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length, int fastLength = 2, int slowLength = 30)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var fastSc = 2.0 / (fastLength + 1);
-        var slowSc = 2.0 / (slowLength + 1);
-        double prevKama = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length)
-            {
-                prevKama = input[i];
-                output[i] = prevKama;
-                continue;
-            }
-
-            // Calculate efficiency ratio
-            var change = Math.Abs(input[i] - input[i - length]);
-            double volatility = 0;
-            for (var j = 0; j < length; j++)
-            {
-                volatility += Math.Abs(input[i - j] - input[i - j - 1]);
-            }
-
-            var er = volatility != 0 ? change / volatility : 0;
-            var sc = Math.Pow((er * (fastSc - slowSc)) + slowSc, 2);
-
-            var kama = prevKama + (sc * (input[i] - prevKama));
-            output[i] = kama;
-            prevKama = kama;
-        }
+        RoundedKaufmanWindow.Compute(input, output, length, fastLength, slowLength);
     }
 
     /// <summary>
@@ -456,7 +356,7 @@ internal static class MovingAverageCore
             // ZEMA = 2*ema1 - ema2
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * ema1[i]) - ema2[i];
+                output[i] = ExponentialExtrapolation.Double(ema1[i], ema2[i]);
             }
         }
         finally
@@ -523,7 +423,7 @@ internal static class MovingAverageCore
             {
                 var ratio = md != 0 ? input[i] / md : 1;
                 var k = 0.6 * length * Math.Pow(ratio, 4);
-                if (k == 0) k = 1;
+                k = Math.Max(1, k);
                 md = md + (input[i] - md) / k;
                 output[i] = md;
             }
@@ -535,54 +435,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void T3MovingAverage(ReadOnlySpan<double> input, Span<double> output, int length, double vFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-        var ema5 = pool.Rent(input.Length);
-        var ema6 = pool.Rent(input.Length);
-
-        try
-        {
-            var e1 = ema1.AsSpan(0, input.Length);
-            var e2 = ema2.AsSpan(0, input.Length);
-            var e3 = ema3.AsSpan(0, input.Length);
-            var e4 = ema4.AsSpan(0, input.Length);
-            var e5 = ema5.AsSpan(0, input.Length);
-            var e6 = ema6.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, e1, length);
-            ExponentialMovingAverage(e1, e2, length);
-            ExponentialMovingAverage(e2, e3, length);
-            ExponentialMovingAverage(e3, e4, length);
-            ExponentialMovingAverage(e4, e5, length);
-            ExponentialMovingAverage(e5, e6, length);
-
-            var c1 = -vFactor * vFactor * vFactor;
-            var c2 = 3 * vFactor * vFactor + 3 * vFactor * vFactor * vFactor;
-            var c3 = -6 * vFactor * vFactor - 3 * vFactor - 3 * vFactor * vFactor * vFactor;
-            var c4 = 1 + 3 * vFactor + vFactor * vFactor * vFactor + 3 * vFactor * vFactor;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (c1 * e6[i]) + (c2 * e5[i]) + (c3 * e4[i]) + (c4 * e3[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-            pool.Return(ema5);
-            pool.Return(ema6);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TillsonWindow(MovingAvgType.ExponentialMovingAverage, length, vFactor);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -591,50 +446,17 @@ internal static class MovingAverageCore
     internal static void Vidya(ReadOnlySpan<double> input, Span<double> output, int length)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // The same VIDYA as CalculateVariableIndexDynamicAverage: the CMO over `length` bars, and the average
-        // seeded at 0. This fast path used a fixed 9-bar CMO and seeded at the first price, so
-        // MovingAvgType.VariableIndexDynamicAverage meant a different average here than in the indicator.
+        if (input.IsEmpty) return;
         var resolved = Math.Max(1, length);
-        var alpha = 2d / (resolved + 1);
-        var pool = ArrayPool<double>.Shared;
-        var changesArray = pool.Rent(input.Length * 2);
-
-        try
+        var alpha = 2d / (resolved + 1d);
+        using var momentum = new ChandeMomentumWindow(Math.Min(resolved, input.Length));
+        var vidya = input[0];
+        for (var i = 0; i < input.Length; i++)
         {
-            var pos = changesArray.AsSpan(0, input.Length);
-            var neg = changesArray.AsSpan(input.Length, input.Length);
-            // Seeded at the first price, not at zero: the smoothing constant is alpha * |CMO|, which is
-            // legitimately zero on a series with no momentum, and a recursion multiplied by zero never
-            // leaves its seed.
-            double posSum = 0, negSum = 0;
-            var vidya = input.Length > 0 ? input[0] : 0;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var diff = i >= 1 ? input[i] - input[i - 1] : 0;
-                pos[i] = diff > 0 ? diff : 0;
-                neg[i] = diff < 0 ? Math.Abs(diff) : 0;
-                posSum += pos[i];
-                negSum += neg[i];
-                if (i >= resolved)
-                {
-                    posSum -= pos[i - resolved];
-                    negSum -= neg[i - resolved];
-                }
-
-                var cmo = posSum + negSum != 0 ? Math.Min(Math.Max((posSum - negSum) / (posSum + negSum) * 100, -100), 100) : 0;
-                var currentCmo = Math.Abs(cmo / 100);
-                vidya = (input[i] * alpha * currentCmo) + (vidya * (1 - (alpha * currentCmo)));
-                output[i] = vidya;
-            }
-        }
-        finally
-        {
-            pool.Return(changesArray);
+            var currentCmo = Math.Abs(momentum.Next(input[i], true) / 100);
+            vidya = VidyaBlend.Compute(vidya, input[i], alpha * currentCmo);
+            output[i] = vidya;
         }
     }
 
@@ -643,50 +465,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VariableMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Chande's VMA as LazyBear writes it, the same algorithm as CalculateVariableMovingAverage. This fast
-        // path used to compute a different average altogether - an EMA weighted by sd / (sd + 0.001), seeded at
-        // the first price - so MovingAvgType.VariableMovingAverage meant one thing here and another there.
-        var resolved = Math.Max(1, length);
-        var k = 1d / resolved;
-        // The same rolling window as the indicator: the highest and lowest iS, O(1) amortised per bar.
-        var isWindow = new RollingMinMax(resolved);
-        // vma is seeded at the first price, not at zero: vI is legitimately zero when the index has not
-        // moved across the window, and a recursion multiplied by zero never leaves its seed.
-        double pdmS = 0, mdmS = 0, pdiS = 0, mdiS = 0, iS = 0;
-        var vma = input.Length > 0 ? input[0] : 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var pdm = i >= 1 ? Math.Max(currentValue - prevValue, 0) : 0;
-            var mdm = i >= 1 ? Math.Max(prevValue - currentValue, 0) : 0;
-
-            pdmS = ((1 - k) * pdmS) + (k * pdm);
-            mdmS = ((1 - k) * mdmS) + (k * mdm);
-            var s = pdmS + mdmS;
-            var pdi = s != 0 ? pdmS / s : 0;
-            var mdi = s != 0 ? mdmS / s : 0;
-
-            pdiS = ((1 - k) * pdiS) + (k * pdi);
-            mdiS = ((1 - k) * mdiS) + (k * mdi);
-            var d = Math.Abs(pdiS - mdiS);
-            var s1 = pdiS + mdiS;
-            var dS1 = s1 != 0 ? d / s1 : 0;
-
-            iS = ((1 - k) * iS) + (k * dS1);
-            isWindow.Add(iS);
-
-            var d1 = isWindow.Max - isWindow.Min;
-            var vI = d1 != 0 ? (iS - isWindow.Min) / d1 : 0;
-            vma = ((1 - (k * vI)) * vma) + (k * vI * currentValue);
-            output[i] = vma;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var engine = new Streaming.VariableMovingAverageEngine(length);
+        for (var i = 0; i < input.Length; i++) output[i] = engine.Next(input[i], true);
     }
 
     /// <summary>
@@ -694,54 +475,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ArnaudLegouxMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 9, double offset = 0.85, double sigma = 6)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var m = offset * (length - 1);
-        var s = length / sigma;
-
-        var pool = ArrayPool<double>.Shared;
-        var weightsArray = pool.Rent(length);
-
-        try
-        {
-            var weights = weightsArray.AsSpan(0, length);
-
-            // Pre-calculate weights
-            double weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = Math.Exp(-Math.Pow(j - m, 2) / (2 * s * s));
-                weights[j] = weight;
-                weightSum += weight;
-            }
-
-            // Normalize weights
-            for (var j = 0; j < length; j++)
-            {
-                weights[j] /= weightSum;
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Bars before the series starts count as zero and the divisor stays the full weight sum,
-                // which is what CalculateArnaudLegouxMovingAverage does, so the run-in is damped rather
-                // than blank. The weights above are already normalised, so no divisor appears here.
-                double alma = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var index = i - length + 1 + j;
-                    alma += index >= 0 ? weights[j] * input[index] : 0;
-                }
-                output[i] = alma;
-            }
-        }
-        finally
-        {
-            pool.Return(weightsArray);
-        }
+        AlmaWindowMean.Compute(input, output, length, offset, sigma);
     }
 
     /// <summary>
@@ -754,8 +488,10 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // LSMA is essentially the same as linear regression value
-        LinearRegression(input, output, length);
+        using var weighted = new Streaming.WmaState(length);
+        using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = LeastSquaresAverage.Combine(weighted.GetNext(input[i], true), simple.Next(input[i], true));
     }
 
     /// <summary>
@@ -768,18 +504,18 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        length = Math.Max(2, length);
+        length = checked(length + (length & 1));
         var halfLength = length / 2;
+        double dimension = 0;
         double frama = 0;
 
         for (var i = 0; i < close.Length; i++)
         {
             if (i < length - 1)
             {
-                output[i] = 0;
-                if (i == 0)
-                {
-                    frama = close[i];
-                }
+                output[i] = close[i];
+                frama = close[i];
                 continue;
             }
 
@@ -814,13 +550,14 @@ internal static class MovingAverageCore
             var n3 = (hh3 - ll3) / length;
 
             // Calculate fractal dimension
-            double d = n1 > 0 && n2 > 0 && n3 > 0 ? (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2) : 1;
+            if (n1 > 0 && n2 > 0 && n3 > 0)
+                dimension = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
 
             // Calculate alpha
-            var alpha = Math.Exp(-4.6 * (d - 1));
+            var alpha = Math.Exp(-4.6 * (dimension - 1));
             alpha = Math.Max(0.01, Math.Min(alpha, 1));
 
-            frama = (alpha * close[i]) + ((1 - alpha) * frama);
+            frama = i < length ? close[i] : (alpha * close[i]) + ((1 - alpha) * frama);
             output[i] = frama;
         }
     }
@@ -881,44 +618,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void SineWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var weightsArray = pool.Rent(length);
-
-        try
-        {
-            var weights = weightsArray.AsSpan(0, length);
-
-            // Pre-calculate sine weights
-            double weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = Math.Sin(Math.PI * (j + 1) / (length + 1));
-                weights[j] = weight;
-                weightSum += weight;
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Bars before the series starts count as zero and the divisor stays the full weight sum,
-                // which is what the batch indicator does, so the run-in is damped rather than blank.
-                double sum = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var index = i - length + 1 + j;
-                    sum += index >= 0 ? weights[j] * input[index] : 0;
-                }
-                output[i] = sum / weightSum;
-            }
-        }
-        finally
-        {
-            pool.Return(weightsArray);
-        }
+        SineWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -971,29 +671,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void GeometricMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateGeometricMovingAverage returns nothing until the window fills, so the run-in stays blank
-            // here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Use logarithms for numerical stability
-            double logSum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                logSum += Math.Log(Math.Max(input[j], 0.000001));
-            }
-            output[i] = Math.Exp(logSum / length);
-        }
+        RollingGeometricMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -1001,35 +679,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RegularizedEma(ReadOnlySpan<double> input, Span<double> output, int length = 14, double lambda = 0.5)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var k = 2.0 / (length + 1);
-        double rema = 0;
-        double prevRema = 0;
-        double prevPrevRema = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i == 0)
-            {
-                rema = input[i];
-                output[i] = rema;
-                prevPrevRema = rema;
-                prevRema = rema;
-                continue;
-            }
-
-            // Standard EMA with regularization term
-            var ema = (k * input[i]) + ((1 - k) * prevRema);
-            rema = ema + lambda * (2 * prevRema - prevPrevRema - ema);
-
-            output[i] = rema;
-            prevPrevRema = prevRema;
-            prevRema = rema;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new RegularizedWindow(length, lambda);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1186,31 +838,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void CubicWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-calculate cubic weights
-        double weightSum = 0;
-        for (var w = 1; w <= length; w++)
-        {
-            weightSum += w * w * w;
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var index = i - length + 1 + j;
-                var weight = (j + 1) * (j + 1) * (j + 1);
-                sum += index >= 0 ? input[index] * weight : 0;
-            }
-            output[i] = sum / weightSum;
-        }
+        IntegerPowerWindowMean.Compute(input, output, length, 3);
     }
 
     /// <summary>
@@ -1218,34 +846,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void NaturalMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Natural MA uses logarithmic weights
-        double logSum = 0;
-        for (var w = 1; w <= length; w++)
-        {
-            logSum += Math.Log(w);
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = Math.Log(j + 1);
-                sum += input[i - length + 1 + j] * weight;
-            }
-            output[i] = sum / logSum;
-        }
+        NaturalWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -1288,18 +889,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AlphaDecreasingEma(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = input[0];
-        for (var i = 1; i < input.Length; i++)
-        {
-            // Alpha decreases as we go
-            var alpha = 2.0 / (length + i);
-            output[i] = alpha * input[i] + (1 - alpha) * output[i - 1];
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new AlphaDecreasingWindow();
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1308,22 +900,13 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = input[0];
-        var baseAlpha = 2.0 / (length + 1);
-
-        for (var i = 1; i < input.Length; i++)
-        {
-            // Adapt alpha based on absolute percentage change
-            var change = input[i - 1] > 0 ? Math.Abs((input[i] - input[i - 1]) / input[i - 1]) : 0;
-            var adaptedAlpha = baseAlpha * (1 + 10 * change);
-            adaptedAlpha = Math.Min(1.0, adaptedAlpha);
-            output[i] = adaptedAlpha * input[i] + (1 - adaptedAlpha) * output[i - 1];
-        }
+        AdaptiveExponentialMovingAverage(input, input, input, output, length);
+    }
+    internal static void AdaptiveExponentialMovingAverage(ReadOnlySpan<double> input, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveEmaWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], high[i], low[i], true);
     }
 
     /// <summary>
@@ -1333,67 +916,41 @@ internal static class MovingAverageCore
     internal static void AutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var k = 2.0 / (length + 1);
-        output[0] = input[0];
-
-        for (var i = 1; i < input.Length; i++)
+        length = Math.Max(1, length);
+        var candidates = new RollingSum();
+        var firstMean = new RollingSum();
+        double accumulatedDeviation = 0;
+        for (var i = 0; i < input.Length; i++)
         {
-            var error = input[i] - output[i - 1];
-            var adaptedK = k + 0.5 * Math.Tanh(error / (Math.Abs(output[i - 1]) + 1e-10));
-            adaptedK = Math.Max(0.01, Math.Min(0.99, adaptedK));
-            output[i] = output[i - 1] + adaptedK * error;
+            var previous = i == 0 ? input[i] : output[i - 1];
+            var lagged = i < 7 ? 0 : input[i - 7];
+            accumulatedDeviation += Math.Abs(lagged - previous);
+            var radius = i == 0 ? 0 : accumulatedDeviation / i * 3;
+            var candidate = input[i] > previous + radius ? input[i] + radius
+                : input[i] < previous - radius ? input[i] - radius : previous;
+            candidates.Add(candidate);
+            firstMean.Add(candidates.Average(length));
+            output[i] = firstMean.Average(length);
         }
     }
 
     /// <summary>
     /// Computes Adaptive Least Squares MA.
-    /// Least squares regression with adaptive window.
+    /// Weighted least squares endpoint with true-range-dependent exponential forgetting.
     /// </summary>
     internal static void AdaptiveLeastSquares(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        var ranges = new RollingMinMax(Math.Max(1, length));
+        var regression = new AdaptiveLeastSquaresMoments();
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            // Calculate linear regression endpoint
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j;
-                var y = input[i - length + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
-
-            var meanX = sumX / length;
-            var meanY = sumY / length;
-            var denominator = sumX2 - length * meanX * meanX;
-
-            if (Math.Abs(denominator) > 1e-10)
-            {
-                var slope = (sumXY - length * meanX * meanY) / denominator;
-                var intercept = meanY - slope * meanX;
-                output[i] = intercept + slope * (length - 1);
-            }
-            else
-            {
-                output[i] = meanY;
-            }
+            var range = i == 0 ? 0 : Math.Abs(input[i] - input[i - 1]);
+            ranges.Add(range);
+            var gain = ranges.Max == 0 ? .01 : MathHelper.MinOrMax(Math.Pow(range / ranges.Max, 1.5), .99, .01);
+            output[i] = regression.Next(input[i], gain);
         }
     }
 
@@ -1488,7 +1045,7 @@ internal static class MovingAverageCore
 
                 // Get median
                 output[i] = length % 2 == 0 ?
-                    (window[length / 2 - 1] + window[length / 2]) / 2 :
+                    PriceMean.Of(window[length / 2 - 1], window[length / 2]) :
                     window[length / 2];
             }
         }
@@ -1504,29 +1061,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            double sumPriceVolume = 0;
-            double sumVolume = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sumPriceVolume += input[j] * volume[j];
-                sumVolume += volume[j];
-            }
-
-            output[i] = sumVolume > 0 ? sumPriceVolume / sumVolume : input[i];
-        }
+        VolumeAdjustedMovingAverage(input, volume, output, length, .67);
     }
 
     /// <summary>
@@ -1535,31 +1070,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-calculate weight sum
-        double weightSum = 0;
-        for (var w = 1; w <= length; w++)
-        {
-            weightSum += w * w;
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var index = i - length + 1 + j;
-                var weight = (j + 1) * (j + 1);
-                sum += index >= 0 ? input[index] * weight : 0;
-            }
-            output[i] = sum / weightSum;
-        }
+        IntegerPowerWindowMean.Compute(input, output, length, 2);
     }
 
     /// <summary>
@@ -1568,32 +1079,8 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ParabolicWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-calculate weight sum using parabolic weights
-        double weightSum = 0;
-        for (var w = 0; w < length; w++)
-        {
-            var weight = length * length - w * w;
-            weightSum += weight;
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var index = i - length + 1 + j;
-                var weight = length * length - (length - 1 - j) * (length - 1 - j);
-                sum += index >= 0 ? input[index] * weight : 0;
-            }
-            output[i] = sum / weightSum;
-        }
+        // Parabolic weights are squared distances from the oldest end of the window.
+        QuadraticWeightedMovingAverage(input, output, length);
     }
 
     #region Batch 14 - Additional Moving Averages
@@ -1640,51 +1127,14 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var floorLength = length / 2;
-        var roundLength = (length + 1) / 2;
-
+        length = Math.Max(1, length);
+        var weight = SymmetricWindowMean.TotalWeight(length);
         for (var i = 0; i < input.Length; i++)
         {
-            double nr = 0, nl = 0, sr = 0, sl = 0;
-
-            if (floorLength == roundLength)
-            {
-                for (var j = 0; j <= floorLength - 1; j++)
-                {
-                    double wr = (length - (length - 1 - j)) * length;
-                    var prevVal = i >= j ? input[i - j] : 0;
-                    nr += wr;
-                    sr += prevVal * wr;
-                }
-
-                for (var j = floorLength; j <= length - 1; j++)
-                {
-                    double wl = (length - j) * length;
-                    var prevVal = i >= j ? input[i - j] : 0;
-                    nl += wl;
-                    sl += prevVal * wl;
-                }
-            }
-            else
-            {
-                for (var j = 0; j <= floorLength; j++)
-                {
-                    double wr = (length - (length - 1 - j)) * length;
-                    var prevVal = i >= j ? input[i - j] : 0;
-                    nr += wr;
-                    sr += prevVal * wr;
-                }
-
-                for (var j = roundLength; j <= length - 1; j++)
-                {
-                    double wl = (length - j) * length;
-                    var prevVal = i >= j ? input[i - j] : 0;
-                    nl += wl;
-                    sl += prevVal * wl;
-                }
-            }
-
-            output[i] = nr + nl != 0 ? (sr + sl) / (nr + nl) : 0;
+            var sum = new ExactMeanAccumulator();
+            for (var lag = 0; lag < length && lag <= i; lag++)
+                sum.Add(input[i - lag], Math.Min(lag + 1, length - lag));
+            output[i] = sum.Mean(weight);
         }
     }
 
@@ -1694,31 +1144,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void SquareRootWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-calculate weight sum
-        double weightSum = 0;
-        for (var w = 1; w <= length; w++)
-        {
-            weightSum += Math.Sqrt(w);
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var index = i - length + 1 + j;
-                var weight = Math.Sqrt(j + 1);
-                sum += index >= 0 ? input[index] * weight : 0;
-            }
-            output[i] = sum / weightSum;
-        }
+        SquareRootWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -1727,31 +1153,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Spencer15PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Spencer 15-point weights (symmetric)
-        var weights = new double[] { -3, -6, -5, 3, 21, 46, 67, 74, 67, 46, 21, 3, -5, -6, -3 };
-        const double weightSum = 320; // Sum of the weights
-
-        // Trailing, not centred. Spencer's graduation formula is classically applied about the middle of
-        // the window, but a centred window reads bars the caller has not seen yet, so the streaming state
-        // could never reproduce it and the batch indicator does not try to: both weight bar i-j. Bars
-        // before the series starts count as zero and the divisor stays the full weight sum, which is what
-        // CalculateSpencer15PointMovingAverage does, so the run-in is damped rather than undefined.
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j < weights.Length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                sum += prevValue * weights[j];
-            }
-
-            output[i] = sum / weightSum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SpencerWindow(false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1760,60 +1164,31 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Spencer21PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 21)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Spencer 21-point weights (symmetric)
-        var weights = new double[] { -1, -3, -5, -5, -2, 6, 18, 33, 47, 57, 60, 57, 47, 33, 18, 6, -2, -5, -5, -3, -1 };
-        const double weightSum = 350; // Sum of the weights
-
-        // Trailing, for the reason given on the 15-point form: a centred window is not causal, so neither
-        // the streaming state nor CalculateSpencer21PointMovingAverage computes one.
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j < weights.Length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                sum += prevValue * weights[j];
-            }
-
-            output[i] = sum / weightSum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SpencerWindow(true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Slow Smoothed Moving Average.
-    /// SMA of SMA for extra smoothness.
+    /// Three sequential averages over the documented split windows.
     /// </summary>
-    internal static void SlowSmoothedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    internal static void SlowSmoothedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 15,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        var sma2Array = pool.Rent(input.Length);
-
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-            var sma2 = sma2Array.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(sma1, sma2, length);
-
-            sma2.CopyTo(output);
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-            pool.Return(sma2Array);
-        }
+        length = Math.Max(1, length);
+        var w2 = Math.Max(1, Math.Min(530, (int)Math.Ceiling(length / 3d)));
+        var w1 = Math.Max(1, Math.Min(530, (int)Math.Ceiling((length - w2) / 2d)));
+        var w3 = Math.Max(1, Math.Min(530, (int)Math.Floor((length - w2) / 2d)));
+        Streaming.IMovingAverageSmoother Stage(int period) => maType == MovingAvgType.SimpleMovingAverage
+            ? new Streaming.RoundedSimpleMovingAverageSmoother(period) : Streaming.MovingAverageSmootherFactory.Create(maType, period);
+        using var first = Stage(w1);
+        using var second = Stage(w2);
+        using var third = Stage(w3);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = third.Next(second.Next(first.Next(input[i], true), true), true);
     }
 
     /// <summary>
@@ -1822,39 +1197,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RepulsionMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        var sma2Array = pool.Rent(input.Length);
-        var sma3Array = pool.Rent(input.Length);
-
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-            var sma2 = sma2Array.AsSpan(0, input.Length);
-            var sma3 = sma3Array.AsSpan(0, input.Length);
-
-            // SMA periods: length, length*2, length*3
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(input, sma2, length * 2);
-            SimpleMovingAverage(input, sma3, length * 3);
-
-            // RMA = sma3 + sma2 - sma1
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = sma3[i] + sma2[i] - sma1[i];
-            }
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-            pool.Return(sma2Array);
-            pool.Return(sma3Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RepulsionWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1863,19 +1208,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuickMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Quick MA = current close + decay * (previous QMA - current close)
-        var decay = 1.0 - (2.0 / (length + 1));
-
-        output[0] = input[0];
-        for (var i = 1; i < input.Length; i++)
-        {
-            output[i] = input[i] + decay * (output[i - 1] - input[i]);
-        }
+        QuickWindowMean.Compute(input, output, length);
     }
 
     #endregion
@@ -1888,37 +1221,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersBetterExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var alpha = 2.0 / (length + 1);
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(input.Length);
-        var errArray = pool.Rent(input.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, input.Length);
-            var err = errArray.AsSpan(0, input.Length);
-
-            ema[0] = input[0];
-            err[0] = 0;
-            output[0] = input[0];
-
-            for (var i = 1; i < input.Length; i++)
-            {
-                ema[i] = alpha * input[i] + (1 - alpha) * ema[i - 1];
-                err[i] = input[i] - ema[i];
-                output[i] = ema[i] + (1 - alpha) * err[i];
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(errArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new BetterEmaWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2031,25 +1336,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersHannMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double filtSum = 0, coefSum = 0;
-
-            for (var j = 1; j <= length; j++)
-            {
-                var prevV = i >= j - 1 ? input[i - (j - 1)] : 0;
-                var cos = 1 - Math.Cos(2 * Math.PI * ((double)j / (length + 1)));
-                filtSum += cos * prevV;
-                coefSum += cos;
-            }
-
-            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
-        }
+        HannWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -2057,103 +1344,24 @@ internal static class MovingAverageCore
     /// Uses triangular window coefficients with partial data handling.
     /// </summary>
     internal static void EhlersTriangleMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var l2 = (double)length / 2;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double filtSum = 0, coefSum = 0;
-
-            for (var j = 1; j <= length; j++)
-            {
-                var prevV = i >= j - 1 ? input[i - (j - 1)] : 0;
-                var c = j < l2 ? j : j > l2 ? length + 1 - j : l2;
-                filtSum += c * prevV;
-                coefSum += c;
-            }
-
-            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
-        }
-    }
+        => SymmetricallyWeightedMovingAverage(input, output, length);
 
     /// <summary>
     /// Computes Elastic Volume Weighted Moving Average V1.
     /// Volume-weighted with elastic adjustment.
     /// </summary>
     internal static void ElasticVolumeWeightedMovingAverageV1(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
-    {
-        if (output.Length < price.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var vwmaArray = pool.Rent(price.Length);
-
-        try
-        {
-            var vwma = vwmaArray.AsSpan(0, price.Length);
-            VolumeWeightedMovingAverage(price, volume, vwma, length);
-
-            // Apply elastic smoothing
-            var k = 2.0 / (length + 1);
-            output[0] = price[0];
-
-            for (var i = 1; i < price.Length; i++)
-            {
-                // Elastic factor based on volume ratio
-                double avgVol = 0;
-                var startIdx = Math.Max(0, i - length + 1);
-                var count = i - startIdx;
-                if (count > 0)
-                {
-                    for (var j = startIdx; j < i; j++)
-                    {
-                        avgVol += volume[j];
-                    }
-                    avgVol /= count;
-                }
-                var volRatio = volume[i] > 0 && i >= length - 1 && avgVol > 0 ? volume[i] / (avgVol + 0.001) : 1.0;
-                var elasticK = k * Math.Min(volRatio, 2.0);
-                output[i] = elasticK * vwma[i] + (1 - elasticK) * output[i - 1];
-            }
-        }
-        finally
-        {
-            pool.Return(vwmaArray);
-        }
-    }
+        => ElasticVolumeWeightedMovingAverageV1(price, volume, output, length, 20);
 
     /// <summary>
     /// Computes Holt Exponential Moving Average.
     /// Double exponential smoothing with trend component.
     /// </summary>
-    internal static void HoltExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.5, double beta = 0.5)
+    internal static void HoltExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20, int? gammaLength = null)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var a = 2.0 / (length + 1);
-        var b = beta * a;
-
-        double level = input[0];
-        double trend = 0;
-        output[0] = level;
-
-        for (var i = 1; i < input.Length; i++)
-        {
-            var prevLevel = level;
-            level = a * input[i] + (1 - a) * (level + trend);
-            trend = b * (level - prevLevel) + (1 - b) * trend;
-            output[i] = level + trend;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new HoltWindow(length, gammaLength ?? length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2162,40 +1370,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void PentupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-        var ema5 = pool.Rent(input.Length);
-
-        try
-        {
-            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema4.AsSpan(0, input.Length), ema5.AsSpan(0, input.Length), length);
-
-            // PEMA = 5*EMA1 - 10*EMA2 + 10*EMA3 - 5*EMA4 + EMA5
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = 5 * ema1[i] - 10 * ema2[i] + 10 * ema3[i] - 5 * ema4[i] + ema5[i];
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-            pool.Return(ema5);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BinomialCascadeWindow(MovingAvgType.ExponentialMovingAverage, length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2204,37 +1381,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadrupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-
-        try
-        {
-            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
-
-            // QEMA = 4*EMA1 - 6*EMA2 + 4*EMA3 - EMA4
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = 4 * ema1[i] - 6 * ema2[i] + 4 * ema3[i] - ema4[i];
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BinomialCascadeWindow(MovingAvgType.ExponentialMovingAverage, length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     #endregion
@@ -2246,29 +1395,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLaguerreFilter(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.2)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var l0 = input.Length > 0 ? input[0] : 0.0;
-        var l1 = l0;
-        var l2 = l0;
-        var l3 = l0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var prevL0 = l0;
-            var prevL1 = l1;
-            var prevL2 = l2;
-
-            l0 = (alpha * input[i]) + ((1 - alpha) * l0);
-            l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * l1);
-            l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * l2);
-            l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * l3);
-
-            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LaguerreFilterWindow(alpha);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2282,7 +1411,8 @@ internal static class MovingAverageCore
         }
 
         gamma = Math.Max(0, Math.Min(1, gamma));
-        var l0 = input.Length > 0 ? input[0] : 0.0;
+        var baseline = input.Length > 0 ? input[0] : 0;
+        double l0 = 0;
         var l1 = l0;
         var l2 = l0;
         var l3 = l0;
@@ -2293,7 +1423,7 @@ internal static class MovingAverageCore
             var prevL1 = l1;
             var prevL2 = l2;
 
-            l0 = ((1 - gamma) * input[i]) + (gamma * l0);
+            l0 = ((1 - gamma) * (input[i] - baseline)) + (gamma * l0);
             l1 = (-gamma * l0) + prevL0 + (gamma * l1);
             l2 = (-gamma * l1) + prevL1 + (gamma * l2);
             l3 = (-gamma * l2) + prevL2 + (gamma * l3);
@@ -2310,123 +1440,16 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersZeroLagExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(input.Length);
-        var ecArray = pool.Rent(input.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, input.Length);
-            var ec = ecArray.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, ema, length);
-
-            var gain = 0.0;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var prevEc = i > 0 ? ec[i - 1] : ema[i];
-                var error = input[i] - prevEc;
-
-                // Adaptive gain calculation
-                if (i > 0)
-                {
-                    var leastError = error * error;
-                    if (leastError > 0)
-                    {
-                        gain = Math.Max(0, Math.Min(2, gain + 0.01));
-                    }
-                    else
-                    {
-                        gain = Math.Max(0, gain - 0.01);
-                    }
-                }
-
-                ec[i] = ema[i] + (gain * error);
-                output[i] = ec[i];
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(ecArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EhlersZeroLagWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Ehlers Fractal Adaptive Moving Average.
     /// </summary>
     internal static void EhlersFractalAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 16)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var halfLength = length / 2;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            // Calculate fractal dimension
-            var n1 = 0.0;
-            var n2 = 0.0;
-            var n3 = 0.0;
-
-            var hh1 = double.MinValue;
-            var ll1 = double.MaxValue;
-            var hh2 = double.MinValue;
-            var ll2 = double.MaxValue;
-            var hh3 = double.MinValue;
-            var ll3 = double.MaxValue;
-
-            for (var j = 0; j < halfLength; j++)
-            {
-                var val = input[i - j];
-                if (val > hh1) hh1 = val;
-                if (val < ll1) ll1 = val;
-            }
-            n1 = (hh1 - ll1) / halfLength;
-
-            for (var j = halfLength; j < length; j++)
-            {
-                var val = input[i - j];
-                if (val > hh2) hh2 = val;
-                if (val < ll2) ll2 = val;
-            }
-            n2 = (hh2 - ll2) / halfLength;
-
-            for (var j = 0; j < length; j++)
-            {
-                var val = input[i - j];
-                if (val > hh3) hh3 = val;
-                if (val < ll3) ll3 = val;
-            }
-            n3 = (hh3 - ll3) / length;
-
-            var dimen = 0.0;
-            if (n1 + n2 > 0 && n3 > 0)
-            {
-                dimen = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
-            }
-
-            var alpha = Math.Exp(-4.6 * (dimen - 1));
-            alpha = Math.Max(0.01, Math.Min(1, alpha));
-
-            var prevFrama = i > 0 ? output[i - 1] : input[i];
-            output[i] = (alpha * input[i]) + ((1 - alpha) * prevFrama);
-        }
-    }
+        => FractalAdaptiveMovingAverage(input, input, input, output, length);
 
     /// <summary>
     /// Computes Ehlers Inverse Fisher Transform.
@@ -2679,24 +1702,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void CubedWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = Math.Pow(length - j, 3);
-                sum += i >= j ? input[i - j] * weight : 0;
-                weightedSum += weight;
-            }
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        IntegerPowerWindowMean.Compute(input, output, length, 3);
     }
 
     /// <summary>
@@ -2741,60 +1747,18 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DampedSineWaveWeightedFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double wSum = 0, wvSum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var ratio = (double)j / length;
-                var w = Math.Sin(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI * ratio))) / j;
-                wvSum += i >= j - 1 ? w * input[i - (j - 1)] : 0;
-                wSum += w;
-            }
-            output[i] = wSum != 0 ? wvSum / wSum : 0;
-        }
+        DampedSineWindow.Compute(input, output, length);
     }
 
     /// <summary>
-    /// Computes End Point Moving Average (Least Squares MA).
+    /// Computes the zero-padded, offset-weighted End Point Moving Average.
     /// </summary>
-    internal static void EndPointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
+    internal static void EndPointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 11, int offset = 4)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j + 1.0;
-                var y = input[i - (length - 1 - j)];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
-
-            var slope = (length * sumXY - sumX * sumY) / (length * sumX2 - sumX * sumX);
-            var intercept = (sumY - slope * sumX) / length;
-            output[i] = intercept + slope * length; // End point value
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        using var window = new AffineAverageWindow(length, offset, capacityHint: input.Length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i]);
     }
 
     /// <summary>
@@ -2802,67 +1766,17 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void FibonacciWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Pre-calculate Fibonacci weights
-        var fibs = new double[length];
-        fibs[0] = 1;
-        if (length > 1) fibs[1] = 1;
-        for (var j = 2; j < length; j++)
-        {
-            fibs[j] = fibs[j - 1] + fibs[j - 2];
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = fibs[length - 1 - j];
-                sum += i >= j ? input[i - j] * weight : 0;
-                weightSum += weight;
-            }
-            output[i] = weightSum != 0 ? sum / weightSum : 0;
-        }
+        FibonacciWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
     /// Computes Generalized Double Exponential Moving Average (GDEMA).
     /// </summary>
-    internal static void GeneralizedDoubleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double volumeFactor = 1.0)
+    internal static void GeneralizedDoubleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double volumeFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1Array = pool.Rent(input.Length);
-        var ema2Array = pool.Rent(input.Length);
-
-        try
-        {
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-            var ema2 = ema2Array.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = ((1 + volumeFactor) * ema1[i]) - (volumeFactor * ema2[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new GeneralizedDoubleWindow(MovingAvgType.ExponentialMovingAverage, length, volumeFactor);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2870,34 +1784,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void GeometricMeanMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            // Summed as logarithms rather than multiplied: the product of a long window overflows a
-            // double once length * log10(price) passes about 308, and published infinity instead.
-            double logSum = 0;
-            var count = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var val = input[i - j];
-                if (val > 0)
-                {
-                    logSum += Math.Log(val);
-                    count++;
-                }
-            }
-            output[i] = count > 0 ? Math.Exp(logSum / count) : 0;
-        }
+        RollingGeometricMean.Compute(input, output, length, positiveOnly: true);
     }
 
     /// <summary>
@@ -2918,18 +1805,9 @@ internal static class MovingAverageCore
                 continue;
             }
 
-            var sum = 0.0;
-            var count = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var val = input[i - j];
-                if (val != 0)
-                {
-                    sum += 1.0 / val;
-                    count++;
-                }
-            }
-            output[i] = count > 0 && sum != 0 ? count / sum : 0;
+            var sum = new ExactReciprocalSum();
+            for (var j = 0; j < length; j++) sum.Add(input[i - j]);
+            output[i] = sum.Mean;
         }
     }
 
@@ -2942,26 +1820,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
-        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * 1.25 * Math.PI / length, 0.01), 0.99));
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (c1 * currentValue) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 0);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2969,28 +1830,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
-        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = (1 - b + Math.Pow(a, 2)) / 4;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue3 = i >= 3 ? input[i - 3] : 0;
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue3)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 1);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -2998,28 +1840,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var a = Math.Exp(Math.Max(Math.Min(-Math.PI / length, -0.01), -0.99));
-        var b = 2 * a * Math.Cos(Math.Min(Math.Max(1.738 * Math.PI / length, 0.01), 0.99));
-        var c = a * a;
-        var d2 = b + c;
-        var d3 = -(c + (b * c));
-        var d4 = c * c;
-        var d1 = 1 - d2 - d3 - d4;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
-
-            output[i] = (d1 * currentValue) + (d2 * prevFilter1) + (d3 * prevFilter2) + (d4 * prevFilter3);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 0);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3027,32 +1850,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var a1 = Math.Exp(Math.Max(Math.Min(-Math.PI / length, -0.01), -0.99));
-        var b1 = 2 * a1 * Math.Cos(Math.Min(Math.Max(1.738 * Math.PI / length, 0.01), 0.99));
-        var c1 = a1 * a1;
-        var coef2 = b1 + c1;
-        var coef3 = -(c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = (1 - b1 + c1) * (1 - c1) / 8;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevValue3 = i >= 3 ? input[i - 3] : 0;
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
-
-            output[i] = i < 4 ? currentValue : (coef1 * (currentValue + (3 * prevValue1) + (3 * prevValue2) + prevValue3)) +
-                                               (coef2 * prevFilter1) + (coef3 * prevFilter2) + (coef4 * prevFilter3);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 1);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3060,26 +1860,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleSuperSmootherFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a1 = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
-        var b1 = 2 * a1 * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
-        var coef2 = b1;
-        var coef3 = -a1 * a1;
-        var coef1 = 1 - coef2 - coef3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = i < 3 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3087,27 +1870,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleSuperSmootherFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(Math.Max(Math.Min(-sqrt2 * Math.PI / length, -0.01), -0.99));
-        var b = 2 * a * Math.Cos(Math.Min(Math.Max(sqrt2 * Math.PI / length, 0.01), 0.99));
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3115,29 +1880,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleSuperSmootherFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var arg = Math.Min(Math.Max(Math.PI / length, 0.01), 0.99);
-        var a1 = Math.Exp(-arg);
-        var b1 = 2 * a1 * Math.Cos(1.738 * arg);
-        var c1 = a1 * a1;
-        var coef2 = b1 + c1;
-        var coef3 = -(c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = 1 - coef2 - coef3 - coef4;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
-
-            output[i] = i < 4 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2) + (coef4 * prevFilter3);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3145,24 +1890,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersDecycler(ReadOnlySpan<double> input, Span<double> output, int length = 60)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(length, 1);
-        var alphaArg = Math.Min(2 * Math.PI / length, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevDec = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (alpha1 / 2 * (currentValue + prevValue1)) + ((1 - alpha1) * prevDec);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DecyclerWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     #endregion
@@ -3174,24 +1904,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersHammingMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20, double pedestal = 3)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double filtSum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? input[i - j] : 0;
-                var sine = Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (length - 1))));
-                filtSum += sine * prevV;
-                coefSum += sine;
-            }
-
-            output[i] = coefSum != 0 ? filtSum / coefSum : 0;
-        }
+        HammingWindowMean.Compute(input, output, length, pedestal);
     }
 
     /// <summary>
@@ -3199,24 +1912,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, double alpha1 = 0.25, double alpha2 = 0.33)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        Span<double> lead = stackalloc double[input.Length];
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevLead = i >= 1 ? lead[i - 1] : 0;
-
-            lead[i] = (2 * currentValue) + ((alpha1 - 2) * prevValue) + ((1 - alpha1) * prevLead);
-
-            var prevLeadIndicator = i >= 1 ? output[i - 1] : 0;
-            output[i] = (alpha2 * lead[i]) + ((1 - alpha2) * prevLeadIndicator);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LeadingWindow(alpha1, alpha2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3224,53 +1922,39 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersHighPassFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 125, double mult = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(length, 1);
-        var sqrt2 = Math.Sqrt(2);
-        var alphaArg = Math.Min(Math.Max(2 * Math.PI / (mult * length * sqrt2), 0.01), 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevHp1 = i >= 1 ? output[i - 1] : 0;
-            var prevHp2 = i >= 2 ? output[i - 2] : 0;
-            var pow1 = Math.Pow(1 - (alpha / 2), 2);
-            var pow2 = Math.Pow(1 - alpha, 2);
-
-            output[i] = (pow1 * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) - (pow2 * prevHp2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new HighPassWindow(length, mult);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Ehlers High Pass Filter V2 using span-based computation.
     /// </summary>
-    internal static void EhlersHighPassFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 48)
+    internal static void EhlersHighPassFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
         length = Math.Max(length, 1);
-        var alphaArg = Math.Min(Math.Max(2 * Math.PI / length, 0.01), 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        for (var i = 0; i < input.Length; i++)
+        var angle = Math.Sqrt(2) * Math.PI / length;
+        var decay = Math.Exp(-angle);
+        var c2 = 2 * decay * Math.Cos(angle);
+        var c3 = -decay * decay;
+        var c1 = (1 + c2 - c3) / 4;
+        var filtered = ArrayPool<double>.Shared.Rent(input.Length);
+        var smoothed = ArrayPool<double>.Shared.Rent(input.Length);
+        try
         {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevHp = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = ((1 - (alpha / 2)) * (currentValue - prevValue1)) + ((1 - alpha) * prevHp);
+            var hp = filtered.AsSpan(0, input.Length);
+            for (var i = 0; i < input.Length; i++)
+                hp[i] = i < 4 ? 0 : c1 * (input[i] - 2 * input[i - 1] + input[i - 2])
+                    + c2 * hp[i - 1] + c3 * hp[i - 2];
+            WeightedMovingAverage(hp, smoothed.AsSpan(0, input.Length), length);
+            WeightedMovingAverage(smoothed.AsSpan(0, input.Length), output, length);
+        }
+        finally
+        {
+            ArrayPool<double>.Shared.Return(filtered);
+            ArrayPool<double>.Shared.Return(smoothed);
         }
     }
 
@@ -3278,36 +1962,8 @@ internal static class MovingAverageCore
     /// Computes Distance Weighted Moving Average using span-based computation.
     /// </summary>
     internal static void DistanceWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        => DistanceMassWindowMean.Compute(input, output, length, reciprocal: true);
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-
-                double distanceSum = 0;
-                for (var k = 0; k < length; k++)
-                {
-                    var prevValue2 = i >= k ? input[i - k] : 0;
-                    distanceSum += Math.Abs(prevValue - prevValue2);
-                }
-
-                var weight = distanceSum != 0 ? 1 / distanceSum : 0;
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            // Every weight is 1 / distance, so the weights only all vanish when every price in the window is
-            // the same price - and the average of a window of one repeated price is that price, not zero.
-            output[i] = weightedSum != 0 ? sum / weightedSum : input[i];
-        }
-    }
 
     /// <summary>
     /// Computes Ehlers Filter using span-based computation.
@@ -3341,24 +1997,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersFiniteImpulseResponseFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var coef = 1 - ((double)j / length);
-                sum += coef * prevValue;
-                coefSum += coef;
-            }
-
-            output[i] = coefSum != 0 ? sum / coefSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EhlersFirWindow();
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3366,20 +2007,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersInfiniteImpulseResponseFilter(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (alpha * currentValue) + ((1 - alpha) * prevFilter);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EhlersIirWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3388,19 +2018,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AhrensMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevAhma = i >= 1 ? output[i - 1] : 0;
-            var priorAhma = i >= length ? output[i - length] : currentValue;
-
-            output[i] = prevAhma + ((currentValue - ((prevAhma + priorAhma) / 2)) / length);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AhrensWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3408,20 +2028,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DoubleExponentialSmoothing(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.01, double gamma = 0.9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var x = input[i];
-            var prevS = i >= 1 ? output[i - 1] : 0;
-            var prevS2 = i >= 2 ? output[i - 2] : 0;
-            var sChg = prevS - prevS2;
-
-            output[i] = (alpha * x) + ((1 - alpha) * (prevS + (gamma * (sChg + ((1 - gamma) * sChg)))));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DoubleSmoothingWindow(alpha, gamma);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3430,40 +2039,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void CompoundRatioMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var r = Math.Pow(length, (1.0 / (length - 1)) - 1);
-        var bas = 1 + (r * 2);
-        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
-
-        // First pass: compute raw weighted average
-        var rawBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var raw = rawBuffer.AsSpan(0, input.Length);
-            for (var i = 0; i < input.Length; i++)
-            {
-                double sum = 0, weightedSum = 0;
-                for (var j = 0; j <= length - 1; j++)
-                {
-                    var weight = Math.Pow(bas, length - j);
-                    var prevValue = i >= j ? input[i - j] : 0;
-                    sum += prevValue * weight;
-                    weightedSum += weight;
-                }
-                raw[i] = weightedSum != 0 ? sum / weightedSum : 0;
-            }
-
-            // Second pass: smooth with WMA
-            WeightedMovingAverage(raw, output, smoothLength);
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(rawBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new CompoundRatioWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3588,50 +2166,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DynamicallyAdjustableMovingAverage(ReadOnlySpan<double> input, Span<double> output, int fastLength = 6, int slowLength = 200)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Compute short and long standard deviations
-        var shortStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var longStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var cumSumBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var shortStdDev = shortStdDevBuffer.AsSpan(0, input.Length);
-            var longStdDev = longStdDevBuffer.AsSpan(0, input.Length);
-            var cumSum = cumSumBuffer.AsSpan(0, input.Length);
-
-            // Compute rolling stddev for both windows
-            ComputeRollingStdDev(input, shortStdDev, fastLength);
-            ComputeRollingStdDev(input, longStdDev, slowLength);
-
-            // Compute cumulative sum
-            double cs = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                cs += input[i];
-                cumSum[i] = cs;
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var a = shortStdDev[i];
-                var b = longStdDev[i];
-                var v = a != 0 ? (b / a) + fastLength : fastLength;
-                var p = (int)Math.Round(Math.Min(Math.Max(v, fastLength), slowLength));
-
-                var prevCumSum = i >= p ? cumSum[i - p] : 0;
-                output[i] = p != 0 ? (cumSum[i] - prevCumSum) / p : 0;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(shortStdDevBuffer);
-            ArrayPool<double>.Shared.Return(longStdDevBuffer);
-            ArrayPool<double>.Shared.Return(cumSumBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DynamicAverageWindow(fastLength, slowLength);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3682,11 +2219,12 @@ internal static class MovingAverageCore
             var sma = smaBuffer.AsSpan(0, input.Length);
 
             WeightedMovingAverage(input, wma, length);
-            SimpleMovingAverage(input, sma, length);
+            using var simple = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < input.Length; i++) sma[i] = simple.Next(input[i], true);
 
             for (var i = 0; i < input.Length; i++)
             {
-                output[i] = (2 * wma[i]) - sma[i];
+                output[i] = LeoAverage.Combine(wma[i], sma[i]);
             }
         }
         finally
@@ -3701,36 +2239,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void McNichollMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // McNicholl's zero-lag EMA, the same as CalculateMcNichollMovingAverage:
-        // ((2 - alpha) * ema1 - ema2) / (1 - alpha), with ema2 the EMA of ema1. This fast path returned
-        // ema + EMA(price - ema), a different average, so MovingAvgType.McNichollMovingAverage meant one thing
-        // here and another in the indicator.
-        var alpha = 2d / (length + 1);
-        var pool = ArrayPool<double>.Shared;
-        var ema1Buffer = pool.Rent(input.Length);
-        var ema2Buffer = pool.Rent(input.Length);
-        try
-        {
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
-            var ema2 = ema2Buffer.AsSpan(0, input.Length);
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = 1 - alpha != 0 ? (((2 - alpha) * ema1[i]) - ema2[i]) / (1 - alpha) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(ema1Buffer);
-            pool.Return(ema2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new McNichollWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3738,44 +2249,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ThreeHMA(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var p = Math.Max((int)Math.Ceiling((double)length / 2), 1);
-        var p1 = Math.Max((int)Math.Ceiling((double)p / 3), 1);
-        var p2 = Math.Max((int)Math.Ceiling((double)p / 2), 1);
-
-        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var midBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma1 = wma1Buffer.AsSpan(0, input.Length);
-            var wma2 = wma2Buffer.AsSpan(0, input.Length);
-            var wma3 = wma3Buffer.AsSpan(0, input.Length);
-            var mid = midBuffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, p1);
-            WeightedMovingAverage(input, wma2, p2);
-            WeightedMovingAverage(input, wma3, p);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
-            }
-
-            WeightedMovingAverage(mid, output, p);
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wma1Buffer);
-            ArrayPool<double>.Shared.Return(wma2Buffer);
-            ArrayPool<double>.Shared.Return(wma3Buffer);
-            ArrayPool<double>.Shared.Return(midBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3783,33 +2259,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ZeroLagTripleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // The same as CalculateZeroLagTripleExponentialMovingAverage: 2 * TEMA - TEMA(TEMA). This fast path
-        // took the second average as an EMA of the TEMA, a different line from the indicator of the same name.
-        var tema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var tema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var tema1 = tema1Buffer.AsSpan(0, input.Length);
-            var tema2 = tema2Buffer.AsSpan(0, input.Length);
-
-            TripleExponentialMovingAverage(input, tema1, length);
-            TripleExponentialMovingAverage(tema1, tema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = tema1[i] + (tema1[i] - tema2[i]);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(tema1Buffer);
-            ArrayPool<double>.Shared.Return(tema2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ZeroLagTripleWindow(MovingAvgType.TripleExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3817,24 +2269,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ZeroLowLagMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 32)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Lag-compensated input
-        var lag = (length - 1) / 2;
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var lagValue = i >= lag ? input[i - lag] : input[0];
-            var compensatedInput = (2 * currentValue) - lagValue;
-
-            var prevOut = i >= 1 ? output[i - 1] : compensatedInput;
-            output[i] = (alpha * compensatedInput) + ((1 - alpha) * prevOut);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ZeroLowLagWindow(length, 1.4);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3842,46 +2279,17 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WildersSummationMethod(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevSum = i >= 1 ? output[i - 1] : 0;
-
-            if (i < length)
-            {
-                output[i] = prevSum + currentValue;
-            }
-            else
-            {
-                output[i] = prevSum - (prevSum / length) + currentValue;
-            }
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilderSummationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Simplified Weighted Moving Average using span-based computation.
     /// </summary>
     internal static void SimplifiedWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        => WeightedMovingAverage(input, output, Math.Max(1, length));
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var priorValue = i >= length ? input[i - length] : 0;
-            var prevSwma = i >= 1 ? output[i - 1] : currentValue;
-
-            output[i] = prevSwma + ((currentValue - priorValue) / length);
-        }
-    }
 
     /// <summary>
     /// Computes Simplified Least Squares Moving Average using span-based computation.
@@ -3889,63 +2297,28 @@ internal static class MovingAverageCore
     internal static void SimplifiedLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 25)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma = wmaBuffer.AsSpan(0, input.Length);
-            var sma = smaBuffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma, length);
-            SimpleMovingAverage(input, sma, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (2 * wma[i]) - sma[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wmaBuffer);
-            ArrayPool<double>.Shared.Return(smaBuffer);
-        }
+        using var window = new SimplifiedLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Sharp Modified Moving Average using span-based computation.
     /// </summary>
-    internal static void SharpModifiedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double factor = 0.7)
+    internal static void SharpModifiedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.IsEmpty) return;
+        length = Math.Max(1, length);
+        var buffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            SimpleMovingAverage(input, sma, length);
-
-            var alpha = 2.0 / (length + 1);
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var smaVal = sma[i];
-                var prevSmma = i >= 1 ? output[i - 1] : currentValue;
-                var diff = currentValue - smaVal;
-
-                output[i] = prevSmma + (alpha * diff * factor);
-            }
+            var average = buffer.AsSpan(0, input.Length);
+            SimpleMovingAverage(input, average, length);
+            using var window = new AffineAverageWindow(length, sharp: true, capacityHint: input.Length, exactSimple: true);
+            for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], average[i]);
         }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-        }
+        finally { ArrayPool<double>.Shared.Return(buffer); }
     }
 
     /// <summary>
@@ -3953,32 +2326,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void TillsonIE2(ReadOnlySpan<double> input, Span<double> output, int length = 15, double vFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
-            var ema2 = ema2Buffer.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var dema = (2 * ema1[i]) - ema2[i];
-                output[i] = ((1 - vFactor) * ema1[i]) + (vFactor * dema);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(ema1Buffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        // The public IE2 contract uses SMA plus regression; the legacy volume-factor argument is unused.
+        using var window = new TillsonIe2Window(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3986,22 +2337,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RecursiveMovingTrendAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevRmta = i >= 1 ? output[i - 1] : currentValue;
-            var priorRmta = i >= length ? output[i - length] : currentValue;
-
-            var rmtaTrend = (prevRmta - priorRmta) / length;
-            output[i] = (alpha * currentValue) + ((1 - alpha) * (prevRmta + rmtaTrend));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new RecursiveTrendWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4009,31 +2347,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var sma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var sma1 = sma1Buffer.AsSpan(0, input.Length);
-            var sma2 = sma2Buffer.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(sma1, sma2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (2 * sma1[i]) - sma2[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(sma1Buffer);
-            ArrayPool<double>.Shared.Return(sma2Buffer);
-        }
+        RollingRootMeanSquare.Compute(input, output, length);
     }
 
     /// <summary>
@@ -4092,58 +2406,17 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HullEstimate(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var halfLength = Math.Max(length / 2, 1);
-
-        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma1 = wma1Buffer.AsSpan(0, input.Length);
-            var wma2 = wma2Buffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, halfLength);
-            WeightedMovingAverage(input, wma2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (3 * wma1[i]) - (2 * wma2[i]);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wma1Buffer);
-            ArrayPool<double>.Shared.Return(wma2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new HullEstimateWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
     /// Computes Inverse Distance Weighted Moving Average using span-based computation.
     /// </summary>
     internal static void InverseDistanceWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
-    {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        => DistanceMassWindowMean.Compute(input, output, length);
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var weight = 1.0 / (j + 1);
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
-    }
 
     /// <summary>
     /// Computes Trimean using span-based computation.
@@ -4169,17 +2442,11 @@ internal static class MovingAverageCore
                 // Sort window for quartile calculation
                 Array.Sort(windowBuffer, 0, n);
 
-                // Calculate Q1, Median, Q3
-                var q1Idx = (n - 1) * 0.25;
-                var medIdx = (n - 1) * 0.5;
-                var q3Idx = (n - 1) * 0.75;
-
-                var q1 = InterpolateQuartile(windowBuffer, n, q1Idx);
-                var median = InterpolateQuartile(windowBuffer, n, medIdx);
-                var q3 = InterpolateQuartile(windowBuffer, n, q3Idx);
-
-                // Trimean = (Q1 + 2*Median + Q3) / 4
-                output[i] = (q1 + (2 * median) + q3) / 4;
+                // The public contract uses nearest-rank quartiles, including partial windows.
+                var q1 = windowBuffer[(n + 3) / 4 - 1];
+                var median = windowBuffer[(2 * n + 3) / 4 - 1];
+                var q3 = windowBuffer[(3 * n + 3) / 4 - 1];
+                output[i] = PriceMean.Of(q1, median, median, q3);
             }
         }
         finally
@@ -4208,31 +2475,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WellRoundedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            var ema = emaBuffer.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma, length);
-            ExponentialMovingAverage(input, ema, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (sma[i] + ema[i]) / 2;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-            ArrayPool<double>.Shared.Return(emaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WellRoundedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4240,21 +2485,13 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LinearRegressionLine(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        length = Math.Max(1, length);
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Linear regression line is the same as LSMA
-        LinearRegression(input, output, length);
-
-        // CalculateLinearRegressionLine builds its slope from a correlation and a standard deviation, both
-        // of which are zero until their window fills, so it reports nothing through the run-in.
-        // LinearRegression fits through the bars it has, which is right for that indicator but not this one.
-        var blank = Math.Min(length - 1, input.Length);
-        for (var i = 0; i < blank; i++)
-        {
-            output[i] = 0;
+            var fit = regression.Next(input[i], true);
+            output[i] = fit.Count < length ? 0 : fit.Last;
         }
     }
 
@@ -4263,27 +2500,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LinearExtrapolation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            // Simple linear extrapolation: 2*current - prior
-            var n = Math.Min(i + 1, length);
-            var currentValue = input[i];
-            var priorValue = i >= n ? input[i - n + 1] : input[0];
-            var slope = (currentValue - priorValue) / (n - 1);
-
-            output[i] = currentValue + slope;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LinearExtrapolationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4296,30 +2515,9 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            var ema = emaBuffer.AsSpan(0, input.Length);
-            var wma = wmaBuffer.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma, length);
-            ExponentialMovingAverage(input, ema, length);
-            WeightedMovingAverage(input, wma, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (sma[i] + ema[i] + wma[i]) / 3;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-            ArrayPool<double>.Shared.Return(emaBuffer);
-            ArrayPool<double>.Shared.Return(wmaBuffer);
-        }
+        length = Math.Max(1, length);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = PriceMean.Of(input[i], i >= length ? input[i - length] : 0);
     }
 
     /// <summary>
@@ -4327,23 +2525,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void SelfWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var value = i >= j ? input[i - j] : 0;
-                // Weight is the value from length periods before
-                var weight = i >= length + j ? input[i - length - j] : 0;
-                weightSum += weight;
-                sum += weight * value;
-            }
-
-            output[i] = weightSum != 0 ? sum / weightSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SelfWeightedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4351,35 +2535,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HendersonWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 7)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var termMult = Math.Max(1, (int)Math.Floor((double)(length - 1) / 2));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var m = termMult;
-                var n = j - termMult;
-                var m1 = (double)(m + 1);
-                var m2 = (double)(m + 2);
-                var m3 = (double)(m + 3);
-
-                var numerator = 315 * (m1 * m1 - n * n) * (m2 * m2 - n * n) * (m3 * m3 - n * n) *
-                    ((3 * m2 * m2) - (11 * n * n) - 16);
-                var denominator = 8 * m2 * (m2 * m2 - 1) * ((4 * m2 * m2) - 1) * ((4 * m2 * m2) - 9) *
-                    ((4 * m2 * m2) - 25);
-                var weight = denominator != 0 ? numerator / denominator : 0;
-                var prevValue = i >= j ? input[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        HendersonWindow.Compute(input, output, length);
     }
 
     /// <summary>
@@ -4390,40 +2546,7 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        // Generate Farey sequence weights
-        var array = new double[4] { 0, 1, 1, length };
-        var resList = new System.Collections.Generic.List<double>();
-
-        while (array[2] <= length)
-        {
-            var a = array[0];
-            var b = array[1];
-            var c = array[2];
-            var d = array[3];
-            var k = Math.Floor((length + b) / array[3]);
-
-            array[0] = c;
-            array[1] = d;
-            array[2] = (k * c) - a;
-            array[3] = (k * d) - b;
-
-            var res = array[1] != 0 ? Math.Round(array[0] / array[1], 3) : 0;
-            resList.Insert(0, res);
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j < resList.Count; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var weight = resList[j];
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        FareyWindowMean.Compute(input, output, length);
     }
 
     /// <summary>
@@ -4431,27 +2554,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RightSidedRickerMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50, double pctWidth = 60)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var width = pctWidth / 100 * length;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double w = 0, vw = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? input[i - j] : 0;
-                var jOverWidth = j / width;
-                var jSquared = (double)j * j;
-                var widthSquared = width * width;
-                var weight = (1 - jOverWidth * jOverWidth) * Math.Exp(-(jSquared / (2 * widthSquared)));
-                w += weight;
-                vw += prevV * weight;
-            }
-
-            output[i] = w != 0 ? vw / w : input[i];
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RickerWindow(length, pctWidth);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4502,36 +2607,13 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void SequentiallyFilteredMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var ema1 = ema1Buffer.AsSpan(0, input.Length);
-            var ema2 = ema2Buffer.AsSpan(0, input.Length);
-            var ema3 = ema3Buffer.AsSpan(0, input.Length);
-
-            // Sequential EMA filtering
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-            ExponentialMovingAverage(ema2, ema3, length);
-
-            // Final output: 3*EMA1 - 3*EMA2 + EMA3
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (3 * ema1[i]) - (3 * ema2[i]) + ema3[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(ema1Buffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-            ArrayPool<double>.Shared.Return(ema3Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
+        using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+        using var gate = new SequentialMeanGate(length);
+        for (var i = 0; i < input.Length; i++) output[i] = gate.Next(input[i], mean.Next(input[i], true), true);
     }
+
 
     /// <summary>
     /// Computes Kalman Smoother using span-based computation.
@@ -4655,23 +2737,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ShapeshiftingMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50, double factor = 0.5)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevSsma = i >= 1 ? output[i - 1] : currentValue;
-
-            // Adaptive factor based on volatility
-            var change = Math.Abs(currentValue - prevSsma);
-            var adaptiveFactor = factor * (1 + change / (Math.Abs(prevSsma) + 0.00001));
-
-            var ssma = (alpha * adaptiveFactor * currentValue) + ((1 - alpha * adaptiveFactor) * prevSsma);
-            output[i] = ssma;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ShapeshiftingWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4724,56 +2792,11 @@ internal static class MovingAverageCore
     {
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        poles = Math.Min(Math.Max(poles, 1), 4);
-        var beta = (1 - Math.Cos(2 * Math.PI / length)) / (Math.Pow(2, 1.0 / poles) - 1);
-        var alpha = -beta + Math.Sqrt(beta * beta + 2 * beta);
-
+        poles = Math.Max(1, Math.Min(4, poles));
+        var gain = EhlersGaussian.Gain(length, poles);
+        var stages = new double[poles];
         for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateEhlersGaussianFilter reads a filter output that does not exist yet as zero, so the
-            // filter starts from nothing and climbs towards the price over its first bars. Seeding the
-            // history with the arriving price instead started it already settled, and the two only met
-            // once the poles had damped the difference away.
-            var currentValue = input[i];
-            var prev1 = i >= 1 ? output[i - 1] : 0;
-            var prev2 = i >= 2 ? output[i - 2] : 0;
-            var prev3 = i >= 3 ? output[i - 3] : 0;
-            var prev4 = i >= 4 ? output[i - 4] : 0;
-
-            double result;
-            if (poles == 1)
-            {
-                result = alpha * currentValue + (1 - alpha) * prev1;
-            }
-            else if (poles == 2)
-            {
-                var c0 = alpha * alpha;
-                var c1 = 2 * (1 - alpha);
-                var c2 = -(1 - alpha) * (1 - alpha);
-                result = c0 * currentValue + c1 * prev1 + c2 * prev2;
-            }
-            else if (poles == 3)
-            {
-                var c0 = alpha * alpha * alpha;
-                var c1 = 3 * (1 - alpha);
-                var c2 = -3 * (1 - alpha) * (1 - alpha);
-                var c3 = (1 - alpha) * (1 - alpha) * (1 - alpha);
-                result = c0 * currentValue + c1 * prev1 + c2 * prev2 + c3 * prev3;
-            }
-            else
-            {
-                var a1 = 1 - alpha;
-                var c0 = alpha * alpha * alpha * alpha;
-                var c1 = 4 * a1;
-                var c2 = -6 * a1 * a1;
-                var c3 = 4 * a1 * a1 * a1;
-                var c4 = -a1 * a1 * a1 * a1;
-                result = c0 * currentValue + c1 * prev1 + c2 * prev2 + c3 * prev3 + c4 * prev4;
-            }
-
-            output[i] = result;
-        }
+            output[i] = EhlersGaussian.Next(input[i], gain, stages, true);
     }
 
     /// <summary>
@@ -4820,7 +2843,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             // Apply 1LC correction: 2*LSMA - SMA
             var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
@@ -4896,24 +2920,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersOptimumEllipticFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var a1 = 0.13785;
-        var a2 = 0.0007;
-        var b1 = 1.2075;
-        var b2 = -0.5587;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prev1 = i >= 1 ? input[i - 1] : currentValue;
-            var prev2 = i >= 2 ? input[i - 2] : currentValue;
-            var prevEf1 = i >= 1 ? output[i - 1] : currentValue;
-            var prevEf2 = i >= 2 ? output[i - 2] : currentValue;
-
-            output[i] = (a1 * (currentValue + prev1)) + (a2 * prev2) + (b1 * prevEf1) + (b2 * prevEf2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EllipticWindow(false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -4921,21 +2930,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersModifiedOptimumEllipticFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : currentValue;
-            var prevValue2 = i >= 2 ? input[i - 2] : prevValue1;
-            var prevValue3 = i >= 3 ? input[i - 3] : prevValue2;
-            var prevMoef1 = i >= 1 ? output[i - 1] : currentValue;
-            var prevMoef2 = i >= 2 ? output[i - 2] : prevMoef1;
-
-            output[i] = (0.13785 * ((2 * currentValue) - prevValue1)) + (0.0007 * ((2 * prevValue1) - prevValue2)) +
-                (0.13785 * ((2 * prevValue2) - prevValue3)) + (1.2103 * prevMoef1) - (0.4867 * prevMoef2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EllipticWindow(true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5035,7 +3032,8 @@ internal static class MovingAverageCore
         var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
             SimpleMovingAverage(input, smaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
@@ -5058,11 +3056,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Using LSMA with quadratic correction
-        PolynomialLeastSquaresMovingAverage(input, output, length, 2);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new Streaming.QuadraticLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], 14, true).Value;
     }
 
     /// <summary>
@@ -5070,43 +3066,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticRegression(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var n = Math.Min(i + 1, length);
-
-            // Compute sums for quadratic regression
-            double sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
-            double sumY = 0, sumXY = 0, sumX2Y = 0;
-
-            for (var j = 0; j < n; j++)
-            {
-                var x = (double)j;
-                var y = input[i - j];
-
-                sumX += x;
-                sumX2 += x * x;
-                sumX3 += x * x * x;
-                sumX4 += x * x * x * x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2Y += x * x * y;
-            }
-
-            // Simplified quadratic regression using normal equations
-            // For simplicity, fall back to linear regression approach
-            var avgX = sumX / n;
-            var avgY = sumY / n;
-            var avgXY = sumXY / n;
-            var avgX2 = sumX2 / n;
-
-            var slope = avgX2 != avgX * avgX ? (avgXY - avgX * avgY) / (avgX2 - avgX * avgX) : 0;
-            var intercept = avgY - slope * avgX;
-
-            output[i] = intercept; // Value at x=0 (current)
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new QuadraticProjectionWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5175,37 +3137,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VerticalHorizontalMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevVhma = i >= 1 ? output[i - 1] : currentValue;
-
-            var n = Math.Min(i + 1, length);
-
-            // Calculate VHF (Vertical Horizontal Filter)
-            double highest = double.MinValue, lowest = double.MaxValue;
-            double changeSum = 0;
-            for (var j = 0; j < n; j++)
-            {
-                var val = input[i - j];
-                if (val > highest) highest = val;
-                if (val < lowest) lowest = val;
-                if (j > 0)
-                {
-                    changeSum += Math.Abs(input[i - j] - input[i - j + 1]);
-                }
-            }
-
-            var range = highest - lowest;
-            var vhf = changeSum > 0 && n > 1 ? range / changeSum : 0;
-
-            // Adaptive EMA based on VHF
-            var alpha = Math.Min(Math.Max(vhf, 0.01), 0.99);
-            output[i] = prevVhma + (alpha * (currentValue - prevVhma));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VerticalHorizontalAverageWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5362,26 +3296,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void IIRLeastSquaresEstimate(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // IIR filter with least squares fitting
-        var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
-
-            var alpha = 2.0 / (length + 1);
-            for (var i = 0; i < input.Length; i++)
-            {
-                var prevIir = i >= 1 ? output[i - 1] : lsmaBuffer[i];
-                output[i] = (alpha * lsmaBuffer[i]) + ((1 - alpha) * prevIir);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(lsmaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new IirLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5426,34 +3343,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void MovingAverageV3(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Triple smoothed average
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var halfLength = Math.Max(2, length / 2);
-            var quarterLength = Math.Max(2, length / 4);
-
-            ExponentialMovingAverage(input, ema1Buffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1Buffer.AsSpan(0, input.Length), ema2Buffer.AsSpan(0, input.Length), halfLength);
-            ExponentialMovingAverage(ema2Buffer.AsSpan(0, input.Length), ema3Buffer.AsSpan(0, input.Length), quarterLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Weighted combination
-                output[i] = (3 * ema1Buffer[i]) - (3 * ema2Buffer[i]) + ema3Buffer[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(ema1Buffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-            ArrayPool<double>.Shared.Return(ema3Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MovingAverageV3Window(MovingAvgType.ExponentialMovingAverage, length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5504,7 +3396,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
             {
@@ -5527,36 +3420,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ParametricCorrectiveLinearMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var lsma = lsmaBuffer[i];
-                var ema = emaBuffer[i];
-
-                // Parametric correction based on deviation
-                var error = currentValue - lsma;
-                var emaError = currentValue - ema;
-
-                // Blend LSMA with correction factor
-                var correction = error != 0 ? Math.Min(Math.Abs(emaError / error), 2) : 1;
-                output[i] = lsma + (error * correction * 0.5);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(lsmaBuffer);
-            ArrayPool<double>.Shared.Return(emaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ParametricCorrectiveWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5612,7 +3478,8 @@ internal static class MovingAverageCore
         var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            LeastSquaresMovingAverage(input, lsmaBuffer.AsSpan(0, input.Length), length);
+            // Preserve this regression-based variant's partial-window fit.
+            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
 
             for (var i = 0; i < input.Length; i++)
             {
@@ -5741,37 +3608,11 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Powered Kaufman Adaptive Moving Average using span-based computation.
     /// </summary>
-    internal static void PoweredKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 2)
+    internal static void PoweredKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 3)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var kamaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            KaufmanAdaptiveMovingAverage(input, kamaBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var kama = kamaBuffer[i];
-                var prevPkama = i >= 1 ? output[i - 1] : currentValue;
-
-                // Apply power to the adaptive factor
-                var diff = currentValue - prevPkama;
-                var adaptiveFactor = kama != 0 ? Math.Pow(Math.Abs(currentValue - kama) / Math.Abs(kama), 1.0 / power) : 0;
-                adaptiveFactor = Math.Min(adaptiveFactor, 1);
-
-                var alpha = 2.0 / (length + 1) * (1 + adaptiveFactor);
-                alpha = Math.Min(alpha, 0.99);
-
-                output[i] = prevPkama + (alpha * diff);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(kamaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PoweredKaufmanWindow(length, power);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>
@@ -5779,27 +3620,8 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(emaBuffer.AsSpan(0, input.Length), ema2Buffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Leading indicator: 2*EMA - EMA of EMA
-                output[i] = (2 * emaBuffer[i]) - ema2Buffer[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(emaBuffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-        }
+        // The legacy Length option has no effect on this fixed-coefficient filter.
+        EhlersLeadingIndicator(input, output, .25, .33);
     }
 
     /// <summary>
@@ -5960,45 +3782,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Compute efficiency ratio for adaptation
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevAarma = i >= 1 ? output[i - 1] : currentValue;
-
-                // Calculate efficiency ratio
-                var n = Math.Min(i + 1, length);
-                var change = i >= n - 1 ? Math.Abs(input[i] - input[i - n + 1]) : 0;
-
-                double volatility = 0;
-                for (var j = 1; j < n; j++)
-                {
-                    volatility += Math.Abs(input[i - j + 1] - input[i - j]);
-                }
-
-                var er = volatility > 0 ? change / volatility : 0;
-
-                // Autonomous adaptation
-                var fastSc = 2.0 / 3.0;
-                var slowSc = 2.0 / 31.0;
-                var sc = er * (fastSc - slowSc) + slowSc;
-                var alpha = sc * sc;
-
-                output[i] = prevAarma + (alpha * (currentValue - prevAarma));
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>
@@ -6018,11 +3804,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Ehlers's version of KAMA
-        KaufmanAdaptiveMovingAverage(input, output, length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EhlersKaufmanWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -6065,33 +3849,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ElasticVolumeWeightedMovingAverageV1(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 40, double mult = 20)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var volumeSmaArray = pool.Rent(price.Length);
-
-        try
-        {
-            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
-            SimpleMovingAverage(volume, volumeSma, length);
-
-            double prevEvwma = price.Length > 0 ? price[0] : 0;
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentAvgVolume = volumeSma[i];
-                var currentVolume = volume[i];
-                var n = currentAvgVolume * mult;
-
-                var evwma = n > 0 ? (((n - currentVolume) * prevEvwma) + (currentVolume * price[i])) / n : 0;
-                output[i] = evwma;
-                prevEvwma = evwma;
-            }
-        }
-        finally
-        {
-            pool.Return(volumeSmaArray);
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < price.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        using var window = new ElasticVolumeAverageWindow(MovingAvgType.SimpleMovingAverage, length, mult);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>
@@ -6099,24 +3860,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ElasticVolumeWeightedMovingAverageV2(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        double volumeSum = 0;
-        double evwma = price.Length > 0 ? price[0] : 0;
-
-        for (var i = 0; i < price.Length; i++)
-        {
-            var currentVolume = volume[i];
-            volumeSum += currentVolume;
-
-            if (i >= length)
-                volumeSum -= volume[i - length];
-
-            var nbv = Math.Min(volumeSum, currentVolume);
-            evwma = volumeSum > 0 ? (((volumeSum - nbv) * evwma) + (nbv * price[i])) / volumeSum : 0;
-            output[i] = evwma;
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < price.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        using var window = new ElasticVolumeWindow(length);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>
@@ -6124,132 +3871,49 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14, double factor = 0.67)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var volumeSmaArray = pool.Rent(price.Length);
-
-        try
-        {
-            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
-            SimpleMovingAverage(volume, volumeSma, length);
-
-            double volumeRatioSum = 0;
-            double priceVolumeRatioSum = 0;
-            var volumeRatioWindow = new double[length];
-            var priceVolumeRatioWindow = new double[length];
-            var windowIdx = 0;
-            var windowCount = 0;
-
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentVolume = volume[i];
-                var volumeIncrement = volumeSma[i] * factor;
-                var volumeRatio = volumeIncrement != 0 ? currentVolume / volumeIncrement : 0;
-                var priceVolumeRatio = price[i] * volumeRatio;
-
-                // Update rolling sums
-                if (windowCount >= length)
-                {
-                    volumeRatioSum -= volumeRatioWindow[windowIdx];
-                    priceVolumeRatioSum -= priceVolumeRatioWindow[windowIdx];
-                }
-                volumeRatioWindow[windowIdx] = volumeRatio;
-                priceVolumeRatioWindow[windowIdx] = priceVolumeRatio;
-                volumeRatioSum += volumeRatio;
-                priceVolumeRatioSum += priceVolumeRatio;
-                windowIdx = (windowIdx + 1) % length;
-                if (windowCount < length) windowCount++;
-
-                output[i] = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(volumeSmaArray);
-        }
+        if (output.Length < price.Length || volume.Length < price.Length) throw new ArgumentException("Output and volume spans must be at least input length.");
+        using var window = new VolumeAdjustedWindow(MovingAvgType.SimpleMovingAverage, length, factor);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>
     /// Computes Windowed Volume Weighted Moving Average.
     /// </summary>
-    internal static void WindowedVolumeWeightedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    internal static void WindowedVolumeWeightedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 100)
     {
         if (output.Length < price.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        double pvSum = 0;
-        double vSum = 0;
-
+        if (volume.Length < price.Length)
+            throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        length = Math.Max(1, length);
         for (var i = 0; i < price.Length; i++)
         {
-            var n = Math.Min(i + 1, length);
-            var currentPv = price[i] * volume[i];
-            pvSum += currentPv;
-            vSum += volume[i];
-
-            if (i >= length)
+            var mean = new ExactVolumeMean();
+            for (var lag = 0; lag < length && lag <= i; lag++)
             {
-                pvSum -= price[i - length] * volume[i - length];
-                vSum -= volume[i - length];
+                // Periodic Bartlett window: its common 2/length normalization cancels in the ratio.
+                var taper = length == 1 ? 1 : Math.Min(lag, length - lag);
+                mean.Add(price[i - lag], volume[i - lag], taper);
             }
-
-            output[i] = vSum != 0 ? pvSum / vSum : price[i];
+            output[i] = mean.Value();
         }
     }
 
     /// <summary>
     /// Computes Middle High Low Moving Average.
     /// </summary>
-    internal static void MiddleHighLowMovingAverage(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length1 = 14, int length2 = 10)
+    internal static void MiddleHighLowMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length1 = 14, int length2 = 10)
     {
-        if (output.Length < high.Length)
+        if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var midpointArray = pool.Rent(high.Length);
-        var midpointSmaArray = pool.Rent(high.Length);
-
+        var midpointArray = ArrayPool<double>.Shared.Rent(input.Length);
         try
         {
-            var midpoint = midpointArray.AsSpan(0, high.Length);
-            var midpointSma = midpointSmaArray.AsSpan(0, high.Length);
-
-            // Calculate midpoint (high + low) / 2 with rolling min/max
-            double highestHigh = double.MinValue;
-            double lowestLow = double.MaxValue;
-            var highWindow = new double[length2];
-            var lowWindow = new double[length2];
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                highWindow[i % length2] = high[i];
-                lowWindow[i % length2] = low[i];
-
-                var windowSize = Math.Min(i + 1, length2);
-                highestHigh = double.MinValue;
-                lowestLow = double.MaxValue;
-                for (var j = 0; j < windowSize; j++)
-                {
-                    var idx = (i - j + length2) % length2;
-                    if (j <= i)
-                    {
-                        if (highWindow[idx] > highestHigh) highestHigh = highWindow[idx];
-                        if (lowWindow[idx] < lowestLow) lowestLow = lowWindow[idx];
-                    }
-                }
-                midpoint[i] = (highestHigh + lowestLow) / 2;
-            }
-
-            // Apply EMA to midpoint
-            ExponentialMovingAverage(midpoint, output, length1);
+            var midpoint = midpointArray.AsSpan(0, input.Length);
+            TrendCore.Midpoint(input, midpoint, Math.Max(1, length2));
+            ExponentialMovingAverage(midpoint, output, Math.Max(1, length1));
         }
-        finally
-        {
-            pool.Return(midpointArray);
-            pool.Return(midpointSmaArray);
-        }
+        finally { ArrayPool<double>.Shared.Return(midpointArray); }
     }
 
     /// <summary>
@@ -6257,50 +3921,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EquityMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var buyPowerArray = pool.Rent(price.Length);
-        var totalPowerArray = pool.Rent(price.Length);
-
-        try
-        {
-            var buyPower = buyPowerArray.AsSpan(0, price.Length);
-            var totalPower = totalPowerArray.AsSpan(0, price.Length);
-
-            double buyPowerSum = 0, totalPowerSum = 0;
-
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentVolume = volume[i];
-                var prevPrice = i >= 1 ? price[i - 1] : price[i];
-                var change = price[i] - prevPrice;
-
-                var bp = change > 0 ? currentVolume * change : 0;
-                var tp = currentVolume * Math.Abs(change);
-
-                buyPowerSum += bp;
-                totalPowerSum += tp;
-
-                if (i >= length)
-                {
-                    var oldChange = price[i - length + 1] - (i >= length ? price[i - length] : price[i - length + 1]);
-                    var oldBp = oldChange > 0 ? volume[i - length + 1] * oldChange : 0;
-                    var oldTp = volume[i - length + 1] * Math.Abs(oldChange);
-                    buyPowerSum -= oldBp;
-                    totalPowerSum -= oldTp;
-                }
-
-                var emv = totalPowerSum != 0 ? (2 * buyPowerSum / totalPowerSum) - 1 : 0;
-                output[i] = emv;
-            }
-        }
-        finally
-        {
-            pool.Return(buyPowerArray);
-            pool.Return(totalPowerArray);
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EquityWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], true);
     }
 
     /// <summary>
@@ -6332,24 +3955,8 @@ internal static class MovingAverageCore
     /// Computes Volume Weighted Average Price.
     /// </summary>
     internal static void VolumeWeightedAveragePrice(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output)
-    {
-        if (output.Length < close.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        => VolumeCore.VolumeWeightedAveragePrice(high, low, close, volume, output);
 
-        double tpvSum = 0;
-        double volumeSum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var typicalPrice = (close[i] + high[i] + low[i]) / 3;
-            var currentVolume = volume[i];
-
-            tpvSum += typicalPrice * currentVolume;
-            volumeSum += currentVolume;
-
-            output[i] = volumeSum != 0 ? tpvSum / volumeSum : 0;
-        }
-    }
 
     /// <summary>
     /// Computes True Range Adjusted Exponential Moving Average.
@@ -6575,8 +4182,11 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var fastAlpha = 2.0 / (1 + fastLength);
-        var slowAlpha = 2.0 / (1 + slowLength);
+        if (input.IsEmpty) return;
+        fastLength = Math.Max(1, fastLength);
+        slowLength = Math.Max(1, slowLength);
+        var fastAlpha = 2.0 / (1d + fastLength);
+        var slowAlpha = 2.0 / (1d + slowLength);
 
         var pool = ArrayPool<double>.Shared;
         var fastEmaArray = pool.Rent(input.Length);
@@ -6595,9 +4205,7 @@ internal static class MovingAverageCore
                 var prevFastEma = i >= 1 ? fastEma[i - 1] : 0;
                 var prevSlowEma = i >= 1 ? slowEma[i - 1] : 0;
 
-                var pMacdEq = fastAlpha - slowAlpha != 0
-                    ? ((prevFastEma * fastAlpha) - (prevSlowEma * slowAlpha)) / (fastAlpha - slowAlpha)
-                    : 0;
+                var pMacdEq = RoundedReverseMacd.Equilibrium(prevFastEma, prevSlowEma, fastAlpha, slowAlpha);
                 output[i] = pMacdEq;
             }
         }
@@ -6613,67 +4221,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void OptimalWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Rolling correlation state
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-        var corrWindow = new double[length * 2]; // Store x,y pairs
-        var corrIndex = 0;
-        var corrCount = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevOwma = i >= 1 ? output[i - 1] : 0;
-
-            // Update rolling correlation (input vs prevOwma)
-            var oldIdx = corrIndex;
-            if (corrCount >= length)
-            {
-                // Remove oldest values
-                var oldX = corrWindow[oldIdx * 2];
-                var oldY = corrWindow[oldIdx * 2 + 1];
-                sumX -= oldX;
-                sumY -= oldY;
-                sumXY -= oldX * oldY;
-                sumX2 -= oldX * oldX;
-                sumY2 -= oldY * oldY;
-            }
-
-            // Add new values
-            corrWindow[corrIndex * 2] = currentValue;
-            corrWindow[corrIndex * 2 + 1] = prevOwma;
-            sumX += currentValue;
-            sumY += prevOwma;
-            sumXY += currentValue * prevOwma;
-            sumX2 += currentValue * currentValue;
-            sumY2 += prevOwma * prevOwma;
-
-            corrIndex = (corrIndex + 1) % length;
-            if (corrCount < length) corrCount++;
-
-            // Calculate correlation
-            var n = corrCount;
-            var numerator = (n * sumXY) - (sumX * sumY);
-            var denomX = (n * sumX2) - (sumX * sumX);
-            var denomY = (n * sumY2) - (sumY * sumY);
-            var denominator = Math.Sqrt(denomX * denomY);
-            var corr = denominator != 0 ? numerator / denominator : 0;
-            if (double.IsNaN(corr) || double.IsInfinity(corr)) corr = 0;
-
-            // Calculate weighted sum
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1 && i >= j; j++)
-            {
-                var weight = Math.Pow(length - j, corr);
-                var prevValue = input[i - j];
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new OptimalWeightedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -6682,85 +4232,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LightLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 250)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var length1 = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        var sma2Array = pool.Rent(input.Length);
-        var indexArray = pool.Rent(input.Length);
-        var indexSmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-            var sma2 = sma2Array.AsSpan(0, input.Length);
-            var indexSpan = indexArray.AsSpan(0, input.Length);
-            var indexSma = indexSmaArray.AsSpan(0, input.Length);
-
-            // Create index array
-            for (var i = 0; i < input.Length; i++)
-                indexSpan[i] = i;
-
-            // Calculate SMAs
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(input, sma2, length1);
-            SimpleMovingAverage(indexSpan, indexSma, length);
-
-            // Calculate standard deviations manually for each point
-            for (var i = 0; i < input.Length; i++)
-            {
-                // CalculateLightLeastSquaresMovingAverage draws its spread from GetStandardDeviationList,
-                // which is zero until its window fills, so the correction and the base average are both zero
-                // through the run-in. The shorter of the two averages fills first, and measuring it against
-                // a partial spread here published a value from the halfway bar that the indicator never has.
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
-                var n = Math.Min(i + 1, length);
-
-                // StdDev of input
-                double inputSum = 0, inputSum2 = 0;
-                for (var j = 0; j < n; j++)
-                {
-                    var val = input[i - j];
-                    inputSum += val;
-                    inputSum2 += val * val;
-                }
-                var inputMean = inputSum / n;
-                var inputVariance = (inputSum2 / n) - (inputMean * inputMean);
-                var stdDev = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
-
-                // StdDev of index
-                double indexSum = 0, indexSum2 = 0;
-                for (var j = 0; j < n; j++)
-                {
-                    var val = (double)(i - j);
-                    indexSum += val;
-                    indexSum2 += val * val;
-                }
-                var indexMean = indexSum / n;
-                var indexVariance = (indexSum2 / n) - (indexMean * indexMean);
-                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
-
-                var c = stdDev != 0 ? (sma2[i] - sma1[i]) / stdDev : 0;
-                var z = indexStdDev != 0 && c != 0 ? (i - indexSma[i]) / indexStdDev * c : 0;
-
-                output[i] = sma1[i] + (z * stdDev);
-            }
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-            pool.Return(sma2Array);
-            pool.Return(indexArray);
-            pool.Return(indexSmaArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new LightLeastSquaresWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -6869,156 +4343,9 @@ internal static class MovingAverageCore
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
 
-        var length1 = (int)Math.Ceiling((double)length / 2);
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-        var indexArray = pool.Rent(input.Length);
-        var indexSmaArray = pool.Rent(input.Length);
-        var bSmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, input.Length);
-            var indexSpan = indexArray.AsSpan(0, input.Length);
-            var indexSma = indexSmaArray.AsSpan(0, input.Length);
-            var bSma = bSmaArray.AsSpan(0, input.Length);
-
-            // Create index array
-            for (var i = 0; i < input.Length; i++)
-                indexSpan[i] = i;
-
-            // Calculate SMAs
-            SimpleMovingAverage(input, sma, length);
-            SimpleMovingAverage(indexSpan, indexSma, length);
-
-            // Rolling correlation state
-            double corrSumX = 0, corrSumY = 0, corrSumXY = 0, corrSumX2 = 0, corrSumY2 = 0;
-            var corrWindowX = new double[length];
-            var corrWindowY = new double[length];
-            var corrIdx = 0;
-            var corrCount = 0;
-
-            // Rolling sum for b
-            double bSum = 0;
-            var bWindow = new double[length1];
-            var bIdx = 0;
-            var bCount = 0;
-
-            // Max tracking for bSma
-            var bSmaMax = new double[length];
-            var bSmaIdx = 0;
-            var bSmaCount = 0;
-
-            double prevD = input.Length > 0 ? input[0] : 0;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var index = (double)i;
-
-                // Update rolling correlation (index vs input)
-                if (corrCount >= length)
-                {
-                    corrSumX -= corrWindowX[corrIdx];
-                    corrSumY -= corrWindowY[corrIdx];
-                    corrSumXY -= corrWindowX[corrIdx] * corrWindowY[corrIdx];
-                    corrSumX2 -= corrWindowX[corrIdx] * corrWindowX[corrIdx];
-                    corrSumY2 -= corrWindowY[corrIdx] * corrWindowY[corrIdx];
-                }
-                corrWindowX[corrIdx] = index;
-                corrWindowY[corrIdx] = currentValue;
-                corrSumX += index;
-                corrSumY += currentValue;
-                corrSumXY += index * currentValue;
-                corrSumX2 += index * index;
-                corrSumY2 += currentValue * currentValue;
-                corrIdx = (corrIdx + 1) % length;
-                if (corrCount < length) corrCount++;
-
-                // Calculate correlation
-                var n = corrCount;
-                var numerator = (n * corrSumXY) - (corrSumX * corrSumY);
-                var denomX = (n * corrSumX2) - (corrSumX * corrSumX);
-                var denomY = (n * corrSumY2) - (corrSumY * corrSumY);
-                var denominator = Math.Sqrt(denomX * denomY);
-                var corr = denominator != 0 ? numerator / denominator : 0;
-                if (double.IsNaN(corr) || double.IsInfinity(corr)) corr = 0;
-
-                // StdDev of input
-                var nStd = Math.Min(i + 1, length);
-                double inputSum = 0, inputSum2 = 0;
-                for (var j = 0; j < nStd; j++)
-                {
-                    var val = input[i - j];
-                    inputSum += val;
-                    inputSum2 += val * val;
-                }
-                var inputMean = inputSum / nStd;
-                var inputVariance = (inputSum2 / nStd) - (inputMean * inputMean);
-                var stdDev = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
-
-                // StdDev of index
-                double indexSum = 0, indexSum2 = 0;
-                for (var j = 0; j < nStd; j++)
-                {
-                    var val = (double)(i - j);
-                    indexSum += val;
-                    indexSum2 += val * val;
-                }
-                var indexMeanVal = indexSum / nStd;
-                var indexVariance = (indexSum2 / nStd) - (indexMeanVal * indexMeanVal);
-                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
-
-                var a = indexStdDev != 0 && corr != 0 ? (index - indexSma[i]) / indexStdDev * corr : 0;
-
-                var b = Math.Abs(prevD - currentValue);
-
-                // Update b rolling sum
-                if (bCount >= length1)
-                {
-                    bSum -= bWindow[bIdx];
-                }
-                bWindow[bIdx] = b;
-                bSum += b;
-                bIdx = (bIdx + 1) % length1;
-                if (bCount < length1) bCount++;
-
-                var bSmaVal = bSum / bCount;
-                bSma[i] = bSmaVal;
-
-                // Track max of bSma over length window
-                if (bSmaCount >= length)
-                {
-                    // Need to recalculate max if we removed the max
-                    bSmaMax[bSmaIdx] = bSmaVal;
-                }
-                else
-                {
-                    bSmaMax[bSmaCount] = bSmaVal;
-                }
-                bSmaIdx = (bSmaIdx + 1) % length;
-                if (bSmaCount < length) bSmaCount++;
-
-                var highest = double.MinValue;
-                for (var j = 0; j < bSmaCount; j++)
-                {
-                    if (bSmaMax[j] > highest) highest = bSmaMax[j];
-                }
-
-                var c = highest > 0 ? b / highest : 0;
-                var d = sma[i] + (a * (stdDev * c));
-                output[i] = d;
-                prevD = d != 0 ? d : currentValue;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-            pool.Return(indexArray);
-            pool.Return(indexSmaArray);
-            pool.Return(bSmaArray);
-        }
+        using var state = new Streaming.OvershootReductionMovingAverageState(length: length);
+        for (var i = 0; i < input.Length; i++)
+            output[i] = state.NextValue(input[i], true);
     }
 
     /// <summary>
@@ -7106,47 +4433,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ThreeHma(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var p = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-        var p1 = Math.Max(1, (int)Math.Ceiling((double)p / 3));
-        var p2 = Math.Max(1, (int)Math.Ceiling((double)p / 2));
-        var sqrtP = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(p)));
-
-        var wma1Array = pool.Rent(input.Length);
-        var wma2Array = pool.Rent(input.Length);
-        var wma3Array = pool.Rent(input.Length);
-        var midArray = pool.Rent(input.Length);
-
-        try
-        {
-            var wma1 = wma1Array.AsSpan(0, input.Length);
-            var wma2 = wma2Array.AsSpan(0, input.Length);
-            var wma3 = wma3Array.AsSpan(0, input.Length);
-            var mid = midArray.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, p1);
-            WeightedMovingAverage(input, wma2, p2);
-            WeightedMovingAverage(input, wma3, p);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (3 * wma1[i]) - wma2[i] - wma3[i];
-            }
-
-            WeightedMovingAverage(mid, output, sqrtP);
-        }
-        finally
-        {
-            pool.Return(wma1Array);
-            pool.Return(wma2Array);
-            pool.Return(wma3Array);
-            pool.Return(midArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -7172,44 +4461,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double lambda = 1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var armaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var arma = armaArray.AsSpan(0, close.Length);
-            TrendCore.AdaptiveAutonomousRecursiveMovingAverage(close, arma, length, lambda);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentArma = arma[i];
-                var prevArma = i > 0 ? arma[i - 1] : currentArma;
-                var currentHigh = high[i];
-                var currentLow = low[i];
-
-                if (currentArma > prevArma)
-                {
-                    output[i] = currentLow;
-                }
-                else if (currentArma < prevArma)
-                {
-                    output[i] = currentHigh;
-                }
-                else
-                {
-                    output[i] = i > 0 ? output[i - 1] : close[i];
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(armaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, lambda);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Stop;
     }
 
     /// <summary>
@@ -7217,52 +4471,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double multiplier = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            var trend = 1;
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentClose = close[i];
-                var currentAtr = atr[i] * multiplier;
-                var prevStop = i > 0 ? output[i - 1] : currentClose;
-
-                if (trend == 1)
-                {
-                    var newStop = currentClose - currentAtr;
-                    output[i] = Math.Max(newStop, prevStop);
-                    if (currentClose < output[i])
-                    {
-                        trend = -1;
-                        output[i] = currentClose + currentAtr;
-                    }
-                }
-                else
-                {
-                    var newStop = currentClose + currentAtr;
-                    output[i] = Math.Min(newStop, prevStop);
-                    if (currentClose > output[i])
-                    {
-                        trend = 1;
-                        output[i] = currentClose - currentAtr;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PoweredKaufmanWindow(length, multiplier);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Stop;
     }
 
     /// <summary>
@@ -7320,20 +4531,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WellesWilderSummation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        double sum = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            sum = sum - (sum / length) + currentValue;
-            output[i] = sum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilderSummationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -7418,34 +4618,16 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DidiIndex(ReadOnlySpan<double> input, Span<double> output, int shortLength = 3, int mediumLength = 8, int longLength = 20)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (input.Length == 0) return;
+        using var shortMean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, shortLength));
+        using var mediumMean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, mediumLength));
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortMa = pool.Rent(input.Length);
-        var mediumMa = pool.Rent(input.Length);
-        var longMa = pool.Rent(input.Length);
-
-        try
-        {
-            SimpleMovingAverage(input, shortMa.AsSpan(0, input.Length), shortLength);
-            SimpleMovingAverage(input, mediumMa.AsSpan(0, input.Length), mediumLength);
-            SimpleMovingAverage(input, longMa.AsSpan(0, input.Length), longLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var medium = mediumMa[i];
-                // Didi Index: ratio of short MA to medium MA minus ratio of long MA to medium MA
-                output[i] = medium != 0 ? (shortMa[i] / medium) - (longMa[i] / medium) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(shortMa);
-            pool.Return(mediumMa);
-            pool.Return(longMa);
+            var first = shortMean.Next(input[i], true);
+            var middle = mediumMean.Next(input[i], true);
+            // The primary Curta output is independent of the separate Longa series.
+            output[i] = middle == 0 ? 0 : first / middle;
         }
     }
 

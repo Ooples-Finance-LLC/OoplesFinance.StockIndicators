@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -74,7 +74,7 @@ public static partial class Calculations
         List<double> cviList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double cvi = 0;
+        var total = new ExactMeanAccumulator();
         for (var i = 0; i < count; i++)
         {
             if (i >= 1)
@@ -83,14 +83,15 @@ public static partial class Calculations
                 var prevValue = inputList[i - 1];
                 if (currentValue > prevValue)
                 {
-                    cvi += volumeList[i];
+                    total.Add(volumeList[i]);
                 }
                 else if (currentValue < prevValue)
                 {
-                    cvi -= volumeList[i];
+                    total.Add(volumeList[i], -1);
                 }
             }
 
+            var cvi = total.Mean(1);
             cviList.Add(cvi);
 
             var prevCvi1 = i >= 1 ? cviList[i - 1] : 0;
@@ -176,46 +177,30 @@ public static partial class Calculations
     public static StockData CalculateAccumulationDistributionLine(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14)
     {
-        var count = stockData.Count;
-        List<double> adlList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < count; i++)
+        List<double> line = new(stockData.Count), first = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var cumulative = new MoneyFlowAccumulationWindow();
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var firstAverage = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
+        for (var i = 0; i < stockData.Count; i++)
         {
-            var currentLow = lowList[i];
-            var currentHigh = highList[i];
-            var currentClose = inputList[i];
-            var currentVolume = volumeList[i];
-            var moneyFlowMultiplier = currentHigh - currentLow != 0 ?
-                (currentClose - currentLow - (currentHigh - currentClose)) / (currentHigh - currentLow) : 0;
-            var moneyFlowVolume = moneyFlowMultiplier * currentVolume;
-
-            var prevAdl = i >= 1 ? adlList[i - 1] : 0;
-            var adl = prevAdl + moneyFlowVolume;
-            adlList.Add(adl);
+            var value = cumulative.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            line.Add(value.Publish());
+            if (standard)
+            {
+                var mean = firstAverage!.Next(value, true);
+                first.Add(mean.Publish());
+            }
         }
-
-        var adlSignalList = GetMovingAverageList(stockData, maType, length, adlList);
-        for (var i = 0; i < count; i++)
+        if (!standard)
         {
-            var adl = adlList[i];
-            var prevAdl = i >= 1 ? adlList[i - 1] : 0;
-            var adlSignal = adlSignalList[i];
-            var prevAdlSignal = i >= 1 ? adlSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(adl - adlSignal, prevAdl - prevAdlSignal);
-            signalsList?.Add(signal);
+            first = GetMovingAverageList(stockData, maType, length, line);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Adl", adlList },
-            { "AdlSignal", adlSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(adlList);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(line[i] - first[i], i == 0 ? 0 : line[i - 1] - first[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Adl", line }, { "AdlSignal", first } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line);
         stockData.IndicatorName = IndicatorName.AccumulationDistributionLine;
-
         return stockData;
     }
 

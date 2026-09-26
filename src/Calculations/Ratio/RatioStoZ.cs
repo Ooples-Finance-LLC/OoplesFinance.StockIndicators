@@ -13,48 +13,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUpsidePotentialRatio(this StockData stockData, int length = 30, double bmk = 0.05)
     {
-        List<double> retList = new(stockData.Count);
-        List<double> upsidePotentialList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double barMin = 60 * 24;
-        double minPerYr = 60 * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        var ratio = (double)1 / length;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TargetReturnWindow(length, bmk, true);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.Add(ret);
-
-            double downSide = 0, upSide = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var iValue = i >= j ? retList[i - j] : 0;
-                downSide += iValue < bench ? Pow(iValue - bench, 2) * ratio : 0;
-                upSide += iValue > bench ? (iValue - bench) * ratio : 0;
-            }
-
-            var prevUpsidePotential = GetLastOrDefault(upsidePotentialList);
-            var upsidePotential = downSide > 0 ? upSide / Sqrt(downSide) : 0;
-            upsidePotentialList.Add(upsidePotential);
-
-            var signal = GetCompareSignal(upsidePotential - 5, prevUpsidePotential - 5);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 5, previous - 5));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Upr", upsidePotentialList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(upsidePotentialList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Upr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.UpsidePotentialRatio;
-
         return stockData;
     }
 
@@ -123,40 +94,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTreynorRatio(this StockData stockData, int length = 30, double beta = 1, double bmk = 0.02)
     {
-        List<double> treynorList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum retSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double barMin = 60 * 24, minPerYr = 60 * 24 * 30 * 12, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TargetReturnWindow(length, bmk, false, beta);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.Add(ret);
-            retSum.Add(ret);
-
-            var retSma = retSum.Average(length);
-            var prevTreynor = GetLastOrDefault(treynorList);
-            var treynor = beta != 0 ? (retSma - bench) / beta : 0;
-            treynorList.Add(treynor);
-
-            var signal = GetCompareSignal(treynor - 2, prevTreynor - 2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tr", treynorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(treynorList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TreynorRatio;
-
         return stockData;
     }
 
@@ -173,61 +123,19 @@ public static partial class Calculations
     public static StockData CalculateSortinoRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
-        List<double> sortinoList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<double> deviationSquaredList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double minPerYr = 60 * 24 * 30 * 12, barMin = 60 * 24, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new SortinoWindow(maType, length, bmk);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 - bench : 0;
-            retList.Add(ret);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ret = retList[i];
-            var retSma = retSmaList[i];
-            var currentDeviation = Math.Min(ret - retSma, 0);
-
-            var deviationSquared = Pow(currentDeviation, 2);
-            deviationSquaredList.Add(deviationSquared);
-        }
-
-        // The downside deviation is exactly 0 when no return in the window falls below the mean. A running
-        // SMA left a residue near 1e-19 there, and the ratio divided by its root came out near 1e7.
-        var divisionOfSumList = maType == MovingAvgType.SimpleMovingAverage
-            ? GetExactWindowAverageList(deviationSquaredList, length)
-            : GetMovingAverageList(stockData, maType, length, deviationSquaredList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var divisionOfSum = divisionOfSumList[i];
-            var stdDeviation = Sqrt(divisionOfSum);
-            var retSma = retSmaList[i];
-
-            var prevSortino = GetLastOrDefault(sortinoList);
-            var sortino = stdDeviation != 0 ? retSma / stdDeviation : 0;
-            sortinoList.Add(sortino);
-
-            var signal = GetCompareSignal(sortino - 2, prevSortino - 2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sr", sortinoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sortinoList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.SortinoRatio;
-
         return stockData;
     }
 
@@ -244,46 +152,19 @@ public static partial class Calculations
     public static StockData CalculateSharpeRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
-        List<double> sharpeList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double minPerYr = 60 * 24 * 30 * 12, barMin = 60 * 24, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ReturnScoreWindow(maType, length, bmk, false);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 - bench : 0;
-            retList.Add(ret);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
-        stockData.SetCustomValues(retList);
-        var stdDevList = GetStandardDeviationList(retList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdDeviation = stdDevList[i];
-            var retSma = retSmaList[i];
-
-            var prevSharpe = GetLastOrDefault(sharpeList);
-            var sharpe = stdDeviation != 0 ? retSma / stdDeviation : 0;
-            sharpeList.Add(sharpe);
-
-            var signal = GetCompareSignal(sharpe - 2, prevSharpe - 2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sr", sharpeList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sharpeList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.SharpeRatio;
-
         return stockData;
     }
 
@@ -297,66 +178,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShinoharaIntensityRatio(this StockData stockData, int length = 14)
     {
-        List<double> tempOpenList = new(stockData.Count);
-        List<double> tempLowList = new(stockData.Count);
-        List<double> tempHighList = new(stockData.Count);
-        List<double> prevCloseList = new(stockData.Count);
-        List<double> ratioAList = new(stockData.Count);
-        List<double> ratioBList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum highSumWindow = new();
-        RollingSum lowSumWindow = new();
-        RollingSum openSumWindow = new();
-        RollingSum prevCloseSumWindow = new();
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
+        List<double> ratioA = new(stockData.Count), ratioB = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ShinoharaWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var high = highList[i];
-            tempHighList.Add(high);
-            highSumWindow.Add(high);
-
-            var low = lowList[i];
-            tempLowList.Add(low);
-            lowSumWindow.Add(low);
-
-            var open = openList[i];
-            tempOpenList.Add(open);
-            openSumWindow.Add(open);
-
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            prevCloseList.Add(prevClose);
-            prevCloseSumWindow.Add(prevClose);
-
-            var highSum = highSumWindow.Sum(length);
-            var lowSum = lowSumWindow.Sum(length);
-            var openSum = openSumWindow.Sum(length);
-            var prevCloseSum = prevCloseSumWindow.Sum(length);
-            var bullA = highSum - openSum;
-            var bearA = openSum - lowSum;
-            var bullB = highSum - prevCloseSum;
-            var bearB = prevCloseSum - lowSum;
-
-            var prevRatioA = GetLastOrDefault(ratioAList);
-            var ratioA = bearA != 0 ? bullA / bearA * 100 : 0;
-            ratioAList.Add(ratioA);
-
-            var prevRatioB = GetLastOrDefault(ratioBList);
-            var ratioB = bearB != 0 ? bullB / bearB * 100 : 0;
-            ratioBList.Add(ratioB);
-
-            var signal = GetCompareSignal(ratioA - ratioB, prevRatioA - prevRatioB);
-            signalsList?.Add(signal);
+            var (a, b) = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            var previousA = i == 0 ? 0 : ratioA[i - 1]; var previousB = i == 0 ? 0 : ratioB[i - 1];
+            ratioA.Add(a); ratioB.Add(b); signals?.Add(GetCompareSignal(a - b, previousA - previousB));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "ARatio", ratioAList },
-            { "BRatio", ratioBList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "ARatio", ratioA }, { "BRatio", ratioB } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.ShinoharaIntensityRatio;
-
         return stockData;
     }
 }

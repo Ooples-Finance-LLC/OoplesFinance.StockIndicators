@@ -18,23 +18,24 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var stdDeviationList = GetStandardDeviationList(inputList, length);
-        var regressionList = CalculateLinearRegression(stockData, length).ChainedValues;
+        List<double> regressionList = new(stockData.Count);
+        using var channel = new ExactRegressionChannelWindow(length, stdDevMult);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var middleBand = regressionList[i];
+            var bands = channel.Next(inputList[i], true);
+            var middleBand = bands.Middle;
+            regressionList.Add(middleBand);
             var currentValue = inputList[i];
-            var currentStdDev = stdDeviationList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? regressionList[i - 1] : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (currentStdDev * stdDevMult);
+            var upperBand = bands.Upper;
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (currentStdDev * stdDevMult);
+            var lowerBand = bands.Lower;
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand, prevUpperBand, lowerBand, prevLowerBand);
@@ -357,7 +358,7 @@ public static partial class Calculations
         {
             var diffMa = diffMaList[i];
             var basis = basisList[i];
-            var dev = 2 * diffMa;
+            var dev = 2 * Math.Max(0, diffMa);
 
             var upper = basis + dev;
             upperList.Add(upper);
@@ -698,6 +699,7 @@ public static partial class Calculations
             yomSquaredList.Add(yomSquared);
         }
 
+        var deviations = maType == MovingAvgType.SimpleMovingAverage ? GetStandardDeviationList(yomList, length2) : null;
         var avyomList = GetMovingAverageList(stockData, maType, length2, yomList);
         var yomSquaredSmaList = GetMovingAverageList(stockData, maType, length2, yomSquaredList);
         for (var i = 0; i < stockData.Count; i++)
@@ -706,7 +708,7 @@ public static partial class Calculations
             var avyom = avyomList[i];
             var yomSquaredSma = yomSquaredSmaList[i];
 
-            var varyom = yomSquaredSma - (avyom * avyom);
+            var varyom = deviations is not null ? deviations[i] * deviations[i] : yomSquaredSma - (avyom * avyom);
             varyomList.Add(varyom);
 
             var som = prevVaryom >= 0 ? Sqrt(prevVaryom) : 0;
@@ -865,7 +867,7 @@ public static partial class Calculations
             absDiffList.Add(absDiff);
 
             absDiffSum += absDiff;
-            var e = i != 0 ? absDiffSum / i : 0;
+            var e = absDiffSum / (i + 1);
             var prevA = GetLastOrDefault(aList);
             var a = ts + e;
             aList.Add(a);

@@ -28,6 +28,7 @@ public static partial class Calculations
         var highMaList = GetMovingAverageList(stockData, maType, length, highList);
         var lowMaList = GetMovingAverageList(stockData, maType, length, lowList);
 
+        double maxLow = 0, minHigh = 0;
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -38,36 +39,34 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var highMa = highMaList[i];
             var lowMa = lowMaList[i];
-            var maxLow = i >= 1 ? prevLow : low;
-            var minHigh = i >= 1 ? prevHigh : high;
+            if (i == 0) { maxLow = low; minHigh = high; }
             var prevNextTrend = GetLastOrDefault(nextTrendList);
             var prevTrend = GetLastOrDefault(trendList);
-            var prevUp = GetLastOrDefault(upList);
-            var prevDown = GetLastOrDefault(downList);
+            var prevUp = i == 0 ? low : upList[i - 1];
+            var prevDown = i == 0 ? high : downList[i - 1];
             var atr = currentAvgTrueRange / 2;
             var dev = length * atr;
 
-            double trend = 0, nextTrend = 0;
+            var trend = prevTrend;
+            var nextTrend = prevNextTrend;
             if (prevNextTrend == 1)
             {
                 maxLow = Math.Max(low, maxLow);
-
-                if (highMa < maxLow && currentValue < (prevLow != 0 ? prevLow : low))
+                if (highMa < maxLow && currentValue < (i > 0 ? prevLow : low))
                 {
                     trend = 1;
                     nextTrend = 0;
                     minHigh = high;
                 }
-                else
+            }
+            else
+            {
+                minHigh = Math.Min(high, minHigh);
+                if (lowMa > minHigh && currentValue > (i > 0 ? prevHigh : high))
                 {
-                    minHigh = Math.Min(high, minHigh);
-
-                    if (lowMa > minHigh && currentValue > (prevHigh != 0 ? prevHigh : high))
-                    {
-                        trend = 0;
-                        nextTrend = 1;
-                        maxLow = low;
-                    }
+                    trend = 0;
+                    nextTrend = 1;
+                    maxLow = low;
                 }
             }
             trendList.Add(trend);
@@ -157,8 +156,9 @@ public static partial class Calculations
         }
 
         var dtrAvgList = GetMovingAverageList(stockData, maType, length, dtrList);
-        var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-        var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
+        // Direction is discontinuous at equal means. Preserve sums through division.
+        var smaSlowList = Streaming.SpreadAverage.Calculate(inputList, maType, slowLength);
+        var smaFastList = Streaming.SpreadAverage.Calculate(inputList, maType, fastLength);
         // The deviation of the true-range window about its own mean; the band below is avg + k * dev, so
         // this is the quantity a band at k sigma is defined against. See #190.
         var dtrStdList = GetStandardDeviationList(dtrList, length);
@@ -268,17 +268,17 @@ public static partial class Calculations
             var dev = rangeStdDevList[i];
             var prevPrice = i >= 1 ? priceList[i - 1] : 0;
 
-            var val = (price + ((-1) * trend)) * (avg + (stdDev1 * dev));
+            var val = price - trend * (avg + (stdDev1 * dev));
             valList.Add(val);
 
-            var val1 = (price + ((-1) * trend)) * (avg + (stdDev2 * dev));
+            var val1 = price - trend * (avg + (stdDev2 * dev));
             val1List.Add(val1);
 
-            var val2 = (price + ((-1) * trend)) * (avg + (stdDev3 * dev));
+            var val2 = price - trend * (avg + (stdDev3 * dev));
             val2List.Add(val2);
 
             var prevVal3 = GetLastOrDefault(val3List);
-            var val3 = (price + ((-1) * trend)) * (avg + (stdDev4 * dev));
+            var val3 = price - trend * (avg + (stdDev4 * dev));
             val3List.Add(val3);
 
             var signal = GetCompareSignal(price - val3, prevPrice - prevVal3);

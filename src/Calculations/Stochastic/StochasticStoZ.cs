@@ -27,12 +27,25 @@ public static partial class Calculations
             var highestHigh = highestList[i];
             var lowestLow = lowestList[i];
 
-            var fastK = highestHigh - lowestLow != 0 ? MinOrMax((currentValue - lowestLow) / (highestHigh - lowestLow) * 100, 100, 0) : 0;
+            var fastK = ClampedRangePosition.Percent(currentValue, lowestLow, highestHigh);
             fastKList.Add(fastK);
         }
 
-        var fastDList = GetMovingAverageList(stockData, maType, smoothLength1, fastKList);
-        var slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        List<double> fastDList;
+        List<double> slowDList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var first = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength1));
+            using var second = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength2));
+            fastDList = fastKList.Select(value => first.Next(value, true)).ToList();
+            slowDList = fastDList.Select(value => second.Next(value, true)).ToList();
+        }
+        else
+        {
+            // Keep both stages explicit: generated component constructors derive their arity here.
+            fastDList = GetMovingAverageList(stockData, maType, smoothLength1, fastKList);
+            slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var slowK = fastDList[i];
@@ -117,8 +130,6 @@ public static partial class Calculations
     public static StockData CalculateTurboStochasticsSlow(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 10, int turboLength = 2)
     {
-        List<double> tssDList = new(stockData.Count);
-        List<double> tssKList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var turbo = turboLength < 0 ? Math.Max(turboLength, length2 * -1) : turboLength > 0 ? Math.Min(turboLength, length2) : 0;
@@ -131,12 +142,12 @@ public static partial class Calculations
         stockData.SetCustomValues(slowDList);
         var tsfDList = CalculateLinearRegression(stockData, length2 + turbo).ChainedValues;
 
-        for (var i = 0; i < tssDList.Count; i++)
+        for (var i = 0; i < stockData.Count; i++)
         {
-            var tssD = tssDList[i];
-            var tssK = tssKList[i];
-            var prevTssk = i >= 1 ? tssKList[i - 1] : 0;
-            var prevTssd = i >= 1 ? tssDList[i - 1] : 0;
+            var tssD = tsfDList[i];
+            var tssK = tsfKList[i];
+            var prevTssk = i >= 1 ? tsfKList[i - 1] : 0;
+            var prevTssd = i >= 1 ? tsfDList[i - 1] : 0;
 
             var signal = GetRsiSignal(tssK - tssD, prevTssk - prevTssd, tssK, prevTssk, 70, 30);
             signalsList?.Add(signal);
@@ -168,61 +179,37 @@ public static partial class Calculations
     public static StockData CalculateStochasticMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
     {
-        List<double> dList = new(stockData.Count);
-        List<double> hlList = new(stockData.Count);
-        List<double> smiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count), signal = new(stockData.Count);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var median = (highestHigh + lowestLow) / 2;
-
-            var diff = currentValue - median;
-            dList.Add(diff);
-
-            var highLow = highestHigh - lowestLow;
-            hlList.Add(highLow);
+            using var window = new StochasticMomentumWindow(maType, length1, length2, smoothLength1, smoothLength2);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = window.Next(input[i], stockData.HighPrices[i], stockData.LowPrices[i], true);
+                line.Add(value.Line); signal.Add(value.Signal);
+            }
         }
-
-        var dEmaList = GetMovingAverageList(stockData, maType, length2, dList);
-        var hlEmaList = GetMovingAverageList(stockData, maType, length2, hlList);
-        var dSmoothEmaList = GetMovingAverageList(stockData, maType, smoothLength1, dEmaList);
-        var hlSmoothEmaList = GetMovingAverageList(stockData, maType, smoothLength1, hlEmaList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var hlSmoothEma = hlSmoothEmaList[i];
-            var dSmoothEma = dSmoothEmaList[i];
-            var hl2 = hlSmoothEma / 2;
-
-            var smi = hl2 != 0 ? MinOrMax(100 * dSmoothEma / hl2, 100, -100) : 0;
-            smiList.Add(smi);
+            List<double> distance = new(stockData.Count), range = new(stockData.Count);
+            using var high = new Streaming.RollingWindowMax(Math.Max(1, length1)); using var low = new Streaming.RollingWindowMin(Math.Max(1, length1));
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = StochasticMomentumWindow.Components(input[i], high.Add(stockData.HighPrices[i], out _), low.Add(stockData.LowPrices[i], out _));
+                distance.Add(value.Distance.Publish()); range.Add(value.Range.Publish());
+            }
+            var firstDistance = GetMovingAverageList(stockData, maType, length2, distance);
+            var firstRange = GetMovingAverageList(stockData, maType, length2, range);
+            var secondDistance = GetMovingAverageList(stockData, maType, smoothLength1, firstDistance);
+            var secondRange = GetMovingAverageList(stockData, maType, smoothLength1, firstRange);
+            for (var i = 0; i < input.Count; i++) line.Add(StochasticMomentumWindow.Ratio(new(secondDistance[i]), new(secondRange[i])));
+            signal = GetMovingAverageList(stockData, maType, smoothLength2, line);
         }
-
-        var smiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, smiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var smi = smiList[i];
-            var smiSignal = smiSignalList[i];
-            var prevSmi = i >= 1 ? smiList[i - 1] : 0;
-            var prevSmiSignal = i >= 1 ? smiSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(smi - smiSignal, prevSmi - prevSmiSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Smi", smiList },
-            { "Signal", smiSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(smiList);
-        stockData.IndicatorName = IndicatorName.StochasticMomentumIndex;
-
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Smi", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.StochasticMomentumIndex;
         return stockData;
     }
 
@@ -282,57 +269,35 @@ public static partial class Calculations
     public static StockData CalculateStochasticCustomOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7,
         int length2 = 3, int length3 = 12)
     {
-        List<double> numList = new(stockData.Count);
-        List<double> denomList = new(stockData.Count);
-        List<double> sckList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count), signal = new(stockData.Count);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-
-            var num = currentValue - lowestLow;
-            numList.Add(num);
-
-            var denom = highestHigh - lowestLow;
-            denomList.Add(denom);
+            using var window = new StochasticCustomWindow(maType, length1, length2, length3);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = window.Next(input[i], stockData.HighPrices[i], stockData.LowPrices[i], true);
+                line.Add(value.Line); signal.Add(value.Signal);
+            }
         }
-
-        var numSmaList = GetMovingAverageList(stockData, maType, length2, numList);
-        var denomSmaList = GetMovingAverageList(stockData, maType, length2, denomList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var numSma = numSmaList[i];
-            var denomSma = denomSmaList[i];
-
-            var sck = denomSma != 0 ? MinOrMax(numSma / denomSma * 100, 100, 0) : 0;
-            sckList.Add(sck);
+            List<double> distance = new(stockData.Count), range = new(stockData.Count);
+            using var high = new Streaming.RollingWindowMax(Math.Max(1, length1)); using var low = new Streaming.RollingWindowMin(Math.Max(1, length1));
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = StochasticCustomWindow.Components(input[i], high.Add(stockData.HighPrices[i], out _), low.Add(stockData.LowPrices[i], out _));
+                distance.Add(value.Distance.Publish()); range.Add(value.Range.Publish());
+            }
+            var firstDistance = GetMovingAverageList(stockData, maType, length2, distance);
+            var firstRange = GetMovingAverageList(stockData, maType, length2, range);
+            for (var i = 0; i < input.Count; i++) line.Add(StochasticCustomWindow.Ratio(new(firstDistance[i]), new(firstRange[i])));
+            signal = GetMovingAverageList(stockData, maType, length3, line);
         }
-
-        var scdList = GetMovingAverageList(stockData, maType, length3, sckList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sck = sckList[i];
-            var scd = scdList[i];
-            var prevSck = i >= 1 ? sckList[i - 1] : 0;
-            var prevScd = i >= 1 ? scdList[i - 1] : 0;
-
-            var signal = GetRsiSignal(sck - scd, prevSck - prevScd, sck, prevSck, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sco", sckList },
-            { "Signal", scdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sckList);
-        stockData.IndicatorName = IndicatorName.StochasticCustomOscillator;
-
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetRsiSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1], line[i], i == 0 ? 0 : line[i - 1], 70, 30));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sco", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.StochasticCustomOscillator;
         return stockData;
     }
 

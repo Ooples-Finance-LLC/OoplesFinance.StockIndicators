@@ -28,8 +28,7 @@ public static partial class Calculations
                 var hh = i >= j ? highestList[i - j] : 0;
                 var ll = i >= j ? lowestList[i - j] : 0;
                 var c = i >= j ? inputList[i - j] : 0;
-                var range = hh - ll;
-                var frac = range != 0 ? (c - ll) / range : 0;
+                var frac = ExactRangePosition.Fraction(c, ll, hh);
                 var ratio = 1 / Sqrt(j + 1);
                 weightSum += frac * ratio;
                 denomSum += ratio;

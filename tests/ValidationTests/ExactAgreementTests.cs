@@ -15,11 +15,12 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 /// The review on PR #243 asked for a 1e-8 tolerance in <see cref="SignalOutputTests"/> on the grounds that
 /// two independent implementations need not produce bit-identical doubles. That is true of some arms and
 /// not others, and it was worth measuring rather than deciding: of the series that agree within 1e-8,
-/// <b>798 are bit-identical and 36 are not</b>. The 36 are listed below.
+/// the observed differences are recorded below. This list is a rounding regression ledger,
+/// not a mathematical error guarantee.
 /// </para>
 /// <para>
-/// So the exact assertions in SignalOutputTests stay exact - none of the indicators they pin is on this
-/// list - and this test is what keeps that true. A new entry means an arm has started to drift from its
+/// SignalOutputTests uses a floating route tolerance. A new entry here records a change in operation
+/// order that has started to differ from its
 /// batch within tolerance, which is worth knowing even though no ratchet would fail.
 /// </para>
 /// </remarks>
@@ -28,49 +29,45 @@ public sealed class ExactAgreementTests
     // Series that agree with their batch within 1e-8 but NOT to the last bit.
     private static readonly HashSet<string> WithinToleranceOnly = new(StringComparer.Ordinal)
     {
-        "Alma.Alma",
-        "BollingerBandsPercentB.PctB",
-        "BollingerBandsWidth.BbWidth",
-        "ChandeForecastOscillator.Cfo",
-        "ChandeMomentumOscillator.Cmo",
+        // Centered population moments and compensated sums change operation order.
+        // These additional outputs were measured within the existing 1e-8 route budget.
+        "BollingerBandsWithAtrPct.LowerBand",
+        "BollingerBandsWithAtrPct.UpperBand",
+        "CloseToCloseVolatility.Ctcv",
+        "CommoditySelectionIndex.Signal",
+        "DampedSineWaveWeightedFilter.Dswwf",
+        "EhlersCommodityChannelIndexInverseFisherTransform.Eiftcci",
+        "EhlersRelativeStrengthIndexInverseFisherTransform.Eiftrsi",
+        "EhlersReverseEmaIndicatorV2.EremaTrend",
+        "EhlersSuperPassbandFilter.LowerBand",
+        "EhlersSuperPassbandFilter.UpperBand",
+        "GarmanKlassVolatility.Gcv",
+        "GarmanKlassVolatility.Signal",
+        "HirashimaSugitaRS.LowerBand2",
+        "HirashimaSugitaRS.UpperBand2",
+        "InternalBarStrengthIndicator.Signal",
+        "JrcFractalDimension.Jrcfd",
+        "JrcFractalDimension.Signal",
+        "MovingAverageSupportResistance.LowerBand",
+        "PseudoPolynomialChannel.MiddleBand",
+        "RateOfChangeBands.LowerBand",
+        "RateOfChangeBands.UpperBand",
+        "SmoothedVolatilityBands.LowerBand",
+        "SmoothedVolatilityBands.UpperBand",
+
         "Cmf.Cmf",
-        "Cmo.Cmo",
-        "CubicWma.Cwma",
         "DemarkPressureRatioV1.Dpr",
         "DemarkPressureRatioV2.Dpr",
-        "EhlersCorrelationAngleIndicator.Cai",
-        "EhlersGaussianFilter.Egf3",
-        "EhlersGaussianFilter.Egf4",
         "EhlersReverseEmaIndicatorV1.Erema",
         "EhlersReverseEmaIndicatorV2.EremaCycle",
-        "FibonacciWeightedMovingAverage.Fwma",
         "InternalBarStrengthIndicator.Ibs",
-        "LinearWeightedMovingAverageCore.Lwma",
         "MacZVwapIndicator.Histogram",
         "MacZVwapIndicator.Macz",
         "MacZVwapIndicator.Signal",
-        "MarketDirectionIndicator.Mdi",
-        "Mfi.Mfi",
-        "MfiCore.Mfi",
-        "PercentageChange.PerformanceIndex",
-        // Signal and Histogram are taken from the primary above, so they inherit its one-ulp offset:
-        // measured at 1.8e-15 absolute, 3.2e-16 relative, over the same walk this test uses.
-        "PercentageVolumeOscillator.Histogram",
-        "PercentageVolumeOscillator.Pvo",
-        "PercentageVolumeOscillator.Signal",
-        "PercentChange.PerformanceIndex",
-        // Same inheritance as the twin above: both are taken from the primary on this line.
-        "Pvo.Histogram",
-        "Pvo.Pvo",
-        "Pvo.Signal",
-        "QuadraticWma.Pwma",
-        "SineWma.Swma",
-        "SquareRootWeightedMovingAverage.Srwma",
-        "Vwma.Vwma",
     };
 
     [Fact]
-    public void EveryAgreeingSeriesIsBitIdenticalExceptTheKnownThirtySix()
+    public void EveryAgreeingSeriesIsBitIdenticalExceptTheRecordedRoundingDifferences()
     {
         var bars = Walk(150);
 
@@ -163,8 +160,8 @@ public sealed class ExactAgreementTests
         var appeared = nearOnly.Except(WithinToleranceOnly).OrderBy(x => x, StringComparer.Ordinal).ToList();
         var tightened = WithinToleranceOnly.Except(nearOnly).OrderBy(x => x, StringComparer.Ordinal).ToList();
 
-        appeared.Should().BeEmpty("these arms have started to differ from their batch in the last bits");
-        tightened.Should().BeEmpty("these are bit-identical now, so delete them from WithinToleranceOnly");
+        appeared.Should().BeEmpty("these arms have started to differ from their batch in the last bits: " + string.Join(", ", appeared));
+        tightened.Should().BeEmpty("these are bit-identical now, so delete them from WithinToleranceOnly: " + string.Join(", ", tightened));
     }
 
     private static List<Bar> Walk(int count)

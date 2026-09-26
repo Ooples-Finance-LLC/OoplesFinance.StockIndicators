@@ -1,4 +1,4 @@
-
+﻿
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -16,28 +16,34 @@ public static partial class Calculations
     public static StockData CalculatePriceMomentumOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 35,
         int length2 = 20, int signalLength = 10)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, _, _, _, _) = GetInputValuesList(stockData);
+            var stableLine = new List<double>(stockData.Count);
+            var stableSignal = new List<double>(stockData.Count);
+            var stableHistogram = new List<double>(stockData.Count);
+            var stableSignals = CreateSignalsList(stockData);
+            using var stableWindow = new PriceMomentumWindow(maType, length1, length2, signalLength, stockData.Count);
+            double previousDifference = 0;
+            foreach (var price in stableInput)
+            {
+                var next = stableWindow.Next(price, true);
+                stableLine.Add(next.Value); stableSignal.Add(next.Signal); stableHistogram.Add(next.Histogram);
+                stableSignals?.Add(GetCompareSignal(next.Histogram, previousDifference));
+                previousDifference = next.Histogram;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pmo", stableLine }, { "Signal", stableSignal } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(stableLine);
+            stockData.IndicatorName = IndicatorName.PriceMomentumOscillator;
+            return stockData;
+        }
+
         List<double> pmoList = new(stockData.Count);
-        List<double> rocMaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var sc1 = 2 / (double)length1;
-        var sc2 = 2 / (double)length2;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var roc = prevValue != 0 ? MinPastValues(i, 1, currentValue - prevValue) / prevValue * 100 : 0;
-
-            var prevRocMa1 = GetLastOrDefault(rocMaList);
-            var rocMa = prevRocMa1 + ((roc - prevRocMa1) * sc1);
-            rocMaList.Add(rocMa);
-
-            var prevPmo = GetLastOrDefault(pmoList);
-            var pmo = prevPmo + (((rocMa * 10) - prevPmo) * sc2);
-            pmoList.Add(pmo);
-        }
+        using var fixedStages = new PriceMomentumWindow(MovingAvgType.ExponentialMovingAverage, length1, length2, 1, stockData.Count);
+        foreach (var price in inputList) pmoList.Add(fixedStages.Next(price, true).Value);
 
         var pmoSignalList = GetMovingAverageList(stockData, maType, signalLength, pmoList);
         for (var i = 0; i < stockData.Count; i++)
@@ -83,11 +89,18 @@ public static partial class Calculations
             var currentPrice = inputList[i];
             var prevPrice = i >= length ? inputList[i - length] : 0;
 
-            var momentumOscillator = prevPrice != 0 ? currentPrice / prevPrice * 100 : 0;
+            var momentumOscillator = RoundedMomentumRatio.Of(currentPrice, prevPrice);
             momentumOscillatorList.Add(momentumOscillator);
         }
 
-        var emaList = GetMovingAverageList(stockData, maType, length, momentumOscillatorList);
+        var finiteInput = FiniteSignalInput.Create(momentumOscillatorList, out var finiteCount);
+        var emaList = GetMovingAverageList(stockData, maType, length, finiteInput);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(length);
+            for (var i = 0; i < finiteCount; i++) emaList[i] = mean.Next(finiteInput[i], true);
+        }
+        for (var i = finiteCount; i < emaList.Count; i++) emaList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var momentum = emaList[i];
@@ -121,6 +134,25 @@ public static partial class Calculations
     public static StockData CalculateRelativeMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length1 = 14, int length2 = 3)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            var line = new List<double>(stockData.Count); var signal = new List<double>(stockData.Count); var histogram = new List<double>(stockData.Count);
+            var events = CreateSignalsList(stockData);
+            using var window = new RelativeMomentumWindow(maType, length1, length2, stockData.Count);
+            double previous = 0, previousHistogram = 0;
+            foreach (var price in prices)
+            {
+                var next = window.Next(price, true);
+                line.Add(next.Value); signal.Add(next.Signal); histogram.Add(next.Histogram);
+                events?.Add(GetRsiSignal(next.Histogram, previousHistogram, next.Value, previous, 70, 30));
+                previous = next.Value; previousHistogram = next.Histogram;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rmi", line }, { "Signal", signal }, { "Histogram", histogram } });
+            stockData.SetSignals(events); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RelativeMomentumIndex;
+            return stockData;
+        }
+
         List<double> rsiList = new(stockData.Count);
         List<double> lossList = new(stockData.Count);
         List<double> gainList = new(stockData.Count);

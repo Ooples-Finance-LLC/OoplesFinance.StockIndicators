@@ -67,6 +67,26 @@ internal static class BuilderArmBinding
         {
             bars.SetInputSeries(new List<double>(data.ChainedValues));
         }
+        else
+        {
+            bars.InputValues = new List<double>(data.InputValues);
+        }
+
+        // A middle-only request must not evaluate unrequested ATR/bands: their range
+        // can overflow while the bounded moving average remains representable.
+        if (spec.Options is KeltnerChannelMiddleSpecOptions middle
+            && (spec.OutputKey ?? target.OutputKey) == "MiddleBand")
+            return CalculationsHelper.GetMovingAverageList(bars, middle.MaType, middle.Length);
+
+        // Typed slow cutoff is twice Length, including periods beyond the Int32 range.
+        if (spec.Options is EhlersDecyclerOscillatorV1SpecOptions decycler)
+        {
+            var laneKey = spec.OutputKey ?? target.OutputKey ?? "FastEdo";
+            if (laneKey is not ("FastEdo" or "SlowEdo")) throw DoesNotPublishKey(target.Name, laneKey);
+            var window = new DecyclerOscillatorWindow(decycler.Length, laneKey == "FastEdo" ? 1.2 : 1, laneKey == "FastEdo" ? 1 : 2);
+            var input = bars.ChainedValues.Count > 0 ? bars.ChainedValues : bars.InputValues;
+            return input.Select(value => window.Next(value, true)).ToList();
+        }
 
         var parameters = method.GetParameters();
         var map = ArgumentMaps.GetOrAdd((spec.Options.GetType(), target.Name), key => MapArguments(key.Options, target, parameters));
@@ -98,7 +118,19 @@ internal static class BuilderArmBinding
 
         // The key the caller named, else the one this arm stands for. A spec naming neither wants the
         // indicator's own series, which is where a single-output indicator publishes it.
-        var key = spec.OutputKey ?? target.OutputKey;
+        var key = spec.OutputKey ?? target.OutputKey
+            ?? OoplesFinance.StockIndicators.Indicators.GeneratedExpandedPrimary.KeyFor(spec.Options.GetType());
+        // These legacy calculations intentionally publish only named outputs. A
+        // typed streaming spec still has a default value; preserve that selection
+        // without turning the generated multi-output facade into a scalar alias.
+        if (key is null && result.CustomValuesList.Count == 0)
+            key = target.Name switch
+            {
+                IndicatorName.EhlersDominantCycleTunedBypassFilter => "V2",
+                IndicatorName.EhlersFourierSeriesAnalysis => "Wave",
+                IndicatorName.VervoortModifiedBollingerBandIndicator => "PercentB",
+                _ => null
+            };
         if (key is null)
         {
             return result.CustomValuesList;

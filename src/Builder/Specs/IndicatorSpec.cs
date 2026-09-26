@@ -1470,7 +1470,7 @@ public sealed class ChoppinessIndexSpecOptions : IIndicatorSpecOptions
 
     public ChoppinessIndexSpecOptions(int length, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Math.Max(2, length);
         MaType = maType;
     }
 
@@ -1702,13 +1702,20 @@ public sealed class MacdHistogramSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class ParabolicSarSpecOptions : IIndicatorSpecOptions
 {
-    public ParabolicSarSpecOptions(int length)
+    public ParabolicSarSpecOptions(int length = 14, double start = .02, double increment = .02, double maximum = .2)
     {
+        if (double.IsNaN(start) || double.IsInfinity(start) || start < 0) throw new ArgumentOutOfRangeException(nameof(start));
+        if (double.IsNaN(increment) || double.IsInfinity(increment) || increment < 0) throw new ArgumentOutOfRangeException(nameof(increment));
+        if (double.IsNaN(maximum) || double.IsInfinity(maximum) || maximum < start) throw new ArgumentOutOfRangeException(nameof(maximum));
         Length = Math.Max(1, length);
+        Start = start; Increment = increment; Maximum = maximum;
     }
 
     [Obsolete("Has no effect: ParabolicSAR has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
+    public double Start { get; }
+    public double Increment { get; }
+    public double Maximum { get; }
 }
 
 /// <summary>
@@ -2854,13 +2861,16 @@ public sealed class AccumulativeSwingIndexSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class ZigZagSpecOptions : IIndicatorSpecOptions
 {
-    public ZigZagSpecOptions(int length)
+    public ZigZagSpecOptions(int length, double deviation = 5)
     {
+        if (double.IsNaN(deviation) || double.IsInfinity(deviation) || deviation < 0) throw new ArgumentOutOfRangeException(nameof(deviation));
         Length = Math.Max(1, length);
+        Deviation = deviation;
     }
 
     [Obsolete("Has no effect: ZigZag takes a deviation percentage and has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
+    public double Deviation { get; }
 }
 
 /// <summary>
@@ -5009,12 +5019,16 @@ public sealed class VolumeAccumulationOscillatorSpecOptions : IIndicatorSpecOpti
 /// </summary>
 public sealed class KasePeakOscillatorV1SpecOptions : IIndicatorSpecOptions
 {
-    public KasePeakOscillatorV1SpecOptions(int length)
+    public KasePeakOscillatorV1SpecOptions(int length) : this(length, 3) { }
+
+    public KasePeakOscillatorV1SpecOptions(int length, int smoothLength = 3)
     {
         Length = Math.Max(1, length);
+        SmoothLength = Math.Max(1, smoothLength);
     }
 
     public int Length { get; }
+    public int SmoothLength { get; }
 }
 
 /// <summary>
@@ -5348,10 +5362,16 @@ public sealed class EhlersUniversalOscillatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class EhlersRecursiveMedianOscillatorSpecOptions : IIndicatorSpecOptions
 {
-    public EhlersRecursiveMedianOscillatorSpecOptions(int length)
+    public EhlersRecursiveMedianOscillatorSpecOptions(int length) : this(5, 12, 30)
     {
         Length = Math.Max(1, length);
     }
+
+    public EhlersRecursiveMedianOscillatorSpecOptions(int length1 = 5, int length2 = 12, int length3 = 30)
+    { Length1 = Math.Max(1, length1); Length2 = Math.Max(1, length2); Length3 = Math.Max(1, length3); }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
 
     [Obsolete("Has no effect: EhlersRecursiveMedianOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
@@ -5401,13 +5421,21 @@ public sealed class EhlersAdaptiveCenterOfGravityOscillatorSpecOptions : IIndica
 /// </summary>
 public sealed class VervoortSmoothedOscillatorSpecOptions : IIndicatorSpecOptions
 {
-    public VervoortSmoothedOscillatorSpecOptions(int length)
+    public VervoortSmoothedOscillatorSpecOptions(int length, int length1 = 18, int length2 = 30, int length3 = 2, int smoothLength = 3, double stdDevMult = 2)
     {
+        if (double.IsNaN(stdDevMult) || double.IsInfinity(stdDevMult) || stdDevMult < 0) throw new ArgumentOutOfRangeException(nameof(stdDevMult));
         Length = Math.Max(1, length);
+        Length1 = Math.Max(1, length1); Length2 = Math.Max(1, length2); Length3 = Math.Max(1, length3);
+        SmoothLength = Math.Max(1, smoothLength); StdDevMult = stdDevMult;
     }
 
     [Obsolete("Has no effect: VervoortSmoothedOscillator has no parameter this option could set. It will be removed in the next major version.")]
     public int Length { get; }
+    public int Length1 { get; }
+    public int Length2 { get; }
+    public int Length3 { get; }
+    public int SmoothLength { get; }
+    public double StdDevMult { get; }
 }
 
 /// <summary>
@@ -6488,12 +6516,16 @@ public sealed class MoveTrackerSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class MultiLevelIndicatorSpecOptions : IIndicatorSpecOptions
 {
-    public MultiLevelIndicatorSpecOptions(int length)
+    public MultiLevelIndicatorSpecOptions(int length) : this(length, 10000) { }
+
+    public MultiLevelIndicatorSpecOptions(int length, double factor)
     {
         Length = Math.Max(1, length);
+        Factor = factor;
     }
 
     public int Length { get; }
+    public double Factor { get; }
 }
 
 /// <summary>
@@ -7027,7 +7059,7 @@ public sealed class EhlersVariableIndexDynamicAverageSpecOptions : IIndicatorSpe
 /// </summary>
 public sealed class FallingRisingFilterSpecOptions : IIndicatorSpecOptions
 {
-    public FallingRisingFilterSpecOptions(int length) { Length = Math.Max(1, length); }
+    public FallingRisingFilterSpecOptions(int length) { Length = Math.Max(2, length); }
     public int Length { get; }
 }
 
@@ -7229,7 +7261,7 @@ public sealed class McNichollMovingAverageSpecOptions : IIndicatorSpecOptions
 
     public McNichollMovingAverageSpecOptions(int length, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Math.Max(2, length);
         MaType = maType;
     }
 
@@ -7569,7 +7601,7 @@ public sealed class SettingLessTrendStepFilteringSpecOptions : IIndicatorSpecOpt
 /// </summary>
 public sealed class ShapeshiftingMovingAverageSpecOptions : IIndicatorSpecOptions
 {
-    public ShapeshiftingMovingAverageSpecOptions(int length) { Length = Math.Max(1, length); }
+    public ShapeshiftingMovingAverageSpecOptions(int length) { Length = Math.Max(2, length); }
     public int Length { get; }
 }
 
@@ -8275,7 +8307,7 @@ public sealed class OscarIndicatorSpecOptions : IIndicatorSpecOptions
 /// </summary>
 public sealed class NarrowBandpassFilterSpecOptions : IIndicatorSpecOptions
 {
-    public NarrowBandpassFilterSpecOptions(int length = 50) { Length = Math.Max(1, length); }
+    public NarrowBandpassFilterSpecOptions(int length = 50) { Length = Math.Max(2, length); }
     public int Length { get; }
 }
 
@@ -9687,7 +9719,7 @@ public sealed class EhlersPhaseCalculationSpecOptions : IIndicatorSpecOptions
 
     public EhlersPhaseCalculationSpecOptions(int length, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Math.Max(2, length);
         MaType = maType;
     }
 
@@ -12726,7 +12758,7 @@ public sealed class GopalakrishnanRangeIndexSpecOptions : IIndicatorSpecOptions
 
     public GopalakrishnanRangeIndexSpecOptions(int length, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Math.Max(2, length);
         MaType = maType;
     }
 
@@ -13541,7 +13573,7 @@ public sealed class PhaseChangeIndexSpecOptions : IIndicatorSpecOptions
 
     public PhaseChangeIndexSpecOptions(int length, int smoothLength, MovingAvgType maType)
     {
-        Length = Math.Max(1, length);
+        Length = Math.Max(2, length);
         SmoothLength = Math.Max(1, smoothLength);
         MaType = maType;
     }
@@ -14245,7 +14277,7 @@ public sealed class TurboStochasticsFastSpecOptions : IIndicatorSpecOptions
     {
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
-        TurboLength = Math.Max(1, turboLength);
+        TurboLength = Math.Max(-Length2, Math.Min(Length2, turboLength));
         MaType = maType;
     }
 
@@ -14266,7 +14298,7 @@ public sealed class TurboStochasticsSlowSpecOptions : IIndicatorSpecOptions
     {
         Length1 = Math.Max(1, length1);
         Length2 = Math.Max(1, length2);
-        TurboLength = Math.Max(1, turboLength);
+        TurboLength = Math.Max(-Length2, Math.Min(Length2, turboLength));
         MaType = maType;
     }
 

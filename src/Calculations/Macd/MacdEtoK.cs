@@ -19,12 +19,13 @@ public static partial class Calculations
         List<double> macdSignalLineList = new(stockData.Count);
         List<double> macdHistogramList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum macdSum = new();
+        using var macdMean = new Streaming.RoundedPartialMeanSmoother(Math.Max(1, Math.Min(signalLength, stockData.Count)));
         var (inputList, highList, lowList, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        inputList = RoundedImpulseOscillator.Input(stockData, inputList);
 
         var typicalPriceZeroLagEmaList = GetMovingAverageList(stockData, MovingAvgType.ZeroLagExponentialMovingAverage, length, inputList);
-        var wellesWilderHighMovingAvgList = GetMovingAverageList(stockData, maType, length, highList);
-        var wellesWilderLowMovingAvgList = GetMovingAverageList(stockData, maType, length, lowList);
+        var wellesWilderHighMovingAvgList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(highList, length) : GetMovingAverageList(stockData, maType, length, highList);
+        var wellesWilderLowMovingAvgList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(lowList, length) : GetMovingAverageList(stockData, maType, length, lowList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -32,11 +33,10 @@ public static partial class Calculations
             var lo = wellesWilderLowMovingAvgList[i];
             var mi = typicalPriceZeroLagEmaList[i];
 
-            var macd = mi > hi ? mi - hi : mi < lo ? mi - lo : 0;
+            var macd = RoundedImpulseOscillator.Line(mi, hi, lo, false);
             macdList.Add(macd);
-            macdSum.Add(macd);
 
-            var macdSignalLine = macdSum.Average(signalLength);
+            var macdSignalLine = macdMean.Next(macd, true);
             macdSignalLineList.Add(macdSignalLine);
 
             var prevMacdHistogram = i >= 1 ? macdHistogramList[i - 1] : 0;
@@ -133,7 +133,9 @@ public static partial class Calculations
             macdList.Add(macd);
         }
 
-        var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, macdList);
+        var finiteInput = FiniteSignalInput.Create(macdList, out var finiteCount);
+        var macdSignalLineList = GetMovingAverageList(stockData, maType, length3, finiteInput);
+        for (var i = finiteCount; i < macdSignalLineList.Count; i++) macdSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macd = macdList[i];

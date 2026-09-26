@@ -24,60 +24,8 @@ internal static class TrendCore
             return;
         }
 
-        var isLong = true;
-        var af = afStart;
-        var ep = high[0];
-        var sar = low[0];
-
-        output[0] = sar;
-
-        for (var i = 1; i < high.Length; i++)
-        {
-            sar = sar + af * (ep - sar);
-
-            if (isLong)
-            {
-                if (high[i] > ep)
-                {
-                    ep = high[i];
-                    af = Math.Min(af + afStep, afMax);
-                }
-
-                if (low[i] < sar)
-                {
-                    isLong = false;
-                    sar = ep;
-                    ep = low[i];
-                    af = afStart;
-                }
-                else
-                {
-                    sar = Math.Min(sar, Math.Min(low[i], i > 0 ? low[i - 1] : low[i]));
-                }
-            }
-            else
-            {
-                if (low[i] < ep)
-                {
-                    ep = low[i];
-                    af = Math.Min(af + afStep, afMax);
-                }
-
-                if (high[i] > sar)
-                {
-                    isLong = true;
-                    sar = ep;
-                    ep = high[i];
-                    af = afStart;
-                }
-                else
-                {
-                    sar = Math.Max(sar, Math.Max(high[i], i > 0 ? high[i - 1] : high[i]));
-                }
-            }
-
-            output[i] = sar;
-        }
+        var kernel = new Streaming.ParabolicSarKernel(afStart, afStep, afMax);
+        for (var i = 0; i < high.Length; i++) output[i] = kernel.Next(high[i], low[i], true);
     }
 
     /// <summary>
@@ -178,7 +126,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -238,31 +186,8 @@ internal static class TrendCore
     /// Computes Average Day Range.
     /// </summary>
     internal static void AverageDayRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
-    {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        => VolatilityCore.AverageDayRange(high, low, output, length);
 
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(range, output, length);
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-        }
-    }
 
     /// <summary>
     /// Computes Typical Price.
@@ -276,7 +201,7 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (high[i] + low[i] + close[i]) / 3;
+            output[i] = PriceMean.Of(high[i], low[i], close[i]);
         }
     }
 
@@ -292,7 +217,7 @@ internal static class TrendCore
 
         for (var i = 0; i < high.Length; i++)
         {
-            output[i] = (high[i] + low[i]) / 2;
+            output[i] = PriceMean.Of(high[i], low[i]);
         }
     }
 
@@ -308,7 +233,7 @@ internal static class TrendCore
 
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (high[i] + low[i] + (2 * close[i])) / 4;
+            output[i] = PriceMean.Of(high[i], low[i], close[i], close[i]);
         }
     }
 
@@ -317,23 +242,7 @@ internal static class TrendCore
     /// </summary>
     internal static void PercentageChange(ReadOnlySpan<double> input, Span<double> output, int length = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-            }
-            else
-            {
-                var prev = input[i - length];
-                output[i] = prev != 0 ? ((input[i] - prev) / prev) * 100 : 0;
-            }
-        }
+        OscillatorCore.RateOfChange(input, output, Math.Max(1, length));
     }
 
     /// <summary>
@@ -346,27 +255,9 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // CalculateLinearRegression fits through the bars there are until the window fills, see
-        // RollingLeastSquares, so the slope is measured from the second bar rather than from the length'th.
-        // A single bar has no slope, which the zero denominator below already reports as zero.
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < input.Length; i++)
-        {
-            var count = Math.Min(length, i + 1);
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0;
-            for (var j = 0; j < count; j++)
-            {
-                var x = j;
-                var y = input[i - count + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-            }
-
-            var denominator = (count * sumX2) - (sumX * sumX);
-            output[i] = denominator != 0 ? ((count * sumXY) - (sumX * sumY)) / denominator : 0;
-        }
+            output[i] = regression.Next(input[i], isFinal: true).Slope;
     }
 
     /// <summary>
@@ -379,31 +270,8 @@ internal static class TrendCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var x = j;
-                var y = input[i - length + 1 + j];
-                sumX += x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2 += x * x;
-                sumY2 += y * y;
-            }
-
-            var numerator = (length * sumXY) - (sumX * sumY);
-            var denominator = Math.Sqrt(((length * sumX2) - (sumX * sumX)) * ((length * sumY2) - (sumY * sumY)));
-            var r = denominator != 0 ? numerator / denominator : 0;
-            output[i] = r * r;
-        }
+        using var window = new ExactRSquaredWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -412,35 +280,9 @@ internal static class TrendCore
     internal static void StandardError(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // The scatter about the fitted line, measured at each position in the window. Taken against the
-        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
-        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
-        using var regression = new RollingLeastSquares(length);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var fit = regression.Next(input[i], isFinal: true);
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumSqDiff = 0;
-            var first = i - length + 1;
-            for (var j = first; j <= i; j++)
-            {
-                var fitted = fit.Intercept + (fit.Slope * (j - first));
-                var diff = input[j] - fitted;
-                sumSqDiff += diff * diff;
-            }
-
-            output[i] = Math.Sqrt(sumSqDiff / length);
-        }
+        using var window = new ExactStandardErrorWindow(length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -497,37 +339,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VerticalHorizontalFilter(ReadOnlySpan<double> close, Span<double> output, int length = 28)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var highest = double.MinValue;
-            var lowest = double.MaxValue;
-            double sumAbsChange = 0;
-
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (close[j] > highest) highest = close[j];
-                if (close[j] < lowest) lowest = close[j];
-
-                if (j > i - length + 1)
-                {
-                    sumAbsChange += Math.Abs(close[j] - close[j - 1]);
-                }
-            }
-
-            var numerator = highest - lowest;
-            output[i] = sumAbsChange != 0 ? numerator / sumAbsChange : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VerticalHorizontalWindow(length, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -678,52 +492,11 @@ internal static class TrendCore
     /// <summary>
     /// Computes Trend Intensity Index.
     /// </summary>
-    internal static void TrendIntensityIndex(ReadOnlySpan<double> close, Span<double> output, int length = 30)
+    internal static void TrendIntensityIndex(ReadOnlySpan<double> close, Span<double> output, int fastLength = 30, int slowLength = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 50;
-                    continue;
-                }
-
-                var upCount = 0;
-                var downCount = 0;
-
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (close[j] > sma[j])
-                    {
-                        upCount++;
-                    }
-                    else if (close[j] < sma[j])
-                    {
-                        downCount++;
-                    }
-                }
-
-                var total = upCount + downCount;
-                output[i] = total != 0 ? (double)upCount / total * 100 : 50;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -741,7 +514,7 @@ internal static class TrendCore
         // different series the library already has a name for: FullTypicalPrice, and DerivedSeriesKind.Ohlc4.
         for (var i = 0; i < close.Length; i++)
         {
-            output[i] = (open[i] + close[i]) / 2;
+            output[i] = PriceMean.Of(open[i], close[i]);
         }
     }
 
@@ -823,7 +596,7 @@ internal static class TrendCore
                 if (close[j] < lowest) lowest = close[j];
             }
 
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -850,7 +623,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -997,40 +770,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VortexPositive(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tr = trArray.AsSpan(0, close.Length);
-            VolatilityCore.TrueRange(high, low, close, tr);
-
-            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
-            // full window, and it measures the first bar against a previous low and high of zero, so bar
-            // zero carries its own high and low instead of nothing.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double vmPlus = 0;
-                double sumTr = 0;
-
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    vmPlus += Math.Abs(high[j] - (j > 0 ? low[j - 1] : 0));
-                    sumTr += tr[j];
-                }
-
-                output[i] = sumTr != 0 ? vmPlus / sumTr : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(trArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -1038,40 +780,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VortexNegative(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tr = trArray.AsSpan(0, close.Length);
-            VolatilityCore.TrueRange(high, low, close, tr);
-
-            // CalculateVortexIndicator sums over however many bars have arrived rather than waiting for a
-            // full window, and it measures the first bar against a previous low and high of zero, so bar
-            // zero carries its own high and low instead of nothing.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double vmMinus = 0;
-                double sumTr = 0;
-
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    vmMinus += Math.Abs(low[j] - (j > 0 ? high[j - 1] : 0));
-                    sumTr += tr[j];
-                }
-
-                output[i] = sumTr != 0 ? vmMinus / sumTr : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(trArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>
@@ -1153,7 +864,7 @@ internal static class TrendCore
                 {
                     output[i] = 1; // Bullish
                 }
-                else if (!emaRising && !histRising)
+                else if (ema[i] < ema[i - 1] && macdHist[i] < macdHist[i - 1])
                 {
                     output[i] = -1; // Bearish
                 }
@@ -1194,7 +905,7 @@ internal static class TrendCore
                 if (low[j] < lowestLow) lowestLow = low[j];
             }
 
-            output[i] = (highestHigh + lowestLow) / 2;
+            output[i] = PriceMean.Of(highestHigh, lowestLow);
         }
     }
 
@@ -1594,19 +1305,7 @@ internal static class TrendCore
     /// </summary>
     internal static void AhrensMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = close[0];
-        var k = 2.0 / (length + 1);
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var diff = close[i] - output[i - 1];
-            output[i] = output[i - 1] + k * diff * (1 + Math.Abs(diff) / (Math.Abs(close[i]) + 1e-10));
-        }
+        MovingAverageCore.AhrensMovingAverage(close, output, length);
     }
 
     #region Batch 16 - Additional Trend Indicators
@@ -1636,7 +1335,7 @@ internal static class TrendCore
             // Senkou Span A = (Tenkan + Kijun) / 2
             for (var i = 0; i < high.Length; i++)
             {
-                output[i] = (tenkan[i] + kijun[i]) / 2;
+                output[i] = PriceMean.Of(tenkan[i], kijun[i]);
             }
         }
         finally
@@ -1669,7 +1368,7 @@ internal static class TrendCore
                 if (low[j] < lowest) lowest = low[j];
             }
 
-            output[i] = (highest + lowest) / 2;
+            output[i] = PriceMean.Of(highest, lowest);
         }
     }
 
@@ -1875,48 +1574,9 @@ internal static class TrendCore
     /// </summary>
     internal static void TripleHullMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var p = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-        var p1 = Math.Max(1, (int)Math.Ceiling((double)p / 3));
-        var p2 = Math.Max(1, (int)Math.Ceiling((double)p / 2));
-
-        var wma1Array = pool.Rent(input.Length);
-        var wma2Array = pool.Rent(input.Length);
-        var wma3Array = pool.Rent(input.Length);
-        var midArray = pool.Rent(input.Length);
-
-        try
-        {
-            var wma1 = wma1Array.AsSpan(0, input.Length);
-            var wma2 = wma2Array.AsSpan(0, input.Length);
-            var wma3 = wma3Array.AsSpan(0, input.Length);
-            var mid = midArray.AsSpan(0, input.Length);
-
-            MovingAverageCore.WeightedMovingAverage(input, wma1, p1);
-            MovingAverageCore.WeightedMovingAverage(input, wma2, p2);
-            MovingAverageCore.WeightedMovingAverage(input, wma3, p);
-
-            // mid = wma1 * 3 - wma2 - wma3
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
-            }
-
-            // Final WMA of mid
-            MovingAverageCore.WeightedMovingAverage(mid, output, p);
-        }
-        finally
-        {
-            pool.Return(wma1Array);
-            pool.Return(wma2Array);
-            pool.Return(wma3Array);
-            pool.Return(midArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1924,37 +1584,9 @@ internal static class TrendCore
     /// </summary>
     internal static void AdaptiveAutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double lambda = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sum = 0;
-        double sumSq = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            sum += currentValue;
-            sumSq += currentValue * currentValue;
-
-            if (i == 0)
-            {
-                output[i] = currentValue;
-                continue;
-            }
-
-            var n = i + 1;
-            var mean = sum / n;
-            var variance = (sumSq / n) - (mean * mean);
-            var stdDev = Math.Sqrt(Math.Max(0, variance));
-
-            var prevArma = output[i - 1];
-            var diff = Math.Abs(currentValue - prevArma);
-            var adaptiveK = diff / (diff + (lambda * stdDev) + 1e-10);
-
-            output[i] = prevArma + adaptiveK * (currentValue - prevArma);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveAutonomousWindow(length, lambda);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>

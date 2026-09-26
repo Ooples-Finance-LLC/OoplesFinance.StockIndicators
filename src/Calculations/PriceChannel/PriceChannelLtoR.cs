@@ -22,6 +22,12 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < emaList.Count; i++) emaList[i] = mean.Next(inputList[i], true);
+        }
+
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -29,14 +35,14 @@ public static partial class Calculations
             var currentEma = emaList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var upperPriceChannel = currentEma * (1 + pct);
+            var upperPriceChannel = RoundedPercentageBand.Of(currentEma, pct, 1);
             upperPriceChannelList.Add(upperPriceChannel);
 
-            var lowerPriceChannel = currentEma * (1 - pct);
+            var lowerPriceChannel = RoundedPercentageBand.Of(currentEma, pct, -1);
             lowerPriceChannelList.Add(lowerPriceChannel);
 
             var prevMidPriceChannel = GetLastOrDefault(midPriceChannelList);
-            var midPriceChannel = (upperPriceChannel + lowerPriceChannel) / 2;
+            var midPriceChannel = currentEma;
             midPriceChannelList.Add(midPriceChannel);
 
             var signal = GetCompareSignal(currentValue - midPriceChannel, prevValue - prevMidPriceChannel);
@@ -66,37 +72,23 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMovingAverageChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
-        List<double> midChannelList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var highMaList = GetMovingAverageList(stockData, maType, length, highList);
-        var lowMaList = GetMovingAverageList(stockData, maType, length, lowList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, highs, lows, _, _) = GetInputValuesList(stockData);
+        List<double> upper = new(stockData.Count), middle = new(stockData.Count), lower = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var upperChannel = highMaList[i];
-            var lowerChannel = lowMaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevMidChannel = GetLastOrDefault(midChannelList);
-            var midChannel = (upperChannel + lowerChannel) / 2;
-            midChannelList.Add(midChannel);
-
-            var signal = GetCompareSignal(currentValue - midChannel, prevValue - prevMidChannel);
-            signalsList?.Add(signal);
+            upper = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(highs), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, highs);
+            lower = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(lows), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, lows);
+            middle = upper.Select((value, i) => HighLowAverageWindow.Midpoint(value, lower[i])).ToList();
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", highMaList },
-            { "MiddleBand", midChannelList },
-            { "LowerBand", lowMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MovingAverageChannel;
-
+        else
+        {
+            using var window = new PriceAverageChannelWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(highs[i], lows[i], true); upper.Add(value.Upper); middle.Add(value.Middle); lower.Add(value.Lower); }
+        }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - middle[i], i == 0 ? 0 : input[i - 1] - middle[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MovingAverageChannel;
         return stockData;
     }
 
@@ -119,6 +111,11 @@ public static partial class Calculations
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < smaList.Count; i++) smaList[i] = mean.Next(inputList[i], true);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -126,12 +123,11 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevSma20 = i >= 1 ? smaList[i - 1] : 0;
-            var factor = currentSma20 * mult;
 
-            var upperEnvelope = currentSma20 + factor;
+            var upperEnvelope = RoundedPercentageBand.Of(currentSma20, mult, 1);
             upperEnvelopeList.Add(upperEnvelope);
 
-            var lowerEnvelope = currentSma20 - factor;
+            var lowerEnvelope = RoundedPercentageBand.Of(currentSma20, mult, -1);
             lowerEnvelopeList.Add(lowerEnvelope);
 
             var signal = GetCompareSignal(currentValue - currentSma20, prevValue - prevSma20);
@@ -876,8 +872,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(smaList, length);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
+        var (highestList, lowestList) = length <= 1 ? (smaList, smaList) : GetMaxAndMinValuesList(smaList, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -887,14 +884,13 @@ public static partial class Calculations
             var lowest = lowestList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
-            var rangeDev = highest - lowest;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (rangeDev * stdDevFactor);
+            var upperBand = RangeBandArithmetic.Band(middleBand, highest, lowest, stdDevFactor);
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (rangeDev * stdDevFactor);
+            var lowerBand = RangeBandArithmetic.Band(middleBand, highest, lowest, -stdDevFactor);
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
@@ -946,7 +942,7 @@ public static partial class Calculations
             downList.Add(down);
 
             var prevMid = GetLastOrDefault(midList);
-            var mid = (up + down) / 2;
+            var mid = PriceMean.Of(up, down);
             midList.Add(mid);
 
             var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
@@ -1113,55 +1109,23 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 10, int slowLength = 50, double mult = 1)
     {
-        List<double> sqList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum sqSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var fastMaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowMaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new MovingAverageBandWindow(maType, fastLength, slowLength, mult, external);
+        var fastAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), fastLength)?.ToList() ?? GetMovingAverageList(stockData, maType, fastLength, input) : null;
+        var slowAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), slowLength)?.ToList() ?? GetMovingAverageList(stockData, maType, slowLength, input) : null;
+        List<double> upper = new(stockData.Count), middle = new(stockData.Count), lower = new(stockData.Count), fast = new(stockData.Count), bandwidth = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var fastMa = fastMaList[i];
-            var slowMa = slowMaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
-
-            var sq = Pow(slowMa - fastMa, 2);
-            sqList.Add(sq);
-            sqSumWindow.Add(sq);
-
-            var dev = Sqrt(sqSumWindow.Average(fastLength)) * mult;
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = slowMa + dev;
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = slowMa - dev;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - fastMa, prevValue - prevFastMa, currentValue, prevValue, 
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, fastAverage?[i], slowAverage?[i]);
+            var center = value.Fast;
+            var previousCenter = i == 0 ? 0 : fast[i - 1];
+            signals?.Add(GetBollingerBandsSignal(input[i] - center, i == 0 ? 0 : input[i - 1] - previousCenter, input[i], i == 0 ? 0 : input[i - 1], value.Upper, i == 0 ? 0 : upper[i - 1], value.Lower, i == 0 ? 0 : lower[i - 1]));
+            upper.Add(value.Upper); middle.Add(value.Middle); lower.Add(value.Lower); fast.Add(value.Fast); bandwidth.Add(value.Width);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The bands are the slow average plus and minus dev, so the slow average is what they are
-            // centred on. The fast one was published here instead, and being a different quantity it has
-            // no reason to lie between them - it left the upper band on 28 bars and the lower on 111.
-            { "UpperBand", upperBandList },
-            { "MiddleBand", slowMaList },
-            { "LowerBand", lowerBandList },
-            { "FastMa", fastMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MovingAverageBands;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower }, { "FastMa", fast } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MovingAverageBands;
         return stockData;
     }
 
@@ -1178,41 +1142,22 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageSupportResistance(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 10, double factor = 2)
     {
-        List<double> topList = new(stockData.Count);
-        List<double> bottomList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var supportLevel = 1 + (factor / 100);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(factor);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> middle;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            middle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        else
         {
-            var currentSma = smaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var top = currentSma * supportLevel;
-            topList.Add(top);
-
-            var bottom = supportLevel != 0 ? currentSma / supportLevel : 0;
-            bottomList.Add(bottom);
-
-            var signal = GetCompareSignal(currentValue - currentSma, prevValue - prevSma);
-            signalsList?.Add(signal);
+            middle = new(stockData.Count); using var window = new SupportResistanceWindow(maType, length);
+            foreach (var price in input) middle.Add(window.Next(price, true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", topList },
-            { "MiddleBand", smaList },
-            { "LowerBand", bottomList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MovingAverageSupportResistance;
-
+        var upper = middle.Select(value => HighLowBandsWindow.Shift(value, factor)).ToList();
+        var lower = middle.Select(value => SupportResistanceWindow.Lower(value, factor)).ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - middle[i], i == 0 ? 0 : input[i - 1] - middle[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MovingAverageSupportResistance;
         return stockData;
     }
 
@@ -1254,11 +1199,11 @@ public static partial class Calculations
             bList.Add(b);
 
             var prevC = GetLastOrDefault(cList);
-            var c = b - prevB != 0 ? prevC + alpha : a - prevA != 0 ? 0 : prevC;
+            var c = b - prevB != 0 ? Math.Min(1, prevC + alpha) : a - prevA != 0 ? 0 : prevC;
             cList.Add(c);
 
             var prevD = GetLastOrDefault(dList);
-            var d = a - prevA != 0 ? prevD + alpha : b - prevB != 0 ? 0 : prevD;
+            var d = a - prevA != 0 ? Math.Min(1, prevD + alpha) : b - prevB != 0 ? 0 : prevD;
             dList.Add(d);
 
             var avg = (a + b) / 2;
@@ -1303,12 +1248,12 @@ public static partial class Calculations
     {
         List<double> upperBandList = new(stockData.Count);
         List<double> lowerBandList = new(stockData.Count);
-        List<double> devList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double devSum = 0;
+        var errors = new ExactCumulativeErrorBands(stdDevFactor);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1317,17 +1262,13 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
-            var dev = Math.Abs(currentValue - middleBand);
-            devList.Add(dev);
-
-            devSum += dev;
-            var maeDev = i != 0 ? devSum / i : 0;
+            var bands = errors.Next(currentValue, middleBand, true);
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (maeDev * stdDevFactor);
+            var upperBand = bands.Upper;
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (maeDev * stdDevFactor);
+            var lowerBand = bands.Lower;
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
@@ -1365,8 +1306,11 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = GetStandardDeviationList(inputList, length);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length)
+            : GetMovingAverageList(stockData, maType, length, inputList);
+        var devList = new List<double>(stockData.Count);
+        using var deviation = new ExactMeanAbsoluteDeviationWindow(length);
+        for (var i = 0; i < stockData.Count; i++) devList.Add(deviation.Next(inputList[i], true));
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1377,11 +1321,11 @@ public static partial class Calculations
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
             var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (currentStdDeviation * stdDevFactor);
+            var upperBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, stdDevFactor);
             upperBandList.Add(upperBand);
 
             var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (currentStdDeviation * stdDevFactor);
+            var lowerBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, -stdDevFactor);
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
@@ -1415,6 +1359,7 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageDisplacedEnvelope(this StockData stockData, 
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 9, int length2 = 13, double pct = 0.5)
     {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
         List<double> upperEnvelopeList = new(stockData.Count);
         List<double> lowerEnvelopeList = new(stockData.Count);
         List<double> middleEnvelopeList = new(stockData.Count);
@@ -1430,15 +1375,15 @@ public static partial class Calculations
             var prevEma = i >= length2 ? emaList[i - length2] : 0;
 
             var prevUpperEnvelope = GetLastOrDefault(upperEnvelopeList);
-            var upperEnvelope = prevEma * ((100 + pct) / 100);
+            var upperEnvelope = RoundedPercentageBand.Percent(prevEma, pct, 1);
             upperEnvelopeList.Add(upperEnvelope);
 
             var prevLowerEnvelope = GetLastOrDefault(lowerEnvelopeList);
-            var lowerEnvelope = prevEma * ((100 - pct) / 100);
+            var lowerEnvelope = RoundedPercentageBand.Percent(prevEma, pct, -1);
             lowerEnvelopeList.Add(lowerEnvelope);
 
             var prevMiddleEnvelope = GetLastOrDefault(middleEnvelopeList);
-            var middleEnvelope = (upperEnvelope + lowerEnvelope) / 2;
+            var middleEnvelope = prevEma;
             middleEnvelopeList.Add(middleEnvelope);
 
             var signal = GetBollingerBandsSignal(currentValue - middleEnvelope, prevValue - prevMiddleEnvelope, currentValue, prevValue,

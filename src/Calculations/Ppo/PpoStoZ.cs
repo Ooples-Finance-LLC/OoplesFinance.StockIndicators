@@ -21,20 +21,22 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var mob1List = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var mob2List = GetMovingAverageList(stockData, maType, slowLength, inputList);
+        var mob1List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, fastLength) : GetMovingAverageList(stockData, maType, fastLength, inputList);
+        var mob2List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, slowLength) : GetMovingAverageList(stockData, maType, slowLength, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var mob1 = mob1List[i];
             var mob2 = mob2List[i];
-            var tfsMob = mob1 - mob2;
 
-            var ppo = mob2 != 0 ? tfsMob / mob2 * 100 : 0;
+            var ppo = RoundedPercentageChange.Of(mob1, mob2);
             ppoList.Add(ppo);
         }
 
-        var ppoSignalLineList = GetMovingAverageList(stockData, maType, signalLength, ppoList);
+        var finite = FiniteSignalInput.Create(ppoList, out var finiteCount);
+        var ppoSignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(finite, signalLength)
+            : GetMovingAverageList(stockData, maType, signalLength, finite);
+        for (var i = finiteCount; i < ppoSignalLineList.Count; i++) ppoSignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var ppo = ppoList[i];

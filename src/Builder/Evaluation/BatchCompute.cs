@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Models;
+﻿using OoplesFinance.StockIndicators.Models;
 using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators.Builder;
@@ -68,6 +68,7 @@ internal static class BatchCompute
     /// <returns>Array of indicator values for each bar.</returns>
     public static double[] ComputeAllWithCustomInput(StockData data, double[] customValues, IStreamingIndicatorState state)
     {
+        if (state is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
         var count = Math.Min(data.Count, customValues.Length);
         var results = new double[count];
         state.Reset();
@@ -146,6 +147,7 @@ internal static class BatchCompute
         var results = new double[count];
         for (var s = 0; s < chain.Count; s++)
         {
+            if (s > 0 && chain[s] is ICustomInputConsumer consumer) consumer.ReadCloseAsInput();
             chain[s].Reset();
         }
 
@@ -200,9 +202,23 @@ internal static class BatchCompute
         StockData marketData,
         IMultiSeriesIndicatorState state,
         Streaming.SeriesKey primaryKey,
-        Streaming.SeriesKey marketKey)
+        Streaming.SeriesKey marketKey, string? outputKey = null)
     {
-        var count = Math.Min(stockData.Count, marketData.Count);
+        // Validate the complete pair before touching state. Row-index pairing is only causal
+        // when both inputs have identical, strictly increasing timestamps.
+        if (stockData.Count != marketData.Count)
+            throw new ArgumentException("Primary and benchmark batches must have equal counts and aligned timestamps.", nameof(marketData));
+        var count = stockData.Count;
+        var domains = state as Validation.IMultiSeriesInputDomainContract;
+        for (var i = 0; i < count; i++)
+        {
+            if (stockData.Dates[i] != marketData.Dates[i] || stockData.Dates[i].Kind != marketData.Dates[i].Kind)
+                throw new ArgumentException($"Primary and benchmark timestamps differ at bar {i}; align inputs explicitly before evaluation.", nameof(marketData));
+            if (i > 0 && (stockData.Dates[i] <= stockData.Dates[i - 1] || stockData.Dates[i].Kind != stockData.Dates[i - 1].Kind))
+                throw new ArgumentException($"Batch timestamps must be strictly increasing (bar {i}).", nameof(stockData));
+            ValidateDomain(stockData, i, domains?.PrimaryInputDomain ?? Validation.IndicatorInputDomain.Finite);
+            ValidateDomain(marketData, i, domains?.BenchmarkInputDomain ?? Validation.IndicatorInputDomain.Finite);
+        }
         var results = new double[count];
         state.Reset();
 
@@ -215,16 +231,27 @@ internal static class BatchCompute
             // First update the market bar so it's available when we update the primary
             var marketBar = CreateBarForSeries(marketData, i, marketKey.Symbol, DefaultTimeframe);
             store.Update(marketKey, marketBar);
+            state.Update(context, marketKey, marketBar, isFinal: true, includeOutputs: false);
 
             // Now update the primary bar and get the result
             var stockBar = CreateBarForSeries(stockData, i, primaryKey.Symbol, DefaultTimeframe);
             store.Update(primaryKey, stockBar);
 
-            var result = state.Update(context, primaryKey, stockBar, isFinal: true, includeOutputs: false);
-            results[i] = result.HasValue ? result.Value : 0;
+            var result = state.Update(context, primaryKey, stockBar, isFinal: true, includeOutputs: outputKey is not null);
+            results[i] = !result.HasValue ? 0 : outputKey is null ? result.Value
+                : result.Outputs is not null && result.Outputs.TryGetValue(outputKey, out var selected) ? selected
+                : throw new InvalidOperationException("The multi-series indicator did not publish output '"+outputKey+"'.");
         }
 
         return results;
+    }
+
+    private static void ValidateDomain(StockData data, int index, Validation.IndicatorInputDomain domain)
+    {
+        var bar = new Indicators.Bar(data.Dates[index], data.OpenPrices[index], data.HighPrices[index],
+            data.LowPrices[index], data.ClosePrices[index], data.Volumes[index]);
+        Validation.IndicatorInputDomain.Finite.Validate(bar);
+        domain.Validate(bar);
     }
 
     /// <summary>

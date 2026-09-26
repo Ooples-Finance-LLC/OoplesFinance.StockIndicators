@@ -209,28 +209,10 @@ public static partial class Calculations
         List<double> rSquaredList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactRSquaredWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double rSquared = 0;
-            if (i >= length - 1)
-            {
-                double sumX = 0, sumY = 0, sumXy = 0, sumX2 = 0, sumY2 = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    double x = j;
-                    var y = inputList[i - length + 1 + j];
-                    sumX += x;
-                    sumY += y;
-                    sumXy += x * y;
-                    sumX2 += x * x;
-                    sumY2 += y * y;
-                }
-
-                var numerator = (length * sumXy) - (sumX * sumY);
-                var denominator = Sqrt(((length * sumX2) - (sumX * sumX)) * ((length * sumY2) - (sumY * sumY)));
-                var r = denominator != 0 ? numerator / denominator : 0;
-                rSquared = r * r;
-            }
+            var rSquared = window.Next(inputList[i], true);
 
             rSquaredList.Add(rSquared);
 
@@ -262,33 +244,20 @@ public static partial class Calculations
     public static StockData CalculateOptimizedTrendTracker(this StockData stockData, MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage,
         int length = 2, double percent = 1.4)
     {
-        List<double> longStopList = new(stockData.Count);
-        List<double> shortStopList = new(stockData.Count);
         List<double> ottList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         var maList = GetMovingAverageList(stockData, maType, length, inputList);
 
+        var stops = new OptimizedTrendStops();
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var ma = maList[i];
-            var fark = ma * percent * 0.01;
-
-            var prevLongStop = i >= 1 ? longStopList[i - 1] : 0;
-            var longStop = ma - fark;
-            longStop = ma > prevLongStop ? Math.Max(longStop, prevLongStop) : longStop;
-            longStopList.Add(longStop);
-
-            var prevShortStop = i >= 1 ? shortStopList[i - 1] : 0;
-            var shortStop = ma + fark;
-            shortStopList.Add(shortStop);
-
             var prevOtt = i >= 1 ? ottList[i - 1] : 0;
-            var mt = ma > prevShortStop ? longStop : ma < prevLongStop ? shortStop : 0;
-            var ott = ma > mt ? mt * (200 + percent) / 200 : mt * (200 - percent) / 200;
+            var ott = stops.Next(ma, percent);
             ottList.Add(ott);
 
             var signal = GetCompareSignal(currentValue - ott, prevValue - prevOtt);
@@ -317,41 +286,23 @@ public static partial class Calculations
     public static StockData CalculatePriceVolumeTrend(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> priceVolumeTrendList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var total = new PriceVolumeTrendTotal(false);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevPvt = i >= 1 ? priceVolumeTrendList[i - 1] : 0;
-            var pvt = prevValue != 0 ? prevPvt + (currentVolume * (MinPastValues(i, 1, currentValue - prevValue) / prevValue)) : prevPvt;
-            priceVolumeTrendList.Add(pvt);
+            var value = total.Next(input[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        var pvtEmaList = GetMovingAverageList(stockData, maType, length, priceVolumeTrendList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pvt = priceVolumeTrendList[i];
-            var pvtEma = pvtEmaList[i];
-            var prevPvt = i >= 1 ? priceVolumeTrendList[i - 1] : 0;
-            var prevPvtEma = i >= 1 ? pvtEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(pvt - pvtEma, prevPvt - prevPvtEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pvt", priceVolumeTrendList },
-            { "Signal", pvtEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(priceVolumeTrendList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pvt", output }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.PriceVolumeTrend;
-
         return stockData;
     }
 
@@ -438,42 +389,23 @@ public static partial class Calculations
     public static StockData CalculateModifiedPriceVolumeTrend(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 23)
     {
-        List<double> mpvtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var total = new PriceVolumeTrendTotal(true);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentVolume = volumeList[i];
-            var rv = currentVolume / 50000;
-
-            var prevMpvt = i >= 1 ? mpvtList[i - 1] : 0;
-            var mpvt = prevValue != 0 ? prevMpvt + (rv * MinPastValues(i, 1, currentValue - prevValue) / prevValue) : 0;
-            mpvtList.Add(mpvt);
+            var value = total.Next(input[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        var mpvtSignalList = GetMovingAverageList(stockData, maType, length, mpvtList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mpvt = mpvtList[i];
-            var mpvtSignal = mpvtSignalList[i];
-            var prevMpvt = i >= 1 ? mpvtList[i - 1] : 0;
-            var prevMpvtSignal = i >= 1 ? mpvtSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(mpvt - mpvtSignal, prevMpvt - prevMpvtSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mpvt", mpvtList },
-            { "Signal", mpvtSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mpvtList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mpvt", output }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.ModifiedPriceVolumeTrend;
-
         return stockData;
     }
 }

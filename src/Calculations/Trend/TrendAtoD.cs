@@ -1,4 +1,4 @@
-
+﻿
 using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
@@ -44,7 +44,9 @@ public static partial class Calculations
             {
                 var emaRising = emaBuffer.Span[i] > emaBuffer.Span[i - 1];
                 var histogramRising = histogramBuffer.Span[i] > histogramBuffer.Span[i - 1];
-                impulse = emaRising && histogramRising ? 1 : !emaRising && !histogramRising ? -1 : 0;
+                var emaFalling = emaBuffer.Span[i] < emaBuffer.Span[i - 1];
+                var histogramFalling = histogramBuffer.Span[i] < histogramBuffer.Span[i - 1];
+                impulse = emaRising && histogramRising ? 1 : emaFalling && histogramFalling ? -1 : 0;
             }
 
             impulseList.Add(impulse);
@@ -81,10 +83,11 @@ public static partial class Calculations
         List<double> cumulativeSumList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double sum = 0;
+        var total = new ExactMeanAccumulator();
         for (var i = 0; i < count; i++)
         {
-            sum += inputList[i];
+            total.Add(inputList[i]);
+            var sum = total.Mean(1);
             cumulativeSumList.Add(sum);
 
             var prevSum1 = i >= 1 ? cumulativeSumList[i - 1] : 0;

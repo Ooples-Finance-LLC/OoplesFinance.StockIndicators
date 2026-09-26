@@ -31,12 +31,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var ema5List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var ema8List = GetMovingAverageList(stockData, maType, length2, inputList);
-        var ema10List = GetMovingAverageList(stockData, maType, length3, inputList);
-        var ema17List = GetMovingAverageList(stockData, maType, length4, inputList);
-        var ema14List = GetMovingAverageList(stockData, maType, length5, inputList);
-        var ema16List = GetMovingAverageList(stockData, maType, length6, inputList);
+        var ema5List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length1) : GetMovingAverageList(stockData, maType, length1, inputList);
+        var ema8List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length2) : GetMovingAverageList(stockData, maType, length2, inputList);
+        var ema10List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length3) : GetMovingAverageList(stockData, maType, length3, inputList);
+        var ema17List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length4) : GetMovingAverageList(stockData, maType, length4, inputList);
+        var ema14List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length5) : GetMovingAverageList(stockData, maType, length5, inputList);
+        var ema16List = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length6) : GetMovingAverageList(stockData, maType, length6, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -60,10 +60,18 @@ public static partial class Calculations
             macd4List.Add(macd4);
         }
 
-        var macd1SignalLineList = GetMovingAverageList(stockData, maType, length1, macd1List);
-        var macd2SignalLineList = GetMovingAverageList(stockData, maType, length1, macd2List); //-V3056
-        var macd3SignalLineList = GetMovingAverageList(stockData, maType, length1, macd3List);
-        var macd4SignalLineList = GetMovingAverageList(stockData, maType, length1, macd4List);
+        var macd1Input = FiniteSignalInput.Create(macd1List, out var macd1Count);
+        var macd1SignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macd1Input, length1) : GetMovingAverageList(stockData, maType, length1, macd1Input);
+        for (var i = macd1Count; i < macd1SignalLineList.Count; i++) macd1SignalLineList[i] = double.NaN;
+        var macd2Input = FiniteSignalInput.Create(macd2List, out var macd2Count);
+        var macd2SignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macd2Input, length1) : GetMovingAverageList(stockData, maType, length1, macd2Input);
+        for (var i = macd2Count; i < macd2SignalLineList.Count; i++) macd2SignalLineList[i] = double.NaN; //-V3056
+        var macd3Input = FiniteSignalInput.Create(macd3List, out var macd3Count);
+        var macd3SignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macd3Input, length1) : GetMovingAverageList(stockData, maType, length1, macd3Input);
+        for (var i = macd3Count; i < macd3SignalLineList.Count; i++) macd3SignalLineList[i] = double.NaN;
+        var macd4Input = FiniteSignalInput.Create(macd4List, out var macd4Count);
+        var macd4SignalLineList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(macd4Input, length1) : GetMovingAverageList(stockData, maType, length1, macd4Input);
+        for (var i = macd4Count; i < macd4SignalLineList.Count; i++) macd4SignalLineList[i] = double.NaN;
         for (var i = 0; i < stockData.Count; i++)
         {
             var macd1 = macd1List[i];
@@ -128,27 +136,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var scAlpha = 2 / (1 + sc);
-        var lcAlpha = 2 / (1 + lc);
-        var spAlpha = 2 / (1 + sp);
+        var scAlpha = RoundedFractionalEma.Coefficient(sc, nameof(sc));
+        var lcAlpha = RoundedFractionalEma.Coefficient(lc, nameof(lc));
+        var spAlpha = RoundedFractionalEma.Coefficient(sp, nameof(sp));
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
 
             var prevFs = i >= 1 ? fsList[i - 1] : 0;
-            var fs = prevFs + (scAlpha * (currentValue - prevFs));
+            var fs = RoundedFractionalEma.Next(currentValue, prevFs, scAlpha);
             fsList.Add(fs);
 
             var prevSs = i >= 1 ? ssList[i - 1] : 0;
-            var ss = prevSs + (lcAlpha * (currentValue - prevSs));
+            var ss = RoundedFractionalEma.Next(currentValue, prevSs, lcAlpha);
             ssList.Add(ss);
 
             var r = fs - ss;
             rList.Add(r);
 
             var prevS = i >= 1 ? sList[i - 1] : 0;
-            var s = prevS + (spAlpha * (r - prevS));
+            var s = RoundedFractionalEma.Next(r, prevS, spAlpha);
             sList.Add(s);
 
             var prevH = i >= 1 ? hList[i - 1] : 0;

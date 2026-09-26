@@ -95,8 +95,15 @@ public static partial class Calculations
         // relative strength index, so sigma is the windowed deviation of that index; the quantity this
         // replaces is about 55% wider, which pushed both levels further from 50 and made the indicator reach
         // them less often. Taken over rsiList by name. See #190.
-        var rsiStdDevList = GetStandardDeviationList(rsiList, length);
-        var rsiSmaList = GetMovingAverageList(stockData, maType, smoothingLength, rsiList);
+        using var deviation = new ExactPopulationWindow(length);
+        var rsiStdDevList = rsiList.Select(v => deviation.Next(v, true)).ToList();
+        List<double> rsiSmaList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var smoothing = new StrengthAverage(maType, smoothingLength, stockData.Count);
+            rsiSmaList = rsiList.Select(v => smoothing.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else rsiSmaList = GetMovingAverageList(stockData, maType, smoothingLength, rsiList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -149,10 +156,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var connorsRsiList = CalculateConnorsRelativeStrengthIndex(stockData, maType, length1, length2, length3).ChainedValues;
-        stockData.SetCustomValues(connorsRsiList);
-        var stochasticList = CalculateStochasticOscillator(stockData, maType, length2, smoothLength1, smoothLength2);
-        var fastDList = stochasticList.ChainedOutputs["FastD"];
-        var slowDList = stochasticList.ChainedOutputs["SlowD"];
+        // Range the oscillator itself; price OHLC and synthesized two-bar candles are unrelated units.
+        var raw = new List<double>(connorsRsiList.Count);
+        var extrema = new RollingMinMax(Math.Max(1, length2));
+        foreach (var value in connorsRsiList)
+        {
+            extrema.Add(value);
+            raw.Add(ClampedRangePosition.Percent(value, extrema.Min, extrema.Max)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+        }
+        List<double> fastDList, slowDList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var fast = new StrengthAverage(maType, smoothLength1, raw.Count);
+            using var slow = new StrengthAverage(maType, smoothLength2, raw.Count);
+            fastDList = raw.Select(v => fast.Next(new StrengthValue(v), true).Mantissa).ToList();
+            slowDList = fastDList.Select(v => slow.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else
+        {
+            fastDList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+            slowDList = GetMovingAverageList(stockData, maType, smoothLength2, fastDList);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -197,10 +221,32 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
         var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length).ChainedValues;
-        stockData.SetCustomValues(rsiList);
-        var stoRsiList = CalculateStochasticOscillator(stockData, maType, Math.Max(1, stochLength ?? length), smoothLength1, smoothLength2);
-        var stochRsiList = stoRsiList.ChainedOutputs["FastD"];
-        var stochRsiSignalList = stoRsiList.ChainedOutputs["SlowD"];
+        var lookback = Math.Max(1, stochLength ?? length);
+        var raw = new List<double>(rsiList.Count);
+        for (var i = 0; i < rsiList.Count; i++)
+        {
+            var low = rsiList[i];
+            var high = low;
+            for (var j = Math.Max(0, i - lookback + 1); j < i; j++)
+            {
+                low = Math.Min(low, rsiList[j]);
+                high = Math.Max(high, rsiList[j]);
+            }
+            raw.Add(ClampedRangePosition.Percent(rsiList[i], low, high)); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
+        }
+        List<double> stochRsiList, stochRsiSignalList;
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var fast = new StrengthAverage(maType, smoothLength1, stockData.Count);
+            using var slow = new StrengthAverage(maType, smoothLength2, stockData.Count);
+            stochRsiList = raw.Select(v => fast.Next(new StrengthValue(v), true).Mantissa).ToList();
+            stochRsiSignalList = stochRsiList.Select(v => slow.Next(new StrengthValue(v), true).Mantissa).ToList();
+        }
+        else
+        {
+            stochRsiList = GetMovingAverageList(stockData, maType, smoothLength1, raw);
+            stochRsiSignalList = GetMovingAverageList(stockData, maType, smoothLength2, stochRsiList);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {

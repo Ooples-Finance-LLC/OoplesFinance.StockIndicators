@@ -1,11 +1,11 @@
-using System;
+﻿using System;
 using System.Buffers;
 
 namespace OoplesFinance.StockIndicators.Core;
 
 /// <summary>
 /// Core span-based implementations for volume indicators.
-/// Zero-allocation computation directly into output spans.
+/// Computation directly into output spans; exceptional-range exact arithmetic may allocate.
 /// </summary>
 internal static class VolumeCore
 {
@@ -15,30 +15,14 @@ internal static class VolumeCore
     internal static void OnBalanceVolume(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
+        var sum = new ExactMeanAccumulator();
+        for (var i = 0; i < close.Length; i++)
         {
-            return;
-        }
-
-        output[0] = volume[0];
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (close[i] > close[i - 1])
-            {
-                output[i] = output[i - 1] + volume[i];
-            }
-            else if (close[i] < close[i - 1])
-            {
-                output[i] = output[i - 1] - volume[i];
-            }
-            else
-            {
-                output[i] = output[i - 1];
-            }
+            var previous = i == 0 ? 0 : close[i - 1];
+            if (close[i] > previous) sum.Add(volume[i]);
+            else if (close[i] < previous) sum.Add(volume[i], -1);
+            output[i] = sum.Mean(1);
         }
     }
 
@@ -47,20 +31,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void AccumulationDistributionLine(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double adl = 0;
-        for (var i = 0; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            var mfm = range != 0 ? ((close[i] - low[i]) - (high[i] - close[i])) / range : 0;
-            var mfv = mfm * volume[i];
-            adl += mfv;
-            output[i] = adl;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new MoneyFlowAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -102,65 +75,21 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Force Index.
     /// </summary>
-    internal static void ForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
+    internal static void ForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rawForceArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rawForce = rawForceArray.AsSpan(0, close.Length);
-
-            rawForce[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                rawForce[i] = (close[i] - close[i - 1]) * volume[i];
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(rawForce, output, length);
-        }
-        finally
-        {
-            pool.Return(rawForceArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ForceWindow(maType, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>
     /// Computes Ease of Movement.
     /// </summary>
-    internal static void EaseOfMovement(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    internal static void EaseOfMovement(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output, double divisor = 1000000)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rawEmvArray = pool.Rent(high.Length);
-
-        try
-        {
-            var rawEmv = rawEmvArray.AsSpan(0, high.Length);
-
-            rawEmv[0] = 0;
-            for (var i = 1; i < high.Length; i++)
-            {
-                var dm = ((high[i] + low[i]) / 2) - ((high[i - 1] + low[i - 1]) / 2);
-                var br = volume[i] / 100000000 / (high[i] - low[i]);
-                rawEmv[i] = br != 0 ? dm / br : 0;
-            }
-
-            MovingAverageCore.SimpleMovingAverage(rawEmv, output, length);
-        }
-        finally
-        {
-            pool.Return(rawEmvArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EaseWindow(divisor);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -182,7 +111,7 @@ internal static class VolumeCore
             else
             {
                 var prevVol = volume[i - length];
-                output[i] = prevVol != 0 ? ((volume[i] - prevVol) / prevVol) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(volume[i], prevVol);
             }
         }
     }
@@ -192,29 +121,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void NegativeVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 1000;
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (volume[i] < volume[i - 1])
-            {
-                var roc = (close[i] - close[i - 1]) / close[i - 1];
-                output[i] = output[i - 1] + (output[i - 1] * roc);
-            }
-            else
-            {
-                output[i] = output[i - 1];
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new VolumeIndexTotal(false);
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -222,29 +131,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void PositiveVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 1000;
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (volume[i] > volume[i - 1])
-            {
-                var roc = (close[i] - close[i - 1]) / close[i - 1];
-                output[i] = output[i - 1] + (output[i - 1] * roc);
-            }
-            else
-            {
-                output[i] = output[i - 1];
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new VolumeIndexTotal(true);
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -252,22 +141,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void PriceVolumeTrend(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 0;
-        for (var i = 1; i < close.Length; i++)
-        {
-            var roc = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
-            output[i] = output[i - 1] + (volume[i] * roc);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new PriceVolumeTrendTotal();
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -280,54 +156,23 @@ internal static class VolumeCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        double cumulativeTPV = 0;
-        double cumulativeVol = 0;
+        var mean = new ExactVolumeMean();
 
         for (var i = 0; i < close.Length; i++)
         {
-            var typicalPrice = (high[i] + low[i] + close[i]) / 3;
-            cumulativeTPV += typicalPrice * volume[i];
-            cumulativeVol += volume[i];
-            output[i] = cumulativeVol != 0 ? cumulativeTPV / cumulativeVol : 0;
+            mean.AddTypical(high[i], low[i], close[i], volume[i]);
+            output[i] = mean.Value();
         }
     }
 
     /// <summary>
     /// Computes Chaikin Oscillator.
     /// </summary>
-    internal static void ChaikinOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 3, int slowLength = 10)
+    internal static void ChaikinOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 3, int slowLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adlArray = pool.Rent(close.Length);
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var adl = adlArray.AsSpan(0, close.Length);
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-
-            AccumulationDistributionLine(high, low, close, volume, adl);
-            MovingAverageCore.ExponentialMovingAverage(adl, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(adl, slowEma, slowLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = fastEma[i] - slowEma[i];
-            }
-        }
-        finally
-        {
-            pool.Return(adlArray);
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MoneyFlowAverageWindow(maType, fastLength, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Signal;
     }
 
     /// <summary>
@@ -342,43 +187,31 @@ internal static class VolumeCore
 
         var pool = ArrayPool<double>.Shared;
         var vfArray = pool.Rent(close.Length);
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
 
         try
         {
             var vf = vfArray.AsSpan(0, close.Length);
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
 
-            double prevHlc = 0;
-            int trend = 0;
-
+            double previousSum = 0, previousRange = 0, cumulativeRange = 0;
+            var trend = 0;
             for (var i = 0; i < close.Length; i++)
             {
-                var hlc = high[i] + low[i] + close[i];
-                var dm = high[i] - low[i];
-                var cm = i > 0 ? (hlc > prevHlc ? dm : -dm) : dm;
-                trend = i > 0 && hlc > prevHlc ? 1 : -1;
-
+                var sum = high[i] + low[i] + close[i];
                 var range = high[i] - low[i];
-                vf[i] = range != 0 ? volume[i] * Math.Abs(2 * (dm / range) - 1) * trend * 100 : 0;
-                prevHlc = hlc;
+                var nextTrend = i == 0 ? 0 : sum > previousSum ? 1 : sum < previousSum ? -1 : trend;
+                cumulativeRange = nextTrend == trend ? cumulativeRange + range : previousRange + range;
+                vf[i] = cumulativeRange == 0 ? 0 : volume[i] * Math.Abs(2 * range / cumulativeRange - 1) * nextTrend * 100;
+                trend = nextTrend;
+                previousSum = sum;
+                previousRange = range;
             }
 
-            MovingAverageCore.ExponentialMovingAverage(vf, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(vf, slowEma, slowLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = fastEma[i] - slowEma[i];
-            }
+            var difference = new OoplesFinance.StockIndicators.Streaming.KlingerEmaDifference(fastLength, slowLength);
+            for (var i = 0; i < close.Length; i++) output[i] = difference.Next(vf[i], true);
         }
         finally
         {
             pool.Return(vfArray);
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
         }
     }
 
@@ -432,63 +265,10 @@ internal static class VolumeCore
     internal static void MoneyFlowIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
         if (output.Length < close.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var typicalPriceArray = pool.Rent(close.Length);
-        var rawMoneyFlowArray = pool.Rent(close.Length);
-
-        try
-        {
-            var typicalPrice = typicalPriceArray.AsSpan(0, close.Length);
-            var rawMoneyFlow = rawMoneyFlowArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                typicalPrice[i] = (high[i] + low[i] + close[i]) / 3;
-                rawMoneyFlow[i] = typicalPrice[i] * volume[i];
-            }
-
-            // CalculateMoneyFlowIndex totals its flows with RollingSum.Sum(length), which adds up however
-            // many bars have arrived, so the index reads from the first bar rather than the length'th.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double posFlow = 0;
-                double negFlow = 0;
-
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    if (j == 0)
-                    {
-                        continue;
-                    }
-
-                    // An unchanged typical price is neither inflow nor outflow there; routing it into the
-                    // negative side here made a flat bar read as selling pressure.
-                    if (typicalPrice[j] > typicalPrice[j - 1])
-                    {
-                        posFlow += rawMoneyFlow[j];
-                    }
-                    else if (typicalPrice[j] < typicalPrice[j - 1])
-                    {
-                        negFlow += rawMoneyFlow[j];
-                    }
-                }
-
-                var mfRatio = negFlow != 0 ? posFlow / negFlow : 0;
-
-                // No outflow at all is a full reading of 100, which is how the indicator reports the
-                // opening bar before either side has anything in it.
-                output[i] = negFlow == 0 ? 100 : posFlow == 0 ? 0 : Math.Min(100, Math.Max(0, 100 - (100 / (1 + mfRatio))));
-            }
-        }
-        finally
-        {
-            pool.Return(typicalPriceArray);
-            pool.Return(rawMoneyFlowArray);
-        }
+        using var flow = new OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex(Math.Min(Math.Max(1, length), Math.Max(1, close.Length)));
+        for (var i = 0; i < close.Length; i++)
+            output[i] = flow.Next(OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex.TypicalPrice(high[i], low[i], close[i]), volume[i], true);
     }
 
     /// <summary>
@@ -496,34 +276,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void TradeVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, double minTickValue = 0.5)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        double tvi = 0;
-        output[0] = tvi;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var change = close[i] - close[i - 1];
-
-            if (change > minTickValue)
-            {
-                tvi += volume[i];
-            }
-            else if (change < -minTickValue)
-            {
-                tvi -= volume[i];
-            }
-
-            output[i] = tvi;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new TradeVolumeTotal(minTickValue);
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -545,12 +300,12 @@ internal static class VolumeCore
             var fastSma = fastSmaArray.AsSpan(0, volume.Length);
             var slowSma = slowSmaArray.AsSpan(0, volume.Length);
 
-            MovingAverageCore.SimpleMovingAverage(volume, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(volume, slowSma, slowLength);
+            BollingerArithmetic.Mean(volume, fastSma, fastLength);
+            BollingerArithmetic.Mean(volume, slowSma, slowLength);
 
             for (var i = 0; i < volume.Length; i++)
             {
-                output[i] = slowSma[i] != 0 ? ((fastSma[i] - slowSma[i]) / slowSma[i]) * 100 : 0;
+                output[i] = RoundedPercentageChange.Of(fastSma[i], slowSma[i]);
             }
         }
         finally
@@ -571,65 +326,11 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Twiggs Money Flow.
     /// </summary>
-    internal static void TwiggsMoneyFlow(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 21)
+    internal static void TwiggsMoneyFlow(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 21, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adArray = pool.Rent(close.Length);
-        var volSumArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ad = adArray.AsSpan(0, close.Length);
-            var volSum = volSumArray.AsSpan(0, close.Length);
-
-            double trh = high[0];
-            double trl = low[0];
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i > 0)
-                {
-                    trh = Math.Max(high[i], close[i - 1]);
-                    trl = Math.Min(low[i], close[i - 1]);
-                }
-
-                var range = trh - trl;
-                var adValue = range != 0 ? ((close[i] - trl) - (trh - close[i])) / range * volume[i] : 0;
-                ad[i] = adValue;
-                volSum[i] = volume[i];
-            }
-
-            // Apply Wilder smoothing (EMA with 1/length factor)
-            var k = 1.0 / length;
-            double smoothedAd = ad[0];
-            double smoothedVol = volSum[0];
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i > 0)
-                {
-                    smoothedAd = smoothedAd + k * (ad[i] - smoothedAd);
-                    smoothedVol = smoothedVol + k * (volSum[i] - smoothedVol);
-                }
-
-                output[i] = smoothedVol != 0 ? smoothedAd / smoothedVol : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(adArray);
-            pool.Return(volSumArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MoneyFlowPercentWindow(length, maType);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>
@@ -641,6 +342,8 @@ internal static class VolumeCore
         {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
+
+        if (close.Length == 0) return;
 
         var pool = ArrayPool<double>.Shared;
         var rArray = pool.Rent(close.Length);
@@ -669,7 +372,7 @@ internal static class VolumeCore
 
             for (var i = 0; i < close.Length; i++)
             {
-                output[i] = tv[i] != 0 ? (vp[i] / tv[i]) * 100 : 0;
+                output[i] = RoundedMomentumRatio.Of(vp[i], tv[i]);
             }
         }
         finally
@@ -717,35 +420,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void WilliamsAD(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 0;
-        double wad = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            double trueRangeHigh = Math.Max(high[i], close[i - 1]);
-            double trueRangeLow = Math.Min(low[i], close[i - 1]);
-
-            if (close[i] > close[i - 1])
-            {
-                wad += close[i] - trueRangeLow;
-            }
-            else if (close[i] < close[i - 1])
-            {
-                wad += close[i] - trueRangeHigh;
-            }
-
-            output[i] = wad;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilliamsAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Publish();
     }
 
     /// <summary>
@@ -796,21 +473,21 @@ internal static class VolumeCore
             return;
         }
 
-        double cvi = 0;
+        var cvi = new ExactMeanAccumulator();
         output[0] = 0;
 
         for (var i = 1; i < close.Length; i++)
         {
             if (close[i] > close[i - 1])
             {
-                cvi += volume[i];
+                cvi.Add(volume[i]);
             }
             else if (close[i] < close[i - 1])
             {
-                cvi -= volume[i];
+                cvi.Add(volume[i], -1);
             }
 
-            output[i] = cvi;
+            output[i] = cvi.Mean(1);
         }
     }
 
@@ -842,25 +519,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void VolumePriceTrend(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        double vpt = 0;
-        output[0] = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var pctChange = close[i - 1] != 0 ? (close[i] - close[i - 1]) / close[i - 1] : 0;
-            vpt += volume[i] * pctChange;
-            output[i] = vpt;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new PriceVolumeTrendTotal();
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -927,26 +588,16 @@ internal static class VolumeCore
     internal static void NormalizedVolume(ReadOnlySpan<double> volume, Span<double> output, int length = 20)
     {
         if (output.Length < volume.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(volume.Length);
-
-        try
+        length = Math.Max(1, length);
+        var sum = new ExactMeanAccumulator();
+        for (var i = 0; i < volume.Length; i++)
         {
-            var sma = smaArray.AsSpan(0, volume.Length);
-            MovingAverageCore.SimpleMovingAverage(volume, sma, length);
-
-            for (var i = 0; i < volume.Length; i++)
-            {
-                output[i] = sma[i] != 0 ? volume[i] / sma[i] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
+            sum.Add(volume[i]);
+            if (i >= length) sum.Add(volume[i - length], -1);
+            var numerator = new ExactMeanAccumulator();
+            numerator.Add(volume[i], length);
+            output[i] = i + 1 < length ? 0 : numerator.Ratio(sum);
         }
     }
 

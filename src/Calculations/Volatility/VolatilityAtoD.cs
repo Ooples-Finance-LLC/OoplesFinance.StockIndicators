@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -24,16 +24,11 @@ public static partial class Calculations
         List<double> adrList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        double sum = 0;
+        var values = SpanCompat.CreateOutputBuffer(count);
+        VolatilityCore.AverageDayRange(SpanCompat.AsReadOnlySpan(highList), SpanCompat.AsReadOnlySpan(lowList), values.Span, length);
         for (var i = 0; i < count; i++)
         {
-            sum += highList[i] - lowList[i];
-            if (i >= length)
-            {
-                sum -= highList[i - length] - lowList[i - length];
-            }
-
-            var adr = i >= length - 1 ? sum / length : 0;
+            var adr = values.Span[i];
             adrList.Add(adr);
 
             var prevAdr1 = i >= 1 ? adrList[i - 1] : 0;
@@ -72,28 +67,10 @@ public static partial class Calculations
         List<double> cvList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactCoefficientWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double cv = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                var stdDev = Sqrt(variance / length);
-                cv = mean != 0 ? stdDev / mean * 100 : 0;
-            }
+            var cv = window.Next(inputList[i], true);
 
             cvList.Add(cv);
 
@@ -135,27 +112,10 @@ public static partial class Calculations
         List<double> ddList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactDownsideWindow(length, targetReturn);
         for (var i = 0; i < count; i++)
         {
-            double downsideDeviation = 0;
-            if (i >= length)
-            {
-                double sumSquaredDownside = 0;
-                var shortfalls = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var prevValue = inputList[j - 1];
-                    var ret = prevValue > 0 ? (inputList[j] - prevValue) / prevValue : 0;
-                    if (ret < targetReturn)
-                    {
-                        var shortfall = ret - targetReturn;
-                        sumSquaredDownside += shortfall * shortfall;
-                        shortfalls++;
-                    }
-                }
-
-                downsideDeviation = shortfalls > 0 ? Sqrt(sumSquaredDownside / shortfalls) : 0;
-            }
+            var downsideDeviation = window.Next(inputList[i], true);
 
             ddList.Add(downsideDeviation);
 
@@ -201,7 +161,7 @@ public static partial class Calculations
         for (var i = 1; i < count; i++)
         {
             var prevValue = inputList[i - 1];
-            returns[i] = prevValue != 0 ? Log(inputList[i] / prevValue) : 0;
+            returns[i] = prevValue != 0 ? StableLogRatio.OfSameSign(inputList[i], prevValue) : 0;
         }
 
         for (var i = 0; i < count; i++)
@@ -303,6 +263,7 @@ public static partial class Calculations
     public static StockData CalculateChoppinessIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
+        length = Math.Max(2, length);
         List<double> ciList = new(stockData.Count);
         List<double> trList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);

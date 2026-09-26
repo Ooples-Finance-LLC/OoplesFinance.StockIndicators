@@ -13,38 +13,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateForceIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> rawForceList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ForceWindow(maType, length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var rawForce = MinPastValues(i, 1, currentValue - prevValue) * currentVolume;
-            rawForceList.Add(rawForce);
+            var value = window.Next(input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetCompareSignal(value - previous, previous - (i < 2 ? 0 : output[i - 2]))); output.Add(value);
         }
-
-        var forceList = GetMovingAverageList(stockData, maType, length, rawForceList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var force = forceList[i];
-            var prevForce1 = i >= 1 ? forceList[i - 1] : 0;
-            var prevForce2 = i >= 2 ? forceList[i - 2] : 0;
-
-            var signal = GetCompareSignal(force - prevForce1, prevForce1 - prevForce2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fi", forceList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(forceList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fi", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.ForceIndex;
-
         return stockData;
     }
 
@@ -79,7 +60,7 @@ public static partial class Calculations
             var currentValue = inputList[i];
             var currentVolume = volumeList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var mom = MinPastValues(i, 1, currentValue - prevValue);
+            var mom = i == 0 ? 0 : currentHigh + currentLow + currentValue - (highList[i - 1] + lowList[i - 1] + prevValue);
 
             var prevTrend = i >= 1 ? trendList[i - 1] : 0;
             var trend = mom > 0 ? 1 : mom < 0 ? -1 : prevTrend;
@@ -93,20 +74,21 @@ public static partial class Calculations
             var cm = trend == prevTrend ? prevCm + dm : prevDm + dm;
             cmList.Add(cm);
 
-            var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : -1;
+            var temp = cm != 0 ? Math.Abs((2 * (dm / cm)) - 1) : 0;
             var vf = currentVolume * temp * trend * 100;
             vfList.Add(vf);
         }
 
-        var ema34List = GetMovingAverageList(stockData, maType, fastLength, vfList);
-        var ema55List = GetMovingAverageList(stockData, maType, slowLength, vfList);
-        for (var i = 0; i < count; i++)
+        if (maType == MovingAvgType.ExponentialMovingAverage)
         {
-            var ema34 = ema34List[i];
-            var ema55 = ema55List[i];
-
-            var klingerOscillator = ema34 - ema55;
-            kvoList.Add(klingerOscillator);
+            var difference = new OoplesFinance.StockIndicators.Streaming.KlingerEmaDifference(fastLength, slowLength);
+            foreach (var force in vfList) kvoList.Add(difference.Next(force, true));
+        }
+        else
+        {
+            var fast = GetMovingAverageList(stockData, maType, fastLength, vfList);
+            var slow = GetMovingAverageList(stockData, maType, slowLength, vfList);
+            for (var i = 0; i < count; i++) kvoList.Add(fast[i] - slow[i]);
         }
 
         var kvoSignalList = GetMovingAverageList(stockData, maType, signalLength, kvoList);
@@ -148,50 +130,27 @@ public static partial class Calculations
     public static StockData CalculateEaseOfMovement(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
         double divisor = 1000000)
     {
-        List<double> halfRangeList = new(stockData.Count);
-        List<double> midpointMoveList = new(stockData.Count);
-        List<double> emvList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var window = new EaseWindow(divisor);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var first = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
+        using var second = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentVolume = volumeList[i];
-            var prevHalfRange = i >= 1 ? halfRangeList[i - 1] : 0;
-            var halfRange = (currentHigh - currentLow) * 0.5;
-            halfRangeList.Add(halfRange);
-            var boxRatio = currentHigh - currentLow != 0 ? currentVolume / (currentHigh - currentLow) : 0;
-
-            var prevMidpointMove = i >= 1 ? midpointMoveList[i - 1] : 0;
-            var midpointMove = halfRange - prevHalfRange;
-            midpointMoveList.Add(midpointMove);
-
-            var emv = boxRatio != 0 ? divisor * ((midpointMove - prevMidpointMove) / boxRatio) : 0;
-            emvList.Add(emv);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(second!.Next(first!.Next(value, true), true).Publish());
         }
-
-        var emvSmaList = GetMovingAverageList(stockData, maType, length, emvList);
-        var emvSignalList = GetMovingAverageList(stockData, maType, length, emvSmaList);
-        for (var i = 0; i < stockData.Count; i++)
+        if (!standard)
         {
-            var emv = emvList[i];
-            var emvSignal = emvSignalList[i];
-            var prevEmv = i >= 1 ? emvList[i - 1] : 0;
-            var prevEmvSignal = i >= 1 ? emvSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(emv - emvSignal, prevEmv - prevEmvSignal);
-            signalsList?.Add(signal);
+            var firstMean = GetMovingAverageList(stockData, maType, length, output);
+            signal = GetMovingAverageList(stockData, maType, length, firstMean);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eom", emvList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(emvList);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eom", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.EaseOfMovement;
-
         return stockData;
     }
 
@@ -429,10 +388,10 @@ public static partial class Calculations
 
             var aMoveMax = aMoveWindow.Max;
             var aMoveMin = aMoveWindow.Min;
-            var theMove = aMoveMax - aMoveMin != 0 ? (1 + ((aMove - aMoveMin) * (10 - 1))) / (aMoveMax - aMoveMin) : 0;
+            var theMove = aMoveMax - aMoveMin != 0 ? 1 + 9 * (aMove - aMoveMin) / (aMoveMax - aMoveMin) : 0;
             var relVolMax = relVolWindow.Max;
             var relVolMin = relVolWindow.Min;
-            var theVol = relVolMax - relVolMin != 0 ? (1 + ((currentRelVol - relVolMin) * (10 - 1))) / (relVolMax - relVolMin) : 0;
+            var theVol = relVolMax - relVolMin != 0 ? 1 + 9 * (currentRelVol - relVolMin) / (relVolMax - relVolMin) : 0;
 
             var vBym = theMove != 0 ? theVol / theMove : 0;
             vBymList.Add(vBym);

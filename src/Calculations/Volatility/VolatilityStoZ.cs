@@ -208,26 +208,10 @@ public static partial class Calculations
         List<double> varianceList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        using var window = new ExactVarianceWindow(length);
         for (var i = 0; i < count; i++)
         {
-            double variance = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
-
-                var mean = sum / length;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                variance /= length;
-            }
+            var variance = window.Next(inputList[i], true);
 
             varianceList.Add(variance);
 
@@ -312,28 +296,10 @@ public static partial class Calculations
         List<double> standardErrorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
-        // The scatter about the fitted line, measured at each position in the window. Taken against the
-        // line's endpoint instead, a window sitting exactly on a sloped line reports scatter where there
-        // is none: MovingAverageCore.LinearRegression stores only LeastSquaresFit.Last.
-        using var regression = new RollingLeastSquares(length);
-
+        using var window = new ExactStandardErrorWindow(length, true);
         for (var i = 0; i < count; i++)
         {
-            var fit = regression.Next(inputList[i], isFinal: true);
-            double standardError = 0;
-            if (i >= length - 1)
-            {
-                double sumSquaredDiff = 0;
-                var first = i - length + 1;
-                for (var j = first; j <= i; j++)
-                {
-                    var fitted = fit.Intercept + (fit.Slope * (j - first));
-                    var diff = inputList[j] - fitted;
-                    sumSquaredDiff += diff * diff;
-                }
-
-                standardError = Sqrt(sumSquaredDiff / length);
-            }
+            var standardError = window.Next(inputList[i], true);
 
             standardErrorList.Add(standardError);
 
@@ -372,31 +338,11 @@ public static partial class Calculations
         var count = inputList.Count;
         List<double> standardErrorList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var sqrtLength = Sqrt(length);
-
+        using var window = new ExactStandardErrorWindow(length, false);
         for (var i = 0; i < count; i++)
         {
-            double stdDev = 0;
-            if (i >= length - 1)
-            {
-                double sum = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sum += inputList[j];
-                }
+            var standardError = window.Next(inputList[i], true);
 
-                var mean = sum / length;
-                double variance = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    var diff = inputList[j] - mean;
-                    variance += diff * diff;
-                }
-
-                stdDev = Sqrt(variance / length);
-            }
-
-            var standardError = stdDev / sqrtLength;
             standardErrorList.Add(standardError);
 
             var prevError1 = i >= 1 ? standardErrorList[i - 1] : 0;
@@ -450,7 +396,7 @@ public static partial class Calculations
                 {
                     if (j > 0 && inputList[j - 1] != 0)
                     {
-                        overnightMean += Log(openList[j] / inputList[j - 1]);
+                        overnightMean += StableLogRatio.OfSameSign(openList[j], inputList[j - 1]);
                     }
                 }
 
@@ -460,7 +406,7 @@ public static partial class Calculations
                 {
                     if (j > 0 && inputList[j - 1] != 0)
                     {
-                        var logOc = Log(openList[j] / inputList[j - 1]);
+                        var logOc = StableLogRatio.OfSameSign(openList[j], inputList[j - 1]);
                         overnightSum += (logOc - overnightMean) * (logOc - overnightMean);
                     }
                 }
@@ -472,7 +418,7 @@ public static partial class Calculations
                 {
                     if (openList[j] != 0)
                     {
-                        openToCloseMean += Log(inputList[j] / openList[j]);
+                        openToCloseMean += StableLogRatio.OfSameSign(inputList[j], openList[j]);
                     }
                 }
 
@@ -482,7 +428,7 @@ public static partial class Calculations
                 {
                     if (openList[j] != 0)
                     {
-                        var logCo = Log(inputList[j] / openList[j]);
+                        var logCo = StableLogRatio.OfSameSign(inputList[j], openList[j]);
                         openToCloseSum += (logCo - openToCloseMean) * (logCo - openToCloseMean);
                     }
                 }
@@ -494,10 +440,10 @@ public static partial class Calculations
                 {
                     var currentClose = inputList[j];
                     var currentOpen = openList[j];
-                    var logHc = currentClose != 0 ? Log(highList[j] / currentClose) : 0;
-                    var logHo = currentOpen != 0 ? Log(highList[j] / currentOpen) : 0;
-                    var logLc = currentClose != 0 ? Log(lowList[j] / currentClose) : 0;
-                    var logLo = currentOpen != 0 ? Log(lowList[j] / currentOpen) : 0;
+                    var logHc = currentClose != 0 ? StableLogRatio.OfSameSign(highList[j], currentClose) : 0;
+                    var logHo = currentOpen != 0 ? StableLogRatio.OfSameSign(highList[j], currentOpen) : 0;
+                    var logLc = currentClose != 0 ? StableLogRatio.OfSameSign(lowList[j], currentClose) : 0;
+                    var logLo = currentOpen != 0 ? StableLogRatio.OfSameSign(lowList[j], currentOpen) : 0;
                     rogersSatchellSum += (logHc * logHo) + (logLc * logLo);
                 }
 
@@ -642,54 +588,23 @@ public static partial class Calculations
     public static StockData CalculateVerticalHorizontalFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 18, int signalLength = 6)
     {
-        List<double> vhfList = new(stockData.Count);
-        List<double> changeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum changeSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); signalLength = Math.Max(1, signalLength);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VerticalHorizontalWindow(length, Math.Max(1, input.Count));
+        var priceMean = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        var line = input.Select(price => window.Next(price, true)).ToList();
+        var signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), signalLength)?.ToList();
+        if (signal is null && StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var highestPrice = highestList[i];
-            var lowestPrice = lowestList[i];
-            var numerator = Math.Abs(highestPrice - lowestPrice);
-
-            var priceChange = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-            changeList.Add(priceChange);
-            changeSumWindow.Add(priceChange);
-
-            var denominator = changeSumWindow.Sum(length);
-            var vhf = denominator != 0 ? numerator / denominator : 0;
-            vhfList.Add(vhf);
+            var values = new double[input.Count];
+            VerticalHorizontalWindow.SmoothSignal(SpanCompat.AsReadOnlySpan(line), values, maType, signalLength);
+            signal = values.ToList();
         }
-
-        var vhfWmaList = GetMovingAverageList(stockData, maType, signalLength, vhfList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentWma = wmaList[i];
-            var prevWma = i >= 1 ? wmaList[i - 1] : 0;
-            var vhfWma = vhfWmaList[i];
-            var vhf = vhfList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentWma, prevValue - prevWma, vhf, vhfWma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vhf", vhfList },
-            { "Signal", vhfWmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vhfList);
-        stockData.IndicatorName = IndicatorName.VerticalHorizontalFilter;
-
+        signal ??= GetMovingAverageList(stockData, maType, signalLength, line);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetVolatilitySignal(input[i] - priceMean[i], i == 0 ? 0 : input[i - 1] - priceMean[i - 1], line[i], signal[i]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vhf", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VerticalHorizontalFilter;
         return stockData;
     }
 
@@ -709,7 +624,7 @@ public static partial class Calculations
         List<double> volList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(inputList, length1);
+        var (highestList1, lowestList1) = length1 <= 1 ? (inputList, inputList) : GetMaxAndMinValuesList(inputList, length1);
         var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList, lowList, length1);
 
         var annualSqrt = Sqrt((double)length2 / length1);
@@ -765,67 +680,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateStandardDevation(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> cList;
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        if (maType == MovingAvgType.SimpleMovingAverage)
-        {
-            // sqrt(E[x^2] - mean^2) is the same population deviation as the two-pass form when the mean is
-            // the window's own, but it computes it by subtracting two large nearly-equal numbers. The
-            // clamp below was the admission: it exists because the difference can come out negative from
-            // rounding alone. Measured over 300 bars at length 14, against the two-pass form:
-            //
-            //     AAPL fixture            relative error 8.6e-13     0 bars clamped
-            //     price 150, spread 6     relative error 6.4e-13     0 bars clamped
-            //     price 1e6, spread 0.001 relative error 36          186 bars clamped
-            //     price 1e7, spread 0.001 relative error 413         187 bars clamped
-            //
-            // Realistic equity data is fine, so this was latent rather than live; but where the price is
-            // large next to its spread the indicator publishes exactly 0 while the true deviation is
-            // positive - at bar 200 of the 1e6 series, 0 against 0.000714. GetStandardDeviationList sums
-            // the squared deviations over the window instead, which is the same quantity computed in a
-            // way that cannot cancel, and it zeroes the same warm-up bars this did (verified: 0
-            // disagreements before the window fills, on all four series above).
-            cList = GetStandardDeviationList(inputList, length);
-        }
-        else
-        {
-            // Left as it was. With any other average this is not a population deviation at all: it takes a
-            // moving average of x^2 but subtracts the square of a plain window mean, so the two halves are
-            // not the same mean and the result has no clean reading. Changing it would move published
-            // values for a quantity nobody has defined, which is a separate decision from this one.
-            List<double> powList = new(stockData.Count);
-            List<double> sumList = new(stockData.Count);
-            RollingSum tempSumWindow = new();
-            cList = new List<double>(stockData.Count);
-
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                var currentValue = inputList[i];
-                tempSumWindow.Add(currentValue);
-
-                var sum = tempSumWindow.Sum(length);
-                var sumPow = Pow(sum, 2);
-                sumList.Add(sumPow);
-
-                var pow = Pow(currentValue, 2);
-                powList.Add(pow);
-            }
-
-            var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                var a = powSmaList[i];
-                var sum = sumList[i];
-                var b = sum / Pow(length, 2);
-
-                var c = a - b >= 0 ? Sqrt(a - b) : 0;
-                cList.Add(c);
-            }
-        }
+        // Population deviation always uses the window's own arithmetic mean.
+        // The configured average controls the signal, not the dispersion measure.
+        var cList = GetStandardDeviationList(inputList, length);
 
         var cSmaList = GetMovingAverageList(stockData, maType, length, cList);
         for (var i = 0; i < stockData.Count; i++)

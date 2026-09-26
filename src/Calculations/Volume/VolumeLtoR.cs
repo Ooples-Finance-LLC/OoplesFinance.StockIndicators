@@ -73,13 +73,12 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
         var volumeSpan = SpanCompat.AsReadOnlySpan(volumeList);
-        var smaBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.SimpleMovingAverage(volumeSpan, smaBuffer.Span, length);
+        var normalizedBuffer = SpanCompat.CreateOutputBuffer(count);
+        VolumeCore.NormalizedVolume(volumeSpan, normalizedBuffer.Span, length);
 
         for (var i = 0; i < count; i++)
         {
-            var averageVolume = smaBuffer.Span[i];
-            var normalizedVolume = averageVolume != 0 ? volumeList[i] / averageVolume : 0;
+            var normalizedVolume = normalizedBuffer.Span[i];
             normalizedVolumeList.Add(normalizedVolume);
 
             var prevNormalized1 = i >= 1 ? normalizedVolumeList[i - 1] : 0;
@@ -108,35 +107,18 @@ public static partial class Calculations
     public static StockData CalculateMoneyFlowIndex(this StockData stockData, int length = 14)
     {
         List<double> mfiList = new(stockData.Count);
-        List<double> posMoneyFlowList = new(stockData.Count);
-        List<double> negMoneyFlowList = new(stockData.Count);
-        var posMoneyFlowSumWindow = new RollingSum();
-        var negMoneyFlowSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        var inputList = stockData.ChainedValues;
+        var volumeList = stockData.Volumes;
 
+        using var flow = new OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex(Math.Min(Math.Max(1, length), Math.Max(1, stockData.Count)));
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var typicalPrice = inputList[i];
-            var prevTypicalPrice = i >= 1 ? inputList[i - 1] : 0;
             var prevMfi1 = i >= 1 ? mfiList[i - 1] : 0;
             var prevMfi2 = i >= 2 ? mfiList[i - 2] : 0;
-            var rawMoneyFlow = typicalPrice * currentVolume;
-
-            var posMoneyFlow = i >= 1 && typicalPrice > prevTypicalPrice ? rawMoneyFlow : 0;
-            posMoneyFlowList.Add(posMoneyFlow);
-            posMoneyFlowSumWindow.Add(posMoneyFlow);
-
-            var negMoneyFlow = i >= 1 && typicalPrice < prevTypicalPrice ? rawMoneyFlow : 0;
-            negMoneyFlowList.Add(negMoneyFlow);
-            negMoneyFlowSumWindow.Add(negMoneyFlow);
-
-            var posMoneyFlowTotal = posMoneyFlowSumWindow.Sum(length);
-            var negMoneyFlowTotal = negMoneyFlowSumWindow.Sum(length);
-            var mfiRatio = negMoneyFlowTotal != 0 ? posMoneyFlowTotal / negMoneyFlowTotal : 0;
-
-            var mfi = negMoneyFlowTotal == 0 ? 100 : posMoneyFlowTotal == 0 ? 0 : MinOrMax(100 - (100 / (1 + mfiRatio)), 100, 0);
+            var price = inputList.Count > 0 ? inputList[i] : OoplesFinance.StockIndicators.Streaming.RollingMoneyFlowIndex.TypicalPrice(
+                stockData.HighPrices[i], stockData.LowPrices[i], stockData.ClosePrices[i]);
+            var mfi = flow.Next(price, volumeList[i], true);
             mfiList.Add(mfi);
 
             var signal = GetRsiSignal(mfi - prevMfi1, prevMfi1 - prevMfi2, mfi, prevMfi1, 80, 20);
@@ -169,18 +151,27 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);   
 
+        var total = new ExactMeanAccumulator();
         for (var i = 0; i < count; i++)
         {
             var currentValue = inputList[i];
             var currentVolume = volumeList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var prevObv = i >= 1 ? obvList[i - 1] : 0;
-            var obv = currentValue > prevValue ? prevObv + currentVolume : currentValue < prevValue ? prevObv - currentVolume : prevObv;
+            if (currentValue > prevValue) total.Add(currentVolume);
+            else if (currentValue < prevValue) total.Add(currentVolume, -1);
+            var obv = total.Mean(1);
             obvList.Add(obv);
         }
 
-        var obvSignalList = GetMovingAverageList(stockData, maType, length, obvList);
+        var finiteInput = FiniteSignalInput.Create(obvList, out var finiteCount);
+        var obvSignalList = GetMovingAverageList(stockData, maType, length, finiteInput);
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var mean = new OoplesFinance.StockIndicators.Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            for (var i = 0; i < finiteCount; i++) obvSignalList[i] = mean.Next(finiteInput[i], true);
+        }
+        for (var i = finiteCount; i < obvSignalList.Count; i++) obvSignalList[i] = double.NaN;
         for (var i = 0; i < count; i++)
         {
             var obv = obvList[i];
@@ -216,49 +207,23 @@ public static partial class Calculations
     public static StockData CalculateNegativeVolumeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 255, int initialValue = 1000)
     {
-        List<double> nviList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var total = new VolumeIndexTotal(false, initialValue);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentClose = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
-            var prevNvi = i >= 1 ? nviList[i - 1] : initialValue;
-            var pctChg = CalculatePercentChange(currentClose, prevClose);
-
-            // Fosback's NVI compounds the period's rate of change onto the running index:
-            //     NVI = prevNVI + (prevNVI * ROC).
-            // CalculatePercentChange returns that ROC already scaled to a percentage, so it has to be
-            // divided back out. Adding pctChg straight onto the index instead moved a 1% day by 1 point
-            // rather than by 1% of the index, making every move smaller than it should be by a factor of
-            // prevNVI / 100.
-            var nvi = currentVolume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
-            nviList.Add(nvi);
+            var value = total.Next(input[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        var nviSignalList = GetMovingAverageList(stockData, maType, length, nviList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var nvi = nviList[i];
-            var prevNvi = i >= 1 ? nviList[i - 1] : 0;
-            var nviSignal = nviSignalList[i];
-            var prevNviSignal = i >= 1 ? nviSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(nvi - nviSignal, prevNvi - prevNviSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Nvi", nviList },
-            { "NviSignal", nviSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nviList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Nvi", output }, { "NviSignal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.NegativeVolumeIndex;
-
         return stockData;
     }
 
@@ -275,45 +240,23 @@ public static partial class Calculations
     public static StockData CalculatePositiveVolumeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 255, int initialValue = 1000)
     {
-        List<double> pviList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var total = new VolumeIndexTotal(true, initialValue);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentClose = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
-            var prevPvi = i >= 1 ? pviList[i - 1] : initialValue;
-            var pctChg = CalculatePercentChange(currentClose, prevClose);
-
-            // PVI is the same construction as NVI, applied on rising volume instead of falling:
-            //     PVI = prevPVI + (prevPVI * ROC).
-            var pvi = currentVolume <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
-            pviList.Add(pvi);
+            var value = total.Next(input[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        var pviSignalList = GetMovingAverageList(stockData, maType, length, pviList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pvi = pviList[i];
-            var prevPvi = i >= 1 ? pviList[i - 1] : 0;
-            var pviSignal = pviSignalList[i];
-            var prevPviSignal = i >= 1 ? pviSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(pvi - pviSignal, prevPvi - prevPviSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pvi", pviList },
-            { "PviSignal", pviSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pviList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pvi", output }, { "PviSignal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.PositiveVolumeIndex;
-
         return stockData;
     }
 
@@ -454,11 +397,11 @@ public static partial class Calculations
             var obvSma = obvSmaList[i];
             var obvStdDev = obvStdDevList[i];
             var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = currentValue + (2 * stdDev) - (sma - (2 * stdDev));
+            var aBot = 4 * stdDev;
             var obv = obvList[i];
             var a = aBot != 0 ? aTop / aBot : 0;
             var bTop = obv - (obvSma - (2 * obvStdDev));
-            var bBot = obvSma + (2 * obvStdDev) - (obvSma - (2 * obvStdDev));
+            var bBot = 4 * obvStdDev;
             var b = bBot != 0 ? bTop / bBot : 0;
 
             var obvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
@@ -533,11 +476,11 @@ public static partial class Calculations
             var nviSma = nviSmaList[i];
             var nviStdDev = nviStdDevList[i];
             var aTop = currentValue - (sma - (2 * stdDev));
-            var aBot = (currentValue + (2 * stdDev)) - (sma - (2 * stdDev));
+            var aBot = 4 * stdDev;
             var nvi = nviList[i];
             var a = aBot != 0 ? aTop / aBot : 0;
             var bTop = nvi - (nviSma - (2 * nviStdDev));
-            var bBot = (nviSma + (2 * nviStdDev)) - (nviSma - (2 * nviStdDev));
+            var bBot = 4 * nviStdDev;
             var b = bBot != 0 ? bTop / bBot : 0;
 
             var nvdi = 1 + b != 0 ? (1 + a) / (1 + b) : 0;
@@ -583,42 +526,21 @@ public static partial class Calculations
     public static StockData CalculateRelativeVolumeIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 60)
     {
-        List<double> relVolList = new(stockData.Count);
-        List<double> dplList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var smaVolumeList = GetMovingAverageList(stockData, maType, length, volumeList);
-        stockData.SetCustomValues(volumeList);
-        var stdDevVolumeList = GetStandardDeviationList(volumeList, length);
-
+        List<double> scores = new(stockData.Count), demands = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new RelativeVolumeWindow(maType, length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var currentValue = inputList[i];
-            var av = smaVolumeList[i];
-            var sd = stdDevVolumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var relVol = sd != 0 ? (currentVolume - av) / sd : 0;
-            relVolList.Add(relVol);
-
-            var prevDpl = i >= 1 ? dplList[i - 1] : 0;
-            var dpl = relVol >= 2 ? prevValue : i >= 1 ? prevDpl : currentValue;
-            dplList.Add(dpl);
-
-            var signal = GetCompareSignal(currentValue - dpl, prevValue - prevDpl);
-            signalsList?.Add(signal);
+            var (score, demand) = window.Next(input[i], stockData.Volumes[i], true);
+            var previousPrice = i == 0 ? 0 : input[i - 1];
+            var previousDemand = i == 0 ? 0 : demands[i - 1];
+            scores.Add(score); demands.Add(demand);
+            signals?.Add(GetCompareSignal(input[i] - demand, previousPrice - previousDemand));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rvi", relVolList },
-            { "Dpl", dplList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(relVolList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rvi", scores }, { "Dpl", demands } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(scores);
         stockData.IndicatorName = IndicatorName.RelativeVolumeIndicator;
-
         return stockData;
     }
 
@@ -633,65 +555,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePriceVolumeOscillator(this StockData stockData, int length1 = 50, int length2 = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> absAList = new(stockData.Count);
-        List<double> absBList = new(stockData.Count);
-        List<double> oscAList = new(stockData.Count);
-        List<double> oscBList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum aSumWindow = new();
-        RollingSum bSumWindow = new();
-        RollingSum absASumWindow = new();
-        RollingSum absBSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> prices = new(stockData.Count), volumes = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var priceWindow = new LaggedBalanceWindow(length1);
+        using var volumeWindow = new LaggedBalanceWindow(length2);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-            var prevVolume = i >= length2 ? volumeList[i - length2] : 0;
-
-            var a = MinPastValues(i, length1, currentValue - prevValue);
-            aList.Add(a);
-            aSumWindow.Add(a);
-
-            var b = MinPastValues(i, length2, currentVolume - prevVolume);
-            bList.Add(b);
-            bSumWindow.Add(b);
-
-            var absA = Math.Abs(a);
-            absAList.Add(absA);
-            absASumWindow.Add(absA);
-
-            var absB = Math.Abs(b);
-            absBList.Add(absB);
-            absBSumWindow.Add(absB);
-
-            var aSum = aSumWindow.Sum(length1);
-            var bSum = bSumWindow.Sum(length2);
-            var absASum = absASumWindow.Sum(length1);
-            var absBSum = absBSumWindow.Sum(length2);
-
-            var oscA = absASum != 0 ? aSum / absASum : 0;
-            oscAList.Add(oscA);
-
-            var oscB = absBSum != 0 ? bSum / absBSum : 0;
-            oscBList.Add(oscB);
-
-            var signal = GetConditionSignal(oscA > 0 && oscB > 0, oscA < 0 && oscB > 0);
-            signalsList?.Add(signal);
+            var price = priceWindow.Next(input[i], true); var volume = volumeWindow.Next(stockData.Volumes[i], true);
+            prices.Add(price); volumes.Add(volume);
+            signals?.Add(GetConditionSignal(price > 0 && volume > 0, price < 0 && volume > 0));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Po", oscAList },
-            { "Vo", oscBList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Po", prices }, { "Vo", volumes } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.PriceVolumeOscillator;
-
         return stockData;
     }
 
@@ -770,7 +647,7 @@ public static partial class Calculations
             var prevVolume = i >= 1 ? volumeList[i - 1] : 0;
 
             var prevMfi = i >= 1 ? mfiList[i - 1] : 0;
-            var mfi = currentVolume != 0 ? (currentHigh - currentLow) / currentVolume : 0;
+            var mfi = RoundedRangeRatio.Of(currentHigh, currentLow, currentVolume);
             mfiList.Add(mfi);
 
             var mfiDiff = mfi - prevMfi;

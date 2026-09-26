@@ -78,8 +78,14 @@ public sealed class MovingAverageTypeParityTests
             IBuiltInIndicator builtIn;
             try
             {
+                var optionsType = type.Assembly.GetType("OoplesFinance.StockIndicators.Builder.Specs." + type.Name + "SpecOptions");
+                bool IsAverageKind(ParameterInfo parameter) => typeof(IMovingAverage).IsAssignableFrom(parameter.ParameterType)
+                    && (optionsType is null || optionsType.GetConstructors().SelectMany(c => c.GetParameters())
+                        .Any(p => string.Equals(p.Name, parameter.Name, StringComparison.OrdinalIgnoreCase)));
+                // Extra stage parameters carry individual periods. This sweep changes the
+                // common average kind; component combinations have their own contract tests.
                 indicator = (IIndicator)constructor.Invoke(constructor.GetParameters()
-                    .Select(p => typeof(IMovingAverage).IsAssignableFrom(p.ParameterType)
+                    .Select(p => IsAverageKind(p)
                         ? Substitute()
                         : p.DefaultValue)
                     .ToArray());
@@ -122,7 +128,7 @@ public sealed class MovingAverageTypeParityTests
             }
             catch (Exception ex)
             {
-                swallowed.Add(type.Name + ": " + ex.GetType().Name);
+                swallowed.Add(type.Name + ": " + ex.GetType().Name + " - " + ex.Message);
                 continue;
             }
 

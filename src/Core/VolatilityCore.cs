@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Buffers;
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators.Core;
 
@@ -124,23 +125,36 @@ internal static class VolatilityCore
             }
 
             // Calculate mean
+            var anchor = input[i - length + 1];
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                sum += input[j];
+                sum += input[j] - anchor;
             }
-            var mean = sum / length;
+            var meanOffset = sum / length;
 
             // Calculate variance
             double variance = 0;
+            var lostSquare = false;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var diff = input[j] - mean;
-                variance += diff * diff;
+                // Keep the mean in translated coordinates: adding a large anchor rounds
+                // away the fractional mean of a tiny spread before variance is evaluated.
+                var diff = (input[j] - anchor) - meanOffset;
+                var square = diff * diff;
+                lostSquare |= diff != 0 && square < 2.2250738585072014E-308;
+                variance += square;
             }
             variance /= length;
 
-            output[i] = Math.Sqrt(variance);
+            if (lostSquare || double.IsNaN(variance) || double.IsInfinity(variance)
+                || variance > 0 && variance < 2.2250738585072014E-308)
+            {
+                var exact = new ExactPopulationDeviation();
+                for (var j = i - length + 1; j <= i; j++) exact.Add(input[j]);
+                output[i] = exact.Value();
+            }
+            else output[i] = Math.Sqrt(variance);
         }
     }
 
@@ -159,37 +173,13 @@ internal static class VolatilityCore
         {
             throw new ArgumentException("Output spans must be at least input length.");
         }
-
+        BollingerArithmetic.Mean(input, middle, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                upper[i] = 0;
-                middle[i] = 0;
-                lower[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate Standard Deviation
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - sma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            middle[i] = sma;
-            upper[i] = sma + (multiplier * stdDev);
-            lower[i] = sma - (multiplier * stdDev);
+            var std = deviation.Next(input[i], true);
+            upper[i] = BollingerArithmetic.Band(middle[i], std, multiplier);
+            lower[i] = BollingerArithmetic.Band(middle[i], std, -multiplier);
         }
     }
 
@@ -209,34 +199,14 @@ internal static class VolatilityCore
         {
             throw new ArgumentException("Output spans must be at least input length.");
         }
-
-        // First compute the MA for the middle band using the registry
-        var maCore = Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(input, middle, length);
-
-        // Then compute bands based on the MA and standard deviation
+        if (maType == Enums.MovingAvgType.SimpleMovingAverage) BollingerArithmetic.Mean(input, middle, length);
+        else Registry.MovingAverageRegistry.GetRequired(maType).Compute(input, middle, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            if (i < length - 1)
-            {
-                upper[i] = 0;
-                lower[i] = 0;
-                continue;
-            }
-
-            var ma = middle[i];
-
-            // Calculate Standard Deviation around the MA
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - ma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            upper[i] = ma + (multiplier * stdDev);
-            lower[i] = ma - (multiplier * stdDev);
+            var std = deviation.Next(input[i], true);
+            upper[i] = BollingerArithmetic.Band(middle[i], std, multiplier);
+            lower[i] = BollingerArithmetic.Band(middle[i], std, -multiplier);
         }
     }
 
@@ -348,33 +318,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void UlcerIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-            // nothing, so the run-in shortens the window instead of blanking it.
-
-            // Find highest close in period
-            var highest = double.MinValue;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                if (close[j] > highest) highest = close[j];
-            }
-
-            // Calculate sum of squared percentage drawdowns
-            double sumSqDd = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var pctDrawdown = highest != 0 ? 100 * (close[j] - highest) / highest : 0;
-                sumSqDd += pctDrawdown * pctDrawdown;
-            }
-
-            output[i] = Math.Sqrt(sumSqDd / length);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DrawdownWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -412,38 +358,9 @@ internal static class VolatilityCore
     internal static void Variance(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            // CalculateVariance returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate mean
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var mean = sum / length;
-
-            // Calculate variance
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - mean;
-                variance += diff * diff;
-            }
-
-            output[i] = variance / length;
-        }
+        using var window = new ExactVarianceWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -456,34 +373,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            StandardDeviation(input, stdDev, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                // Calculate mean
-                double sum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sum += input[j];
-                }
-                var mean = sum / length;
-
-                output[i] = mean != 0 ? (stdDev[i] / mean) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        using var window = new ExactCoefficientWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -492,28 +383,9 @@ internal static class VolatilityCore
     internal static void StandardError(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
         if (output.Length < input.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(input.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, input.Length);
-            StandardDeviation(input, stdDev, length);
-
-            var sqrtLength = Math.Sqrt(length);
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = stdDev[i] / sqrtLength;
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        using var window = new ExactStandardErrorWindow(length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -557,34 +429,14 @@ internal static class VolatilityCore
     /// </summary>
     internal static void BollingerBandsWidth(ReadOnlySpan<double> close, Span<double> output, int length = 20, double multiplier = 2)
     {
-        if (output.Length < close.Length)
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var middle = SpanCompat.CreateOutputBuffer(close.Length);
+        BollingerArithmetic.Mean(close, middle.Span, length);
+        using var deviation = new ExactPopulationWindow(length);
+        for (var i = 0; i < close.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-        var stdDevArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-            StandardDeviation(close, stdDev, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var upper = sma[i] + (multiplier * stdDev[i]);
-                var lower = sma[i] - (multiplier * stdDev[i]);
-                output[i] = sma[i] != 0 ? ((upper - lower) / sma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-            pool.Return(stdDevArray);
+            var std = deviation.Next(close[i], true);
+            output[i] = BollingerArithmetic.Width(middle.Span[i], std, multiplier);
         }
     }
 
@@ -732,6 +584,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        if (close.Length == 0) return;
+
         var pool = ArrayPool<double>.Shared;
         var returnsArray = pool.Rent(close.Length);
 
@@ -742,7 +596,7 @@ internal static class VolatilityCore
             returns[0] = 0;
             for (var i = 1; i < close.Length; i++)
             {
-                returns[i] = close[i - 1] != 0 ? Math.Log(close[i] / close[i - 1]) : 0;
+                returns[i] = close[i - 1] != 0 ? StableLogRatio.OfSameSign(close[i], close[i - 1]) : 0;
             }
 
             StandardDeviation(returns, output, length);
@@ -786,7 +640,7 @@ internal static class VolatilityCore
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logRatio = low[j] != 0 ? Math.Log(high[j] / low[j]) : 0;
+                var logRatio = low[j] != 0 ? StableLogRatio.OfSameSign(high[j], low[j]) : 0;
                 sum += logRatio * logRatio;
             }
 
@@ -804,24 +658,24 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
+        length = Math.Max(1, length);
         var sqrtFactor = Math.Sqrt(252);
 
         for (var i = 0; i < close.Length; i++)
         {
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-            // nothing, so the run-in shortens the window instead of blanking it.
+            if (i < length - 1) { output[i] = 0; continue; }
 
             double sum = 0;
             for (var j = Math.Max(0, i - length + 1); j <= i; j++)
             {
-                var logHL = low[j] != 0 ? Math.Log(high[j] / low[j]) : 0;
-                var logCO = open[j] != 0 ? Math.Log(close[j] / open[j]) : 0;
+                var logHL = low[j] != 0 ? StableLogRatio.OfSameSign(high[j], low[j]) : 0;
+                var logCO = open[j] != 0 ? StableLogRatio.OfSameSign(close[j], open[j]) : 0;
 
                 var term = 0.5 * logHL * logHL - (2 * Math.Log(2) - 1) * logCO * logCO;
                 sum += term;
             }
 
-            output[i] = Math.Sqrt(sum / length) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, sum / length)) * sqrtFactor;
         }
     }
 
@@ -851,15 +705,15 @@ internal static class VolatilityCore
             double sum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
-                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
-                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
-                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+                var logHC = close[j] != 0 ? StableLogRatio.OfSameSign(high[j], close[j]) : 0;
+                var logHO = open[j] != 0 ? StableLogRatio.OfSameSign(high[j], open[j]) : 0;
+                var logLC = close[j] != 0 ? StableLogRatio.OfSameSign(low[j], close[j]) : 0;
+                var logLO = open[j] != 0 ? StableLogRatio.OfSameSign(low[j], open[j]) : 0;
 
                 sum += logHC * logHO + logLC * logLO;
             }
 
-            output[i] = Math.Sqrt(sum / length) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, sum / length)) * sqrtFactor;
         }
     }
 
@@ -894,7 +748,7 @@ internal static class VolatilityCore
             {
                 if (j > 0 && close[j - 1] != 0)
                 {
-                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    var logOC = StableLogRatio.OfSameSign(open[j], close[j - 1]);
                     overnightMean += logOC;
                 }
             }
@@ -904,7 +758,7 @@ internal static class VolatilityCore
             {
                 if (j > 0 && close[j - 1] != 0)
                 {
-                    var logOC = Math.Log(open[j] / close[j - 1]);
+                    var logOC = StableLogRatio.OfSameSign(open[j], close[j - 1]);
                     overnightSum += (logOC - overnightMean) * (logOC - overnightMean);
                 }
             }
@@ -917,7 +771,7 @@ internal static class VolatilityCore
             {
                 if (open[j] != 0)
                 {
-                    var logCO = Math.Log(close[j] / open[j]);
+                    var logCO = StableLogRatio.OfSameSign(close[j], open[j]);
                     ocMean += logCO;
                 }
             }
@@ -927,7 +781,7 @@ internal static class VolatilityCore
             {
                 if (open[j] != 0)
                 {
-                    var logCO = Math.Log(close[j] / open[j]);
+                    var logCO = StableLogRatio.OfSameSign(close[j], open[j]);
                     ocSum += (logCO - ocMean) * (logCO - ocMean);
                 }
             }
@@ -937,17 +791,17 @@ internal static class VolatilityCore
             double rsSum = 0;
             for (var j = i - length + 1; j <= i; j++)
             {
-                var logHC = close[j] != 0 ? Math.Log(high[j] / close[j]) : 0;
-                var logHO = open[j] != 0 ? Math.Log(high[j] / open[j]) : 0;
-                var logLC = close[j] != 0 ? Math.Log(low[j] / close[j]) : 0;
-                var logLO = open[j] != 0 ? Math.Log(low[j] / open[j]) : 0;
+                var logHC = close[j] != 0 ? StableLogRatio.OfSameSign(high[j], close[j]) : 0;
+                var logHO = open[j] != 0 ? StableLogRatio.OfSameSign(high[j], open[j]) : 0;
+                var logLC = close[j] != 0 ? StableLogRatio.OfSameSign(low[j], close[j]) : 0;
+                var logLO = open[j] != 0 ? StableLogRatio.OfSameSign(low[j], open[j]) : 0;
                 rsSum += logHC * logHO + logLC * logLO;
             }
             var rsVar = rsSum / length;
 
             // Yang-Zhang formula
             var yzVar = overnightVar + k * openToCloseVar + (1 - k) * rsVar;
-            output[i] = Math.Sqrt(yzVar) * sqrtFactor;
+            output[i] = Math.Sqrt(Math.Max(0, yzVar)) * sqrtFactor;
         }
     }
 
@@ -997,28 +851,8 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double sumSquaredDownside = 0;
-            var count = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var ret = close[j - 1] > 0 ? (close[j] - close[j - 1]) / close[j - 1] : 0;
-                if (ret < targetReturn)
-                {
-                    sumSquaredDownside += (ret - targetReturn) * (ret - targetReturn);
-                    count++;
-                }
-            }
-
-            output[i] = count > 0 ? Math.Sqrt(sumSquaredDownside / count) : 0;
-        }
+        using var window = new ExactDownsideWindow(length, targetReturn);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>
@@ -1028,27 +862,14 @@ internal static class VolatilityCore
     internal static void AverageDayRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
         if (output.Length < high.Length)
-        {
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-
-        try
+        length = Math.Max(1, length);
+        var sum = new ExactMeanAccumulator();
+        for (var i = 0; i < high.Length; i++)
         {
-            var range = rangeArray.AsSpan(0, high.Length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(range, output, length);
-        }
-        finally
-        {
-            pool.Return(rangeArray);
+            sum.Add(high[i]); sum.Add(low[i], -1);
+            if (i >= length) { sum.Add(high[i - length], -1); sum.Add(low[i - length]); }
+            output[i] = i + 1 < length ? 0 : sum.Mean(length);
         }
     }
 
@@ -1130,22 +951,7 @@ internal static class VolatilityCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        // Calculate moving average as middle line
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = close[i];
-                continue;
-            }
-
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += close[j];
-            }
-            output[i] = sum / length;
-        }
+        MovingAverageCore.LinearRegression(close, output, length);
     }
 
     /// <summary>
@@ -1315,43 +1121,14 @@ internal static class VolatilityCore
     /// <param name="multiplier">Standard deviation multiplier (default 2).</param>
     internal static void BollingerBandsPercentB(ReadOnlySpan<double> input, Span<double> output, int length = 20, double multiplier = 2)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var middle = SpanCompat.CreateOutputBuffer(input.Length);
+        BollingerArithmetic.Mean(input, middle.Span, length);
+        using var deviation = new ExactPopulationWindow(length);
         for (var i = 0; i < input.Length; i++)
         {
-            // CalculateBollingerBandsPercentB returns nothing until the window fills, so the run-in
-            // stays blank here too.
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate SMA
-            double sum = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sum += input[j];
-            }
-            var sma = sum / length;
-
-            // Calculate Standard Deviation
-            double variance = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var diff = input[j] - sma;
-                variance += diff * diff;
-            }
-            var stdDev = Math.Sqrt(variance / length);
-
-            var upperBand = sma + (multiplier * stdDev);
-            var lowerBand = sma - (multiplier * stdDev);
-            var bandWidth = upperBand - lowerBand;
-
-            output[i] = bandWidth != 0 ? ((input[i] - lowerBand) / bandWidth) * 100 : 0;
+            var std = deviation.Next(input[i], true);
+            output[i] = BollingerArithmetic.Percent(input[i], middle.Span[i], std, multiplier);
         }
     }
 

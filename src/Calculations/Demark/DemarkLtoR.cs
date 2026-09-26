@@ -76,54 +76,23 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDemarkPressureRatioV1(this StockData stockData, int length = 13)
     {
-        List<double> bpList = new(stockData.Count);
-        List<double> spList = new(stockData.Count);
-        List<double> pressureRatioList = new(stockData.Count);
-        var bpSumWindow = new RollingSum();
-        var spSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (close, _, _, _, _) = GetInputValuesList(stockData);
+        var high = stockData.HighPrices; var low = stockData.LowPrices;
+        var open = stockData.OpenPrices; var volume = stockData.Volumes;
+        using var pressure = new DemarkPressureWindow(length, false);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
-            var prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
-            var gapup = prevClose != 0 ? (currentOpen - prevClose) / prevClose : 0;
-            var gapdown = currentOpen != 0 ? (prevClose - currentOpen) / currentOpen : 0;
-
-            var bp = gapup > 0.15 ? (currentHigh - prevClose + currentClose - currentLow) * currentVolume :
-                currentClose > currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
-            bpList.Add(bp);
-            bpSumWindow.Add(bp);
-
-            var sp = gapdown > 0.15 ? (prevClose - currentLow + currentHigh - currentClose) * currentVolume :
-                currentClose < currentOpen ? (currentClose - currentOpen) * currentVolume : 0;
-            spList.Add(sp);
-            spSumWindow.Add(sp);
-
-            var bpSum = bpSumWindow.Sum(length);
-            var spSum = spSumWindow.Sum(length);
-
-            var pressureRatio = bpSum - spSum != 0 ? MinOrMax(100 * bpSum / (bpSum - spSum), 100, 0) : 0;
-            pressureRatioList.Add(pressureRatio);
-
-            var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
-            signalsList?.Add(signal);
+            var value = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            var beforePrevious = i < 2 ? 0 : output[i - 2];
+            output.Add(value);
+            signals?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 75, 25));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dpr", pressureRatioList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pressureRatioList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dpr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.DemarkPressureRatioV1;
-
         return stockData;
     }
 
@@ -137,53 +106,23 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDemarkPressureRatioV2(this StockData stockData, int length = 10)
     {
-        List<double> bpList = new(stockData.Count);
-        List<double> spList = new(stockData.Count);
-        List<double> pressureRatioList = new(stockData.Count);
-        var bpSumWindow = new RollingSum();
-        var spSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (close, _, _, _, _) = GetInputValuesList(stockData);
+        var high = stockData.HighPrices; var low = stockData.LowPrices;
+        var open = stockData.OpenPrices; var volume = stockData.Volumes;
+        using var pressure = new DemarkPressureWindow(length, true);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            var currentVolume = volumeList[i];
-            var delta = currentClose - currentOpen;
-            var trueRange = currentHigh - currentLow;
-            var ratio = trueRange != 0 ? delta / trueRange : 0;
-            var prevPr1 = i >= 1 ? pressureRatioList[i - 1] : 0;
-            var prevPr2 = i >= 2 ? pressureRatioList[i - 2] : 0;
-
-            var buyingPressure = delta > 0 ? ratio * currentVolume : 0;
-            bpList.Add(buyingPressure);
-            bpSumWindow.Add(buyingPressure);
-
-            var sellingPressure = delta < 0 ? ratio * currentVolume : 0;
-            spList.Add(sellingPressure);
-            spSumWindow.Add(sellingPressure);
-
-            var bpSum = bpSumWindow.Sum(length);
-            var spSum = spSumWindow.Sum(length);
-            var denom = bpSum + Math.Abs(spSum);
-
-            var pressureRatio = denom != 0 ? MinOrMax(100 * bpSum / denom, 100, 0) : 50;
-            pressureRatioList.Add(pressureRatio);
-
-            var signal = GetRsiSignal(pressureRatio - prevPr1, prevPr1 - prevPr2, pressureRatio, prevPr1, 75, 25);
-            signalsList?.Add(signal);
+            var value = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            var beforePrevious = i < 2 ? 0 : output[i - 2];
+            output.Add(value);
+            signals?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 75, 25));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dpr", pressureRatioList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pressureRatioList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dpr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.DemarkPressureRatioV2;
-
         return stockData;
     }
 

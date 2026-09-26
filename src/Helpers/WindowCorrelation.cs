@@ -31,6 +31,15 @@ internal static class WindowCorrelation
         {
             return 0;
         }
+        if (n == 2)
+        {
+            if (double.IsNaN(x[0]) || double.IsNaN(x[1]) || double.IsNaN(y[0]) || double.IsNaN(y[1])
+                || double.IsInfinity(x[0]) || double.IsInfinity(x[1]) || double.IsInfinity(y[0]) || double.IsInfinity(y[1]))
+                return double.NaN;
+            // Two nonconstant pairs have exactly +/-1 correlation. Evaluating rounded
+            // means can leave a residue which accumulates into a false sign change.
+            return Math.Sign(x[1].CompareTo(x[0])) * Math.Sign(y[1].CompareTo(y[0]));
+        }
 
         double sumX = 0, sumY = 0;
         for (var i = 0; i < n; i++)

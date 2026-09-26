@@ -271,37 +271,15 @@ public sealed class EhlersHannWindowIndicatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Hp")]
 public sealed class EhlersHighPassFilterV1State : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private readonly HighPassFilterV1Engine _engine;
-
-    public EhlersHighPassFilterV1State(int length = 125, double mult = 1)
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _engine = new HighPassFilterV1Engine(Math.Max(1, length), mult);
-    }
-
+    private readonly HighPassWindow _window;
+    public EhlersHighPassFilterV1State(int length = 125, double mult = 1) => _window = new(length, mult);
     public IndicatorName Name => IndicatorName.EhlersHighPassFilterV1;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var hp = _engine.Next(value, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hp", hp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hp, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Hp", value } } : null);
     }
 }
 
@@ -492,6 +470,7 @@ public sealed class EhlersHilbertTransformerState : IStreamingIndicatorState, ID
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _engine.Next(bar, isFinal, out var real, out var imag);
 
         IReadOnlyDictionary<string, double>? outputs = null;
@@ -555,6 +534,7 @@ public sealed class EhlersHilbertTransformerIndicatorState : IStreamingIndicator
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
         var real = peak != 0 ? roofingFilter / peak : 0;
@@ -636,12 +616,14 @@ public sealed class EhlersHomodyneDominantCycleState : IStreamingIndicatorState,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _engine.Next(bar, isFinal, out var real, out var imag);
 
         var re = (real * _prevReal1) + (imag * _prevImag1);
         var im = (_prevReal1 * imag) - (real * _prevImag1);
 
-        var period = im != 0 && re != 0 ? 2 * Math.PI / Math.Abs(im / re) : 0;
+        var advance = Math.Abs(Math.Atan2(im, re));
+        var period = advance != 0 ? 2 * Math.PI / advance : 0;
         period = MathHelper.MinOrMax(period, _length1, _length3);
 
         var domCyc = (_c1 * ((period + _prevPeriod) / 2)) + (_c2 * _prevDomCyc1) + (_c3 * _prevDomCyc2);
@@ -942,62 +924,17 @@ public sealed class EhlersImpulseReactionState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Eiirf")]
 public sealed class EhlersInfiniteImpulseResponseFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly int _lag;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevFilter;
-    private int _index;
-
-    public EhlersInfiniteImpulseResponseFilterState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = 2.0 / (resolved + 1);
-        _lag = MathHelper.MinOrMax((int)Math.Ceiling((1 / _alpha) - 1));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_lag);
-    }
-
+    private readonly EhlersIirWindow _window;
+    public EhlersInfiniteImpulseResponseFilterState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersInfiniteImpulseResponseFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevFilter = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _lag);
-        var diff = _index >= _lag ? value - prevValue : 0;
-        var prevFilter = _index >= 1 ? _prevFilter : 0;
-        var filter = (_alpha * (value + diff)) + ((1 - _alpha) * prevFilter);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevFilter = filter;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eiirf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eiirf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eipi")]
@@ -1240,6 +1177,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 {
     private readonly StreamingInputResolver _input;
     private readonly RsiState _rsi;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _smoother;
 
     public EhlersInverseFisherTransformState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
@@ -1249,6 +1187,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
         var resolvedLength2 = Math.Max(1, length2);
         _input = new StreamingInputResolver(InputName.Close, null);
         _rsi = new RsiState(maType, resolvedLength1);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, resolvedLength2);
         _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
     }
 
@@ -1256,6 +1195,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _rsi.Reset();
         _smoother.Reset();
     }
@@ -1265,11 +1205,8 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
         var value = _input.GetValue(bar);
         var rsi = _rsi.Next(value, isFinal);
         var v1 = 0.1 * (rsi - 50);
-        var v2 = _smoother.Next(v1, isFinal);
-        var bottom = MathHelper.Exp(2 * v2) + 1;
-        var inverseFisherTransform = bottom != 0
-            ? MathHelper.MinOrMax((MathHelper.Exp(2 * v2) - 1) / bottom, 1, -1)
-            : 0;
+        var v2 = _exactAverage is null ? _smoother.Next(v1, isFinal) : _exactAverage.Next(new StrengthValue(v1), isFinal).Mantissa;
+        var inverseFisherTransform = Math.Tanh(v2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1285,6 +1222,7 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _rsi.Dispose();
         _smoother.Dispose();
     }
@@ -1293,129 +1231,25 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 [PrimaryOutput("Ekama")]
 public sealed class EhlersKaufmanAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly RollingWindowSum _diffSum;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevValue;
-    private double _prevKama;
-    private bool _hasPrev;
-    private int _index;
-
-    public EhlersKaufmanAdaptiveMovingAverageState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _diffSum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersKaufmanWindow _window;
+    public EhlersKaufmanAdaptiveMovingAverageState(int length = 20) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersKaufmanAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _diffSum.Reset();
-        _values.Clear();
-        _prevValue = 0;
-        _prevKama = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = Math.Abs(value - prevValue);
-        var diffSum = isFinal ? _diffSum.Add(diff, out _) : _diffSum.Preview(diff, out _);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length - 1);
-        var ef = diffSum != 0 ? Math.Min(Math.Abs(value - priorValue) / diffSum, 1) : 0;
-        var s = MathHelper.Pow((0.6667 * ef) + 0.0645, 2);
-        var prevKama = _index >= 1 ? _prevKama : 0;
-        var kama = (s * value) + ((1 - s) * prevKama);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevValue = value;
-            _prevKama = kama;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ekama", kama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kama, outputs);
-    }
-
-    public void Dispose()
-    {
-        _diffSum.Dispose();
-        _values.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ekama", value } } : null);
     }
 }
 
 internal sealed class EhlersHammingMovingAverageSmoother : IMovingAverageSmoother
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersHammingMovingAverageSmoother(int length, double pedestal = 3)
-    {
-        _length = Math.Max(1, length);
-        _weights = new double[_length];
-        double sum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var weight = Math.Sin(pedestal + ((Math.PI - (2 * pedestal)) * ((double)j / (_length - 1))));
-            _weights[j] = weight;
-            sum += weight;
-        }
-
-        _weightSum = sum;
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var count = _values.Count;
-        double sum = _weights[0] * value;
-
-        for (var j = 1; j < _length; j++)
-        {
-            var offset = j;
-            var prevValue = offset <= count ? _values[count - offset] : 0;
-            sum += _weights[j] * prevValue;
-        }
-
-        var result = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        return result;
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    private readonly HammingWindowMean _mean;
+    public EhlersHammingMovingAverageSmoother(int length, double pedestal = 3) => _mean = new HammingWindowMean(length, pedestal);
+    public double Next(double value, bool isFinal) => _mean.Next(value, isFinal);
+    public void Reset() => _mean.Reset();
+    public void Dispose() => _mean.Dispose();
 }
 
 internal sealed class EhlersHilbertTransformIndicatorEngine : IDisposable

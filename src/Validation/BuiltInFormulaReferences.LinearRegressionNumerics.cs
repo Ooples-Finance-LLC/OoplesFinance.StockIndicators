@@ -1,0 +1,72 @@
+using OoplesFinance.StockIndicators.Indicators;
+
+namespace OoplesFinance.StockIndicators.Validation;
+
+internal static partial class BuiltInFormulaReferences
+{
+    internal static IReadOnlyDictionary<string, double[]> RoundedLinearRegression(IReadOnlyList<Bar> bars, int length)
+    {
+        var fit = new double[bars.Count]; var next = new double[bars.Count];
+        var slopes = new double[bars.Count]; var intercepts = new double[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            var count = Math.Min(i + 1, length);
+            var values = bars.Skip(i - count + 1).Take(count).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            var mean = values.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / new ReferenceFraction(count);
+            var center = new ReferenceFraction(count - 1) / new ReferenceFraction(2);
+            var xx = new ReferenceFraction(0); var xy = new ReferenceFraction(0);
+            for (var j = 0; j < count; j++)
+            {
+                var position = new ReferenceFraction(j) - center;
+                xx += position * position;
+                xy += position * (values[j] - mean);
+            }
+            var slope = count == 1 ? new ReferenceFraction(0) : xy / xx;
+            slopes[i] = slope.ToDouble();
+            fit[i] = (mean + slope * center).ToDouble();
+            next[i] = (mean + slope * (center + new ReferenceFraction(1))).ToDouble();
+            intercepts[i] = (mean + slope * (center - new ReferenceFraction(i))).ToDouble();
+        }
+        return Outputs(("LinearRegression", fit), ("PredictedTomorrow", next), ("Slope", slopes), ("Intercept", intercepts));
+    }
+    internal static double[] RoundedRSquared(IReadOnlyList<Bar> bars, int length)
+    {
+        return bars.Select((_, i) =>
+        {
+            if (i + 1 < length || length == 1) return 0d;
+            var values = bars.Skip(i - length + 1).Take(length).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            var mean = values.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / new ReferenceFraction(length);
+            var center = new ReferenceFraction(length - 1) / new ReferenceFraction(2);
+            var xx = new ReferenceFraction(0); var xy = new ReferenceFraction(0); var yy = new ReferenceFraction(0);
+            for (var j = 0; j < length; j++)
+            {
+                var x = new ReferenceFraction(j) - center;
+                var y = values[j] - mean;
+                xx += x * x; xy += x * y; yy += y * y;
+            }
+            return yy.Sign == 0 ? 0 : (xy * xy / (xx * yy)).ToDouble();
+        }).ToArray();
+    }
+    internal static IReadOnlyDictionary<string, double[]> RoundedRegressionChannel(IReadOnlyList<Bar> bars, int length, double multiplier)
+    {
+        var deviation = PopulationDeviation(bars.Select(b => b.Close).ToArray(), length);
+        var middle = new double[bars.Count]; var upper = new double[bars.Count]; var lower = new double[bars.Count];
+        for (var i = 0; i < bars.Count; i++)
+        {
+            var count = Math.Min(length, i + 1);
+            var values = bars.Skip(i - count + 1).Take(count).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            var mean = values.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / new ReferenceFraction(count);
+            var center = new ReferenceFraction(count - 1) / new ReferenceFraction(2);
+            var xx = new ReferenceFraction(0); var xy = new ReferenceFraction(0);
+            for (var j = 0; j < count; j++)
+            {
+                var x = new ReferenceFraction(j) - center;
+                xx += x * x; xy += x * (values[j] - mean);
+            }
+            var endpoint = count == 1 ? mean : mean + xy / xx * center;
+            var width = ReferenceFraction.FromDouble(deviation[i]) * ReferenceFraction.FromDouble(multiplier);
+            middle[i] = endpoint.ToDouble(); upper[i] = (endpoint + width).ToDouble(); lower[i] = (endpoint - width).ToDouble();
+        }
+        return Outputs(("UpperBand", upper), ("MiddleBand", middle), ("LowerBand", lower));
+    }
+}

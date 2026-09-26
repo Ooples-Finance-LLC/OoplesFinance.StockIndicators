@@ -91,19 +91,16 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.ChainedOutputs["UpperBand"];
-        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
+        var middleBandList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var deviation = new ExactPopulationWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var upperBand = upperBandList[i];
-            var lowerBand = lowerBandList[i];
             var prevPctB1 = i >= 1 ? pctBList[i - 1] : 0;
             var prevPctB2 = i >= 2 ? pctBList[i - 2] : 0;
 
-            var pctB = upperBand - lowerBand != 0 ? (currentValue - lowerBand) / (upperBand - lowerBand) * 100 : 0;
+            var pctB = BollingerArithmetic.Percent(currentValue, middleBandList[i], deviation.Next(currentValue, true), stdDevMult);
             pctBList.Add(pctB);
 
             var signal = GetRsiSignal(pctB - prevPctB1, prevPctB1 - prevPctB2, pctB, prevPctB1, 100, 0);
@@ -137,22 +134,18 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = bbList.ChainedOutputs["UpperBand"];
-        var lowerBandList = bbList.ChainedOutputs["LowerBand"];
-        var middleBandList = bbList.ChainedOutputs["MiddleBand"];
+        var middleBandList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
+        using var deviation = new ExactPopulationWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var upperBand = upperBandList[i];
-            var lowerBand = lowerBandList[i];
             var middleBand = middleBandList[i];
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? middleBandList[i - 1] : 0;
 
             var prevBbWidth = GetLastOrDefault(bbWidthList);
-            var bbWidth = middleBand != 0 ? (upperBand - lowerBand) / middleBand : 0;
+            var bbWidth = BollingerArithmetic.Width(middleBand, deviation.Next(currentValue, true), stdDevMult);
             bbWidthList.Add(bbWidth);
 
             var signal = GetVolatilitySignal(currentValue - middleBand, prevValue - prevMiddleBand, bbWidth, prevBbWidth);
@@ -231,6 +224,8 @@ public static partial class Calculations
         // divisor, so a value about 55% high moved the band and shrank the result at once. See #190.
         var zlhaTemaStdDevList = GetStandardDeviationList(zlhaTemaList, length1);
         var wmaZlhaTemaList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, length1, zlhaTemaList);
+        using var precise = Builder.Compute.ComponentAverage.HasOverrides ? null
+            : new Streaming.VervoortModifiedBandPosition(maType, length1, smoothLength);
         for (var i = 0; i < stockData.Count; i++)
         {
             var zihaTema = zlhaTemaList[i];
@@ -238,6 +233,7 @@ public static partial class Calculations
             var wmaZihaTema = wmaZlhaTemaList[i];
 
             var percb = zihaTemaStdDev != 0 ? (zihaTema + (2 * zihaTemaStdDev) - wmaZihaTema) / (4 * zihaTemaStdDev) * 100 : 0;
+            if (precise is not null) percb = precise.Next(inputList[i], highList[i], lowList[i], true);
             percbList.Add(percb);
         }
 

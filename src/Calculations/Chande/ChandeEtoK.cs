@@ -71,15 +71,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
+        using var regression = new ExactLinearFitWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var currentLinReg = linRegList[i];
 
             var prevPf = GetLastOrDefault(pfList);
-            var pf = currentValue != 0 ? (currentValue - currentLinReg) * 100 / currentValue : 0;
+            var pf = regression.Next(currentValue, true).PercentResidual(currentValue);
             pfList.Add(pf);
 
             var signal = GetCompareSignal(pf, prevPf);
@@ -107,10 +106,7 @@ public static partial class Calculations
     public static StockData CalculateChandeIntradayMomentumIndex(this StockData stockData, int length = 14)
     {
         List<double> imiUnfilteredList = new(stockData.Count);
-        List<double> gainsList = new(stockData.Count);
-        List<double> lossesList = new(stockData.Count);
-        var gainsSumWindow = new RollingSum();
-        var lossesSumWindow = new RollingSum();
+        using var window = new IntradayGainLossWindow(length, stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
 
@@ -121,20 +117,7 @@ public static partial class Calculations
             var prevImi1 = i >= 1 ? imiUnfilteredList[i - 1] : 0;
             var prevImi2 = i >= 2 ? imiUnfilteredList[i - 2] : 0;
 
-            var prevGains = GetLastOrDefault(gainsList);
-            var gains = currentClose > currentOpen ? prevGains + (currentClose - currentOpen) : 0;
-            gainsList.Add(gains);
-            gainsSumWindow.Add(gains);
-
-            var prevLosses = GetLastOrDefault(lossesList);
-            var losses = currentClose < currentOpen ? prevLosses + (currentOpen - currentClose) : 0;
-            lossesList.Add(losses);
-            lossesSumWindow.Add(losses);
-
-            var upt = gainsSumWindow.Sum(length);
-            var dnt = lossesSumWindow.Sum(length);
-
-            var imiUnfiltered = upt + dnt != 0 ? MinOrMax(100 * upt / (upt + dnt), 100, 0) : 0;
+            var imiUnfiltered = window.Next(currentClose, currentOpen, true);
             imiUnfilteredList.Add(imiUnfiltered);
 
             var signal = GetRsiSignal(imiUnfiltered - prevImi1, prevImi1 - prevImi2, imiUnfiltered, prevImi1, 70, 30);

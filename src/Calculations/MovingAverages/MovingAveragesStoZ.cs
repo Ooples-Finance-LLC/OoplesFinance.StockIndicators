@@ -1,4 +1,4 @@
-using OoplesFinance.StockIndicators.Compatibility;
+﻿using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Core;
 
 namespace OoplesFinance.StockIndicators;
@@ -84,11 +84,8 @@ public static partial class Calculations
         if (maType == MovingAvgType.SimpleMovingAverage)
         {
             var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-            var smaBuffer = new double[count];
-            MovingAverageCore.SimpleMovingAverage(inputSpan, smaBuffer, length);
-
             var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-            MovingAverageCore.SimpleMovingAverage(smaBuffer, outputBuffer.Span, length);
+            MovingAverageCore.TriangularMovingAverage(inputSpan, outputBuffer.Span, length);
             tmaList = outputBuffer.ToList();
         }
         else
@@ -168,34 +165,35 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var c1 = -vFactor * vFactor * vFactor;
-        var c2 = (3 * vFactor * vFactor) + (3 * vFactor * vFactor * vFactor);
-        var c3 = (-6 * vFactor * vFactor) - (3 * vFactor) - (3 * vFactor * vFactor * vFactor);
-        var c4 = 1 + (3 * vFactor) + (vFactor * vFactor * vFactor) + (3 * vFactor * vFactor);
+        var coefficients = new TillsonWindow.Coefficients(vFactor);
 
-        var ema1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, length, ema1List);
-        var ema3List = GetMovingAverageList(stockData, maType, length, ema2List);
-        var ema4List = GetMovingAverageList(stockData, maType, length, ema3List);
-        var ema5List = GetMovingAverageList(stockData, maType, length, ema4List);
-        var ema6List = GetMovingAverageList(stockData, maType, length, ema5List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (!Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ema6 = ema6List[i];
-            var ema5 = ema5List[i];
-            var ema4 = ema4List[i];
-            var ema3 = ema3List[i];
-
-            var prevT3 = GetLastOrDefault(t3List);
-            var t3 = (c1 * ema6) + (c2 * ema5) + (c3 * ema4) + (c4 * ema3);
-            t3List.Add(t3);
-
-            var signal = GetCompareSignal(currentValue - t3, prevValue - prevT3);
-            signalsList?.Add(signal);
+            using var window = new TillsonWindow(maType, length, vFactor);
+            foreach (var price in inputList) t3List.Add(window.Next(price, true));
         }
+        else
+        {
+            var ema1List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            var ema2List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema1List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema1List);
+            var ema3List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema2List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema2List);
+            var ema4List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema3List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema3List);
+            var ema5List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema4List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema4List);
+            var ema6List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema5List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema5List);
+
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var ema6 = ema6List[i];
+                var ema5 = ema5List[i];
+                var ema4 = ema4List[i];
+                var ema3 = ema3List[i];
+
+                var t3 = coefficients.Combine(ema3, ema4, ema5, ema6);
+                t3List.Add(t3);
+
+            }
+        }
+        for (var i = 0; i < inputList.Count; i++) signalsList?.Add(GetCompareSignal(inputList[i] - t3List[i], i == 0 ? 0 : inputList[i - 1] - t3List[i - 1]));
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "T3", t3List }
@@ -236,7 +234,7 @@ public static partial class Calculations
             var currentEma3 = ema3List[i];
 
             var prevTema = GetLastOrDefault(temaList);
-            var tema = (3 * currentEma1) - (3 * currentEma2) + currentEma3;
+            var tema = ExponentialExtrapolation.Triple(currentEma1, currentEma2, currentEma3);
             temaList.Add(tema);
 
             var signal = GetCompareSignal(currentValue - tema, prevValue - prevTema);
@@ -263,12 +261,10 @@ public static partial class Calculations
     public static StockData CalculateVolumeWeightedAveragePrice(this StockData stockData)
     {
         List<double> vwapList = new(stockData.Count);
-        List<double> tempVolList = new(stockData.Count);
-        List<double> tempVolPriceList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double tempVolSum = 0;
-        double tempVolPriceSum = 0;
-        var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        var customInput = stockData.ChainedValues.Count > 0;
+        var (inputList, highList, lowList, _, closeList, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
+        var mean = new ExactVolumeMean();
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -276,18 +272,10 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var currentVolume = volumeList[i];
-            tempVolList.Add(currentVolume);
-            tempVolSum += currentVolume;
-
-            var volumePrice = currentValue * currentVolume;
-            tempVolPriceList.Add(volumePrice);
-            tempVolPriceSum += volumePrice;
-
-            var volPriceSum = tempVolPriceSum;
-            var volSum = tempVolSum;
-
+            if (customInput) mean.Add(currentValue, currentVolume);
+            else mean.AddTypical(highList[i], lowList[i], closeList[i], currentVolume);
             var prevVwap = GetLastOrDefault(vwapList);
-            var vwap = volSum != 0 ? volPriceSum / volSum : 0;
+            var vwap = mean.Value();
             vwapList.Add(vwap);
 
             var signal = GetCompareSignal(currentValue - vwap, prevValue - prevVwap);
@@ -316,42 +304,19 @@ public static partial class Calculations
     public static StockData CalculateVolumeWeightedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
-        List<double> volumePriceList = new(stockData.Count);
-        List<double> vwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumePriceSum = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        using var window = new VolumeWeightedWindow(maType, length, false);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volume), length)?.ToList()
+            ?? GetMovingAverageList(stockData, maType, length, volume) : null;
+        List<double> line = new(input.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var currentVolumeSma = volumeSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var volumePrice = currentValue * currentVolume;
-            volumePriceList.Add(volumePrice);
-            volumePriceSum.Add(volumePrice);
-
-            var volumePriceSma = volumePriceSum.Average(length);
-
-            var prevVwma = GetLastOrDefault(vwmaList);
-            var vwma = currentVolumeSma != 0 ? volumePriceSma / currentVolumeSma : 0;
-            vwmaList.Add(vwma);
-
-            var signal = GetCompareSignal(currentValue - vwma, prevValue - prevVwma);
-            signalsList?.Add(signal);
+            var value = external ? window.NextWithAverage(input[i], volume[i], means![i], true) : window.Next(input[i], volume[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vwma", vwmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vwmaList);
-        stockData.IndicatorName = IndicatorName.VolumeWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vwma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolumeWeightedMovingAverage;
         return stockData;
     }
 
@@ -508,40 +473,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZeroLowLagMovingAverage(this StockData stockData, int length = 50, double lag = 1.4)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var lbLength = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ZeroLowLagWindow(length, lag);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorB = i >= lbLength ? bList[i - lbLength] : currentValue;
-            var priorA = i >= length ? aList[i - length] : 0;
-
-            var prevA = GetLastOrDefault(aList);
-            var a = (lag * currentValue) + ((1 - lag) * priorB) + prevA;
-            aList.Add(a);
-
-            var aDiff = a - priorA;
-            var prevB = GetLastOrDefault(bList);
-            var b = aDiff / length;
-            bList.Add(b);
-
-            var signal = GetCompareSignal(currentValue - b, prevValue - prevB);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Zllma", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.ZeroLowLagMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Zllma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ZeroLowLagMovingAverage;
         return stockData;
     }
 
@@ -570,10 +511,9 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var ema1 = ema1List[i];
             var ema2 = ema2List[i];
-            var d = ema1 - ema2;
 
             var prevZema = GetLastOrDefault(zemaList);
-            var zema = ema1 + d;
+            var zema = ExponentialExtrapolation.Double(ema1, ema2);
             zemaList.Add(zema);
 
             var signal = GetCompareSignal(currentValue - zema, prevValue - prevZema);
@@ -602,36 +542,23 @@ public static partial class Calculations
     public static StockData CalculateZeroLagTripleExponentialMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14)
     {
-        List<double> zlTemaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var tma1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var tma2List = GetMovingAverageList(stockData, maType, length, tma1List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || (maType != MovingAvgType.TripleExponentialMovingAverage && !StrengthWindow.Supports(maType));
+        List<double>? first = null, second = null;
+        using var window = new ZeroLagTripleWindow(maType, length, initializeFallback: !custom);
+        if (custom)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var tma1 = tma1List[i];
-            var tma2 = tma2List[i];
-            var diff = tma1 - tma2;
-
-            var prevZltema = GetLastOrDefault(zlTemaList);
-            var zltema = tma1 + diff;
-            zlTemaList.Add(zltema);
-
-            var signal = GetCompareSignal(currentValue - zltema, prevValue - prevZltema);
-            signalsList?.Add(signal);
+            first = GetMovingAverageList(stockData, maType, length, input);
+            second = GetMovingAverageList(stockData, maType, length, first);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ztema", zlTemaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zlTemaList);
-        stockData.IndicatorName = IndicatorName.ZeroLagTripleExponentialMovingAverage;
-
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true, first?[i], second?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ztema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ZeroLagTripleExponentialMovingAverage;
         return stockData;
     }
 
@@ -645,85 +572,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWindowedVolumeWeightedMovingAverage(this StockData stockData, int length = 100)
     {
-        List<double> bartlettWList = new(stockData.Count);
-        List<double> blackmanWList = new(stockData.Count);
-        List<double> hanningWList = new(stockData.Count);
-        List<double> bartlettVWList = new(stockData.Count);
-        List<double> blackmanVWList = new(stockData.Count);
-        List<double> hanningVWList = new(stockData.Count);
-        List<double> bartlettWvwmaList = new(stockData.Count);
-        List<double> blackmanWvwmaList = new(stockData.Count);
-        List<double> hanningWvwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum bartlettWSumWindow = new();
-        RollingSum bartlettVWSumWindow = new();
-        RollingSum blackmanWSumWindow = new();
-        RollingSum blackmanVWSumWindow = new();
-        RollingSum hanningWSumWindow = new();
-        RollingSum hanningVWSumWindow = new();
         var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var iRatio = (double)i / length;
-            var bartlett = 1 - (2 * Math.Abs(i - ((double)length / 2)) / length);
-
-            var bartlettW = bartlett * currentVolume;
-            bartlettWList.Add(bartlettW);
-            bartlettWSumWindow.Add(bartlettW);
-
-            var bartlettWSum = bartlettWSumWindow.Sum(length);
-            var bartlettVW = currentValue * bartlettW;
-            bartlettVWList.Add(bartlettVW);
-            bartlettVWSumWindow.Add(bartlettVW);
-
-            var bartlettVWSum = bartlettVWSumWindow.Sum(length);
-            var prevBartlettWvwma = GetLastOrDefault(bartlettWvwmaList);
-            var bartlettWvwma = bartlettWSum != 0 ? bartlettVWSum / bartlettWSum : 0;
-            bartlettWvwmaList.Add(bartlettWvwma);
-
-            var blackman = 0.42 - (0.5 * Math.Cos(2 * Math.PI * iRatio)) + (0.08 * Math.Cos(4 * Math.PI * iRatio));
-            var blackmanW = blackman * currentVolume;
-            blackmanWList.Add(blackmanW);
-            blackmanWSumWindow.Add(blackmanW);
-
-            var blackmanWSum = blackmanWSumWindow.Sum(length);
-            var blackmanVW = currentValue * blackmanW;
-            blackmanVWList.Add(blackmanVW);
-            blackmanVWSumWindow.Add(blackmanVW);
-
-            var blackmanVWSum = blackmanVWSumWindow.Sum(length);
-            var blackmanWvwma = blackmanWSum != 0 ? blackmanVWSum / blackmanWSum : 0;
-            blackmanWvwmaList.Add(blackmanWvwma);
-
-            var hanning = 0.5 - (0.5 * Math.Cos(2 * Math.PI * iRatio));
-            var hanningW = hanning * currentVolume;
-            hanningWList.Add(hanningW);
-            hanningWSumWindow.Add(hanningW);
-
-            var hanningWSum = hanningWSumWindow.Sum(length);
-            var hanningVW = currentValue * hanningW;
-            hanningVWList.Add(hanningVW);
-            hanningVWSumWindow.Add(hanningVW);
-
-            var hanningVWSum = hanningVWSumWindow.Sum(length);
-            var hanningWvwma = hanningWSum != 0 ? hanningVWSum / hanningWSum : 0;
-            hanningWvwmaList.Add(hanningWvwma);
-
-            var signal = GetCompareSignal(currentValue - bartlettWvwma, prevValue - prevBartlettWvwma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wvwma", bartlettWvwmaList }
-        });
+        var values = new double[inputList.Count];
+        Core.MovingAverageCore.WindowedVolumeWeightedMovingAverage(inputList.ToArray(), volumeList.ToArray(), values, length);
+        var result = values.ToList();
+        List<Signal>? signalsList = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Length; i++)
+            signalsList?.Add(GetCompareSignal(inputList[i] - values[i], i == 0 ? 0 : inputList[i - 1] - values[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wvwma", result } });
         stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bartlettWvwmaList);
+        stockData.SetCustomValues(result);
         stockData.IndicatorName = IndicatorName.WindowedVolumeWeightedMovingAverage;
-
         return stockData;
     }
 
@@ -737,58 +596,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWellRoundedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> srcYList = new(stockData.Count);
-        List<double> srcEmaList = new(stockData.Count);
-        List<double> yEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new WellRoundedWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSrcY = i >= 1 ? srcYList[i - 1] : 0;
-            var prevSrcEma = i >= 1 ? srcEmaList[i - 1] : 0;
-
-            var prevA = GetLastOrDefault(aList);
-            var a = prevA + (alpha * prevSrcY);
-            aList.Add(a);
-
-            var prevB = GetLastOrDefault(bList);
-            var b = prevB + (alpha * prevSrcEma);
-            bList.Add(b);
-
-            var ab = a + b;
-            var prevY = GetLastOrDefault(yList);
-            var y = CalculateEMA(ab, prevY, 1);
-            yList.Add(y);
-
-            var srcY = currentValue - y;
-            srcYList.Add(srcY);
-
-            var prevYEma = GetLastOrDefault(yEmaList);
-            var yEma = CalculateEMA(y, prevYEma, length);
-            yEmaList.Add(yEma);
-
-            var srcEma = currentValue - yEma;
-            srcEmaList.Add(srcEma);
-
-            var signal = GetCompareSignal(currentValue - y, prevValue - prevY);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wrma", yList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(yList);
-        stockData.IndicatorName = IndicatorName.WellRoundedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wrma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.WellRoundedMovingAverage;
         return stockData;
     }
 
@@ -806,13 +622,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var window = new WilderSummationWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevSum = GetLastOrDefault(sumList);
-            var sum = prevSum - (prevSum / length) + currentValue;
+            var sum = window.Next(currentValue, true);
             sumList.Add(sum);
 
             var signal = GetCompareSignal(currentValue - sum, prevValue - prevSum);
@@ -865,7 +682,7 @@ public static partial class Calculations
             q3List.Add(q3);
 
             var prevTrimean = GetLastOrDefault(trimeanList);
-            var trimean = (q1 + (2 * median) + q3) / 4;
+            var trimean = PriceMean.Of(q1, median, median, q3);
             trimeanList.Add(trimean);
 
             var signal = GetCompareSignal(currentValue - trimean, prevValue - prevTrimean);
@@ -901,7 +718,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var alpha = (double)2 / (length + 1);
+        var alpha = 2d / (Math.Max(1, length) + 1d);
 
         var cmoList = CalculateChandeMomentumOscillator(stockData, maType, length: length).ChainedValues;
 
@@ -914,7 +731,7 @@ public static partial class Calculations
             // Seeded at the first price, not at zero: alpha * |CMO| is legitimately zero on a series with no
             // momentum, and a recursion multiplied by zero never leaves its seed.
             var prevVidya = i >= 1 ? vidyaList[i - 1] : currentValue;
-            var currentVidya = (currentValue * alpha * currentCmo) + (prevVidya * (1 - (alpha * currentCmo)));
+            var currentVidya = VidyaBlend.Compute(prevVidya, currentValue, alpha * currentCmo);
             vidyaList.Add(currentVidya);
 
             var signal = GetCompareSignal(currentValue - currentVidya, prevValue - prevVidya);
@@ -941,71 +758,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSymmetricallyWeightedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> swmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var floorLength = (int)Math.Floor((double)length / 2);
-        var roundLength = (int)Math.Round((double)length / 2);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double nr = 0, nl = 0, sr = 0, sl = 0;
-            if (floorLength == roundLength)
-            {
-                for (var j = 0; j <= floorLength - 1; j++)
-                {
-                    double wr = (length - (length - 1 - j)) * length;
-                    var prevVal = i >= j ? inputList[i - j] : 0;
-                    nr += wr;
-                    sr += prevVal * wr;
-                }
-
-                for (var j = floorLength; j <= length - 1; j++)
-                {
-                    double wl = (length - j) * length;
-                    var prevVal = i >= j ? inputList[i - j] : 0;
-                    nl += wl;
-                    sl += prevVal * wl;
-                }
-            }
-            else
-            {
-                for (var j = 0; j <= floorLength; j++)
-                {
-                    double wr = (length - (length - 1 - j)) * length;
-                    var prevVal = i >= j ? inputList[i - j] : 0;
-                    nr += wr;
-                    sr += prevVal * wr;
-                }
-
-                for (var j = roundLength; j <= length - 1; j++)
-                {
-                    double wl = (length - j) * length;
-                    var prevVal = i >= j ? inputList[i - j] : 0;
-                    nl += wl;
-                    sl += prevVal * wl;
-                }
-            }
-
-            var prevSwma = GetLastOrDefault(swmaList);
-            var swma = nr + nl != 0 ? (sr + sl) / (nr + nl) : 0;
-            swmaList.Add(swma);
-
-            var signal = GetCompareSignal(currentValue - swma, prevValue - prevSwma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Swma", swmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(swmaList);
+        var values = new double[inputList.Count];
+        Core.MovingAverageCore.SymmetricallyWeightedMovingAverage(inputList.ToArray(), values, length);
+        var result = values.ToList();
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Length; i++)
+            signals?.Add(GetCompareSignal(inputList[i] - values[i], i == 0 ? 0 : inputList[i - 1] - values[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Swma", result } });
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(result);
         stockData.IndicatorName = IndicatorName.SymmetricallyWeightedMovingAverage;
-
         return stockData;
     }
 
@@ -1022,55 +785,19 @@ public static partial class Calculations
     public static StockData CalculateVolumeAdjustedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, double factor = 0.67)
     {
-        List<double> priceVolumeRatioList = new(stockData.Count);
-        List<double> priceVolumeRatioSumList = new(stockData.Count);
-        List<double> vamaList = new(stockData.Count);
-        List<double> volumeRatioList = new(stockData.Count);
-        List<double> volumeRatioSumList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeRatioSumWindow = new();
-        RollingSum priceVolumeRatioSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList); ;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        using var window = new VolumeAdjustedWindow(maType, length, factor, false);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volume), length)?.ToList()
+            ?? GetMovingAverageList(stockData, maType, length, volume) : null;
+        List<double> line = new(input.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var currentValue = inputList[i];
-            var volumeSma = volumeSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var volumeIncrement = volumeSma * factor;
-
-            var volumeRatio = volumeIncrement != 0 ? currentVolume / volumeIncrement : 0;
-            volumeRatioList.Add(volumeRatio);
-            volumeRatioSumWindow.Add(volumeRatio);
-
-            var priceVolumeRatio = currentValue * volumeRatio;
-            priceVolumeRatioList.Add(priceVolumeRatio);
-            priceVolumeRatioSumWindow.Add(priceVolumeRatio);
-
-            var volumeRatioSum = volumeRatioSumWindow.Sum(length);
-            volumeRatioSumList.Add(volumeRatioSum);
-
-            var priceVolumeRatioSum = priceVolumeRatioSumWindow.Sum(length);
-            priceVolumeRatioSumList.Add(priceVolumeRatioSum);
-
-            var prevVama = GetLastOrDefault(vamaList);
-            var vama = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
-            vamaList.Add(vama);
-
-            var signal = GetCompareSignal(currentValue - vama, prevValue - prevVama);
-            signalsList?.Add(signal);
+            var value = external ? window.NextWithAverage(input[i], volume[i], means![i], true) : window.Next(input[i], volume[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vama", vamaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vamaList);
-        stockData.IndicatorName = IndicatorName.VolumeAdjustedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vama", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolumeAdjustedMovingAverage;
         return stockData;
     }
 
@@ -1216,81 +943,23 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVariableMovingAverage(this StockData stockData, int length = 6)
     {
-        List<double> vmaList = new(stockData.Count);
-        List<double> pdmsList = new(stockData.Count);
-        List<double> pdisList = new(stockData.Count);
-        List<double> mdmsList = new(stockData.Count);
-        List<double> mdisList = new(stockData.Count);
-        List<double> isList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax isWindow = new(length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var k = (double)1 / length;
-
+        var values = new List<double>(stockData.Count);
+        var signals = CreateSignalsList(stockData);
+        using var engine = new OoplesFinance.StockIndicators.Streaming.VariableMovingAverageEngine(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var pdm = Math.Max(MinPastValues(i, 1, currentValue - prevValue), 0);
-            var mdm = Math.Max(MinPastValues(i, 1, prevValue - currentValue), 0);
-
-            var prevPdms = GetLastOrDefault(pdmsList);
-            var pdmS = ((1 - k) * prevPdms) + (k * pdm);
-            pdmsList.Add(pdmS);
-
-            var prevMdms = GetLastOrDefault(mdmsList);
-            var mdmS = ((1 - k) * prevMdms) + (k * mdm);
-            mdmsList.Add(mdmS);
-
-            var s = pdmS + mdmS;
-            var pdi = s != 0 ? pdmS / s : 0;
-            var mdi = s != 0 ? mdmS / s : 0;
-
-            var prevPdis = GetLastOrDefault(pdisList);
-            var pdiS = ((1 - k) * prevPdis) + (k * pdi);
-            pdisList.Add(pdiS);
-
-            var prevMdis = GetLastOrDefault(mdisList);
-            var mdiS = ((1 - k) * prevMdis) + (k * mdi);
-            mdisList.Add(mdiS);
-
-            var d = Math.Abs(pdiS - mdiS);
-            var s1 = pdiS + mdiS;
-            var dS1 = s1 != 0 ? d / s1 : 0;
-
-            var prevIs = GetLastOrDefault(isList);
-            var iS = ((1 - k) * prevIs) + (k * dS1);
-            isList.Add(iS);
-            isWindow.Add(iS);
-
-            var hhv = isWindow.Max;
-            var llv = isWindow.Min;
-            var d1 = hhv - llv;
-            var vI = d1 != 0 ? (iS - llv) / d1 : 0;
-
-            // Seeded at the first price, not at zero: vI is legitimately zero when the index has not moved
-            // across the window, and a recursion multiplied by zero never leaves its seed.
-            var prevVma = i >= 1 ? vmaList[i - 1] : currentValue;
-            // Chande's VMA as LazyBear writes it: an EMA whose smoothing constant is k * vI. This was
-            // (1 - k) * vI * prevVma, which scaled the whole average by vI and pulled it towards zero.
-            var vma = ((1 - (k * vI)) * prevVma) + (k * vI * currentValue);
-            vmaList.Add(vma);
-
-            var signal = GetCompareSignal(currentValue - vma, prevValue - prevVma);
-            signalsList?.Add(signal);
+            var value = engine.Next(inputList[i], true);
+            var previous = i == 0 ? inputList[i] : values[i - 1];
+            signals?.Add(GetCompareSignal(inputList[i] - value, (i == 0 ? 0 : inputList[i - 1]) - previous));
+            values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vma", vmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vmaList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vma", values } });
+        stockData.SetSignals(signals);
+        stockData.SetCustomValues(values);
         stockData.IndicatorName = IndicatorName.VariableMovingAverage;
-
         return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Volatility Moving Average
@@ -1387,46 +1056,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVerticalHorizontalMovingAverage(this StockData stockData, int length = 50)
     {
-        List<double> changeList = new(stockData.Count);
-        List<double> vhmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum changeSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VerticalHorizontalAverageWindow(length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var priorValue = i >= length ? inputList[i - length] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-
-            var priceChange = Math.Abs(currentValue - priorValue);
-            changeList.Add(priceChange);
-            changeSumWindow.Add(priceChange);
-
-            var numerator = highest - lowest;
-            var denominator = changeSumWindow.Sum(length);
-            var vhf = denominator != 0 ? numerator / denominator : 0;
-
-            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
-            // range nor travel, and a tracking rate of zero never leaves the seed.
-            var prevVhma = i >= 1 ? vhmaList[i - 1] : currentValue;
-            var vhma = prevVhma + (Pow(vhf, 2) * (currentValue - prevVhma));
-            vhmaList.Add(vhma);
-
-            var signal = GetCompareSignal(currentValue - vhma, prevValue - prevVhma);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? input[i] : line[i - 1]; var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i == 0 ? 0 : input[i - 1]) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vhma", vhmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vhmaList);
-        stockData.IndicatorName = IndicatorName.VerticalHorizontalMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vhma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VerticalHorizontalMovingAverage;
         return stockData;
     }
 
@@ -1530,37 +1169,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTillsonIE2(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 15)
     {
-        List<double> ie2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var average = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new TillsonIe2Window(maType, length, external);
+        for (var i = 0; i < input.Count; i++)
         {
-            var sma = smaList[i];
-            var a0 = linRegList[i];
-            var a1 = i >= 1 ? linRegList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var m = a0 - a1 + sma;
-
-            var prevIe2 = GetLastOrDefault(ie2List);
-            var ie2 = (m + a0) / 2;
-            ie2List.Add(ie2);
-
-            var signal = GetCompareSignal(currentValue - ie2, prevValue - prevIe2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, average?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ie2", ie2List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ie2List);
-        stockData.IndicatorName = IndicatorName.TillsonIE2;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ie2", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.TillsonIE2;
         return stockData;
     }
 
@@ -1573,64 +1193,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer21PointMovingAverage(this StockData stockData)
     {
-        List<double> spmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new SpencerWindow(true);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= 20; j++)
-            {
-                var weight = j switch
-                {
-                    0 => -1,
-                    1 => -3,
-                    2 => -5,
-                    3 => -5,
-                    4 => -2,
-                    5 => 6,
-                    6 => 18,
-                    7 => 33,
-                    8 => 47,
-                    9 => 57,
-                    10 => 60,
-                    11 => 57,
-                    12 => 47,
-                    13 => 33,
-                    14 => 18,
-                    15 => 6,
-                    16 => -2,
-                    17 => -5,
-                    18 => -5,
-                    19 => -3,
-                    20 => -1,
-                    _ => 0,
-                };
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevSpma = GetLastOrDefault(spmaList);
-            var spma = weightedSum != 0 ? sum / weightedSum : 0;
-            spmaList.Add(spma);
-
-            var signal = GetCompareSignal(currentValue - spma, prevVal - prevSpma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "S21ma", spmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(spmaList);
-        stockData.IndicatorName = IndicatorName.Spencer21PointMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "S21ma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Spencer21PointMovingAverage;
         return stockData;
     }
 
@@ -1643,58 +1214,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer15PointMovingAverage(this StockData stockData)
     {
-        List<double> spmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new SpencerWindow(false);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= 14; j++)
-            {
-                var weight = j switch
-                {
-                    0 => -3,
-                    1 => -6,
-                    2 => -5,
-                    3 => 3,
-                    4 => 21,
-                    5 => 46,
-                    6 => 67,
-                    7 => 74,
-                    8 => 67,
-                    9 => 46,
-                    10 => 21,
-                    11 => 3,
-                    12 => -5,
-                    13 => -6,
-                    14 => -3,
-                    _ => 0,
-                };
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevSpma = GetLastOrDefault(spmaList);
-            var spma = weightedSum != 0 ? sum / weightedSum : 0;
-            spmaList.Add(spma);
-
-            var signal = GetCompareSignal(currentValue - spma, prevVal - prevSpma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "S15ma", spmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(spmaList);
-        stockData.IndicatorName = IndicatorName.Spencer15PointMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "S15ma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Spencer15PointMovingAverage;
         return stockData;
     }
 
@@ -1712,23 +1240,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        using var mean = new SquareRootWindowMean(length);
+
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = Pow(length - j, 0.5);
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
             var prevSrwma = GetLastOrDefault(srwmaList);
-            var srwma = weightedSum != 0 ? sum / weightedSum : 0;
+            var srwma = mean.Next(currentValue, true);
             srwmaList.Add(srwma);
 
             var signal = GetCompareSignal(currentValue - srwma, prevVal - prevSrwma);
@@ -1755,49 +1275,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShapeshiftingMovingAverage(this StockData stockData, int length = 50)
     {
-        List<double> filtXList = new(stockData.Count);
-        List<double> filtNList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ShapeshiftingWindow(length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sumX = 0, weightedSumX = 0, sumN = 0, weightedSumN = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var x = (double)j / (length - 1);
-                var n = -1 + (x * 2);
-                var wx = 1 - (2 * x / (Pow(x, 4) + 1));
-                var wn = 1 - (2 * Pow(n, 2) / (Pow(n, 4 - (4 % 2)) + 1));
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sumX += prevValue * wx;
-                weightedSumX += wx;
-                sumN += prevValue * wn;
-                weightedSumN += wn;
-            }
-
-            var prevFiltX = GetLastOrDefault(filtXList);
-            var filtX = weightedSumX != 0 ? sumX / weightedSumX : 0;
-            filtXList.Add(filtX);
-
-            var filtN = weightedSumN != 0 ? sumN / weightedSumN : 0;
-            filtNList.Add(filtN);
-
-            var signal = GetCompareSignal(currentValue - filtX, prevVal - prevFiltX);
-            signalsList?.Add(signal);
+            var previous = i > 0 ? line[i - 1] : 0;
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i > 0 ? input[i - 1] : 0) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sma", filtXList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtXList);
-        stockData.IndicatorName = IndicatorName.ShapeshiftingMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ShapeshiftingMovingAverage;
         return stockData;
     }
 
@@ -1811,39 +1299,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSelfWeightedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> wmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new SelfWeightedWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var pValue = i >= j ? inputList[i - j] : 0;
-                var weight = i >= length + j ? inputList[i - (length + j)] : 0;
-                weightSum += weight;
-                sum += weight * pValue;
-            }
-
-            var prevWma = GetLastOrDefault(wmaList);
-            var wma = weightSum != 0 ? sum / weightSum : 0;
-            wmaList.Add(wma);
-
-            var signal = GetCompareSignal(currentValue - wma, prevValue - prevWma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Swma", wmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(wmaList);
-        stockData.IndicatorName = IndicatorName.SelfWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Swma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.SelfWeightedMovingAverage;
         return stockData;
     }
 
@@ -1860,28 +1325,15 @@ public static partial class Calculations
         List<double> swmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        using var mean = new SineWindowMean(stockData.Count == 0 ? 1 : length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = Math.Sin((j + 1) * Math.PI / (length + 1));
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
             var prevSwma = GetLastOrDefault(swmaList);
-            var swma = weightedSum != 0 ? sum / weightedSum : 0;
+            var swma = mean.Next(currentValue, true);
             swmaList.Add(swma);
-
-            var signal = GetCompareSignal(currentValue - swma, prevVal - prevSwma);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetCompareSignal(currentValue - swma, prevVal - prevSwma));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -1905,36 +1357,16 @@ public static partial class Calculations
     public static StockData CalculateSimplifiedWeightedMovingAverage(this StockData stockData, int length = 14)
     {
         List<double> wmaList = new(stockData.Count);
-        List<double> cmlList = new(stockData.Count);
-        List<double> cmlSumList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> sumList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double tempSum = 0;
-        double cmlSumTotal = 0;
+        using var weighted = new Streaming.WmaState(Math.Max(1, length));
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSum += currentValue;
-
-            var cml = tempSum;
-            cmlList.Add(cml);
-
-            var prevCmlSum = i >= length ? cmlSumList[i - length] : 0;
-            cmlSumTotal += cml;
-            var cmlSum = cmlSumTotal;
-            cmlSumList.Add(cmlSum);
-
-            var prevSum = GetLastOrDefault(sumList);
-            var sum = cmlSum - prevCmlSum;
-            sumList.Add(sum);
-
             var prevWma = GetLastOrDefault(wmaList);
-            var wma = ((length * cml) - prevSum) / (length * (double)(length + 1) / 2);
+            var wma = weighted.GetNext(currentValue, true);
             wmaList.Add(wma);
 
             var signal = GetCompareSignal(currentValue - wma, prevValue - prevWma);
@@ -1961,43 +1393,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimplifiedLeastSquaresMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> cmlList = new(stockData.Count);
-        List<double> cmlSumList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> sumList = new(stockData.Count);
         List<double> lsmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        double tempSum = 0;
-        double cmlSumTotal = 0;
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        using var window = new SimplifiedLeastSquaresWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSum += currentValue;
-
-            var prevCml = i >= length ? cmlList[i - length] : 0;
-            var cml = tempSum;
-            cmlList.Add(cml);
-
-            var prevCmlSum = i >= length ? cmlSumList[i - length] : 0;
-            cmlSumTotal += cml;
-            var cmlSum = cmlSumTotal;
-            cmlSumList.Add(cmlSum);
-
-            var prevSum = GetLastOrDefault(sumList);
-            var sum = cmlSum - prevCmlSum;
-            sumList.Add(sum);
-
-            var wma = ((length * cml) - prevSum) / (length * (double)(length + 1) / 2);
+            var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevLsma = GetLastOrDefault(lsmaList);
-            var lsma = length != 0 ? (3 * wma) - (2 * (cml - prevCml) / length) : 0;
+            var lsma = window.Next(currentValue, true);
             lsmaList.Add(lsma);
-
-            var signal = GetCompareSignal(currentValue - lsma, prevValue - prevLsma);
-            signalsList?.Add(signal);
+            signalsList?.Add(GetCompareSignal(currentValue - lsma, prevValue - prevLsma));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
@@ -2027,22 +1434,15 @@ public static partial class Calculations
 
         var smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
+        using var window = new AffineAverageWindow(length, sharp: true, capacityHint: stockData.Count, exactSimple: maType == MovingAvgType.SimpleMovingAverage);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var currentSma = smaList[i];
             var prevVal = i >= 1 ? inputList[i - 1] : 0;
 
-            double slope = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevValue = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                double factor = 1 + (2 * (j - 1));
-                slope += prevValue * (length - factor) / 2;
-            }
-
             var prevShmma = GetLastOrDefault(shmmaList);
-            var shmma = currentSma + (6 * slope / ((length + 1) * length));
+            var shmma = window.Next(currentValue, currentSma);
             shmmaList.Add(shmma);
 
             var signal = GetCompareSignal(currentValue - shmma, prevVal - prevShmma);
@@ -2073,13 +1473,23 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var w2 = MinOrMax((int)Math.Ceiling((double)length / 3));
-        var w1 = MinOrMax((int)Math.Ceiling((double)(length - w2) / 2));
-        var w3 = MinOrMax((int)Math.Floor((double)(length - w2) / 2));
+        var w2 = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)length / 3)));
+        var w1 = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)(length - w2) / 2)));
+        var w3 = Math.Max(1, Math.Min(530, (int)Math.Floor((double)(length - w2) / 2)));
 
-        var l1List = GetMovingAverageList(stockData, maType, w1, inputList);
-        var l2List = GetMovingAverageList(stockData, maType, w2, l1List);
-        var l3List = GetMovingAverageList(stockData, maType, w3, l2List);
+        List<double> l3List;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            var values = new double[inputList.Count];
+            MovingAverageCore.SlowSmoothedMovingAverage(inputList.ToArray(), values, length, maType);
+            l3List = values.ToList();
+        }
+        else
+        {
+            var l1List = GetMovingAverageList(stockData, maType, w1, inputList);
+            var l2List = GetMovingAverageList(stockData, maType, w2, l1List);
+            l3List = GetMovingAverageList(stockData, maType, w3, l2List);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2115,30 +1525,25 @@ public static partial class Calculations
         int length = 50)
     {
         List<double> sfmaList = new(stockData.Count);
-        List<double> signList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum signSumWindow = new();
+        using var gate = new SequentialMeanGate(length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        List<double> smaList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
+        {
+            using var exact = new Streaming.RoundedSimpleMovingAverageSmoother(length);
+            smaList = inputList.Select(value => exact.Next(value, true)).ToList();
+        }
+        else smaList = GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var sma = smaList[i];
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            double a = Math.Sign(sma - prevSma);
-            signList.Add(a);
-            signSumWindow.Add(a);
-
-            var sum = signSumWindow.Sum(length);
-            double alpha = Math.Abs(sum) == length ? 1 : 0;
-            // Seeded at the first price, not at an average that has not warmed up yet: on a series whose
-            // average never moves, alpha is zero on every bar and the seed is the whole answer.
             var prevSfma = i >= 1 ? sfmaList[i - 1] : currentValue;
-            var sfma = (alpha * sma) + ((1 - alpha) * prevSfma);
+            var sfma = gate.Next(currentValue, sma, true);
             sfmaList.Add(sfma);
 
             var signal = GetCompareSignal(currentValue - sfma, prevValue - prevSfma);

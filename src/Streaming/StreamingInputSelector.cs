@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Helpers;
 using System;
 using OoplesFinance.StockIndicators.Enums;
 
@@ -21,15 +22,15 @@ internal static class StreamingInputSelector
             case InputName.Volume:
                 return bar.Volume;
             case InputName.TypicalPrice:
-                return (bar.High + bar.Low + bar.Close) / 3;
+                return PriceMean.Of(bar.High, bar.Low, bar.Close);
             case InputName.FullTypicalPrice:
-                return (bar.Open + bar.High + bar.Low + bar.Close) / 4;
+                return PriceMean.Of(bar.Open, bar.High, bar.Low, bar.Close);
             case InputName.MedianPrice:
-                return (bar.High + bar.Low) / 2;
+                return PriceMean.Of(bar.High, bar.Low);
             case InputName.WeightedClose:
-                return (bar.High + bar.Low + (bar.Close * 2)) / 4;
+                return PriceMean.Of(bar.High, bar.Low, bar.Close, bar.Close);
             case InputName.AveragePrice:
-                return (bar.Open + bar.Close) / 2;
+                return PriceMean.Of(bar.Open, bar.Close);
             case InputName.Midpoint:
             case InputName.Midprice:
                 throw new NotSupportedException("InputName.Midpoint and InputName.Midprice require rolling windows. Use a custom selector.");

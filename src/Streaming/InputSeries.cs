@@ -68,21 +68,21 @@ public static class InputSeries
     public static IInputSeries Volume { get; } = new BarSeries(bar => bar.Volume);
 
     /// <summary>(high + low) / 2.</summary>
-    public static IInputSeries MedianPrice { get; } = new BarSeries(bar => (bar.High + bar.Low) / 2);
+    public static IInputSeries MedianPrice { get; } = new BarSeries(bar => PriceMean.Of(bar.High, bar.Low));
 
     /// <summary>(high + low + close) / 3.</summary>
-    public static IInputSeries TypicalPrice { get; } = new BarSeries(bar => (bar.High + bar.Low + bar.Close) / 3);
+    public static IInputSeries TypicalPrice { get; } = new BarSeries(bar => PriceMean.Of(bar.High, bar.Low, bar.Close));
 
     /// <summary>(open + high + low + close) / 4.</summary>
     public static IInputSeries FullTypicalPrice { get; } =
-        new BarSeries(bar => (bar.Open + bar.High + bar.Low + bar.Close) / 4);
+        new BarSeries(bar => PriceMean.Of(bar.Open, bar.High, bar.Low, bar.Close));
 
     /// <summary>(high + low + 2 * close) / 4.</summary>
     public static IInputSeries WeightedClose { get; } =
-        new BarSeries(bar => (bar.High + bar.Low + (bar.Close * 2)) / 4);
+        new BarSeries(bar => PriceMean.Of(bar.High, bar.Low, bar.Close, bar.Close));
 
     /// <summary>(open + close) / 2.</summary>
-    public static IInputSeries AveragePrice { get; } = new BarSeries(bar => (bar.Open + bar.Close) / 2);
+    public static IInputSeries AveragePrice { get; } = new BarSeries(bar => PriceMean.Of(bar.Open, bar.Close));
 
     /// <summary>The midpoint of the close over <paramref name="length"/> bars. A new series each call.</summary>
     public static IInputSeries Midpoint(int length = 14) => new StateSeries(new MidpointState(length));

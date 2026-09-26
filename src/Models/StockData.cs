@@ -42,6 +42,9 @@ public class StockData : IStockData
         set => _inputValues = value ?? new List<double>();
     }
 
+    // Validation must inspect an explicitly selected input, without allocating the lazy close-price copy.
+    internal IReadOnlyList<double> InputValuesForValidation => _inputValues ?? ClosePrices;
+
 
     public List<double> OpenPrices
     {

@@ -27,6 +27,7 @@ public static partial class Calculations
         // otherwise take for the caller's chain. Unchained this is empty, and they read their own
         // default input exactly as before.
         var callerSeries = stockData.CaptureInputSeries();
+        var (sourcePrices, _, _, _, _) = GetInputValuesList(stockData);
         List<double> utmList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
@@ -37,6 +38,11 @@ public static partial class Calculations
         var moList = moVar.ChainedOutputs["Mo"];
         stockData.RestoreInputSeries(callerSeries);
         var bbPctList = CalculateBollingerBandsPercentB(stockData, stdDevMult, maType, length5).ChainedValues;
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var bandPosition = new Streaming.UltimateMomentumBand(maType, length5, stdDevMult);
+            for (var i = 0; i < sourcePrices.Count; i++) bbPctList[i] = bandPosition.Next(sourcePrices[i], true);
+        }
         stockData.RestoreInputSeries(callerSeries);
         var mfi1List = CalculateMoneyFlowIndex(stockData, length2).ChainedValues;
         stockData.RestoreInputSeries(callerSeries);
@@ -56,12 +62,21 @@ public static partial class Calculations
             var ratio = decSum != 0 ? advSum / decSum : 0;
 
             var utm = (200 * bbPct) + (100 * ratio) + (2 * mo) + (1.5 * mfi3) + (3 * mfi2) + (3 * mfi1);
+            // RSI must not normalize arithmetic residue from an otherwise settled blend.
+            var previousBlend = i == 0 ? utm : utmList[i-1];
+            if (Math.Abs(utm-previousBlend) <= 1.4210854715202004e-14*Math.Max(Math.Abs(utm), Math.Abs(previousBlend)))
+                utm = previousBlend;
             utmList.Add(utm);
         }
 
         stockData.SetCustomValues(utmList);
         var utmRsiList = CalculateRelativeStrengthIndex(stockData, maType, length1, length1).ChainedValues;
         var utmiList = GetMovingAverageList(stockData, maType, length1, utmRsiList);
+        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var strength = new Streaming.UltimateMomentumStrength(maType, length1);
+            for (var i = 0; i < utmList.Count; i++) utmiList[i] = strength.Next(utmList[i], true);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var utmi = utmiList[i];

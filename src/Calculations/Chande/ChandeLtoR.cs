@@ -13,36 +13,25 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChandeQuickStick(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> openCloseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var opens = stockData.OpenPrices;
+        var lag = 0; var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? customer = null;
+        if (custom)
         {
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-
-            var openClose = currentClose - currentOpen;
-            openCloseList.Add(openClose);
+            var changes = input.Select((price, i) => OpenCloseAverageWindow.Difference(i >= lag ? opens[i - lag] : 0, price).Publish()).ToList();
+            customer = GetMovingAverageList(stockData, maType, length, changes);
         }
-
-        var smaList = GetMovingAverageList(stockData, maType, length, openCloseList);
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count), signal = new(stockData.Count), histogram = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new OpenCloseAverageWindow(maType, length, lag);
+        for (var i = 0; i < input.Count; i++)
         {
-            var sma = smaList[i];
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(sma, prevSma);
-            signalsList?.Add(signal);
+            var value = window.Next(opens[i], input[i], true, customer?[i]);
+            line.Add(value.Line); signal.Add(value.Signal); histogram.Add(value.Histogram);
+            signals?.Add(GetCompareSignal(value.Signal, i == 0 ? 0 : signal[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cqs", smaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(smaList);
-        stockData.IndicatorName = IndicatorName.ChandeQuickStick;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cqs", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(signal); stockData.IndicatorName = IndicatorName.ChandeQuickStick;
         return stockData;
     }
 
@@ -60,37 +49,19 @@ public static partial class Calculations
         int length = 9, double filter = 3)
     {
         List<double> cmoList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        var diffSumWindow = new RollingSum();
-        var absDiffSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        for (var i = 0; i < stockData.Count; i++)
+        using var window = new ChandeMomentumWindow(Math.Max(1, Math.Min(length, stockData.Count)), filter);
+        for (var i = 0; i < stockData.Count; i++) cmoList.Add(window.Next(inputList[i], true));
+        List<double> cmoSignalList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var diff = MinPastValues(i, 1, currentValue - prevValue);
-            var absDiff = Math.Abs(diff);
-            if (absDiff > filter)
-            {
-                diff = 0; absDiff = 0;
-            }
-            diffList.Add(diff);
-            absDiffList.Add(absDiff);
-            diffSumWindow.Add(diff);
-            absDiffSumWindow.Add(absDiff);
-
-            var diffSum = diffSumWindow.Sum(length);
-            var absDiffSum = absDiffSumWindow.Sum(length);
-
-            var cmo = absDiffSum != 0 ? MinOrMax(100 * diffSum / absDiffSum, 100, -100) : 0;
-            cmoList.Add(cmo);
+            cmoSignalList = new(stockData.Count);
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            foreach (var value in cmoList) cmoSignalList.Add(mean.Next(value, true));
         }
-
-        var cmoSignalList = GetMovingAverageList(stockData, maType, length, cmoList);
+        else cmoSignalList = GetMovingAverageList(stockData, maType, length, cmoList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var cmo = cmoList[i];
@@ -124,27 +95,18 @@ public static partial class Calculations
     public static StockData CalculateChandeMomentumOscillatorAbsolute(this StockData stockData, int length = 9)
     {
         List<double> cmoAbsList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        var absDiffSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var values = new double[inputList.Count];
+        Core.OscillatorCore.ChandeMomentumOscillatorAbsolute(inputList.ToArray(), values, length);
+
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorValue = i >= length ? inputList[i - length] : 0;
             var prevCmoAbs1 = i >= 1 ? cmoAbsList[i - 1] : 0;
             var prevCmoAbs2 = i >= 2 ? cmoAbsList[i - 2] : 0;
 
-            var absDiff = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-            absDiffList.Add(absDiff);
-            absDiffSumWindow.Add(absDiff);
-
-            var num = Math.Abs(100 * MinPastValues(i, length, currentValue - priorValue));
-            var denom = absDiffSumWindow.Sum(length);
-
-            var cmoAbs = denom != 0 ? MinOrMax(num / denom, 100, 0) : 0;
+            var cmoAbs = values[i];
             cmoAbsList.Add(cmoAbs);
 
             var signal = GetRsiSignal(cmoAbs - prevCmoAbs1, prevCmoAbs1 - prevCmoAbs2, cmoAbs, prevCmoAbs1, 70, 30);
@@ -174,39 +136,18 @@ public static partial class Calculations
     public static StockData CalculateChandeMomentumOscillatorAverage(this StockData stockData, int length1 = 5, int length2 = 10, int length3 = 20)
     {
         List<double> cmoAvgList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        var diffSumWindow = new RollingSum();
-        var absDiffSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var values = new double[inputList.Count];
+        Core.OscillatorCore.ChandeMomentumOscillatorAverage(inputList.ToArray(), values, length1, length2, length3);
+
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentPrice = inputList[i];
-            var prevPrice = i >= 1 ? inputList[i - 1] : 0;
             var prevCmoAvg1 = i >= 1 ? cmoAvgList[i - 1] : 0;
             var prevCmoAvg2 = i >= 2 ? cmoAvgList[i - 2] : 0;
 
-            var diff = currentPrice - prevPrice;
-            diffList.Add(diff);
-            diffSumWindow.Add(diff);
-
-            var absDiff = Math.Abs(diff);
-            absDiffList.Add(absDiff);
-            absDiffSumWindow.Add(absDiff);
-
-            var diffSum1 = diffSumWindow.Sum(length1);
-            var absSum1 = absDiffSumWindow.Sum(length1);
-            var diffSum2 = diffSumWindow.Sum(length2);
-            var absSum2 = absDiffSumWindow.Sum(length2);
-            var diffSum3 = diffSumWindow.Sum(length3);
-            var absSum3 = absDiffSumWindow.Sum(length3);
-            var temp1 = absSum1 != 0 ? MinOrMax(diffSum1 / absSum1, 1, -1) : 0;
-            var temp2 = absSum2 != 0 ? MinOrMax(diffSum2 / absSum2, 1, -1) : 0;
-            var temp3 = absSum3 != 0 ? MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
-
-            var cmoAvg = 100 * ((temp1 + temp2 + temp3) / 3);
+            var cmoAvg = values[i];
             cmoAvgList.Add(cmoAvg);
 
             var signal = GetRsiSignal(cmoAvg - prevCmoAvg1, prevCmoAvg1 - prevCmoAvg2, cmoAvg, prevCmoAvg1, 50, -50);
@@ -236,39 +177,18 @@ public static partial class Calculations
     public static StockData CalculateChandeMomentumOscillatorAbsoluteAverage(this StockData stockData, int length1 = 5, int length2 = 10, int length3 = 20)
     {
         List<double> cmoAbsAvgList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        var diffSumWindow = new RollingSum();
-        var absDiffSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var values = new double[inputList.Count];
+        Core.OscillatorCore.ChandeMomentumOscillatorAbsoluteAverage(inputList.ToArray(), values, length1, length2, length3);
+
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentPrice = inputList[i];
-            var prevPrice = i >= 1 ? inputList[i - 1] : 0;
             var prevCmoAbsAvg1 = i >= 1 ? cmoAbsAvgList[i - 1] : 0;
             var prevCmoAbsAvg2 = i >= 2 ? cmoAbsAvgList[i - 2] : 0;
 
-            var diff = currentPrice - prevPrice;
-            diffList.Add(diff);
-            diffSumWindow.Add(diff);
-
-            var absDiff = Math.Abs(diff);
-            absDiffList.Add(absDiff);
-            absDiffSumWindow.Add(absDiff);
-
-            var diffSum1 = diffSumWindow.Sum(length1);
-            var absSum1 = absDiffSumWindow.Sum(length1);
-            var diffSum2 = diffSumWindow.Sum(length2);
-            var absSum2 = absDiffSumWindow.Sum(length2);
-            var diffSum3 = diffSumWindow.Sum(length3);
-            var absSum3 = absDiffSumWindow.Sum(length3);
-            var temp1 = absSum1 != 0 ? MinOrMax(diffSum1 / absSum1, 1, -1) : 0;
-            var temp2 = absSum2 != 0 ? MinOrMax(diffSum2 / absSum2, 1, -1) : 0;
-            var temp3 = absSum3 != 0 ? MinOrMax(diffSum3 / absSum3, 1, -1) : 0;
-
-            var cmoAbsAvg = Math.Abs(100 * ((temp1 + temp2 + temp3) / 3));
+            var cmoAbsAvg = values[i];
             cmoAbsAvgList.Add(cmoAbsAvg);
 
             var signal = GetRsiSignal(cmoAbsAvg - prevCmoAbsAvg1, prevCmoAbsAvg1 - prevCmoAbsAvg2, cmoAbsAvg, prevCmoAbsAvg1, 70, 30);
@@ -349,35 +269,18 @@ public static partial class Calculations
         int length = 14, int signalLength = 3)
     {
         List<double> cmoList = new(stockData.Count);
-        List<double> cmoPosChgList = new(stockData.Count);
-        List<double> cmoNegChgList = new(stockData.Count);
-        var cmoPosSumWindow = new RollingSum();
-        var cmoNegSumWindow = new RollingSum();
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        using var window = new ChandeMomentumWindow(Math.Max(1, Math.Min(length, stockData.Count)));
+        for (var i = 0; i < stockData.Count; i++) cmoList.Add(window.Next(inputList[i], true));
+        List<double> cmoSignalList;
+        if (maType == MovingAvgType.SimpleMovingAverage)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var diff = MinPastValues(i, 1, currentValue - prevValue);
-
-            var negChg = i >= 1 && diff < 0 ? Math.Abs(diff) : 0;
-            cmoNegChgList.Add(negChg);
-            cmoNegSumWindow.Add(negChg);
-
-            var posChg = i >= 1 && diff > 0 ? diff : 0;
-            cmoPosChgList.Add(posChg);
-            cmoPosSumWindow.Add(posChg);
-
-            var negSum = cmoNegSumWindow.Sum(length);
-            var posSum = cmoPosSumWindow.Sum(length);
-
-            var cmo = posSum + negSum != 0 ? MinOrMax((posSum - negSum) / (posSum + negSum) * 100, 100, -100) : 0;
-            cmoList.Add(cmo);
+            cmoSignalList = new(stockData.Count);
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, signalLength));
+            foreach (var value in cmoList) cmoSignalList.Add(mean.Next(value, true));
         }
-
-        var cmoSignalList = GetMovingAverageList(stockData, maType, signalLength, cmoList);
+        else cmoSignalList = GetMovingAverageList(stockData, maType, signalLength, cmoList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var cmo = cmoList[i];

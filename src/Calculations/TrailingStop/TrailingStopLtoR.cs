@@ -15,102 +15,20 @@ public static partial class Calculations
     public static StockData CalculateParabolicSAR(this StockData stockData, double start = 0.02, double increment = 0.02, double maximum = 0.2)
     {
         List<double> sarList = new(stockData.Count);
-        List<double> nextSarList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
+        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var kernel = new Streaming.ParabolicSarKernel(start, increment, maximum);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
-            var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
-            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-
-            bool uptrend;
-            double ep, prevSAR, prevEP, SAR, af = start;
-            if (currentValue > prevValue)
-            {
-                uptrend = true;
-                ep = currentHigh;
-                prevSAR = prevLow1;
-                prevEP = currentHigh;
-            }
-            else
-            {
-                uptrend = false;
-                ep = currentLow;
-                prevSAR = prevHigh1;
-                prevEP = currentLow;
-            }
-            SAR = prevSAR + (start * (prevEP - prevSAR));
-
-            if (uptrend)
-            {
-                if (SAR > currentLow)
-                {
-                    uptrend = false;
-                    SAR = Math.Max(ep, currentHigh);
-                    ep = currentLow;
-                    af = start;
-                }
-            }
-            else
-            {
-                if (SAR < currentHigh)
-                {
-                    uptrend = true;
-                    SAR = Math.Min(ep, currentLow);
-                    ep = currentHigh;
-                    af = start;
-                }
-            }
-
-            if (uptrend)
-            {
-                if (currentHigh > ep)
-                {
-                    ep = currentHigh;
-                    af = Math.Min(af + increment, maximum);
-                }
-            }
-            else
-            {
-                if (currentLow < ep)
-                {
-                    ep = currentLow;
-                    af = Math.Min(af + increment, maximum);
-                }
-            }
-
-            if (uptrend)
-            {
-                SAR = i > 1 ? Math.Min(SAR, prevLow2) : Math.Min(SAR, prevLow1);
-            }
-            else
-            {
-                SAR = i > 1 ? Math.Max(SAR, prevHigh2) : Math.Max(SAR, prevHigh1);
-            }
-            sarList.Add(SAR);
-
-            var prevNextSar = GetLastOrDefault(nextSarList);
-            var nextSar = SAR + (af * (ep - SAR));
-            nextSarList.Add(nextSar);
-
-            var signal = GetCompareSignal(currentHigh - nextSar, prevHigh1 - prevNextSar);
-            signalsList?.Add(signal);
+            var sar = kernel.Next(highList[i], lowList[i], true);
+            var previous = i == 0 ? 0 : sarList[i - 1];
+            sarList.Add(sar);
+            signalsList?.Add(GetCompareSignal(highList[i] - sar, i == 0 ? 0 : highList[i - 1] - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sar", nextSarList }
-        });
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sar", sarList } });
         stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nextSarList);
+        stockData.SetCustomValues(sarList);
         stockData.IndicatorName = IndicatorName.ParabolicSAR;
-
         return stockData;
     }
 
@@ -158,7 +76,7 @@ public static partial class Calculations
             lowerList.Add(lower);
 
             var prevOs = GetLastOrDefault(osList);
-            var os = currentValue > upper ? 1 : currentValue > lower ? 0 : prevOs;
+            var os = currentValue > upper ? 1 : currentValue < lower ? 0 : prevOs;
             osList.Add(os);
 
             var prevTs = GetLastOrDefault(tsList);
@@ -189,6 +107,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNickRypockTrailingReverse(this StockData stockData, int length = 2)
     {
+        length = Math.Max(1, length);
         List<double> nrtrList = new(stockData.Count);
         List<double> hpList = new(stockData.Count);
         List<double> lpList = new(stockData.Count);
@@ -196,7 +115,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var pct = length * 0.01;
+        var pct = (double)length;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -207,29 +126,29 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevNrtr = GetLastOrDefault(nrtrList);
-            double nrtr, hp = 0, lp = 0, trend = 0;
+            double nrtr, hp = 0, lp = 0, trend = prevTrend;
             if (prevTrend >= 0)
             {
                 hp = currentValue > prevHp ? currentValue : prevHp;
-                nrtr = hp * (1 - pct);
+                nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
 
                 if (currentValue <= nrtr)
                 {
                     trend = -1;
                     lp = currentValue;
-                    nrtr = lp * (1 + pct);
+                    nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
                 }
             }
             else
             {
                 lp = currentValue < prevLp ? currentValue : prevLp;
-                nrtr = lp * (1 + pct);
+                nrtr = RoundedPercentageBand.Percent(lp, pct, 1);
 
                 if (currentValue > nrtr)
                 {
                     trend = 1;
                     hp = currentValue;
-                    nrtr = hp * (1 - pct);
+                    nrtr = RoundedPercentageBand.Percent(hp, pct, -1);
                 }
             }
             trendList.Add(trend);
@@ -280,10 +199,10 @@ public static partial class Calculations
             var pSS = i >= 1 ? GetLastOrDefault(stopSList) : currentClose;
             var pSL = i >= 1 ? GetLastOrDefault(stopLList) : currentClose;
 
-            var stopL = currentHigh > prevHH ? currentHigh - (pct * currentHigh) : pSL;
+            var stopL = currentHigh > prevHH ? RoundedPercentageBand.Percent(currentHigh, pct, -1) : pSL;
             stopLList.Add(stopL);
 
-            var stopS = currentLow < prevLL ? currentLow + (pct * currentLow) : pSS;
+            var stopS = currentLow < prevLL ? RoundedPercentageBand.Percent(currentLow, pct, 1) : pSS;
             stopSList.Add(stopS);
 
             var signal = GetConditionSignal(prevHigh < stopS && currentHigh > stopS, prevLow > stopL && currentLow < stopL);

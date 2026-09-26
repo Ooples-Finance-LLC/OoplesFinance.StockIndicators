@@ -8,82 +8,21 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Ecti")]
 public sealed class EhlersCorrelationTrendIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sy;
-    private readonly double _syy;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersCorrelationTrendIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        (_sy, _syy) = BuildYAxisSums(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersCorrelationWindow _correlation;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersCorrelationTrendIndicatorState(int length = 20) => _correlation = new EhlersCorrelationWindow(length, true);
     public IndicatorName Name => IndicatorName.EhlersCorrelationTrendIndicator;
 
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() { _correlation.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sx = 0;
-        double sxx = 0;
-        double sxy = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var y = -j;
-            sx += x;
-            sxx += x * x;
-            sxy += x * y;
-        }
+        StreamingInputValidation.Validate(bar);
+        var (real, imag) = _correlation.Next(_input.GetValue(bar), isFinal);
 
-        var denom = ((_length * sxx) - (sx * sx)) * ((_length * _syy) - (_sy * _sy));
-        var corr = denom > 0
-            ? ((_length * sxy) - (sx * _sy)) / MathHelper.Sqrt(denom)
-            : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ecti", corr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(corr, outputs);
+        return new StreamingIndicatorStateResult(real, includeOutputs
+            ? new Dictionary<string, double> { { "Ecti", real } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static (double sy, double syy) BuildYAxisSums(int length)
-    {
-        double sy = 0;
-        double syy = 0;
-        for (var j = 0; j <= length - 1; j++)
-        {
-            var y = -j;
-            sy += y;
-            syy += y * y;
-        }
-
-        return (sy, syy);
-    }
+    public void Dispose() => _correlation.Dispose();
 }
 
 [PrimaryOutput("Ecog")]
@@ -147,63 +86,21 @@ public sealed class EhlersCenterofGravityOscillatorState : IStreamingIndicatorSt
     }
 }
 
-[PrimaryOutput("SlowEdo")]
+[PrimaryOutput("FastEdo")]
 public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
 {
-    private readonly double _fastMult;
-    private readonly double _slowMult;
-    private readonly HighPassFilterV1Engine _fastHp;
-    private readonly HighPassFilterV1Engine _slowHp;
-    private readonly HighPassFilterV1Engine _fastDecHp;
-    private readonly HighPassFilterV1Engine _slowDecHp;
-    private readonly StreamingInputResolver _input;
-
-    public EhlersDecyclerOscillatorV1State(int fastLength = 100, int slowLength = 125,
-        double fastMult = 1.2, double slowMult = 1)
-    {
-        _fastMult = fastMult;
-        _slowMult = slowMult;
-        _fastHp = new HighPassFilterV1Engine(fastLength, 1);
-        _slowHp = new HighPassFilterV1Engine(slowLength, 1);
-        _fastDecHp = new HighPassFilterV1Engine(fastLength, 0.5);
-        _slowDecHp = new HighPassFilterV1Engine(slowLength, 0.5);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DecyclerOscillatorWindow _fast, _slow;
+    public EhlersDecyclerOscillatorV1State(int fastLength = 100, int slowLength = 125, double fastMult = 1.2, double slowMult = 1)
+        : this(new DecyclerOscillatorWindow(fastLength, fastMult), new DecyclerOscillatorWindow(slowLength, slowMult)) { }
+    private EhlersDecyclerOscillatorV1State(DecyclerOscillatorWindow fast, DecyclerOscillatorWindow slow) { _fast = fast; _slow = slow; }
+    internal static EhlersDecyclerOscillatorV1State ForPeriod(int length) => new(new DecyclerOscillatorWindow(length), new DecyclerOscillatorWindow(length, 1, 2));
     public IndicatorName Name => IndicatorName.EhlersDecyclerOscillatorV1;
-
-    public void Reset()
-    {
-        _fastHp.Reset();
-        _slowHp.Reset();
-        _fastDecHp.Reset();
-        _slowDecHp.Reset();
-    }
-
+    public void Reset() { _fast.Reset(); _slow.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fastHp = _fastHp.Next(value, isFinal);
-        var slowHp = _slowHp.Next(value, isFinal);
-        var fastDec = value - fastHp;
-        var slowDec = value - slowHp;
-        var fastFiltered = _fastDecHp.Next(fastDec, isFinal);
-        var slowFiltered = _slowDecHp.Next(slowDec, isFinal);
-
-        var fastOsc = value != 0 ? 100 * _fastMult * fastFiltered / value : 0;
-        var slowOsc = value != 0 ? 100 * _slowMult * slowFiltered / value : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "FastEdo", fastOsc },
-                { "SlowEdo", slowOsc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(slowOsc, outputs);
+        StreamingInputValidation.Validate(bar);
+        var fast = _fast.Next(bar.Close, isFinal); var slow = _slow.Next(bar.Close, isFinal);
+        return new(fast, includeOutputs ? new Dictionary<string, double> { { "FastEdo", fast }, { "SlowEdo", slow } } : null);
     }
 }
 
@@ -259,164 +156,36 @@ public sealed class EhlersDecyclerOscillatorV2State : IStreamingIndicatorState, 
 [PrimaryOutput("Ed")]
 public sealed class EhlersDecyclerState : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevDec;
-    private int _index;
-
-    public EhlersDecyclerState(int length = 60)
-    {
-        var resolved = Math.Max(1, length);
-        var alphaArg = Math.Min(2 * Math.PI / resolved, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DecyclerWindow _window;
+    public EhlersDecyclerState(int length = 60) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersDecycler;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevDec = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue : 0;
-        var prevDec = _prevDec;
-        var dec = (_alpha1 / 2 * (value + prevValue1)) + ((1 - _alpha1) * prevDec);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevDec = dec;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ed", dec }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dec, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ed", value } } : null);
     }
 }
 
 [PrimaryOutput("Real")]
 public sealed class EhlersCorrelationCycleIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sy;
-    private readonly double _syy;
-    private readonly double _nsy;
-    private readonly double _nsyy;
-    private readonly double[] _cosValues;
-    private readonly double[] _negSinValues;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersCorrelationCycleIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _cosValues = new double[_length];
-        _negSinValues = new double[_length];
-        (_sy, _syy, _nsy, _nsyy) = BuildTrigonometricSums(_length, _cosValues, _negSinValues);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersCorrelationWindow _correlation;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersCorrelationCycleIndicatorState(int length = 20) => _correlation = new EhlersCorrelationWindow(length, false);
     public IndicatorName Name => IndicatorName.EhlersCorrelationCycleIndicator;
-
     internal double LastImag { get; private set; }
-
-    public void Reset()
-    {
-        _values.Clear();
-        LastImag = 0;
-    }
-
+    public void Reset() { _correlation.Reset(); LastImag = 0; }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sx = 0;
-        double sxx = 0;
-        double sxy = 0;
-        double nsxy = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
-            var y = _cosValues[j - 1];
-            var ny = _negSinValues[j - 1];
-            sx += x;
-            sxx += x * x;
-            sxy += x * y;
-            nsxy += x * ny;
-        }
-
-        var realDenom = ((_length * sxx) - (sx * sx)) * ((_length * _syy) - (_sy * _sy));
-        var real = realDenom > 0
-            ? ((_length * sxy) - (sx * _sy)) / MathHelper.Sqrt(realDenom)
-            : 0;
-
-        var imagDenom = ((_length * sxx) - (sx * sx)) * ((_length * _nsyy) - (_nsy * _nsy));
-        var imag = imagDenom > 0
-            ? ((_length * nsxy) - (sx * _nsy)) / MathHelper.Sqrt(imagDenom)
-            : 0;
+        StreamingInputValidation.Validate(bar);
+        var (real, imag) = _correlation.Next(_input.GetValue(bar), isFinal);
         LastImag = imag;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Real", real },
-                { "Imag", imag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(real, outputs);
+        return new StreamingIndicatorStateResult(real, includeOutputs
+            ? new Dictionary<string, double> { { "Real", real }, { "Imag", imag } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static (double sy, double syy, double nsy, double nsyy) BuildTrigonometricSums(
-        int length, double[] cosValues, double[] negSinValues)
-    {
-        double sy = 0;
-        double syy = 0;
-        double nsy = 0;
-        double nsyy = 0;
-        for (var j = 1; j <= length; j++)
-        {
-            var v = MathHelper.MinOrMax(2 * Math.PI * ((double)(j - 1) / length), 0.99, 0.01);
-            var cos = Math.Cos(v);
-            var negSin = -Math.Sin(v);
-            cosValues[j - 1] = cos;
-            negSinValues[j - 1] = negSin;
-            sy += cos;
-            syy += cos * cos;
-            nsy += negSin;
-            nsyy += negSin * negSin;
-        }
-
-        return (sy, syy, nsy, nsyy);
-    }
+    public void Dispose() => _correlation.Dispose();
 }
 
 [PrimaryOutput("Cai")]
@@ -442,11 +211,11 @@ public sealed class EhlersCorrelationAngleIndicatorState : IStreamingIndicatorSt
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var real = _cycle.Update(bar, isFinal, includeOutputs: false).Value;
         var imag = _cycle.LastImag;
         var prevAngle = _hasPrev ? _prevAngle : 0;
-        var angle = imag != 0 ? 90 + Math.Atan(real / imag).ToDegrees() : 900;
-        angle = imag > 0 ? angle - 180 : angle;
+        var angle = EhlersCorrelationPhase.Angle(real, imag);
         angle = prevAngle - angle < 270 && angle < prevAngle ? prevAngle : angle;
 
         if (isFinal)
@@ -488,6 +257,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
     private readonly double[] _bpPrev2;
     private readonly double[,] _bpHistory;
     private readonly double[] _bpCurrent;
+    private readonly double[] _powers;
     private readonly int _ring;
     private double _prevRoofingFilter1;
     private double _prevRoofingFilter2;
@@ -504,6 +274,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
         _bpPrev2 = new double[_length1 + 1];
         _bpHistory = new double[_length1 + 1, _ring];
         _bpCurrent = new double[_length1 + 1];
+        _powers = new double[_length1 + 1];
     }
 
     public IndicatorName Name => IndicatorName.EhlersCombFilterSpectralEstimate;
@@ -522,6 +293,7 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var prevRoofingFilter2 = _prevRoofingFilter2;
 
@@ -547,8 +319,13 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
                 pwr += MathHelper.Pow(prevBp / j, 2);
             }
 
+            _powers[j] = pwr;
             maxPwr = Math.Max(pwr, maxPwr);
-            pwr = maxPwr != 0 ? pwr / maxPwr : 0;
+        }
+
+        for (var j = _length2; j <= _length1; j++)
+        {
+            var pwr = maxPwr != 0 ? _powers[j] / maxPwr : 0;
             if (pwr >= 0.5)
             {
                 spx += j * pwr;
@@ -602,7 +379,7 @@ public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorSta
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
         _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(length3, 0);
+        _length3 = Math.Max(length3, 1);
         _autoCorrelation = new EhlersAutoCorrelationIndicatorState(_length1, Math.Max(1, length2));
         _corrValues = new PooledRingBuffer<double>(_length1);
     }
@@ -617,12 +394,9 @@ public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorSta
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var corr = _autoCorrelation.Update(bar, isFinal, includeOutputs: false).Value;
         var start = _length3;
-        if (start < 0)
-        {
-            start = 0;
-        }
 
         double delta = 0;
         for (var j = start; j <= _length1; j++)
@@ -685,6 +459,7 @@ public sealed class EhlersClassicHilbertTransformerState : IStreamingIndicatorSt
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
         var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
         var real = peak != 0 ? roofingFilter / peak : 0;
@@ -980,6 +755,7 @@ public sealed class EhlersCycleAmplitudeState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var bp = _bpState.Update(bar, isFinal, includeOutputs: false).Value;
         var bpCount = _bpBuffer.Count;
 
@@ -1105,6 +881,8 @@ public sealed class EhlersCyberCycleState : IStreamingIndicatorState
 public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
 {
     private readonly int _length3;
+    private readonly double[] _xWindow;
+    private readonly double[] _yWindow;
     private readonly double _alpha;
     private readonly double _c1;
     private readonly double _c2;
@@ -1122,8 +900,9 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
     public EhlersConvolutionIndicatorState(int length1 = 80, int length2 = 40, int length3 = 48)
     {
         _length3 = Math.Max(1, length3);
-        var piPrd = MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1);
-        _alpha = (Math.Cos(piPrd) + Math.Sin(piPrd) - 1) / Math.Cos(piPrd);
+        _xWindow = new double[_length3]; _yWindow = new double[_length3];
+        var piPrd = Math.Min(.99, MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1));
+        _alpha = 1-Math.Cos(piPrd)/(1+Math.Sin(piPrd));
         var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
         var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
         _c2 = b1;
@@ -1164,30 +943,18 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
         var roofingFilter = (_c1 * ((highPass + prevHp1) / 2)) + (_c2 * prevRoofingFilter1) + (_c3 * prevRoofingFilter2);
 
         var n = Math.Min(_index + 1, _length3);
-        double sx = 0;
-        double sy = 0;
-        double sxx = 0;
-        double syy = 0;
-        double sxy = 0;
-        for (var j = 1; j <= _length3; j++)
+        for (var lag = 0; lag < n; lag++)
         {
-            var x = GetRoofingOffsetValue(roofingFilter, j - 1);
-            var y = GetRoofingOffsetValue(roofingFilter, j);
-            sx += x;
-            sy += y;
-            sxx += x * x;
-            sxy += x * y;
-            syy += y * y;
+            _xWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag);
+            _yWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag+1);
         }
-
-        var denom = ((n * sxx) - (sx * sx)) * ((n * syy) - (sy * sy));
-        var corr = denom > 0 ? (((n * sxy) - (sx * sy)) / MathHelper.Sqrt(denom)) : 0;
+        var corr = WindowCorrelation.Pearson(_xWindow.AsSpan(0, n), _yWindow.AsSpan(0, n));
         var expValue = MathHelper.Exp(3 * corr);
-        var conv = (1 + (expValue - 1)) / (expValue + 1) / 2;
+        var conv = expValue / (expValue + 1) / 2;
 
         var filtLength = (int)Math.Ceiling(0.5 * n);
         var prevFilt = GetRoofingOffsetValue(roofingFilter, filtLength);
-        var slope = prevFilt < roofingFilter ? -1 : 1;
+        var slope = roofingFilter-prevFilt > 1e-12*Math.Max(1, Math.Max(Math.Abs(roofingFilter), Math.Abs(prevFilt))) ? -1 : 1;
 
         if (isFinal)
         {
@@ -1230,11 +997,14 @@ public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
 public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
     private readonly CommodityChannelIndexState _cciState;
+    private readonly StrengthAverage? _exactAverage;
     private readonly IMovingAverageSmoother _signalSmoother;
 
     public EhlersCommodityChannelIndexInverseFisherTransformState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 20, int signalLength = 9,
         double constant = 0.015)
     {
+        CommodityIndexWindow.ValidateConstant(constant);
+        if (StrengthWindow.Supports(maType)) _exactAverage = new StrengthAverage(maType, signalLength);
         _cciState = new CommodityChannelIndexState(maType, Math.Max(1, length), constant);
         _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
@@ -1250,17 +1020,18 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 
     public void Reset()
     {
+        _exactAverage?.Reset();
         _cciState.Reset();
         _signalSmoother.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var cci = _cciState.Update(bar, isFinal, includeOutputs: false).Value;
         var v1 = 0.1 * (cci - 50);
-        var v2 = _signalSmoother.Next(v1, isFinal);
-        var expValue = MathHelper.Exp(2 * v2);
-        var iFish = expValue + 1 != 0 ? (expValue - 1) / (expValue + 1) : 0;
+        var v2 = _exactAverage is null ? _signalSmoother.Next(v1, isFinal) : _exactAverage.Next(new StrengthValue(v1), isFinal).Mantissa;
+        var iFish = Math.Tanh(v2);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -1276,6 +1047,7 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 
     public void Dispose()
     {
+        _exactAverage?.Dispose();
         _cciState.Dispose();
         _signalSmoother.Dispose();
     }
@@ -1455,47 +1227,47 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
         var prevValue1 = _index >= 1 ? _prevValue1 : 0;
         var prevValue2 = _index >= 2 ? _prevValue2 : 0;
 
-        var v1Neg2 = (0.080778 * (value + (1.907 * prevValue1) + prevValue2)) +
+        var v1Neg2 = (EhlersChebyshevGains.Minus2 * (value + (1.907 * prevValue1) + prevValue2)) +
                      (0.293 * _prevV1Neg2_1) - (0.063 * _prevV1Neg2_2);
         var waveNeg2 = v1Neg2 + (0.513 * _prevV1Neg2_1) + _prevV1Neg2_2 +
                        (0.451 * _prevWaveNeg2_1) - (0.481 * _prevWaveNeg2_2);
 
-        var v1Neg1 = (0.021394 * (value + (1.777 * prevValue1) + prevValue2)) +
+        var v1Neg1 = (EhlersChebyshevGains.Minus1 * (value + (1.777 * prevValue1) + prevValue2)) +
                      (0.731 * _prevV1Neg1_1) - (0.166 * _prevV1Neg1_2);
         var waveNeg1 = v1Neg1 + (0.977 * _prevV1Neg1_1) + _prevV1Neg1_2 +
                        (1.008 * _prevWaveNeg1_1) - (0.561 * _prevWaveNeg1_2);
 
-        var v10 = (0.0095822 * (value + (1.572 * prevValue1) + prevValue2)) +
+        var v10 = (EhlersChebyshevGains.Zero * (value + (1.572 * prevValue1) + prevValue2)) +
                   (1.026 * _prevV10_1) - (0.282 * _prevV10_2);
         var wave0 = v10 + (0.356 * _prevV10_1) + _prevV10_2 +
                     (1.329 * _prevWave0_1) - (0.644 * _prevWave0_2);
 
-        var v11 = (0.00461 * (value + (1.192 * prevValue1) + prevValue2)) +
+        var v11 = (EhlersChebyshevGains.One * (value + (1.192 * prevValue1) + prevValue2)) +
                   (1.281 * _prevV11_1) - (0.426 * _prevV11_2);
         var wave1 = v11 - (0.384 * _prevV11_1) + _prevV11_2 +
                     (1.565 * _prevWave1_1) - (0.729 * _prevWave1_2);
 
-        var v12 = (0.0026947 * (value + (0.681 * prevValue1) + prevValue2)) +
+        var v12 = (EhlersChebyshevGains.Two * (value + (0.681 * prevValue1) + prevValue2)) +
                   (1.46 * _prevV12_1) - (0.543 * _prevV12_2);
         var wave2 = v12 - (0.966 * _prevV12_1) + _prevV12_2 +
                     (1.703 * _prevWave2_1) - (0.793 * _prevWave2_2);
 
-        var v13 = (0.0017362 * (value + (0.012 * prevValue1) + prevValue2)) +
+        var v13 = (EhlersChebyshevGains.Three * (value + (0.012 * prevValue1) + prevValue2)) +
                   (1.606 * _prevV13_1) - (0.65 * _prevV13_2);
         var wave3 = v13 - (1.408 * _prevV13_1) + _prevV13_2 +
                     (1.801 * _prevWave3_1) - (0.848 * _prevWave3_2);
 
-        var v14 = (0.0013738 * (value - (0.669 * prevValue1) + prevValue2)) +
+        var v14 = (EhlersChebyshevGains.Four * (value - (0.669 * prevValue1) + prevValue2)) +
                   (1.716 * _prevV14_1) - (0.74 * _prevV14_2);
         var wave4 = v14 - (1.685 * _prevV14_1) + _prevV14_2 +
                     (1.866 * _prevWave4_1) - (0.89 * _prevWave4_2);
 
-        var v15 = (0.0010794 * (value - (1.226 * prevValue1) + prevValue2)) +
+        var v15 = (EhlersChebyshevGains.Five * (value - (1.226 * prevValue1) + prevValue2)) +
                   (1.8 * _prevV15_1) - (0.811 * _prevV15_2);
         var wave5 = v15 - (1.842 * _prevV15_1) + _prevV15_2 +
                     (1.91 * _prevWave5_1) - (0.922 * _prevWave5_2);
 
-        var v16 = (0.001705 * (value - (1.659 * prevValue1) + prevValue2)) +
+        var v16 = (EhlersChebyshevGains.Six * (value - (1.659 * prevValue1) + prevValue2)) +
                   (1.873 * _prevV16_1) - (0.878 * _prevV16_2);
         var wave6 = v16 - (1.957 * _prevV16_1) + _prevV16_2 +
                     (1.946 * _prevWave6_1) - (0.951 * _prevWave6_2);
@@ -1577,107 +1349,23 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
 [PrimaryOutput("Ebema")]
 public sealed class EhlersBetterExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevEma;
-    private int _index;
-
-    public EhlersBetterExponentialMovingAverageState(int length = 20)
-    {
-        var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
-        _alpha = val != 0 ? MathHelper.MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BetterEmaWindow _window;
+    public EhlersBetterExponentialMovingAverageState(int length = 20) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersBetterExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevEma = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevEma = _index >= 1 ? _prevEma : 0;
-
-        var ema = (_alpha * value) + ((1 - _alpha) * prevEma);
-        var bEma = (_alpha * ((value + prevValue) / 2)) + ((1 - _alpha) * prevEma);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevEma = ema;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ebema", bEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bEma, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ebema", value } } : null);
     }
 }
 
 internal sealed class HighPassFilterV1Engine
 {
-    private readonly double _alpha;
-    private readonly double _pow1;
-    private readonly double _pow2;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevHp1;
-    private double _prevHp2;
-    private int _index;
-
-    public HighPassFilterV1Engine(int length, double mult)
-    {
-        var resolved = Math.Max(1, length);
-        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / (mult * resolved * MathHelper.Sqrt2), 0.99, 0.01);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _pow1 = MathHelper.Pow(1 - (_alpha / 2), 2);
-        _pow2 = MathHelper.Pow(1 - _alpha, 2);
-    }
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _index = 0;
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevHp2 = _index >= 2 ? _prevHp2 : 0;
-        var hp = (_pow1 * (value - (2 * prevValue1) + prevValue2)) +
-                 (2 * (1 - _alpha) * prevHp1) - (_pow2 * prevHp2);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevHp2 = _prevHp1;
-            _prevHp1 = hp;
-            _index++;
-        }
-
-        return hp;
-    }
+    private readonly HighPassWindow _window;
+    public HighPassFilterV1Engine(int length, double mult) => _window = new(length, mult);
+    public void Reset() => _window.Reset();
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
 }
 
 internal sealed class HighPassFilterV2Engine : IDisposable

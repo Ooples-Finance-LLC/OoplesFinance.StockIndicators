@@ -23,8 +23,8 @@ public static partial class Calculations
         {
             var currentLow = lowList[i];
             var currentHigh = highList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
+            var prevHigh = i >= 1 ? highList[i - 1] : currentHigh;
+            var prevLow = i >= 1 ? lowList[i - 1] : currentLow;
 
             var dMax = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
             dMaxList.Add(dMax);

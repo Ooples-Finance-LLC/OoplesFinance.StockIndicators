@@ -20,11 +20,11 @@ public static partial class Calculations
         var upperBandList = new List<double>(count);
         var lowerBandList = new List<double>(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        var smaList = maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(inputList, length) : GetMovingAverageList(stockData, maType, length, inputList);
         // Bollinger's definition: the population standard deviation of the last `length` prices around their
         // own mean. This used to be StandardDeviationVolatility - a different measure - and, through the
         // moving average left on CustomValuesList, of the middle band rather than the prices.
-        var stdDeviationList = GetStandardDeviationList(inputList, length);
+        using var deviation = new ExactPopulationWindow(length);
 
         double prevUpperBand = 0;
         double prevLowerBand = 0;
@@ -32,14 +32,14 @@ public static partial class Calculations
         {
             var middleBand = smaList[i];
             var currentValue = inputList[i];
-            var currentStdDeviation = stdDeviationList[i];
+            var currentStdDeviation = deviation.Next(currentValue, true);
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
 
-            var upperBand = middleBand + (currentStdDeviation * stdDevMult);
+            var upperBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, stdDevMult);
             upperBandList.Add(upperBand);
 
-            var lowerBand = middleBand - (currentStdDeviation * stdDevMult);
+            var lowerBand = BollingerArithmetic.Band(middleBand, currentStdDeviation, -stdDevMult);
             lowerBandList.Add(lowerBand);
 
             var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand, prevUpperBand, lowerBand, prevLowerBand);

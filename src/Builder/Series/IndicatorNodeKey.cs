@@ -129,7 +129,10 @@ internal sealed class IndicatorNodeKey : IEquatable<IndicatorNodeKey>
                 builder.Append(enumValue.GetType().Name).Append('.').Append(enumValue).Append(';');
                 return true;
             case IFormattable formattable when value.GetType().IsPrimitive || value is decimal:
-                builder.Append(formattable.ToString("R", CultureInfo.InvariantCulture)).Append(';');
+                // Framework 4.6.1 rejects the round-trip specifier on integral and
+                // decimal values. General formatting is exact for those types.
+                var format = value is double || value is float ? "R" : "G";
+                builder.Append(formattable.ToString(format, CultureInfo.InvariantCulture)).Append(';');
                 return true;
             case IEnumerable sequence:
                 builder.Append('[');
