@@ -1672,63 +1672,17 @@ public sealed class FXSniperIndicatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Glma")]
 public sealed class GainLossMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _glmaSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public GainLossMovingAverageState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
-        int length = 14, int signalLength = 7)
-    {
-        _glmaSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly GainLossAverageWindow _window;
+    public GainLossMovingAverageState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 14, int signalLength = 7) => _window = new(maType, length, signalLength);
     public IndicatorName Name => IndicatorName.GainLossMovingAverage;
-
-    public void Reset()
-    {
-        _glmaSmoother.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priceChg = _hasPrev ? value - prevValue : 0;
-        var gainLoss = value + prevValue != 0 ? priceChg / ((value + prevValue) / 2) * 100 : 0;
-        var glma = _glmaSmoother.Next(gainLoss, isFinal);
-        var signal = _signalSmoother.Next(glma, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Glma", glma },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(glma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value.Value, includeOutputs ? new Dictionary<string, double> { { "Glma", value.Value }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _glmaSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ghla")]

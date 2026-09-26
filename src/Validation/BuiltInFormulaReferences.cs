@@ -32,6 +32,16 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.GainLossMovingAverage)
+        {
+            var gainLossKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gainLossKeys.Length; slot++)
+            {
+                var key = gainLossKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GainLossAverageOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VerticalHorizontalMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VerticalHorizontalAverageOutputs(bars, builtIn)["Vhma"], IndicatorErrorBudget.Exact);

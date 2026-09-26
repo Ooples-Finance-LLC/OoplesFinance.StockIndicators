@@ -1169,39 +1169,23 @@ public static partial class Calculations
     public static StockData CalculateGainLossMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 14, int signalLength = 7)
     {
-        List<double> gainLossList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); signalLength = Math.Max(1, signalLength);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(input.Count), signal = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var gainLoss = currentValue + prevValue != 0 ? MinPastValues(i, 1, currentValue - prevValue) / ((currentValue + prevValue) / 2) * 100 : 0;
-            gainLossList.Add(gainLoss);
+            var changes = input.Select((price, i) => GainLossAverageWindow.Change(price, i == 0 ? 0 : input[i - 1], i > 0)).ToList();
+            line = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(changes), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, changes);
+            signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, line);
         }
-
-        var gainLossAvgList = GetMovingAverageList(stockData, maType, length, gainLossList);
-        var gainLossAvgSignalList = GetMovingAverageList(stockData, maType, signalLength, gainLossAvgList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var gainLossSignal = gainLossAvgSignalList[i];
-            var prevGainLossSignal1 = i >= 1 ? gainLossAvgSignalList[i - 1] : 0;
-            var prevGainLossSignal2 = i >= 2 ? gainLossAvgSignalList[i - 2] : 0;
-
-            var signal = GetCompareSignal(gainLossSignal - prevGainLossSignal1, prevGainLossSignal1 - prevGainLossSignal2);
-            signalsList?.Add(signal);
+            using var window = new GainLossAverageWindow(maType, length, signalLength, Math.Max(1, input.Count));
+            foreach (var price in input) { var value = window.Next(price, true); line.Add(value.Value); signal.Add(value.Signal); }
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Glma", gainLossAvgList },
-            { "Signal", gainLossAvgSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gainLossAvgList);
-        stockData.IndicatorName = IndicatorName.GainLossMovingAverage;
-
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(signal[i] - (i > 0 ? signal[i - 1] : 0), (i > 0 ? signal[i - 1] : 0) - (i > 1 ? signal[i - 2] : 0)));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Glma", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.GainLossMovingAverage;
         return stockData;
     }
 

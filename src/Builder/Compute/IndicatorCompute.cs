@@ -1821,8 +1821,7 @@ internal static partial class IndicatorCompute
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, spec.OutputKey == "Dema2" ? d2l.SlowLength : d2l.FastLength, d2l.SlowLength, d2l.MaType),
             GainLossMovingAverageSpecOptions glma => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
-                    glma.SignalLength, glma.MaType)
+                ? ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType, glma.SignalLength, true)
                 : ComputeGainLossMovingAverageFast(data, context, glma.Length, glma.MaType),
             EmaWaveIndicatorSpecOptions wave => ComputeEmaWaveFast(data, context, wave.Length1, wave.Length2, wave.Length3, wave.SmoothLength, spec.OutputKey),
             ErgodicMeanDeviationIndicatorSpecOptions emdi => ComputeErgodicMeanDeviationIndicatorFast(data, context,
@@ -20948,30 +20947,23 @@ internal static partial class IndicatorCompute
     /// Computes Gain Loss Moving Average with signal line.
     /// </summary>
     internal static ComputeBuffer ComputeGainLossMovingAverageFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int signalLength = 7, bool signal = false)
     {
-        // CalculateGainLossMovingAverage publishes the FIRST smoothing of the percentage gain or loss as
-        // "Glma"; the second smoothing is the separate "Signal" series. The arm this replaces returned the
-        // signal, and its switch fell back to Wilders for every average but three.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var gainLoss = context.Rent(count);
-        var raw = gainLoss.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-
-            raw[i] = currentValue + prevValue != 0
-                ? CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) / ((currentValue + prevValue) / 2) * 100
-                : 0;
+            var changes = input.Select((price, i) => GainLossAverageWindow.Change(price, i == 0 ? 0 : input[i - 1], i > 0)).ToArray();
+            using var first = context.Rent(input.Count);
+            MovingAverage(data, maType, length, changes, first.WritableSpan);
+            if (signal) MovingAverage(data, maType, signalLength, first.Span, result.WritableSpan);
+            else first.Span.CopyTo(result.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, gainLoss.Span, buffer.WritableSpan);
-        return buffer;
+        else
+        {
+            using var window = new GainLossAverageWindow(maType, length, signalLength, Math.Max(1, input.Count));
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = signal ? value.Signal : value.Value; }
+        }
+        return result;
     }
 
     /// <summary>
