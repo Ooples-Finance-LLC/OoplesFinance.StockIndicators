@@ -22,7 +22,8 @@ internal sealed class HighPassWindow
         var term = new ExactMeanAccumulator(); term.Add(value.Mantissa, coefficient); term.ScaleByPowerOfTwo(value.UpperShift);
         var negative = new ExactMeanAccumulator(); negative.Subtract(term); sum.Subtract(negative);
     }
-    internal double Next(double price, bool commit)
+    internal double Next(double price, bool commit) => NextValue(price, commit).Publish();
+    internal RocBankValue NextValue(double price, bool commit)
     {
         if (double.IsNaN(price) || double.IsInfinity(price)) throw new ArgumentOutOfRangeException(nameof(price));
         var sum = new ExactMeanAccumulator(); sum.Add(price, _gain); sum.Add(_input1, -2 * _gain); sum.Add(_input2, _gain);
@@ -33,7 +34,7 @@ internal sealed class HighPassWindow
         {
             _older = _previous; _previous = result; _input2 = _input1; _input1 = price;
         }
-        return result.Publish();
+        return result;
     }
     internal void Reset() { _previous = _older = default; _input1 = _input2 = 0; }
 }

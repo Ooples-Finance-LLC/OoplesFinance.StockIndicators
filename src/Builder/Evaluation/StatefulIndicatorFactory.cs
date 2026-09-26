@@ -339,6 +339,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersKaufmanAdaptiveMovingAverageSpecOptions ekama => new EhlersKaufmanAdaptiveMovingAverageState(ekama.Length),
             VolumeAdjustedMovingAverageSpecOptions volumeAdjusted => new VolumeAdjustedMovingAverageState(volumeAdjusted.MaType, volumeAdjusted.Length, volumeAdjusted.Factor),
             VolumeAdjustedMaSpecOptions volumeAdjustedAlias => new VolumeAdjustedMovingAverageState(length: volumeAdjustedAlias.Length),
+            EhlersSimpleDecyclerSpecOptions simpleDecycler => new EhlersSimpleDecyclerState(simpleDecycler.Length),
             EhlersHighPassFilterV1SpecOptions highPass => new EhlersHighPassFilterV1State(highPass.Length),
             Ehlers3PoleButterworthFilterV1SpecOptions threePole0 => new Ehlers3PoleButterworthFilterV1State(threePole0.Length),
             Ehlers3PoleButterworthFilterV2SpecOptions threePole1 => new Ehlers3PoleButterworthFilterV2State(threePole1.Length),

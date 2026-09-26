@@ -8638,30 +8638,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersSimpleDecycler(ReadOnlySpan<double> close, Span<double> output, int length = 125)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length, 1);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = close[i] - hp[i];
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new SimpleDecyclerWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Middle;
     }
 
     /// <summary>
