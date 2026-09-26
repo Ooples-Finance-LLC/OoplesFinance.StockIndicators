@@ -719,47 +719,25 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData Calculate3HMA(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 50)
     {
-        List<double> midList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var p = (int)Math.Max(1, Math.Ceiling((double)length / 2));
-        var p1 = (int)Math.Max(1, Math.Ceiling((double)p / 3));
-        var p2 = (int)Math.Max(1, Math.Ceiling((double)p / 2));
-
-        var wma1List = GetMovingAverageList(stockData, maType, p1, inputList);
-        var wma2List = GetMovingAverageList(stockData, maType, p2, inputList);
-        var wma3List = GetMovingAverageList(stockData, maType, p, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var wma1 = wma1List[i];
-            var wma2 = wma2List[i];
-            var wma3 = wma3List[i];
-
-            var mid = (wma1 * 3) - wma2 - wma3;
-            midList.Add(mid);
+            var p = ThreeHullWindow.Period(length);
+            var first = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), ThreeHullWindow.Third(p))?.ToList() ?? GetMovingAverageList(stockData, maType, ThreeHullWindow.Third(p), input);
+            var second = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), ThreeHullWindow.Half(p))?.ToList() ?? GetMovingAverageList(stockData, maType, ThreeHullWindow.Half(p), input);
+            var third = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), p)?.ToList() ?? GetMovingAverageList(stockData, maType, p, input);
+            var adjusted = first.Select((v, i) => ThreeHullWindow.Combine(v, second[i], third[i])).ToList();
+            line = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(adjusted), p)?.ToList() ?? GetMovingAverageList(stockData, maType, p, adjusted);
         }
-
-        var aList = GetMovingAverageList(stockData, maType, p, midList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var a = aList[i];
-            var prevA = i >= 1 ? aList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var signal = GetCompareSignal(currentValue - a, prevValue - prevA);
-            signalsList?.Add(signal);
+            using var window = new ThreeHullWindow(maType, length);
+            foreach (var price in input) line.Add(window.Next(price, true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "3hma", aList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName._3HMA;
-
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "3hma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName._3HMA;
         return stockData;
     }
 

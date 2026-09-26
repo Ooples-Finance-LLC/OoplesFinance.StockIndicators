@@ -1602,48 +1602,9 @@ internal static class TrendCore
     /// </summary>
     internal static void TripleHullMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var p = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-        var p1 = Math.Max(1, (int)Math.Ceiling((double)p / 3));
-        var p2 = Math.Max(1, (int)Math.Ceiling((double)p / 2));
-
-        var wma1Array = pool.Rent(input.Length);
-        var wma2Array = pool.Rent(input.Length);
-        var wma3Array = pool.Rent(input.Length);
-        var midArray = pool.Rent(input.Length);
-
-        try
-        {
-            var wma1 = wma1Array.AsSpan(0, input.Length);
-            var wma2 = wma2Array.AsSpan(0, input.Length);
-            var wma3 = wma3Array.AsSpan(0, input.Length);
-            var mid = midArray.AsSpan(0, input.Length);
-
-            MovingAverageCore.WeightedMovingAverage(input, wma1, p1);
-            MovingAverageCore.WeightedMovingAverage(input, wma2, p2);
-            MovingAverageCore.WeightedMovingAverage(input, wma3, p);
-
-            // mid = wma1 * 3 - wma2 - wma3
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
-            }
-
-            // Final WMA of mid
-            MovingAverageCore.WeightedMovingAverage(mid, output, p);
-        }
-        finally
-        {
-            pool.Return(wma1Array);
-            pool.Return(wma2Array);
-            pool.Return(wma3Array);
-            pool.Return(midArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

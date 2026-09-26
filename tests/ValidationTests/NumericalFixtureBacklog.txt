@@ -2607,15 +2607,6 @@ OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TheRangeIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.ThreeHMA/default
-OoplesFinance.StockIndicators.Indicators.ThreeHMA/longer-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHMA/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHMA/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHma/default
-OoplesFinance.StockIndicators.Indicators.ThreeHma/longer-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHma/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHma/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ThreeHma/weighted-average
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/default
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/longer-periods
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/minimum-periods
@@ -2701,10 +2692,6 @@ OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/default
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TripleHullMovingAverage/default
-OoplesFinance.StockIndicators.Indicators.TripleHullMovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.TripleHullMovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TripleHullMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TrueRangeAdjustedExponentialMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.TrueRangeAdjustedExponentialMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.TrueRangeAdjustedExponentialMovingAverage/minimum-periods
@@ -3042,8 +3029,3 @@ OoplesFinance.StockIndicators.Indicators._1LCLeastSquaresMovingAverage/longer-pe
 OoplesFinance.StockIndicators.Indicators._1LCLeastSquaresMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators._1LCLeastSquaresMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators._1LCLeastSquaresMovingAverage/weighted-average
-OoplesFinance.StockIndicators.Indicators._3HMA/default
-OoplesFinance.StockIndicators.Indicators._3HMA/longer-periods
-OoplesFinance.StockIndicators.Indicators._3HMA/minimum-periods
-OoplesFinance.StockIndicators.Indicators._3HMA/shorter-periods
-OoplesFinance.StockIndicators.Indicators._3HMA/weighted-average
