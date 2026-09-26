@@ -4217,11 +4217,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Ehlers's version of KAMA
-        KaufmanAdaptiveMovingAverage(input, output, length);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EhlersKaufmanWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

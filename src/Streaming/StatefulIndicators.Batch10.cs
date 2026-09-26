@@ -1253,72 +1253,15 @@ public sealed class EhlersInverseFisherTransformState : IStreamingIndicatorState
 [PrimaryOutput("Ekama")]
 public sealed class EhlersKaufmanAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly RollingWindowSum _diffSum;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevValue;
-    private double _prevKama;
-    private bool _hasPrev;
-    private int _index;
-
-    public EhlersKaufmanAdaptiveMovingAverageState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _diffSum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersKaufmanWindow _window;
+    public EhlersKaufmanAdaptiveMovingAverageState(int length = 20) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersKaufmanAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _diffSum.Reset();
-        _values.Clear();
-        _prevValue = 0;
-        _prevKama = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = Math.Abs(value - prevValue);
-        var diffSum = isFinal ? _diffSum.Add(diff, out _) : _diffSum.Preview(diff, out _);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length - 1);
-        var ef = diffSum != 0 ? Math.Min(Math.Abs(value - priorValue) / diffSum, 1) : 0;
-        var s = MathHelper.Pow((0.6667 * ef) + 0.0645, 2);
-        var prevKama = _index >= 1 ? _prevKama : 0;
-        var kama = (s * value) + ((1 - s) * prevKama);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevValue = value;
-            _prevKama = kama;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ekama", kama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kama, outputs);
-    }
-
-    public void Dispose()
-    {
-        _diffSum.Dispose();
-        _values.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ekama", value } } : null);
     }
 }
 

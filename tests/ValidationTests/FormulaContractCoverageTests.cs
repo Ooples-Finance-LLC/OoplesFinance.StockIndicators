@@ -1622,8 +1622,8 @@ public sealed class FormulaContractCoverageTests
         Check(new OvershootReductionMovingAverage(2), new[] { 0d, 2, 4 });
         Check(new EdgePreservingFilter(1), new[] { 1d, 4d / 3, 2 });
         Check(new EhlersAllPassPhaseShifter(4), new[] { .25, .5, 1.9375 });
-        var gain = .0645 * .0645;
-        Check(new EhlersKaufmanAdaptiveMovingAverage(1), new[] { gain, 3 * gain - gain * gain, 7 * gain - 4 * gain * gain + gain * gain * gain });
+        // Round each recursive affine blend, rather than expanding an unrounded polynomial.
+        Check(new EhlersKaufmanAdaptiveMovingAverage(1), new[] { .00416025, .0124634423199375, .02905259128402598 });
         void Check(IIndicator indicator, double[] expected) => Assert.Single(BuiltInFormulaReferences.For(indicator)).Check(
             new IndicatorValidationContext("filter-hand-example", bars, new[] { expected }, 0));
     }

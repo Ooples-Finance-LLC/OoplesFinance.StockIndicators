@@ -1464,42 +1464,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersKaufmanAdaptiveMovingAverage(this StockData stockData, int length = 20)
     {
-        List<double> kamaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new EhlersKaufmanWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorValue = i >= length - 1 ? inputList[i - (length - 1)] : 0;
-
-            double deltaSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var cValue = i >= j ? inputList[i - j] : 0;
-                var pValue = i >= j + 1 ? inputList[i - (j + 1)] : 0;
-                deltaSum += Math.Abs(cValue - pValue);
-            }
-
-            var ef = deltaSum != 0 ? Math.Min(Math.Abs(currentValue - priorValue) / deltaSum, 1) : 0;
-            var s = Pow((0.6667 * ef) + 0.0645, 2);
-
-            var prevKama = GetLastOrDefault(kamaList);
-            var kama = (s * currentValue) + ((1 - s) * prevKama);
-            kamaList.Add(kama);
-
-            var signal = GetCompareSignal(currentValue - kama, prevValue - prevKama);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ekama", kamaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kamaList);
-        stockData.IndicatorName = IndicatorName.EhlersKaufmanAdaptiveMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ekama", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersKaufmanAdaptiveMovingAverage;
         return stockData;
     }
 

@@ -14300,5 +14300,152 @@
     "before": "new ParametricCorrectiveWindow(length, alpha, per)",
     "after": "new ParametricCorrectiveWindow(14, alpha, per)",
     "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "ehlers-kaufman-signed-distance",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "if (result.Sign < 0)",
+    "after": "if (result.Sign < -1)",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-retains-expired-change",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "travel.Subtract(_changes.Peek());",
+    "after": "{}",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-distance-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "Distance(price, _previous)",
+    "after": "Distance(price, _average)",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-startup-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_prices.Peek() : 0",
+    "after": "_prices.Peek() : price",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-period-one",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_length == 1 ? price",
+    "after": "_length == 1 ? 0",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-fast-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": ".6667 * efficiency",
+    "after": ".6666 * efficiency",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-slow-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "+ .0645",
+    "after": "+ .0644",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-omits-square",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "var gain = root * root",
+    "after": "var gain = root",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-wrong-retention-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "next.AddProduct(_average, -gain)",
+    "after": "next.AddProduct(_average, gain)",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-stale-prices-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-stale-changes-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_changes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-stale-travel-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_travel = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-stale-previous-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_previous = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-stale-average-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersKaufmanWindow.cs",
+    "before": "_average = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.EfficiencyRatioPreservesPreviewResetAndExtremeDifferences"
+  },
+  {
+    "id": "ehlers-kaufman-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersKaufmanAdaptiveMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "ehlers-kaufman-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "ehlers-kaufman-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(",
+    "before": "new EhlersKaufmanWindow(length)",
+    "after": "new EhlersKaufmanWindow(14)",
+    "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
   }
 ]
