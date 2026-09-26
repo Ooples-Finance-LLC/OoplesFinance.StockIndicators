@@ -279,77 +279,29 @@ public static partial class Calculations
     public static StockData CalculateAbsoluteStrengthMTFIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 50, int smoothLength = 25)
     {
-        List<double> prevValuesList = new(stockData.Count);
-        List<double> bulls0List = new(stockData.Count);
-        List<double> bears0List = new(stockData.Count);
-        List<double> bulls1List = new(stockData.Count);
-        List<double> bears1List = new(stockData.Count);
-        List<double> bulls2List = new(stockData.Count);
-        List<double> bears2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> bulls = new(input.Count), bears = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            prevValuesList.Add(prevValue);
+            var lagged = input.Select((_, i) => i == 0 ? 0 : input[i - 1]).ToList();
+            List<double> Average(List<double> values, int period) => Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(values), period)?.ToList() ?? GetMovingAverageList(stockData, maType, period, values);
+            var current = Average(input.ToList(), length); var previous = Average(lagged, length);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var difference = AbsoluteStrengthMtfWindow.Difference(new RocBankValue(current[i]), new RocBankValue(previous[i]));
+                bulls.Add(difference.Mantissa > 0 ? difference.Publish() : 0); bears.Add(difference.Mantissa < 0 ? -difference.Publish() : 0);
+            }
+            bulls = Average(bulls, smoothLength); bears = Average(bears, smoothLength);
         }
-
-        var price1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var price2List = GetMovingAverageList(stockData, maType, length, prevValuesList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var price1 = price1List[i];
-            var price2 = price2List[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var high = highList[i];
-            var low = lowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-
-            var bulls0 = 0.5 * (Math.Abs(price1 - price2) + (price1 - price2));
-            bulls0List.Add(bulls0);
-
-            var bears0 = 0.5 * (Math.Abs(price1 - price2) - (price1 - price2));
-            bears0List.Add(bears0);
-
-            var bulls1 = price1 - lowest;
-            bulls1List.Add(bulls1);
-
-            var bears1 = highest - price1;
-            bears1List.Add(bears1);
-
-            var bulls2 = 0.5 * (Math.Abs(high - prevHigh) + (high - prevHigh));
-            bulls2List.Add(bulls2);
-
-            var bears2 = 0.5 * (Math.Abs(prevLow - low) + (prevLow - low));
-            bears2List.Add(bears2);
+            using var window = new AbsoluteStrengthMtfWindow(maType, length, smoothLength, Math.Max(1, input.Count));
+            foreach (var price in input) { var value = window.Next(price, true); bulls.Add(value.Bulls); bears.Add(value.Bears); }
         }
-
-        var smthBulls0List = GetMovingAverageList(stockData, maType, smoothLength, bulls0List);
-        var smthBears0List = GetMovingAverageList(stockData, maType, smoothLength, bears0List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var bulls = smthBulls0List[i];
-            var bears = smthBears0List[i];
-            var prevBulls = i >= 1 ? smthBulls0List[i - 1] : 0;
-            var prevBears = i >= 1 ? smthBears0List[i - 1] : 0;
-
-            var signal = GetCompareSignal(bulls - bears, prevBulls - prevBears);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Bulls", smthBulls0List },
-            { "Bears", smthBears0List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.AbsoluteStrengthMTFIndicator;
-
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(bulls[i] - bears[i], i > 0 ? bulls[i - 1] - bears[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Bulls", bulls }, { "Bears", bears } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.AbsoluteStrengthMTFIndicator;
         return stockData;
     }
 

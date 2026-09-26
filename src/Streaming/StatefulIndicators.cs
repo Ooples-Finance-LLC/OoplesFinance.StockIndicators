@@ -6166,75 +6166,17 @@ public sealed class AdaptiveErgodicCandlestickOscillatorState : IStreamingIndica
 [PrimaryOutput("Bulls")]
 public sealed class AbsoluteStrengthMTFIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _price1;
-    private readonly IMovingAverageSmoother _price2;
-    private readonly IMovingAverageSmoother _bulls;
-    private readonly IMovingAverageSmoother _bears;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public AbsoluteStrengthMTFIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50,
-        int smoothLength = 25)
-    {
-        var resolvedLength = Math.Max(1, length);
-        _price1 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _price2 = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _bulls = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _bears = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AbsoluteStrengthMtfWindow _window;
+    public AbsoluteStrengthMTFIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50, int smoothLength = 25) => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.AbsoluteStrengthMTFIndicator;
-
-    public void Reset()
-    {
-        _price1.Reset();
-        _price2.Reset();
-        _bulls.Reset();
-        _bears.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var price1 = _price1.Next(value, isFinal);
-        var price2 = _price2.Next(prevValue, isFinal);
-        var diff = price1 - price2;
-        var bulls0 = 0.5 * (Math.Abs(diff) + diff);
-        var bears0 = 0.5 * (Math.Abs(diff) - diff);
-        var bulls = _bulls.Next(bulls0, isFinal);
-        var bears = _bears.Next(bears0, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Bulls", bulls },
-                { "Bears", bears }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bulls, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value.Bulls, includeOutputs ? new Dictionary<string, double> { { "Bulls", value.Bulls }, { "Bears", value.Bears } } : null);
     }
-
-    public void Dispose()
-    {
-        _price1.Dispose();
-        _price2.Dispose();
-        _bulls.Dispose();
-        _bears.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Aroon")]
