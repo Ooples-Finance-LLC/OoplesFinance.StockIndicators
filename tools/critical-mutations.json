@@ -16519,5 +16519,123 @@
     "before": "ExactVarianceWindow.Units(gain)",
     "after": "ExactVarianceWindow.Units(1)",
     "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-wrong-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "var capacity = Math.Min(Math.Max(1, length), Math.Max(1, capacityHint));",
+    "after": "var capacity = Math.Min(Math.Max(2, length), Math.Max(1, capacityHint));",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-signed-change",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "BigInteger.Abs(units - _previous)",
+    "after": "units - _previous",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-wrong-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": ": BigInteger.Zero;",
+    "after": ": BigInteger.Abs(units);",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-drops-change-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "sum -= _changes[0];",
+    "after": "sum -= 0;",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-wrong-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "after": "ExactVarianceWindow.Units(low) - ExactVarianceWindow.Units(high)",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-stale-price-history",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "_previous = units;",
+    "after": "_previous = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-stale-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalWindow.cs",
+    "before": "_sum = _previous = default;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class VerticalHorizontalFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class VerticalHorizontalFilterState",
+    "before": "_signal = new(maType, Math.Max(1, signalLength), int.MaxValue)",
+    "after": "_signal = new(maType, Math.Max(1, length), int.MaxValue)",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-raw-signal-publishes-primary",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(",
+    "before": "if (!signal) return buffer;",
+    "after": "if (!signal || input.Count >= 0) return buffer;",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-customer-batch-signal-input",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateVerticalHorizontalFilter(",
+    "before": "Take(SpanCompat.AsReadOnlySpan(line), signalLength)",
+    "after": "Take(SpanCompat.AsReadOnlySpan(input), signalLength)",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhf-customer-fast-signal-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(",
+    "before": "ComponentAverage.Take(raw.Span, signalLength)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), signalLength)",
+    "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

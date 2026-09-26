@@ -1327,76 +1327,25 @@ public sealed class MovingAverageDisplacedEnvelopeState : IStreamingIndicatorSta
 [PrimaryOutput("Vhf")]
 public sealed class VerticalHorizontalFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly RollingWindowSum _changeSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public VerticalHorizontalFilterState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 18,
-        int signalLength = 6)
+    private readonly VerticalHorizontalWindow _window;
+    private readonly RocBankAverage? _signal;
+    private readonly IMovingAverageSmoother? _fallback;
+    public VerticalHorizontalFilterState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 18, int signalLength = 6)
     {
-        var resolved = Math.Max(1, length);
-        _maxWindow = new RollingWindowMax(resolved);
-        _minWindow = new RollingWindowMin(resolved);
-        _changeSum = new RollingWindowSum(resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _window = new(length);
+        if (StrengthWindow.Supports(maType)) _signal = new(maType, Math.Max(1, signalLength), int.MaxValue);
+        else _fallback = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
     }
-
     public IndicatorName Name => IndicatorName.VerticalHorizontalFilter;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _changeSum.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset(); _signal?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
-        var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
-        var numerator = Math.Abs(highest - lowest);
-        var priceChange = _hasPrev ? Math.Abs(value - _prevValue) : 0;
-
-        int countAfter;
-        var sum = isFinal ? _changeSum.Add(priceChange, out countAfter) : _changeSum.Preview(priceChange, out countAfter);
-        var vhf = sum != 0 ? numerator / sum : 0;
-        var signal = _signalSmoother.Next(vhf, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Vhf", vhf },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vhf, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        var signal = _signal is null ? _fallback!.Next(value, isFinal) : _signal.Next(new RocBankValue(value), isFinal).Publish();
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Vhf", value }, { "Signal", signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _changeSum.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() { _window.Dispose(); _signal?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Ss")]
