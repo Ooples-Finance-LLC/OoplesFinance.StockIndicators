@@ -13042,35 +13042,11 @@ internal sealed class ZeroLagTripleExponentialMovingAverageSmoother : IMovingAve
 
 internal sealed class McNichollMovingAverageSmoother : IMovingAverageSmoother
 {
-    private readonly double _alpha;
-    private readonly EmaState _ema1;
-    private readonly EmaState _ema2;
-
-    public McNichollMovingAverageSmoother(int length)
-    {
-        var resolved = Math.Max(2, length);
-        _alpha = 2d / (resolved + 1);
-        _ema1 = new EmaState(resolved);
-        _ema2 = new EmaState(resolved);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var ema1 = _ema1.GetNext(value, isFinal);
-        var ema2 = _ema2.GetNext(ema1, isFinal);
-        var denom = 1 - _alpha;
-        return denom != 0 ? (((2 - _alpha) * ema1) - ema2) / denom : 0;
-    }
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-    }
-
-    public void Dispose()
-    {
-    }
+    private readonly McNichollWindow _window;
+    public McNichollMovingAverageSmoother(int length) => _window = new(MovingAvgType.ExponentialMovingAverage, length);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class WeightedMovingAverageSmoother : IMovingAverageSmoother

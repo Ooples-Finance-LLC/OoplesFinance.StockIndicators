@@ -14869,30 +14869,19 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMcNichollMovingAverageFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateMcNichollMovingAverage corrects a double-smoothed series by the exponential alpha of the
-        // same window: (((2 - alpha) * ema1) - ema2) / (1 - alpha). The core routine hardcoded its own
-        // smoothing, so the spec's MaType never reached the calculation.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 2);
-        var alpha = (double)2 / (length + 1);
-
-        using var firstPass = context.Rent(count);
-        using var secondPass = context.Rent(count);
-        MovingAverage(data, maType, length, input, firstPass.WritableSpan);
-        MovingAverage(data, maType, length, firstPass.Span, secondPass.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var ema1 = firstPass.Span;
-        var ema2 = secondPass.Span;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(2, length);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new McNichollWindow(maType, length);
+        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
+        if (custom)
         {
-            output[i] = 1 - alpha != 0 ? (((2 - alpha) * ema1[i]) - ema2[i]) / (1 - alpha) : 0;
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, maType, length, first.Span, second.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+        return result;
     }
 
     /// <summary>
