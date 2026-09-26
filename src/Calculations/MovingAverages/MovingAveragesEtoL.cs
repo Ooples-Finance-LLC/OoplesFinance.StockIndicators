@@ -805,35 +805,23 @@ public static partial class Calculations
     public static StockData CalculateGeneralizedDoubleExponentialMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 5, double factor = 0.7)
     {
-        List<double> gdList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var ema1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, length, ema1List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? first = null, second = null;
+        using var window = new GeneralizedDoubleWindow(maType, length, factor);
+        if (custom)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentEma1 = ema1List[i];
-            var currentEma2 = ema2List[i];
-
-            var prevGd = GetLastOrDefault(gdList);
-            var gd = (currentEma1 * (1 + factor)) - (currentEma2 * factor);
-            gdList.Add(gd);
-
-            var signal = GetCompareSignal(currentValue - gd, prevValue - prevGd);
-            signalsList?.Add(signal);
+            first = GetMovingAverageList(stockData, maType, length, input);
+            second = GetMovingAverageList(stockData, maType, length, first);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Gdema", gdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gdList);
-        stockData.IndicatorName = IndicatorName.GeneralizedDoubleExponentialMovingAverage;
-
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true, first?[i], second?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Gdema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.GeneralizedDoubleExponentialMovingAverage;
         return stockData;
     }
 
