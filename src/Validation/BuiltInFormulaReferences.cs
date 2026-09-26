@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersDecycler)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DecyclerOutputs(bars, builtIn)["Ed"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSimpleDecycler)
         {
             var decyclerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

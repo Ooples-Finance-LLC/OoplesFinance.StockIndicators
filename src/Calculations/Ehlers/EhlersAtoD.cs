@@ -315,7 +315,7 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var alpha1 = EhlersFirstOrderCoefficient.Alpha(length);
+        var window = new DecyclerWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -323,7 +323,7 @@ public static partial class Calculations
             var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
 
             var prevDec = GetLastOrDefault(decList);
-            var dec = (alpha1 / 2 * (currentValue + prevValue1)) + ((1 - alpha1) * prevDec);
+            var dec = window.Next(currentValue, true);
             decList.Add(dec);
 
             var signal = GetCompareSignal(currentValue - dec, prevValue1 - prevDec);

@@ -16104,5 +16104,87 @@
     "before": "laneKey == \"FastEdo\" ? 1 : 2",
     "after": "laneKey == \"FastEdo\" ? 1 : (double)unchecked(decycler.Length * 2) / decycler.Length",
     "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-wrong-input-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "sum.Add(price, _alpha)",
+    "after": "sum.Add(price, 2 * _alpha)",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-drops-prior-price",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "sum.Add(_price, _alpha);",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-wrong-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "2 * ((BigInteger.One << 1074) - _alpha)",
+    "after": "((BigInteger.One << 1074) - _alpha)",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-wrong-scale",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "ScaleByPowerOfTwo(-1075)",
+    "after": "ScaleByPowerOfTwo(-1074)",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-loses-extended-state",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "var result = RocBankValue.Round(sum);",
+    "after": "var result = new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-stale-price-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "_price = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-stale-filter-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersDecyclerState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-basic-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDecyclerFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]
