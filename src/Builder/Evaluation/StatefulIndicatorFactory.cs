@@ -416,6 +416,7 @@ internal static partial class StatefulIndicatorFactory
             WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),
             DemaSpecOptions dema => new DoubleExponentialMovingAverageState(length: dema.Length),
             TemaSpecOptions tema => new TripleExponentialMovingAverageState(length: tema.Length),
+            HullMovingAverageSpecOptions hullFull => new HullMovingAverageState(hullFull.MaType, hullFull.Length),
             HmaSpecOptions hma => new HullMovingAverageState(length: hma.Length),
             TmaSpecOptions tma => new TriangularMovingAverageState(maType: tma.MaType, length: tma.Length),
             SymmetricallyWeightedMovingAverageSpecOptions symmetric => new SymmetricallyWeightedMovingAverageState(symmetric.Length),

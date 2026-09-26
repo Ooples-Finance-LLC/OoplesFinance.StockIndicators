@@ -19940,33 +19940,21 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeHullMovingAverageFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateHullMovingAverage rounds its half-length and its square-root length and passes both through
-        // the [2, 530] clamp MinOrMax applies, then smooths twice the half-length average less the full-length
-        // one. Both specs bound to it ran MovingAverageCore.HullMovingAverage, which truncates those lengths
-        // rather than rounding them and can only ever use a weighted average, so neither matched - and the one
-        // that does carry a MaType was ignoring it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var halfLength = Math.Max(1, Math.Min(530, (int)Math.Round((double)length / 2)));
-        var sqrtLength = Math.Max(1, Math.Min(530, (int)Math.Round(MathHelper.Sqrt(length))));
-
-        using var full = context.Rent(count);
-        using var half = context.Rent(count);
-        MovingAverage(data, maType, length, input, full.WritableSpan);
-        MovingAverage(data, maType, halfLength, input, half.WritableSpan);
-
-        using var weighted = context.Rent(count);
-        var total = weighted.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            total[i] = (2 * half.Span[i]) - full.Span[i];
+            using var full = context.Rent(input.Count); using var half = context.Rent(input.Count); using var adjusted = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), full.WritableSpan);
+            MovingAverage(data, maType, HullWindow.Half(length), SpanCompat.AsReadOnlySpan(input), half.WritableSpan);
+            for (var i = 0; i < input.Count; i++) adjusted.WritableSpan[i] = HullWindow.Combine(full.Span[i], half.Span[i]);
+            MovingAverage(data, maType, HullWindow.Root(length), adjusted.Span, buffer.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, sqrtLength, weighted.Span, buffer.WritableSpan);
-
+        else
+        {
+            using var window = new HullWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        }
         return buffer;
     }
 

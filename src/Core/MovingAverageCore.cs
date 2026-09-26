@@ -264,45 +264,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HullMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var halfLength = Math.Max(length / 2, 1);
-        var sqrtLength = Math.Max((int)Math.Sqrt(length), 1);
-
-        var pool = ArrayPool<double>.Shared;
-        var wmaHalfArray = pool.Rent(input.Length);
-        var wmaFullArray = pool.Rent(input.Length);
-        var diffArray = pool.Rent(input.Length);
-        try
-        {
-            var wmaHalf = wmaHalfArray.AsSpan(0, input.Length);
-            var wmaFull = wmaFullArray.AsSpan(0, input.Length);
-            var diff = diffArray.AsSpan(0, input.Length);
-
-            // WMA with half period
-            WeightedMovingAverage(input, wmaHalf, halfLength);
-
-            // WMA with full period
-            WeightedMovingAverage(input, wmaFull, length);
-
-            // 2*WMA(n/2) - WMA(n)
-            for (var i = 0; i < input.Length; i++)
-            {
-                diff[i] = (2 * wmaHalf[i]) - wmaFull[i];
-            }
-
-            // Final WMA with sqrt period
-            WeightedMovingAverage(diff, output, sqrtLength);
-        }
-        finally
-        {
-            pool.Return(wmaHalfArray);
-            pool.Return(wmaFullArray);
-            pool.Return(diffArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new HullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

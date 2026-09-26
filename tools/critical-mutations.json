@@ -11654,5 +11654,112 @@
     "after": "",
     "filter": "FullyQualifiedName~IirLeastSquaresNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class IIRLeastSquaresEstimateState"
+  },
+  {
+    "id": "hull-truncates-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Math.Round(Math.Max(1, length) / 2d)",
+    "after": "Math.Floor(Math.Max(1, length) / 2d)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-truncates-root-period",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Math.Round(Math.Sqrt(Math.Max(1, length)))",
+    "after": "Math.Floor(Math.Sqrt(Math.Max(1, length)))",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-wrong-half-cap",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Math.Min(530, (int)Math.Round(Math.Max(1, length) / 2d))",
+    "after": "Math.Min(529, (int)Math.Round(Math.Max(1, length) / 2d))",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-wrong-root-cap",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Math.Min(530, (int)Math.Round(Math.Sqrt(Math.Max(1, length))))",
+    "after": "Math.Min(529, (int)Math.Round(Math.Sqrt(Math.Max(1, length))))",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-wrong-half-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "half.AddTo(ref total, 2)",
+    "after": "half.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-wrong-full-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "full.AddTo(ref total, -1)",
+    "after": "full.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-sequential-half-stage",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Smooth(input, 1, commit)",
+    "after": "Smooth(full, 1, commit)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-premature-adjustment-publication",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "Smooth(RocBankValue.Round(total), 2, commit)",
+    "after": "Smooth(new RocBankValue(total.Mean(1)), 2, commit)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "_averages[stage].Next(value, commit)",
+    "after": "_averages[stage].Next(value, true)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-stale-averages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HullWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~HullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-raw-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CustomerStagesReceiveOriginalThenAdjustedInputsInOrder",
+    "scope": "internal static ComputeBuffer ComputeHullMovingAverageFast("
+  },
+  {
+    "id": "hull-batch-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~HullNumericalTests.CustomerStagesReceiveOriginalThenAdjustedInputsInOrder",
+    "scope": "public static StockData CalculateHullMovingAverage("
+  },
+  {
+    "id": "hull-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HullNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class HullMovingAverageState"
   }
 ]

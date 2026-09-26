@@ -195,68 +195,23 @@ public static partial class Calculations
     public static StockData CalculateHullMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 20)
     {
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-
-        var length2 = Math.Max(1, Math.Min(530, (int)Math.Round((double)length / 2)));
-        var sqrtLength = Math.Max(1, Math.Min(530, (int)Math.Round(Sqrt(length))));
-
-        List<double> hullMAList;
-        if (maType == MovingAvgType.WeightedMovingAverage)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-            var wma1 = new double[count];
-            var wma2 = new double[count];
-            MovingAverageCore.WeightedMovingAverage(inputSpan, wma1, length);
-            MovingAverageCore.WeightedMovingAverage(inputSpan, wma2, length2);
-
-            var totalWeighted = new double[count];
-            for (var i = 0; i < count; i++)
-            {
-                totalWeighted[i] = (2 * wma2[i]) - wma1[i];
-            }
-
-            var outputBuffer = SpanCompat.CreateOutputBuffer(count);
-            MovingAverageCore.WeightedMovingAverage(totalWeighted, outputBuffer.Span, sqrtLength);
-            hullMAList = outputBuffer.ToList();
+            var full = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+            var half = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), HullWindow.Half(length))?.ToList() ?? GetMovingAverageList(stockData, maType, HullWindow.Half(length), input);
+            var adjusted = full.Select((v, i) => HullWindow.Combine(v, half[i])).ToList();
+            line = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(adjusted), HullWindow.Root(length))?.ToList() ?? GetMovingAverageList(stockData, maType, HullWindow.Root(length), adjusted);
         }
         else
         {
-            var totalWeightedMAList = new List<double>(count);
-            var wma1List = GetMovingAverageList(stockData, maType, length, inputList);
-            var wma2List = GetMovingAverageList(stockData, maType, length2, inputList);
-
-            for (var i = 0; i < count; i++)
-            {
-                var currentWMA1 = wma1List[i];
-                var currentWMA2 = wma2List[i];
-
-                var totalWeightedMA = (2 * currentWMA2) - currentWMA1;
-                totalWeightedMAList.Add(totalWeightedMA);
-            }
-
-            hullMAList = GetMovingAverageList(stockData, maType, sqrtLength, totalWeightedMAList);
+            using var window = new HullWindow(maType, length);
+            foreach (var price in input) line.Add(window.Next(price, true));
         }
-
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hullMa = hullMAList[i];
-            var prevHullMa = i >= 1 ? inputList[i - 1] : 0;
-
-            var signal = GetCompareSignal(currentValue - hullMa, prevValue - prevHullMa);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hma", hullMAList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hullMAList);
-        stockData.IndicatorName = IndicatorName.HullMovingAverage;
-
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.HullMovingAverage;
         return stockData;
     }
 
