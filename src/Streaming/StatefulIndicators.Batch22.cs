@@ -748,60 +748,17 @@ public sealed class SelfAdjustingRelativeStrengthIndexState : IStreamingIndicato
 [PrimaryOutput("Swma")]
 public sealed class SelfWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public SelfWeightedMovingAverageState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _values = new PooledRingBuffer<double>(_length * 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SelfWeightedWindow _window;
+    public SelfWeightedMovingAverageState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.SelfWeightedMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        double weightSum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var pValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var weight = EhlersStreamingWindow.GetOffsetValue(_values, value, _length + j);
-            weightSum += weight;
-            sum += weight * pValue;
-        }
-
-        var swma = weightSum != 0 ? sum / weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Swma", swma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(swma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Swma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sgi")]

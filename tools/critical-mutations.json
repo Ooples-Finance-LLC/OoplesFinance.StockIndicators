@@ -11876,5 +11876,102 @@
     "after": "",
     "filter": "FullyQualifiedName~ThreeHullNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class _3HMAState"
+  },
+  {
+    "id": "self-weighted-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "At(current, _length + j)",
+    "after": "At(current, j)",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-drops-startup-term",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "_history.Count - _length + 1",
+    "after": "_history.Count - _length",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-omits-oldest-term",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "Math.Min(_length,",
+    "after": "Math.Min(_length - 1,",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-rounds-product-before-sum",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "numerator.AddProduct(At(current, j), weight)",
+    "after": "numerator.Add(At(current, j) * weight)",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-uses-count-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "numerator.Ratio(denominator)",
+    "after": "numerator.Mean(Math.Max(1, terms))",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-erases-weight-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "denominator.Add(weight)",
+    "after": "denominator.Add(Math.Abs(weight))",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-loses-lagged-window",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "_capacity = 2L * _length",
+    "after": "_capacity = _length",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-integer-capacity-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "2L * _length",
+    "after": "2 * _length",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "internal void Reset() { _history.Clear(); _start = 0; }",
+    "after": "internal void Reset() { _start = 0; }",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-does-not-rotate-ring",
+    "module": "numerical",
+    "file": "src/Helpers/SelfWeightedWindow.cs",
+    "before": "_start = (_start + 1) % _history.Count",
+    "after": "_start = 0",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "self-weighted-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SelfWeightedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class SelfWeightedMovingAverageState"
   }
 ]

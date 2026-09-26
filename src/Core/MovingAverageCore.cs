@@ -2959,23 +2959,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void SelfWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var value = i >= j ? input[i - j] : 0;
-                // Weight is the value from length periods before
-                var weight = i >= length + j ? input[i - length - j] : 0;
-                weightSum += weight;
-                sum += weight * value;
-            }
-
-            output[i] = weightSum != 0 ? sum / weightSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SelfWeightedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
