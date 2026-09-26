@@ -35,90 +35,17 @@ public sealed class MarketFacilitationIndexState : IStreamingIndicatorState
 [PrimaryOutput("Mmi")]
 public sealed class MarketMeannessIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly double[] _medianScratch;
-    private readonly IMovingAverageSmoother? _mmiSmoother;
-    private readonly NoiseEliminationTechnologyEngine? _mmiNet;
-    private readonly StreamingInputResolver _input;
-
-    public MarketMeannessIndexState(MovingAvgType maType = MovingAvgType.EhlersNoiseEliminationTechnology,
-        int length = 100)
-    {
-        _length = Math.Max(1, length);
-        if (maType == MovingAvgType.EhlersNoiseEliminationTechnology)
-        {
-            _mmiNet = new NoiseEliminationTechnologyEngine(_length);
-        }
-        else
-        {
-            _mmiSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        }
-
-        _values = new PooledRingBuffer<double>(_length);
-        _medianScratch = new double[_length];
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MeannessWindow _window;
+    public MarketMeannessIndexState(MovingAvgType maType = MovingAvgType.EhlersNoiseEliminationTechnology, int length = 100) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.MarketMeannessIndex;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _mmiSmoother?.Reset();
-        _mmiNet?.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var median = EhlersStreamingWindow.GetMedian(_values, value, _medianScratch);
-        int nl = 0;
-        int nh = 0;
-        for (var j = 1; j < _length; j++)
-        {
-            var value1 = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
-            var value2 = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-
-            if (value1 > median && value1 > value2)
-            {
-                nl++;
-            }
-            else if (value1 < median && value1 < value2)
-            {
-                nh++;
-            }
-        }
-
-        var mmi = _length != 1 ? 100d * (nl + nh) / (_length - 1) : 0;
-        var mmiSmoothed = _mmiNet != null
-            ? _mmiNet.Next(mmi, isFinal)
-            : _mmiSmoother!.Next(mmi, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mmi", mmi },
-                { "MmiSmoothed", mmiSmoothed }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mmi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Mmi", value.Line }, { "MmiSmoothed", value.Smoothed } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _mmiSmoother?.Dispose();
-        _mmiNet?.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mr")]

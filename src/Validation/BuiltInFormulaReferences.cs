@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.MarketMeannessIndex && (AverageKind(builtIn.CreateOptions(), 0) is 1 or 2 or 3 or 6 || ((Builder.Specs.MarketMeannessIndexSpecOptions)builtIn.CreateOptions()).MaType == MovingAvgType.EhlersNoiseEliminationTechnology))
+        {
+            var meannessKeys = new[] { "Mmi", "MmiSmoothed" };
+            for (var slot = 0; slot < meannessKeys.Length; slot++)
+            {
+                var key = meannessKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => MeannessOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PriceZoneOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.Reference(0, bars => PriceZoneOutputs(bars, builtIn)["Pzo"], IndicatorErrorBudget.Exact);

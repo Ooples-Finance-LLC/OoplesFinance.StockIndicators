@@ -536,62 +536,26 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMarketMeannessIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersNoiseEliminationTechnology, int length = 100)
     {
-        List<double> mmiList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        using var medianWindow = new RollingMedian(length);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !(StrengthWindow.Supports(maType) || maType == MovingAvgType.EhlersNoiseEliminationTechnology);
+        var priceAverage = GetMovingAverageList(stockData, maType, length, input);
+        List<double> line = new(stockData.Count), smoothed = new(stockData.Count);
+        using var window = new MeannessWindow(maType, length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            medianWindow.Add(currentValue);
-
-            var median = medianWindow.Median;
-            int nl = 0, nh = 0;
-            for (var j = 1; j < length; j++)
-            {
-                var value1 = i >= j - 1 ? tempList[i - (j - 1)] : 0;
-                var value2 = i >= j ? tempList[i - j] : 0;
-
-                if (value1 > median && value1 > value2)
-                {
-                    nl++;
-                }
-                else if (value1 < median && value1 < value2)
-                {
-                    nh++;
-                }
-            }
-
-            double mmi = length != 1 ? 100d * (nl + nh) / (length - 1) : 0;
-            mmiList.Add(mmi);
+            var value = window.Next(input[i], true); line.Add(value.Line); smoothed.Add(value.Smoothed);
         }
-
-        var mmiFilterList = GetMovingAverageList(stockData, maType, length, mmiList);
-        for (var i = 0; i < stockData.Count; i++)
+        if (custom) smoothed = GetMovingAverageList(stockData, maType, length, line);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var mmiFilt = mmiFilterList[i];
-            var prevMmiFilt1 = i >= 1 ? mmiFilterList[i - 1] : 0;
-            var prevMmiFilt2 = i >= 2 ? mmiFilterList[i - 2] : 0;
-            var currentValue = inputList[i];
-            var currentMa = maList[i];
-
-            var signal = GetConditionSignal(currentValue < currentMa && ((mmiFilt > prevMmiFilt1 && prevMmiFilt1 < prevMmiFilt2) || (mmiFilt < prevMmiFilt1 && prevMmiFilt1 > prevMmiFilt2)), currentValue < currentMa && ((mmiFilt > prevMmiFilt1 && prevMmiFilt1 < prevMmiFilt2) || (mmiFilt < prevMmiFilt1 && prevMmiFilt1 > prevMmiFilt2)));
-            signalsList?.Add(signal);
+            var previous = i >= 1 ? smoothed[i - 1] : 0; var before = i >= 2 ? smoothed[i - 2] : 0;
+            var turn = input[i] < priceAverage[i] && (smoothed[i] > previous && previous < before || smoothed[i] < previous && previous > before);
+            signals?.Add(GetConditionSignal(turn, turn));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mmi", mmiList },
-            { "MmiSmoothed", mmiFilterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mmiList);
-        stockData.IndicatorName = IndicatorName.MarketMeannessIndex;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mmi", line }, { "MmiSmoothed", smoothed } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MarketMeannessIndex;
         return stockData;
     }
 

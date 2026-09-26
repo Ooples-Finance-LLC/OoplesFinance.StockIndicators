@@ -9038,5 +9038,87 @@
     "after": "",
     "filter": "FullyQualifiedName~PriceZoneNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class PriceZoneOscillatorState"
+  },
+  {
+    "id": "meanness-overflowing-even-median",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "middle.Mean(2)",
+    "after": "(_ordered[(count - 1) / 2] + _ordered[count / 2]) / 2",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-inclusive-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "current > median && current > previous",
+    "after": "current >= median && current > previous",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-reversed-lower-move",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "current < median && current < previous",
+    "after": "current < median && current > previous",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-wrong-count-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "100d * outward / (_length - 1)",
+    "after": "100d * outward / _length",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-drops-startup-padding",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "lag < _length - 1",
+    "after": "lag < Math.Min(_values.Count, _length - 1)",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "if (commit) _values.TryAdd",
+    "after": "if (value != 0) _values.TryAdd",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-stale-values-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "_values.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-wrong-net-period",
+    "module": "numerical",
+    "file": "src/Helpers/MeannessWindow.cs",
+    "before": "_net = new(_length)",
+    "after": "_net = new(1)",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.PartialMediansPaddedPairsAndSmoothingMatchIndependentFormulas"
+  },
+  {
+    "id": "meanness-skips-first-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), priceAverage.WritableSpan);",
+    "after": "",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.CustomerAveragesReceivePricesThenTheRawCount",
+    "scope": "internal static ComputeBuffer ComputeMarketMeannessIndexFast("
+  },
+  {
+    "id": "meanness-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MeannessNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class MarketMeannessIndexState"
   }
 ]
