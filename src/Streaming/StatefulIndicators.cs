@@ -8015,76 +8015,16 @@ public sealed class AdaptiveMovingAverageState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Aema")]
 public sealed class AdaptiveExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _mltp1;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevAema;
-    private int _index;
-    private bool _hasPrev;
-
-    public AdaptiveExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10)
-    {
-        _length = Math.Max(1, length);
-        _mltp1 = (double)2 / (_length + 1);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AdaptiveEmaWindow _window;
+    public AdaptiveExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.AdaptiveExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevAema = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var sma = _sma.Next(value, isFinal);
-        var mltp2 = highest - lowest != 0
-            ? MathHelper.MinOrMax(Math.Abs((2 * value) - lowest - highest) / (highest - lowest), 1, 0)
-            : 0;
-        var rate = _mltp1 * (1 + mltp2);
-        var prevAema = _hasPrev ? _prevAema : value;
-        var aema = _index <= _length ? sma : prevAema + (rate * (value - prevAema));
-
-        if (isFinal)
-        {
-            _prevAema = aema;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Aema", aema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(aema, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Aema", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Aarma")]

@@ -755,7 +755,7 @@ public static class CalculationsHelper
                     MovingAverageCore.AlphaDecreasingEma(inputSpan, outputSpan, length);
                     break;
                 case MovingAvgType.AdaptiveExponentialMovingAverage:
-                    MovingAverageCore.AdaptiveExponentialMovingAverage(inputSpan, outputSpan, length);
+                    MovingAverageCore.AdaptiveExponentialMovingAverage(inputSpan, SpanCompat.AsReadOnlySpan(stockData.HighPrices), SpanCompat.AsReadOnlySpan(stockData.LowPrices), outputSpan, length);
                     break;
                 case MovingAvgType.AutonomousRecursiveMovingAverage:
                     MovingAverageCore.AutonomousRecursiveMovingAverage(inputSpan, outputSpan, length);

@@ -17710,5 +17710,128 @@
     "after": "value.Average",
     "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast("
+  },
+  {
+    "id": "aema-wrong-seed-kind",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "_seed = new(kind, _length, capacityHint)",
+    "after": "_seed = new(MovingAvgType.SimpleMovingAverage, _length, capacityHint)",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-wrong-startup-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "_count <= _length",
+    "after": "_count < _length",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-wrong-range-window",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "var capacity = Math.Min(_length, Math.Max(1, capacityHint))",
+    "after": "var capacity = Math.Min(_length + 1, Math.Max(1, capacityHint))",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-wrong-price-distance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "2 * ExactVarianceWindow.Units(price)",
+    "after": "ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-premature-distance-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "BigInteger.Abs(2 * ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(lowest) - ExactVarianceWindow.Units(highest))",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(2 * price - lowest - highest))",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-wrong-base-rate",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "2 / (_length + 1d)",
+    "after": "1 / (_length + 1d)",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-clamps-valid-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "RocBankValue value;",
+    "after": "rate = Math.Min(1, rate); RocBankValue value;",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-drops-feedback-correction",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "sum.Subtract(correction);",
+    "after": "// Deliberately omit feedback correction.",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "var highest = commit ?",
+    "after": "commit = true; var highest = commit ?",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "_count = 0;",
+    "after": "_count += 0;",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-stale-seed-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveEmaWindow.cs",
+    "before": "_seed?.Reset();",
+    "after": "// Deliberately retain seed history.\n        ",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.\n        ",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "public sealed class AdaptiveExponentialMovingAverageState :"
+  },
+  {
+    "id": "aema-registry-discards-ohlc",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "before": "MovingAverageCore.AdaptiveExponentialMovingAverage(close, high, low, output, length)",
+    "after": "MovingAverageCore.AdaptiveExponentialMovingAverage(close, close, close, output, length)",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "public readonly struct AemaCore :"
+  },
+  {
+    "id": "aema-helper-wrong-period",
+    "module": "numerical",
+    "file": "src/Helpers/CalculationsHelper.cs",
+    "before": "movingAvgList = stockData.CalculateAdaptiveExponentialMovingAverage(length: length).ChainedValues;",
+    "after": "movingAvgList = stockData.CalculateAdaptiveExponentialMovingAverage(length: length + 1).ChainedValues;",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "aema-customer-seed-period",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), length",
+    "after": "SpanCompat.AsReadOnlySpan(input), length + 1",
+    "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "public static StockData CalculateAdaptiveExponentialMovingAverage("
   }
 ]

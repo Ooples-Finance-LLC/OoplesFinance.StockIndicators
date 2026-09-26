@@ -142,40 +142,19 @@ public static partial class Calculations
     public static StockData CalculateAdaptiveExponentialMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 10)
     {
-        List<double> aemaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var mltp1 = (double)2 / (length + 1);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var seeds = external ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new AdaptiveEmaWindow(maType, length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hh = highestList[i];
-            var ll = lowestList[i];
-            var sma = smaList[i];
-            var mltp2 = hh - ll != 0 ? MinOrMax(Math.Abs((2 * currentValue) - ll - hh) / (hh - ll), 1, 0) : 0;
-            var rate = mltp1 * (1 + mltp2);
-
-            var prevAema = i >= 1 ? GetLastOrDefault(aemaList) : currentValue;
-            var aema = i <= length ? sma : prevAema + (rate * (currentValue - prevAema));
-            aemaList.Add(aema);
-
-            var signal = GetCompareSignal(currentValue - aema, prevValue - prevAema);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? input[i] : line[i - 1]; var value = window.Next(input[i], high[i], low[i], true, seeds is null ? null : seeds[i]); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i > 0 ? input[i - 1] : 0) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Aema", aemaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aemaList);
-        stockData.IndicatorName = IndicatorName.AdaptiveExponentialMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Aema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AdaptiveExponentialMovingAverage;
         return stockData;
     }
 
