@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EquityMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EquityOutputs(bars, builtIn)["Eqma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersLaguerreFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LaguerreFilterOutputs(bars, 2d / (Integer(builtIn.CreateOptions(), "Length", 9) + 1d))["Elf"], IndicatorErrorBudget.Exact);

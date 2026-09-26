@@ -436,79 +436,17 @@ public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Eqma")]
 public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _chgXSum;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevEqma;
-    private double _prevX;
-    private double _chgXCumSum;
-    private bool _hasPrev;
-
-    public EquityMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _chgXSum = new RollingWindowSum(resolved);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EquityWindow _window;
+    public EquityMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.EquityMovingAverage;
-
-    public void Reset()
-    {
-        _chgXSum.Reset();
-        _sma.Reset();
-        _prevValue = 0;
-        _prevEqma = 0;
-        _prevX = 0;
-        _chgXCumSum = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var sma = _sma.Next(value, isFinal);
-        var prevEqma = _hasPrev ? _prevEqma : value;
-        var prevX = _prevX;
-        var x = Math.Sign(value - sma);
-        var priceDiff = _hasPrev ? value - prevValue : 0;
-
-        var chgX = priceDiff * prevX;
-        var req = isFinal ? _chgXSum.Add(chgX, out _) : _chgXSum.Preview(chgX, out _);
-        var chgXCum = priceDiff * x;
-        var opteq = _chgXCumSum + chgXCum;
-        var alpha = opteq != 0 ? MathHelper.MinOrMax(req / opteq, 0.99, 0.01) : 0.99;
-        var eqma = (alpha * value) + ((1 - alpha) * prevEqma);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevEqma = eqma;
-            _prevX = x;
-            _chgXCumSum = opteq;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eqma", eqma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(eqma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eqma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _chgXSum.Dispose();
-        _sma.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eco")]

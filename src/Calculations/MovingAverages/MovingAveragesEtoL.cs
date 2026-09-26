@@ -1423,54 +1423,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEquityMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> chgXList = new(stockData.Count);
-        List<double> chgXCumList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<double> eqmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum chgXSumWindow = new();
-        double chgXCumSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new EquityWindow(maType, length, initializeFallback: false);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma = smaList[i];
-            var prevEqma = i >= 1 ? eqmaList[i - 1] : currentValue;
-
-            var prevX = GetLastOrDefault(xList);
-            double x = Math.Sign(currentValue - sma);
-            xList.Add(x);
-
-            var chgX = MinPastValues(i, 1, currentValue - prevValue) * prevX;
-            chgXList.Add(chgX);
-            chgXSumWindow.Add(chgX);
-
-            var chgXCum = MinPastValues(i, 1, currentValue - prevValue) * x;    
-            chgXCumList.Add(chgXCum);
-            chgXCumSum += chgXCum;
-
-            var opteq = chgXCumSum;
-            var req = chgXSumWindow.Sum(length);
-            var alpha = opteq != 0 ? MinOrMax(req / opteq, 0.99, 0.01) : 0.99;  
-
-            var eqma = (alpha * currentValue) + ((1 - alpha) * prevEqma);
-            eqmaList.Add(eqma);
-
-            var signal = GetCompareSignal(currentValue - eqma, prevValue - prevEqma);
-            signalsList?.Add(signal);
+            var average = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+            for (var i = 0; i < input.Count; i++) line.Add(window.NextWithAverage(input[i], average[i], true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eqma", eqmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(eqmaList);
-        stockData.IndicatorName = IndicatorName.EquityMovingAverage;
-
+        else foreach (var price in input) line.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? -input[0] : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eqma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EquityMovingAverage;
         return stockData;
     }
 

@@ -12766,5 +12766,128 @@
     "before": "new LaguerreFilterWindow(2d / (Math.Max(1, length) + 1d))",
     "after": "new LaguerreFilterWindow(.2)",
     "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.MaximumBuilderPeriodConvertsToPositiveGainWithoutOverflow"
+  },
+  {
+    "id": "equity-wrong-lagged-side",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "change.Multiply(_side)",
+    "after": "change.Multiply(side)",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-wrong-current-side",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "change.AddTo(ref cumulative, side)",
+    "after": "change.AddTo(ref cumulative, _side)",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-drops-expired-request",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "_changes[0].AddTo(ref requested, -1)",
+    "after": "_changes[0].AddTo(ref requested, 0)",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-forgets-cumulative-history",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "var cumulative = _cumulative",
+    "after": "var cumulative = new ExactMeanAccumulator()",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-wrong-minimum-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "Math.Max(.01,",
+    "after": "Math.Max(0,",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-wrong-maximum-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "Math.Min(.99,",
+    "after": "Math.Min(1,",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-wrong-zero-total-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "cumulative.IsExactlyZero ? .99",
+    "after": "cumulative.IsExactlyZero ? .01",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-stale-income-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "_requested = _cumulative = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "_started = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "equity-overflows-price-difference",
+    "module": "numerical",
+    "file": "src/Helpers/EquityWindow.cs",
+    "before": "var result = sum.Mean(1);",
+    "after": "var result = previous + gain * (price - previous);",
+    "filter": "FullyQualifiedName~EquityNumericalTests.AdaptiveGainKeepsFinitePricesInTheirConvexRange"
+  },
+  {
+    "id": "equity-customer-gets-volumes",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan",
+    "after": "length, SpanCompat.AsReadOnlySpan(data.Volumes), average.WritableSpan",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CustomerAverageReceivesPricesAndBatchOnlyAveragesRemainUsable",
+    "scope": "internal static ComputeBuffer ComputeEquityMovingAverageFast("
+  },
+  {
+    "id": "equity-eagerly-constructs-batch-fallback",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "before": "initializeFallback: false",
+    "after": "initializeFallback: true",
+    "filter": "FullyQualifiedName~EquityNumericalTests.CustomerAverageReceivesPricesAndBatchOnlyAveragesRemainUsable",
+    "scope": "public static StockData CalculateEquityMovingAverage("
+  },
+  {
+    "id": "equity-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EquityNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EquityMovingAverageState"
   }
 ]
