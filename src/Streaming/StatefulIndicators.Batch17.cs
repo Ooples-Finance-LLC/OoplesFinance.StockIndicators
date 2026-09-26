@@ -472,54 +472,17 @@ public sealed class McGinleyDynamicIndicatorState : IStreamingIndicatorState
 [PrimaryOutput("Mnma")]
 public sealed class McNichollMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly StreamingInputResolver _input;
-
-    public McNichollMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 20)
-    {
-        var resolved = Math.Max(2, length);
-        _alpha = 2d / (resolved + 1);
-        _ema1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema2 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly McNichollWindow _window;
+    public McNichollMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.McNichollMovingAverage;
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema1 = _ema1.Next(value, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var denom = 1 - _alpha;
-        var mnma = denom != 0 ? (((2 - _alpha) * ema1) - ema2) / denom : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mnma", mnma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mnma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Mnma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema1.Dispose();
-        _ema2.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mhlma")]

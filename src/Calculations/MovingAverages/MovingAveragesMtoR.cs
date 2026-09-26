@@ -574,37 +574,23 @@ public static partial class Calculations
         int length = 20)
     {
         length = Math.Max(2, length);
-        List<double> mnmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        var ema1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, length, ema1List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? first = null, second = null;
+        using var window = new McNichollWindow(maType, length);
+        if (custom)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ema1 = ema1List[i];
-            var ema2 = ema2List[i];
-
-            var prevMnma = GetLastOrDefault(mnmaList);
-            var mnma = 1 - alpha != 0 ? (((2 - alpha) * ema1) - ema2) / (1 - alpha) : 0;
-            mnmaList.Add(mnma);
-
-            var signal = GetCompareSignal(currentValue - mnma, prevValue - prevMnma);
-            signalsList?.Add(signal);
+            first = GetMovingAverageList(stockData, maType, length, input);
+            second = GetMovingAverageList(stockData, maType, length, first);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mnma", mnmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mnmaList);
-        stockData.IndicatorName = IndicatorName.McNichollMovingAverage;
-
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true, first?[i], second?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mnma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.McNichollMovingAverage;
         return stockData;
     }
 

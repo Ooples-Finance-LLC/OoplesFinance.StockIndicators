@@ -10652,5 +10652,79 @@
     "after": "",
     "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ZeroLagTripleExponentialMovingAverageState"
+  },
+  {
+    "id": "mcnicholl-wrong-unit-gain",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "2L * _length",
+    "after": "2L * _length - 1",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "result.Mean(_length - 1L)",
+    "after": "result.Mean(_length)",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-adds-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "-(_length + 1L)",
+    "after": "(_length + 1L)",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-commits-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "_first.Next(new RocBankValue(price), commit)",
+    "after": "_first.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-commits-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "_second.Next(first, commit)",
+    "after": "_second.Next(first, true)",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-stale-first-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-stale-second-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "_second?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "mcnicholl-reuses-first-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, first.Span, second.WritableSpan",
+    "after": "length, SpanCompat.AsReadOnlySpan(input), second.WritableSpan",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.CustomerStagesRemainSequential",
+    "scope": "internal static ComputeBuffer ComputeMcNichollMovingAverageFast("
+  },
+  {
+    "id": "mcnicholl-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~McNichollNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class McNichollMovingAverageState"
   }
 ]
