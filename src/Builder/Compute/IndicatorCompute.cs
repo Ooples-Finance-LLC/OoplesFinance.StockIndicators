@@ -1838,9 +1838,7 @@ internal static partial class IndicatorCompute
             // change the bound series. Length2 is not used by the clip indicator's batch at all.
             EhlersSimpleDerivIndicatorSpecOptions esdi => ComputeEhlersSimpleDerivIndicatorFast(data, context, esdi.Length, esdi.SignalLength, esdi.MaType, spec.OutputKey),
             EhlersSimpleClipIndicatorSpecOptions esci => ComputeEhlersSimpleClipIndicatorFast(data, context, esci.Length1, esci.Length3, esci.SignalLength, esci.MaType, spec.OutputKey),
-            ElderMarketThermometerSpecOptions emt => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeElderMarketThermometerFast(data, context), emt.Length, emt.MaType)
-                : ComputeElderMarketThermometerFast(data, context),
+            ElderMarketThermometerSpecOptions emt => ComputeElderMarketThermometerFast(data, context, emt.Length, emt.MaType, spec.OutputKey == "Signal"),
             EhlersRelativeVigorIndexSpecOptions ervi => ComputeEhlersRelativeVigorIndexFast(data, context, ervi.Length, ervi.MaType, ervi.SignalLength, spec.OutputKey),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => ComputeEhlersMovingAverageDifferenceFast(data, context, emad.FastLength, emad.SlowLength, emad.MaType),
             Dema2LinesSpecOptions d2l => ComputeDema2LinesFast(data, context, spec.OutputKey == "Dema2" ? d2l.SlowLength : d2l.FastLength, d2l.SlowLength, d2l.MaType),
@@ -21983,30 +21981,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Elder Market Thermometer with signal line.
     /// </summary>
-    internal static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeElderMarketThermometerFast(StockData data, ComputeContext context, int length = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // CalculateElderMarketThermometer publishes the raw thermometer: zero on an inside bar, and otherwise
-        // whichever of the two range extensions was the larger. Its length and maType average that series into
-        // an unpublished signal only, so the arm takes neither.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var custom = ComponentAverage.HasOverrides;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        if (custom)
         {
-            var currentHigh = highs[i];
-            var currentLow = lows[i];
-            var prevHigh = i >= 1 ? highs[i - 1] : 0;
-            var prevLow = i >= 1 ? lows[i - 1] : 0;
-
-            output[i] = currentHigh < prevHigh && currentLow > prevLow ? 0
-                : currentHigh - prevHigh > prevLow - currentLow ? Math.Abs(currentHigh - prevHigh)
-                : Math.Abs(prevLow - currentLow);
+            using var priceMean = context.Rent(data.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), priceMean.WritableSpan);
         }
-
-        return buffer;
+        using var raw = context.Rent(data.Count);
+        var output = context.Rent(data.Count);
+        using var thermometer = new ElderThermometerWindow(maType, length);
+        for (var i = 0; i < data.Count; i++)
+        {
+            var value = thermometer.Next(data.HighPrices[i], data.LowPrices[i], true);
+            raw.WritableSpan[i] = value.Value;
+            output.WritableSpan[i] = signal ? value.Signal : value.Value;
+        }
+        if (custom)
+        {
+            using var smoothed = context.Rent(data.Count);
+            MovingAverage(data, maType, length, raw.Span, smoothed.WritableSpan);
+            if (signal) smoothed.Span.CopyTo(output.WritableSpan);
+        }
+        return output;
     }
 
     /// <summary>

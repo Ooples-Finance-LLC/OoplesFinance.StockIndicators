@@ -7025,5 +7025,72 @@
     "after": "_linReg.Next(value, true)",
     "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
     "scope": "public sealed class RegressionOscillatorState"
+  },
+  {
+    "id": "thermometer-sums-extensions",
+    "module": "numerical",
+    "file": "src/Helpers/ElderThermometerWindow.cs",
+    "before": "BigInteger.Max(rising, falling)",
+    "after": "rising + falling",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "thermometer-ignores-low-extension",
+    "module": "numerical",
+    "file": "src/Helpers/ElderThermometerWindow.cs",
+    "before": "ExactVarianceWindow.Units(previousLow) - ExactVarianceWindow.Units(low)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "thermometer-publishes-before-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/ElderThermometerWindow.cs",
+    "before": "_wide.Next(expansion, commit)",
+    "after": "_wide.Next(new StrengthValue(value), commit)",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "thermometer-keeps-high-on-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElderThermometerWindow.cs",
+    "before": "_high = _low = 0;",
+    "after": "_low = 0;",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "thermometer-commits-preview-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/ElderThermometerWindow.cs",
+    "before": "if (commit) { _high = high; _low = low; }",
+    "after": "if (_wide is not null) { _high = high; _low = low; }",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "thermometer-core-blanks-first-bar",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i] = ElderThermometerWindow.Publish",
+    "after": "output[i] = i == 0 ? 0 : ElderThermometerWindow.Publish",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention",
+    "scope": "internal static void ElderMarketThermometer("
+  },
+  {
+    "id": "thermometer-raw-wrong-smoothing-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "new ElderThermometerWindow(maType, length)",
+    "after": "new ElderThermometerWindow(maType, 22)",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention",
+    "scope": "internal static ComputeBuffer ComputeElderMarketThermometerFast("
+  },
+  {
+    "id": "thermometer-raw-skips-first-component",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "        if (custom)\n        {\n            using var priceMean",
+    "after": "        if (custom && signal)\n        {\n            using var priceMean",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.CustomerSignalUsesTheSecondAverageForBothOutputRequests",
+    "scope": "internal static ComputeBuffer ComputeElderMarketThermometerFast("
   }
 ]

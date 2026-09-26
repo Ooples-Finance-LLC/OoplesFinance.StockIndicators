@@ -2864,20 +2864,18 @@ public static partial class Calculations
         var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
+        List<double> wideSignal = new(stockData.Count);
+        using var thermometer = new ElderThermometerWindow(maType, length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentHigh = highList[i];
             var currentLow = lowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-
-            var emt = currentHigh < prevHigh && currentLow > prevLow ? 0 : currentHigh - prevHigh > prevLow - currentLow ? Math.Abs(currentHigh - prevHigh) :
-                Math.Abs(prevLow - currentLow);
-            emtList.Add(emt);
+            var (emt, signal) = thermometer.Next(currentHigh, currentLow, true);
+            emtList.Add(emt); wideSignal.Add(signal);
         }
 
-        var aemtList = GetMovingAverageList(stockData, maType, length, emtList);
+        var aemtList = StrengthWindow.Supports(maType) ? wideSignal : GetMovingAverageList(stockData, maType, length, emtList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
