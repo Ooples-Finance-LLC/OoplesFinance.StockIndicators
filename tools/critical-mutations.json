@@ -7570,5 +7570,71 @@
     "after": "",
     "filter": "FullyQualifiedName~VolumeBalanceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TFSVolumeOscillatorState"
+  },
+  {
+    "id": "relative-volume-strict-demand-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "score >= 2 ? _previousPrice",
+    "after": "score > 2 ? _previousPrice",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.PopulationScorePreservesWideResidualsAndExactDemandThreshold"
+  },
+  {
+    "id": "relative-volume-demand-uses-current-price",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "score >= 2 ? _previousPrice",
+    "after": "score >= 2 ? price",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.PopulationScorePreservesWideResidualsAndExactDemandThreshold"
+  },
+  {
+    "id": "relative-volume-uses-price-score",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "_score.Next(volume, average,",
+    "after": "_score.Next(price, average,",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.PopulationScorePreservesWideResidualsAndExactDemandThreshold"
+  },
+  {
+    "id": "relative-volume-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "if (commit) { _previousPrice",
+    "after": "if (_score is not null) { _previousPrice",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.PopulationScorePreservesWideResidualsAndExactDemandThreshold"
+  },
+  {
+    "id": "relative-volume-stale-start-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "_previousPrice = _demand = 0; _started = false;",
+    "after": "_previousPrice = _demand = 0;",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.PopulationScorePreservesWideResidualsAndExactDemandThreshold"
+  },
+  {
+    "id": "relative-volume-ignores-customer-center",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolumeWindow.cs",
+    "before": "_simple && !customerMean.HasValue",
+    "after": "_simple",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.CustomerVolumeMeanControlsBothScoreAndDemandPrice"
+  },
+  {
+    "id": "relative-volume-skips-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (custom) MovingAverage",
+    "after": "if (custom && data.Count < 0) MovingAverage",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.CustomerVolumeMeanControlsBothScoreAndDemandPrice",
+    "scope": "internal static ComputeBuffer ComputeRelativeVolumeIndicatorFast("
+  },
+  {
+    "id": "relative-volume-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class RelativeVolumeIndicatorState"
   }
 ]

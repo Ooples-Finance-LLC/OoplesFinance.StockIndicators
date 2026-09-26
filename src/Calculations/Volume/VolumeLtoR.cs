@@ -574,42 +574,21 @@ public static partial class Calculations
     public static StockData CalculateRelativeVolumeIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 60)
     {
-        List<double> relVolList = new(stockData.Count);
-        List<double> dplList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var smaVolumeList = GetMovingAverageList(stockData, maType, length, volumeList);
-        stockData.SetCustomValues(volumeList);
-        var stdDevVolumeList = GetStandardDeviationList(volumeList, length);
-
+        List<double> scores = new(stockData.Count), demands = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new RelativeVolumeWindow(maType, length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var currentValue = inputList[i];
-            var av = smaVolumeList[i];
-            var sd = stdDevVolumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var relVol = sd != 0 ? (currentVolume - av) / sd : 0;
-            relVolList.Add(relVol);
-
-            var prevDpl = i >= 1 ? dplList[i - 1] : 0;
-            var dpl = relVol >= 2 ? prevValue : i >= 1 ? prevDpl : currentValue;
-            dplList.Add(dpl);
-
-            var signal = GetCompareSignal(currentValue - dpl, prevValue - prevDpl);
-            signalsList?.Add(signal);
+            var (score, demand) = window.Next(input[i], stockData.Volumes[i], true);
+            var previousPrice = i == 0 ? 0 : input[i - 1];
+            var previousDemand = i == 0 ? 0 : demands[i - 1];
+            scores.Add(score); demands.Add(demand);
+            signals?.Add(GetCompareSignal(input[i] - demand, previousPrice - previousDemand));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rvi", relVolList },
-            { "Dpl", dplList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(relVolList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rvi", scores }, { "Dpl", demands } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(scores);
         stockData.IndicatorName = IndicatorName.RelativeVolumeIndicator;
-
         return stockData;
     }
 
