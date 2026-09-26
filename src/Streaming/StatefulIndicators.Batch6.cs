@@ -1164,253 +1164,65 @@ public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, I
 [PrimaryOutput("E2bf")]
 public sealed class Ehlers2PoleButterworthFilterV1State : IStreamingIndicatorState
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private bool _hasPrev;
-
-    public Ehlers2PoleButterworthFilterV1State(int length = 10)
-    {
-        var resolved = Math.Max(2, length);
-        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * 1.25 * Math.PI / resolved);
-        _c2 = b;
-        _c3 = -a * a;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleButterworthFilterV1State(int length = 10) => _window = new(length, 0);
     public IndicatorName Name => IndicatorName.Ehlers2PoleButterworthFilterV1;
-
-    public void Reset()
-    {
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevFilter1 = _hasPrev ? _prevFilter1 : 0;
-        var prevFilter2 = _hasPrev ? _prevFilter2 : 0;
-        var filt = (_c1 * value) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filt;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "E2bf", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E2bf", value } } : null);
     }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("E2bf")]
 public sealed class Ehlers2PoleButterworthFilterV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
-    public Ehlers2PoleButterworthFilterV2State(int length = 15)
-    {
-        var resolved = Math.Max(2, length);
-        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _c2 = b;
-        _c3 = -a * a;
-        _c1 = (1 - b + (a * a)) / 4;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleButterworthFilterV2State(int length = 15) => _window = new(length, 1);
     public IndicatorName Name => IndicatorName.Ehlers2PoleButterworthFilterV2;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevFilter1 = _prevFilter1;
-        var prevFilter2 = _prevFilter2;
-        var prevValue1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
-        var prevValue2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
-
-        var filt = _index < 3
-            ? value
-            : (_c1 * (value + (2 * prevValue1) + prevValue2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filt;
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "E2bf", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E2bf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Essf")]
 public sealed class Ehlers2PoleSuperSmootherFilterV1State : IStreamingIndicatorState
 {
-    private readonly double _coef1;
-    private readonly double _coef2;
-    private readonly double _coef3;
-    private readonly StreamingInputResolver _input;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
-    public Ehlers2PoleSuperSmootherFilterV1State(int length = 15)
-    {
-        var resolved = Math.Max(2, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _coef2 = b1;
-        _coef3 = -a1 * a1;
-        _coef1 = 1 - _coef2 - _coef3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleSuperSmootherFilterV1State(int length = 15) => _window = new(length, 2);
     public IndicatorName Name => IndicatorName.Ehlers2PoleSuperSmootherFilterV1;
-
-    public void Reset()
-    {
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevFilter1 = _prevFilter1;
-        var prevFilter2 = _prevFilter2;
-
-        var filt = _index < 3 ? value : (_coef1 * value) + (_coef2 * prevFilter1) + (_coef3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filt;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Essf", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Essf", value } } : null);
     }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("E2ssf")]
 public sealed class Ehlers2PoleSuperSmootherFilterV2State : IStreamingIndicatorState
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public Ehlers2PoleSuperSmootherFilterV2State(int length = 10)
-    {
-        var resolved = Math.Max(2, length);
-        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _c2 = b;
-        _c3 = -a * a;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleSuperSmootherFilterV2State(int length = 10) => _window = new(length, 3);
     public IndicatorName Name => IndicatorName.Ehlers2PoleSuperSmootherFilterV2;
-
-    public void Reset()
-    {
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevFilter1 = _prevFilter1;
-        var prevFilter2 = _prevFilter2;
-
-        var filt = (_c1 * ((value + prevValue) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filt;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "E2ssf", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E2ssf", value } } : null);
     }
+    public void Dispose() { }
 }
 
 internal sealed class PriceMomentumOscillatorEngine

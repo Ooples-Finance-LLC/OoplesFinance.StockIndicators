@@ -13224,10 +13224,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers2PoleButterworthFilterV1(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers2PoleButterworthFilterV1(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -13235,10 +13235,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers2PoleButterworthFilterV2(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers2PoleButterworthFilterV2(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -13268,10 +13268,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV1Fast(StockData data, ComputeContext context, int length = 15)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers2PoleSuperSmootherFilterV1(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers2PoleSuperSmootherFilterV1(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -13279,10 +13279,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV2Fast(StockData data, ComputeContext context, int length = 10)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers2PoleSuperSmootherFilterV2(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers2PoleSuperSmootherFilterV2(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>

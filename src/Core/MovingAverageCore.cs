@@ -1829,27 +1829,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(-sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(sqrt2 * 1.25 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (c1 * currentValue) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 0);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1857,29 +1839,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(-sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(sqrt2 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = (1 - b + Math.Pow(a, 2)) / 4;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 1);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1928,27 +1890,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleSuperSmootherFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a1 = Math.Exp(-sqrt2 * Math.PI / length);
-        var b1 = 2 * a1 * Math.Cos(sqrt2 * Math.PI / length);
-        var coef2 = b1;
-        var coef3 = -a1 * a1;
-        var coef1 = 1 - coef2 - coef3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = i < 3 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1956,28 +1900,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers2PoleSuperSmootherFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var sqrt2 = Math.Sqrt(2);
-        var a = Math.Exp(-sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(sqrt2 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TwoPoleWindow(length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -315,38 +315,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV2(this StockData stockData, int length = 10)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new TwoPoleWindow(length, 3); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var filt = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E2ssf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E2ssf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers2PoleSuperSmootherFilterV2;
-
         return stockData;
     }
 
@@ -394,38 +372,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * 1.25 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = 1 - c2 - c3;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new TwoPoleWindow(length, 0); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var filt = (c1 * currentValue) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E2bf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E2bf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers2PoleButterworthFilterV1;
-
         return stockData;
     }
 
@@ -438,39 +394,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = Exp(-MathHelper.Sqrt2 * Math.PI / length);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
-        var c2 = b;
-        var c3 = -a * a;
-        var c1 = (1 - b + Pow(a, 2)) / 4;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new TwoPoleWindow(length, 1); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-
-            var filt = i < 3 ? currentValue : (c1 * (currentValue + (2 * prevValue1) + prevValue2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue1 - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E2bf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E2bf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers2PoleButterworthFilterV2;
-
         return stockData;
     }
 
@@ -724,38 +657,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers2PoleSuperSmootherFilterV1(this StockData stockData, int length = 15)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
-        var coef2 = b1;
-        var coef3 = -a1 * a1;
-        var coef1 = 1 - coef2 - coef3;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new TwoPoleWindow(length, 2); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var filt = i < 3 ? currentValue : (coef1 * currentValue) + (coef2 * prevFilter1) + (coef3 * prevFilter2);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Essf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Essf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers2PoleSuperSmootherFilterV1;
-
         return stockData;
     }
 
