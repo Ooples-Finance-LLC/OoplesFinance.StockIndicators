@@ -5131,28 +5131,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RegressionOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var lrArray = pool.Rent(input.Length);
-
-        try
-        {
-            var lr = lrArray.AsSpan(0, input.Length);
-
-            // Calculate linear regression
-            TrendCore.LinearRegressionSlope(input, lr, length);
-
-            // Apply smoothing
-            MovingAverageCore.SimpleMovingAverage(lr, output, length / 2 > 0 ? length / 2 : 1);
-        }
-        finally
-        {
-            pool.Return(lrArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = regression.Next(input[i], true).PercentFitResidual(input[i]);
     }
 
     /// <summary>

@@ -488,12 +488,12 @@ public sealed class RecursiveStochasticState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Rosc")]
 public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly LinearRegressionState _linReg;
+    private readonly ExactLinearFitWindow _linReg;
     private readonly StreamingInputResolver _input;
 
     public RegressionOscillatorState(int length = 63)
     {
-        _linReg = new LinearRegressionState(length);
+        _linReg = new ExactLinearFitWindow(length);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -506,9 +506,9 @@ public sealed class RegressionOscillatorState : IStreamingIndicatorState, IDispo
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _input.GetValue(bar);
-        var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-        var rosc = linReg != 0 ? 100 * ((value / linReg) - 1) : 0;
+        var rosc = _linReg.Next(value, isFinal).PercentFitResidual(value);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

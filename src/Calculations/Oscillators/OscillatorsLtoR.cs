@@ -2603,15 +2603,15 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
+        using var regression = new ExactLinearFitWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var currentLinReg = linRegList[i];
+            var fit = regression.Next(currentValue, true);
 
             var prevRosc = GetLastOrDefault(roscList);
-            var rosc = currentLinReg != 0 ? 100 * ((currentValue / currentLinReg) - 1) : 0;
+            var rosc = fit.PercentFitResidual(currentValue);
             roscList.Add(rosc);
 
             var signal = GetCompareSignal(rosc, prevRosc);

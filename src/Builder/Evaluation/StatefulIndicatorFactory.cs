@@ -238,6 +238,7 @@ internal static partial class StatefulIndicatorFactory
             PriceLineChannelSpecOptions lineChannel => new PriceLineChannelState(lineChannel.MaType, lineChannel.Length),
             PriceCurveChannelSpecOptions curveChannel => new PriceCurveChannelState(curveChannel.MaType, curveChannel.Length),
             RandomWalkIndexSpecOptions motion => new RandomWalkIndexState(motion.MaType, motion.Length),
+            LinearRegressionLineSpecOptions line => new LinearRegressionLineState(line.MaType, line.Length),
             RegressionOscillatorSpecOptions regression => new RegressionOscillatorState(regression.Length),
             RunningEquitySpecOptions equity => new RunningEquityState(equity.MaType, equity.Length),
             RecursiveDifferenciatorSpecOptions recursive => new RecursiveDifferenciatorState(recursive.MaType, recursive.Length, recursive.Alpha),

@@ -3342,21 +3342,13 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LinearRegressionLine(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        length = Math.Max(1, length);
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < input.Length; i++)
         {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Linear regression line is the same as LSMA
-        LinearRegression(input, output, length);
-
-        // CalculateLinearRegressionLine builds its slope from a correlation and a standard deviation, both
-        // of which are zero until their window fills, so it reports nothing through the run-in.
-        // LinearRegression fits through the bars it has, which is right for that indicator but not this one.
-        var blank = Math.Min(length - 1, input.Length);
-        for (var i = 0; i < blank; i++)
-        {
-            output[i] = 0;
+            var fit = regression.Next(input[i], true);
+            output[i] = fit.Count < length ? 0 : fit.Last;
         }
     }
 

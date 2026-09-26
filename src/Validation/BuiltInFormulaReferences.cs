@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RegressionOscillator ||
+            builtIn.BatchName == IndicatorName.LinearRegressionLine && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.RegressionOscillator ? "Rosc" : "LinReg";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DerivedRegressionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.KendallRankCorrelationCoefficient or IndicatorName.LogisticCorrelation)
         {
             var logistic = builtIn.BatchName == IndicatorName.LogisticCorrelation;

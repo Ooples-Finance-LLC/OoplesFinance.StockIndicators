@@ -681,62 +681,25 @@ public static partial class Calculations
     public static StockData CalculateLinearRegressionLine(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        List<double> regList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index themselves.
-        var myList = GetStandardDeviationList(inputList, length);
-
+        length = Math.Max(1, length);
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var meanPrice = GetMovingAverageList(stockData, maType, length, input);
+        var times = Enumerable.Range(0, stockData.Count).Select(i => (double)i).ToList();
+        var meanTime = GetMovingAverageList(stockData, maType, length, times);
+        using var regression = new ExactLinearFitWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            yList.Add(currentValue);
-
-            double x = i;
-            xList.Add(x);
-
-            corrWindow.Add(currentValue, x);
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add((double)corr);
+            var fit = regression.Next(input[i], true);
+            var value = fit.Count < length ? meanPrice[i] : maType == MovingAvgType.SimpleMovingAverage ? fit.Last : fit.CenteredLine(meanPrice[i], meanTime[i]);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i == 0 ? 0 : input[i - 1]) - previous));
         }
-
-        var xMaList = GetMovingAverageList(stockData, maType, length, xList);
-        var mxList = GetStandardDeviationList(xList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var my = myList[i];
-            var mx = mxList[i];
-            var corr = corrList[i];
-            var yMa = yMaList[i];
-            var xMa = xMaList[i];
-            var x = xList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var slope = mx != 0 ? corr * (my / mx) : 0;
-            var inter = yMa - (slope * xMa);
-
-            var prevReg = GetLastOrDefault(regList);
-            var reg = (x * slope) + inter;
-            regList.Add(reg);
-
-            var signal = GetCompareSignal(currentValue - reg, prevValue - prevReg);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "LinReg", regList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(regList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "LinReg", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.LinearRegressionLine;
-
         return stockData;
     }
 
