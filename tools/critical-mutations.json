@@ -11459,5 +11459,103 @@
     "after": "",
     "filter": "FullyQualifiedName~HoltNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class HoltExponentialMovingAverageState"
+  },
+  {
+    "id": "hull-estimate-wrong-second-average",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "MovingAvgType.ExponentialMovingAverage",
+    "after": "MovingAvgType.WeightedMovingAverage",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-wrong-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "Math.Ceiling(length / 2d)",
+    "after": "Math.Floor(length / 2d)",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-wrong-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "Math.Max(2,",
+    "after": "Math.Max(1,",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-wrong-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(531,",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-wrong-weighted-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "weighted.AddTo(ref sum, 3)",
+    "after": "weighted.AddTo(ref sum, 2)",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-wrong-batch-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "sum.Add(weighted, 3)",
+    "after": "sum.Add(weighted, 2)",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-commits-weighted-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "_weighted.Next(input, commit)",
+    "after": "_weighted.Next(input, true)",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-commits-exponential-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "_exponential.Next(input, commit)",
+    "after": "_exponential.Next(input, true)",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-stale-weighted-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "_weighted.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-stale-exponential-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HullEstimateWindow.cs",
+    "before": "_exponential.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "hull-estimate-customer-stages-become-sequential",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maLength, input, exponential.WritableSpan",
+    "after": "maLength, weighted.Span, exponential.WritableSpan",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.CustomerAveragesReceiveTheSameSourceIndependently",
+    "scope": "internal static ComputeBuffer ComputeHullEstimateFast("
+  },
+  {
+    "id": "hull-estimate-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HullEstimateNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class HullEstimateState"
   }
 ]

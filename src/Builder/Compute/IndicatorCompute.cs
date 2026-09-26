@@ -14492,7 +14492,7 @@ internal static partial class IndicatorCompute
         var ema = exponential.Span;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (3 * wma[i]) - (2 * ema[i]);
+            output[i] = HullEstimateWindow.Combine(wma[i], ema[i]);
         }
 
         return buffer;

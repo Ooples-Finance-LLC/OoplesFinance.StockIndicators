@@ -2871,33 +2871,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HullEstimate(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var halfLength = Math.Max(length / 2, 1);
-
-        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma1 = wma1Buffer.AsSpan(0, input.Length);
-            var wma2 = wma2Buffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, halfLength);
-            WeightedMovingAverage(input, wma2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (3 * wma1[i]) - (2 * wma2[i]);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wma1Buffer);
-            ArrayPool<double>.Shared.Return(wma2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new HullEstimateWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

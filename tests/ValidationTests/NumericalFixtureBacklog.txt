@@ -1531,10 +1531,6 @@ OoplesFinance.StockIndicators.Indicators.Hma/default
 OoplesFinance.StockIndicators.Indicators.Hma/longer-periods
 OoplesFinance.StockIndicators.Indicators.Hma/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Hma/shorter-periods
-OoplesFinance.StockIndicators.Indicators.HullEstimate/default
-OoplesFinance.StockIndicators.Indicators.HullEstimate/longer-periods
-OoplesFinance.StockIndicators.Indicators.HullEstimate/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HullEstimate/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HullMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.HullMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.HullMovingAverage/minimum-periods
