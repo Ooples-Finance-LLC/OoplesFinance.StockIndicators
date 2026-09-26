@@ -1959,26 +1959,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersHighPassFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 125, double mult = 1)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(length, 1);
-        var alpha = EhlersFirstOrderCoefficient.Alpha(mult * length * Math.Sqrt(2));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevHp1 = i >= 1 ? output[i - 1] : 0;
-            var prevHp2 = i >= 2 ? output[i - 2] : 0;
-            var pow1 = Math.Pow(1 - (alpha / 2), 2);
-            var pow2 = Math.Pow(1 - alpha, 2);
-
-            output[i] = (pow1 * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) - (pow2 * prevHp2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new HighPassWindow(length, mult);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

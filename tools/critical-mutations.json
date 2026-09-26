@@ -15808,5 +15808,120 @@
     "before": "new ThreePoleWindow(length, 2)",
     "after": "new ThreePoleWindow(length, 0)",
     "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-wrong-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "(2 * unit - alpha) * (2 * unit - alpha)",
+    "after": "(unit - alpha) * (unit - alpha)",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-wrong-first-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "pole << 1077",
+    "after": "pole << 1076",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-wrong-second-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "-(pole * pole) << 2",
+    "after": "(pole * pole) << 2",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-wrong-difference",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "sum.Add(_input1, -2 * _gain)",
+    "after": "sum.Add(_input1, -_gain)",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-drops-input-lag-two",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "sum.Add(_input2, _gain);",
+    "after": "",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-wrong-scale",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "ScaleByPowerOfTwo(-2150)",
+    "after": "ScaleByPowerOfTwo(-2148)",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-loses-extended-state",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "var result = RocBankValue.Round(sum);",
+    "after": "var result = new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-stale-previous-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "_previous = _older = default;",
+    "after": "_older = default;",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-stale-older-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "_previous = _older = default;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-stale-input-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassWindow.cs",
+    "before": "_input1 = _input2 = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHighPassFilterV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersHighPassFilterV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "high-pass-ignores-multiplier",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersHighPassFilterV1(",
+    "before": "new HighPassWindow(length, mult)",
+    "after": "new HighPassWindow(length, 1)",
+    "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

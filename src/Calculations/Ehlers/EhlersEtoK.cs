@@ -13,37 +13,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHighPassFilterV1(this StockData stockData, int length = 125, double mult = 1)
     {
-        length = Math.Max(length, 1);
-        List<double> highPassList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = EhlersFirstOrderCoefficient.Alpha(mult * length * Math.Sqrt(2));
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new HighPassWindow(length, mult); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevHp1 = i >= 1 ? highPassList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? highPassList[i - 2] : 0;
-            var pow1 = Pow(1 - (alpha / 2), 2);
-            var pow2 = Pow(1 - alpha, 2);
-
-            var highPass = (pow1 * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) - (pow2 * prevHp2);
-            highPassList.Add(highPass);
-
-            var signal = GetCompareSignal(highPass, prevHp1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(value, i == 0 ? 0 : output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hp", highPassList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(highPassList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hp", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.EhlersHighPassFilterV1;
-
         return stockData;
     }
 
