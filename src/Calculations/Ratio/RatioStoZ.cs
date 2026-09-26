@@ -247,66 +247,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateShinoharaIntensityRatio(this StockData stockData, int length = 14)
     {
-        List<double> tempOpenList = new(stockData.Count);
-        List<double> tempLowList = new(stockData.Count);
-        List<double> tempHighList = new(stockData.Count);
-        List<double> prevCloseList = new(stockData.Count);
-        List<double> ratioAList = new(stockData.Count);
-        List<double> ratioBList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum highSumWindow = new();
-        RollingSum lowSumWindow = new();
-        RollingSum openSumWindow = new();
-        RollingSum prevCloseSumWindow = new();
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
+        List<double> ratioA = new(stockData.Count), ratioB = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ShinoharaWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var high = highList[i];
-            tempHighList.Add(high);
-            highSumWindow.Add(high);
-
-            var low = lowList[i];
-            tempLowList.Add(low);
-            lowSumWindow.Add(low);
-
-            var open = openList[i];
-            tempOpenList.Add(open);
-            openSumWindow.Add(open);
-
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            prevCloseList.Add(prevClose);
-            prevCloseSumWindow.Add(prevClose);
-
-            var highSum = highSumWindow.Sum(length);
-            var lowSum = lowSumWindow.Sum(length);
-            var openSum = openSumWindow.Sum(length);
-            var prevCloseSum = prevCloseSumWindow.Sum(length);
-            var bullA = highSum - openSum;
-            var bearA = openSum - lowSum;
-            var bullB = highSum - prevCloseSum;
-            var bearB = prevCloseSum - lowSum;
-
-            var prevRatioA = GetLastOrDefault(ratioAList);
-            var ratioA = bearA != 0 ? bullA / bearA * 100 : 0;
-            ratioAList.Add(ratioA);
-
-            var prevRatioB = GetLastOrDefault(ratioBList);
-            var ratioB = bearB != 0 ? bullB / bearB * 100 : 0;
-            ratioBList.Add(ratioB);
-
-            var signal = GetCompareSignal(ratioA - ratioB, prevRatioA - prevRatioB);
-            signalsList?.Add(signal);
+            var (a, b) = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            var previousA = i == 0 ? 0 : ratioA[i - 1]; var previousB = i == 0 ? 0 : ratioB[i - 1];
+            ratioA.Add(a); ratioB.Add(b); signals?.Add(GetCompareSignal(a - b, previousA - previousB));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "ARatio", ratioAList },
-            { "BRatio", ratioBList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "ARatio", ratioA }, { "BRatio", ratioB } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.ShinoharaIntensityRatio;
-
         return stockData;
     }
 }

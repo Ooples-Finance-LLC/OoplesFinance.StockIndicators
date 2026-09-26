@@ -1230,76 +1230,17 @@ public sealed class SharpModifiedMovingAverageState : IStreamingIndicatorState, 
 [PrimaryOutput("ARatio")]
 public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _highSum;
-    private readonly RollingWindowSum _lowSum;
-    private readonly RollingWindowSum _openSum;
-    private readonly RollingWindowSum _prevCloseSum;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public ShinoharaIntensityRatioState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _highSum = new RollingWindowSum(_length);
-        _lowSum = new RollingWindowSum(_length);
-        _openSum = new RollingWindowSum(_length);
-        _prevCloseSum = new RollingWindowSum(_length);
-    }
-
+    private readonly ShinoharaWindow _window;
+    public ShinoharaIntensityRatioState(int length = 14) => _window = new ShinoharaWindow(length);
     public IndicatorName Name => IndicatorName.ShinoharaIntensityRatio;
-
-    public void Reset()
-    {
-        _highSum.Reset();
-        _lowSum.Reset();
-        _openSum.Reset();
-        _prevCloseSum.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var highSum = isFinal ? _highSum.Add(bar.High, out _) : _highSum.Preview(bar.High, out _);
-        var lowSum = isFinal ? _lowSum.Add(bar.Low, out _) : _lowSum.Preview(bar.Low, out _);
-        var openSum = isFinal ? _openSum.Add(bar.Open, out _) : _openSum.Preview(bar.Open, out _);
-        var prevCloseSum = isFinal ? _prevCloseSum.Add(prevClose, out _) : _prevCloseSum.Preview(prevClose, out _);
-        var bullA = highSum - openSum;
-        var bearA = openSum - lowSum;
-        var bullB = highSum - prevCloseSum;
-        var bearB = prevCloseSum - lowSum;
-        var ratioA = bearA != 0 ? bullA / bearA * 100 : 0;
-        var ratioB = bearB != 0 ? bullB / bearB * 100 : 0;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "ARatio", ratioA },
-                { "BRatio", ratioB }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ratioA, outputs);
+        var (a, b) = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(a, includeOutputs ? new Dictionary<string, double> { { "ARatio", a }, { "BRatio", b } } : null);
     }
-
-    public void Dispose()
-    {
-        _highSum.Dispose();
-        _lowSum.Dispose();
-        _openSum.Dispose();
-        _prevCloseSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sc")]

@@ -7636,5 +7636,87 @@
     "after": "",
     "filter": "FullyQualifiedName~RelativeVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class RelativeVolumeIndicatorState"
+  },
+  {
+    "id": "shinohara-uses-current-close",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "new Candle(open, high, low, _previous)",
+    "after": "new Candle(open, high, low, close)",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-drops-low-side",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "downA.Add(candle.Low, -weight);",
+    "after": "downA.Add(candle.Low, 0);",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-wrong-percent-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "upA.Add(candle.High, 100 * weight);",
+    "after": "upA.Add(candle.High, weight);",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-keeps-expired-candles",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "if (_window.Count == _window.Capacity)",
+    "after": "if (_window.Count > _window.Capacity)",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-clamps-unbounded-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "var result = (upA.Ratio(downA), upB.Ratio(downB));",
+    "after": "var result = (Math.Min(100, upA.Ratio(downA)), upB.Ratio(downB));",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "if (commit)\n        {",
+    "after": "if (_window.Capacity > 0)\n        {",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-stale-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/ShinoharaWindow.cs",
+    "before": "_upA = _downA = _upB = _downB = default; _previous = 0;",
+    "after": "_upA = _downA = _upB = _downB = default;",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-raw-b-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields",
+    "scope": "internal static ComputeBuffer ComputeShinoharaIntensityRatioBFast("
+  },
+  {
+    "id": "shinohara-native-b-discards-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new ShinoharaIntensityRatioState(shinoharaB.Length)",
+    "after": "new ShinoharaIntensityRatioState(14)",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.ExactCandleSumsPreserveBothRatiosPreviousCloseAndSelectedFields"
+  },
+  {
+    "id": "shinohara-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ShinoharaNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ShinoharaIntensityRatioState"
   }
 ]

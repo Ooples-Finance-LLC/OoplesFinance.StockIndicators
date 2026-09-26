@@ -8425,27 +8425,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ShinoharaIntensityRatioA(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highSum = new RollingSum();
-        var lowSum = new RollingSum();
-        var openSum = new RollingSum();
-
-        for (var i = 0; i < high.Length; i++)
-        {
-            highSum.Add(high[i]);
-            lowSum.Add(low[i]);
-            openSum.Add(open[i]);
-
-            var bullA = highSum.Sum(length) - openSum.Sum(length);
-            var bearA = openSum.Sum(length) - lowSum.Sum(length);
-
-            output[i] = bearA != 0 ? bullA / bearA * 100 : 0;
-        }
+        if (high.Length != open.Length || low.Length != open.Length || output.Length < open.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new ShinoharaWindow(length);
+        for (var i = 0; i < open.Length; i++) output[i] = window.Next(open[i], high[i], low[i], 0, true).A;
     }
 
     /// <summary>
@@ -8453,28 +8436,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ShinoharaIntensityRatioB(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var highSum = new RollingSum();
-        var lowSum = new RollingSum();
-        var prevCloseSum = new RollingSum();
-
-        for (var i = 0; i < high.Length; i++)
-        {
-            highSum.Add(high[i]);
-            lowSum.Add(low[i]);
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            prevCloseSum.Add(prevClose);
-
-            var bullB = highSum.Sum(length) - prevCloseSum.Sum(length);
-            var bearB = prevCloseSum.Sum(length) - lowSum.Sum(length);
-
-            output[i] = bearB != 0 ? bullB / bearB * 100 : 0;
-        }
+        if (high.Length != close.Length || low.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new ShinoharaWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, high[i], low[i], close[i], true).B;
     }
 
     /// <summary>
