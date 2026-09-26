@@ -19467,5 +19467,145 @@
     "after": "",
     "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
     "scope": "internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast("
+  },
+  {
+    "id": "atr-percent-band-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = Math.Max(1, length + 1);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-basis-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "new(kind, bbLength, capacityHint)",
+    "after": "new(kind, bbLength + 1, capacityHint)",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-high-tie",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "highVsLow.Sign >= 0",
+    "after": "highVsLow.Sign > 0",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-denominator-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "denominator.ScaleByPowerOfTwo(-1);",
+    "after": "denominator.ScaleByPowerOfTwo(-2);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-denominator-origin",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "denominator.Add(highWins ? _previousClose : low);",
+    "after": "denominator.Add(low);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "if (denominator.IsExactlyZero) return default;",
+    "after": "if (denominator.IsExactlyZero) return new(1);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-feedback-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "fraction.AddTo(ref feedback, 200);",
+    "after": "fraction.AddTo(ref feedback, 100);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-feedback-history",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "_previousPercent.AddTo(ref feedback, _length - 1L);",
+    "after": "_previousPercent.AddTo(ref feedback, _length);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "if (commit) { _previousClose = close;",
+    "after": "{ _previousClose = close;",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "_previousClose = 0; _previousPercent = default;",
+    "after": "/* preserve percentage and close */",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-early-deviation-publish",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "var deviation = percent.Multiply(_multiplier);",
+    "after": "var deviation = new RocBankValue(percent.Multiply(_multiplier).Publish());",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-lower-direction",
+    "module": "numerical",
+    "file": "src/Helpers/AtrPercentBandWindow.cs",
+    "before": "Band(-1)",
+    "after": "Band(1)",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis"
+  },
+  {
+    "id": "atr-percent-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsWithAtrPctFast("
+  },
+  {
+    "id": "atr-percent-band-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart2.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, bbLength))",
+    "after": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis",
+    "scope": "public static StockData CalculateBollingerBandsWithAtrPct("
+  },
+  {
+    "id": "atr-percent-band-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis",
+    "scope": "public sealed class BollingerBandsWithAtrPctState :"
+  },
+  {
+    "id": "atr-percent-band-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.StartupZeroDenominatorsTiesAndExtremeArithmeticMatchIndependentFractions|FullyQualifiedName~AtrPercentBandNumericalTests.SelectedInputAndCustomerBasisRetainPeriodAndCandleRange|FullyQualifiedName~AtrPercentBandNumericalTests.InvalidInputsDoNotMutateNativeState|FullyQualifiedName~AtrPercentBandNumericalTests.BatchOnlyAveragesStillUseTheirSelectedBasis",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsWithAtrPctFast("
+  },
+  {
+    "id": "atr-percent-band-factory-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "pct.MaType, pct.Length, pct.BbLength, pct.StdDevMult",
+    "after": "pct.MaType, pct.BbLength, pct.Length, pct.StdDevMult",
+    "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
   }
 ]

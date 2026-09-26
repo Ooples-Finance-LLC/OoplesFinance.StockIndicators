@@ -9342,78 +9342,17 @@ public sealed class BollingerBandsWidthState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("MiddleBand")]
 public sealed class BollingerBandsWithAtrPctState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _ratio;
-    private readonly double _stdDevMult;
-    private readonly IMovingAverageSmoother _basisSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevAptr;
-    private bool _hasPrev;
-
-    public BollingerBandsWithAtrPctState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        int bbLength = 20, double stdDevMult = 2)
-    {
-        var resolvedLength = Math.Max(1, length);
-        _ratio = (double)2 / (resolvedLength + 1);
-        _stdDevMult = stdDevMult;
-        _basisSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, bbLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AtrPercentBandWindow _window;
+    public BollingerBandsWithAtrPctState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, int bbLength = 20, double stdDevMult = 2)
+    { _window = new(maType, length, bbLength, stdDevMult); }
     public IndicatorName Name => IndicatorName.BollingerBandsWithAtrPct;
-
-    public void Reset()
-    {
-        _basisSmoother.Reset();
-        _prevValue = 0;
-        _prevAptr = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var basis = _basisSmoother.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var lh = bar.High - bar.Low;
-        var hc = Math.Abs(bar.High - prevValue);
-        var lc = Math.Abs(bar.Low - prevValue);
-        var mm = Math.Max(Math.Max(lh, hc), lc);
-        var atrs = mm == hc ? hc / (prevValue + (hc / 2))
-            : mm == lc ? lc / (bar.Low + (lc / 2))
-            : mm == lh ? lh / (bar.Low + (lh / 2))
-            : 0;
-        var aptr = (100 * atrs * _ratio) + (_prevAptr * (1 - _ratio));
-        var dev = _stdDevMult * aptr;
-        var upper = basis + (basis * dev / 100);
-        var lower = basis - (basis * dev / 100);
-        var middle = basis;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevAptr = aptr;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _basisSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Brsi")]

@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.BollingerBandsWithAtrPct)
+        {
+            var atrPercentKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < atrPercentKeys.Length; slot++) { var key = atrPercentKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AtrPercentBandOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AverageTrueRangeTrailingStops)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrTrailingOutputs(bars, builtIn)["Atrts"], IndicatorErrorBudget.Exact);

@@ -16,62 +16,19 @@ public static partial class Calculations
     public static StockData CalculateBollingerBandsWithAtrPct(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, int bbLength = 20, double stdDevMult = 2)
     {
-        List<double> aptrList = new(stockData.Count);
-        List<double> upperList = new(stockData.Count);
-        List<double> lowerList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var ratio = (double)2 / (length + 1);
-
-        var smaList = GetMovingAverageList(stockData, maType, bbLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var basis = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, bbLength))?.ToList() ?? GetMovingAverageList(stockData, maType, bbLength, input) : null;
+        using var window = new AtrPercentBandWindow(maType, length, bbLength, stdDevMult, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var basis = smaList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var lh = currentHigh - currentLow;
-            var hc = Math.Abs(currentHigh - prevValue);
-            var lc = Math.Abs(currentLow - prevValue);
-            var mm = Math.Max(Math.Max(lh, hc), lc);
-            var prevBasis = i >= 1 ? smaList[i - 1] : 0;
-            var hcDenom = prevValue + (hc / 2);
-            var lcDenom = currentLow + (lc / 2);
-            var lhDenom = currentLow + (lh / 2);
-            var atrs = mm == hc ? (hcDenom != 0 ? hc / hcDenom : 0) :
-                       mm == lc ? (lcDenom != 0 ? lc / lcDenom : 0) :
-                       mm == lh ? (lhDenom != 0 ? lh / lhDenom : 0) : 0;
-
-            var prevAptr = GetLastOrDefault(aptrList);
-            var aptr = (100 * atrs * ratio) + (prevAptr * (1 - ratio));
-            aptrList.Add(aptr);
-
-            var dev = stdDevMult * aptr;
-            var prevUpper = GetLastOrDefault(upperList);
-            var upper = basis + (basis * dev / 100);
-            upperList.Add(upper);
-
-            var prevLower = GetLastOrDefault(lowerList);
-            var lower = basis - (basis * dev / 100);
-            lowerList.Add(lower);
-
-            var signal = GetBollingerBandsSignal(currentValue - basis, prevValue - prevBasis, currentValue, prevValue, upper, prevUpper, lower, prevLower);
-            signalsList?.Add(signal);
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(basis![i]) : null);
+            signals?.Add(GetBollingerBandsSignal(input[i] - point.Middle, (i > 0 ? input[i - 1] - middle[i - 1] : 0), input[i], i > 0 ? input[i - 1] : 0, point.Upper, i > 0 ? upper[i - 1] : 0, point.Lower, i > 0 ? lower[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperList },
-            { "MiddleBand", smaList },
-            { "LowerBand", lowerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.BollingerBandsWithAtrPct;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.BollingerBandsWithAtrPct; return stockData;
     }
 
 

@@ -21424,28 +21424,14 @@ internal static partial class IndicatorCompute
         int length = 14, int bbLength = 20, double stdDevMult = 2,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(values);
-        var count = values.Count;
-        var result = context.Rent(count);
-        MovingAverage(data, maType, bbLength, input, result.WritableSpan);
-        if (band == ChannelBand.Middle) return result;
-        using var high = context.Rent(count);
-        using var low = context.Rent(count);
-        CustomRange(data, input, high.WritableSpan, low.WritableSpan);
-        var gain = 2d / (length + 1);
-        double fraction = 0;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var basis = context.Rent(count);
+        if (external) MovingAverage(data, maType, Math.Max(1, bbLength), SpanCompat.AsReadOnlySpan(input), basis.WritableSpan);
+        var result = context.Rent(count); using var window = new AtrPercentBandWindow(maType, length, bbLength, stdDevMult, external, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            var previous = i == 0 ? 0 : input[i - 1];
-            var highGap = Math.Abs(high.Span[i] - previous);
-            var lowGap = Math.Abs(low.Span[i] - previous);
-            var range = high.Span[i] - low.Span[i];
-            var largest = Math.Max(range, Math.Max(highGap, lowGap));
-            var denominator = largest == highGap ? previous + highGap / 2 // NOSONAR: S1244 - Select the operand returned by Max, including its deterministic tie order.
-                : largest == lowGap ? low.Span[i] + lowGap / 2 : low.Span[i] + range / 2; // NOSONAR: S1244 - Select the operand returned by Max, including its deterministic tie order.
-            fraction = gain * (denominator == 0 ? 0 : largest / denominator) + (1 - gain) * fraction;
-            result.WritableSpan[i] *= 1 + (band == ChannelBand.Upper ? 1 : -1) * stdDevMult * fraction;
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(basis.Span[i]) : null);
+            result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
         }
         return result;
     }
