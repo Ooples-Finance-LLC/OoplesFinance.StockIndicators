@@ -17,7 +17,7 @@ internal static partial class BuiltInFormulaReferences
         return ReferenceFraction.FromDouble(value.ToDouble()) * scale;
     }
 
-    private static ReferenceFraction[] SmoothRocBankStage(ReferenceFraction[] input, int length, int kind)
+    private static ReferenceFraction[] SmoothRocBankStage(ReferenceFraction[] input, int length, int kind, Func<ReferenceFraction, ReferenceFraction>? rounding = null)
     {
         var result = new ReferenceFraction[input.Length];
         var prefix = new ReferenceFraction[input.Length + 1];
@@ -48,7 +48,7 @@ internal static partial class BuiltInFormulaReferences
                 total /= kind == 2 ? new ReferenceFraction(length) * new ReferenceFraction(length + 1L) / new ReferenceFraction(2)
                     : new ReferenceFraction(kind == 3 ? Math.Min(i + 1, length) : length);
             }
-            result[i] = RoundRocBankStage(total);
+            result[i] = rounding is null ? RoundRocBankStage(total) : rounding(total);
         }
         return result;
     }

@@ -1596,70 +1596,19 @@ public sealed class PolynomialLeastSquaresMovingAverageState : IStreamingIndicat
 [PrimaryOutput("Pvi")]
 public sealed class PositiveVolumeIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly int _initialValue;
-    private double _prevClose;
-    private double _prevVolume;
-    private double _prevPvi;
-    private bool _hasPrev;
-
-    public PositiveVolumeIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 255,
-        int initialValue = 1000)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _initialValue = initialValue;
-    }
-
+    private readonly VolumeIndexWindow _window;
+    public PositiveVolumeIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 255, int initialValue = 1000)
+        => _window = new VolumeIndexWindow(maType, length, true, initialValue);
     public IndicatorName Name => IndicatorName.PositiveVolumeIndex;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevClose = 0;
-        _prevVolume = 0;
-        _prevPvi = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevVolume = _hasPrev ? _prevVolume : 0;
-        var prevPvi = _hasPrev ? _prevPvi : _initialValue;
-        var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        // Matches the batch CalculatePositiveVolumeIndex: PVI = prevPVI + prevPVI * ROC, on rising volume.
-        var pvi = volume <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
-        var signal = _signalSmoother.Next(pvi, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _prevVolume = volume;
-            _prevPvi = pvi;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pvi", pvi },
-                { "PviSignal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pvi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Pvi", value.Line }, { "PviSignal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pkama")]

@@ -15,6 +15,25 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
         var divisor = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
         _numerator = numerator / divisor; _denominator = denominator / divisor;
     }
+    // Validation-only binary64 precision with an unbounded upper exponent.
+    // Select a normal-sized mantissa directly; ordinary and subnormal rounding
+    // still use ToDouble. This avoids repeatedly reducing enormous rationals.
+    internal ReferenceFraction RoundExtendedBinary64()
+    {
+        var published = ToDouble();
+        if (!double.IsInfinity(published)) return FromDouble(published);
+        var exponentBound = BitLength(BigInteger.Abs(_numerator)) - BitLength(_denominator);
+        var shift = Math.Max(512, ((exponentBound - 1023 + 511) / 512) * 512);
+        var reduced = new ReferenceFraction(_numerator, _denominator << shift).ToDouble();
+        if (double.IsInfinity(reduced))
+        {
+            shift += 512;
+            reduced = new ReferenceFraction(_numerator, _denominator << shift).ToDouble();
+        }
+        var rounded = FromDouble(reduced);
+        return new ReferenceFraction(rounded._numerator << shift, rounded._denominator);
+    }
+
     internal int Sign => _numerator.Sign;
     internal ReferenceFraction Abs() => new(BigInteger.Abs(_numerator), _denominator);
     internal static ReferenceFraction FromDouble(double value)

@@ -8856,5 +8856,113 @@
     "after": "",
     "filter": "FullyQualifiedName~TradeVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TradeVolumeIndexState"
+  },
+  {
+    "id": "volume-index-wrong-volume-direction",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "_positive ? volume > _previousVolume : volume < _previousVolume",
+    "after": "_positive ? volume < _previousVolume : volume > _previousVolume",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-inclusive-volume-tie",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "_positive ? volume > _previousVolume : volume < _previousVolume",
+    "after": "_positive ? volume >= _previousVolume : volume <= _previousVolume",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-wrong-initial-value",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "_index = new(initialValue)",
+    "after": "_index = new(1000)",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-wrong-signed-price-return",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "BigInteger.Abs(prior) + ExactVarianceWindow.Units(price) - prior",
+    "after": "ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-drops-extended-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "<< index.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "if (commit) { _index",
+    "after": "if (volume != 0) { _index",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-stale-index-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "_index = new(_initial);",
+    "after": "_index = new(_initial + _index.Mantissa);",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeIndexWindow.cs",
+    "before": "new RocBankAverage(kind, length, int.MaxValue)",
+    "after": "new RocBankAverage(kind, 1, int.MaxValue)",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "volume-index-raw-discards-selected-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.ExactContributionsPreserveAliasesSelectionAndState",
+    "scope": "internal static ComputeBuffer ComputeVolumeIndexFast("
+  },
+  {
+    "id": "volume-index-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "line.Span, means.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), means.WritableSpan",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.CustomerSignalReceivesCumulativeLineForEveryOutputRequest",
+    "scope": "internal static ComputeBuffer ComputeVolumeIndexFast("
+  },
+  {
+    "id": "volume-index-negativevolumeindex-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class NegativeVolumeIndexState"
+  },
+  {
+    "id": "volume-index-positivevolumeindex-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PositiveVolumeIndexState"
+  },
+  {
+    "id": "volume-index-oracle-drops-exponent",
+    "module": "numerical",
+    "file": "src/Validation/ReferenceFraction.cs",
+    "before": "rounded._numerator << shift",
+    "after": "rounded._numerator",
+    "filter": "FullyQualifiedName~VolumeIndexNumericalTests.DirectExponentRoundingMatchesIndependentStepwiseReduction"
   }
 ]

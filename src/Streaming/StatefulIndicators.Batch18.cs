@@ -1225,72 +1225,19 @@ public sealed class NegativeVolumeDisparityIndicatorState : IStreamingIndicatorS
 [PrimaryOutput("Nvi")]
 public sealed class NegativeVolumeIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly int _initialValue;
-    private double _prevClose;
-    private double _prevVolume;
-    private double _prevNvi;
-    private bool _hasPrev;
-
-    public NegativeVolumeIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 255,
-        int initialValue = 1000)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _initialValue = initialValue;
-    }
-
+    private readonly VolumeIndexWindow _window;
+    public NegativeVolumeIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 255, int initialValue = 1000)
+        => _window = new VolumeIndexWindow(maType, length, false, initialValue);
     public IndicatorName Name => IndicatorName.NegativeVolumeIndex;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevClose = 0;
-        _prevVolume = 0;
-        _prevNvi = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevVolume = _hasPrev ? _prevVolume : 0;
-        var prevNvi = _hasPrev ? _prevNvi : _initialValue;
-        var pctChg = CalculationsHelper.CalculatePercentChange(value, prevClose);
-        // Matches the batch CalculateNegativeVolumeIndex: Fosback compounds the rate of change onto the
-        // running index (NVI = prevNVI + prevNVI * ROC), and CalculatePercentChange returns that ROC
-        // already scaled to a percentage, so the 100 has to come back out.
-        var nvi = volume >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
-        var signal = _signalSmoother.Next(nvi, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _prevVolume = volume;
-            _prevNvi = nvi;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Nvi", nvi },
-                { "NviSignal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(nvi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Nvi", value.Line }, { "NviSignal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Nrtr")]
