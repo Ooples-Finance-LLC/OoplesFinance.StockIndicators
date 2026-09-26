@@ -17203,34 +17203,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(StockData data, ComputeContext context, int length = 14,
         double factor = 0.67, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateVolumeAdjustedMovingAverage weights each bar of the chained series by how its volume
-        // compares to a fraction of the window's average volume, so a heavy bar counts for more than one and
-        // a quiet one for less. The window sums those weights rather than counting bars.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var averageVolume = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, averageVolume.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var volumeRatioSum = new RollingSum();
-        var priceVolumeRatioSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var volumeIncrement = averageVolume.Span[i] * factor;
-            var volumeRatio = volumeIncrement != 0 ? volumes[i] / volumeIncrement : 0;
-            volumeRatioSum.Add(volumeRatio);
-            priceVolumeRatioSum.Add(input[i] * volumeRatio);
-
-            var weight = volumeRatioSum.Sum(length);
-            output[i] = weight != 0 ? priceVolumeRatioSum.Sum(length) / weight : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new VolumeAdjustedWindow(maType, length, factor, false);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var mean = context.Rent(input.Count);
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), mean.WritableSpan);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = external
+            ? window.NextWithAverage(input[i], data.Volumes[i], mean.Span[i], true) : window.Next(input[i], data.Volumes[i], true);
+        return output;
     }
 
     /// <summary>

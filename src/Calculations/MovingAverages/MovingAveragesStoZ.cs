@@ -824,55 +824,19 @@ public static partial class Calculations
     public static StockData CalculateVolumeAdjustedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, double factor = 0.67)
     {
-        List<double> priceVolumeRatioList = new(stockData.Count);
-        List<double> priceVolumeRatioSumList = new(stockData.Count);
-        List<double> vamaList = new(stockData.Count);
-        List<double> volumeRatioList = new(stockData.Count);
-        List<double> volumeRatioSumList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeRatioSumWindow = new();
-        RollingSum priceVolumeRatioSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList); ;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        using var window = new VolumeAdjustedWindow(maType, length, factor, false);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volume), length)?.ToList()
+            ?? GetMovingAverageList(stockData, maType, length, volume) : null;
+        List<double> line = new(input.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentVolume = volumeList[i];
-            var currentValue = inputList[i];
-            var volumeSma = volumeSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var volumeIncrement = volumeSma * factor;
-
-            var volumeRatio = volumeIncrement != 0 ? currentVolume / volumeIncrement : 0;
-            volumeRatioList.Add(volumeRatio);
-            volumeRatioSumWindow.Add(volumeRatio);
-
-            var priceVolumeRatio = currentValue * volumeRatio;
-            priceVolumeRatioList.Add(priceVolumeRatio);
-            priceVolumeRatioSumWindow.Add(priceVolumeRatio);
-
-            var volumeRatioSum = volumeRatioSumWindow.Sum(length);
-            volumeRatioSumList.Add(volumeRatioSum);
-
-            var priceVolumeRatioSum = priceVolumeRatioSumWindow.Sum(length);
-            priceVolumeRatioSumList.Add(priceVolumeRatioSum);
-
-            var prevVama = GetLastOrDefault(vamaList);
-            var vama = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
-            vamaList.Add(vama);
-
-            var signal = GetCompareSignal(currentValue - vama, prevValue - prevVama);
-            signalsList?.Add(signal);
+            var value = external ? window.NextWithAverage(input[i], volume[i], means![i], true) : window.Next(input[i], volume[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vama", vamaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vamaList);
-        stockData.IndicatorName = IndicatorName.VolumeAdjustedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vama", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolumeAdjustedMovingAverage;
         return stockData;
     }
 
