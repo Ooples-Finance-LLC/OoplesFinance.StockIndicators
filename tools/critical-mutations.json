@@ -15419,5 +15419,209 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~LinearExtrapolationNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-wrong-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "length = Math.Max(2, length)",
+    "after": "length = Math.Max(3, length)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-wrong-angle",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "variant == 0 ? Math.Sqrt(2) * 1.25",
+    "after": "variant == 1 ? Math.Sqrt(2) * 1.25",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "_startup = variant is 1 or 2 ? 3 : 0",
+    "after": "_startup = variant is 1 or 2 ? 2 : 0",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-wrong-binomial-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "_gain * (_binomial == 2 ? 2 : 1)",
+    "after": "_gain",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-drops-input-lag-two",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "if (_binomial == 2) sum.Add(_input2, _gain);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-drops-feedback-one",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "AddFeedback(ref sum, _previous, _feedback1 << _binomial);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-drops-feedback-two",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "AddFeedback(ref sum, _older, _feedback2 << _binomial);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-rounds-pole-polynomial",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "_feedback1 = 2 * radius * cosine;",
+    "after": "_feedback1 = ExactVarianceWindow.Units(2 * Math.Exp(-decay) * Math.Cos(variant == 0 ? Math.Sqrt(2) * 1.25 * Math.PI / length : decay)) << 1074;",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-loses-extended-state",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "result = RocBankValue.Round(sum);",
+    "after": "result = new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-stale-input-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "_input1 = _input2 = 0;",
+    "after": "_input2 = 0;",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TwoPoleWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-invalid-bar-0",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class Ehlers2PoleButterworthFilterV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-selected-input-0",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-core-variant-0",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers2PoleButterworthFilterV1(",
+    "before": "new TwoPoleWindow(length, 0)",
+    "after": "new TwoPoleWindow(length, 1)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-invalid-bar-1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class Ehlers2PoleButterworthFilterV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-selected-input-1",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers2PoleButterworthFilterV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-core-variant-1",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers2PoleButterworthFilterV2(",
+    "before": "new TwoPoleWindow(length, 1)",
+    "after": "new TwoPoleWindow(length, 2)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-invalid-bar-2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class Ehlers2PoleSuperSmootherFilterV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-selected-input-2",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-core-variant-2",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers2PoleSuperSmootherFilterV1(",
+    "before": "new TwoPoleWindow(length, 2)",
+    "after": "new TwoPoleWindow(length, 3)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-invalid-bar-3",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class Ehlers2PoleSuperSmootherFilterV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-selected-input-3",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers2PoleSuperSmootherFilterV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "two-pole-core-variant-3",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers2PoleSuperSmootherFilterV2(",
+    "before": "new TwoPoleWindow(length, 3)",
+    "after": "new TwoPoleWindow(length, 0)",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

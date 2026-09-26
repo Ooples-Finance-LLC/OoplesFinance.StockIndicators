@@ -4314,47 +4314,11 @@ internal sealed class ReverseEmaEngine
 
 internal sealed class Ehlers2PoleSuperSmootherFilterV1Smoother : IMovingAverageSmoother
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
-    public Ehlers2PoleSuperSmootherFilterV1Smoother(int length)
-    {
-        var resolved = Math.Max(2, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var filt = _index < 3 ? value : (_c1 * value) + (_c2 * _prevFilter1) + (_c3 * _prevFilter2);
-
-        if (isFinal)
-        {
-            _prevFilter2 = _prevFilter1;
-            _prevFilter1 = filt;
-            _index++;
-        }
-
-        return filt;
-    }
-
-    public void Reset()
-    {
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
-
-    public void Dispose()
-    {
-    }
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleSuperSmootherFilterV1Smoother(int length) => _window = new(length, 2);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
 }
 
 internal sealed class EhlersTriangleMovingAverageSmoother : IMovingAverageSmoother

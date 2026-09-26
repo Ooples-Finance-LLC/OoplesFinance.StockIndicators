@@ -1383,53 +1383,11 @@ public sealed class EhlersHammingMovingAverageState : IStreamingIndicatorState, 
 
 internal sealed class Ehlers2PoleSuperSmootherFilterV2Smoother : IMovingAverageSmoother
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private double _prevValue;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
-    public Ehlers2PoleSuperSmootherFilterV2Smoother(int length)
-    {
-        var resolved = Math.Max(2, length);
-        var a = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b = 2 * a * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _c2 = b;
-        _c3 = -a * a;
-        _c1 = 1 - _c2 - _c3;
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevFilter1 = _index >= 1 ? _prevFilter1 : 0;
-        var prevFilter2 = _index >= 2 ? _prevFilter2 : 0;
-        var filt = (_c1 * ((value + prevValue) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevFilter2 = _prevFilter1;
-            _prevFilter1 = filt;
-            _index++;
-        }
-
-        return filt;
-    }
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
-
-    public void Dispose()
-    {
-    }
+    private readonly TwoPoleWindow _window;
+    public Ehlers2PoleSuperSmootherFilterV2Smoother(int length) => _window = new(length, 3);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
 }
 
 internal sealed class EhlersSuperSmootherFilterEngine
