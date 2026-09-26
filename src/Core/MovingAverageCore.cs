@@ -2655,27 +2655,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LinearExtrapolation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            // Simple linear extrapolation: 2*current - prior
-            var n = Math.Min(i + 1, length);
-            var currentValue = input[i];
-            var priorValue = i >= n ? input[i - n + 1] : input[0];
-            var slope = (currentValue - priorValue) / (n - 1);
-
-            output[i] = currentValue + slope;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LinearExtrapolationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
