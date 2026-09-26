@@ -7959,5 +7959,87 @@
     "after": "",
     "filter": "FullyQualifiedName~ReturnScoreNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class InformationRatioState"
+  },
+  {
+    "id": "sortino-squares-upside",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "if (value.Mantissa >= 0) return default;",
+    "after": "if (value.Mantissa <= 0) return default;",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-loses-small-squares",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "return RocBankValue.Round(square);",
+    "after": "return new RocBankValue(PublishSquare(RocBankValue.Round(square)) == 0 ? 0 : RocBankValue.Round(square).Mantissa, RocBankValue.Round(square).UpperShift);",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "_prices[0] : 0",
+    "after": "_prices[_prices.Count - 1] : 0",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-ignores-benchmark",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "difference.AddProduct(previous, _benchmark, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-drops-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "<< value.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-wrong-normalization-scale",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "<< 3222",
+    "after": "<< 3220",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "if (commit) _prices.TryAdd",
+    "after": "if (_prices.Capacity > 0) _prices.TryAdd",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "sortino-skips-customer-risk",
+    "module": "numerical",
+    "file": "src/Helpers/SortinoWindow.cs",
+    "before": "new RocBankValue(customerDownside.Value, 2148)",
+    "after": "new RocBankValue(customerMean!.Value, 2148)",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.CustomerMeanControlsNumerator"
+  },
+  {
+    "id": "sortino-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark",
+    "scope": "internal static ComputeBuffer ComputeSortinoRatioFast("
+  },
+  {
+    "id": "sortino-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SortinoNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class SortinoRatioState"
   }
 ]

@@ -2668,11 +2668,6 @@ OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/minimum-length
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SortinoRatio/default
-OoplesFinance.StockIndicators.Indicators.SortinoRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.SortinoRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SortinoRatio/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SortinoRatio/weighted-average
 OoplesFinance.StockIndicators.Indicators.Spencer15PointMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.Spencer15PointMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.Spencer15PointMovingAverage/minimum-periods
