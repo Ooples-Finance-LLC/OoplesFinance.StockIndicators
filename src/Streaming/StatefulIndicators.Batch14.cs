@@ -1146,78 +1146,17 @@ public sealed class HawkeyeVolumeIndicatorState : IStreamingIndicatorState, ICus
 [PrimaryOutput("Hwma")]
 public sealed class HendersonWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public HendersonWeightedMovingAverageState(int length = 7)
-    {
-        var resolved = Math.Max(1, length);
-        var termMult = MathHelper.MinOrMax((int)Math.Floor((double)(resolved - 1) / 2));
-        _weights = new double[resolved];
-        double weightSum = 0;
-        for (var j = 0; j < resolved; j++)
-        {
-            var m = termMult;
-            var n = j - termMult;
-            var numerator = 315 * (MathHelper.Pow(m + 1, 2) - MathHelper.Pow(n, 2)) *
-                (MathHelper.Pow(m + 2, 2) - MathHelper.Pow(n, 2)) *
-                (MathHelper.Pow(m + 3, 2) - MathHelper.Pow(n, 2)) *
-                ((3 * MathHelper.Pow(m + 2, 2)) - (11 * MathHelper.Pow(n, 2)) - 16);
-            var denominator = 8 * (m + 2) * (MathHelper.Pow(m + 2, 2) - 1) *
-                ((4 * MathHelper.Pow(m + 2, 2)) - 1) * ((4 * MathHelper.Pow(m + 2, 2)) - 9) *
-                ((4 * MathHelper.Pow(m + 2, 2)) - 25);
-            var weight = denominator != 0 ? numerator / denominator : 0;
-            _weights[j] = weight;
-            weightSum += weight;
-        }
-
-        _weightSum = weightSum;
-        _values = new PooledRingBuffer<double>(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HendersonWindow _window;
+    public HendersonWeightedMovingAverageState(int length = 7) => _window = new(length);
     public IndicatorName Name => IndicatorName.HendersonWeightedMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < _weights.Length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * _weights[j];
-        }
-
-        var hwma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hwma", hwma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hwma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Hwma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Hpi")]

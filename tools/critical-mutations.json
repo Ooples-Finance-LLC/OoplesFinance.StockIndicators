@@ -11279,5 +11279,86 @@
     "after": "",
     "filter": "FullyQualifiedName~RegularizedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class RegularizedExponentialMovingAverageState"
+  },
+  {
+    "id": "henderson-wrong-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.SevenPointImpulseMatchesThePublishedPolynomialWeights"
+  },
+  {
+    "id": "henderson-wrong-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "Math.Max(2,",
+    "after": "Math.Max(1,",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "henderson-wrong-polynomial",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "11 * square",
+    "after": "10 * square",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.SevenPointImpulseMatchesThePublishedPolynomialWeights"
+  },
+  {
+    "id": "henderson-wrong-weight-origin",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "var n = lag - m;",
+    "after": "var n = lag - m + 1;",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "henderson-drops-last-tap",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "lag < _weights.Length &&",
+    "after": "lag < _weights.Length - 1 &&",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.FullConstantWindowsRetainUnitGainDespiteSignedWeights"
+  },
+  {
+    "id": "henderson-rounded-polynomial-weights",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "sum.Add(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], (double)_weights[lag]);",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.SevenPointImpulseMatchesThePublishedPolynomialWeights"
+  },
+  {
+    "id": "henderson-wrong-signed-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "denominator.Add(1, _weights[lag]);",
+    "after": "denominator.Add(1, System.Numerics.BigInteger.Abs(_weights[lag]));",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.FullConstantWindowsRetainUnitGainDespiteSignedWeights"
+  },
+  {
+    "id": "henderson-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "henderson-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HendersonWindow.cs",
+    "before": "internal void Reset() => _values.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "henderson-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HendersonNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class HendersonWeightedMovingAverageState"
   }
 ]
