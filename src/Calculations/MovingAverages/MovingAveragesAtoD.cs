@@ -448,14 +448,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var window = new AlphaDecreasingWindow();
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var alpha = (double)2 / (i + 1);
 
             var prevEma = GetLastOrDefault(emaList);
-            var ema = (alpha * currentValue) + ((1 - alpha) * prevEma);
+            var ema = window.Next(currentValue, true);
             emaList.Add(ema);
 
             var signal = GetCompareSignal(currentValue - ema, prevValue - prevEma);

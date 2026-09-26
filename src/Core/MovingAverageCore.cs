@@ -996,18 +996,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AlphaDecreasingEma(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = input[0];
-        for (var i = 1; i < input.Length; i++)
-        {
-            // Alpha decreases as we go
-            var alpha = 2.0 / (length + i);
-            output[i] = alpha * input[i] + (1 - alpha) * output[i - 1];
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new AlphaDecreasingWindow();
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

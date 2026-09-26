@@ -9883,5 +9883,95 @@
     "after": "",
     "filter": "FullyQualifiedName~AhrensNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class AhrensMovingAverageState"
+  },
+  {
+    "id": "alpha-decreasing-wrong-alpha-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "2d / (_count + 1d)",
+    "after": "1d / (_count + 1d)",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-wrong-bar-number",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "_count + 1d",
+    "after": "_count + 2d",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-wrong-retained-weight",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "Product(_previous, 1 - alpha)",
+    "after": "Product(_previous, alpha)",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-wrong-product-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "1074 - Math.Max(0, exponent - 1)",
+    "after": "1073 - Math.Max(0, exponent - 1)",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-retains-zero-weight-value",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "if (factor == 0 || value.Mantissa == 0) return default;",
+    "after": "if (factor == 0) return value; if (value.Mantissa == 0) return default;",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-discards-recurrent-state",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(price);",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-stale-count-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-stale-value-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AlphaDecreasingWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow"
+  },
+  {
+    "id": "alpha-decreasing-ignores-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.BarNumberAlphaPreservesRoundingAndRecoversAfterFirstOverflow",
+    "scope": "internal static ComputeBuffer ComputeAlphaDecreasingEmaFast("
+  },
+  {
+    "id": "alpha-decreasing-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~AlphaDecreasingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AlphaDecreasingExponentialMovingAverageState"
   }
 ]
