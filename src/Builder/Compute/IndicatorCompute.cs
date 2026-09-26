@@ -1845,9 +1845,7 @@ internal static partial class IndicatorCompute
             },
             HighLowMovingAverageSpecOptions hlma => ComputeHighLowMovingAverageFast(data, context, hlma.Length, hlma.MaType, spec.OutputKey),
             StiffnessIndicatorSpecOptions sti => ComputeStiffnessIndicatorFast(data, context, sti.Length1, sti.Length2, sti.SmoothingLength, sti.MaType),
-            MarketMeannessIndexSpecOptions mmi => spec.OutputKey == "MmiSmoothed"
-                ? SmoothPublished(data, context, ComputeMarketMeannessIndexFast(data, context, mmi.Length), mmi.Length, mmi.MaType)
-                : ComputeMarketMeannessIndexFast(data, context, mmi.Length),
+            MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length, mmi.MaType, spec.OutputKey),
             SharpeRatioSpecOptions sr => ComputeSharpeRatioFast(data, context, sr.Length, sr.Bmk, sr.MaType),
 
             // Batch 14 - More Risk Ratios and Trend Indicators
@@ -22028,45 +22026,25 @@ internal static partial class IndicatorCompute
     /// Computes Market Meanness Index using zero-allocation fast path.
     /// Counts reversals above/below median in a lookback period.
     /// </summary>
-    internal static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeMarketMeannessIndexFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.EhlersNoiseEliminationTechnology, string? outputKey = null)
     {
-        // CalculateMarketMeannessIndex publishes the raw count under "Mmi"; its moving average only feeds the
-        // separate "MmiSmoothed" series, so maType reaches nothing here and the arm no longer smooths. The
-        // median is the rolling median of the window so far - partial at the start rather than skipped - and
-        // the count is converted to a percentage without integer truncation.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using var medianWindow = new RollingMedian(length);
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count); using var window = new MeannessWindow(maType, length);
+        var custom = ComponentAverage.HasOverrides;
+        using var line = context.Rent(input.Count); using var smoothed = context.Rent(input.Count);
+        if (custom)
         {
-            medianWindow.Add(input[i]);
-            var median = medianWindow.Median;
-
-            int nl = 0, nh = 0;
-            for (var j = 1; j < length; j++)
-            {
-                var value1 = i >= j - 1 ? input[i - (j - 1)] : 0;
-                var value2 = i >= j ? input[i - j] : 0;
-
-                if (value1 > median && value1 > value2)
-                {
-                    nl++;
-                }
-                else if (value1 < median && value1 < value2)
-                {
-                    nh++;
-                }
-            }
-
-            output[i] = length != 1 ? 100d * (nl + nh) / (length - 1) : 0;
+            using var priceAverage = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), priceAverage.WritableSpan);
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = window.Next(input[i], true).Line;
+            MovingAverage(data, maType, length, line.Span, smoothed.WritableSpan);
+            for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = outputKey == "MmiSmoothed" ? smoothed.Span[i] : line.Span[i];
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true); output.WritableSpan[i] = outputKey == "MmiSmoothed" ? value.Smoothed : value.Line;
+        }
+        return output;
     }
 
     /// <summary>
