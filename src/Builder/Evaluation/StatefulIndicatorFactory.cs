@@ -335,6 +335,7 @@ internal static partial class StatefulIndicatorFactory
             OscarIndicatorSpecOptions oscar => new OscarIndicatorState(oscar.Length),
             KarobeinOscillatorSpecOptions karobein => new KarobeinOscillatorState(karobein.MaType, karobein.Length),
             ModularFilterSpecOptions modular => new ModularFilterState(modular.Length, modular.Beta, modular.Z),
+            MovingAverageSupportResistanceSpecOptions support => new MovingAverageSupportResistanceState(support.MaType, support.Length),
             MovingAverageV3SpecOptions v3 => new MovingAverageV3State(v3.MaType, v3.Length),
             MovingAverageBandsSpecOptions bands => new MovingAverageBandsState(bands.MaType, bands.FastLength, bands.SlowLength, bands.Mult),
             MovingAverageBandWidthSpecOptions bandwidth => new MovingAverageBandWidthState(bandwidth.MaType, bandwidth.FastLength, bandwidth.SlowLength, bandwidth.Mult),

@@ -1142,41 +1142,22 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageSupportResistance(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 10, double factor = 2)
     {
-        List<double> topList = new(stockData.Count);
-        List<double> bottomList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var supportLevel = 1 + (factor / 100);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(factor);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> middle;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            middle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        else
         {
-            var currentSma = smaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var top = currentSma * supportLevel;
-            topList.Add(top);
-
-            var bottom = supportLevel != 0 ? currentSma / supportLevel : 0;
-            bottomList.Add(bottom);
-
-            var signal = GetCompareSignal(currentValue - currentSma, prevValue - prevSma);
-            signalsList?.Add(signal);
+            middle = new(stockData.Count); using var window = new SupportResistanceWindow(maType, length);
+            foreach (var price in input) middle.Add(window.Next(price, true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", topList },
-            { "MiddleBand", smaList },
-            { "LowerBand", bottomList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MovingAverageSupportResistance;
-
+        var upper = middle.Select(value => HighLowBandsWindow.Shift(value, factor)).ToList();
+        var lower = middle.Select(value => SupportResistanceWindow.Lower(value, factor)).ToList();
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - middle[i], i == 0 ? 0 : input[i - 1] - middle[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MovingAverageSupportResistance;
         return stockData;
     }
 

@@ -13791,5 +13791,97 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "support-resistance-wrong-ratio-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "top.Add(middle, 100)",
+    "after": "top.Add(middle, 99)",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-wrong-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "bottom.Add(100)",
+    "after": "bottom.Add(99)",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-wrong-ratio-direction",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "top.Ratio(bottom)",
+    "after": "bottom.Ratio(top)",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-wrong-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "bottom.IsExactlyZero ? 0",
+    "after": "bottom.IsExactlyZero ? middle",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-premature-level-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "return bottom.IsExactlyZero ? 0 : top.Ratio(bottom);",
+    "after": "var level = 1 + factor / 100; return level == 0 ? 0 : middle / level;",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "_average.Next(new RocBankValue(price), commit)",
+    "after": "_average.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "support-resistance-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SupportResistanceWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "support-resistance-wrong-upper-sign",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageSupportResistanceState",
+    "before": "HighLowBandsWindow.Shift(middle, _factor)",
+    "after": "HighLowBandsWindow.Shift(middle, -_factor)",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-accepts-invalid-factor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageSupportResistanceState",
+    "before": "HighLowBandsWindow.ValidateShift(factor);",
+    "after": "",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "support-resistance-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageSupportResistanceState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "support-resistance-customer-wrong-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageSupportResistanceFast(",
+    "before": "maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan",
+    "after": "maType, length + 1, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan",
+    "filter": "FullyQualifiedName~SupportResistanceNumericalTests.CustomerAverageReceivesPrices"
   }
 ]
