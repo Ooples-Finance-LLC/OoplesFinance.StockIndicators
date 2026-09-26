@@ -22006,34 +22006,17 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRateOfChangeBandsFast(StockData data, ComputeContext context, int length = 12, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        var count = data.Count;
-        var buffer = context.Rent(count);
-        var roc = ArrayPool<double>.Shared.Rent(count);
-        try
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var raw = context.Rent(count); using var roc = context.Rent(count);
+        var result = context.Rent(count); using var window = new RocBandWindow(maType, length, smoothLength, external, Math.Max(1, count));
+        for (var i = 0; i < count; i++)
         {
-            var rocSpan = roc.AsSpan(0, count);
-
-            // Calculate ROC
-            OscillatorCore.RateOfChange(close, rocSpan, length);
-
-            if (outputKey is "UpperBand" or "MiddleBand" or "LowerBand")
-            {
-                var mean = new Streaming.AdaptiveWindowMean(length);
-                for (var i = 0; i < count; i++)
-                {
-                    var width = Math.Sqrt(mean.Next(rocSpan[i] * rocSpan[i], length, true));
-                    buffer.WritableSpan[i] = outputKey == "UpperBand" ? width : outputKey == "LowerBand" ? -width : 0;
-                }
-            }
-            else MovingAverage(data, maType, smoothLength, rocSpan, buffer.WritableSpan);
+            var point = window.Next(input[i], true); raw.WritableSpan[i] = point.RawReturn; roc.WritableSpan[i] = point.Roc;
+            result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? -point.Upper : 0;
         }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(roc);
-        }
-
-        return buffer;
+        if (external) MovingAverage(data, maType, Math.Max(1, smoothLength), raw.Span, roc.WritableSpan);
+        if (outputKey is not ("UpperBand" or "LowerBand" or "MiddleBand")) roc.Span.CopyTo(result.WritableSpan);
+        return result;
     }
 
     /// <summary>

@@ -20105,5 +20105,139 @@
     "after": "",
     "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary",
     "scope": "internal static ComputeBuffer ComputePriceHeadleyAccelerationBandsFast("
+  },
+  {
+    "id": "roc-band-lookback",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = Math.Max(1, length + 1);",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "RocBankValue.Return(close, _prices[0])",
+    "after": "RocBankValue.Return(close, _prices[_prices.Count - 1])",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "new(kind, smoothLength, capacityHint)",
+    "after": "new(kind, length, capacityHint)",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-square-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "var square = units * units;",
+    "after": "var square = 2 * units * units;",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-stale-square",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "if (_count >= _length) sum -= _squares[0];",
+    "after": "if (_count > long.MaxValue) sum -= _squares[0];",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-rms-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "new BigInteger(Math.Min(_length, _count + 1))",
+    "after": "BigInteger.One",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-early-return-publish",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift",
+    "after": "ExactVarianceWindow.Units(value.Publish())",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "if (commit) { _prices.TryAdd",
+    "after": "{ _prices.TryAdd",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-signal-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "_signal.Next(value, commit)",
+    "after": "_signal.Next(value, true)",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RocBandWindow.cs",
+    "before": "_sum = BigInteger.Zero; _count = 0;",
+    "after": "/* retain sum and count */",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns"
+  },
+  {
+    "id": "roc-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "internal static ComputeBuffer ComputeRateOfChangeBandsFast("
+  },
+  {
+    "id": "roc-band-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "before": "SpanCompat.AsReadOnlySpan(raw), Math.Max(1, smoothLength))",
+    "after": "SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length))",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "public static StockData CalculateRateOfChangeBands("
+  },
+  {
+    "id": "roc-band-zero-center",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "before": "middle.Add(0);",
+    "after": "middle.Add(point.Roc);",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "public static StockData CalculateRateOfChangeBands("
+  },
+  {
+    "id": "roc-band-primary-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "return new(point.Roc,",
+    "after": "return new(point.Upper,",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "public sealed class RateOfChangeBandsState :"
+  },
+  {
+    "id": "roc-band-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "public sealed class RateOfChangeBandsState :"
+  },
+  {
+    "id": "roc-band-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
+    "scope": "internal static ComputeBuffer ComputeRateOfChangeBandsFast("
   }
 ]

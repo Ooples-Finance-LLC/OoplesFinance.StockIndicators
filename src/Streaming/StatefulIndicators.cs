@@ -2810,65 +2810,16 @@ public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Roc")]
 public sealed class RateOfChangeBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RateOfChangeState _roc;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly RollingWindowSum _rocSquaredSum;
-
-    public RateOfChangeBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 12,
-        int smoothLength = 3)
-    {
-        _length = Math.Max(1, length);
-        _roc = new RateOfChangeState(_length);
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _rocSquaredSum = new RollingWindowSum(_length);
-    }
-
+    private readonly RocBandWindow _window;
+    public RateOfChangeBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 12, int smoothLength = 3) { _window = new(maType, length, smoothLength); }
     public IndicatorName Name => IndicatorName.RateOfChangeBands;
-
-    public void Reset()
-    {
-        _roc.Reset();
-        _middleSmoother.Reset();
-        _rocSquaredSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roc = _roc.Update(bar, isFinal, includeOutputs: false).Value;
-        var middle = _middleSmoother.Next(roc, isFinal);
-        var rocSquared = roc * roc;
-
-        int countAfter;
-        var sum = isFinal ? _rocSquaredSum.Add(rocSquared, out countAfter) : _rocSquaredSum.Preview(rocSquared, out countAfter);
-        var squaredAvg = countAfter > 0 ? sum / countAfter : 0;
-        var upper = MathHelper.Sqrt(squaredAvg);
-        var lower = -upper;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // Plus and minus the RMS is centred on zero; the rate of change travels between the bands
-            // rather than being their centre. See the batch calculation.
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", 0 },
-                { "LowerBand", lower },
-                { "Roc", middle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Roc, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", 0 }, { "LowerBand", -point.Upper }, { "Roc", point.Roc } } : null);
     }
-
-    public void Dispose()
-    {
-        _roc.Dispose();
-        _middleSmoother.Dispose();
-        _rocSquaredSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

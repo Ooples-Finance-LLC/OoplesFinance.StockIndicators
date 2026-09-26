@@ -944,60 +944,15 @@ public static partial class Calculations
     public static StockData CalculateRateOfChangeBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 12, int smoothLength = 3)
     {
-        List<double> rocSquaredList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<double> centreList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum rocSquaredSum = new();
-
-        var rocList = CalculateRateOfChange(stockData, length).ChainedValues;
-        var middleBandList = GetMovingAverageList(stockData, maType, smoothLength, rocList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roc = rocList[i];
-            var middleBand = middleBandList[i];
-            var prevMiddleBand1 = i >= 1 ? middleBandList[i - 1] : 0;
-            var prevMiddleBand2 = i >= 2 ? middleBandList[i - 2] : 0;
-
-            var rocSquared = Pow(roc, 2);
-            rocSquaredList.Add(rocSquared);
-            rocSquaredSum.Add(rocSquared);
-
-            var squaredAvg = rocSquaredSum.Average(length);
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = Sqrt(squaredAvg);
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = -upperBand;
-            lowerBandList.Add(lowerBand);
-
-            // The bands are plus and minus the root mean square of the rate of change, so they are
-            // centred on zero. The rate of change itself travels between them, the way price travels
-            // between Bollinger bands; it is not the centre line.
-            centreList.Add(0);
-
-            var signal = GetBollingerBandsSignal(middleBand - prevMiddleBand1, prevMiddleBand1 - prevMiddleBand2, middleBand, prevMiddleBand1, 
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The smoothed rate of change was published as the middle band, and it crossed the envelope
-            // it is measured against - above the upper on 40 bars and below the lower on 61. It keeps its
-            // own name; zero, which is what plus and minus the RMS is centred on, becomes the centre.
-            { "UpperBand", upperBandList },
-            { "MiddleBand", centreList },
-            { "LowerBand", lowerBandList },
-            { "Roc", middleBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.RateOfChangeBands;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new RocBandWindow(maType, length, smoothLength, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), roc = new(input.Count), raw = new(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); upper.Add(point.Upper); middle.Add(0); lower.Add(-point.Upper); roc.Add(point.Roc); raw.Add(point.RawReturn); }
+        if (external) roc = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, smoothLength))?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, raw);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var previous = i > 0 ? roc[i - 1] : 0; signals?.Add(GetBollingerBandsSignal(roc[i] - previous, previous - (i > 1 ? roc[i - 2] : 0), roc[i], previous, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower }, { "Roc", roc } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.RateOfChangeBands; return stockData;
     }
 
 
