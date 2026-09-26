@@ -14161,10 +14161,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersModifiedOptimumEllipticFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.EhlersModifiedOptimumEllipticFilter(inputSpan, buffer.WritableSpan, length);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        var window = new EllipticWindow(true);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 
@@ -14185,26 +14185,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersOptimumEllipticFilterFast(StockData data, ComputeContext context)
     {
-        // CalculateEhlersOptimumEllipticFilter is a fixed two pole recursion with published coefficients; it
-        // has no length, which is why the spec's Length is marked as having no effect. The core routine took
-        // one and filtered something else.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevOef1 = i >= 1 ? output[i - 1] : 0;
-            var prevOef2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (0.13785 * input[i]) + (0.0007 * prevValue1) + (0.13785 * prevValue2) + (1.2103 * prevOef1)
-                - (0.4867 * prevOef2);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        var window = new EllipticWindow(false);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

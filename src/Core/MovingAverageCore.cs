@@ -3325,24 +3325,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersOptimumEllipticFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var a1 = 0.13785;
-        var a2 = 0.0007;
-        var b1 = 1.2075;
-        var b2 = -0.5587;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prev1 = i >= 1 ? input[i - 1] : currentValue;
-            var prev2 = i >= 2 ? input[i - 2] : currentValue;
-            var prevEf1 = i >= 1 ? output[i - 1] : currentValue;
-            var prevEf2 = i >= 2 ? output[i - 2] : currentValue;
-
-            output[i] = (a1 * (currentValue + prev1)) + (a2 * prev2) + (b1 * prevEf1) + (b2 * prevEf2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EllipticWindow(false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -3350,21 +3335,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersModifiedOptimumEllipticFilter(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : currentValue;
-            var prevValue2 = i >= 2 ? input[i - 2] : prevValue1;
-            var prevValue3 = i >= 3 ? input[i - 3] : prevValue2;
-            var prevMoef1 = i >= 1 ? output[i - 1] : currentValue;
-            var prevMoef2 = i >= 2 ? output[i - 2] : prevMoef1;
-
-            output[i] = (0.13785 * ((2 * currentValue) - prevValue1)) + (0.0007 * ((2 * prevValue1) - prevValue2)) +
-                (0.13785 * ((2 * prevValue2) - prevValue3)) + (1.2103 * prevMoef1) - (0.4867 * prevMoef2);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EllipticWindow(true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -12497,5 +12497,135 @@
     "after": "",
     "filter": "FullyQualifiedName~CompoundRatioNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class CompoundRatioMovingAverageState"
+  },
+  {
+    "id": "elliptic-wrong-input-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "new RocBankValue(price), .13785",
+    "after": "new RocBankValue(price), .1378",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-wrong-middle-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "new RocBankValue(first), .0007",
+    "after": "new RocBankValue(first), .007",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-wrong-feedback-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "Product(ref sum, previous, 1.2103)",
+    "after": "Product(ref sum, previous, 1.2)",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-wrong-feedback-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "Product(ref sum, older, -.4867)",
+    "after": "Product(ref sum, older, .4867)",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-wrong-lead-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "sum.Add(current, 2)",
+    "after": "sum.Add(current, 1)",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-zero-seeded-modified-input",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_modified && _count < 1 ? price : _input1",
+    "after": "_modified && _count < 1 ? 0 : _input1",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-zero-seeded-modified-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "new RocBankValue(price) : _output1",
+    "after": "default : _output1",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-loses-third-input",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_input3 = second;",
+    "after": "_input3 = first;",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-loses-second-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_output2 = previous;",
+    "after": "_output2 = result;",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-drops-extended-product-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "negative.ScaleByPowerOfTwo(value.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-premature-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_output1 = result;",
+    "after": "_output1 = new RocBankValue(result.Publish());",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-stale-count-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-stale-feedback-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EllipticWindow.cs",
+    "before": "_output1 = _output2 = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.RecurrencesPreserveStartupCancellationPreviewAndReset"
+  },
+  {
+    "id": "elliptic-invalid-EhlersOptimumEllipticFilterState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EhlersOptimumEllipticFilterState"
+  },
+  {
+    "id": "elliptic-invalid-EhlersModifiedOptimumEllipticFilterState",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EllipticNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EhlersModifiedOptimumEllipticFilterState"
   }
 ]
