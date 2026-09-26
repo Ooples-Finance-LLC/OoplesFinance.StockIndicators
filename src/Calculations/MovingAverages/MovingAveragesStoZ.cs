@@ -304,58 +304,19 @@ public static partial class Calculations
     public static StockData CalculateVolumeWeightedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
-        if (maType == MovingAvgType.SimpleMovingAverage)
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        using var window = new VolumeWeightedWindow(maType, length, false);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volume), length)?.ToList()
+            ?? GetMovingAverageList(stockData, maType, length, volume) : null;
+        List<double> line = new(input.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var (prices, _, _, _, volumes) = GetInputValuesList(stockData);
-            var values = new double[prices.Count];
-            Core.MovingAverageCore.VolumeWeightedMovingAverage(prices.ToArray(), volumes.ToArray(), values, length);
-            var result = values.ToList();
-            var signals = CreateSignalsList(stockData);
-            for (var i = 0; i < values.Length; i++)
-                signals?.Add(GetCompareSignal(prices[i] - values[i], i == 0 ? 0 : prices[i - 1] - values[i - 1]));
-            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vwma", result } });
-            stockData.SetSignals(signals);
-            stockData.SetCustomValues(result);
-            stockData.IndicatorName = IndicatorName.VolumeWeightedMovingAverage;
-            return stockData;
+            var value = external ? window.NextWithAverage(input[i], volume[i], means![i], true) : window.Next(input[i], volume[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        List<double> volumePriceList = new(stockData.Count);
-        List<double> vwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumePriceSum = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var currentVolumeSma = volumeSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var volumePrice = currentValue * currentVolume;
-            volumePriceList.Add(volumePrice);
-            volumePriceSum.Add(volumePrice);
-
-            var volumePriceSma = volumePriceSum.Average(length);
-
-            var prevVwma = GetLastOrDefault(vwmaList);
-            var vwma = currentVolumeSma != 0 ? volumePriceSma / currentVolumeSma : 0;
-            vwmaList.Add(vwma);
-
-            var signal = GetCompareSignal(currentValue - vwma, prevValue - prevVwma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vwma", vwmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vwmaList);
-        stockData.IndicatorName = IndicatorName.VolumeWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vwma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VolumeWeightedMovingAverage;
         return stockData;
     }
 

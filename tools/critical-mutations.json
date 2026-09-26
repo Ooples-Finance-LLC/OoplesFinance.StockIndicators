@@ -593,8 +593,8 @@
     "module": "component-averages",
     "file": "src/Builder/Compute/IndicatorCompute.cs",
     "scope": "internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast",
-    "before": "if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)",
-    "after": "if (maType == MovingAvgType.SimpleMovingAverage)",
+    "before": "ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~VolumeWeightedMeanHonorsTheCustomerVolumeAverage"
   },
   {
@@ -14834,5 +14834,154 @@
     "before": "new VolumeAdjustedWindow(maType, length, factor, false)",
     "after": "new VolumeAdjustedWindow(maType, 14, factor, false)",
     "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-premature-simple-output",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "count < _length ? 0",
+    "after": "count < 1 ? 0",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-retains-expired-product",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "sum.AddProduct(old.Price, old.Volume, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-retains-expired-mass",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "mass.Add(old.Volume, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-overflows-price-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "sum.AddProduct(price, volume);",
+    "after": "sum.Add(price * volume);",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-wrong-volume-average-input",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "_average?.NextMean(volume, commit)",
+    "after": "_average?.NextMean(price, commit)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-wrong-partial-mean-count",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "denominator.Add(value, count)",
+    "after": "denominator.Add(value, _length)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-drops-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "denominator.Add(value, count)",
+    "after": "denominator.Add(value)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-inverted-quotient",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "sum.Ratio(denominator)",
+    "after": "denominator.Ratio(sum)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-stale-average-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-stale-terms-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "_terms.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-stale-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "_sum = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-stale-mass-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeWeightedWindow.cs",
+    "before": "_mass = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class VolumeWeightedMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(",
+    "before": "new VolumeWeightedWindow(maType, length, false)",
+    "after": "new VolumeWeightedWindow(maType, 14, false)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-raw-customer-gets-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeWeightedMovingAverageFast(",
+    "before": "SpanCompat.AsReadOnlySpan(data.Volumes)",
+    "after": "SpanCompat.AsReadOnlySpan(input)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "volume-weighted-batch-customer-gets-prices",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesStoZ.cs",
+    "scope": "public static StockData CalculateVolumeWeightedMovingAverage(",
+    "before": "Compatibility.SpanCompat.AsReadOnlySpan(volume)",
+    "after": "Compatibility.SpanCompat.AsReadOnlySpan(input)",
+    "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
   }
 ]

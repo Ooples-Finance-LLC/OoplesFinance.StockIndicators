@@ -45,6 +45,7 @@ internal sealed class VolumeAdjustedWindow : IDisposable
         }
         return mean;
     }
+    internal double NextMean(double volume, bool commit) => Average(volume, commit);
     internal double Next(double price, double volume, bool commit) => NextWithAverage(price, volume, Average(volume, commit), commit);
     internal double NextWithAverage(double price, double volume, double average, bool commit)
     {

@@ -351,61 +351,15 @@ public sealed class VolumeWeightedAveragePriceState : IStreamingIndicatorState, 
 [PrimaryOutput("Vwma")]
 public sealed class VolumeWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingVolumeMean? _exactMean;
-    private readonly RollingWindowSum _volumePriceSum;
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly StreamingInputResolver _input;
-
-    public VolumeWeightedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _exactMean = maType == MovingAvgType.SimpleMovingAverage ? new RollingVolumeMean(resolved) : null;
-        _volumePriceSum = new RollingWindowSum(resolved);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeWeightedWindow _window;
+    public VolumeWeightedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.VolumeWeightedMovingAverage;
-
-    public void Reset()
-    {
-        _exactMean?.Reset();
-        _volumePriceSum.Reset();
-        _volumeMa.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        double vwma;
-        if (_exactMean is not null) vwma = _exactMean.Next(value, volume, isFinal);
-        else
-        {
-            var volumePrice = value * volume;
-            var volumePriceSum = isFinal ? _volumePriceSum.Add(volumePrice, out var count) : _volumePriceSum.Preview(volumePrice, out count);
-            var volumePriceAvg = count > 0 ? volumePriceSum / count : 0;
-            var volumeMa = _volumeMa.Next(volume, isFinal);
-            vwma = volumeMa != 0 ? volumePriceAvg / volumeMa : 0;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vwma", vwma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vwma, outputs);
-    }
-
-    public void Dispose()
-    {
-        _exactMean?.Dispose();
-        _volumePriceSum.Dispose();
-        _volumeMa.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Vwma", value } } : null);
     }
 }
 
