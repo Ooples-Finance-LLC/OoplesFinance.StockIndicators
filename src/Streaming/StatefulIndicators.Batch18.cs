@@ -431,70 +431,17 @@ public sealed class MultiVoteOnBalanceVolumeState : IStreamingIndicatorState, ID
 [PrimaryOutput("Nbpf")]
 public sealed class NarrowBandpassFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public NarrowBandpassFilterState(int length = 50)
-    {
-        _length = Math.Max(2, length);
-        _weights = BuildWeights(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly NarrowBandpassWindow _window;
+    public NarrowBandpassFilterState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.NarrowBandpassFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * _weights[j];
-        }
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Nbpf", sum }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sum, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Nbpf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static double[] BuildWeights(int length)
-    {
-        var weights = new double[length];
-        for (var j = 0; j < length; j++)
-        {
-            var x = j / (double)(length - 1);
-            var win = 0.42 - (0.5 * Math.Cos(2 * Math.PI * x)) + (0.08 * Math.Cos(4 * Math.PI * x));
-            weights[j] = Math.Sin(2 * Math.PI * j / length) * win;
-        }
-
-        return weights;
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Nxc")]

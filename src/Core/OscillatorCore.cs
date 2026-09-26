@@ -7511,29 +7511,13 @@ internal static class OscillatorCore
     }
 
     /// <summary>
-    /// Computes Narrow Bandpass Filter using Blackman-Harris window.
+    /// Computes Narrow Bandpass Filter using a Blackman window.
     /// </summary>
     internal static void NarrowBandpassFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var x = j / (double)(length - 1);
-                var win = 0.42 - (0.5 * Math.Cos(2 * Math.PI * x)) + (0.08 * Math.Cos(4 * Math.PI * x));
-                var w = Math.Sin(2 * Math.PI * j / length) * win;
-                sum += prevValue * w;
-            }
-            output[i] = sum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new NarrowBandpassWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

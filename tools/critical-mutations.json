@@ -16975,5 +16975,104 @@
     "after": "output[i] = input[i]",
     "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static void ShapeshiftingMovingAverage("
+  },
+  {
+    "id": "nbpf-wrong-window",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "window.Add(.42);",
+    "after": "window.Add(.5);",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-wrong-harmonic",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "Math.Cos(4 * Math.PI * x)",
+    "after": "Math.Cos(2 * Math.PI * x)",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-wrong-carrier",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "Math.Sin(2 * Math.PI * j / length)",
+    "after": "Math.Sin(Math.PI * j / length)",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-wrong-coordinate",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "(double)j / (length - 1)",
+    "after": "(double)j / length",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-rounded-products",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "sum.AddProduct(_prices[_prices.Count - j], _weights[j]);",
+    "after": "sum.Add(_prices[_prices.Count - j] * _weights[j]);",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-reversed-history",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "_prices[_prices.Count - j]",
+    "after": "_prices[j - 1]",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-wrong-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "sum.Mean(1);",
+    "after": "sum.Mean(_weights.Length);",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "if (commit) _prices.TryAdd(price, out _);",
+    "after": "_prices.TryAdd(price, out _);",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/NarrowBandpassWindow.cs",
+    "before": "internal void Reset() => _prices.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "nbpf-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class NarrowBandpassFilterState :"
+  },
+  {
+    "id": "nbpf-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeNarrowBandpassFilterFast("
+  },
+  {
+    "id": "nbpf-core-identity",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "output[i] = window.Next(input[i], true)",
+    "after": "output[i] = input[i]",
+    "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static void NarrowBandpassFilter("
   }
 ]
