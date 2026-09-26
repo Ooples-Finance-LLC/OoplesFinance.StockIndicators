@@ -1371,38 +1371,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNarrowBandpassFilter(this StockData stockData, int length = 50)
     {
-        length = Math.Max(2, length);
-        List<double> sumList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new NarrowBandpassWindow(length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var prevSum1 = i >= 1 ? sumList[i - 1] : 0;
-            var prevSum2 = i >= 2 ? sumList[i - 2] : 0;
-
-            double sum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? inputList[i - j] : 0;
-                var x = j / (double)(length - 1);
-                var win = 0.42 - (0.5 * Math.Cos(2 * Math.PI * x)) + (0.08 * Math.Cos(4 * Math.PI * x));
-                var w = Math.Sin(2 * Math.PI * j / length) * win;
-                sum += prevValue * w;
-            }
-            sumList.Add(sum);
-
-            var signal = GetCompareSignal(sum - prevSum1, prevSum1 - prevSum2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(value - (i > 0 ? line[i - 1] : 0), (i > 0 ? line[i - 1] : 0) - (i > 1 ? line[i - 2] : 0)));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Nbpf", sumList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sumList);
-        stockData.IndicatorName = IndicatorName.NarrowBandpassFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Nbpf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.NarrowBandpassFilter;
         return stockData;
     }
 

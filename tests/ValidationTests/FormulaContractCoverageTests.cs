@@ -1616,7 +1616,9 @@ public sealed class FormulaContractCoverageTests
         var bars = new[] { 1d, 2, 4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new ShapeshiftingMovingAverage(2), new[] { 1d, 2, 4 });
         Check(new ShapeshiftingMovingAverage(3), new[] { 17d / 18, 35d / 18, 70d / 18 });
-        Check(new NarrowBandpassFilter(3), new[] { 0d, Math.Sqrt(3) / 2, Math.Sqrt(3) });
+        // The exact dot-product contract uses platform-rounded sine coefficients.
+        var carrier = Math.Sin(2 * Math.PI / 3);
+        Check(new NarrowBandpassFilter(3), new[] { 0d, carrier, 2 * carrier });
         Check(new ParametricKalmanFilter(2), new[] { 1d, 1, 1.75 });
         Check(new ParametricCorrectiveLinearMovingAverage(2), new[] { 0d, 0, 23d / 36 });
         Check(new OvershootReductionMovingAverage(2), new[] { 0d, 2, 4 });
