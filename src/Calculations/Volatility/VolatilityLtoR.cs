@@ -376,7 +376,6 @@ public static partial class Calculations
         int length = 100)
     {
         List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
         List<double> bSumList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         RollingSum bSumWindow = new();
@@ -386,8 +385,9 @@ public static partial class Calculations
         var length1 = MinOrMax((int)Math.Ceiling((double)length / 2));
 
         var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
+        var wide = StrengthWindow.Supports(maType);
 
-        for (var i = 0; i < stockData.Count; i++)
+        for (var i = 0; !wide && i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
@@ -398,22 +398,19 @@ public static partial class Calculations
             aList.Add(a);
         }
 
-        var aEma1List = GetMovingAverageList(stockData, maType, length1, aList);
-        var aEma2List = GetMovingAverageList(stockData, maType, length1, aEma1List);
+        using var reversal = new ReversalPointsWindow(maType, length);
+        var aEma1List = wide ? aList : GetMovingAverageList(stockData, maType, length1, aList);
+        var aEma2List = wide ? aList : GetMovingAverageList(stockData, maType, length1, aEma1List);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var aEma1 = aEma1List[i];
-            var aEma2 = aEma2List[i];
             var currentValue = inputList[i];
             var ema = emaList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
             var prevEma = i >= 1 ? emaList[i - 1] : 0;
 
-            var b = aEma2 != 0 ? aEma1 / aEma2 : 0;
-            bList.Add(b);
-            bSumWindow.Add(b);
+            if (!wide) bSumWindow.Add(aEma2List[i] != 0 ? aEma1List[i] / aEma2List[i] : 0);
 
-            var bSum = bSumWindow.Sum(length);
+            var bSum = wide ? reversal.Next(currentValue, true) : bSumWindow.Sum(length);
             bSumList.Add(bSum);
 
             var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, bSum, c);

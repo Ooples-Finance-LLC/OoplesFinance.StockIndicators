@@ -7191,5 +7191,80 @@
     "before": "var highList = stockData.HighPrices; var lowList = stockData.LowPrices;",
     "after": "var (_, highList, lowList, _, _) = GetInputValuesList(stockData);",
     "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
+  },
+  {
+    "id": "reversal-points-publishes-wide-movement",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "StrengthValue.Round(change, 1).Absolute",
+    "after": "new StrengthValue(Math.Abs(price - _previous))",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-signed-movement",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "StrengthValue.Round(change, 1).Absolute",
+    "after": "StrengthValue.Round(change, 1)",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-skips-second-average",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "var second = _second!.Next(first, commit);",
+    "after": "var second = first;",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-keeps-expired-ratios",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "if (_ratios.Count == _ratios.Capacity)",
+    "after": "if (_ratios.Count > _ratios.Capacity)",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-commits-preview-price",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "if (commit) _previous = price;",
+    "after": "_previous = price;",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-stale-price-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ReversalPointsWindow.cs",
+    "before": "{ _previous = 0; _sum = default;",
+    "after": "{ _sum = default;",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction"
+  },
+  {
+    "id": "reversal-points-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.WideMovementSurvivesBothAveragesAndRollingEviction",
+    "scope": "internal static ComputeBuffer ComputeReversalPointsFast("
+  },
+  {
+    "id": "reversal-points-skips-price-component",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (ComponentAverage.HasOverrides && count < 0)",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.CustomerAveragesConsumePriceThenBothMovementStages",
+    "scope": "internal static ComputeBuffer ComputeReversalPointsFast("
+  },
+  {
+    "id": "reversal-points-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ReversalPointsNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ReversalPointsState"
   }
 ]
