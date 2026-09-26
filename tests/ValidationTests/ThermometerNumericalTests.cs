@@ -34,6 +34,7 @@ public sealed class ThermometerNumericalTests
                 using var arm = IndicatorCompute.ComputeArm(Data(bars), spec, context); Assert.NotNull(arm); Assert.Equal(pair.Value, arm.Value.ToArray());
                 var selected = Data(bars); selected.CustomValuesList = bars.Select(_ => 42d).ToList();
                 using var selectedArm = IndicatorCompute.ComputeArm(selected, spec, context); Assert.NotNull(selectedArm); Assert.Equal(pair.Value, selectedArm.Value.ToArray());
+                Assert.Equal(pair.Value, BuilderArmBinding.Compute(selected, spec, target).ToArray());
             }
             var core = new double[bars.Length];
             OoplesFinance.StockIndicators.Core.OscillatorCore.ElderMarketThermometer(bars.Select(b => b.High).ToArray(), bars.Select(b => b.Low).ToArray(), core);

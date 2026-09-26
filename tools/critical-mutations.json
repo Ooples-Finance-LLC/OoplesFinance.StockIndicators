@@ -7092,5 +7092,104 @@
     "after": "        if (custom && signal)\n        {\n            using var priceMean",
     "filter": "FullyQualifiedName~ThermometerNumericalTests.CustomerSignalUsesTheSecondAverageForBothOutputRequests",
     "scope": "internal static ComputeBuffer ComputeElderMarketThermometerFast("
+  },
+  {
+    "id": "demark-pressure-inclusive-gap",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "(20 * difference).CompareTo(3 * denominator) * denominator.Sign > 0;",
+    "after": "(20 * difference).CompareTo(3 * denominator) * denominator.Sign >= 0;",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.GapBranchesAreStrictlyAboveFifteenPercent"
+  },
+  {
+    "id": "demark-pressure-ignores-negative-gap-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "(20 * difference).CompareTo(3 * denominator) * denominator.Sign > 0;",
+    "after": "(20 * difference).CompareTo(3 * denominator) > 0;",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-v2-ignores-range",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "new Weight(delta * v, range)",
+    "after": "new Weight(delta * v, BigInteger.One)",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-ignores-volume",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "var v = ExactVarianceWindow.Units(volume);",
+    "after": "var v = ExactVarianceWindow.Units(1);",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-keeps-expired-pressure",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "if (_window.Count == _window.Capacity)",
+    "after": "if (_window.Count > _window.Capacity)",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-v2-drops-absolute-sell",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "buyers + sellers.Abs() : buyers - sellers",
+    "after": "buyers - sellers : buyers - sellers",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-v2-wrong-neutral",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "value = _second ? 50 : 0;",
+    "after": "value = 0;",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-v1-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation",
+    "scope": "internal static ComputeBuffer ComputeDemarkPressureRatioV1Fast("
+  },
+  {
+    "id": "demark-pressure-v2-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation",
+    "scope": "internal static ComputeBuffer ComputeDemarkPressureRatioV2Fast("
+  },
+  {
+    "id": "demark-pressure-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "if (commit) { _window.TryAdd",
+    "after": "if (_window.Capacity > 0) { _window.TryAdd",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "demark-pressure-clamps-as-unit-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPressureWindow.cs",
+    "before": "numerator >= 100 * divisor ? 100",
+    "after": "numerator >= divisor ? 100",
+    "filter": "FullyQualifiedName~DemarkPressureNumericalTests.ExactPressurePreservesProductsSelectedInputsAndSignedCancellation"
+  },
+  {
+    "id": "thermometer-batch-synthesizes-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "scope": "public static StockData CalculateElderMarketThermometer(",
+    "before": "var highList = stockData.HighPrices; var lowList = stockData.LowPrices;",
+    "after": "var (_, highList, lowList, _, _) = GetInputValuesList(stockData);",
+    "filter": "FullyQualifiedName~ThermometerNumericalTests.WideExpansionKeepsFiniteSignalsAndFirstBarConvention"
   }
 ]

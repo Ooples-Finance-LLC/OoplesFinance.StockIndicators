@@ -227,6 +227,7 @@ internal static partial class StatefulIndicatorFactory
             DemarkSetupIndicatorSpecOptions dsi => new DemarkSetupIndicatorState(dsi.Length),
             DemarkReversalPointsSpecOptions dsi => new DemarkReversalPointsState(dsi.Length1, dsi.Length2),
             DemarkRangeExpansionIndexSpecOptions dsi => new DemarkRangeExpansionIndexState(dsi.Length),
+            DemarkPressureRatioV2SpecOptions pressure2 => new DemarkPressureRatioV2State(pressure2.Length),
             DemarkPressureRatioV1SpecOptions pressure => new DemarkPressureRatioV1State(pressure.Length),
             SentimentZoneOscillatorSpecOptions sentiment => new SentimentZoneOscillatorState(sentiment.MaType, sentiment.Length),
             SpearmanIndicatorSpecOptions spearman => new SpearmanIndicatorState(spearman.MaType, spearman.Length, spearman.SignalLength),

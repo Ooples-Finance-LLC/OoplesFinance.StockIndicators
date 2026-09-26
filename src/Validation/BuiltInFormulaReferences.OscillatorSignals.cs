@@ -263,18 +263,6 @@ internal static partial class BuiltInFormulaReferences
                     var amplitude = Average(envelope, period, envelopeKind);
                     return Outputs(("Eamd", amplitude), ("Signal", Average(amplitude, period, envelopeKind)));
                 });
-            case IndicatorName.DemarkPressureRatioV2:
-                return new("Dpr", new[] { "Dpr" }, bars =>
-                {
-                    var pressure = bars.Select(b => b.High == b.Low ? 0 : b.Volume * (b.Close - b.Open) / (b.High - b.Low)).ToArray(); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    var line = pressure.Select((_, i) =>
-                    {
-                        var window = Window(pressure, i, length).ToArray();
-                        var total = window.Sum(Math.Abs);
-                        return total == 0 ? 50 : 50 * (1 + window.Sum() / total);
-                    }).ToArray();
-                    return Outputs(("Dpr", line));
-                });
             case IndicatorName.RexOscillator:
                 return new("Ro", new[] { "Ro", "Signal" }, bars =>
                 {

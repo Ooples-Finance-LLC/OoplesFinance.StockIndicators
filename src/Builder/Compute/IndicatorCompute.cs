@@ -14247,7 +14247,7 @@ internal static partial class IndicatorCompute
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
         OscillatorCore.DemarkPressureRatioV1(high, low, open, close, volume, buffer.WritableSpan, length);
@@ -14262,7 +14262,7 @@ internal static partial class IndicatorCompute
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
         var buffer = context.Rent(data.Count);
         OscillatorCore.DemarkPressureRatioV2(high, low, open, close, volume, buffer.WritableSpan, length);

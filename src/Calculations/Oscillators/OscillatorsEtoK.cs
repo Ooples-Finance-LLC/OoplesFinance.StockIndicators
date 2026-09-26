@@ -2861,7 +2861,8 @@ public static partial class Calculations
     {
         List<double> emtList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var highList = stockData.HighPrices; var lowList = stockData.LowPrices;
 
         var emaList = GetMovingAverageList(stockData, maType, length, inputList);
         List<double> wideSignal = new(stockData.Count);

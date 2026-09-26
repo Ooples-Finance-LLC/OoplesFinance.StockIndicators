@@ -25,30 +25,6 @@ internal static partial class BuiltInFormulaReferences
                 }).ToArray()));
             });
         }
-        if (name == IndicatorName.DemarkPressureRatioV1)
-        {
-            var period = Integer(options, "Length", 13);
-            return new("Dpr", new[] { "Dpr" }, bars =>
-            {
-                var buy = new double[bars.Count];
-                var sell = new double[bars.Count];
-                for (var i = 0; i < bars.Count; i++)
-                {
-                    var b = bars[i];
-                    var previous = i == 0 ? 0 : bars[i - 1].Close;
-                    var upGap = previous == 0 ? 0 : (b.Open - previous) / previous;
-                    var downGap = b.Open == 0 ? 0 : (previous - b.Open) / b.Open;
-                    buy[i] = b.Volume * (upGap > .15 ? b.High - previous + b.Close - b.Low : Math.Max(0, b.Close - b.Open));
-                    sell[i] = b.Volume * (downGap > .15 ? previous - b.Low + b.High - b.Close : Math.Max(0, b.Open - b.Close));
-                }
-                return Outputs(("Dpr", bars.Select((_, i) =>
-                {
-                    var buyers = Window(buy, i, period).Sum();
-                    var total = buyers + Window(sell, i, period).Sum();
-                    return total == 0 ? 0 : Math.Max(0, Math.Min(100, 100 * buyers / total));
-                }).ToArray()));
-            });
-        }
         if (name == IndicatorName.DemarkRangeExpansionIndex)
         {
             var period = Integer(options, "Length", 5);
