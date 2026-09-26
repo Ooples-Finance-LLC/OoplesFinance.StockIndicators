@@ -115,6 +115,7 @@ internal static partial class StatefulIndicatorFactory
             // Moving Averages - use named parameters where MovingAvgType is first
             OmegaRatioSpecOptions omega => new OmegaRatioState(omega.Length, omega.Bmk),
             UpsidePotentialRatioSpecOptions upr => new UpsidePotentialRatioState(upr.Length, upr.Bmk),
+            MartinRatioSpecOptions martin => new MartinRatioState(martin.MaType, martin.Length, martin.Bmk),
             SortinoRatioSpecOptions sortino => new SortinoRatioState(sortino.MaType, sortino.Length, sortino.Bmk),
             SharpeRatioSpecOptions sharpe => new SharpeRatioState(sharpe.MaType, sharpe.Length, sharpe.Bmk),
             InformationRatioSpecOptions information => new InformationRatioState(information.MaType, information.Length, information.Bmk),

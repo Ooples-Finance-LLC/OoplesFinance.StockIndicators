@@ -318,33 +318,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void UlcerIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // Before the window fills, the batch indicator averages what has arrived rather than returning
-            // nothing, so the run-in shortens the window instead of blanking it.
-
-            // Find highest close in period
-            var highest = double.MinValue;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                if (close[j] > highest) highest = close[j];
-            }
-
-            // Calculate sum of squared percentage drawdowns
-            double sumSqDd = 0;
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var pctDrawdown = highest != 0 ? 100 * (close[j] - highest) / highest : 0;
-                sumSqDd += pctDrawdown * pctDrawdown;
-            }
-
-            output[i] = Math.Sqrt(sumSqDd / length);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DrawdownWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

@@ -8041,5 +8041,95 @@
     "after": "",
     "filter": "FullyQualifiedName~SortinoNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class SortinoRatioState"
+  },
+  {
+    "id": "drawdown-uses-current-price-as-high",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "RocBankValue.Return(price, high)",
+    "after": "RocBankValue.Return(price, price)",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-drops-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "<< drawdown.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-keeps-expired-squares",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "? _squares[0] : BigInteger.Zero",
+    "after": "? BigInteger.Zero : BigInteger.Zero",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-full-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "Math.Min(_squares.Count + 1, _squares.Capacity)",
+    "after": "_squares.Capacity",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "if (commit) { _squares.TryAdd",
+    "after": "if (_squares.Capacity > 0) { _squares.TryAdd",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-martin-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "_prices[0] : 0",
+    "after": "_prices[_prices.Count - 1] : 0",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-martin-ignores-benchmark",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "difference.AddProduct(previous, _benchmark, -100);",
+    "after": "",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-martin-skips-customer-mean",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "new RocBankValue(customerMean.Value)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.CustomerMeanControlsNumerator"
+  },
+  {
+    "id": "drawdown-core-discards-period",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "before": "new DrawdownWindow(length)",
+    "after": "new DrawdownWindow(1)",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark",
+    "scope": "internal static void UlcerIndex("
+  },
+  {
+    "id": "drawdown-stale-moments-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DrawdownWindow.cs",
+    "before": "_squares.Clear(); _sum = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "drawdown-martinratio-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DrawdownNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class MartinRatioState"
   }
 ]

@@ -124,71 +124,19 @@ public sealed class MarketMeannessIndexState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Mr")]
 public sealed class MartinRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _bench;
-    private readonly IMovingAverageSmoother _retSmoother;
-    private readonly UlcerIndexState _ulcerIndex;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _priceValue;
-
-    public MartinRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 30, double bmk = 0.02)
-    {
-        _length = Math.Max(1, length);
-        var barMin = 60d * 24;
-        var minPerYr = 60d * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = MathHelper.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _ulcerIndex = new UlcerIndexState(_length, _ => _priceValue);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MartinWindow _window;
+    public MartinRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = .02)
+        => _window = new MartinWindow(maType, length, bmk);
     public IndicatorName Name => IndicatorName.MartinRatio;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _retSmoother.Reset();
-        _ulcerIndex.Reset();
-        _priceValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var ret = priorValue != 0 ? 100 * ((value / priorValue) - 1 - _bench) : 0;
-        _priceValue = value;
-        var retSma = _retSmoother.Next(ret, isFinal);
-        var ulcer = _ulcerIndex.Update(bar, isFinal, includeOutputs: false).Value;
-        var martin = ulcer != 0 ? retSma / ulcer : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mr", martin }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(martin, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Mr", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _retSmoother.Dispose();
-        _ulcerIndex.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Mi")]

@@ -189,42 +189,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUlcerIndex(this StockData stockData, int length = 14)
     {
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        var ulcerIndexList = new List<double>(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-        var highestList = length <= 1 ? inputList : GetMaxAndMinValuesList(inputList, length).Item1;
-        var pctDrawdownSquaredSum = new RollingSum();
-
-        double prevUlcerIndex1 = 0;
-        double prevUlcerIndex2 = 0;
-        for (var i = 0; i < count; i++)
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new DrawdownWindow(length);
+        for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var maxValue = highestList[i];
-
-            var pctDrawdownSquared = maxValue != 0 ? Pow((currentValue - maxValue) / maxValue * 100, 2) : 0;
-            pctDrawdownSquaredSum.Add(pctDrawdownSquared);
-
-            var squaredAvg = pctDrawdownSquaredSum.Average(length);
-
-            var ulcerIndex = squaredAvg >= 0 ? Sqrt(squaredAvg) : 0;
-            ulcerIndexList.Add(ulcerIndex);
-
-            var signal = GetCompareSignal(ulcerIndex - prevUlcerIndex1, prevUlcerIndex1 - prevUlcerIndex2, true);
-            signalsList?.Add(signal);
-
-            prevUlcerIndex2 = prevUlcerIndex1;
-            prevUlcerIndex1 = ulcerIndex;
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetCompareSignal(value - previous, previous - (i < 2 ? 0 : output[i - 2]), true)); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ui", ulcerIndexList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ulcerIndexList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ui", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.UlcerIndex;
-
         return stockData;
     }
 

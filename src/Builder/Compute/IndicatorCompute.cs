@@ -4076,26 +4076,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     private static void UlcerIndex(ReadOnlySpan<double> input, int length, Span<double> output)
     {
-        // CalculateUlcerIndex averages the squared percentage drawdown from the window's own high over however
-        // many bars have been seen, not over the full length, so the opening bars are the root mean square of
-        // what is actually there. VolatilityCore.UlcerIndex divided by the length throughout, which understated
-        // every bar before the window filled.
-        var count = input.Length;
-        length = Math.Max(length, 1);
-
-        var highWindow = new RollingMinMax(length);
-        var squaredDrawdown = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            highWindow.Add(currentValue);
-            var maxValue = highWindow.Max;
-
-            squaredDrawdown.Add(maxValue != 0 ? MathHelper.Pow((currentValue - maxValue) / maxValue * 100, 2) : 0);
-
-            var squaredAvg = squaredDrawdown.Average(length);
-            output[i] = squaredAvg >= 0 ? MathHelper.Sqrt(squaredAvg) : 0;
-        }
+        using var window = new DrawdownWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -22296,40 +22278,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMartinRatioFast(StockData data, ComputeContext context, int length = 30,
         double bmk = 0.02, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // Excess returns and drawdowns both use percent units. Ulcer risk is measured on prices.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        const double barMinutes = 60 * 24;
-        const double minutesPerYear = 60 * 24 * 30 * 12;
-        var barsPerYear = minutesPerYear / barMinutes;
-        var bench = MathHelper.Pow(1 + bmk, length / barsPerYear) - 1;
-
-        using var returns = context.Rent(count);
-        var ret = returns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length);
+        using var window = new MartinWindow(maType, length, bmk);
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var prevValue = i >= length ? input[i - length] : 0;
-            ret[i] = prevValue != 0 ? 100 * ((input[i] / prevValue) - 1 - bench) : 0;
+            using var returns = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) returns.WritableSpan[i] = window.ReturnValue(input[i], i >= length ? input[i - length] : 0).Publish();
+            MovingAverage(data, maType, length, returns.Span, means.WritableSpan);
         }
-
-        using var smoothedReturns = context.Rent(count);
-        MovingAverage(data, maType, length, returns.Span, smoothedReturns.WritableSpan);
-        var retSma = smoothedReturns.Span;
-
-        using var ulcer = context.Rent(count);
-        UlcerIndex(input, length, ulcer.WritableSpan);
-        var ulcerIndex = ulcer.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = ulcerIndex[i] != 0 ? retSma[i] / ulcerIndex[i] : 0;
-        }
-
-        return buffer;
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        return output;
     }
 
     /// <summary>
