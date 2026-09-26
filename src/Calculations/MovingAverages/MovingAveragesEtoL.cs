@@ -1374,35 +1374,18 @@ public static partial class Calculations
     public static StockData CalculateElasticVolumeWeightedMovingAverageV1(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 40, double mult = 20)
     {
-        List<double> evwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volumes) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new ElasticVolumeAverageWindow(maType, length, mult, initializeFallback: false);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentAvgVolume = volumeSmaList[i];
-            var currentVolume = volumeList[i];
-            var n = currentAvgVolume * mult;
-
-            var prevEVWMA = i >= 1 ? GetLastOrDefault(evwmaList) : currentValue;
-            var evwma = n > 0 ? prevEVWMA + currentVolume / n * (currentValue - prevEVWMA) : prevEVWMA;
-            evwmaList.Add(evwma);
-
-            var signal = GetCompareSignal(currentValue - evwma, prevValue - prevEVWMA);
-            signalsList?.Add(signal);
+            var average = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(volumes), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, volumes);
+            for (var i = 0; i < input.Count; i++) line.Add(window.NextWithAverage(input[i], volumes[i], new RocBankValue(average[i]), true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Evwma", evwmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(evwmaList);
-        stockData.IndicatorName = IndicatorName.ElasticVolumeWeightedMovingAverageV1;
-
+        else for (var i = 0; i < input.Count; i++) line.Add(window.Next(input[i], volumes[i], true));
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? -input[0] : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Evwma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ElasticVolumeWeightedMovingAverageV1;
         return stockData;
     }
 

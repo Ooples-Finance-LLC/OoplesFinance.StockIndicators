@@ -8,59 +8,17 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Evwma")]
 public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _mult;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _volumeSmoother;
-    private double _prevEvwma;
-    private bool _hasPrev;
-
-    public ElasticVolumeWeightedMovingAverageV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 40, double mult = 20)
-    {
-        _mult = mult;
-        _volumeSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ElasticVolumeAverageWindow _window;
+    public ElasticVolumeWeightedMovingAverageV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 40, double mult = 20) => _window = new(maType, length, mult);
     public IndicatorName Name => IndicatorName.ElasticVolumeWeightedMovingAverageV1;
-
-    public void Reset()
-    {
-        _volumeSmoother.Reset();
-        _prevEvwma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var avgVolume = _volumeSmoother.Next(bar.Volume, isFinal);
-        var n = avgVolume * _mult;
-        var prevEvwma = _hasPrev ? _prevEvwma : value;
-        var evwma = n > 0 ? prevEvwma + bar.Volume / n * (value - prevEvwma) : prevEvwma;
-
-        if (isFinal)
-        {
-            _prevEvwma = evwma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Evwma", evwma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(evwma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Evwma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Evwma")]

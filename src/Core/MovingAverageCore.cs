@@ -4542,33 +4542,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ElasticVolumeWeightedMovingAverageV1(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 40, double mult = 20)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var volumeSmaArray = pool.Rent(price.Length);
-
-        try
-        {
-            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
-            SimpleMovingAverage(volume, volumeSma, length);
-
-            double prevEvwma = price.Length > 0 ? price[0] : 0;
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentAvgVolume = volumeSma[i];
-                var currentVolume = volume[i];
-                var n = currentAvgVolume * mult;
-
-                var evwma = n > 0 ? prevEvwma + currentVolume / n * (price[i] - prevEvwma) : prevEvwma;
-                output[i] = evwma;
-                prevEvwma = evwma;
-            }
-        }
-        finally
-        {
-            pool.Return(volumeSmaArray);
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < price.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        using var window = new ElasticVolumeAverageWindow(MovingAvgType.SimpleMovingAverage, length, mult);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>
