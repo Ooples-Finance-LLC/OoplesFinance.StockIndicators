@@ -12889,5 +12889,119 @@
     "after": "",
     "filter": "FullyQualifiedName~EquityNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EquityMovingAverageState"
+  },
+  {
+    "id": "high-low-average-upper-uses-lowest",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_upper.Next(new RocBankValue(highest), commit)",
+    "after": "_upper.Next(new RocBankValue(lowest), commit)",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-lower-uses-highest",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_lower.Next(new RocBankValue(lowest), commit)",
+    "after": "_lower.Next(new RocBankValue(highest), commit)",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-wrong-midpoint-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "sum.Mean(1)",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-overflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "return sum.Mean(2);",
+    "after": "return (upper + lower) / 2;",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-underflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "return sum.Mean(2);",
+    "after": "return upper / 2 + lower / 2;",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-commits-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "var highest = commit ?",
+    "after": "var highest = true ?",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-commits-low-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "var lowest = commit ?",
+    "after": "var lowest = true ?",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_upper.Next(new RocBankValue(highest), commit)",
+    "after": "_upper.Next(new RocBankValue(highest), true)",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-stale-high-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_high.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-stale-low-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_low.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-stale-upper-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_upper?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-stale-lower-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowAverageWindow.cs",
+    "before": "_lower?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.ExtremaAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-average-customer-gets-upper-twice",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, lowest.Span, lowerBand.WritableSpan",
+    "after": "length, highest.Span, lowerBand.WritableSpan",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.CustomerAveragesReceiveRollingHighsAndLowsIndependently",
+    "scope": "internal static ComputeBuffer ComputeHighLowMovingAverageFast("
+  },
+  {
+    "id": "high-low-average-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class HighLowMovingAverageState"
   }
 ]
