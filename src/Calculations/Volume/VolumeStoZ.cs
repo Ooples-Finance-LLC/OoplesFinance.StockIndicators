@@ -605,43 +605,23 @@ public static partial class Calculations
     public static StockData CalculateTradeVolumeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, double minTickValue = 0.5)
     {
-        List<double> tviList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var total = new TradeVolumeTotal(minTickValue);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentPrice = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevPrice = i >= 1 ? inputList[i - 1] : 0;
-            var priceChange = currentPrice - prevPrice;
-
-            var prevTvi = i >= 1 ? tviList[i - 1] : 0;
-            var tvi = priceChange > minTickValue ? prevTvi + currentVolume : priceChange < -minTickValue ?
-                prevTvi - currentVolume : prevTvi;
-            tviList.Add(tvi);
+            var value = total.Next(input[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        var tviSignalList = GetMovingAverageList(stockData, maType, length, tviList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tvi = tviList[i];
-            var tviSignal = tviSignalList[i];
-            var prevTvi = i >= 1 ? tviList[i - 1] : 0;
-            var prevTviSignal = i >= 1 ? tviSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(tvi - tviSignal, prevTvi - prevTviSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tvi", tviList },
-            { "Signal", tviSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tviList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tvi", output }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TradeVolumeIndex;
-
         return stockData;
     }
 

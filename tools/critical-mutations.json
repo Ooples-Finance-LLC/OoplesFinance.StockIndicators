@@ -8782,5 +8782,79 @@
     "after": "",
     "filter": "FullyQualifiedName~PriceVolumeTrendNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ModifiedPriceVolumeTrendState"
+  },
+  {
+    "id": "trade-volume-inclusive-up-tick",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "if (up.Sign > 0)",
+    "after": "if (up.Sign >= 0)",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-inclusive-down-tick",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "else if (down.Sign < 0)",
+    "after": "else if (down.Sign <= 0)",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-wrong-volume-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "total.Add(volume, -1)",
+    "after": "total.Add(volume, 1)",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-rounded-tick-comparison",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "up.Add(price); up.Add(_previous, -1); up.Add(_tick, -1);",
+    "after": "up.Add(price - _previous - _tick);",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "if (commit) { _total",
+    "after": "if (volume != 0) { _total",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-stale-total-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "_total = default; _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/TradeVolumeWindow.cs",
+    "before": "new RocBankAverage(kind, length, int.MaxValue)",
+    "after": "new RocBankAverage(kind, 1, int.MaxValue)",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.ExactContributionsPreserveAliasesSelectionAndState"
+  },
+  {
+    "id": "trade-volume-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "line.Span, means.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), means.WritableSpan",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.CustomerSignalReceivesCumulativeLineForEveryOutputRequest",
+    "scope": "internal static ComputeBuffer ComputeTradeVolumeIndexFast("
+  },
+  {
+    "id": "trade-volume-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TradeVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TradeVolumeIndexState"
   }
 ]
