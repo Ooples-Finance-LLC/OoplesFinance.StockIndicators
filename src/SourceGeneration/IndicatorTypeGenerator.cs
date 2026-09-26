@@ -384,7 +384,7 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         // stage for callers supplying independent/custom components.
         if (name.Groups[1].Value is "RelativeSpreadStrength" or "KaseDevStopV1" or "EhlersEmpiricalModeDecomposition") asks = 3;
         if (name.Groups[1].Value == "KasePeakOscillatorV2") asks = 1;
-        if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio") asks = 2;
+        if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio" or "TwiggsMoneyFlow") asks = 2;
         if (name.Groups[1].Value == "QuantitativeQualitativeEstimation") asks = 5;
         // These wrappers consume two averages inside the oscillator and one after it.
         if (name.Groups[1].Value is "EhlersRelativeStrengthIndexInverseFisherTransform"

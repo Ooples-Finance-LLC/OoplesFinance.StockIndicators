@@ -150,6 +150,7 @@ internal static partial class StatefulIndicatorFactory
             NaturalMarketMirrorSpecOptions naturalMirror => new NaturalMarketMirrorState(naturalMirror.MaType, naturalMirror.Length),
             NaturalMarketRiverSpecOptions naturalRiver => new NaturalMarketRiverState(naturalRiver.MaType, naturalRiver.Length),
             NaturalMarketComboSpecOptions naturalCombo => new NaturalMarketComboState(naturalCombo.MaType, naturalCombo.Length, naturalCombo.SmoothLength),
+            TwiggsMoneyFlowSpecOptions twiggs => new TwiggsMoneyFlowState(twiggs.MaType, twiggs.Length),
             VolumeAccumulationPercentSpecOptions accumulation => new VolumeAccumulationPercentState(accumulation.Length),
             HawkeyeVolumeIndicatorSpecOptions hawkeye => new HawkeyeVolumeIndicatorState(hawkeye.Length, hawkeye.Divisor),
             PriceVolumeOscillatorSpecOptions priceVolume => new PriceVolumeOscillatorState(priceVolume.Length, 14),

@@ -448,65 +448,11 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Twiggs Money Flow.
     /// </summary>
-    internal static void TwiggsMoneyFlow(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 21)
+    internal static void TwiggsMoneyFlow(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 21, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adArray = pool.Rent(close.Length);
-        var volSumArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ad = adArray.AsSpan(0, close.Length);
-            var volSum = volSumArray.AsSpan(0, close.Length);
-
-            double trh = high[0];
-            double trl = low[0];
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i > 0)
-                {
-                    trh = Math.Max(high[i], close[i - 1]);
-                    trl = Math.Min(low[i], close[i - 1]);
-                }
-
-                var range = trh - trl;
-                var adValue = range != 0 ? ((close[i] - trl) - (trh - close[i])) / range * volume[i] : 0;
-                ad[i] = adValue;
-                volSum[i] = volume[i];
-            }
-
-            // Apply Wilder smoothing (EMA with 1/length factor)
-            var k = 1.0 / length;
-            double smoothedAd = ad[0];
-            double smoothedVol = volSum[0];
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i > 0)
-                {
-                    smoothedAd = smoothedAd + k * (ad[i] - smoothedAd);
-                    smoothedVol = smoothedVol + k * (volSum[i] - smoothedVol);
-                }
-
-                output[i] = smoothedVol != 0 ? smoothedAd / smoothedVol : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(adArray);
-            pool.Return(volSumArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MoneyFlowPercentWindow(length, maType);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>

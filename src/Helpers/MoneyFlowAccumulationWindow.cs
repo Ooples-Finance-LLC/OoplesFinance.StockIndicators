@@ -8,6 +8,13 @@ internal sealed class MoneyFlowAccumulationWindow
     private ExactMeanAccumulator _total;
     internal RocBankValue Next(double high, double low, double close, double volume, bool commit)
     {
+        var flow = Flow(high, low, close, volume);
+        var total = _total; flow.AddTo(ref total);
+        if (commit) _total = total;
+        return RocBankValue.Round(total);
+    }
+    internal static RocBankValue Flow(double high, double low, double close, double volume)
+    {
         RocBankValue flow = default;
         if (high != low)
         {
@@ -21,9 +28,7 @@ internal sealed class MoneyFlowAccumulationWindow
                 if (!double.IsInfinity(value)) { flow = new RocBankValue(value, shift); break; }
             }
         }
-        var total = _total; flow.AddTo(ref total);
-        if (commit) _total = total;
-        return RocBankValue.Round(total);
+        return flow;
     }
     internal void Reset() => _total = default;
 }
