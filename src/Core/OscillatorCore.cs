@@ -7906,31 +7906,11 @@ internal static class OscillatorCore
     internal static void TrendDetectionIndex(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 40,
         bool direction = false)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(length1, length2);
-        var momSum = new RollingSum();
-        var momAbsSum = new RollingSum();
-
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendDetectionWindow(length1, length2);
         for (var i = 0; i < close.Length; i++)
         {
-            // CalculateTrendDetectionIndex passes its momentum through MinPastValues, which reports zero
-            // until the lookback has arrived rather than measuring the price against a previous value of
-            // zero. Taking the whole price as the momentum put an outlier the size of the price itself
-            // into both rolling sums, and the longer of the two carried it for fifty-nine bars.
-            var mom = i >= length1 ? close[i] - close[i - length1] : 0;
-            momSum.Add(mom);
-            momAbsSum.Add(Math.Abs(mom));
-
-            var tdiDirection = momSum.Sum(length1);
-            var momAbsSum1 = momAbsSum.Sum(length1);
-            var momAbsSum2 = momAbsSum.Sum(length2);
-
-            output[i] = direction ? tdiDirection : Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
+            var value = window.Next(close[i], true); output[i] = direction ? value.Direction : value.Line;
         }
     }
 

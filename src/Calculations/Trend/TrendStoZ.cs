@@ -697,51 +697,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrendDetectionIndex(this StockData stockData, int length1 = 20, int length2 = 40)
     {
-        List<double> tdiList = new(stockData.Count);
-        List<double> momList = new(stockData.Count);
-        List<double> tdiDirectionList = new(stockData.Count);
-        List<double> momAbsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum momSumWindow = new();
-        RollingSum momAbsSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> output = new(stockData.Count), direction = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TrendDetectionWindow(length1, length2);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-
-            var mom = MinPastValues(i, length1, currentValue - prevValue);
-            momList.Add(mom);
-            momSumWindow.Add(mom);
-
-            var momAbs = Math.Abs(mom);
-            momAbsList.Add(momAbs);
-            momAbsSumWindow.Add(momAbs);
-
-            var prevTdiDirection = i >= 1 ? tdiDirectionList[i - 1] : 0;
-            var tdiDirection = momSumWindow.Sum(length1);
-            tdiDirectionList.Add(tdiDirection);
-
-            var momAbsSum1 = momAbsSumWindow.Sum(length1);
-            var momAbsSum2 = momAbsSumWindow.Sum(length2);
-
-            var prevTdi = i >= 1 ? tdiList[i - 1] : 0;
-            var tdi = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
-            tdiList.Add(tdi);
-
-            var signal = GetCompareSignal(tdiDirection - tdi, prevTdiDirection - prevTdi);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value.Line); direction.Add(value.Direction);
+            signals?.Add(GetCompareSignal(value.Direction - value.Line, i == 0 ? 0 : direction[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tdi", tdiList },
-            { "TdiDirection", tdiDirectionList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tdiList);
-        stockData.IndicatorName = IndicatorName.TrendDetectionIndex;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tdi", output }, { "TdiDirection", direction } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.TrendDetectionIndex;
         return stockData;
     }
 

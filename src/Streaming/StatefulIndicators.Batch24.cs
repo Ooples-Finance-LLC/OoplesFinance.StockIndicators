@@ -1681,77 +1681,17 @@ public sealed class TrendContinuationFactorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Tdi")]
 public sealed class TrendDetectionIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly RollingWindowSum _momSum;
-    private readonly RollingWindowSum _momAbsSum1;
-    private readonly RollingWindowSum _momAbsSum2;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public TrendDetectionIndexState(int length1 = 20, int length2 = 40)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _momSum = new RollingWindowSum(_length1);
-        _momAbsSum1 = new RollingWindowSum(_length1);
-        _momAbsSum2 = new RollingWindowSum(resolved2);
-        _values = new PooledRingBuffer<double>(_length1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendDetectionWindow _window;
+    public TrendDetectionIndexState(int length1 = 20, int length2 = 40) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.TrendDetectionIndex;
-
-    public void Reset()
-    {
-        _momSum.Reset();
-        _momAbsSum1.Reset();
-        _momAbsSum2.Reset();
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= _length1
-            ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length1)
-            : 0;
-        var mom = _index >= _length1 ? value - prevValue : 0;
-
-        int countAfter;
-        var tdiDirection = isFinal ? _momSum.Add(mom, out countAfter) : _momSum.Preview(mom, out countAfter);
-        var momAbs = Math.Abs(mom);
-        var momAbsSum1 = isFinal ? _momAbsSum1.Add(momAbs, out countAfter) : _momAbsSum1.Preview(momAbs, out countAfter);
-        var momAbsSum2 = isFinal ? _momAbsSum2.Add(momAbs, out countAfter) : _momAbsSum2.Preview(momAbs, out countAfter);
-        var tdi = Math.Abs(tdiDirection) - momAbsSum2 + momAbsSum1;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Tdi", tdi },
-                { "TdiDirection", tdiDirection }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tdi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Tdi", value.Line }, { "TdiDirection", value.Direction } } : null);
     }
-
-    public void Dispose()
-    {
-        _momSum.Dispose();
-        _momAbsSum1.Dispose();
-        _momAbsSum2.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tdfi")]

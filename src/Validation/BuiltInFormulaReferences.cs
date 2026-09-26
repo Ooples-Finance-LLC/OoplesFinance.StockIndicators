@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TrendDetectionIndex)
+        {
+            var detectionKeys = builtIn.BatchOutputKey is { } detectionKey ? new[] { detectionKey } : new[] { "Tdi", "TdiDirection" };
+            for (var slot = 0; slot < detectionKeys.Length; slot++)
+            {
+                var key = detectionKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendDetectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendTriggerFactor)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrendTriggerOutputs(bars, builtIn)["Ttf"], IndicatorErrorBudget.Exact);
