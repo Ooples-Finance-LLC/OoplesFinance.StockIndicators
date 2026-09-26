@@ -1618,71 +1618,17 @@ public sealed class OCHistogramState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Or")]
 public sealed class OmegaRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _bench;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _returns;
-    private readonly StreamingInputResolver _input;
-
-    public OmegaRatioState(int length = 30, double bmk = 0.05)
-    {
-        _length = Math.Max(1, length);
-        var barMin = 60d * 24;
-        var minPerYr = 60d * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = MathHelper.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _returns = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TargetReturnWindow _window;
+    public OmegaRatioState(int length = 30, double bmk = .05) => _window = new TargetReturnWindow(length, bmk, false);
     public IndicatorName Name => IndicatorName.OmegaRatio;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _returns.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
-        double downSide = 0;
-        double upSide = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var iValue = EhlersStreamingWindow.GetOffsetValue(_returns, ret, j);
-            downSide += iValue < _bench ? _bench - iValue : 0;
-            upSide += iValue > _bench ? iValue - _bench : 0;
-        }
-
-        var omega = downSide != 0 ? upSide / downSide : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _returns.TryAdd(ret, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Or", omega }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(omega, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Or", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _returns.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Obvdi")]

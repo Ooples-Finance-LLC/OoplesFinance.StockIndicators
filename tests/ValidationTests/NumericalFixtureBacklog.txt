@@ -2112,10 +2112,6 @@ OoplesFinance.StockIndicators.Indicators.OCHistogram/longer-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/minimum-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/shorter-periods
 OoplesFinance.StockIndicators.Indicators.OCHistogram/weighted-average
-OoplesFinance.StockIndicators.Indicators.OmegaRatio/default
-OoplesFinance.StockIndicators.Indicators.OmegaRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.OmegaRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.OmegaRatio/shorter-periods
 OoplesFinance.StockIndicators.Indicators.OnBalanceVolumeDisparityIndicator/default
 OoplesFinance.StockIndicators.Indicators.OnBalanceVolumeDisparityIndicator/longer-length
 OoplesFinance.StockIndicators.Indicators.OnBalanceVolumeDisparityIndicator/longer-periods
@@ -3130,10 +3126,6 @@ OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/default
 OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/longer-periods
 OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/minimum-periods
 OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/shorter-periods
-OoplesFinance.StockIndicators.Indicators.UpsidePotentialRatio/default
-OoplesFinance.StockIndicators.Indicators.UpsidePotentialRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.UpsidePotentialRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.UpsidePotentialRatio/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/default
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/longer-periods
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/minimum-periods

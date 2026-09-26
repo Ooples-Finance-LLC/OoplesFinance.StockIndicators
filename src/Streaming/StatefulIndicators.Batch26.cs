@@ -73,81 +73,17 @@ public sealed class UpsideDownsideVolumeState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Upr")]
 public sealed class UpsidePotentialRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _bench;
-    private readonly double _ratio;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _retValues;
-    private readonly StreamingInputResolver _input;
-
-    public UpsidePotentialRatioState(int length = 30, double bmk = 0.05)
-    {
-        _length = Math.Max(1, length);
-        _ratio = 1d / _length;
-        double barMin = 60 * 24;
-        double minPerYr = 60 * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = Math.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _retValues = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TargetReturnWindow _window;
+    public UpsidePotentialRatioState(int length = 30, double bmk = .05) => _window = new TargetReturnWindow(length, bmk, true);
     public IndicatorName Name => IndicatorName.UpsidePotentialRatio;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _retValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var ret = priorValue != 0 ? (value / priorValue) - 1 : 0;
-
-        double downSide = 0;
-        double upSide = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var retValue = EhlersStreamingWindow.GetOffsetValue(_retValues, ret, j);
-            if (retValue < _bench)
-            {
-                var diff = retValue - _bench;
-                downSide += (diff * diff) * _ratio;
-            }
-            else if (retValue > _bench)
-            {
-                upSide += (retValue - _bench) * _ratio;
-            }
-        }
-
-        var upr = downSide > 0 ? upSide / Math.Sqrt(downSide) : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _retValues.TryAdd(ret, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Upr", upr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(upr, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Upr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _retValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("vClose")]
