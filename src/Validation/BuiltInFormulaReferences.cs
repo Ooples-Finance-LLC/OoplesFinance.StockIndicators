@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersLaguerreFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LaguerreFilterOutputs(bars, 2d / (Integer(builtIn.CreateOptions(), "Length", 9) + 1d))["Elf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersOptimumEllipticFilter or IndicatorName.EhlersModifiedOptimumEllipticFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EllipticNumericalOutputs(bars, builtIn.BatchName == IndicatorName.EhlersModifiedOptimumEllipticFilter)["Emoef"], IndicatorErrorBudget.Exact);

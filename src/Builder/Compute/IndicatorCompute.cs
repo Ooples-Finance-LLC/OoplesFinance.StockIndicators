@@ -12930,10 +12930,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersLaguerreFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        var alpha = 2.0 / (length + 1); // Convert length to alpha
-        MovingAverageCore.EhlersLaguerreFilter(close, buffer.WritableSpan, alpha);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        var window = new LaguerreFilterWindow(2d / (Math.Max(1, length) + 1d));
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

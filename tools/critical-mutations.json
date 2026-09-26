@@ -12627,5 +12627,144 @@
     "after": "",
     "filter": "FullyQualifiedName~EllipticNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EhlersModifiedOptimumEllipticFilterState"
+  },
+  {
+    "id": "laguerre-filter-wrong-first-retention",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "old.AddTo(ref sum);",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-wrong-first-gain",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "Product(ref sum, current, _alpha)",
+    "after": "Product(ref sum, current, 1 - _alpha)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "private RocBankValue First("
+  },
+  {
+    "id": "laguerre-filter-missing-stage-input",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "oldInput.AddTo(ref sum);",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-wrong-stage-sign",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "current.AddTo(ref sum, -1)",
+    "after": "current.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-wrong-stage-retention",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "Product(ref sum, oldOutput, -_alpha)",
+    "after": "Product(ref sum, oldOutput, _alpha)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-third-stage-uses-first-stage",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "Stage(l1, p1, p2)",
+    "after": "Stage(l0, p1, p2)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-wrong-output-weight",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "l1.AddTo(ref sum, 2)",
+    "after": "l1.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-wrong-output-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "count: 6",
+    "after": "count: 4",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-zero-startup",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "var p0 = _started ? _l0 : input",
+    "after": "var p0 = _started ? _l0 : default",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "_started = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-premature-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "_l2 = l2;",
+    "after": "_l2 = new RocBankValue(l2.Publish());",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-drops-extended-product-scale",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "negative.ScaleByPowerOfTwo(value.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "laguerre-filter-accepts-invalid-gain",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreFilterWindow.cs",
+    "before": "if (double.IsNaN(alpha) || double.IsInfinity(alpha)) throw new ArgumentOutOfRangeException(nameof(alpha));",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.ConstantPricesSurviveExtremeFiniteGainsAndInvalidGainsAreRejected"
+  },
+  {
+    "id": "laguerre-filter-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EhlersLaguerreFilterState"
+  },
+  {
+    "id": "laguerre-filter-builder-period-overflow",
+    "module": "numerical",
+    "file": "src/Builder/Compute/BuilderArmTargets.cs",
+    "before": "[typeof(EhlersLaguerreFilterSpecOptions)] = new(IndicatorName.EhlersLaguerreFilter, null, new BuilderArgument(\"Length\", \"alpha\", v => v is int n ? 2.0 / (n + 1d) : v))",
+    "after": "[typeof(EhlersLaguerreFilterSpecOptions)] = new(IndicatorName.EhlersLaguerreFilter, null, new BuilderArgument(\"Length\", \"alpha\", v => v is int n ? 2.0 / (n + 1) : v))",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.MaximumBuilderPeriodConvertsToPositiveGainWithoutOverflow"
+  },
+  {
+    "id": "laguerre-filter-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersLaguerreFilterFast(",
+    "before": "new LaguerreFilterWindow(2d / (Math.Max(1, length) + 1d))",
+    "after": "new LaguerreFilterWindow(.2)",
+    "filter": "FullyQualifiedName~LaguerreFilterNumericalTests.MaximumBuilderPeriodConvertsToPositiveGainWithoutOverflow"
   }
 ]

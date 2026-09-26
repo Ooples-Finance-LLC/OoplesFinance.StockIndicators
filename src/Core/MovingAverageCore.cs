@@ -1499,29 +1499,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersLaguerreFilter(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.2)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var l0 = input.Length > 0 ? input[0] : 0.0;
-        var l1 = l0;
-        var l2 = l0;
-        var l3 = l0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var prevL0 = l0;
-            var prevL1 = l1;
-            var prevL2 = l2;
-
-            l0 = (alpha * input[i]) + ((1 - alpha) * l0);
-            l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * l1);
-            l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * l2);
-            l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * l3);
-
-            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new LaguerreFilterWindow(alpha);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

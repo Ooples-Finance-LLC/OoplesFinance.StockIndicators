@@ -365,7 +365,7 @@ internal static class BuilderArmTargets
         [typeof(EhlersInstantaneousTrendlineV2SpecOptions)] = new(IndicatorName.EhlersInstantaneousTrendlineV2),
         [typeof(EhlersInverseFisherTransformSpecOptions)] = new(IndicatorName.EhlersInverseFisherTransform, null, new BuilderArgument("Length", "length1")),
         [typeof(EhlersKaufmanAdaptiveMovingAverageSpecOptions)] = new(IndicatorName.EhlersKaufmanAdaptiveMovingAverage),
-        [typeof(EhlersLaguerreFilterSpecOptions)] = new(IndicatorName.EhlersLaguerreFilter, null, new BuilderArgument("Length", "alpha", v => v is int n ? 2.0 / (n + 1) : v)),
+        [typeof(EhlersLaguerreFilterSpecOptions)] = new(IndicatorName.EhlersLaguerreFilter, null, new BuilderArgument("Length", "alpha", v => v is int n ? 2.0 / (n + 1d) : v)),
         [typeof(EhlersLaguerreRsiSpecOptions)] = new(IndicatorName.EhlersLaguerreRelativeStrengthIndex, null, new BuilderArgument("Length", "gamma", v => v is int n ? 1 - (2.0 / (n + 1)) : v)),
         [typeof(EhlersLeadingIndicatorSpecOptions)] = new(IndicatorName.EhlersLeadingIndicator),
         [typeof(EhlersMarketStateIndicatorSpecOptions)] = new(IndicatorName.EhlersMarketStateIndicator),
