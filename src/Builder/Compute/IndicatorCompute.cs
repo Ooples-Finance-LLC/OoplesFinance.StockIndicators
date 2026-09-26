@@ -15131,29 +15131,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRecursiveMovingTrendAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateRecursiveMovingTrendAverage runs an undamped accumulator alongside the smoothed series and
-        // feeds that accumulator's step back into it, both seeded at the first value. The core routine this
-        // replaced produced a different curve.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var alpha = (double)2 / (Math.Max(1, length) + 1);
-
-        using var accumulator = context.Rent(count);
-        var bot = accumulator.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousBot = i >= 1 ? bot[i - 1] : currentValue;
-            var previousValue = i >= 1 ? output[i - 1] : currentValue;
-
-            bot[i] = ((1 - alpha) * previousBot) + currentValue;
-            output[i] = ((1 - alpha) * previousValue) + (alpha * (currentValue + bot[i] - previousBot));
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.RecursiveMovingTrendAverage(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 

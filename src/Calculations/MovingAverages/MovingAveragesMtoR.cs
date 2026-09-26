@@ -1273,37 +1273,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRecursiveMovingTrendAverage(this StockData stockData, int length = 14)
     {
-        List<double> botList = new(stockData.Count);
-        List<double> nResList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new RecursiveTrendWindow(length);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevBot = i >= 1 ? botList[i - 1] : currentValue;
-            var prevNRes = i >= 1 ? nResList[i - 1] : currentValue;
-
-            var bot = ((1 - alpha) * prevBot) + currentValue;
-            botList.Add(bot);
-
-            var nRes = ((1 - alpha) * prevNRes) + (alpha * (currentValue + bot - prevBot));
-            nResList.Add(nRes);
-
-            var signal = GetCompareSignal(currentValue - nRes, prevValue - prevNRes);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? -input[i] : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rmta", nResList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nResList);
-        stockData.IndicatorName = IndicatorName.RecursiveMovingTrendAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rmta", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RecursiveMovingTrendAverage;
         return stockData;
     }
 

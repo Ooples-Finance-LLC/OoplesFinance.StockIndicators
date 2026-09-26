@@ -220,53 +220,15 @@ public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Rmta")]
 public sealed class RecursiveMovingTrendAverageState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevBot;
-    private double _prevNRes;
-    private bool _hasPrev;
-
-    public RecursiveMovingTrendAverageState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = 2d / (resolved + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RecursiveTrendWindow _window;
+    public RecursiveMovingTrendAverageState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.RecursiveMovingTrendAverage;
-
-    public void Reset()
-    {
-        _prevBot = 0;
-        _prevNRes = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevBot = _hasPrev ? _prevBot : value;
-        var prevNRes = _hasPrev ? _prevNRes : value;
-        var bot = ((1 - _alpha) * prevBot) + value;
-        var nRes = ((1 - _alpha) * prevNRes) + (_alpha * (value + bot - prevBot));
-
-        if (isFinal)
-        {
-            _prevBot = bot;
-            _prevNRes = nRes;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rmta", nRes }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(nRes, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rmta", value } } : null);
     }
 }
 
