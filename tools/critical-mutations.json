@@ -20239,5 +20239,95 @@
     "after": "",
     "filter": "FullyQualifiedName~RocBandNumericalTests.ExtendedReturnsAndExactRmsPreserveStartupEvictionAndZeroCenter|FullyQualifiedName~RocBandNumericalTests.CustomerSmoothingReceivesSelectedReturnsAndItsOwnPeriod|FullyQualifiedName~RocBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~RocBandNumericalTests.LegacyBatchOnlyAveragesStillSmoothReturns",
     "scope": "internal static ComputeBuffer ComputeRateOfChangeBandsFast("
+  },
+  {
+    "id": "g-channel-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "Math.Max(2, length)",
+    "after": "Math.Max(1, length)",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-upper-clip",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "Math.Max(close, _upper)",
+    "after": "Math.Min(close, _upper)",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-lower-clip",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "Math.Min(close, _lower)",
+    "after": "Math.Max(close, _lower)",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-upper-contraction",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "upperSum.Add(_upper, -1)",
+    "after": "upperSum.Add(_upper, 1)",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-lower-contraction",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "lowerSum.Add(_lower, -1)",
+    "after": "lowerSum.Add(_lower, 1)",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-early-midpoint-sum",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "middle.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-rounded-contraction",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "var upper = upperSum.Mean(_length); var lower = lowerSum.Mean(_length);",
+    "after": "var contraction = (_upper - _lower) / _length; var upper = Math.Max(close, _upper) - contraction; var lower = Math.Min(close, _lower) + contraction;",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "if (commit) { _upper = upper;",
+    "after": "{ _upper = upper;",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GChannelWindow.cs",
+    "before": "_upper = _lower = 0;",
+    "after": "_upper = 0;",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "g-channel-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeGChannelsFast("
+  },
+  {
+    "id": "g-channel-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~GChannelNumericalTests.NormalizedContractionKeepsSubnormalAndExtremeBandsOrdered|FullyQualifiedName~GChannelNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~GChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class GChannelsState :"
   }
 ]

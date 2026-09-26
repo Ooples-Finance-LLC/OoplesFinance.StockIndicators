@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            GChannelsSpecOptions channel => ComputeGChannelsFast(data, context, channel.Length, spec.OutputKey),
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType, spec.OutputKey),
 
             // Batch 18 - Strength and Zone Indicators
@@ -22000,10 +22001,15 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    /// <summary>
-    /// Computes Rate of Change Bands using zero-allocation fast path.
-    /// Returns the ROC smoothed value.
-    /// </summary>
+    /// <summary>Computes the selected G Channel boundary or midpoint.</summary>
+    internal static ComputeBuffer ComputeGChannelsFast(StockData data, ComputeContext context, int length = 100, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); var window = new GChannelWindow(length);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes the selected ROC envelope output; the default is smoothed ROC.</summary>
     internal static ComputeBuffer ComputeRateOfChangeBandsFast(StockData data, ComputeContext context, int length = 12, int smoothLength = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var count = input.Count;

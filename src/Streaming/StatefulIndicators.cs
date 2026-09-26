@@ -2825,57 +2825,14 @@ public sealed class RateOfChangeBandsState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("MiddleBand")]
 public sealed class GChannelsState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private double _prevB;
-    private int _count;
-
-    public GChannelsState(int length = 100)
-    {
-        _length = Math.Max(2, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly GChannelWindow _window;
+    public GChannelsState(int length = 100) { _window = new(length); }
     public IndicatorName Name => IndicatorName.GChannels;
-
-    public void Reset()
-    {
-        _prevA = 0;
-        _prevB = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevA = _count >= 1 ? _prevA : 0;
-        var prevB = _count >= 1 ? _prevB : 0;
-        var factor = _length != 0 ? (prevA - prevB) / _length : 0;
-
-        var a = Math.Max(value, prevA) - factor;
-        var b = Math.Min(value, prevB) + factor;
-        var middle = (a + b) / 2;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _count++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", middle },
-                { "LowerBand", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
 }
 

@@ -1200,10 +1200,6 @@ OoplesFinance.StockIndicators.Indicators.FunctionToCandles/longer-periods
 OoplesFinance.StockIndicators.Indicators.FunctionToCandles/minimum-periods
 OoplesFinance.StockIndicators.Indicators.FunctionToCandles/shorter-periods
 OoplesFinance.StockIndicators.Indicators.FunctionToCandles/weighted-average
-OoplesFinance.StockIndicators.Indicators.GChannels/default
-OoplesFinance.StockIndicators.Indicators.GChannels/longer-periods
-OoplesFinance.StockIndicators.Indicators.GChannels/minimum-periods
-OoplesFinance.StockIndicators.Indicators.GChannels/shorter-periods
 OoplesFinance.StockIndicators.Indicators.GatorOscillator/default
 OoplesFinance.StockIndicators.Indicators.GatorOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.GatorOscillator/minimum-periods
