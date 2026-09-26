@@ -750,69 +750,18 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Sco")]
 public sealed class StochasticCustomOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _numSmoother;
-    private readonly IMovingAverageSmoother _denomSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public StochasticCustomOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7,
-        int length2 = 3, int length3 = 12)
-    {
-        var resolved1 = Math.Max(1, length1);
-        _highWindow = new RollingWindowMax(resolved1);
-        _lowWindow = new RollingWindowMin(resolved1);
-        _numSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _denomSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StochasticCustomWindow _window;
+    public StochasticCustomOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7, int length2 = 3, int length3 = 12)
+        => _window = new(maType, length1, length2, length3);
     public IndicatorName Name => IndicatorName.StochasticCustomOscillator;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _numSmoother.Reset();
-        _denomSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var num = value - lowest;
-        var denom = highest - lowest;
-        var numSma = _numSmoother.Next(num, isFinal);
-        var denomSma = _denomSmoother.Next(denom, isFinal);
-        var sck = denomSma != 0 ? MathHelper.MinOrMax(numSma / denomSma * 100, 100, 0) : 0;
-        var scd = _signalSmoother.Next(sck, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Sco", sck },
-                { "Signal", scd }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sck, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Sco", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _numSmoother.Dispose();
-        _denomSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sfo")]

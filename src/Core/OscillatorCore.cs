@@ -5600,61 +5600,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void StochasticCustomOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int kPeriod = 14, int dPeriod = 3, int smoothPeriod = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var kArray = pool.Rent(close.Length);
-        var smoothKArray = pool.Rent(close.Length);
-        var dArray = pool.Rent(close.Length);
-
-        try
-        {
-            var k = kArray.AsSpan(0, close.Length);
-            var smoothK = smoothKArray.AsSpan(0, close.Length);
-            var d = dArray.AsSpan(0, close.Length);
-
-            // Calculate raw %K
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < kPeriod - 1)
-                {
-                    k[i] = 50;
-                }
-                else
-                {
-                    var highest = high[i];
-                    var lowest = low[i];
-                    for (var j = i - kPeriod + 1; j <= i; j++)
-                    {
-                        if (high[j] > highest) highest = high[j];
-                        if (low[j] < lowest) lowest = low[j];
-                    }
-
-                    var range = highest - lowest;
-                    k[i] = range != 0 ? (close[i] - lowest) / range * 100 : 50;
-                }
-            }
-
-            // Smooth %K
-            MovingAverageCore.SimpleMovingAverage(k, smoothK, smoothPeriod);
-
-            // Calculate %D
-            MovingAverageCore.SimpleMovingAverage(smoothK, d, dPeriod);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = smoothK[i] - d[i];
-            }
-        }
-        finally
-        {
-            pool.Return(kArray);
-            pool.Return(smoothKArray);
-            pool.Return(dArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new StochasticCustomWindow(MovingAvgType.SimpleMovingAverage, kPeriod, smoothPeriod, dPeriod);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Line;
     }
 
     /// <summary>

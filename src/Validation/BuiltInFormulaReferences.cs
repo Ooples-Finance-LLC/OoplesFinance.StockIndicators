@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.StochasticCustomOscillator && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var scoKeys = new[] { "Sco", "Signal" };
+            for (var slot = 0; slot < scoKeys.Length; slot++)
+            {
+                var key = scoKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => StochasticCustomOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.StochasticMomentumIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var smiKeys = new[] { "Smi", "Signal" };
