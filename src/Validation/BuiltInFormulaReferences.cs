@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TrendDirectionForceIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => TrendForceOutputs(bars, builtIn)["Tdfi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ReversalPoints && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.Reference(0, bars => ReversalPointsOutputs(bars, builtIn)["Rp"], IndicatorErrorBudget.Exact);

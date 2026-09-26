@@ -246,6 +246,7 @@ internal static partial class StatefulIndicatorFactory
             RecursiveDifferenciatorSpecOptions recursive => new RecursiveDifferenciatorState(recursive.MaType, recursive.Length, recursive.Alpha),
             RelativeSpreadStrengthSpecOptions spread => new RelativeSpreadStrengthState(spread.MaType, spread.FastLength, spread.SlowLength, spread.Length, spread.SmoothLength),
             SimpleLinesSpecOptions lines => new SimpleLinesState(lines.Length, lines.Multiplier),
+            TrendDirectionForceIndexSpecOptions trendForce => new TrendDirectionForceIndexState(trendForce.MaType, trendForce.Length1, trendForce.Length2),
             ReversalPointsSpecOptions reversals => new ReversalPointsState(reversals.MaType, reversals.Length),
             SimpleCycleSpecOptions simpleCycle => new SimpleCycleState(simpleCycle.Length),
             RatioOchlAveragerSpecOptions => new RatioOCHLAveragerState(),
