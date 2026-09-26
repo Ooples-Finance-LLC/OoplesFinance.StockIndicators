@@ -888,48 +888,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateHendersonWeightedMovingAverage(this StockData stockData, int length = 7)
     {
-        List<double> hwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var termMult = MinOrMax((int)Math.Floor((double)(length - 1) / 2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new HendersonWindow(length);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var m = termMult;
-                var n = j - termMult;
-                var numerator = 315 * (Pow(m + 1, 2) - Pow(n, 2)) * (Pow(m + 2, 2) - Pow(n, 2)) * (Pow(m + 3, 2) -
-                    Pow(n, 2)) * ((3 * Pow(m + 2, 2)) - (11 * Pow(n, 2)) - 16);
-                var denominator = 8 * (m + 2) * (Pow(m + 2, 2) - 1) * ((4 * Pow(m + 2, 2)) - 1) * ((4 * Pow(m + 2, 2)) - 9) *
-                                  ((4 * Pow(m + 2, 2)) - 25);
-                var weight = denominator != 0 ? numerator / denominator : 0;
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevHwma = GetLastOrDefault(hwmaList);
-            var hwma = weightedSum != 0 ? sum / weightedSum : 0;
-            hwmaList.Add(hwma);
-
-            var signal = GetCompareSignal(currentValue - hwma, prevVal - prevHwma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hwma", hwmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hwmaList);
-        stockData.IndicatorName = IndicatorName.HendersonWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hwma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.HendersonWeightedMovingAverage;
         return stockData;
     }
 

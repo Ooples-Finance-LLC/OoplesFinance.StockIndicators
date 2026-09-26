@@ -3094,35 +3094,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void HendersonWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 7)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var termMult = Math.Max(2, Math.Min(530, (length - 1) / 2));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var m = termMult;
-                var n = j - termMult;
-                var m1 = (double)(m + 1);
-                var m2 = (double)(m + 2);
-                var m3 = (double)(m + 3);
-
-                var numerator = 315 * (m1 * m1 - n * n) * (m2 * m2 - n * n) * (m3 * m3 - n * n) *
-                    ((3 * m2 * m2) - (11 * n * n) - 16);
-                var denominator = 8 * m2 * (m2 * m2 - 1) * ((4 * m2 * m2) - 1) * ((4 * m2 * m2) - 9) *
-                    ((4 * m2 * m2) - 25);
-                var weight = denominator != 0 ? numerator / denominator : 0;
-                var prevValue = i >= j ? input[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        HendersonWindow.Compute(input, output, length);
     }
 
     /// <summary>
