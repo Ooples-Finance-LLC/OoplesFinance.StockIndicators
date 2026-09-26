@@ -822,57 +822,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLaguerreFilter(this StockData stockData, double alpha = 0.2)
     {
-        List<double> filterList = new(stockData.Count);
-        List<double> firList = new(stockData.Count);
-        List<double> l0List = new(stockData.Count);
-        List<double> l1List = new(stockData.Count);
-        List<double> l2List = new(stockData.Count);
-        List<double> l3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var window = new LaguerreFilterWindow(alpha); double previousFir = 0;
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevP1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevP2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevP3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevL0 = i >= 1 ? GetLastOrDefault(l0List) : currentValue;
-            var prevL1 = i >= 1 ? GetLastOrDefault(l1List) : currentValue;
-            var prevL2 = i >= 1 ? GetLastOrDefault(l2List) : currentValue;
-            var prevL3 = i >= 1 ? GetLastOrDefault(l3List) : currentValue;
-
-            var l0 = (alpha * currentValue) + ((1 - alpha) * prevL0);
-            l0List.Add(l0);
-
-            var l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * prevL1);
-            l1List.Add(l1);
-
-            var l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * prevL2);
-            l2List.Add(l2);
-
-            var l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * prevL3);
-            l3List.Add(l3);
-
-            var prevFilter = GetLastOrDefault(filterList);
-            var filter = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-            filterList.Add(filter);
-
-            var prevFir = GetLastOrDefault(firList);
-            var fir = (currentValue + (2 * prevP1) + (2 * prevP2) + prevP3) / 6;
-            firList.Add(fir);
-
-            var signal = GetCompareSignal(filter - fir, prevFilter - prevFir);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var firSum = new ExactMeanAccumulator(); firSum.Add(input[i]);
+            if (i > 0) firSum.Add(input[i - 1], 2); if (i > 1) firSum.Add(input[i - 2], 2); if (i > 2) firSum.Add(input[i - 3]);
+            var fir = firSum.Mean(6);
+            signals?.Add(GetCompareSignal(value - fir, i == 0 ? 0 : line[i - 1] - previousFir));
+            line.Add(value); previousFir = fir;
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Elf", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersLaguerreFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Elf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersLaguerreFilter;
         return stockData;
     }
 

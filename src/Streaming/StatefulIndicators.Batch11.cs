@@ -8,75 +8,17 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Elf")]
 public sealed class EhlersLaguerreFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevL0;
-    private double _prevL1;
-    private double _prevL2;
-    private double _prevL3;
-    private bool _hasPrev;
-
-    public EhlersLaguerreFilterState(double alpha = 0.2)
-    {
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(3);
-    }
-
+    private readonly LaguerreFilterWindow _window;
+    public EhlersLaguerreFilterState(double alpha = .2) => _window = new(alpha);
     public IndicatorName Name => IndicatorName.EhlersLaguerreFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevL0 = 0;
-        _prevL1 = 0;
-        _prevL2 = 0;
-        _prevL3 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevL0 = _hasPrev ? _prevL0 : value;
-        var prevL1 = _hasPrev ? _prevL1 : value;
-        var prevL2 = _hasPrev ? _prevL2 : value;
-        var prevL3 = _hasPrev ? _prevL3 : value;
-
-        var l0 = (_alpha * value) + ((1 - _alpha) * prevL0);
-        var l1 = (-1 * (1 - _alpha) * l0) + prevL0 + ((1 - _alpha) * prevL1);
-        var l2 = (-1 * (1 - _alpha) * l1) + prevL1 + ((1 - _alpha) * prevL2);
-        var l3 = (-1 * (1 - _alpha) * l2) + prevL2 + ((1 - _alpha) * prevL3);
-
-        var filter = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevL0 = l0;
-            _prevL1 = l1;
-            _prevL2 = l2;
-            _prevL3 = l3;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Elf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Elf", value } } : null);
     }
-
-public void Dispose()
-{
-    _values.Dispose();
-}
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Eri")]
