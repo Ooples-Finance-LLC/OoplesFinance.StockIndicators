@@ -89,60 +89,18 @@ public sealed class EhlersCenterofGravityOscillatorState : IStreamingIndicatorSt
 [PrimaryOutput("FastEdo")]
 public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
 {
-    private readonly double _fastMult;
-    private readonly double _slowMult;
-    private readonly HighPassFilterV1Engine _fastHp;
-    private readonly HighPassFilterV1Engine _slowHp;
-    private readonly HighPassFilterV1Engine _fastDecHp;
-    private readonly HighPassFilterV1Engine _slowDecHp;
-    private readonly StreamingInputResolver _input;
-
-    public EhlersDecyclerOscillatorV1State(int fastLength = 100, int slowLength = 125,
-        double fastMult = 1.2, double slowMult = 1)
-    {
-        _fastMult = fastMult;
-        _slowMult = slowMult;
-        _fastHp = new HighPassFilterV1Engine(fastLength, 1);
-        _slowHp = new HighPassFilterV1Engine(slowLength, 1);
-        _fastDecHp = new HighPassFilterV1Engine(fastLength, 0.5);
-        _slowDecHp = new HighPassFilterV1Engine(slowLength, 0.5);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DecyclerOscillatorWindow _fast, _slow;
+    public EhlersDecyclerOscillatorV1State(int fastLength = 100, int slowLength = 125, double fastMult = 1.2, double slowMult = 1)
+        : this(new DecyclerOscillatorWindow(fastLength, fastMult), new DecyclerOscillatorWindow(slowLength, slowMult)) { }
+    private EhlersDecyclerOscillatorV1State(DecyclerOscillatorWindow fast, DecyclerOscillatorWindow slow) { _fast = fast; _slow = slow; }
+    internal static EhlersDecyclerOscillatorV1State ForPeriod(int length) => new(new DecyclerOscillatorWindow(length), new DecyclerOscillatorWindow(length, 1, 2));
     public IndicatorName Name => IndicatorName.EhlersDecyclerOscillatorV1;
-
-    public void Reset()
-    {
-        _fastHp.Reset();
-        _slowHp.Reset();
-        _fastDecHp.Reset();
-        _slowDecHp.Reset();
-    }
-
+    public void Reset() { _fast.Reset(); _slow.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fastHp = _fastHp.Next(value, isFinal);
-        var slowHp = _slowHp.Next(value, isFinal);
-        var fastDec = value - fastHp;
-        var slowDec = value - slowHp;
-        var fastFiltered = _fastDecHp.Next(fastDec, isFinal);
-        var slowFiltered = _slowDecHp.Next(slowDec, isFinal);
-
-        var fastOsc = value != 0 ? 100 * _fastMult * fastFiltered / value : 0;
-        var slowOsc = value != 0 ? 100 * _slowMult * slowFiltered / value : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "FastEdo", fastOsc },
-                { "SlowEdo", slowOsc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fastOsc, outputs);
+        StreamingInputValidation.Validate(bar);
+        var fast = _fast.Next(bar.Close, isFinal); var slow = _slow.Next(bar.Close, isFinal);
+        return new(fast, includeOutputs ? new Dictionary<string, double> { { "FastEdo", fast }, { "SlowEdo", slow } } : null);
     }
 }
 

@@ -78,6 +78,16 @@ internal static class BuilderArmBinding
             && (spec.OutputKey ?? target.OutputKey) == "MiddleBand")
             return CalculationsHelper.GetMovingAverageList(bars, middle.MaType, middle.Length);
 
+        // Typed slow cutoff is twice Length, including periods beyond the Int32 range.
+        if (spec.Options is EhlersDecyclerOscillatorV1SpecOptions decycler)
+        {
+            var laneKey = spec.OutputKey ?? target.OutputKey ?? "FastEdo";
+            if (laneKey is not ("FastEdo" or "SlowEdo")) throw DoesNotPublishKey(target.Name, laneKey);
+            var window = new DecyclerOscillatorWindow(decycler.Length, laneKey == "FastEdo" ? 1.2 : 1, laneKey == "FastEdo" ? 1 : 2);
+            var input = bars.ChainedValues.Count > 0 ? bars.ChainedValues : bars.InputValues;
+            return input.Select(value => window.Next(value, true)).ToList();
+        }
+
         var parameters = method.GetParameters();
         var map = ArgumentMaps.GetOrAdd((spec.Options.GetType(), target.Name), key => MapArguments(key.Options, target, parameters));
         var args = new object?[parameters.Length];

@@ -7,7 +7,7 @@ internal sealed class HighPassWindow
 {
     private readonly BigInteger _gain, _feedback1, _feedback2;
     private RocBankValue _previous, _older;
-    private double _input1, _input2;
+    private RocBankValue _input1, _input2;
     internal HighPassWindow(int length, double multiplier = 1)
     {
         if (double.IsNaN(multiplier) || double.IsInfinity(multiplier)) throw new ArgumentOutOfRangeException(nameof(multiplier));
@@ -26,7 +26,11 @@ internal sealed class HighPassWindow
     internal RocBankValue NextValue(double price, bool commit)
     {
         if (double.IsNaN(price) || double.IsInfinity(price)) throw new ArgumentOutOfRangeException(nameof(price));
-        var sum = new ExactMeanAccumulator(); sum.Add(price, _gain); sum.Add(_input1, -2 * _gain); sum.Add(_input2, _gain);
+        return NextValue(new RocBankValue(price), commit);
+    }
+    internal RocBankValue NextValue(RocBankValue price, bool commit)
+    {
+        var sum = new ExactMeanAccumulator(); AddFeedback(ref sum, price, _gain); AddFeedback(ref sum, _input1, -2 * _gain); AddFeedback(ref sum, _input2, _gain);
         AddFeedback(ref sum, _previous, _feedback1); AddFeedback(ref sum, _older, _feedback2);
         sum.ScaleByPowerOfTwo(-2150);
         var result = RocBankValue.Round(sum);
@@ -36,5 +40,5 @@ internal sealed class HighPassWindow
         }
         return result;
     }
-    internal void Reset() { _previous = _older = default; _input1 = _input2 = 0; }
+    internal void Reset() { _previous = _older = default; _input1 = _input2 = default; }
 }

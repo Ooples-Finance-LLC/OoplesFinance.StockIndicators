@@ -237,53 +237,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV1(this StockData stockData, int fastLength = 100, int slowLength = 125, 
         double fastMult = 1.2, double slowMult = 1)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-        List<double> decycler1OscillatorList = new(stockData.Count);
-        List<double> decycler2OscillatorList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var decycler1List = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersSimpleDecycler(data, fastLength));
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var decycler2List = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersSimpleDecycler(data, slowLength));
-        stockData.SetCustomValues(decycler1List);
-        var decycler1FilteredList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersHighPassFilterV1(data, fastLength, 0.5));
-        stockData.SetCustomValues(decycler2List);
-        var decycler2FilteredList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersHighPassFilterV1(data, slowLength, 0.5));
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var fastWindow = new DecyclerOscillatorWindow(fastLength, fastMult); var slowWindow = new DecyclerOscillatorWindow(slowLength, slowMult);
+        List<double> fast = new(stockData.Count), slow = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var decycler1Filtered = decycler1FilteredList[i];
-            var decycler2Filtered = decycler2FilteredList[i];
-
-            var prevDecyclerOsc1 = GetLastOrDefault(decycler1OscillatorList);
-            var decyclerOscillator1 = currentValue != 0 ? 100 * fastMult * decycler1Filtered / currentValue : 0;
-            decycler1OscillatorList.Add(decyclerOscillator1);
-
-            var prevDecyclerOsc2 = GetLastOrDefault(decycler2OscillatorList);
-            var decyclerOscillator2 = currentValue != 0 ? 100 * slowMult * decycler2Filtered / currentValue : 0;
-            decycler2OscillatorList.Add(decyclerOscillator2);
-
-            var signal = GetCompareSignal(decyclerOscillator2 - decyclerOscillator1, prevDecyclerOsc2 - prevDecyclerOsc1);
-            signalsList?.Add(signal);
+            fast.Add(fastWindow.Next(input[i], true)); slow.Add(slowWindow.Next(input[i], true));
+            signals?.Add(GetCompareSignal(slow[i] - fast[i], i == 0 ? 0 : slow[i - 1] - fast[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "FastEdo", decycler1OscillatorList },
-            { "SlowEdo", decycler2OscillatorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "FastEdo", fast }, { "SlowEdo", slow } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.EhlersDecyclerOscillatorV1;
-
         return stockData;
     }
 
