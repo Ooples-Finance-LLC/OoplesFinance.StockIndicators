@@ -3056,11 +3056,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Using LSMA with quadratic correction
-        PolynomialLeastSquaresMovingAverage(input, output, length, 2);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new Streaming.QuadraticLeastSquaresWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], 14, true).Value;
     }
 
     /// <summary>

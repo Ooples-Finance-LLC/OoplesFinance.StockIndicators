@@ -1,55 +1,44 @@
 using OoplesFinance.StockIndicators.Indicators;
-
 namespace OoplesFinance.StockIndicators.Validation;
-
 internal static partial class BuiltInFormulaReferences
 {
-    private static FormulaDefinition? QuadraticFit(IBuiltInIndicator indicator)
+    private static FormulaDefinition? QuadraticFit(IBuiltInIndicator indicator) => indicator.BatchName != IndicatorName.QuadraticLeastSquaresMovingAverage ? null
+        : new("Qlma", new[] { "Qlma", "Forecast" }, bars => QuadraticFitOutputs(bars, indicator));
+    internal static IReadOnlyDictionary<string, double[]> QuadraticFitOutputs(IReadOnlyList<Bar> bars, IBuiltInIndicator indicator) =>
+        QuadraticFitOutputs(bars, Math.Max(1, Integer(indicator.CreateOptions(), "Length", 50)), 14);
+    internal static IReadOnlyDictionary<string, double[]> QuadraticFitOutputs(IReadOnlyList<Bar> bars, int length, int horizon)
     {
-        if (indicator.BatchName != IndicatorName.QuadraticLeastSquaresMovingAverage) return null;
-        var length = Integer(indicator.CreateOptions(), "Length");
-        return new("Qlma", new[] { "Qlma", "Forecast" }, bars =>
+        length = Math.Max(1, length); var zero = new ReferenceFraction(0); var one = new ReferenceFraction(1);
+        var fitted = new double[bars.Count]; var forecast = new double[bars.Count];
+        for (var i = length - 1; i < bars.Count; i++)
         {
-            var fitted = new double[bars.Count]; var forecast = new double[bars.Count];
-            for (var i = length-1; i < bars.Count; i++)
+            var samples = bars.Skip(i - length + 1).Take(length).Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray();
+            if (length < 3) { fitted[i] = forecast[i] = (samples.Aggregate(zero, (sum, value) => sum + value) / new ReferenceFraction(length)).ToDouble(); continue; }
+            var matrix = new ReferenceFraction[3, 4];
+            for (var a = 0; a < 3; a++) for (var b = 0; b < 4; b++) matrix[a, b] = zero;
+            for (var j = 0; j < length; j++)
             {
-                var samples = bars.Skip(i-length+1).Take(length).Select(b => (decimal)b.Close).ToArray();
-                if (length < 3)
+                var x = new ReferenceFraction(j); var row = new[] { one, x, x * x };
+                for (var a = 0; a < 3; a++)
                 {
-                    fitted[i] = forecast[i] = (double)samples.Average();
-                    continue;
+                    for (var b = 0; b < 3; b++) matrix[a, b] += row[a] * row[b];
+                    matrix[a, 3] += row[a] * samples[j];
                 }
-                // Solve the design matrix in decimal with pivoted elimination. Production
-                // uses orthogonal discrete polynomials instead of these normal equations.
-                var system = new decimal[3,4];
-                for (var j = 0; j < length; j++)
-                {
-                    var x = j-(length-1)/2m;
-                    var row = new[] { 1m, x, x*x };
-                    for (var a = 0; a < 3; a++)
-                    {
-                        for (var b = 0; b < 3; b++) system[a,b] += row[a]*row[b];
-                        system[a,3] += row[a]*samples[j];
-                    }
-                }
-                for (var column = 0; column < 3; column++)
-                {
-                    var pivot = Enumerable.Range(column, 3-column).OrderByDescending(row => Math.Abs(system[row,column])).First();
-                    for (var k = column; k < 4; k++) (system[column,k], system[pivot,k]) = (system[pivot,k], system[column,k]);
-                    var scale = system[column,column];
-                    for (var k = column; k < 4; k++) system[column,k] /= scale;
-                    for (var row = 0; row < 3; row++)
-                    {
-                        if (row == column) continue;
-                        var multiple = system[row,column];
-                        for (var k = column; k < 4; k++) system[row,k] -= multiple*system[column,k];
-                    }
-                }
-                double At(decimal x) => (double)(system[0,3]+x*system[1,3]+x*x*system[2,3]);
-                fitted[i] = At((length-1)/2m);
-                forecast[i] = At((length-1)/2m+14);
             }
-            return Outputs(("Qlma", fitted), ("Forecast", forecast));
-        });
+            // Exact normal equations; distinct abscissas make all leading pivots nonzero.
+            for (var column = 0; column < 3; column++)
+            {
+                var pivot = matrix[column, column];
+                for (var k = column; k < 4; k++) matrix[column, k] /= pivot;
+                for (var row = 0; row < 3; row++)
+                {
+                    if (row == column) continue; var multiple = matrix[row, column];
+                    for (var k = column; k < 4; k++) matrix[row, k] -= multiple * matrix[column, k];
+                }
+            }
+            double At(long x) { var value = new ReferenceFraction(x); return (matrix[0, 3] + value * matrix[1, 3] + value * value * matrix[2, 3]).ToDouble(); }
+            fitted[i] = At(length - 1L); forecast[i] = At(length - 1L + horizon);
+        }
+        return Outputs(("Qlma", fitted), ("Forecast", forecast));
     }
 }
