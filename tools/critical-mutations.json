@@ -13331,5 +13331,106 @@
     "before": "true, average.Span[i]",
     "after": "true, input[i]",
     "filter": "FullyQualifiedName~TillsonIe2NumericalTests.CustomerAverageReceivesPricesAndPreservesRegression"
+  },
+  {
+    "id": "alligator-wrong-delay",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "Math.Max(0, offset);",
+    "after": "Math.Max(0, offset + 1);",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.OffsetsHandleZeroNegativeAndMaximumWithoutWrapping"
+  },
+  {
+    "id": "alligator-bypasses-delay",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "_history.Count < _offset ? 0 : _history.Peek()",
+    "after": "average",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "_history.Count < _offset ? 0 :",
+    "after": "_history.Count < _offset ? average :",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "_average.Next(new RocBankValue(price), commit)",
+    "after": "_average.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-commits-delay-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "if (commit && _offset > 0)",
+    "after": "if (_offset > 0)",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-stale-delay-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AlligatorLineWindow.cs",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-stale-jaw-after-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AlligatorIndexState",
+    "before": "_jaw.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-stale-teeth-after-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AlligatorIndexState",
+    "before": "_teeth.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-stale-lips-after-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AlligatorIndexState",
+    "before": "_lips.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-teeth-uses-jaw",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AlligatorIndexState",
+    "before": "var teeth = _teeth.Next(price, isFinal);",
+    "after": "var teeth = _jaw.Next(price, isFinal);",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.DelayedLinesPreservePreviewResetAndExtremePrices"
+  },
+  {
+    "id": "alligator-customer-gets-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer AlligatorLine(",
+    "before": "GetInputValuesList(InputName.MedianPrice, data)",
+    "after": "GetInputValuesList(InputName.Close, data)",
+    "filter": "FullyQualifiedName~AlligatorNumericalTests.CustomerAveragesReceiveMedianPricesInThreeSlots"
   }
 ]

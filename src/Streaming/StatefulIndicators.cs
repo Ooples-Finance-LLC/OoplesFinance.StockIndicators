@@ -8936,90 +8936,23 @@ public sealed class ArnaudLegouxMovingAverageState : IStreamingIndicatorState, I
 [PrimaryOutput("Lips")]
 public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly int _jawOffset;
-    private readonly int _teethOffset;
-    private readonly int _lipsOffset;
-    private readonly IMovingAverageSmoother _jawSmoother;
-    private readonly IMovingAverageSmoother _teethSmoother;
-    private readonly IMovingAverageSmoother _lipsSmoother;
-    private readonly PooledRingBuffer<double> _jawWindow;
-    private readonly PooledRingBuffer<double> _teethWindow;
-    private readonly PooledRingBuffer<double> _lipsWindow;
-    private StreamingInputResolver _input;
-
+    private readonly AlligatorLineWindow _jaw, _teeth, _lips;
+    private StreamingInputResolver _input = new(InputName.MedianPrice, null);
     public AlligatorIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int jawLength = 13,
         int jawOffset = 8, int teethLength = 8, int teethOffset = 5, int lipsLength = 5, int lipsOffset = 3)
     {
-        _jawOffset = Math.Max(0, jawOffset);
-        _teethOffset = Math.Max(0, teethOffset);
-        _lipsOffset = Math.Max(0, lipsOffset);
-        _jawSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, jawLength));
-        _teethSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, teethLength));
-        _lipsSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, lipsLength));
-        _jawWindow = new PooledRingBuffer<double>(_jawOffset + 1);
-        _teethWindow = new PooledRingBuffer<double>(_teethOffset + 1);
-        _lipsWindow = new PooledRingBuffer<double>(_lipsOffset + 1);
-        _input = new StreamingInputResolver(InputName.MedianPrice, null);
+        _jaw = new(maType, jawLength, jawOffset); _teeth = new(maType, teethLength, teethOffset); _lips = new(maType, lipsLength, lipsOffset);
     }
-
     public IndicatorName Name => IndicatorName.AlligatorIndex;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _jawSmoother.Reset();
-        _teethSmoother.Reset();
-        _lipsSmoother.Reset();
-        _jawWindow.Clear();
-        _teethWindow.Clear();
-        _lipsWindow.Clear();
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
+    public void Reset() { _jaw.Reset(); _teeth.Reset(); _lips.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var jaw = _jawSmoother.Next(value, isFinal);
-        var teeth = _teethSmoother.Next(value, isFinal);
-        var lips = _lipsSmoother.Next(value, isFinal);
-
-        // Each line is its own value an offset of bars back, counting this bar, so it is read before this bar
-        // is committed; reading it after made a preview a bar late once the window was full.
-        var displacedJaw = EhlersStreamingWindow.GetOffsetValue(_jawWindow, jaw, _jawOffset);
-        var displacedTeeth = EhlersStreamingWindow.GetOffsetValue(_teethWindow, teeth, _teethOffset);
-        var displacedLips = EhlersStreamingWindow.GetOffsetValue(_lipsWindow, lips, _lipsOffset);
-
-        if (isFinal)
-        {
-            _jawWindow.TryAdd(jaw, out _);
-            _teethWindow.TryAdd(teeth, out _);
-            _lipsWindow.TryAdd(lips, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Lips", displacedLips },
-                { "Teeth", displacedTeeth },
-                { "Jaws", displacedJaw }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(displacedLips, outputs);
+        StreamingInputValidation.Validate(bar);
+        var price = _input.GetValue(bar); var jaw = _jaw.Next(price, isFinal); var teeth = _teeth.Next(price, isFinal); var lips = _lips.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(lips, includeOutputs ? new Dictionary<string, double> { { "Jaws", jaw }, { "Teeth", teeth }, { "Lips", lips } } : null);
     }
-
-    public void Dispose()
-    {
-        _jawSmoother.Dispose();
-        _teethSmoother.Dispose();
-        _lipsSmoother.Dispose();
-        _jawWindow.Dispose();
-        _teethWindow.Dispose();
-        _lipsWindow.Dispose();
-    }
+    public void Dispose() { _jaw.Dispose(); _teeth.Dispose(); _lips.Dispose(); }
 }
 
 [PrimaryOutput("Amom")]
