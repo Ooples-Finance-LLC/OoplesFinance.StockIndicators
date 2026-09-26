@@ -297,16 +297,8 @@ internal static partial class IndicatorCompute
             CmfSpecOptions cmf => ComputeCmfFast(data, context, cmf.Length),
             ForceIndexSpecOptions fi => ComputeForceIndexFast(data, context, fi.Length, fi.MaType),
             VrocSpecOptions vroc => ComputeVrocFast(data, context, vroc.Length),
-            NviSpecOptions nvi => spec.OutputKey switch
-            {
-                "NviSignal" => SmoothPublished(data, context, ComputeNviFast(data, context, nvi.Length), nvi.Length, nvi.MaType),
-                _ => ComputeNviFast(data, context, nvi.Length)
-            },
-            PviSpecOptions pvi => spec.OutputKey switch
-            {
-                "PviSignal" => SmoothPublished(data, context, ComputePviFast(data, context, pvi.Length), pvi.Length, pvi.MaType),
-                _ => ComputePviFast(data, context, pvi.Length)
-            },
+            NviSpecOptions nvi => ComputeNviFast(data, context, nvi.Length, nvi.MaType, spec.OutputKey),
+            PviSpecOptions pvi => ComputePviFast(data, context, pvi.Length, pvi.MaType, spec.OutputKey),
             PvtSpecOptions pvt => spec.OutputKey switch
             {
                 "Signal" => ComputePriceVolumeTrendSignalFast(data, context, pvt.Length, pvt.MaType),
@@ -1640,11 +1632,7 @@ internal static partial class IndicatorCompute
             KnowSureThingSpecOptions kst2 => ComputeKnowSureThingFast(data, context, kst2.RocLength1, kst2.RocLength2,
                 kst2.RocLength3, kst2.RocLength4, kst2.Length1, kst2.Length2, kst2.Length3, kst2.Length4, kst2.MaType,
                 signalLength: kst2.SignalLength, outputKey: spec.OutputKey),
-            NegativeVolumeIndexSpecOptions nvi2 => spec.OutputKey switch
-            {
-                "NviSignal" => SmoothPublished(data, context, ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue), nvi2.Length, nvi2.MaType),
-                _ => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue)
-            },
+            NegativeVolumeIndexSpecOptions nvi2 => ComputeNegativeVolumeIndexFast(data, context, nvi2.InitialValue, nvi2.Length, nvi2.MaType, spec.OutputKey),
             OnBalanceVolumeSpecOptions obv2 => spec.OutputKey switch
             {
                 "ObvSignal" => SmoothFinitePublished(data, context, ComputeOnBalanceVolumeFast(data, context), obv2.Length, obv2.MaType),
@@ -1667,11 +1655,7 @@ internal static partial class IndicatorCompute
                     pvo2.SignalLength, pvo2.MaType),
                 _ => ComputePercentageVolumeOscillatorFast(data, context, pvo2.FastLength, pvo2.SlowLength, pvo2.MaType)
             },
-            PositiveVolumeIndexSpecOptions pvi2 => spec.OutputKey switch
-            {
-                "PviSignal" => SmoothPublished(data, context, ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue), pvi2.Length, pvi2.MaType),
-                _ => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue)
-            },
+            PositiveVolumeIndexSpecOptions pvi2 => ComputePositiveVolumeIndexFast(data, context, pvi2.InitialValue, pvi2.Length, pvi2.MaType, spec.OutputKey),
             PrettyGoodOscillatorSpecOptions pgo2 => ComputePrettyGoodOscillatorFast(data, context, pgo2.Length, pgo2.MaType),
             PriceMomentumOscillatorSpecOptions pmo2 => ComputePriceMomentumOscillatorFast(data, context, pmo2.Length1, pmo2.Length2,
                 pmo2.MaType, pmo2.SignalLength, spec.OutputKey),
@@ -3555,41 +3539,17 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNviFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeNviFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        _ = length;
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.NegativeVolumeIndex(close, volume, buffer.WritableSpan);
-        return buffer;
+        return ComputeVolumeIndexFast(data, context, false, 1000, length, maType, outputKey);
     }
 
     /// <summary>
     /// Computes Positive Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePviFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputePviFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        _ = length;
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.PositiveVolumeIndex(close, volume, buffer.WritableSpan);
-        return buffer;
+        return ComputeVolumeIndexFast(data, context, true, 1000, length, maType, outputKey);
     }
 
     /// <summary>
@@ -20481,31 +20441,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Negative Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000)
+    internal static ComputeBuffer ComputeVolumeIndexFast(StockData data, ComputeContext context, bool positive, int initialValue, int length, MovingAvgType maType, string? outputKey)
     {
-        // CalculateNegativeVolumeIndex seeds the running index at initialValue and compounds the period's
-        // rate of change onto it only on bars where volume fell. VolumeCore.NegativeVolumeIndex hard-coded
-        // the seed at 1000 and read the close instead of the chained series, so an indicator built with any
-        // other starting value diverged from the first bar. The moving average of this series is the
-        // separate "NviSignal" output, so neither length nor maType belongs on the primary path.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var prevClose = i >= 1 ? input[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
-            var prevNvi = i >= 1 ? output[i - 1] : initialValue;
-            var pctChg = CalculationsHelper.CalculatePercentChange(input[i], prevClose);
-
-            output[i] = volumes[i] >= prevVolume ? prevNvi : prevNvi + (prevNvi * pctChg / 100);
+            using var line = context.Rent(input.Count); var cumulative = new VolumeIndexTotal(positive, initialValue);
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(input[i], data.Volumes[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, means.WritableSpan);
         }
+        using var window = new VolumeIndexWindow(maType, length, positive, initialValue); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+            output.WritableSpan[i] = outputKey == (positive ? "PviSignal" : "NviSignal") ? value.Signal : value.Line;
+        }
+        return output;
+    }
 
-        return buffer;
+    internal static ComputeBuffer ComputeNegativeVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000, int length = 255, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
+    {
+        return ComputeVolumeIndexFast(data, context, false, initialValue, length, maType, outputKey);
     }
 
     /// <summary>
@@ -20582,29 +20540,9 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Positive Volume Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000)
+    internal static ComputeBuffer ComputePositiveVolumeIndexFast(StockData data, ComputeContext context, int initialValue = 1000, int length = 255, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculatePositiveVolumeIndex compounds the percent change of the chained series on every bar whose
-        // volume rose, and holds its previous level otherwise. Its length and maType feed only the unpublished
-        // signal average. The arm this replaced took the raw close from the ticker list and ignored chaining.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevClose = i >= 1 ? input[i - 1] : 0;
-            var prevVolume = i >= 1 ? volumes[i - 1] : 0;
-            var prevPvi = i >= 1 ? output[i - 1] : initialValue;
-            var pctChg = CalculationsHelper.CalculatePercentChange(input[i], prevClose);
-
-            output[i] = volumes[i] <= prevVolume ? prevPvi : prevPvi + (prevPvi * pctChg / 100);
-        }
-
-        return buffer;
+        return ComputeVolumeIndexFast(data, context, true, initialValue, length, maType, outputKey);
     }
 
     /// <summary>

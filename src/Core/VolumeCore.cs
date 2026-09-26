@@ -121,29 +121,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void NegativeVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 1000;
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (volume[i] < volume[i - 1])
-            {
-                var roc = (close[i] - close[i - 1]) / close[i - 1];
-                output[i] = output[i - 1] + (output[i - 1] * roc);
-            }
-            else
-            {
-                output[i] = output[i - 1];
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new VolumeIndexTotal(false);
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -151,29 +131,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void PositiveVolumeIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 1000;
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (volume[i] > volume[i - 1])
-            {
-                var roc = (close[i] - close[i - 1]) / close[i - 1];
-                output[i] = output[i - 1] + (output[i - 1] * roc);
-            }
-            else
-            {
-                output[i] = output[i - 1];
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var total = new VolumeIndexTotal(true);
+        for (var i = 0; i < close.Length; i++) output[i] = total.Next(close[i], volume[i], true).Publish();
     }
 
     /// <summary>

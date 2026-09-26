@@ -544,8 +544,10 @@ internal static partial class StatefulIndicatorFactory
             PriceVolumeTrendSpecOptions pvtNamed => new PriceVolumeTrendState(pvtNamed.MaType, pvtNamed.Length),
             VolumePriceTrendSpecOptions vpt => new PriceVolumeTrendState(vpt.MaType, vpt.Length),
             ModifiedPriceVolumeTrendSpecOptions mpvt => new ModifiedPriceVolumeTrendState(mpvt.MaType, mpvt.Length),
-            NviSpecOptions nvi => new NegativeVolumeIndexState(maType: nvi.MaType),
-            PviSpecOptions pvi => new PositiveVolumeIndexState(maType: pvi.MaType),
+            NviSpecOptions nvi => new NegativeVolumeIndexState(nvi.MaType, nvi.Length),
+            NegativeVolumeIndexSpecOptions nviNamed => new NegativeVolumeIndexState(nviNamed.MaType, nviNamed.Length, nviNamed.InitialValue),
+            PviSpecOptions pvi => new PositiveVolumeIndexState(pvi.MaType, pvi.Length),
+            PositiveVolumeIndexSpecOptions pviNamed => new PositiveVolumeIndexState(pviNamed.MaType, pviNamed.Length, pviNamed.InitialValue),
             ChaikinOscillatorSpecOptions co => new ChaikinOscillatorState(maType: co.MaType, fastLength: co.FastLength, slowLength: co.SlowLength),
             // The state has no averaging length of its own; its divisor is the batch indicator's, not the length.
             EaseOfMovementSpecOptions ease => new EaseOfMovementState(ease.Divisor),

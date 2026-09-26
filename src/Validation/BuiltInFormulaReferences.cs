@@ -17,6 +17,17 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.NegativeVolumeIndex or IndicatorName.PositiveVolumeIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var primary = builtIn.BatchName == IndicatorName.PositiveVolumeIndex ? "Pvi" : "Nvi";
+            var volumeIndexKeys = builtIn.BatchOutputKey is { } volumeIndexKey ? new[] { volumeIndexKey } : new[] { primary, primary + "Signal" };
+            for (var slot = 0; slot < volumeIndexKeys.Length; slot++)
+            {
+                var key = volumeIndexKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolumeIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TradeVolumeIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             var tradeVolumeKeys = new[] { "Tvi", "Signal" };
