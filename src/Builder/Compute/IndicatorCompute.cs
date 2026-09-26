@@ -17939,26 +17939,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersSimpleDecyclerFast(StockData data, ComputeContext context, int length = 125,
         double bandPercent = 0)
     {
-        // CalculateEhlersSimpleDecycler publishes the decycler as its MiddleBand and scales it by a
-        // percentage either side for the other two. Only the middle one was being produced, so all three
-        // keys answered with it. The bands are multiples rather than offsets, so a negative decycler puts
-        // the upper band below the middle - which is why the pin holds the ratio and not an ordering.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        var output = buffer.WritableSpan;
-        OscillatorCore.EhlersSimpleDecycler(inputSpan, output, length);
-
-        if (bandPercent != 0)
-        {
-            var scale = 1 + (bandPercent / 100);
-            for (var i = 0; i < output.Length; i++)
-            {
-                output[i] *= scale;
-            }
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new SimpleDecyclerWindow(length, bandPercent, 0); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Upper;
+        return result;
     }
 
     /// <summary>

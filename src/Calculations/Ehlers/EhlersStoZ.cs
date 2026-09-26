@@ -15,45 +15,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSimpleDecycler(this StockData stockData, int length = 125, double upperPct = 0.5, double lowerPct = 0.5)
     {
-        length = Math.Max(length, 1);
-        List<double> decyclerList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var hpList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersHighPassFilterV1(data, length, 1));
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new SimpleDecyclerWindow(length, upperPct, lowerPct);
+        List<double> middle = new(stockData.Count), upper = new(stockData.Count), lower = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hp = hpList[i];
-
-            var prevDecycler = GetLastOrDefault(decyclerList);
-            var decycler = currentValue - hp;
-            decyclerList.Add(decycler);
-
-            var upperBand = (1 + (upperPct / 100)) * decycler;
-            upperBandList.Add(upperBand);
-
-            var lowerBand = (1 - (lowerPct / 100)) * decycler;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetCompareSignal(currentValue - decycler, prevValue - prevDecycler);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); middle.Add(value.Middle); upper.Add(value.Upper); lower.Add(value.Lower);
+            signals?.Add(GetCompareSignal(input[i] - value.Middle, i == 0 ? 0 : input[i - 1] - middle[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", decyclerList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(decyclerList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(middle);
         stockData.IndicatorName = IndicatorName.EhlersSimpleDecycler;
-
         return stockData;
     }
 

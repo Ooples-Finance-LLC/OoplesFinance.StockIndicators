@@ -2059,51 +2059,17 @@ public sealed class EhlersSimpleCycleIndicatorState : IStreamingIndicatorState, 
 [PrimaryOutput("MiddleBand")]
 public sealed class EhlersSimpleDecyclerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _upperPct;
-    private readonly double _lowerPct;
-    private readonly StreamingInputResolver _input;
-    private readonly HighPassFilterV1Engine _hp;
-
-    public EhlersSimpleDecyclerState(int length = 125, double upperPct = 0.5, double lowerPct = 0.5)
-    {
-        _upperPct = upperPct;
-        _lowerPct = lowerPct;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _hp = new HighPassFilterV1Engine(Math.Max(1, length), 1);
-    }
-
+    private readonly SimpleDecyclerWindow _window;
+    public EhlersSimpleDecyclerState(int length = 125, double upperPct = .5, double lowerPct = .5) => _window = new(length, upperPct, lowerPct);
     public IndicatorName Name => IndicatorName.EhlersSimpleDecycler;
-
-    public void Reset()
-    {
-        _hp.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highPass = _hp.Next(value, isFinal);
-        var decycler = value - highPass;
-        var upperBand = (1 + (_upperPct / 100)) * decycler;
-        var lowerBand = (1 - (_lowerPct / 100)) * decycler;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upperBand },
-                { "MiddleBand", decycler },
-                { "LowerBand", lowerBand }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(decycler, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", value.Upper }, { "MiddleBand", value.Middle }, { "LowerBand", value.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Esdi")]

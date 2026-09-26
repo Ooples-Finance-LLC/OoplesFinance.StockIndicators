@@ -15923,5 +15923,105 @@
     "before": "new HighPassWindow(length, mult)",
     "after": "new HighPassWindow(length, 1)",
     "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-publishes-high-pass-too-soon",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "_highPass.NextValue(price, commit)",
+    "after": "new RocBankValue(_highPass.Next(price, commit))",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-adds-high-pass",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "highPass.AddTo(ref total, -1)",
+    "after": "highPass.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-wrong-upper-percent",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "1 + upperPercent / 100",
+    "after": "1 + upperPercent",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-wrong-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "1 - lowerPercent / 100",
+    "after": "1 + lowerPercent / 100",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-swaps-upper-lower",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "middle.Multiply(_upper).Publish(), middle.Multiply(_lower).Publish()",
+    "after": "middle.Multiply(_lower).Publish(), middle.Multiply(_upper).Publish()",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "_highPass.NextValue(price, commit)",
+    "after": "_highPass.NextValue(price, true)",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "_highPass.Reset()",
+    "after": "_highPass.ToString()",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-publishes-middle-too-soon",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleDecyclerWindow.cs",
+    "before": "var middle = RocBankValue.Round(total);",
+    "after": "var middle = new RocBankValue(total.Mean(1));",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSimpleDecyclerState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleDecyclerFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-ignores-band-percent",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleDecyclerFast(",
+    "before": "new SimpleDecyclerWindow(length, bandPercent, 0)",
+    "after": "new SimpleDecyclerWindow(length, 0, 0)",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "simple-decycler-core-publishes-upper",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersSimpleDecycler(",
+    "before": "window.Next(close[i], true).Middle",
+    "after": "window.Next(close[i], true).Upper",
+    "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]
