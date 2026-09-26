@@ -301,126 +301,35 @@ public sealed class DemarkPivotPointsState : IStreamingIndicatorState
 [PrimaryOutput("Dpr")]
 public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _bpSum;
-    private readonly RollingWindowSum _spSum;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public DemarkPressureRatioV1State(int length = 13)
-    {
-        var resolved = Math.Max(1, length);
-        _bpSum = new RollingWindowSum(resolved);
-        _spSum = new RollingWindowSum(resolved);
-    }
-
+    private readonly DemarkPressureWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public DemarkPressureRatioV1State(int length = 13) => _window = new DemarkPressureWindow(length, false);
     public IndicatorName Name => IndicatorName.DemarkPressureRatioV1;
-
-    public void Reset()
-    {
-        _bpSum.Reset();
-        _spSum.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var gapup = prevClose != 0 ? (bar.Open - prevClose) / prevClose : 0;
-        var gapdown = bar.Open != 0 ? (prevClose - bar.Open) / bar.Open : 0;
-
-        var bp = gapup > 0.15
-            ? (bar.High - prevClose + bar.Close - bar.Low) * bar.Volume
-            : bar.Close > bar.Open ? (bar.Close - bar.Open) * bar.Volume : 0;
-
-        var sp = gapdown > 0.15
-            ? -(prevClose - bar.Low + bar.High - bar.Close) * bar.Volume
-            : bar.Close < bar.Open ? (bar.Close - bar.Open) * bar.Volume : 0;
-
-        var bpSum = isFinal ? _bpSum.Add(bp, out _) : _bpSum.Preview(bp, out _);
-        var spSum = isFinal ? _spSum.Add(sp, out _) : _spSum.Preview(sp, out _);
-        var pressureRatio = bpSum - spSum != 0
-            ? MathHelper.MinOrMax(100 * bpSum / (bpSum - spSum), 100, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Dpr", pressureRatio }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pressureRatio, outputs);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, _input.GetValue(bar), bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Dpr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _bpSum.Dispose();
-        _spSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dpr")]
 public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _bpSum;
-    private readonly RollingWindowSum _spSum;
-
-    public DemarkPressureRatioV2State(int length = 10)
-    {
-        var resolved = Math.Max(1, length);
-        _bpSum = new RollingWindowSum(resolved);
-        _spSum = new RollingWindowSum(resolved);
-    }
-
+    private readonly DemarkPressureWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public DemarkPressureRatioV2State(int length = 10) => _window = new DemarkPressureWindow(length, true);
     public IndicatorName Name => IndicatorName.DemarkPressureRatioV2;
-
-    public void Reset()
-    {
-        _bpSum.Reset();
-        _spSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var delta = bar.Close - bar.Open;
-        var trueRange = bar.High - bar.Low;
-        var ratio = trueRange != 0 ? delta / trueRange : 0;
-        var buyingPressure = delta > 0 ? ratio * bar.Volume : 0;
-        var sellingPressure = delta < 0 ? ratio * bar.Volume : 0;
-
-        var bpSum = isFinal ? _bpSum.Add(buyingPressure, out _) : _bpSum.Preview(buyingPressure, out _);
-        var spSum = isFinal ? _spSum.Add(sellingPressure, out _) : _spSum.Preview(sellingPressure, out _);
-        var denom = bpSum + Math.Abs(spSum);
-        var pressureRatio = denom != 0 ? MathHelper.MinOrMax(100 * bpSum / denom, 100, 0) : 50;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Dpr", pressureRatio }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pressureRatio, outputs);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, _input.GetValue(bar), bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Dpr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _bpSum.Dispose();
-        _spSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Drei")]

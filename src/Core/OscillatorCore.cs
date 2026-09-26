@@ -7710,55 +7710,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkPressureRatioV1(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-        var spArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            var sp = spArray.AsSpan(0, close.Length);
-
-            // Calculate buying and selling pressure
-            for (var i = 0; i < close.Length; i++)
-            {
-                var prevClose = i >= 1 ? close[i - 1] : 0;
-                var gapup = prevClose != 0 ? (open[i] - prevClose) / prevClose : 0;
-                var gapdown = open[i] != 0 ? (prevClose - open[i]) / open[i] : 0;
-
-                bp[i] = gapup > 0.15 ? (high[i] - prevClose + close[i] - low[i]) * volume[i] :
-                    close[i] > open[i] ? (close[i] - open[i]) * volume[i] : 0;
-
-                sp[i] = gapdown > 0.15 ? -(prevClose - low[i] + high[i] - close[i]) * volume[i] :
-                    close[i] < open[i] ? (close[i] - open[i]) * volume[i] : 0;
-            }
-
-            // Calculate rolling sums and pressure ratio
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double bpSum = 0, spSum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    bpSum += bp[j];
-                    spSum += sp[j];
-                }
-
-                output[i] = bpSum - spSum != 0 ? Math.Min(Math.Max(100 * bpSum / (bpSum - spSum), 0), 100) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-            pool.Return(spArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || open.Length != close.Length || volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var pressure = new DemarkPressureWindow(length, false);
+        for (var i = 0; i < close.Length; i++) output[i] = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>
@@ -7766,53 +7721,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkPressureRatioV2(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-        var spArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            var sp = spArray.AsSpan(0, close.Length);
-
-            // Calculate buying and selling pressure
-            for (var i = 0; i < close.Length; i++)
-            {
-                var delta = close[i] - open[i];
-                var trueRange = high[i] - low[i];
-                var ratio = trueRange != 0 ? delta / trueRange : 0;
-
-                bp[i] = delta > 0 ? ratio * volume[i] : 0;
-                sp[i] = delta < 0 ? ratio * volume[i] : 0;
-            }
-
-            // Calculate rolling sums and pressure ratio. CalculateDemarkPressureRatioV2 totals its two
-            // pressures with RollingSum.Sum(length), which adds up however many bars have arrived, so the
-            // ratio is measured from the first bar and only falls back to the neutral fifty when there is
-            // no pressure on either side.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double bpSum = 0, spSum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    bpSum += bp[j];
-                    spSum += sp[j];
-                }
-
-                var denom = bpSum + Math.Abs(spSum);
-                output[i] = denom != 0 ? Math.Min(Math.Max(100 * bpSum / denom, 0), 100) : 50;
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-            pool.Return(spArray);
-        }
+        if (high.Length != close.Length || low.Length != close.Length || open.Length != close.Length || volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var pressure = new DemarkPressureWindow(length, true);
+        for (var i = 0; i < close.Length; i++) output[i] = pressure.Next(open[i], high[i], low[i], close[i], volume[i], true);
     }
 
     /// <summary>
