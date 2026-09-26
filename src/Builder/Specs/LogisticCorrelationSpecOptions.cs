@@ -6,6 +6,7 @@ public sealed class LogisticCorrelationSpecOptions : IIndicatorSpecOptions
     public LogisticCorrelationSpecOptions(int length = 100, double k = 10)
     {
         Length = Math.Max(1, length);
+        if (double.IsNaN(k) || double.IsInfinity(k)) throw new ArgumentOutOfRangeException(nameof(k));
         K = k;
     }
     public int Length { get; }

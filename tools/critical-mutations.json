@@ -6837,5 +6837,104 @@
     "before": "< 9 - 1e-10",
     "after": "< 90 - 1e-10",
     "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "rank-logistic-drops-startup-pairs",
+    "module": "numerical",
+    "file": "src/Helpers/KendallCorrelationWindow.cs",
+    "before": "var padding = _prices.Capacity - count;",
+    "after": "var padding = 0;",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-counts-ties",
+    "module": "numerical",
+    "file": "src/Helpers/KendallCorrelationWindow.cs",
+    "before": "p.CompareTo(otherPrice) * f.CompareTo(otherFit)",
+    "after": "(p == otherPrice ? 1 : p.CompareTo(otherPrice)) * (f == otherFit ? 1 : f.CompareTo(otherFit))",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-commits-fit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KendallCorrelationWindow.cs",
+    "before": "_fit.Next(price, commit)",
+    "after": "_fit.Next(price, true)",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-retains-fit-on-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KendallCorrelationWindow.cs",
+    "before": "_fit.Reset(); _prices.Clear();",
+    "after": "_prices.Clear();",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-loses-overflow-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "? 2 * ExactVarianceWindow.Units",
+    "after": "? ExactVarianceWindow.Units",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-reverses-correlation",
+    "module": "numerical",
+    "file": "src/Helpers/LogisticCorrelationWindow.cs",
+    "before": "-_gain * correlation",
+    "after": "_gain * correlation",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-loses-rolling-index-shift",
+    "module": "numerical",
+    "file": "src/Helpers/LogisticCorrelationWindow.cs",
+    "before": "_weighted - _sum + expired + (count - 1) * current",
+    "after": "_weighted + expired + (count - 1) * current",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-wrong-time-variance",
+    "module": "numerical",
+    "file": "src/Helpers/LogisticCorrelationWindow.cs",
+    "before": "(n * n - 1) * spread",
+    "after": "(n * n) * spread",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-loses-exponent-floor",
+    "module": "numerical",
+    "file": "src/Helpers/LogisticCorrelationWindow.cs",
+    "before": "Math.Min(100, -_gain * correlation)",
+    "after": "-_gain * correlation",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute"
+  },
+  {
+    "id": "rank-logistic-kendall-raw-wrong-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "before": "new KendallCorrelationWindow(length)",
+    "after": "new KendallCorrelationWindow(20)",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute",
+    "scope": "private static ComputeBuffer ComputeKendallCorrelation("
+  },
+  {
+    "id": "rank-logistic-logistic-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.WideFitsTiesTinyCorrelationsAndSignedGainsMatchEveryRoute",
+    "scope": "private static ComputeBuffer ComputeLogisticCorrelation("
+  },
+  {
+    "id": "rank-logistic-accepts-invalid-gain",
+    "module": "numerical",
+    "file": "src/Builder/Specs/LogisticCorrelationSpecOptions.cs",
+    "before": "if (double.IsNaN(k) || double.IsInfinity(k))",
+    "after": "if (k == 123456789)",
+    "filter": "FullyQualifiedName~RankLogisticNumericalTests.NonfiniteGainsAreRejectedBeforeCalculation",
+    "scope": "public LogisticCorrelationSpecOptions("
   }
 ]

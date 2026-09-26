@@ -2596,55 +2596,21 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateKendallRankCorrelationCoefficient(this StockData stockData, int length = 20)
     {
-        List<double> numeratorList = new(stockData.Count);
-        List<double> pearsonCorrelationList = new(stockData.Count);
-        List<double> kendallCorrelationList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var corrWindow = new RollingCorrelation();
-
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new KendallCorrelationWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevKendall1 = i >= 1 ? kendallCorrelationList[i - 1] : 0;
-            var prevKendall2 = i >= 2 ? kendallCorrelationList[i - 2] : 0;
-
-            var currentValue = inputList[i];
-            var linReg = linRegList[i];
-            corrWindow.Add(linReg, currentValue);
-            var pearsonCorrelation = corrWindow.R(length);
-            pearsonCorrelation = IsValueNullOrInfinity(pearsonCorrelation) ? 0 : pearsonCorrelation;
-            pearsonCorrelationList.Add((double)pearsonCorrelation);
-
-            var totalPairs = length * (double)(length - 1) / 2;
-            double numerator = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                for (var k = 0; k <= j; k++)
-                {
-                    var prevValueJ = i >= j ? inputList[i - j] : 0;
-                    var prevValueK = i >= k ? inputList[i - k] : 0;
-                    var prevLinRegJ = i >= j ? linRegList[i - j] : 0;
-                    var prevLinRegK = i >= k ? linRegList[i - k] : 0;
-                    numerator += Math.Sign(prevLinRegJ - prevLinRegK) * Math.Sign(prevValueJ - prevValueK);
-                }
-            }
-
-            var kendallCorrelation = totalPairs == 0 ? 0 : numerator / totalPairs;
-            kendallCorrelationList.Add(kendallCorrelation);
-
-            var signal = GetCompareSignal(kendallCorrelation - prevKendall1, prevKendall1 - prevKendall2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            var beforePrevious = i < 2 ? 0 : output[i - 2];
+            output.Add(value);
+            signals?.Add(GetCompareSignal(value - previous, previous - beforePrevious));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Krcc", kendallCorrelationList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kendallCorrelationList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Krcc", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.KendallRankCorrelationCoefficient;
-
         return stockData;
     }
 

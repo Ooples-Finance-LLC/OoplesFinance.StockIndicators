@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.KendallRankCorrelationCoefficient or IndicatorName.LogisticCorrelation)
+        {
+            var logistic = builtIn.BatchName == IndicatorName.LogisticCorrelation;
+            yield return IndicatorValidationRule.Reference(0, bars => RankLogisticOutputs(bars, builtIn)[logistic ? "LogCorr" : "Krcc"],
+                logistic ? LogisticCorrelationBudget : IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersCorrelationTrendIndicator or IndicatorName.EhlersCorrelationCycleIndicator
             or IndicatorName.EhlersCorrelationAngleIndicator or IndicatorName.EhlersMarketStateIndicator)
         {

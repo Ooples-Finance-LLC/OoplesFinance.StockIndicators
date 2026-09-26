@@ -660,42 +660,21 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateLogisticCorrelation(this StockData stockData, int length = 100, double k = 10)
     {
-        List<double> logList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var corrWindow = new RollingCorrelation();
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new LogisticCorrelationWindow(length, k);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            corrWindow.Add(i, currentValue);
-
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add((double)corr);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            var beforePrevious = i < 2 ? 0 : output[i - 2];
+            output.Add(value);
+            signals?.Add(GetCompareSignal(value - previous, previous - beforePrevious));
         }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var corr = corrList[i];
-            var prevLog1 = i >= 1 ? logList[i - 1] : 0;
-            var prevLog2 = i >= 2 ? logList[i - 2] : 0;
-
-            var log = 1 / (1 + Exp(k * -corr));
-            logList.Add(log);
-
-            var signal = GetCompareSignal(log - prevLog1, prevLog1 - prevLog2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "LogCorr", logList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(logList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "LogCorr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.LogisticCorrelation;
-
         return stockData;
     }
 
