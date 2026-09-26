@@ -20443,5 +20443,135 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~DEnvelopeNumericalTests.ZeroSeededCorrectionAndDeviationClampRetainExtendedState|FullyQualifiedName~DEnvelopeNumericalTests.SelectedClosesDriveTheCorrectionAndItsDeviation|FullyQualifiedName~DEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class DEnvelopeState :"
+  },
+  {
+    "id": "smart-envelope-period",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "new BigInteger(Math.Max(1, length)) << 1074",
+    "after": "new BigInteger(Math.Max(1, length)) << 1073",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-first-price-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "_hasPrevious ? _upper : current",
+    "after": "_hasPrevious ? _upper : BigInteger.Zero",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-upper-distance",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "BigInteger.Min(BigInteger.Abs(current - previousUpper), change)",
+    "after": "BigInteger.Max(BigInteger.Abs(current - previousUpper), change)",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-lower-distance",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "BigInteger.Min(BigInteger.Abs(current - previousLower), change)",
+    "after": "BigInteger.Max(BigInteger.Abs(current - previousLower), change)",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-upper-clip",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "BigInteger.Max(current, previousUpper)",
+    "after": "BigInteger.Min(current, previousUpper)",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-lower-clip",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "BigInteger.Min(current, previousLower)",
+    "after": "BigInteger.Max(current, previousLower)",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-upper-feedback-source",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "upperDistance * _factor * _upperDirection",
+    "after": "upperDistance * _factor * _lowerDirection",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-upper-feedback-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "lower < previousLower ? -1 : 1",
+    "after": "lower <= previousLower ? -1 : 1",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-lower-feedback-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "upper > previousUpper ? -1 : 1",
+    "after": "upper >= previousUpper ? -1 : 1",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "BigInteger.Abs(current - _previous)",
+    "after": "BigInteger.Abs(current - _previous * 0)",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "if (commit) { _upper = upper;",
+    "after": "{ _upper = upper;",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-early-midpoint-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "ExactMeanAccumulator.UnitRatio(upper + lower, new BigInteger(2))",
+    "after": "(ExactMeanAccumulator.UnitRatio(upper, BigInteger.One) + ExactMeanAccumulator.UnitRatio(lower, BigInteger.One)) / 2",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-early-boundary-state",
+    "module": "numerical",
+    "file": "src/Helpers/SmartEnvelopeWindow.cs",
+    "before": "_upper = upper;",
+    "after": "_upper = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(upper, BigInteger.One));",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "smart-envelope-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeSmartEnvelopeFast("
+  },
+  {
+    "id": "smart-envelope-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class SmartEnvelopeState :"
   }
 ]

@@ -2029,10 +2029,6 @@ OoplesFinance.StockIndicators.Indicators.SimplePriceZone/default
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/longer-periods
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SimplePriceZone/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SmartEnvelope/default
-OoplesFinance.StockIndicators.Indicators.SmartEnvelope/longer-periods
-OoplesFinance.StockIndicators.Indicators.SmartEnvelope/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SmartEnvelope/shorter-periods
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/default
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/longer-length
 OoplesFinance.StockIndicators.Indicators.SmoothedWilliamsR/longer-periods

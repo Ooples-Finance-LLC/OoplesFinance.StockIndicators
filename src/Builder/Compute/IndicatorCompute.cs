@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            SmartEnvelopeSpecOptions smart => ComputeSmartEnvelopeFast(data, context, smart.Length, smart.Factor, spec.OutputKey),
             DEnvelopeSpecOptions envelope => ComputeDEnvelopeFast(data, context, envelope.Length, envelope.DevFactor, spec.OutputKey),
             GChannelsSpecOptions channel => ComputeGChannelsFast(data, context, channel.Length, spec.OutputKey),
             RateOfChangeBandsSpecOptions rocb => ComputeRateOfChangeBandsFast(data, context, rocb.Length, rocb.SmoothLength, rocb.MaType, spec.OutputKey),
@@ -22000,6 +22001,14 @@ internal static partial class IndicatorCompute
         }
 
         return buffer;
+    }
+
+    /// <summary>Computes the selected Smart Envelope boundary or midpoint.</summary>
+    internal static ComputeBuffer ComputeSmartEnvelopeFast(StockData data, ComputeContext context, int length = 14, double factor = 1, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); var window = new SmartEnvelopeWindow(length, factor);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        return result;
     }
 
     /// <summary>Computes the selected de-lagged envelope boundary or midpoint.</summary>

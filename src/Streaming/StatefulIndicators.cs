@@ -2296,72 +2296,14 @@ public sealed class TimeSeriesForecastState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("MiddleBand")]
 public sealed class SmartEnvelopeState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly double _factor;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevA;
-    private double _prevB;
-    private double _prevASignal;
-    private double _prevBSignal;
-    private bool _hasPrev;
-
-    public SmartEnvelopeState(int length = 14, double factor = 1)
-    {
-        _length = Math.Max(1, length);
-        _factor = factor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SmartEnvelopeWindow _window;
+    public SmartEnvelopeState(int length = 14, double factor = 1) { _window = new(length, factor); }
     public IndicatorName Name => IndicatorName.SmartEnvelope;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevA = 0;
-        _prevB = 0;
-        _prevASignal = 0;
-        _prevBSignal = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevA = _hasPrev ? _prevA : value;
-        var prevB = _hasPrev ? _prevB : value;
-        var prevASignal = _hasPrev ? _prevASignal : 0;
-        var prevBSignal = _hasPrev ? _prevBSignal : 0;
-        var diff = _hasPrev ? Math.Abs(value - prevValue) : 0;
-        var a = Math.Max(value, prevA) - (Math.Min(Math.Abs(value - prevA), diff) / _length * prevASignal);
-        var b = Math.Min(value, prevB) + (Math.Min(Math.Abs(value - prevB), diff) / _length * prevBSignal);
-        var aSignal = b < prevB ? -_factor : _factor;
-        var bSignal = a > prevA ? -_factor : _factor;
-        var avg = (a + b) / 2;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevA = a;
-            _prevB = b;
-            _prevASignal = aSignal;
-            _prevBSignal = bSignal;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", avg },
-                { "LowerBand", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(avg, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
 }
 

@@ -885,54 +885,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSmartEnvelope(this StockData stockData, int length = 14, double factor = 1)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> aSignalList = new(stockData.Count);
-        List<double> bSignalList = new(stockData.Count);
-        List<double> avgList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new SmartEnvelopeWindow(length, factor);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var prevASignal = GetLastOrDefault(aSignalList);
-            var prevBSignal = GetLastOrDefault(bSignalList);
-            var diff = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-
-            var a = Math.Max(currentValue, prevA) - (Math.Min(Math.Abs(currentValue - prevA), diff) / length * prevASignal);
-            aList.Add(a);
-
-            var b = Math.Min(currentValue, prevB) + (Math.Min(Math.Abs(currentValue - prevB), diff) / length * prevBSignal);
-            bList.Add(b);
-
-            var aSignal = b < prevB ? -factor : factor;
-            aSignalList.Add(aSignal);
-
-            var bSignal = a > prevA ? -factor : factor;
-            bSignalList.Add(bSignal);
-
-            var prevAvg = GetLastOrDefault(avgList);
-            var avg = (a + b) / 2;
-            avgList.Add(avg);
-
-            var signal = GetCompareSignal(currentValue - avg, prevValue - prevAvg);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aList },
-            { "MiddleBand", avgList },
-            { "LowerBand", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.SmartEnvelope;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.SmartEnvelope; return stockData;
     }
 
 

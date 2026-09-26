@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.SmartEnvelope)
+        {
+            var smartKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < smartKeys.Length; slot++) { var key = smartKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SmartEnvelopeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DEnvelope)
         {
             var envelopeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
