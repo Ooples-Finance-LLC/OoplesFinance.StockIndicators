@@ -7703,27 +7703,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeAlphaDecreasingEmaFast(StockData data, ComputeContext context)
     {
-        // CalculateAlphaDecreasingExponentialMovingAverage takes no length at all: its smoothing constant is
-        // two over the bar number, which starts at two and decays for the whole series. That is why the spec
-        // marks its length as having no effect, and why it is no longer passed here.
-        // MovingAverageCore.AlphaDecreasingEma is a length-driven average of the close, a different series
-        // from its first bar on.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var ema = buffer.WritableSpan;
-
-        double previousEma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var alpha = (double)2 / (i + 1);
-            previousEma = (alpha * input[i]) + ((1 - alpha) * previousEma);
-            ema[i] = previousEma;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.AlphaDecreasingEma(SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+        return result;
     }
 
     /// <summary>

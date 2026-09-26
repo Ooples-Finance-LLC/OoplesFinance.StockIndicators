@@ -84,10 +84,6 @@ OoplesFinance.StockIndicators.Indicators.AlligatorTeeth/default
 OoplesFinance.StockIndicators.Indicators.AlligatorTeeth/longer-periods
 OoplesFinance.StockIndicators.Indicators.AlligatorTeeth/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AlligatorTeeth/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AlphaDecreasingEma/default
-OoplesFinance.StockIndicators.Indicators.AlphaDecreasingEma/longer-periods
-OoplesFinance.StockIndicators.Indicators.AlphaDecreasingEma/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AlphaDecreasingEma/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Ama/default
 OoplesFinance.StockIndicators.Indicators.Ama/longer-periods
 OoplesFinance.StockIndicators.Indicators.Ama/minimum-periods

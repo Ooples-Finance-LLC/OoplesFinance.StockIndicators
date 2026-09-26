@@ -8739,45 +8739,14 @@ public sealed class AdaptiveLeastSquaresState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ema")]
 public sealed class AlphaDecreasingExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevEma;
-    private int _index;
-
-    public AlphaDecreasingExponentialMovingAverageState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AlphaDecreasingWindow _window = new();
     public IndicatorName Name => IndicatorName.AlphaDecreasingExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _prevEma = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var alpha = (double)2 / (_index + 1);
-        var ema = (alpha * value) + ((1 - alpha) * _prevEma);
-
-        if (isFinal)
-        {
-            _prevEma = ema;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ema", ema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ema", value } } : null);
     }
 }
 
