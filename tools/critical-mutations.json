@@ -14983,5 +14983,128 @@
     "before": "Compatibility.SpanCompat.AsReadOnlySpan(volume)",
     "after": "Compatibility.SpanCompat.AsReadOnlySpan(input)",
     "filter": "FullyQualifiedName~VolumeWeightedNumericalTests"
+  },
+  {
+    "id": "dynamic-average-wrong-variance-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "b * _fast * _fast * 4",
+    "after": "b * _slow * _slow * 4",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-wrong-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "2L * (mid - _fast) + 1",
+    "after": "2L * (mid - _fast) + 2",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-wrong-even-tie",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "(mid & 1) != 0",
+    "after": "(mid & 1) == 0",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-reversed-periods",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "Math.Min(_fast, _slow)",
+    "after": "Math.Max(_fast, _slow)",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-drops-current-price",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "sum.Add(price);",
+    "after": "sum.Add(0);",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-wrong-window",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "_prices.Count - (period - 1)",
+    "after": "_prices.Count - period",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "sum.Mean(period)",
+    "after": "sum.Mean(_fast)",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations",
+    "scope": "internal double Next("
+  },
+  {
+    "id": "dynamic-average-stale-prices-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-stale-moments-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "_short.Reset(); _long.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-retains-expired-sum",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "sum -= old;",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-retains-expired-square",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "squares -= old * old;",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-partial-variance",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicAverageWindow.cs",
+    "before": "var full = _values.Count >= _length - 1;",
+    "after": "var full = _values.Count >= 0;",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DynamicallyAdjustableMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "dynamic-average-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DynamicAverageNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

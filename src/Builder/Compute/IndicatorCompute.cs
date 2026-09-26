@@ -15068,43 +15068,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDynamicallyAdjustableMovingAverageFast(StockData data, ComputeContext context, int fastLength = 6,
         int slowLength = 200)
     {
-        // CalculateDynamicallyAdjustableMovingAverage picks its period from the ratio of the slow to the fast
-        // standard deviation, then averages the chained series over that period by differencing a running
-        // cumulative sum. The core routine this replaced averaged over the fast length throughout.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-
-        using var shortDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, shortDeviation.WritableSpan, fastLength);
-        var shortStdDev = shortDeviation.Span;
-
-        using var longDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, longDeviation.WritableSpan, slowLength);
-        var longStdDev = longDeviation.Span;
-
-        using var cumulative = context.Rent(count);
-        var k = cumulative.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double tempSum = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var a = shortStdDev[i];
-            var v = a != 0 ? (longStdDev[i] / a) + fastLength : fastLength;
-
-            tempSum += input[i];
-            k[i] = tempSum;
-
-            var p = (int)Math.Round(MathHelper.MinOrMax(v, slowLength, fastLength));
-            var prevK = i >= p ? k[i - p] : 0;
-            output[i] = p != 0 ? (k[i] - prevK) / p : 0;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.DynamicallyAdjustableMovingAverage(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, fastLength, slowLength);
         return buffer;
     }
 

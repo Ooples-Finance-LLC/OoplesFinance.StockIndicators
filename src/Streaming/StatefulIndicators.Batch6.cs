@@ -672,79 +672,18 @@ public sealed class DynamicallyAdjustableFilterState : IStreamingIndicatorState,
 [PrimaryOutput("Dama")]
 public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _fastLength;
-    private readonly int _slowLength;
-    private readonly RollingStandardDeviation _fastStdDev;
-    private readonly RollingStandardDeviation _slowStdDev;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _kValues;
-    private double _tempSum;
-    private double _fastStdDevValue;
-
-    public DynamicallyAdjustableMovingAverageState(int fastLength = 6, int slowLength = 200)
-    {
-        _fastLength = Math.Max(1, fastLength);
-        _slowLength = Math.Max(1, slowLength);
-        _fastStdDev = new RollingStandardDeviation(_fastLength);
-        _slowStdDev = new RollingStandardDeviation(_slowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _kValues = new PooledRingBuffer<double>(_slowLength);
-    }
-
+    private readonly DynamicAverageWindow _window;
+    public DynamicallyAdjustableMovingAverageState(int fastLength = 6, int slowLength = 200) => _window = new(fastLength, slowLength);
     public IndicatorName Name => IndicatorName.DynamicallyAdjustableMovingAverage;
-
-    public void Reset()
-    {
-        _fastStdDev.Reset();
-        _slowStdDev.Reset();
-        _kValues.Clear();
-        _tempSum = 0;
-        _fastStdDevValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fastStdDev = _fastStdDev.Next(value, isFinal);
-        var prevFastStdDev = _fastStdDevValue;
-        _fastStdDevValue = fastStdDev;
-        var slowStdDev = _slowStdDev.Next(value, isFinal);
-        if (!isFinal)
-        {
-            _fastStdDevValue = prevFastStdDev;
-        }
-        var v = fastStdDev != 0 ? (slowStdDev / fastStdDev) + _fastLength : _fastLength;
-        var p = (int)Math.Round(MathHelper.MinOrMax(v, _slowLength, _fastLength));
-
-        var tempSum = _tempSum + value;
-        var prevK = _kValues.Count >= p ? _kValues[_kValues.Count - p] : 0;
-        var ama = p != 0 ? (tempSum - prevK) / p : 0;
-
-        if (isFinal)
-        {
-            _tempSum = tempSum;
-            _kValues.TryAdd(tempSum, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Dama", ama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ama, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Dama", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastStdDev.Dispose();
-        _slowStdDev.Dispose();
-        _kValues.Dispose();
+    public void Dispose() { }
     }
-}
 
 [PrimaryOutput("Dmi")]
 public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDisposable

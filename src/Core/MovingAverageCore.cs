@@ -2321,50 +2321,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DynamicallyAdjustableMovingAverage(ReadOnlySpan<double> input, Span<double> output, int fastLength = 6, int slowLength = 200)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Compute short and long standard deviations
-        var shortStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var longStdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var cumSumBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var shortStdDev = shortStdDevBuffer.AsSpan(0, input.Length);
-            var longStdDev = longStdDevBuffer.AsSpan(0, input.Length);
-            var cumSum = cumSumBuffer.AsSpan(0, input.Length);
-
-            // Compute rolling stddev for both windows
-            ComputeRollingStdDev(input, shortStdDev, fastLength);
-            ComputeRollingStdDev(input, longStdDev, slowLength);
-
-            // Compute cumulative sum
-            double cs = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                cs += input[i];
-                cumSum[i] = cs;
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var a = shortStdDev[i];
-                var b = longStdDev[i];
-                var v = a != 0 ? (b / a) + fastLength : fastLength;
-                var p = (int)Math.Round(Math.Min(Math.Max(v, fastLength), slowLength));
-
-                var prevCumSum = i >= p ? cumSum[i - p] : 0;
-                output[i] = p != 0 ? (cumSum[i] - prevCumSum) / p : 0;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(shortStdDevBuffer);
-            ArrayPool<double>.Shared.Return(longStdDevBuffer);
-            ArrayPool<double>.Shared.Return(cumSumBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DynamicAverageWindow(fastLength, slowLength);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
