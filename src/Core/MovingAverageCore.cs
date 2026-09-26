@@ -4576,24 +4576,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ElasticVolumeWeightedMovingAverageV2(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        length = Math.Max(1, length);
-        double volumeSum = 0;
-        double evwma = price.Length > 0 ? price[0] : 0;
-
-        for (var i = 0; i < price.Length; i++)
-        {
-            var currentVolume = volume[i];
-            volumeSum += currentVolume;
-
-            if (i >= length)
-                volumeSum -= volume[i - length];
-
-            evwma = volumeSum > 0 ? evwma + currentVolume / volumeSum * (price[i] - evwma) : evwma;
-            output[i] = evwma;
-        }
+        if (output.Length < price.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < price.Length) throw new ArgumentException("Volume span must be at least input length.", nameof(volume));
+        using var window = new ElasticVolumeWindow(length);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>

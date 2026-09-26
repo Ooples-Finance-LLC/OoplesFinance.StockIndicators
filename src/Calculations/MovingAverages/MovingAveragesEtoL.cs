@@ -1416,37 +1416,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateElasticVolumeWeightedMovingAverageV2(this StockData stockData, int length = 14)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> evwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volumes) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new ElasticVolumeWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var currentVolume = volumeList[i];
-            tempList.Add(currentVolume);
-            volumeSumWindow.Add(currentVolume);
-
-            var volumeSum = volumeSumWindow.Sum(length);
-            var prevEvwma = i == 0 ? currentValue : GetLastOrDefault(evwmaList);
-            var evwma = volumeSum > 0 ? prevEvwma + currentVolume / volumeSum * (currentValue - prevEvwma) : prevEvwma;
-            evwmaList.Add(evwma);
-
-            var signal = GetCompareSignal(currentValue - evwma, prevValue - prevEvwma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], volumes[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? -input[0] : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Evwma", evwmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(evwmaList);
-        stockData.IndicatorName = IndicatorName.ElasticVolumeWeightedMovingAverageV2;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Evwma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ElasticVolumeWeightedMovingAverageV2;
         return stockData;
     }
 
