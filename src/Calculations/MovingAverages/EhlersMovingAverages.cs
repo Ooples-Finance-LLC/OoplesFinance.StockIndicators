@@ -783,35 +783,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLeadingIndicator(this StockData stockData, double alpha1 = 0.25, double alpha2 = 0.33)
     {
-        List<double> leadList = new(stockData.Count);
-        List<double> leadIndicatorList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); var signals = CreateSignalsList(stockData);
+        var window = new LeadingWindow(alpha1, alpha2);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevLead = GetLastOrDefault(leadList);
-            var lead = (2 * currentValue) + ((alpha1 - 2) * prevValue) + ((1 - alpha1) * prevLead);
-            leadList.Add(lead);
-
-            var prevLeadIndicator = GetLastOrDefault(leadIndicatorList);
-            var leadIndicator = (alpha2 * lead) + ((1 - alpha2) * prevLeadIndicator);
-            leadIndicatorList.Add(leadIndicator);
-
-            var signal = GetCompareSignal(currentValue - leadIndicator, prevValue - prevLeadIndicator);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eli", leadIndicatorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(leadIndicatorList);
-        stockData.IndicatorName = IndicatorName.EhlersLeadingIndicator;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eli", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersLeadingIndicator;
         return stockData;
     }
 

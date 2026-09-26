@@ -16186,5 +16186,104 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~DecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-wrong-current-weight",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "leadSum.Add(price, 2)",
+    "after": "leadSum.Add(price, 1)",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-wrong-price-difference",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "leadSum.Add(_price, -2)",
+    "after": "leadSum.Add(_price, -1)",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-drops-lead-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "AddScaled(ref leadSum, _lead, -_alpha1);",
+    "after": "",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-drops-output-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "AddScaled(ref outputSum, _output, -_alpha2);",
+    "after": "",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-premature-lead",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "var lead = RocBankValue.Round(leadSum);",
+    "after": "var lead = new RocBankValue(leadSum.Mean(1));",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-stale-price-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "_price = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-stale-lead-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "_lead = _output = default;",
+    "after": "_output = default;",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-stale-output-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LeadingWindow.cs",
+    "before": "_lead = _output = default;",
+    "after": "_lead = default;",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersLeadingIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersLeadingIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "leading-registry-wrong-coefficient",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersLeadingIndicator(ReadOnlySpan<double> input, Span<double> output, int",
+    "before": "EhlersLeadingIndicator(input, output, .25, .33);",
+    "after": "EhlersLeadingIndicator(input, output, .25, .5);",
+    "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]
