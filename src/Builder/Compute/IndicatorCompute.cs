@@ -4606,46 +4606,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast(StockData data, ComputeContext context, int length = 10,
         int maLength = 21, int signalLength = 34)
     {
-        // CalculateAbsoluteStrengthIndex keeps three running totals over the whole history - the gains as
-        // ratios, the unchanged bars as a fixed fraction of length, and the losses as inverse ratios - reads a
-        // strength off them, and publishes how far that strength sits from its own exponential average once a
-        // McNicholl double smoothing has been taken out.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var alpha = (double)2 / (signalLength + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double gains = 0;
-        double unchanged = 0;
-        double losses = 0;
-        double strengthAverage = 0;
-        double firstSmoothing = 0;
-        double secondSmoothing = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-
-            gains = input[i] > previousValue && previousValue != 0 ? gains + ((input[i] / previousValue) - 1) : gains;
-            unchanged = input[i] == previousValue ? unchanged + ((double)1 / length) : unchanged;
-            losses = input[i] < previousValue && input[i] != 0 ? losses + ((previousValue / input[i]) - 1) : losses;
-
-            var down = (losses + unchanged) / 2;
-            var strength = down != 0 ? 1 - (1 / (1 + ((gains + unchanged) / 2 / down))) : 1;
-            strengthAverage = CalculationsHelper.CalculateEMA(strength, strengthAverage, maLength);
-
-            var oscillator = strength - strengthAverage;
-            firstSmoothing = (alpha * oscillator) + ((1 - alpha) * firstSmoothing);
-            secondSmoothing = (alpha * firstSmoothing) + ((1 - alpha) * secondSmoothing);
-
-            var smoothed = 1 - alpha != 0 ? (((2 - alpha) * firstSmoothing) - secondSmoothing) / (1 - alpha) : 0;
-            output[i] = oscillator - smoothed;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        if (input.Any(value => !(value > 0) || double.IsInfinity(value)))
+            throw new ArgumentOutOfRangeException(nameof(data), "Absolute Strength Index requires strictly positive finite effective prices.");
+        var window = new AbsoluteStrengthWindow(length, maLength, signalLength); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

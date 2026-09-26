@@ -121,72 +121,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAbsoluteStrengthIndex(this StockData stockData, int length = 10, int maLength = 21, int signalLength = 34)
     {
-        List<double> AList = new(stockData.Count);
-        List<double> MList = new(stockData.Count);
-        List<double> DList = new(stockData.Count);
-        List<double> mtList = new(stockData.Count);
-        List<double> utList = new(stockData.Count);
-        List<double> abssiEmaList = new(stockData.Count);
-        List<double> dList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        if (inputList.Any(value => !(value > 0) || double.IsInfinity(value)))
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        if (input.Any(value => !(value > 0) || double.IsInfinity(value)))
             throw new ArgumentOutOfRangeException(nameof(stockData), "Absolute Strength Index requires strictly positive finite effective prices.");
-
-        var alp = (double)2 / (signalLength + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new AbsoluteStrengthWindow(length, maLength, signalLength);
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevA = GetLastOrDefault(AList);
-            var A = currentValue > prevValue && prevValue != 0 ? prevA + ((currentValue / prevValue) - 1) : prevA;
-            AList.Add(A);
-
-            var prevM = GetLastOrDefault(MList);
-            var M = currentValue == prevValue ? prevM + ((double)1 / length) : prevM;
-            MList.Add(M);
-
-            var prevD = GetLastOrDefault(DList);
-            var D = currentValue < prevValue && currentValue != 0 ? prevD + ((prevValue / currentValue) - 1) : prevD;
-            DList.Add(D);
-
-            var abssi = (D + M) / 2 != 0 ? 1 - (1 / (1 + ((A + M) / 2 / ((D + M) / 2)))) : 1;
-            var abssiEma = CalculateEMA(abssi, GetLastOrDefault(abssiEmaList), maLength);
-            abssiEmaList.Add(abssiEma);
-
-            var abssio = abssi - abssiEma;
-            var prevMt = GetLastOrDefault(mtList);
-            var mt = (alp * abssio) + ((1 - alp) * prevMt);
-            mtList.Add(mt);
-
-            var prevUt = GetLastOrDefault(utList);
-            var ut = (alp * mt) + ((1 - alp) * prevUt);
-            utList.Add(ut);
-
-            // McNicholl's zero-lag form, written here as it is in CalculateMcNichollMovingAverage. Grouped
-            // as (2 - alp) * (mt - ut) it collapses toward zero, because mt and ut converge on each other,
-            // and d = abssio - s then returns abssio very nearly unchanged - so the detrending this line
-            // exists to perform silently did not happen. No invariant catches it: both forms settle on a
-            // flat market, which is why it survived alongside the same defect in DEnvelope.
-            var s = 1 - alp != 0 ? (((2 - alp) * mt) - ut) / (1 - alp) : 0;
-            var prevd = GetLastOrDefault(dList);
-            var d = abssio - s;
-            dList.Add(d);
-
-            var signal = GetCompareSignal(d, prevd);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(value, i > 0 ? line[i - 1] : 0));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Asi", dList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dList);
-        stockData.IndicatorName = IndicatorName.AbsoluteStrengthIndex;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Asi", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AbsoluteStrengthIndex;
         return stockData;
     }
 

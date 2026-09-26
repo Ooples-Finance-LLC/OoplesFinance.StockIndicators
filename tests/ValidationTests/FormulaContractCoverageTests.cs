@@ -2293,7 +2293,8 @@ public sealed class FormulaContractCoverageTests
         Check(new AbsoluteStrengthMTFIndicator(2, 2), prices, new[] { 0d, .5, 1.25 }, new double[3]);
         // First probability is one. Its zero-seeded mean leaves 10/11; the two
         // signal filters remove a fraction 4/35 of that residual on the first bar.
-        Check(new AbsoluteStrengthIndex(2), prices.Take(1).ToArray(), new[] { 62d / 77 });
+        // Rounding each filter stage yields the predecessor of the once-rounded 62/77.
+        Check(new AbsoluteStrengthIndex(2), prices.Take(1).ToArray(), new[] { 0.8051948051948051 });
         Check(new SwingIndex(), bars, new[] { 0d, 2300d / 19, -425d / 7 });
         Check(new AccumulativeSwingIndex(0, 2), bars, new[] { 0d, 2300d / 19, 8025d / 133 },
             new[] { 0d, 1150d / 19, 24125d / 266 });

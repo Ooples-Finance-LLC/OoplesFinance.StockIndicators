@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AbsoluteStrengthIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AbsoluteStrengthOutputs(bars, builtIn)["Asi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.NarrowBandpassFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => NarrowBandpassOutputs(bars, builtIn)["Nbpf"], IndicatorErrorBudget.Exact);

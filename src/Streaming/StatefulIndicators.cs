@@ -5673,86 +5673,15 @@ public sealed class ElderRayIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Asi")]
 public sealed class AbsoluteStrengthIndexState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly int _maLength;
-    private readonly double _alpha;
-    private double _a;
-    private double _m;
-    private double _d;
-    private double _abssiEma;
-    private double _mt;
-    private double _ut;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public AbsoluteStrengthIndexState(int length = 10, int maLength = 21, int signalLength = 34)
-    {
-        _length = Math.Max(1, length);
-        _maLength = Math.Max(1, maLength);
-        var resolvedSignalLength = Math.Max(1, signalLength);
-        _alpha = (double)2 / (resolvedSignalLength + 1);
-    }
-
+    private readonly AbsoluteStrengthWindow _window;
+    public AbsoluteStrengthIndexState(int length = 10, int maLength = 21, int signalLength = 34) => _window = new(length, maLength, signalLength);
     public IndicatorName Name => IndicatorName.AbsoluteStrengthIndex;
-
-    public void Reset()
-    {
-        _a = 0;
-        _m = 0;
-        _d = 0;
-        _abssiEma = 0;
-        _mt = 0;
-        _ut = 0;
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        if (bar is null) throw new ArgumentNullException(nameof(bar));
-        Validation.IndicatorInputDomain.PositiveClose.Validate(new Indicators.Bar(bar.StartTime,
-            bar.Open, bar.High, bar.Low, bar.Close, bar.Volume));
-        var value = bar.Close;
-        var prevValue = _hasPrev ? _prevValue : 0;
-
-        var a = value > prevValue && prevValue != 0 ? _a + ((value / prevValue) - 1) : _a;
-        var m = value == prevValue ? _m + ((double)1 / _length) : _m;
-        var d = value < prevValue && value != 0 ? _d + ((prevValue / value) - 1) : _d;
-
-        var dm = (d + m) / 2;
-        var am = (a + m) / 2;
-        var abssi = dm != 0 ? 1 - (1 / (1 + (am / dm))) : 1;
-        var abssiEma = CalculationsHelper.CalculateEMA(abssi, _abssiEma, _maLength);
-        var abssio = abssi - abssiEma;
-        var mt = (_alpha * abssio) + ((1 - _alpha) * _mt);
-        var ut = (_alpha * mt) + ((1 - _alpha) * _ut);
-        // McNicholl's zero-lag form; see the batch calculation for why the grouping matters.
-        var s = 1 - _alpha != 0 ? (((2 - _alpha) * mt) - ut) / (1 - _alpha) : 0;
-        var asi = abssio - s;
-
-        if (isFinal)
-        {
-            _a = a;
-            _m = m;
-            _d = d;
-            _abssiEma = abssiEma;
-            _mt = mt;
-            _ut = ut;
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Asi", asi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(asi, outputs);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Asi", value } } : null);
     }
 }
 
