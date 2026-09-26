@@ -5780,45 +5780,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersDecyclerOscillatorV1(ReadOnlySpan<double> close, Span<double> output, int shortLength = 10, int longLength = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var shortHpArray = pool.Rent(close.Length);
-        var longHpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var shortHp = shortHpArray.AsSpan(0, close.Length);
-            var longHp = longHpArray.AsSpan(0, close.Length);
-
-            var alphaShort = (Math.Cos(2 * Math.PI / shortLength) + Math.Sin(2 * Math.PI / shortLength) - 1) / Math.Cos(2 * Math.PI / shortLength);
-            var alphaLong = (Math.Cos(2 * Math.PI / longLength) + Math.Sin(2 * Math.PI / longLength) - 1) / Math.Cos(2 * Math.PI / longLength);
-
-            // High-pass filter
-            shortHp[0] = 0;
-            longHp[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                shortHp[i] = (1 - alphaShort / 2) * (1 - alphaShort / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
-                            2 * (1 - alphaShort) * shortHp[i - 1] - (1 - alphaShort) * (1 - alphaShort) * (i > 1 ? shortHp[i - 2] : 0);
-                longHp[i] = (1 - alphaLong / 2) * (1 - alphaLong / 2) * (close[i] - 2 * close[Math.Max(0, i - 1)] + close[Math.Max(0, i - 2)]) +
-                           2 * (1 - alphaLong) * longHp[i - 1] - (1 - alphaLong) * (1 - alphaLong) * (i > 1 ? longHp[i - 2] : 0);
-            }
-
-            // Oscillator = short decycler - long decycler
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = (close[i] - shortHp[i]) - (close[i] - longHp[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(shortHpArray);
-            pool.Return(longHpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        // This span publishes FastEdo. The slow period belongs to the companion
+        // output, as in the typed indicator; retain the legacy parameter signature.
+        var window = new DecyclerOscillatorWindow(shortLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

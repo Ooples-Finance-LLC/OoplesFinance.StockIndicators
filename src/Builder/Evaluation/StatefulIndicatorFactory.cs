@@ -138,7 +138,7 @@ internal static partial class StatefulIndicatorFactory
             ClosedFormDistanceVolatilitySpecOptions distance => new ClosedFormDistanceVolatilityState(distance.MaType, distance.Length),
             MotionSmoothnessIndexSpecOptions motion => new MotionSmoothnessIndexState(motion.Length),
             NaturalMarketSlopeSpecOptions natural => new NaturalMarketSlopeState(natural.Length),
-            EhlersDecyclerOscillatorV1SpecOptions decycler => new EhlersDecyclerOscillatorV1State(decycler.Length, decycler.Length * 2),
+            EhlersDecyclerOscillatorV1SpecOptions decycler => EhlersDecyclerOscillatorV1State.ForPeriod(decycler.Length),
             TironeLevelsSpecOptions tirone => new TironeLevelsState(tirone.Length),
             ProjectedSupportAndResistanceSpecOptions projected => new ProjectedSupportAndResistanceState(projected.Length),
             ZweigMarketBreadthIndicatorSpecOptions breadth => new ZweigMarketBreadthIndicatorState(breadth.MaType, breadth.Length),

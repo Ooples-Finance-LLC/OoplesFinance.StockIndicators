@@ -15837,15 +15837,15 @@
     "id": "high-pass-wrong-difference",
     "module": "numerical",
     "file": "src/Helpers/HighPassWindow.cs",
-    "before": "sum.Add(_input1, -2 * _gain)",
-    "after": "sum.Add(_input1, -_gain)",
+    "before": "AddFeedback(ref sum, _input1, -2 * _gain)",
+    "after": "AddFeedback(ref sum, _input1, -_gain)",
     "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   },
   {
     "id": "high-pass-drops-input-lag-two",
     "module": "numerical",
     "file": "src/Helpers/HighPassWindow.cs",
-    "before": "sum.Add(_input2, _gain);",
+    "before": "AddFeedback(ref sum, _input2, _gain);",
     "after": "",
     "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   },
@@ -15893,7 +15893,7 @@
     "id": "high-pass-stale-input-reset",
     "module": "numerical",
     "file": "src/Helpers/HighPassWindow.cs",
-    "before": "_input1 = _input2 = 0;",
+    "before": "_input1 = _input2 = default;",
     "after": "",
     "filter": "FullyQualifiedName~HighPassNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   },
@@ -16023,5 +16023,86 @@
     "before": "window.Next(close[i], true).Middle",
     "after": "window.Next(close[i], true).Upper",
     "filter": "FullyQualifiedName~SimpleDecyclerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-wrong-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "periodScale / 2",
+    "after": "periodScale",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-wrong-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "highPass.AddTo(ref difference, -1)",
+    "after": "highPass.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-wrong-factor",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "factor.Add(multiplier, 100)",
+    "after": "factor.Add(multiplier, 10)",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "Round(numerator, price)",
+    "after": "Round(numerator, 1)",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-stale-first-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "_first.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-stale-second-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "_second.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "_first.NextValue(price, commit)",
+    "after": "_first.NextValue(price, true)",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-premature-middle",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerOscillatorWindow.cs",
+    "before": "var filtered = _second.NextValue(middle, commit);",
+    "after": "var filtered = _second.NextValue(middle.Publish(), commit);",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersDecyclerOscillatorV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "decycler-oscillator-slow-period-overflow",
+    "module": "numerical",
+    "file": "src/Builder/Compute/BuilderArmBinding.cs",
+    "before": "laneKey == \"FastEdo\" ? 1 : 2",
+    "after": "laneKey == \"FastEdo\" ? 1 : (double)unchecked(decycler.Length * 2) / decycler.Length",
+    "filter": "FullyQualifiedName~DecyclerOscillatorNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

@@ -285,7 +285,7 @@ internal static class BuilderArmTargets
         [typeof(EhlersCyberCycleSpecOptions)] = new(IndicatorName.EhlersCyberCycle, null, new BuilderArgument("Length", "alpha", v => v is int n ? 2.0 / (n + 1) : v)),
         [typeof(EhlersCycleAmplitudeSpecOptions)] = new(IndicatorName.EhlersCycleAmplitude),
         [typeof(EhlersCycleBandPassFilterSpecOptions)] = new(IndicatorName.EhlersCycleBandPassFilter),
-        [typeof(EhlersDecyclerOscillatorV1SpecOptions)] = new(IndicatorName.EhlersDecyclerOscillatorV1, null, new BuilderArgument("Length", "fastLength"), new BuilderArgument("Length", "slowLength", v => v is int n ? n * 2 : v)),
+        [typeof(EhlersDecyclerOscillatorV1SpecOptions)] = new(IndicatorName.EhlersDecyclerOscillatorV1, null, new BuilderArgument("Length", "fastLength"), new BuilderArgument("Length", "slowLength", v => v is int n ? n * 2d : v)),
         [typeof(EhlersDecyclerOscillatorV2SpecOptions)] = new(IndicatorName.EhlersDecyclerOscillatorV2),
         [typeof(EhlersDecyclerSpecOptions)] = new(IndicatorName.EhlersDecycler),
         [typeof(EhlersDetrendedLeadingIndicatorSpecOptions)] = new(IndicatorName.EhlersDetrendedLeadingIndicator),

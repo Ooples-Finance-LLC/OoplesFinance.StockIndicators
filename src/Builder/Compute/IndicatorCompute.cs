@@ -951,7 +951,7 @@ internal static partial class IndicatorCompute
             EhlersDecyclerOscillatorV1SpecOptions edov1 => spec.OutputKey switch
             {
                 null or "FastEdo" => ComputeEhlersDecyclerOscillatorV1Fast(data, context, edov1.Length),
-                "SlowEdo" => ComputeEhlersDecyclerOscillatorV1Fast(data, context, edov1.Length * 2, 1),
+                "SlowEdo" => ComputeEhlersDecyclerOscillatorV1Fast(data, context, edov1.Length, 1, 2),
                 _ => null
             },
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
@@ -11111,37 +11111,12 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Decycler Oscillator V1 using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV1Fast(StockData data, ComputeContext context, int fastLength = 100,
-        double fastMult = 1.2)
+        double fastMult = 1.2, double periodScale = 1)
     {
-        // The bound key is FastEdo, so only the fast oscillator is published; the slow length and its
-        // multiplier reach the SlowEdo line alone. The decycler is the input less its own high pass,
-        // and the oscillator is the high pass of that decycler scaled by price.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        fastLength = Math.Max(fastLength, 1);
-
-        using var highPass = EhlersHighPassFilterV1(context, input, fastLength, 1);
-        var hp = highPass.Span;
-
-        using var decycler = context.Rent(count);
-        var dec = decycler.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            dec[i] = input[i] - hp[i];
-        }
-
-        using var filtered = EhlersHighPassFilterV1(context, decycler.Span, fastLength, 0.5);
-        var filt = filtered.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = input[i] != 0 ? 100 * fastMult * filt[i] / input[i] : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count); var window = new DecyclerOscillatorWindow(fastLength, fastMult, periodScale);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>
