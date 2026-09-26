@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AverageTrueRangeTrailingStops)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrTrailingOutputs(bars, builtIn)["Atrts"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.BollingerBandsAverageTrueRange)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BollingerAtrOutputs(bars, builtIn)["AtrDev"], IndicatorErrorBudget.Exact);

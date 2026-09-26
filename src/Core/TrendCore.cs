@@ -1192,52 +1192,9 @@ internal static class TrendCore
     /// </summary>
     internal static void AtrTrailingStops(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            output[0] = close[0];
-            var trend = 1; // 1 = uptrend, -1 = downtrend
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                var atrValue = atr[i] * multiplier;
-                var longStop = close[i] - atrValue;
-                var shortStop = close[i] + atrValue;
-
-                if (trend == 1)
-                {
-                    output[i] = Math.Max(output[i - 1], longStop);
-                    if (close[i] < output[i])
-                    {
-                        trend = -1;
-                        output[i] = shortStop;
-                    }
-                }
-                else
-                {
-                    output[i] = Math.Min(output[i - 1], shortStop);
-                    if (close[i] > output[i])
-                    {
-                        trend = 1;
-                        output[i] = longStop;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new AtrTrailingWindow(MovingAvgType.ExponentialMovingAverage, 63, length, multiplier, capacityHint: Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>

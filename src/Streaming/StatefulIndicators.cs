@@ -8961,72 +8961,17 @@ public sealed class AverageMoneyFlowOscillatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Atrts")]
 public sealed class AverageTrueRangeTrailingStopsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-    private readonly IMovingAverageSmoother _atr;
-    private readonly StreamingInputResolver _input;
-    private readonly double _factor;
-    private double _prevValue;
-    private double _prevAtrts;
-    private bool _hasPrev;
-
-    public AverageTrueRangeTrailingStopsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 63, int length2 = 21, double factor = 3)
-    {
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _atr = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _factor = factor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AtrTrailingWindow _window;
+    public AverageTrueRangeTrailingStopsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63, int length2 = 21, double factor = 3)
+    { _window = new(maType, length1, length2, factor); }
     public IndicatorName Name => IndicatorName.AverageTrueRangeTrailingStops;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _atr.Reset();
-        _prevValue = 0;
-        _prevAtrts = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : value;
-        var ema = _ema.Next(value, isFinal);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atr.Next(tr, isFinal);
-        var prevAtrts = _hasPrev ? _prevAtrts : value;
-        var upTrend = value > ema;
-        var dnTrend = value <= ema;
-        var atrts = upTrend ? Math.Max(value - (_factor * atr), prevAtrts) : dnTrend
-            ? Math.Min(value + (_factor * atr), prevAtrts)
-            : prevAtrts;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevAtrts = atrts;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Atrts", atrts }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(atrts, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Atrts", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _atr.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("ProbPrime")]

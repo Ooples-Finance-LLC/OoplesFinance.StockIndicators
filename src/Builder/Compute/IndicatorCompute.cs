@@ -18873,35 +18873,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast(StockData data, ComputeContext context,
         int length2 = 21, double factor = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63)
     {
-        // CalculateAverageTrueRangeTrailingStops ratchets a stop towards the price while a longer average
-        // says which side of it we are on, and both the average and the true range take the type it was
-        // given. The stop only ever moves in the direction of the trend, so it has to be carried forward
-        // bar by bar rather than read out of a window.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var atr = ComputeAtrFast(data, context, length2, maType);
-        using var trendBuffer = context.Rent(count);
-        var trend = trendBuffer.WritableSpan;
-        MovingAverage(data, maType, length1, input, trend);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var atr = context.Rent(count); using var trend = context.Rent(count);
+        if (external)
         {
-            var currentValue = input[i];
-
-            // The first bar has no stop to ratchet against, so it starts at the price itself.
-            var prevStop = i >= 1 ? output[i - 1] : currentValue;
-            var band = factor * atr.Span[i];
-
-            output[i] = currentValue > trend[i]
-                ? Math.Max(currentValue - band, prevStop)
-                : Math.Min(currentValue + band, prevStop);
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, Math.Max(1, length2), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length1), SpanCompat.AsReadOnlySpan(input), trend.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(count); using var window = new AtrTrailingWindow(maType, length1, length2, factor, external, Math.Max(1, count));
+        for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(trend.Span[i]) : null, external ? new RocBankValue(atr.Span[i]) : null);
+        return result;
     }
 
     /// <summary>

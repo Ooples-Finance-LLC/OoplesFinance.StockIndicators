@@ -19324,5 +19324,148 @@
     "before": "stockData.SetOutputValues(() => new Dictionary<string, List<double>> {\n            { \"UpperBand\", bands[\"UpperBand\"] }, { \"MiddleBand\", bands[\"MiddleBand\"] }, { \"LowerBand\", bands[\"LowerBand\"] }\n        });",
     "after": "stockData.SetOutputValues(() => bands.ToDictionary(pair => pair.Key, pair => pair.Value));",
     "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "atr-trailing-trend-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "new(kind, trendLength, rangeLength, kind, capacityHint)",
+    "after": "new(kind, trendLength + 1, rangeLength, kind, capacityHint)",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "new(kind, trendLength, rangeLength, kind, capacityHint)",
+    "after": "new(kind, trendLength, rangeLength + 1, kind, capacityHint)",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-tie-direction",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "trend.Sign > 0",
+    "after": "trend.Sign >= 0",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-boundary-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "up ? -1 : 1",
+    "after": "up ? 1 : -1",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-up-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "up ? movement.Sign > 0 : movement.Sign < 0",
+    "after": "up ? movement.Sign < 0 : movement.Sign < 0",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-down-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "up ? movement.Sign > 0 : movement.Sign < 0",
+    "after": "up ? movement.Sign > 0 : movement.Sign > 0",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-zero-seed",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "_hasPrevious ? _previous : new RocBankValue(close)",
+    "after": "_hasPrevious ? _previous : new RocBankValue(0)",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "if (commit) { _previous = stop;",
+    "after": "{ _previous = stop;",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "_previous = default; _hasPrevious = false;",
+    "after": "/* retain previous stop */",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-early-stop-publish",
+    "module": "numerical",
+    "file": "src/Helpers/AtrTrailingWindow.cs",
+    "before": "_previous = stop;",
+    "after": "_previous = new RocBankValue(stop.Publish());",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection"
+  },
+  {
+    "id": "atr-trailing-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "public sealed class AverageTrueRangeTrailingStopsState :"
+  },
+  {
+    "id": "atr-trailing-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast("
+  },
+  {
+    "id": "atr-trailing-customer-range-period",
+    "module": "numerical",
+    "file": "src/Calculations/TrailingStop/TrailingStopAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2))",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2 + 1))",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "public static StockData CalculateAverageTrueRangeTrailingStops("
+  },
+  {
+    "id": "atr-trailing-customer-trend-period",
+    "module": "numerical",
+    "file": "src/Calculations/TrailingStop/TrailingStopAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))",
+    "after": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1 + 1))",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "public static StockData CalculateAverageTrueRangeTrailingStops("
+  },
+  {
+    "id": "atr-trailing-trend-core-period",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "ExponentialMovingAverage, 63, length, multiplier",
+    "after": "ExponentialMovingAverage, 1, length, multiplier",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "internal static void AtrTrailingStops("
+  },
+  {
+    "id": "atr-trailing-moving-core-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "ExponentialMovingAverage, 63, length, multiplier",
+    "after": "ExponentialMovingAverage, 63, length + 1, multiplier",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "internal static void AverageTrueRangeTrailingStops("
+  },
+  {
+    "id": "atr-trailing-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~AtrTrailingNumericalTests.HalfLineProjectionPreservesStartupTiesReversalsAndExtremeState|FullyQualifiedName~AtrTrailingNumericalTests.SelectedClosesAndCustomerRangeThenTrendKeepTheirOrder|FullyQualifiedName~AtrTrailingNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~AtrTrailingNumericalTests.LegacyBatchOnlyAveragesPreserveTheSameStopProjection",
+    "scope": "internal static ComputeBuffer ComputeAverageTrueRangeTrailingStopsFast("
   }
 ]

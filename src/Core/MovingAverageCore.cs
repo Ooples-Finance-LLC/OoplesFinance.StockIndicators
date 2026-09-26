@@ -4481,48 +4481,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AverageTrueRangeTrailingStops(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double multiplier = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentClose = close[i];
-                var currentAtr = atr[i] * multiplier;
-                var prevStop = i > 0 ? output[i - 1] : currentClose;
-                var prevClose = i > 0 ? close[i - 1] : currentClose;
-
-                if (currentClose > prevStop && prevClose > prevStop)
-                {
-                    output[i] = Math.Max(prevStop, currentClose - currentAtr);
-                }
-                else if (currentClose < prevStop && prevClose < prevStop)
-                {
-                    output[i] = Math.Min(prevStop, currentClose + currentAtr);
-                }
-                else if (currentClose > prevStop)
-                {
-                    output[i] = currentClose - currentAtr;
-                }
-                else
-                {
-                    output[i] = currentClose + currentAtr;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new AtrTrailingWindow(MovingAvgType.ExponentialMovingAverage, 63, length, multiplier, capacityHint: Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>

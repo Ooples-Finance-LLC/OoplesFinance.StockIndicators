@@ -116,39 +116,22 @@ public static partial class Calculations
     public static StockData CalculateAverageTrueRangeTrailingStops(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 63, int length2 = 21, double factor = 3)
     {
-        List<double> atrtsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? atr = null, trend = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentEma = emaList[i];
-            var currentAtr = atrList[i];
-            var prevAtrts = i >= 1 ? GetLastOrDefault(atrtsList) : currentValue;
-            var upTrend = currentValue > currentEma;
-            var dnTrend = currentValue <= currentEma;
-
-            var atrts = upTrend ? Math.Max(currentValue - (factor * currentAtr), prevAtrts) : dnTrend ?
-                Math.Min(currentValue + (factor * currentAtr), prevAtrts) : prevAtrts;
-            atrtsList.Add(atrts);
-
-            var signal = GetCompareSignal(currentValue - atrts, prevValue - prevAtrts);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, length2, ranges);
+            trend = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Atrts", atrtsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(atrtsList);
-        stockData.IndicatorName = IndicatorName.AverageTrueRangeTrailingStops;
-
-        return stockData;
+        using var window = new AtrTrailingWindow(maType, length1, length2, factor, external, Math.Max(1, input.Count));
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var stop = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(trend![i]) : null, external ? new RocBankValue(atr![i]) : null);
+            signals?.Add(GetCompareSignal(input[i] - stop, (i > 0 ? input[i - 1] : 0) - (i > 0 ? values[i - 1] : input[i]))); values.Add(stop);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Atrts", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AverageTrueRangeTrailingStops; return stockData;
     }
 
 }
