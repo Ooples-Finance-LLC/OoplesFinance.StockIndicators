@@ -15940,40 +15940,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTillsonIE2Fast(StockData data, ComputeContext context, int length = 15,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateTillsonIE2 averages the moving average corrected by the one-bar change in the linear
-        // regression with the regression itself. MovingAverageCore.TillsonIE2 had no regression term, so the
-        // spec's MaType never reached the calculation either.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var regressionFit = context.Rent(count);
-        var fitted = regressionFit.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length))
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new TillsonIe2Window(maType, length, external);
+        if (external)
         {
-            for (var i = 0; i < count; i++)
-            {
-                fitted[i] = regression.Next(input[i], isFinal: true).Last;
-            }
+            using var average = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, average.Span[i]);
         }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var fit = regressionFit.Span;
-        for (var i = 0; i < count; i++)
-        {
-            var a0 = fit[i];
-            var a1 = i >= 1 ? fit[i - 1] : 0;
-            var m = a0 - a1 + sma[i];
-            output[i] = (m + a0) / 2;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

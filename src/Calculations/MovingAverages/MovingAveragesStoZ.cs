@@ -1317,37 +1317,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTillsonIE2(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 15)
     {
-        List<double> ie2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var average = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new TillsonIe2Window(maType, length, external);
+        for (var i = 0; i < input.Count; i++)
         {
-            var sma = smaList[i];
-            var a0 = linRegList[i];
-            var a1 = i >= 1 ? linRegList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var m = a0 - a1 + sma;
-
-            var prevIe2 = GetLastOrDefault(ie2List);
-            var ie2 = (m + a0) / 2;
-            ie2List.Add(ie2);
-
-            var signal = GetCompareSignal(currentValue - ie2, prevValue - prevIe2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, average?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ie2", ie2List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ie2List);
-        stockData.IndicatorName = IndicatorName.TillsonIE2;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ie2", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.TillsonIE2;
         return stockData;
     }
 

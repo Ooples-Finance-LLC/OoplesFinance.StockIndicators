@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TillsonIE2 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TillsonIe2Outputs(bars, builtIn)["Ie2"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TillsonT3MovingAverage && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TillsonOutputs(bars, builtIn)["T3"], IndicatorErrorBudget.Exact);
