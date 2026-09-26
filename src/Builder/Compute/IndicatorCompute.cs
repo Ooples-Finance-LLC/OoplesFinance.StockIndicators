@@ -21926,27 +21926,22 @@ internal static partial class IndicatorCompute
         int length = 20, double factor = 0.001, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         ChannelBand band = ChannelBand.Middle)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(input.Length);
-        if (band == ChannelBand.Middle)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var upper = context.Rent(count); using var middle = context.Rent(count); using var lower = context.Rent(count);
+        if (external) MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(input), middle.WritableSpan);
+        using var window = external ? null : new HeadleyBandWindow(maType, length, factor, Math.Max(1, count));
+        for (var i = 0; i < count; i++)
         {
-            MovingAverage(data, maType, length, input, buffer.WritableSpan);
-            return buffer;
+            if (external) { var bounds = HeadleyBandWindow.Boundaries(high[i], low[i], factor); upper.WritableSpan[i] = bounds.Upper.Publish(); lower.WritableSpan[i] = bounds.Lower.Publish(); }
+            else { var point = window!.Next(high[i], low[i], input[i], true); upper.WritableSpan[i] = point.Upper; middle.WritableSpan[i] = point.Middle; lower.WritableSpan[i] = point.Lower; }
         }
-        using var highs = context.Rent(input.Length);
-        using var lows = context.Rent(input.Length);
-        CustomRange(data, input, highs.WritableSpan, lows.WritableSpan);
-        using var source = context.Rent(input.Length);
-        for (var i = 0; i < input.Length; i++)
+        if (external)
         {
-            var high = highs.Span[i];
-            var low = lows.Span[i];
-            var shift = high + low == 0 ? 0 : 4000 * factor * (high - low) / (high + low);
-            source.WritableSpan[i] = band == ChannelBand.Upper ? high * (1 + shift) : low * (1 - shift);
+            using var stage = context.Rent(count);
+            MovingAverage(data, maType, Math.Max(1, length), upper.Span, stage.WritableSpan); stage.Span.CopyTo(upper.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), lower.Span, stage.WritableSpan); stage.Span.CopyTo(lower.WritableSpan);
         }
-        MovingAverage(data, maType, length, source.Span, buffer.WritableSpan);
-        return buffer;
+        var result = context.Rent(count); (band == ChannelBand.Upper ? upper.Span : band == ChannelBand.Lower ? lower.Span : middle.Span).CopyTo(result.WritableSpan); return result;
     }
 
     /// <summary>

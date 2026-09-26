@@ -19981,5 +19981,129 @@
     "before": "dcw.MaType, signalOutput: true",
     "after": "dcw.MaType, signalOutput: false",
     "filter": "FullyQualifiedName~DonchianWidthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "headley-band-upper-period",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_upper = new(kind, length, capacityHint)",
+    "after": "_upper = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-lower-period",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_lower = new(kind, length, capacityHint)",
+    "after": "_lower = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-denominator-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "denominator.Add(low);",
+    "after": "denominator.Add(low, -1);",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-factor-scale",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "numerator.AddProduct(high, factor, 4000)",
+    "after": "numerator.AddProduct(high, factor, 400)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "numerator.AddProduct(low, factor, -4000)",
+    "after": "numerator.AddProduct(low, factor, 4000)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "var shift = default(RocBankValue);",
+    "after": "var shift = new RocBankValue(1);",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-lower-direction",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "lower.AddProduct(low, shift.Mantissa, -1)",
+    "after": "lower.AddProduct(low, shift.Mantissa, 1)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-early-boundary-publish",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_upper.Next(boundaries.Upper, commit)",
+    "after": "_upper.Next(new RocBankValue(boundaries.Upper.Publish()), commit)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-upper-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_upper.Next(boundaries.Upper, commit)",
+    "after": "_upper.Next(boundaries.Upper, true)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-lower-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_lower.Next(boundaries.Lower, commit)",
+    "after": "_lower.Next(boundaries.Lower, true)",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HeadleyBandWindow.cs",
+    "before": "_upper?.Reset(); _middle?.Reset(); _lower?.Reset();",
+    "after": "/* preserve previous smoothing state */",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary"
+  },
+  {
+    "id": "headley-band-customer-stage-order",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "before": "SpanCompat.AsReadOnlySpan(upper), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(lower), Math.Max(1, length))",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary",
+    "scope": "public static StockData CalculatePriceHeadleyAccelerationBands("
+  },
+  {
+    "id": "headley-band-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary",
+    "scope": "public static StockData CalculatePriceHeadleyAccelerationBands("
+  },
+  {
+    "id": "headley-band-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary",
+    "scope": "public sealed class PriceHeadleyAccelerationBandsState :"
+  },
+  {
+    "id": "headley-band-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~HeadleyBandNumericalTests.ExactRangeRatiosAndExtendedBoundariesSurviveAveraging|FullyQualifiedName~HeadleyBandNumericalTests.CustomerStagesConsumeSelectedCenterThenUpperThenLower|FullyQualifiedName~HeadleyBandNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~HeadleyBandNumericalTests.LegacyBatchOnlyAveragesRetainEachBoundary",
+    "scope": "internal static ComputeBuffer ComputePriceHeadleyAccelerationBandsFast("
   }
 ]

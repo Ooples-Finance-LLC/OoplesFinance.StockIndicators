@@ -586,64 +586,16 @@ public sealed class UniChannelState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class PriceHeadleyAccelerationBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _upperSmoother;
-    private readonly IMovingAverageSmoother _lowerSmoother;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _factor;
-
-    public PriceHeadleyAccelerationBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
-        double factor = 0.001)
-    {
-        var resolved = Math.Max(1, length);
-        _upperSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowerSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _factor = factor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HeadleyBandWindow _window;
+    public PriceHeadleyAccelerationBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double factor = .001) { _window = new(maType, length, factor); }
     public IndicatorName Name => IndicatorName.PriceHeadleyAccelerationBands;
-
-    public void Reset()
-    {
-        _upperSmoother.Reset();
-        _lowerSmoother.Reset();
-        _middleSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _middleSmoother.Next(value, isFinal);
-        var mult = bar.High + bar.Low != 0
-            ? 4 * _factor * 1000 * (bar.High - bar.Low) / (bar.High + bar.Low)
-            : 0;
-        var outerUpper = bar.High * (1 + mult);
-        var outerLower = bar.Low * (1 - mult);
-        var upper = _upperSmoother.Next(outerUpper, isFinal);
-        var lower = _lowerSmoother.Next(outerLower, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _upperSmoother.Dispose();
-        _lowerSmoother.Dispose();
-        _middleSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

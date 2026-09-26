@@ -246,54 +246,24 @@ public static partial class Calculations
     public static StockData CalculatePriceHeadleyAccelerationBands(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 20, double factor = 0.001)
     {
-        List<double> ubList = new(stockData.Count);
-        List<double> lbList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var middleBandList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count);
+        if (external) middle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        using var window = external ? null : new HeadleyBandWindow(maType, length, factor, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var mult = currentHigh + currentLow != 0 ? 4 * factor * 1000 * (currentHigh - currentLow) / (currentHigh + currentLow) : 0;
-
-            var outerUb = currentHigh * (1 + mult);
-            ubList.Add(outerUb);
-
-            var outerLb = currentLow * (1 - mult);
-            lbList.Add(outerLb);
+            if (external) { var bounds = HeadleyBandWindow.Boundaries(high[i], low[i], factor); upper.Add(bounds.Upper.Publish()); lower.Add(bounds.Lower.Publish()); }
+            else { var point = window!.Next(high[i], low[i], input[i], true); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); }
         }
-
-        var suList = GetMovingAverageList(stockData, maType, length, ubList);
-        var slList = GetMovingAverageList(stockData, maType, length, lbList);
-        for (var i = 0; i < stockData.Count; i++)
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var middleBand = middleBandList[i];
-            var prevMiddleBand = i >= 1 ? middleBandList[i - 1] : 0;
-            var outerUbSma = suList[i];
-            var prevOuterUbSma = i >= 1 ? suList[i - 1] : 0;
-            var outerLbSma = slList[i];
-            var prevOuterLbSma = i >= 1 ? slList[i - 1] : 0;
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
-                outerUbSma, prevOuterUbSma, outerLbSma, prevOuterLbSma);
-            signalsList?.Add(signal);
+            upper = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(upper), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, upper);
+            lower = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(lower), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", suList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", slList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.PriceHeadleyAccelerationBands;
-
-        return stockData;
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.PriceHeadleyAccelerationBands; return stockData;
     }
 
 
