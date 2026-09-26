@@ -3529,26 +3529,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeForceIndexFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateForceIndex publishes the smoothed raw force, and the raw force is the change in the chained
-        // series times the bar volume. VolumeCore.ForceIndex rebuilt the close and volume from the ticker list,
-        // so a chained force index measured the close no matter what it was chained to.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        using var rawForce = context.Rent(count);
-        var raw = rawForce.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            raw[i] = CalculationsHelper.MinPastValues(i, 1, input[i] - previousValue) * volumes[i];
+            using var force = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) force.WritableSpan[i] = i == 0 ? 0 : ForceWindow.RawForce(input[i], input[i - 1], data.Volumes[i]).Publish();
+            MovingAverage(data, maType, Math.Max(1, length), force.Span, means.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(length, 1), rawForce.Span, buffer.WritableSpan);
-
-        return buffer;
+        using var window = new ForceWindow(maType, length); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], data.Volumes[i], true, custom ? means.Span[i] : null);
+        return output;
     }
 
     /// <summary>
@@ -5060,11 +5052,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeElderForceIndexFast(StockData data, ComputeContext context, int length = 13)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.ElderForceIndex(close, volume, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeForceIndexFast(data, context, length, MovingAvgType.ExponentialMovingAverage);
     }
 
     /// <summary>

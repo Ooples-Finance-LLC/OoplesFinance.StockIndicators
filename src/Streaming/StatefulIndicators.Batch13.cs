@@ -1139,56 +1139,19 @@ public sealed class FoldedRelativeStrengthIndexState : IStreamingIndicatorState,
 [PrimaryOutput("Fi")]
 public sealed class ForceIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public ForceIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14)
-    {
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ForceWindow _window;
+    public ForceIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
+        => _window = new ForceWindow(maType, length);
     public IndicatorName Name => IndicatorName.ForceIndex;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var rawForce = _hasPrev ? (value - prevValue) * bar.Volume : 0;
-        var force = _smoother.Next(rawForce, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Fi", force }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(force, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Fi", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fo")]

@@ -75,32 +75,11 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Force Index.
     /// </summary>
-    internal static void ForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
+    internal static void ForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rawForceArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rawForce = rawForceArray.AsSpan(0, close.Length);
-
-            rawForce[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                rawForce[i] = (close[i] - close[i - 1]) * volume[i];
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(rawForce, output, length);
-        }
-        finally
-        {
-            pool.Return(rawForceArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ForceWindow(maType, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>
