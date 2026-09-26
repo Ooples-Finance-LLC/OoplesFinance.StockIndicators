@@ -212,54 +212,21 @@ public sealed class AtrChannelWidthState : IStreamingIndicatorState, IDisposable
 /// The distance between a Keltner channel's bands as a percentage of its middle, bar by bar.
 /// </summary>
 /// <remarks>
-/// The streaming twin of <c>Calculations.CalculateKeltnerChannelWidth</c>. Its middle comes from the same
-/// <c>EmaState</c> the batch path's exponential average is built on, and its range from
-/// <see cref="AverageTrueRangeState"/>, so neither can drift from the batch engine.
+/// Uses the batch engine's extended-range EMA and Wilder ATR contract. The percentage
+/// width is evaluated directly, so overflowing outer bands cannot corrupt a finite ratio.
 /// </remarks>
 [PrimaryOutput("Kcw")]
 public sealed class KeltnerChannelWidthState : IStreamingIndicatorState, IDisposable
 {
+    private readonly KeltnerWindow _window;
     private readonly double _multiplier;
-    private readonly EmaState _ema;
-    private readonly AverageTrueRangeState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-
-    public KeltnerChannelWidthState(int length = 20, double multiplier = 2)
-    {
-        _multiplier = multiplier;
-        _ema = new EmaState(Math.Max(1, length));
-        _averageTrueRange = new AverageTrueRangeState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public KeltnerChannelWidthState(int length = 20, double multiplier = 2) { _window = new(MovingAvgType.ExponentialMovingAverage, length, length); _multiplier = multiplier; }
     public IndicatorName Name => IndicatorName.KeltnerChannelWidth;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _averageTrueRange.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema = _ema.GetNext(value, isFinal);
-        var atr = _averageTrueRange.Update(bar, isFinal, includeOutputs: false).Value;
-        var upper = ema + (_multiplier * atr);
-        var lower = ema - (_multiplier * atr);
-        var width = ema != 0 ? (upper - lower) / ema * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Kcw", width } };
-        }
-
-        return new StreamingIndicatorStateResult(width, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal); var width = KeltnerWindow.Width(point.Middle, point.Atr, _multiplier);
+        return new(width, includeOutputs ? new Dictionary<string, double> { { "Kcw", width } } : null);
     }
-
-    public void Dispose()
-    {
-        _averageTrueRange.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }

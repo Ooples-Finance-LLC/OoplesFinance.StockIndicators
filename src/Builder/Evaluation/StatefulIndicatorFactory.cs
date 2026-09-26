@@ -86,6 +86,7 @@ internal static partial class StatefulIndicatorFactory
             ContractLowSpecOptions => new ContractHighLowState(),
             FractalChaosOscillatorSpecOptions => new FractalChaosOscillatorState(),
             Dema2LinesSpecOptions ordinal => new Dema2LinesState(ordinal.MaType, ordinal.FastLength, ordinal.SlowLength),
+            KeltnerChannelsSpecOptions keltner => new KeltnerChannelsState(keltner.MaType, keltner.Length1, keltner.Length2, keltner.MultFactor),
             KeltnerChannelMiddleSpecOptions ordinal => new KeltnerChannelsState(ordinal.MaType, ordinal.Length) { MiddleOnly = true },
             PriceVolumeRankSpecOptions ordinal => new PriceVolumeRankState(ordinal.MaType, ordinal.FastLength, ordinal.SlowLength),
             EhlersNoiseEliminationTechnologySpecOptions ordinal => new EhlersNoiseEliminationTechnologyState(ordinal.Length),

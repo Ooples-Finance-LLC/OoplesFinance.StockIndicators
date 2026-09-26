@@ -4098,15 +4098,15 @@
     "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions",
     "before": "{ MiddleOnly = true }",
     "after": "{ MiddleOnly = false }",
-    "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.MiddleAliasExposesOnlyItsConfiguredAverage"
   },
   {
     "module": "ordinal-family-numerical",
     "id": "ordinal-keltner-middle-overflows-endpoints",
     "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
     "scope": "public static StockData CalculateKeltnerChannels",
-    "before": "var midChannel = currentEma20Day;",
-    "after": "var midChannel = (upperChannel + lowerChannel) / 2;",
+    "before": "middle.Add(point.Middle)",
+    "after": "middle.Add((point.Upper + point.Lower) / 2)",
     "filter": "FullyQualifiedName~OrdinalFamilyNumericalTests.FullKeltnerMiddleDoesNotReconstructItsMeanFromOverflowingEndpoints"
   },
   {
@@ -18541,5 +18541,147 @@
     "after": "data.InputValues",
     "scope": "internal static ComputeBuffer ComputeButterworthFilterFast(",
     "filter": "FullyQualifiedName~TwoPoleNumericalTests.ButterworthAliasRawPreservesSelectedSeries"
+  },
+  {
+    "id": "keltner-wrong-center-period",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "new(kind, centerLength, capacityHint)",
+    "after": "new(kind, centerLength + 1, capacityHint)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-wrong-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "new(rangeKind, rangeLength, capacityHint)",
+    "after": "new(rangeKind, rangeLength + 1, capacityHint)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-wrong-atr-kind",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "new(rangeKind, rangeLength, capacityHint)",
+    "after": "new(MovingAvgType.ExponentialMovingAverage, rangeLength, capacityHint)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-zero-startup-close",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "_hasPrevious ? _previous : close",
+    "after": "_hasPrevious ? _previous : 0",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-ignores-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "_hasPrevious ? _previous : close",
+    "after": "_hasPrevious ? _previous * 0 + close : close",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-rounded-range-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "_atr.Next(range, commit)",
+    "after": "_atr.Next(new RocBankValue(range.Publish()), commit)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-upper-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "Distance(atr, multiplier); middle.AddTo(ref upper)",
+    "after": "Distance(atr, multiplier, -1); middle.AddTo(ref upper)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "Distance(atr, multiplier, -1); middle.AddTo(ref lower)",
+    "after": "Distance(atr, multiplier); middle.AddTo(ref lower)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-half-width",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "Distance(atr, multiplier, 200)",
+    "after": "Distance(atr, multiplier, 100)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "if (commit) { _previous = close;",
+    "after": "{ _previous = close;",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-stale-previous-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KeltnerWindow.cs",
+    "before": "_previous = 0; _hasPrevious = false;",
+    "after": "/* preserve previous close */",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "keltner-wrong-customer-atr-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "before": "Math.Max(1, length2))?.ToList()",
+    "after": "Math.Max(1, length2 + 1))?.ToList()",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public static StockData CalculateKeltnerChannels("
+  },
+  {
+    "id": "keltner-selected-width-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeKeltnerChannelWidthFast("
+  },
+  {
+    "id": "keltner-invalid-bands",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class KeltnerChannelsState :"
+  },
+  {
+    "id": "keltner-invalid-width",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch38.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BandsAndWidthsPreserveFiniteResultsAcrossExtremeRanges|FullyQualifiedName~KeltnerNumericalTests.SelectedPricesAndCustomerAtrThenCenterKeepTheirOrder|FullyQualifiedName~KeltnerNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class KeltnerChannelWidthState :"
+  },
+  {
+    "id": "keltner-batch-average-fallback",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "before": " || !StrengthWindow.Supports(maType) || !StrengthWindow.Supports(atrMaType)",
+    "after": "",
+    "scope": "public static StockData CalculateKeltnerChannels(",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BatchOnlyAveragesRemainAvailableForBothChannelStages"
+  },
+  {
+    "id": "keltner-raw-average-fallback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(kind)",
+    "after": "",
+    "scope": "private static ComputeBuffer ComputeKeltnerChannelBand(",
+    "filter": "FullyQualifiedName~KeltnerNumericalTests.BatchOnlyAveragesRemainAvailableForBothChannelStages"
   }
 ]

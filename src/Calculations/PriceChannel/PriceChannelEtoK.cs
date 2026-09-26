@@ -815,55 +815,24 @@ public static partial class Calculations
         int length1 = 20, int length2 = 10, double multFactor = 2,
         MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> upperChannelList = new(stockData.Count);
-        List<double> lowerChannelList = new(stockData.Count);
-        List<double> midChannelList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // ORDER MATTERS. GetMovingAverageList writes its result into stockData.CustomValuesList, and the
-        // true-range helper treats a non-empty CustomValuesList as the close series. Computing the average
-        // first therefore made the ATR measure the distance from each bar's high and low to the PREVIOUS
-        // MOVING AVERAGE rather than to the previous close - on AAPL that inflated ATR(10) from 3.9553 to
-        // 9.7261 and pushed the upper band from 143.74 to 155.28. The ATR is computed here, before any
-        // moving average touches stockData.
-        var atrList = CalculateAverageTrueRange(stockData, atrMaType, length2).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        List<double>? customAtr = null, customMiddle = null;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType) || !StrengthWindow.Supports(atrMaType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentEma20Day = emaList[i];
-            var currentAtr10Day = atrList[i];
-
-            var upperChannel = currentEma20Day + (multFactor * currentAtr10Day);
-            upperChannelList.Add(upperChannel);
-
-            var lowerChannel = currentEma20Day - (multFactor * currentAtr10Day);
-            lowerChannelList.Add(lowerChannel);
-
-            var prevMidChannel = GetLastOrDefault(midChannelList);
-            var midChannel = currentEma20Day;
-            midChannelList.Add(midChannel);
-
-            var signal = GetCompareSignal(currentValue - midChannel, prevValue - prevMidChannel);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            customAtr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, atrMaType, length2, ranges);
+            customMiddle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperChannelList },
-            { "MiddleBand", midChannelList },
-            { "LowerBand", lowerChannelList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.KeltnerChannels;
-
-        return stockData;
+        using var window = customMiddle is null ? new KeltnerWindow(maType, length1, length2, atrMaType, Math.Max(1, input.Count)) : null;
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var stages = customMiddle is null ? window!.Next(high[i], low[i], input[i], true) : (new RocBankValue(customMiddle[i]), new RocBankValue(customAtr![i]));
+            var point = KeltnerWindow.Bands(stages.Item1, stages.Item2, multFactor);
+            signals?.Add(GetCompareSignal(input[i] - point.Middle, i == 0 ? 0 : input[i - 1] - middle[i - 1])); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.KeltnerChannels; return stockData;
     }
 
 

@@ -393,35 +393,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void KeltnerChannelWidth(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 20, double multiplier = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(close, ema, length);
-            AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var upper = ema[i] + (multiplier * atr[i]);
-                var lower = ema[i] - (multiplier * atr[i]);
-                output[i] = ema[i] != 0 ? ((upper - lower) / ema[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new KeltnerWindow(MovingAvgType.ExponentialMovingAverage, length, length, capacityHint: Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) { var point = window.Next(high[i], low[i], close[i], true); output[i] = KeltnerWindow.Width(point.Middle, point.Atr, multiplier); }
     }
 
     /// <summary>

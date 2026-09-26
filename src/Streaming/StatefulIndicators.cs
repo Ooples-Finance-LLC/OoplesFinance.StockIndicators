@@ -3245,85 +3245,21 @@ public sealed class HighLowBandsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class KeltnerChannelsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public KeltnerChannelsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20,
-        int length2 = 10, double multFactor = 2,
-        MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
-    {
-        // The ATR is smoothed with Wilder's method, matching the batch CalculateKeltnerChannels and the
-        // standard definition; maType stays the basis average. Passing maType to both would silently make
-        // the bands disagree with the batch calculation.
-        _atrSmoother = MovingAverageSmootherFactory.Create(atrMaType, Math.Max(1, length2));
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _mult = multFactor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-
+    private readonly KeltnerWindow _window;
+    private readonly double _multiplier;
+    public KeltnerChannelsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 20, int length2 = 10, double multFactor = 2, MovingAvgType atrMaType = MovingAvgType.WildersSmoothingMethod)
+    { _window = new(maType, length1, length2, atrMaType); _multiplier = multFactor; }
     internal bool MiddleOnly { get; set; }
-
     public IndicatorName Name => IndicatorName.KeltnerChannels;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _middleSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        if (MiddleOnly)
-        {
-            var middleOnly = _middleSmoother.Next(value, isFinal);
-            IReadOnlyDictionary<string, double>? middleOutput = includeOutputs
-                ? new Dictionary<string, double> { ["MiddleBand"] = middleOnly } : null;
-            return new StreamingIndicatorStateResult(middleOnly, middleOutput);
-        }
-        // On the very first bar there is no previous close. Seeding it with 0 made the true range
-        // max(high-low, |high-0|, |low-0|) - the bar's PRICE rather than its range - which on AAPL made
-        // the opening ATR 18.2880 instead of 0.5170 and put the first upper band at 218.59 instead of
-        // 183.04. The batch true-range helper uses the bar's own close for that first bar; match it.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var middle = _middleSmoother.Next(value, isFinal);
-        var upper = middle + (_mult * atr);
-        var lower = middle - (_mult * atr);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar);
+        if (MiddleOnly) { var middle = _window.NextMiddle(bar.Close, isFinal).Publish(); return new(middle, includeOutputs ? new Dictionary<string, double> { { "MiddleBand", middle } } : null); }
+        var stages = _window.Next(bar.High, bar.Low, bar.Close, isFinal); var point = KeltnerWindow.Bands(stages.Middle, stages.Atr, _multiplier);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _middleSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

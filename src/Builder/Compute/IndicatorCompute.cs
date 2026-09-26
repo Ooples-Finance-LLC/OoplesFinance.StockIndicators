@@ -5819,31 +5819,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeKeltnerChannelWidthFast(StockData data, ComputeContext context, int length = 20,
         double multiplier = 2)
     {
-        // CalculateKeltnerChannelWidth measures the span between the two bands as a percentage of the
-        // exponential average of the chained series that centres them. The bands are that average stepped by a
-        // multiple of the Wilders average true range, so the width is the whole span, not one side of it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(inputList),
-            average.WritableSpan);
-        var ema = average.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, MovingAvgType.WildersSmoothingMethod);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var upper = ema[i] + (multiplier * atr[i]);
-            var lower = ema[i] - (multiplier * atr[i]);
-            output[i] = ema[i] != 0 ? (upper - lower) / ema[i] * 100 : 0;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+        using var window = new KeltnerWindow(MovingAvgType.ExponentialMovingAverage, length, length, capacityHint: Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); result.WritableSpan[i] = KeltnerWindow.Width(point.Middle, point.Atr, multiplier); }
+        return result;
     }
 
     /// <summary>
@@ -21279,12 +21258,22 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer ComputeKeltnerChannelBand(StockData data, ComputeContext context,
         int centerLength, int rangeLength, double multiplier, MovingAvgType kind, string? key)
     {
-        var result = ComputeKeltnerMiddleFast(data, context, centerLength, kind);
-        if (key is not ("UpperBand" or "LowerBand")) return result;
-        using var atr = ComputeAtrFast(data, context, rangeLength, MovingAvgType.WildersSmoothingMethod);
-        var signed = key == "UpperBand" ? multiplier : -multiplier;
-        var output = result.WritableSpan;
-        for (var i = 0; i < output.Length; i++) output[i] += signed * atr.Span[i];
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        using var atr = context.Rent(count); using var center = context.Rent(count);
+        var useStages = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind);
+        if (useStages)
+        {
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, MovingAvgType.WildersSmoothingMethod, Math.Max(1, rangeLength), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+            MovingAverage(data, kind, Math.Max(1, centerLength), SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
+        }
+        var result = context.Rent(count); using var window = useStages ? null : new KeltnerWindow(kind, centerLength, rangeLength, capacityHint: Math.Max(1, count));
+        for (var i = 0; i < count; i++)
+        {
+            var stages = useStages ? (new RocBankValue(center.Span[i]), new RocBankValue(atr.Span[i])) : window!.Next(high[i], low[i], input[i], true);
+            var point = KeltnerWindow.Bands(stages.Item1, stages.Item2, multiplier);
+            result.WritableSpan[i] = key == "UpperBand" ? point.Upper : key == "LowerBand" ? point.Lower : point.Middle;
+        }
         return result;
     }
 
