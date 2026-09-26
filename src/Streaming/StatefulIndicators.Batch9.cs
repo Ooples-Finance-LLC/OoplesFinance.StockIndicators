@@ -841,73 +841,18 @@ public sealed class EhlersFilterState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Efirf")]
 public sealed class EhlersFiniteImpulseResponseFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _coef1;
-    private readonly double _coef2;
-    private readonly double _coef3;
-    private readonly double _coef4;
-    private readonly double _coef5;
-    private readonly double _coef6;
-    private readonly double _coef7;
-    private readonly double _coefSum;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
+    private readonly EhlersFirWindow _window;
     public EhlersFiniteImpulseResponseFilterState(double coef1 = 1, double coef2 = 3.5, double coef3 = 4.5,
-        double coef4 = 3, double coef5 = 0.5, double coef6 = -0.5, double coef7 = -1.5)
-    {
-        _coef1 = coef1;
-        _coef2 = coef2;
-        _coef3 = coef3;
-        _coef4 = coef4;
-        _coef5 = coef5;
-        _coef6 = coef6;
-        _coef7 = coef7;
-        _coefSum = coef1 + coef2 + coef3 + coef4 + coef5 + coef6 + coef7;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(6);
-    }
-
+        double coef4 = 3, double coef5 = .5, double coef6 = -.5, double coef7 = -1.5) => _window = new(coef1, coef2, coef3, coef4, coef5, coef6, coef7);
     public IndicatorName Name => IndicatorName.EhlersFiniteImpulseResponseFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevValue3 = EhlersStreamingWindow.GetOffsetValue(_values, value, 3);
-        var prevValue4 = EhlersStreamingWindow.GetOffsetValue(_values, value, 4);
-        var prevValue5 = EhlersStreamingWindow.GetOffsetValue(_values, value, 5);
-        var prevValue6 = EhlersStreamingWindow.GetOffsetValue(_values, value, 6);
-        var filter = ((_coef1 * value) + (_coef2 * prevValue1) + (_coef3 * prevValue2) +
-                      (_coef4 * prevValue3) + (_coef5 * prevValue4) + (_coef6 * prevValue5) +
-                      (_coef7 * prevValue6)) / _coefSum;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Efirf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Efirf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Efdso")]

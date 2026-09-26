@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersFiniteImpulseResponseFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersFirOutputs(bars)["Efirf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.Spencer15PointMovingAverage or IndicatorName.Spencer21PointMovingAverage)
         {
             var spencerKey = builtIn.BatchName == IndicatorName.Spencer21PointMovingAverage ? "S21ma" : "S15ma";

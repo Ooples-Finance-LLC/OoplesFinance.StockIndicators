@@ -17586,22 +17586,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersFiniteImpulseResponseFilterFast(StockData data, ComputeContext context, double coef1 = 1,
         double coef2 = 3.5, double coef3 = 4.5, double coef4 = 3, double coef5 = 0.5, double coef6 = -0.5, double coef7 = -1.5)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        var coefficientSum = coef1 + coef2 + coef3 + coef4 + coef5 + coef6 + coef7;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var weighted = (coef1 * input[i]) + (coef2 * (i >= 1 ? input[i - 1] : 0)) + (coef3 * (i >= 2 ? input[i - 2] : 0)) +
-                (coef4 * (i >= 3 ? input[i - 3] : 0)) + (coef5 * (i >= 4 ? input[i - 4] : 0)) +
-                (coef6 * (i >= 5 ? input[i - 5] : 0)) + (coef7 * (i >= 6 ? input[i - 6] : 0));
-            output[i] = coefficientSum != 0 ? weighted / coefficientSum : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new EhlersFirWindow(coef1, coef2, coef3, coef4, coef5, coef6, coef7);
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

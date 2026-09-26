@@ -10081,5 +10081,94 @@
     "after": "",
     "filter": "FullyQualifiedName~SpencerNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class Spencer21PointMovingAverageState"
+  },
+  {
+    "id": "ehlers-fir-wrong-current-tap",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "numerator.AddProduct(price, _coefficients[0]);",
+    "after": "numerator.AddProduct(price, _coefficients[1]);",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-wrong-history-order",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "_history[_history.Count - lag]",
+    "after": "_history[lag - 1]",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-drops-last-tap",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "lag <= _history.Count",
+    "after": "lag < _history.Count",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-absolute-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "sum.Add(coefficient);",
+    "after": "sum.Add(Math.Abs(coefficient));",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-premature-denominator-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "_denominator = sum;",
+    "after": "var published = new ExactMeanAccumulator(); published.Add(sum.Mean(1)); _denominator = published;",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-premature-product-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "numerator.AddProduct(_history[_history.Count - lag], _coefficients[lag]);",
+    "after": "numerator.Add(_history[_history.Count - lag] * _coefficients[lag]);",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "internal void Reset() => _history.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.ExactSevenTapNormalizationHandlesCancellationAndCustomCoefficients"
+  },
+  {
+    "id": "ehlers-fir-allows-zero-coefficient-sum",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "if (sum.IsExactlyZero) throw new ArgumentException(\"FIR coefficients must have a nonzero sum.\");",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.InvalidCoefficientsRejectBeforeAnyWindowIsCreated"
+  },
+  {
+    "id": "ehlers-fir-wrong-coefficient-diagnostic",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersFirWindow.cs",
+    "before": "$\"coef{i + 1}\"",
+    "after": "\"coef1\"",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.InvalidCoefficientsRejectBeforeAnyWindowIsCreated"
+  },
+  {
+    "id": "ehlers-fir-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersFirNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EhlersFiniteImpulseResponseFilterState"
   }
 ]
