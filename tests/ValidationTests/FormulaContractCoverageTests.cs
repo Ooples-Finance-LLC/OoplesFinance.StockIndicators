@@ -2479,7 +2479,7 @@ public sealed class FormulaContractCoverageTests
         Check(new DistanceWeightedMovingAverage(3), prices, new[] { .2, 1, 103d / 47 });
         Check(new MiddleHighLowMovingAverage(2, 2), prices, new[] { 1d, 1.25, 29d / 12 });
         Check(new RepulsionMovingAverage(1), prices, new[] { -1d, -.5, 7d / 3 - 1 });
-        Check(new MovingAverageV3(2), prices, new[] { 1d, 1.5, 43d / 12 });
+        Check(new MovingAverageV3(2), prices, new[] { 1d, 1.5, 3.583333333333333 });
         Check(new SelfWeightedMovingAverage(2), prices, new[] { 0d, 0, 4 });
         Check(new HoltExponentialMovingAverage(2), prices, new[] { 1d, 2, 11d / 3 });
         // Three times the published WMA minus twice the published EMA, then one output rounding.

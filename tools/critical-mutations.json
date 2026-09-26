@@ -13677,5 +13677,119 @@
     "before": "slowLength, SpanCompat.AsReadOnlySpan(input), slowAverage.WritableSpan",
     "after": "slowLength, fastAverage.Span, slowAverage.WritableSpan",
     "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.CustomerAveragesReceiveOriginalPricesAtBothPeriods"
+  },
+  {
+    "id": "moving-average-v3-wrong-first-weight",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "numerator + denominator",
+    "after": "numerator",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-wrong-second-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "ref sum, -numerator",
+    "after": "ref sum, numerator",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "sum.Mean(denominator)",
+    "after": "sum.Mean(denominator + 1)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-unit-second-period-returns-second",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "if (denominator == 0) return first;",
+    "after": "if (denominator == 0) return second;",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-overflows-period-sum",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "ref sum, numerator + denominator",
+    "after": "ref sum, (int)(numerator + denominator)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-premature-coefficient-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "return sum.Mean(denominator);",
+    "after": "var alpha = (double)numerator / denominator; return (1 + alpha) * first - alpha * second;",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-wrong-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_second = new(kind, _length2, int.MaxValue)",
+    "after": "_second = new(kind, _length1, int.MaxValue)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-cascades-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_second.Next(new RocBankValue(price), commit)",
+    "after": "_second.Next(new RocBankValue(first), commit)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-commits-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_first.Next(new RocBankValue(price), commit)",
+    "after": "_first.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-commits-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_second.Next(new RocBankValue(price), commit)",
+    "after": "_second.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-stale-first-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-stale-second-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageV3Window.cs",
+    "before": "_second?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.ExtrapolationPreservesPreviewResetAndExtremePrices"
+  },
+  {
+    "id": "moving-average-v3-customer-period-order",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageV3Fast(",
+    "before": "maType, length1, SpanCompat.AsReadOnlySpan(input), result.WritableSpan",
+    "after": "maType, length2, SpanCompat.AsReadOnlySpan(input), result.WritableSpan",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.CustomerAveragesReceiveOriginalPricesInPeriodOrder"
+  },
+  {
+    "id": "moving-average-v3-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MovingAverageV3State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageV3NumericalTests.InvalidFieldsNeverAdvanceAnyState"
   }
 ]

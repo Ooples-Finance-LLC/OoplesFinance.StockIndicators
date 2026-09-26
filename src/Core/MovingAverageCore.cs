@@ -3725,34 +3725,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void MovingAverageV3(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Triple smoothed average
-        var ema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var ema3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var halfLength = Math.Max(2, length / 2);
-            var quarterLength = Math.Max(2, length / 4);
-
-            ExponentialMovingAverage(input, ema1Buffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1Buffer.AsSpan(0, input.Length), ema2Buffer.AsSpan(0, input.Length), halfLength);
-            ExponentialMovingAverage(ema2Buffer.AsSpan(0, input.Length), ema3Buffer.AsSpan(0, input.Length), quarterLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                // Weighted combination
-                output[i] = (3 * ema1Buffer[i]) - (3 * ema2Buffer[i]) + ema3Buffer[i];
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(ema1Buffer);
-            ArrayPool<double>.Shared.Return(ema2Buffer);
-            ArrayPool<double>.Shared.Return(ema3Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MovingAverageV3Window(MovingAvgType.ExponentialMovingAverage, length, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

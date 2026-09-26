@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.MovingAverageV3 && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovingAverageV3Outputs(bars, builtIn)["Mav3"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.MovingAverageBands or IndicatorName.MovingAverageBandWidth && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var averageBandKeys = builtIn.BatchName == IndicatorName.MovingAverageBandWidth ? new[] { "Mabw" } : new[] { "UpperBand", "MiddleBand", "LowerBand", "FastMa" };
