@@ -9440,5 +9440,196 @@
     "after": "",
     "filter": "FullyQualifiedName~TrendDetectionNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TrendDetectionIndexState"
+  },
+  {
+    "id": "trend-continuation-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "if (_hasPrevious)",
+    "after": "if (_hasPrevious || price != 0)",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-wrong-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "difference.Add(_previous, -1)",
+    "after": "difference.Add(_previous)",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-retains-run-on-ties",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "if (change.Mantissa == 0) return default;",
+    "after": "if (change.Mantissa == 0) return previous;",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-subtracts-continuation",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "previous.AddTo(ref total);",
+    "after": "previous.AddTo(ref total, -1);",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-adds-opposing-run",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "minusRun.AddTo(ref positive, -1);",
+    "after": "minusRun.AddTo(ref positive);",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-wrong-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "_terms[0].Plus.AddTo(ref plusSum, -1);",
+    "after": "_terms[_terms.Count - 1].Plus.AddTo(ref plusSum, -1);",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendContinuationWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums"
+  },
+  {
+    "id": "trend-continuation-discards-minus-leg",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "leg == TrendContinuationLeg.Minus ? value.Minus : value.Plus",
+    "after": "value.Plus",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.ConsecutiveRunsResetOnTiesAndRecoverThroughRollingSums",
+    "scope": "internal static ComputeBuffer ComputeTrendContinuationFactorFast("
+  },
+  {
+    "id": "trend-continuation-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendContinuationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrendContinuationFactorState"
+  },
+  {
+    "id": "accumulation-alias-ignores-selected-williams-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWilliamsADFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AccumulationAliasNumericalTests"
+  },
+  {
+    "id": "accumulation-alias-discards-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "\"AdlSignal\" => ComputeAccumulationDistributionLineFast(data, context, adl.Length, MovingAvgType.ExponentialMovingAverage, \"AdlSignal\"),",
+    "after": "\"AdlSignal\" => ComputeAccumulationDistributionLineFast(data, context, adl.Length),",
+    "filter": "FullyQualifiedName~AccumulationAliasNumericalTests"
+  },
+  {
+    "id": "accumulation-alias-ignores-native-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "AdlSpecOptions adlAlias => new AccumulationDistributionLineState(length: adlAlias.Length),",
+    "after": "AdlSpecOptions adlAlias => new AccumulationDistributionLineState(),",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "accumulation-alias-reverses-williams-contribution",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "scope": "internal RocBankValue Next(",
+    "before": "total.Add(endpoint, -1);",
+    "after": "total.Add(endpoint);",
+    "filter": "FullyQualifiedName~AccumulationAliasNumericalTests"
+  },
+  {
+    "id": "accumulation-alias-reverses-moneyflow-price",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "scope": "internal static RocBankValue Flow(",
+    "before": "numerator.AddProduct(close, volume, 2);",
+    "after": "numerator.AddProduct(close, volume, -2);",
+    "filter": "FullyQualifiedName~AccumulationAliasNumericalTests"
+  },
+  {
+    "id": "wilder-summation-wrong-decay-period",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "count: _length",
+    "after": "count: _length + 1L",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-adds-decay",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "decay.AddTo(ref previous, -1);",
+    "after": "decay.AddTo(ref previous);",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-drops-current-price",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "total.Add(price);",
+    "after": "total.Add(0);",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-premature-state-publication",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "_previous = result;",
+    "after": "_previous = new RocBankValue(result.Publish());",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-wrong-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSummationWindow.cs",
+    "before": "_previous = default;",
+    "after": "_previous = new RocBankValue(1);",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow"
+  },
+  {
+    "id": "wilder-summation-alias-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "return ComputeWellesWilderSummationFast(data, context, length);",
+    "after": "return ComputeWellesWilderSummationFast(data, context, 1);",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.RecurrenceStartsAtFirstPriceAndRecoversAfterOverflow",
+    "scope": "internal static ComputeBuffer ComputeWildersSummationMethodFast("
+  },
+  {
+    "id": "wilder-summation-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WilderSummationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class WellesWilderSummationState"
   }
 ]

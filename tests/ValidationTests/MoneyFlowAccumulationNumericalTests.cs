@@ -126,7 +126,7 @@ public sealed class MoneyFlowAccumulationNumericalTests
         }
     }
 
-    internal static readonly HashSet<string> Families = new(StringComparer.Ordinal) { "AccumulationDistributionLine", "ChaikinOscillator" };
+    internal static readonly HashSet<string> Families = new(StringComparer.Ordinal) { "Adl", "AccumulationDistributionLine", "ChaikinOscillator" };
     public static IEnumerable<object[]> Cases => IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
         .Where(c => Families.Contains(c.IndicatorType.Name)).Select(c => new object[] { c });
     public static IEnumerable<object[]> Routes => Cases.SelectMany(c => new[] { "batch", "fast", "arm", "native", "streaming" }

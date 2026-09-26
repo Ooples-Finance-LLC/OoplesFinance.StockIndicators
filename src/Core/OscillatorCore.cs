@@ -2945,31 +2945,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void TrendContinuationFactor(ReadOnlySpan<double> close, Span<double> output, int length = 35)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            double plusCf = 0, minusCf = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                var change = close[j] - close[j - 1];
-                if (change > 0)
-                    plusCf += change;
-                else
-                    minusCf += Math.Abs(change);
-            }
-
-            output[i] = plusCf + minusCf != 0 ? (plusCf - minusCf) / (plusCf + minusCf) * 100 : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendContinuationWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Plus;
     }
 
     /// <summary>
