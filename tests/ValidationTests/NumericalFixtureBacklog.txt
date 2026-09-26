@@ -2495,11 +2495,6 @@ OoplesFinance.StockIndicators.Indicators.SwamiStochastics/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SwamiStochastics/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.SwamiStochastics/shorter-periods
 OoplesFinance.StockIndicators.Indicators.SwingIndex/default
-OoplesFinance.StockIndicators.Indicators.T3/default
-OoplesFinance.StockIndicators.Indicators.T3/longer-periods
-OoplesFinance.StockIndicators.Indicators.T3/minimum-periods
-OoplesFinance.StockIndicators.Indicators.T3/shorter-periods
-OoplesFinance.StockIndicators.Indicators.T3/weighted-average
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/minimum-periods
@@ -2558,11 +2553,6 @@ OoplesFinance.StockIndicators.Indicators.TillsonIE2/longer-periods
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TillsonIE2/weighted-average
-OoplesFinance.StockIndicators.Indicators.TillsonT3MovingAverage/default
-OoplesFinance.StockIndicators.Indicators.TillsonT3MovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.TillsonT3MovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TillsonT3MovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TillsonT3MovingAverage/weighted-average
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/default
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/longer-length1
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/longer-length2

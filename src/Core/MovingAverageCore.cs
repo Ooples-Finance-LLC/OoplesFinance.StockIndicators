@@ -435,54 +435,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void T3MovingAverage(ReadOnlySpan<double> input, Span<double> output, int length, double vFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-        var ema5 = pool.Rent(input.Length);
-        var ema6 = pool.Rent(input.Length);
-
-        try
-        {
-            var e1 = ema1.AsSpan(0, input.Length);
-            var e2 = ema2.AsSpan(0, input.Length);
-            var e3 = ema3.AsSpan(0, input.Length);
-            var e4 = ema4.AsSpan(0, input.Length);
-            var e5 = ema5.AsSpan(0, input.Length);
-            var e6 = ema6.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, e1, length);
-            ExponentialMovingAverage(e1, e2, length);
-            ExponentialMovingAverage(e2, e3, length);
-            ExponentialMovingAverage(e3, e4, length);
-            ExponentialMovingAverage(e4, e5, length);
-            ExponentialMovingAverage(e5, e6, length);
-
-            var c1 = -vFactor * vFactor * vFactor;
-            var c2 = 3 * vFactor * vFactor + 3 * vFactor * vFactor * vFactor;
-            var c3 = -6 * vFactor * vFactor - 3 * vFactor - 3 * vFactor * vFactor * vFactor;
-            var c4 = 1 + 3 * vFactor + vFactor * vFactor * vFactor + 3 * vFactor * vFactor;
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (c1 * e6[i]) + (c2 * e5[i]) + (c3 * e4[i]) + (c4 * e3[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-            pool.Return(ema5);
-            pool.Return(ema6);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TillsonWindow(MovingAvgType.ExponentialMovingAverage, length, vFactor);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -165,34 +165,35 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var c1 = -vFactor * vFactor * vFactor;
-        var c2 = (3 * vFactor * vFactor) + (3 * vFactor * vFactor * vFactor);
-        var c3 = (-6 * vFactor * vFactor) - (3 * vFactor) - (3 * vFactor * vFactor * vFactor);
-        var c4 = 1 + (3 * vFactor) + (vFactor * vFactor * vFactor) + (3 * vFactor * vFactor);
+        var coefficients = new TillsonWindow.Coefficients(vFactor);
 
-        var ema1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, length, ema1List);
-        var ema3List = GetMovingAverageList(stockData, maType, length, ema2List);
-        var ema4List = GetMovingAverageList(stockData, maType, length, ema3List);
-        var ema5List = GetMovingAverageList(stockData, maType, length, ema4List);
-        var ema6List = GetMovingAverageList(stockData, maType, length, ema5List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (!Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ema6 = ema6List[i];
-            var ema5 = ema5List[i];
-            var ema4 = ema4List[i];
-            var ema3 = ema3List[i];
-
-            var prevT3 = GetLastOrDefault(t3List);
-            var t3 = (c1 * ema6) + (c2 * ema5) + (c3 * ema4) + (c4 * ema3);
-            t3List.Add(t3);
-
-            var signal = GetCompareSignal(currentValue - t3, prevValue - prevT3);
-            signalsList?.Add(signal);
+            using var window = new TillsonWindow(maType, length, vFactor);
+            foreach (var price in inputList) t3List.Add(window.Next(price, true));
         }
+        else
+        {
+            var ema1List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            var ema2List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema1List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema1List);
+            var ema3List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema2List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema2List);
+            var ema4List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema3List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema3List);
+            var ema5List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema4List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema4List);
+            var ema6List = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ema5List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ema5List);
+
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var ema6 = ema6List[i];
+                var ema5 = ema5List[i];
+                var ema4 = ema4List[i];
+                var ema3 = ema3List[i];
+
+                var t3 = coefficients.Combine(ema3, ema4, ema5, ema6);
+                t3List.Add(t3);
+
+            }
+        }
+        for (var i = 0; i < inputList.Count; i++) signalsList?.Add(GetCompareSignal(inputList[i] - t3List[i], i == 0 ? 0 : inputList[i - 1] - t3List[i - 1]));
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "T3", t3List }
