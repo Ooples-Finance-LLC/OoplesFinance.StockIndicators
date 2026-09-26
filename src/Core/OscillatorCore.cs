@@ -5009,46 +5009,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Price Volume Oscillator.
     /// </summary>
-    internal static void PriceVolumeOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int shortLength = 5, int longLength = 10)
+    internal static void PriceVolumeOscillator(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> priceOutput, Span<double> volumeOutput, int length1 = 50, int length2 = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var pvArray = pool.Rent(close.Length);
-        var shortEmaArray = pool.Rent(close.Length);
-        var longEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var pv = pvArray.AsSpan(0, close.Length);
-            var shortEma = shortEmaArray.AsSpan(0, close.Length);
-            var longEma = longEmaArray.AsSpan(0, close.Length);
-
-            // Calculate price * volume
-            for (var i = 0; i < close.Length; i++)
-            {
-                pv[i] = close[i] * volume[i];
-            }
-
-            // Calculate EMAs of PV
-            MovingAverageCore.ExponentialMovingAverage(pv, shortEma, shortLength);
-            MovingAverageCore.ExponentialMovingAverage(pv, longEma, longLength);
-
-            // Calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = longEma[i] != 0 ? ((shortEma[i] - longEma[i]) / longEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(pvArray);
-            pool.Return(shortEmaArray);
-            pool.Return(longEmaArray);
-        }
+        if (volume.Length != close.Length || priceOutput.Length < close.Length || volumeOutput.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and sufficient output spans are required.");
+        using var prices = new LaggedBalanceWindow(length1); using var volumes = new LaggedBalanceWindow(length2);
+        for (var i = 0; i < close.Length; i++) { priceOutput[i] = prices.Next(close[i], true); volumeOutput[i] = volumes.Next(volume[i], true); }
     }
 
     #endregion

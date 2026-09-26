@@ -243,88 +243,18 @@ public sealed class PriceMomentumOscillatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Po")]
 public sealed class PriceVolumeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly RollingWindowSum _aSum;
-    private readonly RollingWindowSum _bSum;
-    private readonly RollingWindowSum _absASum;
-    private readonly RollingWindowSum _absBSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _volumes;
-    private readonly StreamingInputResolver _input;
-
+    private readonly LaggedBalanceWindow _prices, _volumes;
     public PriceVolumeOscillatorState(int length1 = 50, int length2 = 14)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _aSum = new RollingWindowSum(_length1);
-        _bSum = new RollingWindowSum(_length2);
-        _absASum = new RollingWindowSum(_length1);
-        _absBSum = new RollingWindowSum(_length2);
-        _values = new PooledRingBuffer<double>(_length1);
-        _volumes = new PooledRingBuffer<double>(_length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _prices = new LaggedBalanceWindow(length1); _volumes = new LaggedBalanceWindow(length2); }
     public IndicatorName Name => IndicatorName.PriceVolumeOscillator;
-
-    public void Reset()
-    {
-        _aSum.Reset();
-        _bSum.Reset();
-        _absASum.Reset();
-        _absBSum.Reset();
-        _values.Clear();
-        _volumes.Clear();
-    }
-
+    public void Reset() { _prices.Reset(); _volumes.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var prevVolume = EhlersStreamingWindow.GetOffsetValue(_volumes, volume, _length2);
-        var hasValue = _values.Count >= _length1;
-        var hasVolume = _volumes.Count >= _length2;
-        var a = hasValue ? value - prevValue : 0;
-        var b = hasVolume ? volume - prevVolume : 0;
-        var absA = Math.Abs(a);
-        var absB = Math.Abs(b);
-        var aSum = isFinal ? _aSum.Add(a, out _) : _aSum.Preview(a, out _);
-        var bSum = isFinal ? _bSum.Add(b, out _) : _bSum.Preview(b, out _);
-        var absASum = isFinal ? _absASum.Add(absA, out _) : _absASum.Preview(absA, out _);
-        var absBSum = isFinal ? _absBSum.Add(absB, out _) : _absBSum.Preview(absB, out _);
-        var oscA = absASum != 0 ? aSum / absASum : 0;
-        var oscB = absBSum != 0 ? bSum / absBSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _volumes.TryAdd(volume, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Po", oscA },
-                { "Vo", oscB }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(oscA, outputs);
+        StreamingInputValidation.Validate(bar);
+        var price = _prices.Next(bar.Close, isFinal); var volume = _volumes.Next(bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(price, includeOutputs ? new Dictionary<string, double> { { "Po", price }, { "Vo", volume } } : null);
     }
-
-    public void Dispose()
-    {
-        _aSum.Dispose();
-        _bSum.Dispose();
-        _absASum.Dispose();
-        _absBSum.Dispose();
-        _values.Dispose();
-        _volumes.Dispose();
-    }
+    public void Dispose() { _prices.Dispose(); _volumes.Dispose(); }
 }
 
 [PrimaryOutput("Pvr")]

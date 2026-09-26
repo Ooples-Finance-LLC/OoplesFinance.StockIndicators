@@ -7718,5 +7718,89 @@
     "after": "",
     "filter": "FullyQualifiedName~ShinoharaNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ShinoharaIntensityRatioState"
+  },
+  {
+    "id": "price-volume-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "_prices[0] : value",
+    "after": "_prices[_prices.Count - 1] : value",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-nonzero-startup",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "_prices[0] : value",
+    "after": "_prices[0] : 0",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-signed-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "to >= from ? weight : -weight",
+    "after": "weight",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-keeps-expired-changes",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "if (_changes.Count == _changes.Capacity)",
+    "after": "if (_changes.Count > _changes.Capacity)",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "if (commit)\n        {",
+    "after": "if (_prices.Capacity > 0)\n        {",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-stale-values-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LaggedBalanceWindow.cs",
+    "before": "_prices.Clear(); _changes.Clear();",
+    "after": "_changes.Clear();",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup"
+  },
+  {
+    "id": "price-volume-volume-leg-uses-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "volume ? data.Volumes :",
+    "after": "volume ? data.InputValues :",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup",
+    "scope": "internal static ComputeBuffer ComputePriceVolumeOscillatorFast("
+  },
+  {
+    "id": "price-volume-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup",
+    "scope": "internal static ComputeBuffer ComputePriceVolumeOscillatorFast("
+  },
+  {
+    "id": "price-volume-core-discards-volume-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "using var volumes = new LaggedBalanceWindow(length2);",
+    "after": "using var volumes = new LaggedBalanceWindow(length1);",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.IndependentLaggedLegsPreserveWideChangesAndStartup",
+    "scope": "internal static void PriceVolumeOscillator("
+  },
+  {
+    "id": "price-volume-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PriceVolumeOscillatorState"
   }
 ]
