@@ -47,6 +47,25 @@ internal sealed class ExactLinearFitWindow : IDisposable
             var otherNumerator = other._n.IsOne ? other._sum : other._sum * other._spread + 3 * other._covariance * (other._n - 1);
             return (numerator * otherDenominator - otherNumerator * denominator, denominator * otherDenominator);
         }
+        internal double Index => (double)_index;
+        internal double PercentFitResidual(double value)
+        {
+            var denominator = _n.IsOne ? BigInteger.One : _n * _spread;
+            var numerator = _n.IsOne ? _sum : _sum * _spread + 3 * _covariance * (_n - 1);
+            if (numerator.IsZero) return 0;
+            return ExactMeanAccumulator.UnitRatio((100 * (ExactVarianceWindow.Units(value) * denominator - numerator) * numerator.Sign) << 1074,
+                BigInteger.Abs(numerator));
+        }
+        internal double CenteredLine(double meanPrice, double meanTime)
+        {
+            if (_n.IsOne) return meanPrice;
+            if (double.IsNaN(meanPrice) || double.IsInfinity(meanPrice) || double.IsNaN(meanTime) || double.IsInfinity(meanTime))
+                return meanPrice + Slope * (Index - meanTime);
+            var denominator = _n * _spread;
+            var offset = (_index << 1074) - ExactVarianceWindow.Units(meanTime);
+            return ExactMeanAccumulator.UnitRatio((ExactVarianceWindow.Units(meanPrice) * denominator << 1074) + 6 * _covariance * offset,
+                denominator << 1074);
+        }
         internal int Count => (int)_n;
         internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.UnitRatio(6 * _covariance, _n * _spread);
         internal double Last => At(_n - 1);

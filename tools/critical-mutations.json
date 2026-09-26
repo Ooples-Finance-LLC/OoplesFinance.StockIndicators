@@ -6936,5 +6936,94 @@
     "after": "if (k == 123456789)",
     "filter": "FullyQualifiedName~RankLogisticNumericalTests.NonfiniteGainsAreRejectedBeforeCalculation",
     "scope": "public LogisticCorrelationSpecOptions("
+  },
+  {
+    "id": "derived-regression-uses-rounded-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "if (numerator.IsZero) return 0;",
+    "after": "if (Last == 0) return 0;",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal double PercentFitResidual("
+  },
+  {
+    "id": "derived-regression-normalizes-by-price",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "BigInteger.Abs(numerator));",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(value) * denominator) + BigInteger.One);",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal double PercentFitResidual("
+  },
+  {
+    "id": "derived-regression-loses-price-center",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "ExactVarianceWindow.Units(meanPrice) * denominator << 1074",
+    "after": "BigInteger.Zero << 1074",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal double CenteredLine("
+  },
+  {
+    "id": "derived-regression-rounds-slope-too-early",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "before": "6 * _covariance * offset",
+    "after": "ExactVarianceWindow.Units(Slope) * denominator * offset",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal double CenteredLine("
+  },
+  {
+    "id": "derived-regression-core-oscillator-wrong-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new ExactLinearFitWindow(length)",
+    "after": "new ExactLinearFitWindow(14)",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal static void RegressionOscillator("
+  },
+  {
+    "id": "derived-regression-core-line-starts-early",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "fit.Count < length ? 0 : fit.Last",
+    "after": "fit.Count < length - 1 ? 0 : fit.Last",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal static void LinearRegressionLine("
+  },
+  {
+    "id": "derived-regression-line-ignores-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides",
+    "after": "maType == MovingAvgType.SimpleMovingAverage",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.BothCustomerCentersRemainEffective",
+    "scope": "internal static ComputeBuffer ComputeLinearRegressionLineFast("
+  },
+  {
+    "id": "derived-regression-line-wrong-time-center",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "fit.CenteredLine(priceMean.Span[i], timeMean.Span[i])",
+    "after": "fit.CenteredLine(priceMean.Span[i], priceMean.Span[i])",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "internal static ComputeBuffer ComputeLinearRegressionLineFast("
+  },
+  {
+    "id": "derived-regression-typed-line-ignores-average",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new LinearRegressionLineState(line.MaType, line.Length)",
+    "after": "new LinearRegressionLineState(MovingAvgType.SimpleMovingAverage, line.Length)",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection"
+  },
+  {
+    "id": "derived-regression-native-oscillator-commits-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "_linReg.Next(value, isFinal)",
+    "after": "_linReg.Next(value, true)",
+    "filter": "FullyQualifiedName~DerivedRegressionNumericalTests.ExactFitsPreserveResidualsWideEndpointsAndAverageSelection",
+    "scope": "public sealed class RegressionOscillatorState"
   }
 ]

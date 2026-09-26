@@ -10369,23 +10369,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRegressionOscillatorFast(StockData data, ComputeContext context, int length = 63)
     {
-        // CalculateRegressionOscillator is how far the chained series stands above or below the linear
-        // regression fitted at the same bar, as a percentage of that fit. OscillatorCore.RegressionOscillator
-        // read the close and fitted a different window, so it agreed at no bar.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var rosc = buffer.WritableSpan;
-
-        using var regression = new ExactLinearFitWindow(length);
-        for (var i = 0; i < count; i++)
-        {
-            var linReg = regression.Next(input[i], isFinal: true).Last;
-            rosc[i] = linReg != 0 ? 100 * ((input[i] / linReg) - 1) : 0;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        OscillatorCore.RegressionOscillator(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 
@@ -15163,51 +15149,24 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeLinearRegressionLineFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateLinearRegressionLine fits the chained series against the bar index through a rolling
-        // correlation: the slope is that correlation scaled by the ratio of the two standard deviations and
-        // the intercept places the line on the moving averages of both series, so maType moves the result.
-        // MovingAverageCore.LinearRegressionLine solved a different least squares problem and ignored it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var index = context.Rent(count);
-        var x = index.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length);
+        var values = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var input = SpanCompat.AsReadOnlySpan(values);
+        var classical = maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides;
+        using var index = context.Rent(values.Count);
+        for (var i = 0; i < values.Count; i++) index.WritableSpan[i] = i;
+        using var priceMean = context.Rent(values.Count);
+        MovingAverage(data, maType, length, input, priceMean.WritableSpan);
+        using var timeMean = context.Rent(values.Count);
+        MovingAverage(data, maType, length, index.Span, timeMean.WritableSpan);
+        var output = context.Rent(values.Count);
+        using var regression = new ExactLinearFitWindow(length);
+        for (var i = 0; i < values.Count; i++)
         {
-            x[i] = i;
+            var fit = regression.Next(values[i], true);
+            output.WritableSpan[i] = fit.Count < length ? priceMean.Span[i] : classical ? fit.Last : fit.CenteredLine(priceMean.Span[i], timeMean.Span[i]);
         }
-
-        using var valueAverage = context.Rent(count);
-        MovingAverage(data, maType, length, input, valueAverage.WritableSpan);
-        var yMa = valueAverage.Span;
-
-        using var indexAverage = context.Rent(count);
-        MovingAverage(data, maType, length, index.Span, indexAverage.WritableSpan);
-        var xMa = indexAverage.Span;
-
-        using var valueDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, valueDeviation.WritableSpan, Math.Max(1, length));
-        var my = valueDeviation.Span;
-
-        using var indexDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(index.Span, indexDeviation.WritableSpan, Math.Max(1, length));
-        var mx = indexDeviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var correlation = new RollingCorrelation();
-        for (var i = 0; i < count; i++)
-        {
-            correlation.Add(input[i], i);
-            var corr = correlation.R(length);
-            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-            var slope = mx[i] != 0 ? corr * (my[i] / mx[i]) : 0;
-            output[i] = (i * slope) + (yMa[i] - (slope * xMa[i]));
-        }
-
-        return buffer;
+        return output;
     }
 
     /// <summary>

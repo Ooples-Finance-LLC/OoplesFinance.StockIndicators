@@ -1215,81 +1215,29 @@ public sealed class LinearQuadraticConvergenceDivergenceOscillatorState : IStrea
 public sealed class LinearRegressionLineState : IStreamingIndicatorState, IDisposable
 {
     private readonly int _length;
-    private readonly RollingWindowCorrelation _correlation;
-    private readonly IMovingAverageSmoother _yMa;
-    private readonly IMovingAverageSmoother _xMa;
-    private readonly RollingStandardDeviation _yStdDev;
-    private readonly RollingStandardDeviation _xStdDev;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
+    private readonly bool _classical;
+    private readonly ExactLinearFitWindow _regression;
+    private readonly IMovingAverageSmoother _priceMean, _timeMean;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public LinearRegressionLineState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        _length = Math.Max(1, length);
-        _correlation = new RollingWindowCorrelation(_length);
-        _yMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _xMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _yStdDev = new RollingStandardDeviation(_length);
-        _xStdDev = new RollingStandardDeviation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _length = Math.Max(1, length); _classical = maType == MovingAvgType.SimpleMovingAverage;
+        _regression = new ExactLinearFitWindow(_length);
+        _priceMean = MovingAverageSmootherFactory.Create(maType, _length);
+        _timeMean = MovingAverageSmootherFactory.Create(maType, _length);
     }
-
     public IndicatorName Name => IndicatorName.LinearRegressionLine;
-
-    public void Reset()
-    {
-        _correlation.Reset();
-        _yMa.Reset();
-        _xMa.Reset();
-        _yStdDev.Reset();
-        _xStdDev.Reset();
-        _index = 0;
-    }
-
+    public void Reset() { _regression.Reset(); _priceMean.Reset(); _timeMean.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var x = (double)_index;
-
-        var corr = isFinal
-            ? _correlation.Add(value, x, out _)
-            : _correlation.Preview(value, x, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-        var yMa = _yMa.Next(value, isFinal);
-        var xMa = _xMa.Next(x, isFinal);
-        // slope = r * sd(y) / sd(x), from the standard deviations of the prices and of the bar index
-        // themselves - so the line is the least-squares fit of the window, evaluated at this bar.
-        var my = _yStdDev.Next(value, isFinal);
-        var mx = _xStdDev.Next(x, isFinal);
-        var slope = mx != 0 ? corr * (my / mx) : 0;
-        var inter = yMa - (slope * xMa);
-        var reg = (x * slope) + inter;
-
-        if (isFinal)
-        {
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "LinReg", reg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(reg, outputs);
+        StreamingInputValidation.Validate(bar);
+        var fit = _regression.Next(_input.GetValue(bar), isFinal);
+        var meanPrice = _priceMean.Next(_input.GetValue(bar), isFinal);
+        var meanTime = _timeMean.Next(fit.Index, isFinal);
+        var value = fit.Count < _length ? meanPrice : _classical ? fit.Last : fit.CenteredLine(meanPrice, meanTime);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "LinReg", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _correlation.Dispose();
-        _yMa.Dispose();
-        _xMa.Dispose();
-        _yStdDev.Dispose();
-        _xStdDev.Dispose();
-    }
+    public void Dispose() { _regression.Dispose(); _priceMean.Dispose(); _timeMean.Dispose(); }
 }
 
 [PrimaryOutput("Ts")]
