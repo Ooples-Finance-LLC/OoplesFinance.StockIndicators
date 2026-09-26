@@ -21770,41 +21770,23 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer MovingAverageBandLevels(StockData data, ComputeContext context, int fastLength,
         int slowLength, double mult, MovingAvgType maType, MovingAverageBandSeries series)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slowAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var fast = fastAverage.Span;
-        var slow = slowAverage.Span;
-
-        var gaps = new RollingSum();
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new MovingAverageBandWindow(maType, fastLength, slowLength, mult, external);
+        using var fastAverage = context.Rent(external ? input.Count : 0); using var slowAverage = context.Rent(external ? input.Count : 0);
+        if (external)
         {
-            var gap = slow[i] - fast[i];
-            gaps.Add(gap * gap);
-
-            var deviation = Math.Sqrt(gaps.Average(fastLength)) * mult;
-            var upper = slow[i] + deviation;
-            var lower = slow[i] - deviation;
-
-            output[i] = series switch
-            {
-                MovingAverageBandSeries.MiddleBand => slow[i],
-                MovingAverageBandSeries.LowerBand => lower,
-                MovingAverageBandSeries.FastMa => fast[i],
-                MovingAverageBandSeries.BandWidth => slow[i] != 0 ? (upper - lower) / slow[i] * 100 : 0,
-                _ => upper
-            };
+            MovingAverage(data, maType, fastLength, SpanCompat.AsReadOnlySpan(input), fastAverage.WritableSpan);
+            MovingAverage(data, maType, slowLength, SpanCompat.AsReadOnlySpan(input), slowAverage.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true, external ? fastAverage.Span[i] : null, external ? slowAverage.Span[i] : null);
+            result.WritableSpan[i] = series switch { MovingAverageBandSeries.MiddleBand => value.Middle, MovingAverageBandSeries.LowerBand => value.Lower,
+                MovingAverageBandSeries.FastMa => value.Fast, MovingAverageBandSeries.BandWidth => value.Width, _ => value.Upper };
+        }
+        return result;
     }
 
     /// <summary>

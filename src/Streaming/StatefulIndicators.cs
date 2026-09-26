@@ -1042,70 +1042,17 @@ public sealed class RootMovingAverageSquaredErrorBandsState : IStreamingIndicato
 [PrimaryOutput("FastMa")]
 public sealed class MovingAverageBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly RollingWindowSum _sqSum;
-    private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-
-    public MovingAverageBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 10,
-        int slowLength = 50, double mult = 1)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _sqSum = new RollingWindowSum(resolvedFast);
-        _mult = mult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MovingAverageBandWindow _window;
+    public MovingAverageBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 10, int slowLength = 50, double mult = 1) => _window = new(maType, fastLength, slowLength, mult);
     public IndicatorName Name => IndicatorName.MovingAverageBands;
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _sqSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fast = _fastSmoother.Next(value, isFinal);
-        var slow = _slowSmoother.Next(value, isFinal);
-        var diff = slow - fast;
-        var sq = diff * diff;
-
-        int countAfter;
-        var sum = isFinal ? _sqSum.Add(sq, out countAfter) : _sqSum.Preview(sq, out countAfter);
-        var dev = MathHelper.Sqrt(countAfter > 0 ? sum / countAfter : 0) * _mult;
-        var upper = slow + dev;
-        var lower = slow - dev;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // The bands are the slow average plus and minus dev, so the slow average is the centre; the
-            // fast one is a different quantity. See the batch calculation.
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", slow },
-                { "LowerBand", lower },
-                { "FastMa", fast }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fast, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Fast, includeOutputs ? new Dictionary<string, double> { { "UpperBand", value.Upper }, { "MiddleBand", value.Middle }, { "LowerBand", value.Lower }, { "FastMa", value.Fast } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-        _sqSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

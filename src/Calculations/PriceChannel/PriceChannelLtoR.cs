@@ -1109,55 +1109,23 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 10, int slowLength = 50, double mult = 1)
     {
-        List<double> sqList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum sqSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var fastMaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var slowMaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new MovingAverageBandWindow(maType, fastLength, slowLength, mult, external);
+        var fastAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), fastLength)?.ToList() ?? GetMovingAverageList(stockData, maType, fastLength, input) : null;
+        var slowAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), slowLength)?.ToList() ?? GetMovingAverageList(stockData, maType, slowLength, input) : null;
+        List<double> upper = new(stockData.Count), middle = new(stockData.Count), lower = new(stockData.Count), fast = new(stockData.Count), bandwidth = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var fastMa = fastMaList[i];
-            var slowMa = slowMaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFastMa = i >= 1 ? fastMaList[i - 1] : 0;
-
-            var sq = Pow(slowMa - fastMa, 2);
-            sqList.Add(sq);
-            sqSumWindow.Add(sq);
-
-            var dev = Sqrt(sqSumWindow.Average(fastLength)) * mult;
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = slowMa + dev;
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = slowMa - dev;
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - fastMa, prevValue - prevFastMa, currentValue, prevValue, 
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, fastAverage?[i], slowAverage?[i]);
+            var center = value.Fast;
+            var previousCenter = i == 0 ? 0 : fast[i - 1];
+            signals?.Add(GetBollingerBandsSignal(input[i] - center, i == 0 ? 0 : input[i - 1] - previousCenter, input[i], i == 0 ? 0 : input[i - 1], value.Upper, i == 0 ? 0 : upper[i - 1], value.Lower, i == 0 ? 0 : lower[i - 1]));
+            upper.Add(value.Upper); middle.Add(value.Middle); lower.Add(value.Lower); fast.Add(value.Fast); bandwidth.Add(value.Width);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The bands are the slow average plus and minus dev, so the slow average is what they are
-            // centred on. The fast one was published here instead, and being a different quantity it has
-            // no reason to lie between them - it left the upper band on 28 bars and the lower on 111.
-            { "UpperBand", upperBandList },
-            { "MiddleBand", slowMaList },
-            { "LowerBand", lowerBandList },
-            { "FastMa", fastMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MovingAverageBands;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower }, { "FastMa", fast } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MovingAverageBands;
         return stockData;
     }
 

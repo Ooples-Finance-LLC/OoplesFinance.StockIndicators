@@ -13522,5 +13522,160 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "moving-average-bands-wrong-gap-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "difference.Add(fast, -1)",
+    "after": "difference.Add(fast, 1)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-forgets-expired-gap",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "if (full) Square(ref squares, _gaps[0], -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-zero-pads-rms-startup",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "full ? _gaps.Capacity : _gaps.Count + 1",
+    "after": "_gaps.Capacity",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-drops-gap-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "negative.ScaleByPowerOfTwo(2 * value.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.HiddenDeviationPreservesFiniteWidthsAndNarrowBands"
+  },
+  {
+    "id": "moving-average-bands-wrong-root-rescaling",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "new(scaled.SqrtMean(count), 1)",
+    "after": "new(scaled.SqrtMean(count), 0)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.HiddenDeviationPreservesFiniteWidthsAndNarrowBands"
+  },
+  {
+    "id": "moving-average-bands-commits-fast-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_fast.Next(new RocBankValue(price), commit)",
+    "after": "_fast.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-commits-slow-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_slow.Next(new RocBankValue(price), commit)",
+    "after": "_slow.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-commits-gap-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "if (commit) { _squares = squares;",
+    "after": "if (true) { _squares = squares;",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-stale-fast-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_fast?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-stale-slow-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_slow?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-stale-gap-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_gaps.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-stale-squares-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "_squares = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-wrong-width-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "width.AddTo(ref numerator, 200)",
+    "after": "width.AddTo(ref numerator, 100)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.HiddenDeviationPreservesFiniteWidthsAndNarrowBands"
+  },
+  {
+    "id": "moving-average-bands-reconstructs-width-from-published-bands",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "slow == 0 ? 0 : numerator.Ratio(denominator)",
+    "after": "slow == 0 ? 0 : (upper.Mean(1) - lower.Mean(1)) / slow * 100",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.HiddenDeviationPreservesFiniteWidthsAndNarrowBands"
+  },
+  {
+    "id": "moving-average-bands-wrong-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "width.AddTo(ref lower, -1)",
+    "after": "width.AddTo(ref lower, 1)",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.RootMeanSquareBandsPreservePreviewResetAndExtendedRange"
+  },
+  {
+    "id": "moving-average-bands-accepts-invalid-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/MovingAverageBandWindow.cs",
+    "before": "if (double.IsNaN(mult) || double.IsInfinity(mult)) throw new ArgumentOutOfRangeException(nameof(mult));",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.NonfiniteMultipliersAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "moving-average-bands-movingaveragebands-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageBandsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "moving-average-bands-movingaveragebandwidth-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "scope": "public sealed class MovingAverageBandWidthState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "moving-average-bands-customer-slow-receives-fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer MovingAverageBandLevels(",
+    "before": "slowLength, SpanCompat.AsReadOnlySpan(input), slowAverage.WritableSpan",
+    "after": "slowLength, fastAverage.Span, slowAverage.WritableSpan",
+    "filter": "FullyQualifiedName~MovingAverageBandsNumericalTests.CustomerAveragesReceiveOriginalPricesAtBothPeriods"
   }
 ]

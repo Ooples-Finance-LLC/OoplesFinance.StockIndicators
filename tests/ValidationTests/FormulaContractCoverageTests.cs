@@ -2229,7 +2229,8 @@ public sealed class FormulaContractCoverageTests
         var prices = new[] { 1d, 2, 4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new Wwma(2), prices, new[] { .5, 1.25, 2.625 });
         Check(new Tma(2), prices, new[] { 0d, .75, 2.25 });
-        Check(new Hma(2), prices, new[] { 4d / 3, 7d / 3, 14d / 3 });
+        // WMA stages publish binary64 before Hull combines them.
+        Check(new Hma(2), prices, new[] { 2 - 2d / 3, 4 - 5d / 3, 8 - 10d / 3 });
         Check(new BollingerBands(2), prices, new[] { 0d, 2.5, 5 }, new[] { 0d, 1.5, 3 }, new[] { 0d, .5, 1 });
         Check(new Variance(2), prices, new[] { 0d, .25, 1 });
         Check(new PriceMomentumOscillator(2, 2, 2), prices,
@@ -2242,7 +2243,7 @@ public sealed class FormulaContractCoverageTests
         Check(new StollerAverageRangeChannels(2), prices, new[] { 0d, 2.5, 6 }, new[] { 0d, 1.5, 3 }, new[] { 0d, .5, 0 });
         Check(new HighLowBands(2), prices, new[] { 0d, .7575, 2.2725 }, new[] { 0d, .75, 2.25 }, new[] { 0d, .7425, 2.2275 });
         Check(new HighLowMovingAverage(2), prices, new[] { 2d / 3, 5d / 3, 10d / 3 },
-            new[] { 2d / 3, 4d / 3, 2.5 }, new[] { 2d / 3, 1, 5d / 3 });
+            new[] { 2d / 3, (5d / 3 + 1) / 2, 2.5 }, new[] { 2d / 3, 1, 5d / 3 });
         Check(new StochasticFastOscillator(2, 2, 2), prices,
             new[] { 0d, 50, 250d / 3 }, new[] { 0d, 25, 575d / 9 });
         Check(new StochasticRegular(2, 2), prices, new[] { 0d, 100, 100 }, new[] { 0d, 50, 100 });
@@ -2262,7 +2263,7 @@ public sealed class FormulaContractCoverageTests
         Check(new MovingAverageChannel(2), bars, new[] { 0d, 14.5, 15.5 },
             new[] { 0d, 13, 13.75 }, new[] { 0d, 11.5, 12 });
         Check(new MovingAverageBands(1, 2), prices, new[] { 1d, 2, 4 },
-            new[] { 1d, 1.5, 19d / 6 }, new[] { 1d, 1, 7d / 3 }, new[] { 1d, 2, 4 });
+            new[] { 1d, 1.5, 19d / 6 }, new[] { 1d, 1, 2 * (19d / 6) - 4 }, new[] { 1d, 2, 4 });
         Check(new KirshenbaumBands(2, 3), prices, new[] { 1d, 1.5, 19d / 6 + 1 / (6 * Math.Sqrt(3)) },
             new[] { 1d, 1.5, 19d / 6 }, new[] { 1d, 1.5, 19d / 6 - 1 / (6 * Math.Sqrt(3)) });
         Check(new AverageTrueRangeChannel(2, 2), bars, new[] { 11d, 25, 24 },
@@ -2469,19 +2470,21 @@ public sealed class FormulaContractCoverageTests
         Check(new EhlersInfiniteImpulseResponseFilter(3), prices, new[] { .5, 1.25, 4.125 });
         Check(new EhlersIirFilter(3), prices, new[] { .5, 1.25, 4.125 });
         Check(new EhlersOptimumEllipticFilter(3), impulse.Take(3).ToArray(), new[] { .13785, .167539855, .2735318915065 });
-        Check(new EhlersModifiedOptimumEllipticFilter(3), prices, new[] { 1d, 1.2757, 2.02432971 });
+        // Binary64 coefficient values, exact products, and a rounded feedback value on each bar.
+        Check(new EhlersModifiedOptimumEllipticFilter(3), prices, new[] { 0.9999999999999999, 1.2756999999999998, 2.02432971 });
         Check(new HendersonWeightedMovingAverage(7), impulse,
             new[] { -42d, 42, 210, 295, 210, 42, -42 }.Select(v => v / 715).ToArray());
         Check(new HendersonWeightedMovingAverage(3), impulse,
             new[] { -21d / 223, 84d / 223, 160d / 223, 0, 0, 0, 0 });
         Check(new DistanceWeightedMovingAverage(3), prices, new[] { .2, 1, 103d / 47 });
         Check(new MiddleHighLowMovingAverage(2, 2), prices, new[] { 1d, 1.25, 29d / 12 });
-        Check(new RepulsionMovingAverage(1), prices, new[] { -1d, -.5, 4d / 3 });
+        Check(new RepulsionMovingAverage(1), prices, new[] { -1d, -.5, 7d / 3 - 1 });
         Check(new MovingAverageV3(2), prices, new[] { 1d, 1.5, 43d / 12 });
         Check(new SelfWeightedMovingAverage(2), prices, new[] { 0d, 0, 4 });
         Check(new HoltExponentialMovingAverage(2), prices, new[] { 1d, 2, 11d / 3 });
-        Check(new HullEstimate(3), prices, new[] { 0d, 2, 11d / 3 });
-        Check(new RecursiveMovingTrendAverage(2), prices, new[] { 11d / 9, 67d / 27, 137d / 27 });
+        // Three times the published WMA minus twice the published EMA, then one output rounding.
+        Check(new HullEstimate(3), prices, new[] { -1.1102230246251565e-16, 2.0, 3.6666666666666674 });
+        Check(new RecursiveMovingTrendAverage(2), prices, new[] { 11d / 9, 67d / 27, 5.0740740740740735 });
 
         void Check(IIndicator indicator, Bar[] input, params double[][] expected)
         {
