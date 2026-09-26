@@ -121,64 +121,18 @@ public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndica
 [PrimaryOutput("Emt")]
 public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private double _prevLow;
-    private double _prevHigh;
-    private bool _hasPrev;
-
+    private readonly ElderThermometerWindow _window;
     public ElderMarketThermometerState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 22)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-    }
-
+        => _window = new ElderThermometerWindow(maType, length);
     public IndicatorName Name => IndicatorName.ElderMarketThermometer;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevLow = 0;
-        _prevHigh = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-
-        var emt = bar.High < prevHigh && bar.Low > prevLow
-            ? 0
-            : bar.High - prevHigh > prevLow - bar.Low
-                ? Math.Abs(bar.High - prevHigh)
-                : Math.Abs(prevLow - bar.Low);
-
-        var signal = _signalSmoother.Next(emt, isFinal);
-
-        if (isFinal)
-        {
-            _prevLow = bar.Low;
-            _prevHigh = bar.High;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Emt", emt },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(emt, outputs);
+        var (value, signal) = _window.Next(bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Emt", value }, { "Signal", signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eszs")]

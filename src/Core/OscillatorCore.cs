@@ -10716,35 +10716,9 @@ internal static class OscillatorCore
     /// <param name="output">Output span for thermometer values.</param>
     internal static void ElderMarketThermometer(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (high.Length == 0) return;
-
-        output[0] = 0;
-        for (var i = 1; i < high.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            var prevHigh = high[i - 1];
-            var prevLow = low[i - 1];
-
-            // EMT = 0 if inside bar, else max of |high - prevHigh| or |prevLow - low|
-            if (currentHigh < prevHigh && currentLow > prevLow)
-            {
-                output[i] = 0;
-            }
-            else if (currentHigh - prevHigh > prevLow - currentLow)
-            {
-                output[i] = Math.Abs(currentHigh - prevHigh);
-            }
-            else
-            {
-                output[i] = Math.Abs(prevLow - currentLow);
-            }
-        }
+        if (low.Length != high.Length || output.Length < high.Length) throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        for (var i = 0; i < high.Length; i++)
+            output[i] = ElderThermometerWindow.Publish(ElderThermometerWindow.Expansion(high[i], low[i], i == 0 ? 0 : high[i - 1], i == 0 ? 0 : low[i - 1]));
     }
 
     /// <summary>

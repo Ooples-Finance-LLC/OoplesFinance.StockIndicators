@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ElderMarketThermometer && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ThermometerOutputs(bars, builtIn)["Emt"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => ThermometerOutputs(bars, builtIn)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RegressionOscillator ||
             builtIn.BatchName == IndicatorName.LinearRegressionLine && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
