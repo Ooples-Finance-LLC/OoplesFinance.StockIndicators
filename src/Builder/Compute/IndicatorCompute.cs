@@ -13041,26 +13041,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersZeroLagEmaFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateEhlersZeroLagExponentialMovingAverage averages the series after adding back the momentum
-        // over half the window, which is what removes the lag. The core routine read the close, cancelled no
-        // lag, and could not be given an average type.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var lag = Math.Max(0, (length - 1) / 2);
-
-        using var corrected = context.Rent(count);
-        var d = corrected.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new EhlersZeroLagWindow(maType, length);
+        var buffer = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = input[i];
-            var prevValue = i >= lag ? input[i - lag] : 0;
-            d[i] = currentValue + CalculationsHelper.MinPastValues(i, lag, currentValue - prevValue);
+            using var corrected = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) corrected.WritableSpan[i] = window.Correct(input[i], true).Publish();
+            MovingAverage(data, maType, length, corrected.Span, buffer.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, corrected.Span, buffer.WritableSpan);
+        else for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

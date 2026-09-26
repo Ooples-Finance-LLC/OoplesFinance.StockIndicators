@@ -1446,40 +1446,19 @@ public static partial class Calculations
     public static StockData CalculateEhlersZeroLagExponentialMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        List<double> dList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var lag = Math.Max(0, (length - 1) / 2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new EhlersZeroLagWindow(maType, length);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= lag ? inputList[i - lag] : 0;
-
-            var d = currentValue + MinPastValues(i, lag, currentValue - prevValue);
-            dList.Add(d);
+            var corrected = input.Select(price => window.Correct(price, true).Publish()).ToList();
+            line = GetMovingAverageList(stockData, maType, length, corrected);
         }
-
-        var zemaList = GetMovingAverageList(stockData, maType, length, dList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var zema = zemaList[i];
-            var prevZema = i >= 1 ? zemaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(currentValue - zema, prevValue - prevZema);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ezlema", zemaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zemaList);
-        stockData.IndicatorName = IndicatorName.EhlersZeroLagExponentialMovingAverage;
-
+        else foreach (var price in input) line.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++)
+            signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ezlema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersZeroLagExponentialMovingAverage;
         return stockData;
     }
 
