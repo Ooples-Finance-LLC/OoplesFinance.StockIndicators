@@ -16876,5 +16876,104 @@
     "after": "SpanCompat.AsReadOnlySpan(changes), signalLength",
     "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public static StockData CalculateGainLossMovingAverage("
+  },
+  {
+    "id": "shape-wrong-shape",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "denominator - 2 * j * BigInteger.Pow(d, 3)",
+    "after": "denominator - j * BigInteger.Pow(d, 3)",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-drops-negative-weights",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "mass.Add(_weights[j]);",
+    "after": "_weights[j] = Math.Max(0, _weights[j]); mass.Add(_weights[j]);",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-wrong-coordinate",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "new BigInteger(length - 1)",
+    "after": "new BigInteger(length)",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-drops-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "var value = sum.Ratio(_mass);",
+    "after": "var unit = new ExactMeanAccumulator(); unit.Add(1); var value = sum.Ratio(unit);",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-rounded-products",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "sum.AddProduct(_prices[_prices.Count - j], _weights[j]);",
+    "after": "sum.Add(_prices[_prices.Count - j] * _weights[j]);",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-reversed-history",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "_prices[_prices.Count - j]",
+    "after": "_prices[j - 1]",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-drops-current",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "sum.AddProduct(price, _weights[0]);",
+    "after": "sum.AddProduct(0, _weights[0]);",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "if (commit) _prices.TryAdd(price, out _);",
+    "after": "_prices.TryAdd(price, out _);",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ShapeshiftingWindow.cs",
+    "before": "internal void Reset() => _prices.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "shape-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ShapeshiftingMovingAverageState :"
+  },
+  {
+    "id": "shape-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeShapeshiftingMovingAverageFast("
+  },
+  {
+    "id": "shape-registry-identity",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "output[i] = window.Next(input[i], true)",
+    "after": "output[i] = input[i]",
+    "filter": "FullyQualifiedName~ShapeshiftingNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~ShapeshiftingNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~ShapeshiftingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static void ShapeshiftingMovingAverage("
   }
 ]

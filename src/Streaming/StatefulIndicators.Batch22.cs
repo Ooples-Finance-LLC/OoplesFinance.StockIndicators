@@ -923,92 +923,17 @@ public sealed class SettingLessTrendStepFilteringState : IStreamingIndicatorStat
 [PrimaryOutput("Sma")]
 public sealed class ShapeshiftingMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weightsX;
-    private readonly double[] _weightsN;
-    private readonly double _weightSumX;
-    private readonly double _weightSumN;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public ShapeshiftingMovingAverageState(int length = 50)
-    {
-        _length = Math.Max(2, length);
-        _weightsX = new double[_length];
-        _weightsN = new double[_length];
-        double sumX = 0;
-        double sumN = 0;
-        if (_length == 1)
-        {
-            _weightsX[0] = 1;
-            _weightsN[0] = 1;
-            sumX = 1;
-            sumN = 1;
-        }
-        else
-        {
-            for (var j = 0; j < _length; j++)
-            {
-                var x = (double)j / (_length - 1);
-                var n = -1 + (x * 2);
-                var wx = 1 - (2 * x / (MathHelper.Pow(x, 4) + 1));
-                var wn = 1 - (2 * MathHelper.Pow(n, 2) / (MathHelper.Pow(n, 4) + 1));
-                _weightsX[j] = wx;
-                _weightsN[j] = wn;
-                sumX += wx;
-                sumN += wn;
-            }
-        }
-
-        _weightSumX = sumX;
-        _weightSumN = sumN;
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ShapeshiftingWindow _window;
+    public ShapeshiftingMovingAverageState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.ShapeshiftingMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sumX = 0;
-        double sumN = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sumX += prevValue * _weightsX[j];
-            sumN += prevValue * _weightsN[j];
-        }
-
-        var filtX = _weightSumX != 0 ? sumX / _weightSumX : 0;
-        _ = _weightSumN != 0 ? sumN / _weightSumN : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sma", filtX }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filtX, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Sma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sr")]

@@ -15609,36 +15609,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeShapeshiftingMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
-        length = Math.Max(2, length);
-        // CalculateShapeshiftingMovingAverage weights the window by 1 - 2x / (x^4 + 1), where x runs from zero
-        // at the current bar to one at the far end, and treats bars before the start of the series as zero
-        // rather than shortening the window. The published series is that filter; the second, symmetric filter
-        // the batch also builds is not published.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            double sumX = 0;
-            double weightedSumX = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var x = (double)j / (length - 1);
-                var wx = 1 - (2 * x / (MathHelper.Pow(x, 4) + 1));
-                var prevValue = i >= j ? input[i - j] : 0;
-
-                sumX += prevValue * wx;
-                weightedSumX += wx;
-            }
-
-            output[i] = weightedSumX != 0 ? sumX / weightedSumX : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.ShapeshiftingMovingAverage(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
