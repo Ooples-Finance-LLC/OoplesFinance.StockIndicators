@@ -194,46 +194,19 @@ public static partial class Calculations
     public static StockData CalculateSharpeRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
-        List<double> sharpeList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double minPerYr = 60 * 24 * 30 * 12, barMin = 60 * 24, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ReturnScoreWindow(maType, length, bmk, false);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 - bench : 0;
-            retList.Add(ret);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
-        stockData.SetCustomValues(retList);
-        var stdDevList = GetStandardDeviationList(retList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdDeviation = stdDevList[i];
-            var retSma = retSmaList[i];
-
-            var prevSharpe = GetLastOrDefault(sharpeList);
-            var sharpe = stdDeviation != 0 ? retSma / stdDeviation : 0;
-            sharpeList.Add(sharpe);
-
-            var signal = GetCompareSignal(sharpe - 2, prevSharpe - 2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sr", sharpeList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sharpeList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.SharpeRatio;
-
         return stockData;
     }
 

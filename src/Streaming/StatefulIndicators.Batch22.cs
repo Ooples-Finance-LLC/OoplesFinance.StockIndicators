@@ -1132,70 +1132,19 @@ public sealed class ShapeshiftingMovingAverageState : IStreamingIndicatorState, 
 [PrimaryOutput("Sr")]
 public sealed class SharpeRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _bench;
-    private readonly IMovingAverageSmoother _retSmoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _retValue;
-
-    public SharpeRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = 0.02)
-    {
-        _length = Math.Max(1, length);
-        var barMin = 60d * 24;
-        var minPerYr = 60d * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = MathHelper.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new RollingStandardDeviation(_length);
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ReturnScoreWindow _window;
+    public SharpeRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = .02)
+        => _window = new ReturnScoreWindow(maType, length, bmk, false);
     public IndicatorName Name => IndicatorName.SharpeRatio;
-
-    public void Reset()
-    {
-        _retSmoother.Reset();
-        _stdDev.Reset();
-        _values.Clear();
-        _retValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, _length);
-        var ret = prevValue != 0 ? (value / prevValue) - 1 - _bench : 0;
-        _retValue = ret;
-        var stdDev = _stdDev.Next(_retValue, isFinal);
-        var retSma = _retSmoother.Next(ret, isFinal);
-        var sharpe = stdDev != 0 ? retSma / stdDev : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sr", sharpe }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sharpe, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Sr", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _retSmoother.Dispose();
-        _stdDev.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Smma")]

@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.SharpeRatio or IndicatorName.InformationRatio && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.InformationRatio ? "Ir" : "Sr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ReturnScoreOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendIntensityIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.Reference(0, bars => TrendIntensityOutputs(bars, builtIn)["Tii"], IndicatorErrorBudget.Exact);
