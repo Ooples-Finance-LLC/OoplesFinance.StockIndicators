@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.AlligatorIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
+        {
+            var alligatorKeys = builtIn.BatchOutputKey is { } alligatorKey ? new[] { alligatorKey } : new[] { "Lips", "Teeth", "Jaws" };
+            for (var slot = 0; slot < alligatorKeys.Length; slot++)
+            {
+                var key = alligatorKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AlligatorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TillsonIE2 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TillsonIe2Outputs(bars, builtIn)["Ie2"], IndicatorErrorBudget.Exact);

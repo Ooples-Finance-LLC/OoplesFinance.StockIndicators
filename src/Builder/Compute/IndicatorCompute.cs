@@ -12881,6 +12881,13 @@ internal static partial class IndicatorCompute
         var (inputList, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
         var count = inputList.Count;
 
+        offset = Math.Max(0, offset);
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result = context.Rent(count); using var window = new AlligatorLineWindow(maType, length, offset);
+            for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(inputList[i], true);
+            return result;
+        }
         using var smoothed = context.Rent(count);
         MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
         var line = smoothed.Span;

@@ -430,22 +430,34 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.MedianPrice, stockData);
 
-        var jawList = GetMovingAverageList(stockData, maType, jawLength, inputList);
-        var teethList = GetMovingAverageList(stockData, maType, teethLength, inputList);
-        var lipsList = GetMovingAverageList(stockData, maType, lipsLength, inputList);
+        jawOffset = Math.Max(0, jawOffset); teethOffset = Math.Max(0, teethOffset); lipsOffset = Math.Max(0, lipsOffset);
+        List<double> jawList, teethList, lipsList;
+        var alreadyDisplaced = !Builder.Compute.ComponentAverage.HasOverrides && StrengthWindow.Supports(maType);
+        if (alreadyDisplaced)
+        {
+            jawList = new(stockData.Count); teethList = new(stockData.Count); lipsList = new(stockData.Count);
+            using var jaw = new AlligatorLineWindow(maType, jawLength, jawOffset); using var teeth = new AlligatorLineWindow(maType, teethLength, teethOffset); using var lips = new AlligatorLineWindow(maType, lipsLength, lipsOffset);
+            foreach (var price in inputList) { jawList.Add(jaw.Next(price, true)); teethList.Add(teeth.Next(price, true)); lipsList.Add(lips.Next(price, true)); }
+        }
+        else
+        {
+            jawList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), jawLength)?.ToList() ?? GetMovingAverageList(stockData, maType, jawLength, inputList);
+            teethList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), teethLength)?.ToList() ?? GetMovingAverageList(stockData, maType, teethLength, inputList);
+            lipsList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), lipsLength)?.ToList() ?? GetMovingAverageList(stockData, maType, lipsLength, inputList);
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevJaw = GetLastOrDefault(displacedJawList);
-            var displacedJaw = i >= jawOffset ? jawList[i - jawOffset] : 0;
+            var displacedJaw = alreadyDisplaced ? jawList[i] : i >= jawOffset ? jawList[i - jawOffset] : 0;
             displacedJawList.Add(displacedJaw);
 
             var prevTeeth = GetLastOrDefault(displacedTeethList);
-            var displacedTeeth = i >= teethOffset ? teethList[i - teethOffset] : 0;
+            var displacedTeeth = alreadyDisplaced ? teethList[i] : i >= teethOffset ? teethList[i - teethOffset] : 0;
             displacedTeethList.Add(displacedTeeth);
 
             var prevLips = GetLastOrDefault(displacedLipsList);
-            var displacedLips = i >= lipsOffset ? lipsList[i - lipsOffset] : 0;
+            var displacedLips = alreadyDisplaced ? lipsList[i] : i >= lipsOffset ? lipsList[i - lipsOffset] : 0;
             displacedLipsList.Add(displacedLips);
 
             var signal = GetBullishBearishSignal(displacedLips - Math.Max(displacedJaw, displacedTeeth), prevLips - Math.Max(prevJaw, prevTeeth),
