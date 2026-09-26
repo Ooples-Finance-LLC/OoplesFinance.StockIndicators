@@ -1609,7 +1609,7 @@ internal static partial class IndicatorCompute
             AbsolutePriceOscillatorSpecOptions apo2 => ComputeApoFast(data, context, apo2.FastLength, apo2.SlowLength, apo2.MaType),
             AccumulationDistributionLineSpecOptions adl2 => spec.OutputKey switch
             {
-                null or "Adl" => ComputeAccumulationDistributionLineFast(data, context),
+                null or "Adl" => ComputeAccumulationDistributionLineFast(data, context, adl2.Length, adl2.MaType),
                 "AdlSignal" => ComputeAccumulationDistributionLineSignalFast(data, context, adl2.Length, adl2.MaType),
                 _ => null
             },
@@ -3660,28 +3660,24 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChaikinOscillatorFast(StockData data, ComputeContext context, int fastLength = 3,
         int slowLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateChaikinOscillator is the gap between two averages OF THE ACCUMULATION DISTRIBUTION LINE,
-        // taken with whichever average it was given. VolumeCore.ChaikinOscillator has no average to give it,
-        // so the type the caller configured reached nothing.
-        using var line = ComputeAccumulationDistributionLineFast(data, context);
-        var adl = line.Span;
-        var count = adl.Length;
-
-        using var fast = context.Rent(count);
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, adl, fast.WritableSpan);
-        MovingAverage(data, maType, slowLength, adl, slow.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var fastSpan = fast.Span;
-        var slowSpan = slow.Span;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
+        if (custom)
         {
-            output[i] = fastSpan[i] - slowSpan[i];
+            using var line = context.Rent(input.Count); var cumulative = new MoneyFlowAccumulationWindow();
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, fastLength), line.Span, first.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, slowLength), line.Span, second.WritableSpan);
         }
-
-        return buffer;
+        using var window = new MoneyFlowAverageWindow(maType, fastLength, slowLength);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+            output.WritableSpan[i] = value.Signal;
+        }
+        return output;
     }
 
     /// <summary>
@@ -20215,24 +20211,25 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accumulation Distribution Line using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAccumulationDistributionLineFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeAccumulationDistributionLineFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var first = context.Rent(input.Count);
+        if (custom)
         {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
+            using var line = context.Rent(input.Count); var cumulative = new MoneyFlowAccumulationWindow();
+            for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = cumulative.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, length), line.Span, first.WritableSpan);
         }
-        var buffer = context.Rent(count);
-        VolumeCore.AccumulationDistributionLine(high, low, close, volume, buffer.WritableSpan);
-        return buffer;
+        using var window = new MoneyFlowAverageWindow(maType, length, null);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? first.Span[i] : null, null);
+            output.WritableSpan[i] = outputKey == "AdlSignal" ? value.Signal : value.Line;
+        }
+        return output;
     }
 
     /// <summary>
@@ -20247,15 +20244,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAccumulationDistributionLineSignalFast(StockData data,
         ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        using var line = ComputeAccumulationDistributionLineFast(data, context);
-        var source = line.Span;
-        var buffer = context.Rent(source.Length);
-
-        // Cleared first: a rented buffer arrives with whatever the last caller left in it, and a smoother
-        // that writes nothing would otherwise hand back that, which is how this first read as the line.
-        buffer.WritableSpan.Clear();
-        MovingAverage(data, maType, length, source, buffer.WritableSpan);
-        return buffer;
+        return ComputeAccumulationDistributionLineFast(data, context, length, maType, "AdlSignal");
     }
 
     /// <summary>

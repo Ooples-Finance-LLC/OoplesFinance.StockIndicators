@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.AccumulationDistributionLine or IndicatorName.ChaikinOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var moneyFlowKeys = builtIn.BatchName == IndicatorName.AccumulationDistributionLine ? new[] { "Adl", "AdlSignal" } : new[] { "ChaikinOsc" };
+            for (var slot = 0; slot < moneyFlowKeys.Length; slot++)
+            {
+                var key = moneyFlowKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MoneyFlowAccumulationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution || builtIn.BatchName == IndicatorName.SmoothedWilliamsAccumulationDistribution && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             var accumulationKeys = builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution ? new[] { "Wad" } : new[] { "Swad", "Signal" };

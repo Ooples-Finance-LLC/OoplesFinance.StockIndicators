@@ -8223,5 +8223,106 @@
     "after": "",
     "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class SmoothedWilliamsAccumulationDistributionState"
+  },
+  {
+    "id": "moneyflow-accumulation-wrong-close-weight",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "numerator.AddProduct(close, volume, 2)",
+    "after": "numerator.AddProduct(close, volume, 1)",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-wrong-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "denominator.Add(low, -scale)",
+    "after": "denominator.Add(low, scale)",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-drops-running-total",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "var total = _total; flow.AddTo",
+    "after": "var total = new ExactMeanAccumulator(); flow.AddTo",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-rounds-away-recovery",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "if (commit) _total = total;",
+    "after": "if (commit) { _total = default; _total.Add(total.Mean(1)); }",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "if (commit) _total = total;",
+    "after": "if (high != low) _total = total;",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-wrong-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "new RocBankAverage(kind, secondLength.Value, int.MaxValue)",
+    "after": "new RocBankAverage(kind, firstLength, int.MaxValue)",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-adds-averages",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowAccumulationWindow.cs",
+    "before": "second.AddTo(ref signal, -1)",
+    "after": "second.AddTo(ref signal, 1)",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages"
+  },
+  {
+    "id": "moneyflow-accumulation-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "line.Span, first.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(input), first.WritableSpan",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.CustomerAveragesReceiveTheLineAndKeepTheirOrder",
+    "scope": "internal static ComputeBuffer ComputeChaikinOscillatorFast("
+  },
+  {
+    "id": "moneyflow-accumulation-core-ignores-average",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "before": "new MoneyFlowAverageWindow(maType, fastLength, slowLength)",
+    "after": "new MoneyFlowAverageWindow(MovingAvgType.ExponentialMovingAverage, fastLength, slowLength)",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages",
+    "scope": "internal static void ChaikinOscillator("
+  },
+  {
+    "id": "moneyflow-accumulation-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.ExactMoneyFlowProductsPreserveWideRangesAndBothAverages",
+    "scope": "internal static ComputeBuffer ComputeAccumulationDistributionLineFast("
+  },
+  {
+    "id": "moneyflow-accumulation-accumulationdistributionline-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AccumulationDistributionLineState"
+  },
+  {
+    "id": "moneyflow-accumulation-chaikinoscillator-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ChaikinOscillatorState"
   }
 ]

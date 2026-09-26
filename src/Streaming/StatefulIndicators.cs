@@ -5848,122 +5848,37 @@ public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable,
 [PrimaryOutput("Adl")]
 public sealed class AccumulationDistributionLineState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private double _adl;
-
+    private readonly MoneyFlowAverageWindow _window;
     public AccumulationDistributionLineState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-    }
-
+        => _window = new MoneyFlowAverageWindow(maType, length);
     public IndicatorName Name => IndicatorName.AccumulationDistributionLine;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _adl = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = bar.Close;
-        var volume = bar.Volume;
-        var multiplier = high - low != 0
-            ? (close - low - (high - close)) / (high - low)
-            : 0;
-        var moneyFlowVolume = multiplier * volume;
-
-        var adl = _adl + moneyFlowVolume;
-        var signal = _signalSmoother.Next(adl, isFinal);
-
-        if (isFinal)
-        {
-            _adl = adl;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Adl", adl },
-                { "AdlSignal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(adl, outputs);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Adl", value.Line }, { "AdlSignal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("ChaikinOsc")]
 public sealed class ChaikinOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private double _adl;
-
+    private readonly MoneyFlowAverageWindow _window;
     public ChaikinOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 3, int slowLength = 10)
-    {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-    }
-
+        => _window = new MoneyFlowAverageWindow(maType, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.ChaikinOscillator;
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _adl = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = bar.Close;
-        var volume = bar.Volume;
-        var multiplier = high - low != 0
-            ? (close - low - (high - close)) / (high - low)
-            : 0;
-        var moneyFlowVolume = multiplier * volume;
-        var adl = _adl + moneyFlowVolume;
-
-        var fast = _fastSmoother.Next(adl, isFinal);
-        var slow = _slowSmoother.Next(adl, isFinal);
-        var chaikinOsc = fast - slow;
-
-        if (isFinal)
-        {
-            _adl = adl;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "ChaikinOsc", chaikinOsc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(chaikinOsc, outputs);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "ChaikinOsc", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Signal, outputs);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tsi")]

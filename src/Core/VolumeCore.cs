@@ -31,20 +31,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void AccumulationDistributionLine(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double adl = 0;
-        for (var i = 0; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            var mfm = range != 0 ? ((close[i] - low[i]) - (high[i] - close[i])) / range : 0;
-            var mfv = mfm * volume[i];
-            adl += mfv;
-            output[i] = adl;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new MoneyFlowAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Publish();
     }
 
     /// <summary>
@@ -276,39 +265,11 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Chaikin Oscillator.
     /// </summary>
-    internal static void ChaikinOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 3, int slowLength = 10)
+    internal static void ChaikinOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int fastLength = 3, int slowLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var adlArray = pool.Rent(close.Length);
-        var fastEmaArray = pool.Rent(close.Length);
-        var slowEmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var adl = adlArray.AsSpan(0, close.Length);
-            var fastEma = fastEmaArray.AsSpan(0, close.Length);
-            var slowEma = slowEmaArray.AsSpan(0, close.Length);
-
-            AccumulationDistributionLine(high, low, close, volume, adl);
-            MovingAverageCore.ExponentialMovingAverage(adl, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(adl, slowEma, slowLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = fastEma[i] - slowEma[i];
-            }
-        }
-        finally
-        {
-            pool.Return(adlArray);
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new MoneyFlowAverageWindow(maType, fastLength, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Signal;
     }
 
     /// <summary>
