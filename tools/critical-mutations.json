@@ -12274,5 +12274,113 @@
     "after": "",
     "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ElasticVolumeWeightedMovingAverageV1State"
+  },
+  {
+    "id": "repulsion-wrong-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "Period(length, 2)",
+    "after": "Period(length, 1)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-wrong-third-period",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "Period(length, 3)",
+    "after": "Period(length, 2)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-integer-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "Math.Max(1, (long)length) * multiple",
+    "after": "Math.Max(1, length) * multiple",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.DerivedPeriodsDoNotWrapAndFiniteTermsCancelBeforePublication"
+  },
+  {
+    "id": "repulsion-wrong-first-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "first.AddTo(ref total, -1)",
+    "after": "first.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-wrong-second-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "second.AddTo(ref total, 1)",
+    "after": "second.AddTo(ref total, -1)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-omits-third-term",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "third.AddTo(ref total, 1);",
+    "after": "",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-sequential-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "Smooth(input, 1, commit)",
+    "after": "Smooth(first, 1, commit)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-overflows-combined-terms",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "return total.Mean(1);",
+    "after": "return third.Publish() + second.Publish() - first.Publish();",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.DerivedPeriodsDoNotWrapAndFiniteTermsCancelBeforePublication",
+    "scope": "internal double Next("
+  },
+  {
+    "id": "repulsion-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "_averages[stage].Next(value, commit)",
+    "after": "_averages[stage].Next(value, true)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-stale-averages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RepulsionWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "repulsion-raw-sequential-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "RepulsionWindow.Period(length, 2), SpanCompat.AsReadOnlySpan(input), second.WritableSpan",
+    "after": "RepulsionWindow.Period(length, 2), first.Span, second.WritableSpan",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CustomerAveragesReceiveOriginalInputsIndependently",
+    "scope": "internal static ComputeBuffer ComputeRepulsionMovingAverageFast("
+  },
+  {
+    "id": "repulsion-batch-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.CustomerAveragesReceiveOriginalInputsIndependently",
+    "scope": "public static StockData CalculateRepulsionMovingAverage("
+  },
+  {
+    "id": "repulsion-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~RepulsionNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class RepulsionMovingAverageState"
   }
 ]
