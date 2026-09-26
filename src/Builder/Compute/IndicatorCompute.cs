@@ -14924,40 +14924,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeOptimalWeightedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateOptimalWeightedMovingAverage raises each bar's distance from the present to the correlation
-        // between price and the average's own previous value, so the weighting tightens onto recent bars as the
-        // average tracks price and flattens when it does not. MovingAverageCore.OptimalWeightedMovingAverage
-        // uses fixed weights and agrees with none of it. RollingWindowCorrelation is the pooled form of the
-        // batch's RollingCorrelation, so the arm stays allocation free.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var owma = buffer.WritableSpan;
-
-        using var correlation = new Streaming.RollingWindowCorrelation(length);
-        double previousOwma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var corr = correlation.Add(input[i], previousOwma, out _);
-            corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = MathHelper.Pow(length - j, corr);
-                var previousValue = i >= j ? input[i - j] : 0;
-
-                sum += previousValue * weight;
-                weightedSum += weight;
-            }
-
-            previousOwma = weightedSum != 0 ? sum / weightedSum : 0;
-            owma[i] = previousOwma;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var window = new OptimalWeightedWindow(length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

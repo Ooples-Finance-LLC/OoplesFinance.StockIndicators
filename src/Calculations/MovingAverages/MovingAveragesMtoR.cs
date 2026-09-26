@@ -447,50 +447,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateOptimalWeightedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> owmaList = new(stockData.Count);
-        List<double> prevOwmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new OptimalWeightedWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var prevVal = GetLastOrDefault(tempList);
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-
-            var prevOwma = i >= 1 ? owmaList[i - 1] : 0;
-            prevOwmaList.Add(prevOwma);
-
-            corrWindow.Add(currentValue, prevOwma);
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = Pow(length - j, (double)corr);
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var owma = weightedSum != 0 ? sum / weightedSum : 0;
-            owmaList.Add(owma);
-
-            var signal = GetCompareSignal(currentValue - owma, prevVal - prevOwma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Owma", owmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(owmaList);
-        stockData.IndicatorName = IndicatorName.OptimalWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Owma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.OptimalWeightedMovingAverage;
         return stockData;
     }
 

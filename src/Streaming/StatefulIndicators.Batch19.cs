@@ -141,75 +141,17 @@ public sealed class OnBalanceVolumeReflexState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Owma")]
 public sealed class OptimalWeightedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowCorrelation _corrWindow;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevOwma;
-    private bool _hasPrev;
-
-    public OptimalWeightedMovingAverageState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _corrWindow = new RollingWindowCorrelation(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OptimalWeightedWindow _window;
+    public OptimalWeightedMovingAverageState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.OptimalWeightedMovingAverage;
-
-    public void Reset()
-    {
-        _corrWindow.Reset();
-        _values.Clear();
-        _prevOwma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevOwma = _hasPrev ? _prevOwma : 0;
-        var corr = isFinal ? _corrWindow.Add(value, prevOwma, out _) : _corrWindow.Preview(value, prevOwma, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-        double sum = 0;
-        double weightedSum = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var weight = MathHelper.Pow(_length - j, corr);
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-
-            sum += prevValue * weight;
-            weightedSum += weight;
-        }
-
-        var owma = weightedSum != 0 ? sum / weightedSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevOwma = owma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Owma", owma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(owma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Owma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _corrWindow.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ott")]
