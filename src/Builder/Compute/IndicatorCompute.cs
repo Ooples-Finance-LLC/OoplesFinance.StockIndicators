@@ -21446,6 +21446,16 @@ internal static partial class IndicatorCompute
     {
         // CalculateHighLowMovingAverage smooths the highest high and the lowest low of the window and takes
         // their midpoint. The switch this replaced fell back to a weighted average for every type but three.
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result = context.Rent(data.Count); using var window = new HighLowAverageWindow(maType, length);
+            for (var i = 0; i < data.Count; i++)
+            {
+                var value = window.Next(data.HighPrices[i], data.LowPrices[i], true);
+                result.WritableSpan[i] = outputKey == "UpperBand" ? value.Upper : outputKey == "LowerBand" ? value.Lower : value.Middle;
+            }
+            return result;
+        }
         var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
@@ -21478,7 +21488,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = outputKey == "UpperBand" ? upper[i] : outputKey == "LowerBand" ? lower[i] : (upper[i] + lower[i]) / 2;
+            output[i] = outputKey == "UpperBand" ? upper[i] : outputKey == "LowerBand" ? lower[i] : HighLowAverageWindow.Midpoint(upper[i], lower[i]);
         }
 
         return buffer;
