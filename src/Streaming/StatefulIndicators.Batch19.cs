@@ -328,96 +328,18 @@ public sealed class OscOscillatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Orma")]
 public sealed class OvershootReductionMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _length1;
-    private readonly ExactLinearFitWindow _regression;
-    private readonly RollingWindowSum _bSum;
-    private readonly RollingWindowMax _bSmaMax;
-    private readonly IMovingAverageSmoother _indexSmoother;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevD;
-    private int _index;
-    private bool _hasPrev;
-
-    public OvershootReductionMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _length1 = (int)Math.Ceiling((double)_length / 2);
-        _regression = new ExactLinearFitWindow(_length);
-        _bSum = new RollingWindowSum(_length1);
-        _bSmaMax = new RollingWindowMax(_length);
-        _indexSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OvershootWindow _window;
+    public OvershootReductionMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.OvershootReductionMovingAverage;
-
-    public void Reset()
-    {
-        _regression.Reset();
-        _bSum.Reset();
-        _bSmaMax.Reset();
-        _indexSmoother.Reset();
-        _sma.Reset();
-        _prevValue = 0;
-        _prevD = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var value = NextValue(_input.GetValue(bar), isFinal);
-        return new StreamingIndicatorStateResult(value, includeOutputs
-            ? new Dictionary<string, double>(1) { { "Orma", value } } : null);
+        var value = NextValue(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Orma", value } } : null);
     }
-
-    internal double NextValue(double value, bool isFinal)
-    {
-        var index = (double)_index;
-
-        var fit = _regression.Next(value, isFinal);
-
-        var indexSma = _indexSmoother.Next(index, isFinal);
-        var sma = _sma.Next(value, isFinal);
-
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevD = _hasPrev ? (_prevD != 0 ? _prevD : prevValue) : prevValue;
-        var slope = fit.Count == _length ? fit.Slope : 0;
-
-        var b = Math.Abs(prevD - value);
-        int bCount;
-        var bSum = isFinal ? _bSum.Add(b, out bCount) : _bSum.Preview(b, out bCount);
-        var bSma = bCount > 0 ? bSum / bCount : 0;
-        var highest = isFinal ? _bSmaMax.Add(bSma, out _) : _bSmaMax.Preview(bSma, out _);
-        // ROMA normalizes the smoothed error, keeping the reduction gain in [0, 1].
-        var c = highest != 0 ? bSma / highest : 0;
-
-        var d = sma + slope * (index - indexSma) * c;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevD = d;
-            _index++;
-            _hasPrev = true;
-        }
-
-        return d;
-    }
-
-    public void Dispose()
-    {
-        _regression.Dispose();
-        _bSum.Dispose();
-        _bSmaMax.Dispose();
-        _indexSmoother.Dispose();
-        _sma.Dispose();
-    }
+    internal double NextValue(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sar")]

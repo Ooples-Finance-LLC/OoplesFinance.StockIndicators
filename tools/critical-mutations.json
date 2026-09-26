@@ -268,9 +268,9 @@
   {
     "id": "overshoot-unsmoothed-gain",
     "module": "overshoot",
-    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
-    "before": "var c = highest != 0 ? bSma / highest : 0;",
-    "after": "var c = highest != 0 ? b / highest : 0;",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "UnitRatio(mean << 1074, highest)",
+    "after": "UnitRatio(error << 1074, highest)",
     "filter": "FullyQualifiedName~OvershootFormulaTests"
   },
   {
@@ -16402,5 +16402,122 @@
     "before": "if (ComponentAverage.HasOverrides)",
     "after": "if (ComponentAverage.HasOverrides && inputList.Count < 0)",
     "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-wrong-error-period",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "new((int)((_length + 1L) / 2))",
+    "after": "new(_length)",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-drops-error-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "sum -= _errors[0];",
+    "after": "sum -= 0;",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-wrong-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "RoundUnits(sum, count)",
+    "after": "RoundUnits(sum, _length)",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-ignores-max-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "_means[0] == highest",
+    "after": "_means.Count < 0",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-ignores-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "fit.Count < _length",
+    "after": "fit.Count < 0",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-drops-zero-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "_previous.IsZero ? _price : _previous",
+    "after": "_previous",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-premature-prediction",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "_previous = result;",
+    "after": "_previous = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(result, BigInteger.One));",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "_fit.Next(price, commit)",
+    "after": "_fit.Next(price, true)",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-stale-prediction-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OvershootWindow.cs",
+    "before": "_sum = _previous = _price = default;",
+    "after": "_sum = _price = default;",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OvershootReductionMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-ignores-customer-batch",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculateOvershootReductionMovingAverage(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || ",
+    "after": "",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-ignores-customer-fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(",
+    "before": "ComponentAverage.HasOverrides || ",
+    "after": "",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "overshoot-ignores-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ExactLinearFitWindow.cs",
+    "scope": "internal BigInteger CenteredUnits(",
+    "before": "ExactVarianceWindow.Units(gain)",
+    "after": "ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~OvershootNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

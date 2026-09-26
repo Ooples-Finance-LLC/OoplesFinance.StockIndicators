@@ -23,6 +23,14 @@ internal readonly struct RocBankValue
         product.ScaleByPowerOfTwo(UpperShift);
         return Round(product);
     }
+    internal static BigInteger RoundUnits(BigInteger numerator, BigInteger denominator)
+    {
+        for (var shift = 0; ; shift += 32)
+        {
+            var value = ExactMeanAccumulator.UnitRatio(numerator, denominator << shift);
+            if (!double.IsInfinity(value)) return ExactVarianceWindow.Units(value) << shift;
+        }
+    }
     internal static RocBankValue Round(ExactMeanAccumulator sum, double unit = 1, long count = 1)
     {
         if (sum.IsExactlyZero) return default;

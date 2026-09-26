@@ -472,24 +472,25 @@ public static partial class Calculations
     public static StockData CalculateOvershootReductionMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14)
     {
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        using var state = new OoplesFinance.StockIndicators.Streaming.OvershootReductionMovingAverageState(maType, length);
-        List<double> line = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new OvershootWindow(maType, length, initializeFallback: false);
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var price = inputList[i];
-            var previousPrice = i == 0 ? 0 : inputList[i - 1];
-            var previous = i > 0 && line[i - 1] != 0 ? line[i - 1] : previousPrice;
-            var value = state.NextValue(price, isFinal: true);
-            line.Add(value);
-            signalsList?.Add(GetCompareSignal(price - value, previousPrice - previous));
+            var indices = Enumerable.Range(0, input.Count).Select(i => (double)i).ToList();
+            var indexMean = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(indices), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, indices);
+            var priceMean = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+            for (var i = 0; i < input.Count; i++) line.Add(window.Next(input[i], true, priceMean[i], indexMean[i]));
+        }
+        else foreach (var price in input) line.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++)
+        {
+            var previousPrice = i == 0 ? 0 : input[i - 1]; var previous = i > 0 && line[i - 1] != 0 ? line[i - 1] : previousPrice;
+            signals?.Add(GetCompareSignal(input[i] - line[i], previousPrice - previous));
         }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Orma", line } });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(line);
-        stockData.IndicatorName = IndicatorName.OvershootReductionMovingAverage;
-
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.OvershootReductionMovingAverage;
         return stockData;
     }
 

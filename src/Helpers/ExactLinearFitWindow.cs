@@ -66,6 +66,14 @@ internal sealed class ExactLinearFitWindow : IDisposable
             return ExactMeanAccumulator.UnitRatio((ExactVarianceWindow.Units(meanPrice) * denominator << 1074) + 6 * _covariance * offset,
                 denominator << 1074);
         }
+        internal BigInteger CenteredUnits(double meanPrice, double meanTime, double gain)
+        {
+            if (_n.IsOne) return ExactVarianceWindow.Units(meanPrice);
+            var denominator = _n * _spread;
+            var offset = (_index << 1074) - ExactVarianceWindow.Units(meanTime);
+            var numerator = (ExactVarianceWindow.Units(meanPrice) * denominator << 2148) + 6 * _covariance * offset * ExactVarianceWindow.Units(gain);
+            return RocBankValue.RoundUnits(numerator, denominator << 2148);
+        }
         internal int Count => (int)_n;
         internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.UnitRatio(6 * _covariance, _n * _spread);
         internal double Last => At(_n - 1);
