@@ -7,13 +7,13 @@ internal sealed class ZeroLagTripleWindow : IDisposable
     private readonly RocBankAverage[]? _averages;
     private readonly IMovingAverageSmoother[]? _fallbacks;
     private readonly bool _triple;
-    internal ZeroLagTripleWindow(MovingAvgType kind, int length)
+    internal ZeroLagTripleWindow(MovingAvgType kind, int length, bool initializeFallback = true)
     {
         if (kind == MovingAvgType.ZeroLagTripleExponentialMovingAverage) kind = MovingAvgType.TripleExponentialMovingAverage;
         _triple = kind == MovingAvgType.TripleExponentialMovingAverage;
         if (_triple || StrengthWindow.Supports(kind))
             _averages = Enumerable.Range(0, _triple ? 6 : 2).Select(_ => new RocBankAverage(_triple ? MovingAvgType.ExponentialMovingAverage : kind, length, int.MaxValue)).ToArray();
-        else _fallbacks = Enumerable.Range(0, 2).Select(_ => MovingAverageSmootherFactory.Create(kind, Math.Max(1, length))).ToArray();
+        else if (initializeFallback) _fallbacks = Enumerable.Range(0, 2).Select(_ => MovingAverageSmootherFactory.Create(kind, Math.Max(1, length))).ToArray();
     }
     private RocBankValue Smooth(RocBankValue value, int stage, bool commit)
     {

@@ -628,7 +628,7 @@ public static partial class Calculations
             third = GetMovingAverageList(stockData, maType, length, second);
         }
         List<double> line = new(stockData.Count), signal = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
-        using var window = new TrixWindow(maType, length);
+        using var window = new TrixWindow(maType, length, initializeFallback: !custom);
         using var signalAverage = custom ? null : new RocBankAverage(maType, signalLength, int.MaxValue);
         for (var i = 0; i < input.Count; i++)
         {

@@ -808,7 +808,7 @@ public static partial class Calculations
         var (input, _, _, _, _) = GetInputValuesList(stockData);
         var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
         List<double>? first = null, second = null;
-        using var window = new GeneralizedDoubleWindow(maType, length, factor);
+        using var window = new GeneralizedDoubleWindow(maType, length, factor, initializeFallback: !custom);
         if (custom)
         {
             first = GetMovingAverageList(stockData, maType, length, input);

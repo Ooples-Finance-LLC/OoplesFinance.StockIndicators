@@ -7,10 +7,10 @@ internal sealed class TrixWindow : IDisposable
     private readonly RocBankAverage[]? _averages;
     private readonly IMovingAverageSmoother[]? _fallbacks;
     private RocBankValue _previous;
-    internal TrixWindow(MovingAvgType kind, int length)
+    internal TrixWindow(MovingAvgType kind, int length, bool initializeFallback = true)
     {
         if (StrengthWindow.Supports(kind)) _averages = Enumerable.Range(0, 3).Select(_ => new RocBankAverage(kind, length, int.MaxValue)).ToArray();
-        else _fallbacks = Enumerable.Range(0, 3).Select(_ => MovingAverageSmootherFactory.Create(kind, Math.Max(1, length))).ToArray();
+        else if (initializeFallback) _fallbacks = Enumerable.Range(0, 3).Select(_ => MovingAverageSmootherFactory.Create(kind, Math.Max(1, length))).ToArray();
     }
     internal RocBankValue Next(double price, bool commit, double? customerFirst = null, double? customerSecond = null, double? customerThird = null)
     {

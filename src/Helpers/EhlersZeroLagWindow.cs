@@ -8,11 +8,11 @@ internal sealed class EhlersZeroLagWindow : IDisposable
     private readonly PooledRingBuffer<double> _prices;
     private readonly RocBankAverage? _average;
     private readonly IMovingAverageSmoother? _fallback;
-    internal EhlersZeroLagWindow(MovingAvgType kind, int length)
+    internal EhlersZeroLagWindow(MovingAvgType kind, int length, bool initializeFallback = true)
     {
         length = Math.Max(1, length); _lag = (length - 1) / 2; _prices = new(Math.Max(1, _lag));
         if (StrengthWindow.Supports(kind)) _average = new(kind, length, int.MaxValue);
-        else _fallback = MovingAverageSmootherFactory.Create(kind, length);
+        else if (initializeFallback) _fallback = MovingAverageSmootherFactory.Create(kind, length);
     }
     internal RocBankValue Correct(double price, bool commit)
     {

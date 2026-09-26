@@ -11142,5 +11142,45 @@
     "after": "",
     "filter": "FullyQualifiedName~DampedSineNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class DampedSineWaveWeightedFilterState"
+  },
+  {
+    "id": "cascade-fallback-generalizeddouble",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "else if (initializeFallback)",
+    "after": "else",
+    "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
+  },
+  {
+    "id": "cascade-fallback-mcnicholl",
+    "module": "numerical",
+    "file": "src/Helpers/McNichollWindow.cs",
+    "before": "else if (initializeFallback)",
+    "after": "else",
+    "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
+  },
+  {
+    "id": "cascade-fallback-zerolagtriple",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "else if (initializeFallback)",
+    "after": "else",
+    "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
+  },
+  {
+    "id": "cascade-fallback-ehlerszerolag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersZeroLagWindow.cs",
+    "before": "else if (initializeFallback)",
+    "after": "else",
+    "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
+  },
+  {
+    "id": "cascade-fallback-trix",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "else if (initializeFallback)",
+    "after": "else",
+    "filter": "FullyQualifiedName~CascadeFallbackNumericalTests"
   }
 ]
