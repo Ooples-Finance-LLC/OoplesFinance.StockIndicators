@@ -10996,5 +10996,78 @@
     "after": "",
     "filter": "FullyQualifiedName~EhlersZeroLagNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EhlersZeroLagExponentialMovingAverageState"
+  },
+  {
+    "id": "recursive-trend-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "_hasPrevious ? _accumulator : current",
+    "after": "_hasPrevious ? _accumulator : default",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-wrong-retention",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "priorAccumulator.Multiply(1 - _alpha)",
+    "after": "priorAccumulator.Multiply(_alpha)",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-wrong-correction-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "priorAccumulator, -1",
+    "after": "priorAccumulator, 1",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-integer-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-wrong-previous-update",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = current;",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-premature-accumulator-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveTrendWindow.cs",
+    "before": "_accumulator = accumulator;",
+    "after": "_accumulator = new RocBankValue(accumulator.Publish());",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "recursive-trend-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class RecursiveMovingTrendAverageState"
   }
 ]

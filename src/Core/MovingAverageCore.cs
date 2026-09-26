@@ -2863,22 +2863,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RecursiveMovingTrendAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevRmta = i >= 1 ? output[i - 1] : currentValue;
-            var priorRmta = i >= length ? output[i - length] : currentValue;
-
-            var rmtaTrend = (prevRmta - priorRmta) / length;
-            output[i] = (alpha * currentValue) + ((1 - alpha) * (prevRmta + rmtaTrend));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new RecursiveTrendWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
