@@ -1291,7 +1291,12 @@ public readonly struct PolyLsmaCore : IMovingAverageCore
     public bool RequiresOhlc => false;
     public bool RequiresVolume => false;
     public bool HasExtraParams => false;
-    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length) => MovingAverageCore.PolynomialLeastSquaresMovingAverage(input, output, length);
+    public void Compute(ReadOnlySpan<double> input, Span<double> output, int length)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
+    }
     public void Compute(ReadOnlySpan<double> input, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(input, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length) => Compute(close, output, length);
     public void ComputeOhlc(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length, ReadOnlySpan<double> extraParams) => Compute(close, output, length);
