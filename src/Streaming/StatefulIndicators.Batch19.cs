@@ -466,88 +466,15 @@ public sealed class ParabolicWeightedMovingAverageState : IStreamingIndicatorSta
 [PrimaryOutput("Pclma")]
 public sealed class ParametricCorrectiveLinearMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly double _per;
-    private readonly RollingWindowSum _w1Sum;
-    private readonly RollingWindowSum _w2Sum;
-    private readonly RollingWindowSum _vw1Sum;
-    private readonly RollingWindowSum _vw2Sum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public ParametricCorrectiveLinearMovingAverageState(int length = 50, double alpha = 1, double per = 35)
-    {
-        _length = Math.Max(1, length);
-        _alpha = alpha;
-        _per = per;
-        _w1Sum = new RollingWindowSum(_length);
-        _w2Sum = new RollingWindowSum(_length);
-        _vw1Sum = new RollingWindowSum(_length);
-        _vw2Sum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ParametricCorrectiveWindow _window;
+    public ParametricCorrectiveLinearMovingAverageState(int length = 50, double alpha = 1, double per = 35) => _window = new(length, alpha, per);
     public IndicatorName Name => IndicatorName.ParametricCorrectiveLinearMovingAverage;
-
-    public void Reset()
-    {
-        _w1Sum.Reset();
-        _w2Sum.Reset();
-        _vw1Sum.Reset();
-        _vw2Sum.Reset();
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var p1 = _index + 1 - ((_per / 100) * _length);
-        var p2 = _index + 1 - (((100 - _per) / 100) * _length);
-
-        var w1 = p1 >= 0 ? p1 : _alpha * p1;
-        var w2 = p2 >= 0 ? p2 : _alpha * p2;
-        var vw1 = prevValue * w1;
-        var vw2 = prevValue * w2;
-
-        var wSum1 = isFinal ? _w1Sum.Add(w1, out _) : _w1Sum.Preview(w1, out _);
-        var wSum2 = isFinal ? _w2Sum.Add(w2, out _) : _w2Sum.Preview(w2, out _);
-        var sum1 = isFinal ? _vw1Sum.Add(vw1, out _) : _vw1Sum.Preview(vw1, out _);
-        var sum2 = isFinal ? _vw2Sum.Add(vw2, out _) : _vw2Sum.Preview(vw2, out _);
-
-        var rrma1 = wSum1 != 0 ? sum1 / wSum1 : 0;
-        var rrma2 = wSum2 != 0 ? sum2 / wSum2 : 0;
-        _ = rrma2;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pclma", rrma1 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rrma1, outputs);
-    }
-
-    public void Dispose()
-    {
-        _w1Sum.Dispose();
-        _w2Sum.Dispose();
-        _vw1Sum.Dispose();
-        _vw2Sum.Dispose();
-        _values.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pclma", value } } : null);
     }
 }
 
