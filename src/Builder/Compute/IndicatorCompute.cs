@@ -22321,40 +22321,26 @@ internal static partial class IndicatorCompute
         int smoothLength = 25, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         BullBearSeries series = BullBearSeries.Bulls)
     {
-        // CalculateAbsoluteStrengthMTFIndicator averages the chained series and the same series lagged one
-        // bar, and splits the difference between the two averages into its positive half (the bulls) and its
-        // negative half (the bears), each smoothed over smoothLength. The switch this replaced published a
-        // moving average of the close. The batch's other four strength series reach no published key.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var lagged = context.Rent(count);
-        var previous = lagged.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            previous[i] = i >= 1 ? input[i - 1] : 0;
+            var lagged = input.Select((_, i) => i == 0 ? 0 : input[i - 1]).ToArray();
+            using var current = context.Rent(input.Count); using var previous = context.Rent(input.Count); using var values = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), current.WritableSpan);
+            MovingAverage(data, maType, length, lagged, previous.WritableSpan);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var difference = AbsoluteStrengthMtfWindow.Difference(new RocBankValue(current.Span[i]), new RocBankValue(previous.Span[i]));
+                values.WritableSpan[i] = series == BullBearSeries.Bulls ? Math.Max(0, difference.Publish()) : Math.Max(0, -difference.Publish());
+            }
+            MovingAverage(data, maType, smoothLength, values.Span, result.WritableSpan);
         }
-
-        using var currentAverage = context.Rent(count);
-        using var laggedAverage = context.Rent(count);
-        MovingAverage(data, maType, length, input, currentAverage.WritableSpan);
-        MovingAverage(data, maType, length, lagged.Span, laggedAverage.WritableSpan);
-
-        using var strength = context.Rent(count);
-        var raw = strength.WritableSpan;
-        for (var i = 0; i < count; i++)
+        else
         {
-            var difference = currentAverage.Span[i] - laggedAverage.Span[i];
-            raw[i] = series == BullBearSeries.Bears
-                ? 0.5 * (Math.Abs(difference) - difference)
-                : 0.5 * (Math.Abs(difference) + difference);
+            using var window = new AbsoluteStrengthMtfWindow(maType, length, smoothLength, Math.Max(1, input.Count));
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = series == BullBearSeries.Bulls ? value.Bulls : value.Bears; }
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, strength.Span, buffer.WritableSpan);
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

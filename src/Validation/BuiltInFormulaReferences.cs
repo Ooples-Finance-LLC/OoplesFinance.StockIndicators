@@ -32,6 +32,16 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AbsoluteStrengthMTFIndicator)
+        {
+            var strengthKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < strengthKeys.Length; slot++)
+            {
+                var key = strengthKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AbsoluteStrengthMtfOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AbsoluteStrengthIndex)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AbsoluteStrengthOutputs(bars, builtIn)["Asi"], IndicatorErrorBudget.Exact);

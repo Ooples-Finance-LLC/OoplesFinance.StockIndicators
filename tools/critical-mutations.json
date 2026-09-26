@@ -17188,5 +17188,130 @@
     "after": "data.InputValues",
     "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast("
+  },
+  {
+    "id": "asmtf-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "Average(new RocBankValue(_price), 1, commit)",
+    "after": "Average(new RocBankValue(price), 1, commit)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-wrong-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "previous.AddTo(ref sum, -1)",
+    "after": "previous.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-wrong-bulls-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "difference.Mantissa > 0 ? difference : default",
+    "after": "difference.Mantissa < 0 ? difference : default",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-wrong-bears-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "new RocBankValue(-difference.Mantissa, difference.UpperShift)",
+    "after": "new RocBankValue(difference.Mantissa, difference.UpperShift)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-drops-extended-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "new RocBankValue(-difference.Mantissa, difference.UpperShift)",
+    "after": "new RocBankValue(-difference.Mantissa)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-wrong-smoothing-period",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "Math.Max(1, smoothLength), Math.Max(1, smoothLength)",
+    "after": "Math.Max(1, length), Math.Max(1, length)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "var current = Average(new RocBankValue(price), 0, commit);",
+    "after": "commit = true; var current = Average(new RocBankValue(price), 0, commit);",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-stale-price-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "_price = 0;",
+    "after": "_price = _price + 0;",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-stale-smoothers-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthMtfWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength"
+  },
+  {
+    "id": "asmtf-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
+    "scope": "public sealed class AbsoluteStrengthMTFIndicatorState :"
+  },
+  {
+    "id": "asmtf-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
+    "scope": "internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast("
+  },
+  {
+    "id": "asmtf-wrong-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "series == BullBearSeries.Bulls ? value.Bulls : value.Bears",
+    "after": "value.Bulls",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
+    "scope": "internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast("
+  },
+  {
+    "id": "asmtf-customer-fast-lag",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, lagged, previous.WritableSpan",
+    "after": "length, SpanCompat.AsReadOnlySpan(input), previous.WritableSpan",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
+    "scope": "internal static ComputeBuffer ComputeAbsoluteStrengthMTFFast("
+  },
+  {
+    "id": "asmtf-customer-batch-bears-input",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "before": "bears = Average(bears, smoothLength);",
+    "after": "bears = Average(bulls, smoothLength);",
+    "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
+    "scope": "public static StockData CalculateAbsoluteStrengthMTFIndicator("
   }
 ]

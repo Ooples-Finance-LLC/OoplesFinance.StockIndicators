@@ -1,14 +1,5 @@
 # Existing numerical-fixture enrollment debt for issue #244; not passing execution evidence.
 # Remove entries as their contracts are completed. New indicators/configurations must be enrolled.
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/default
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/longer-length
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/longer-smoothLength
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/minimum-length
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/minimum-smoothLength
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AbsoluteStrengthMTFIndicator/weighted-average
 OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/default
 OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/minimum-periods
