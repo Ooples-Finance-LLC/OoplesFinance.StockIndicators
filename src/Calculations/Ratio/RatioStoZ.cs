@@ -94,40 +94,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTreynorRatio(this StockData stockData, int length = 30, double beta = 1, double bmk = 0.02)
     {
-        List<double> treynorList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum retSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double barMin = 60 * 24, minPerYr = 60 * 24 * 30 * 12, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TargetReturnWindow(length, bmk, false, beta);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.Add(ret);
-            retSum.Add(ret);
-
-            var retSma = retSum.Average(length);
-            var prevTreynor = GetLastOrDefault(treynorList);
-            var treynor = beta != 0 ? (retSma - bench) / beta : 0;
-            treynorList.Add(treynor);
-
-            var signal = GetCompareSignal(treynor - 2, prevTreynor - 2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tr", treynorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(treynorList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TreynorRatio;
-
         return stockData;
     }
 

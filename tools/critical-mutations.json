@@ -7414,5 +7414,70 @@
     "before": "ExactVarianceWindow.Units(previous));",
     "after": "BigInteger.Abs(ExactVarianceWindow.Units(previous)));",
     "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "treynor-ignores-beta-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "excess.N * beta.D * beta.N.Sign",
+    "after": "excess.N * beta.D",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-ignores-benchmark",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "var excess = new Fraction(up.N, up.D * count) - _benchmark;",
+    "after": "var excess = new Fraction(up.N, up.D * count);",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-sums-instead-of-averages",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "var excess = new Fraction(up.N, up.D * count)",
+    "after": "var excess = new Fraction(up.N, up.D)",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-zero-beta-not-neutral",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "result = beta.N.IsZero ? 0 :",
+    "after": "result = beta.N.IsZero ? 1 :",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-skips-signed-return-sum",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "if (_beta.HasValue) return (value, default);",
+    "after": "if (_beta.HasValue) return (new Fraction(BigInteger.Abs(value.N), value.D), default);",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-native-discards-beta",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new TreynorRatioState(treynor.Length, treynor.Beta, treynor.Bmk)",
+    "after": "new TreynorRatioState(treynor.Length, 1, treynor.Bmk)",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-raw-discards-beta",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "treynor.Length, treynor.Bmk, false, treynor.Beta",
+    "after": "treynor.Length, treynor.Bmk, false, 1",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.ExactMeanExcessReturnPreservesCancellationAndSignedBeta"
+  },
+  {
+    "id": "treynor-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TreynorNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TreynorRatioState"
   }
 ]

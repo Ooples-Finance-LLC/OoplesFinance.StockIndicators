@@ -17,9 +17,9 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
-        if (builtIn.BatchName is IndicatorName.OmegaRatio or IndicatorName.UpsidePotentialRatio)
+        if (builtIn.BatchName is IndicatorName.TreynorRatio or IndicatorName.OmegaRatio or IndicatorName.UpsidePotentialRatio)
         {
-            var key = builtIn.BatchName == IndicatorName.OmegaRatio ? "Or" : "Upr";
+            var key = builtIn.BatchName == IndicatorName.TreynorRatio ? "Tr" : builtIn.BatchName == IndicatorName.OmegaRatio ? "Or" : "Upr";
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TargetReturnsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
             yield break;
         }

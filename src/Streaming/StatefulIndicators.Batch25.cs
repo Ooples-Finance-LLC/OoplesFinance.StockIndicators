@@ -543,66 +543,17 @@ public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Tr")]
 public sealed class TreynorRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _beta;
-    private readonly double _bench;
-    private readonly RollingWindowSum _retSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public TreynorRatioState(int length = 30, double beta = 1, double bmk = 0.02)
-    {
-        _length = Math.Max(1, length);
-        _beta = beta;
-        double barMin = 60 * 24;
-        double minPerYr = 60 * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = Math.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _retSum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TargetReturnWindow _window;
+    public TreynorRatioState(int length = 30, double beta = 1, double bmk = .02) => _window = new TargetReturnWindow(length, bmk, false, beta);
     public IndicatorName Name => IndicatorName.TreynorRatio;
-
-    public void Reset()
-    {
-        _retSum.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
-
-        var retSum = isFinal ? _retSum.Add(ret, out var countAfter) : _retSum.Preview(ret, out countAfter);
-        var retSma = countAfter > 0 ? retSum / countAfter : 0;
-        var treynor = _beta != 0 ? (retSma - _bench) / _beta : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tr", treynor }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(treynor, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Tr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _retSum.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("To")]
