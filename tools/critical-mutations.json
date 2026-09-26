@@ -15623,5 +15623,190 @@
     "before": "new TwoPoleWindow(length, 3)",
     "after": "new TwoPoleWindow(length, 0)",
     "filter": "FullyQualifiedName~TwoPoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-wrong-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "length = Math.Max(2, length)",
+    "after": "length = Math.Max(3, length)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-wrong-angle",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "Math.Cos(1.738 * Math.PI / length)",
+    "after": "Math.Cos(1.414 * Math.PI / length)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "_startup = variant == 0 ? 0 : 4",
+    "after": "_startup = variant == 0 ? 0 : 3",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-wrong-binomial-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "sum.Add(_input1, _gain * 3);",
+    "after": "sum.Add(_input1, _gain * 2);",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-drops-input-lag-three",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "sum.Add(_input3, _gain);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-drops-feedback-one",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "AddFeedback(ref sum, _previous, _feedback1 << _binomial);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-drops-feedback-two",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "AddFeedback(ref sum, _older, _feedback2 << _binomial);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-drops-feedback-three",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "AddFeedback(ref sum, _oldest, _feedback3 << _binomial);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-rounds-pole-polynomial",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "_feedback1 = (pair + real) << 2148;",
+    "after": "_feedback1 = ExactVarianceWindow.Units(2 * Math.Exp(-Math.PI / length) * Math.Cos(1.738 * Math.PI / length) + Math.Exp(-2 * Math.PI / length)) << 3222;",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-loses-extended-state",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "result = RocBankValue.Round(sum);",
+    "after": "result = new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-stale-oldest-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "_previous = _older = _oldest = default;",
+    "after": "_previous = _older = default;",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ThreePoleWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-invalid-bar-0",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class Ehlers3PoleButterworthFilterV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-selected-input-0",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-core-variant-0",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers3PoleButterworthFilterV1(",
+    "before": "new ThreePoleWindow(length, 0)",
+    "after": "new ThreePoleWindow(length, 1)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-invalid-bar-1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class Ehlers3PoleButterworthFilterV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-selected-input-1",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-core-variant-1",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers3PoleButterworthFilterV2(",
+    "before": "new ThreePoleWindow(length, 1)",
+    "after": "new ThreePoleWindow(length, 2)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-invalid-bar-2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class Ehlers3PoleSuperSmootherFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-selected-input-2",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlers3PoleSuperSmootherFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "three-pole-core-variant-2",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void Ehlers3PoleSuperSmootherFilter(",
+    "before": "new ThreePoleWindow(length, 2)",
+    "after": "new ThreePoleWindow(length, 0)",
+    "filter": "FullyQualifiedName~ThreePoleNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

@@ -337,29 +337,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleSuperSmootherFilter(this StockData stockData, int length = 20)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var kernel = new Streaming.ButterworthThreePoleKernel(length, smoothInput: false);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new ThreePoleWindow(length, 2); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var filt = kernel.Next(currentValue, true);
-            filtList.Add(filt);
-            signalsList?.Add(GetCompareSignal(currentValue - filt, prevValue - prevFilter1));
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E3ssf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E3ssf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers3PoleSuperSmootherFilter;
-
         return stockData;
     }
 
@@ -416,41 +403,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV1(this StockData stockData, int length = 10)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = Exp(-Math.PI / length);
-        var b = 2 * a * Math.Cos(1.738 * Math.PI / length);
-        var c = a * a;
-        var d2 = b + c;
-        var d3 = -(c + (b * c));
-        var d4 = c * c;
-        var d1 = 1 - d2 - d3 - d4;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new ThreePoleWindow(length, 0); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? filtList[i - 3] : 0;
-
-            var filt = (d1 * currentValue) + (d2 * prevFilter1) + (d3 * prevFilter2) + (d4 * prevFilter3);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E3bf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E3bf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers3PoleButterworthFilterV1;
-
         return stockData;
     }
 
@@ -463,32 +425,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlers3PoleButterworthFilterV2(this StockData stockData, int length = 15)
     {
-        length = Math.Max(2, length);
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var kernel = new Streaming.ButterworthThreePoleKernel(length);
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new ThreePoleWindow(length, 1); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var filt = kernel.Next(currentValue, true);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue1 - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "E3bf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "E3bf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.Ehlers3PoleButterworthFilterV2;
-
         return stockData;
     }
 

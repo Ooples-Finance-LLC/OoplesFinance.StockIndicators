@@ -9,94 +9,47 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("E3ssf")]
 public sealed class Ehlers3PoleSuperSmootherFilterState : IStreamingIndicatorState
 {
-    private readonly ButterworthThreePoleKernel _kernel;
-    private readonly StreamingInputResolver _input = new(InputName.Close, null);
-    public Ehlers3PoleSuperSmootherFilterState(int length = 20) => _kernel = new(length, smoothInput: false);
+    private readonly ThreePoleWindow _window;
+    public Ehlers3PoleSuperSmootherFilterState(int length = 20) => _window = new(length, 2);
     public IndicatorName Name => IndicatorName.Ehlers3PoleSuperSmootherFilter;
-    public void Reset() => _kernel.Reset();
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var value = _kernel.Next(_input.GetValue(bar), isFinal);
-        return new(value, includeOutputs ? new Dictionary<string, double> { ["E3ssf"] = value } : null);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E3ssf", value } } : null);
     }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("E3bf")]
 public sealed class Ehlers3PoleButterworthFilterV1State : IStreamingIndicatorState
 {
-    private readonly double _coef1;
-    private readonly double _coef2;
-    private readonly double _coef3;
-    private readonly double _coef4;
-    private readonly StreamingInputResolver _input;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private double _prevFilter3;
-
-    public Ehlers3PoleButterworthFilterV1State(int length = 10)
-    {
-        var resolved = Math.Max(2, length);
-        var a = MathHelper.Exp(-Math.PI / resolved);
-        var b = 2 * a * Math.Cos(1.738 * Math.PI / resolved);
-        var c = a * a;
-        _coef2 = b + c;
-        _coef3 = -(c + (b * c));
-        _coef4 = c * c;
-        _coef1 = 1 - _coef2 - _coef3 - _coef4;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ThreePoleWindow _window;
+    public Ehlers3PoleButterworthFilterV1State(int length = 10) => _window = new(length, 0);
     public IndicatorName Name => IndicatorName.Ehlers3PoleButterworthFilterV1;
-
-    public void Reset()
-    {
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _prevFilter3 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevFilter1 = _prevFilter1;
-        var prevFilter2 = _prevFilter2;
-        var prevFilter3 = _prevFilter3;
-        var filt = (_coef1 * value) + (_coef2 * prevFilter1) + (_coef3 * prevFilter2) + (_coef4 * prevFilter3);
-
-        if (isFinal)
-        {
-            _prevFilter3 = prevFilter2;
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filt;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "E3bf", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E3bf", value } } : null);
     }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("E3bf")]
 public sealed class Ehlers3PoleButterworthFilterV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly ButterworthThreePoleKernel _kernel;
-    private readonly StreamingInputResolver _input = new(InputName.Close, null);
-    public Ehlers3PoleButterworthFilterV2State(int length = 15) => _kernel = new(length);
+    private readonly ThreePoleWindow _window;
+    public Ehlers3PoleButterworthFilterV2State(int length = 15) => _window = new(length, 1);
     public IndicatorName Name => IndicatorName.Ehlers3PoleButterworthFilterV2;
-    public void Reset() => _kernel.Reset();
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var value = _kernel.Next(_input.GetValue(bar), isFinal);
-        return new(value, includeOutputs ? new Dictionary<string, double> { ["E3bf"] = value } : null);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "E3bf", value } } : null);
     }
     public void Dispose() { }
 }

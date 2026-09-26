@@ -22,6 +22,11 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ParametricCorrectiveOutputs(bars, builtIn)["Pclma"], IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (ThreePoleVariant(builtIn.BatchName) >= 0)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ThreePoleOutputs(bars, builtIn).Values.First(), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (TwoPoleVariant(builtIn.BatchName) >= 0)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TwoPoleOutputs(bars, builtIn).Values.First(), IndicatorErrorBudget.Exact);
