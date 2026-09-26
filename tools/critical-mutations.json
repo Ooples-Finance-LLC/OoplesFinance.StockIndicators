@@ -13883,5 +13883,128 @@
     "before": "maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan",
     "after": "maType, length + 1, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan",
     "filter": "FullyQualifiedName~SupportResistanceNumericalTests.CustomerAverageReceivesPrices"
+  },
+  {
+    "id": "better-ema-wrong-minimum-gain",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "Math.Max(.01, (value - 1) / value)",
+    "after": "Math.Max(.02, (value - 1) / value)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-wrong-maximum-gain",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "Math.Min(.99,",
+    "after": "Math.Min(.98,",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-wrong-trigonometric-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "Math.Cos(angle) + Math.Sin(angle)",
+    "after": "Math.Cos(angle) - Math.Sin(angle)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-wrong-retention-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "sum.AddProduct(previous, -_alpha)",
+    "after": "sum.AddProduct(previous, _alpha)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-publishes-ordinary-ema",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "var output = Blend(middle, _ema)",
+    "after": "var output = Blend(price, _ema)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-feeds-back-published-output",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "_ema = ema;",
+    "after": "_ema = output;",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-midpoint-uses-ema",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(price, _previous)",
+    "after": "HighLowAverageWindow.Midpoint(price, _ema)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-overflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(price, _previous)",
+    "after": "(price + _previous) / 2",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-underflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(price, _previous)",
+    "after": "price / 2 + _previous / 2",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "if (commit) { _previous = price;",
+    "after": "if (true) { _previous = price;",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-stale-price-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "_previous = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-stale-ema-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BetterEmaWindow.cs",
+    "before": "_ema = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.MidpointOutputUsesOrdinaryFeedbackAndPreservesPreviewReset"
+  },
+  {
+    "id": "better-ema-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersBetterExponentialMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "better-ema-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersBetterExponentialMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "better-ema-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersBetterExponentialMovingAverageFast(",
+    "before": "new BetterEmaWindow(length)",
+    "after": "new BetterEmaWindow(14)",
+    "filter": "FullyQualifiedName~BetterEmaNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
   }
 ]
