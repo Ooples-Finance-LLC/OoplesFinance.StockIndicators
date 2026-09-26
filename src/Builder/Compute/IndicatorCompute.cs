@@ -20887,10 +20887,13 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
-        var c1 = -vFactor * vFactor * vFactor;
-        var c2 = (3 * vFactor * vFactor) + (3 * vFactor * vFactor * vFactor);
-        var c3 = (-6 * vFactor * vFactor) - (3 * vFactor) - (3 * vFactor * vFactor * vFactor);
-        var c4 = 1 + (3 * vFactor) + (vFactor * vFactor * vFactor) + (3 * vFactor * vFactor);
+        var coefficients = new TillsonWindow.Coefficients(vFactor);
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result = context.Rent(count); using var window = new TillsonWindow(maType, length, vFactor);
+            for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(inputList[i], true);
+            return result;
+        }
 
         using var first = context.Rent(count);
         using var second = context.Rent(count);
@@ -20910,7 +20913,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (c1 * sixth.Span[i]) + (c2 * fifth.Span[i]) + (c3 * fourth.Span[i]) + (c4 * third.Span[i]);
+            output[i] = coefficients.Combine(third.Span[i], fourth.Span[i], fifth.Span[i], sixth.Span[i]);
         }
 
         return buffer;

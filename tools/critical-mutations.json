@@ -13102,5 +13102,120 @@
     "after": "HighLowBandsWindow.Shift(middle, _pctShift)",
     "scope": "public sealed class HighLowBandsState",
     "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "tillson-wrong-third-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_third = sum * sum * sum;",
+    "after": "_third = sum * sum;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-wrong-fourth-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_fourth = -3 * numerator * sum * sum;",
+    "after": "_fourth = 3 * numerator * sum * sum;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-wrong-fifth-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_fifth = 3 * numerator * numerator * sum;",
+    "after": "_fifth = 2 * numerator * numerator * sum;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-wrong-sixth-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_sixth = -numerator * numerator * numerator;",
+    "after": "_sixth = numerator * numerator * numerator;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-wrong-binary-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_scale = 3 * power;",
+    "after": "_scale = 2 * power;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-negative-factor-loses-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "bits < 0 ? -significand : significand",
+    "after": "significand",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-drops-sixth-stage",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "stage < 6; stage++",
+    "after": "stage < 5; stage++",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-third-uses-second",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "if (stage == 2) third = price;",
+    "after": "if (stage == 1) third = price;",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "_averages[stage].Next(new RocBankValue(price), commit)",
+    "after": "_averages[stage].Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-stale-state-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages.Skip(1)) average.Reset();",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.SixStagesPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "tillson-accepts-invalid-factor",
+    "module": "numerical",
+    "file": "src/Helpers/TillsonWindow.cs",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor)) throw new ArgumentOutOfRangeException(nameof(factor));",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.NonfiniteFactorsAreRejectedEvenForEmptyInput"
+  },
+  {
+    "id": "tillson-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TillsonT3MovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "tillson-customer-sixth-gets-fourth",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTillsonT3Fast(",
+    "before": "length, fifth.Span, sixth.WritableSpan",
+    "after": "length, fourth.Span, sixth.WritableSpan",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.CustomerStagesReceiveSixSequentialInputs"
+  },
+  {
+    "id": "tillson-raw-ignores-factor",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTillsonT3Fast(",
+    "before": "new TillsonWindow(maType, length, vFactor)",
+    "after": "new TillsonWindow(maType, length, 0)",
+    "filter": "FullyQualifiedName~TillsonNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
   }
 ]

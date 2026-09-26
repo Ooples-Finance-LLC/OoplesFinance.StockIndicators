@@ -460,6 +460,7 @@ internal static partial class StatefulIndicatorFactory
             SimplifiedLeastSquaresMovingAverageSpecOptions simplifiedLsma => new SimplifiedLeastSquaresMovingAverageState(simplifiedLsma.Length),
             FramaSpecOptions frama => new EhlersFractalAdaptiveMovingAverageState(frama.Length),
             McGinleyDynamicSpecOptions mcg => new McGinleyDynamicIndicatorState(length: mcg.Length),
+            TillsonT3MovingAverageSpecOptions tillson => new TillsonT3MovingAverageState(tillson.MaType, tillson.Length, tillson.VFactor),
             T3SpecOptions t3 => new TillsonT3MovingAverageState(maType: t3.MaType, length: t3.Length),
             LinRegSpecOptions linreg => new LinearRegressionState(length: linreg.Length),
             StandardDeviationChannelSpecOptions deviationChannel => new StandardDeviationChannelState(deviationChannel.Length),
