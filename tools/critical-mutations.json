@@ -18514,5 +18514,32 @@
     "after": "SpanCompat.AsReadOnlySpan(eco), Math.Max(1, signalLength + 1)",
     "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState",
     "scope": "public static StockData CalculateAdaptiveErgodicCandlestickOscillator("
+  },
+  {
+    "id": "butterworth-alias-wrong-formula",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverageCore.Ehlers2PoleButterworthFilterV1(input, buffer.WritableSpan, length)",
+    "after": "MovingAverageCore.Ehlers2PoleSuperSmootherFilterV1(input, buffer.WritableSpan, length)",
+    "scope": "internal static ComputeBuffer ComputeButterworthFilterFast(",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset|FullyQualifiedName~TwoPoleNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields"
+  },
+  {
+    "id": "butterworth-alias-wrong-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan, length)",
+    "after": "buffer.WritableSpan, length + 1)",
+    "scope": "internal static ComputeBuffer ComputeButterworthFilterFast(",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset|FullyQualifiedName~TwoPoleNumericalTests.SelectedSourcePreservesTheFormulaAndOriginalCandleFields"
+  },
+  {
+    "id": "butterworth-alias-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "scope": "internal static ComputeBuffer ComputeButterworthFilterFast(",
+    "filter": "FullyQualifiedName~TwoPoleNumericalTests.ButterworthAliasRawPreservesSelectedSeries"
   }
 ]

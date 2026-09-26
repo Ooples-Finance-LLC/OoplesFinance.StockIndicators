@@ -184,10 +184,6 @@ OoplesFinance.StockIndicators.Indicators.BullPowerIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.BullPowerIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.BullPowerIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.BullPowerIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.ButterworthFilter/default
-OoplesFinance.StockIndicators.Indicators.ButterworthFilter/longer-periods
-OoplesFinance.StockIndicators.Indicators.ButterworthFilter/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ButterworthFilter/shorter-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/default
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/longer-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/minimum-periods

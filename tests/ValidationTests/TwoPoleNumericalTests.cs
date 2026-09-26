@@ -25,6 +25,18 @@ public sealed class TwoPoleNumericalTests
         2 => new Ehlers2PoleSuperSmootherFilterV1State(length), _ => new Ehlers2PoleSuperSmootherFilterV2State(length)
     };
     [Fact]
+    public void ButterworthAliasRawPreservesSelectedSeries()
+    {
+        var prices = new[] { 1d, -2, 3, -4, 0, 0, 0, 0 };
+        foreach (var length in new[] { 1, 2, 7, 100 })
+        {
+            var data = Data(BarsOf(Enumerable.Repeat(10d, prices.Length).ToArray())); data.SetCustomValues(prices.ToList());
+            var expected = BuiltInFormulaReferences.TwoPoleOutputs(BarsOf(prices), (IBuiltInIndicator)new ButterworthFilter(length)).Values.Single();
+            using var context = new ComputeContext(); using var raw = IndicatorCompute.ComputeButterworthFilterFast(data, context, length);
+            Assert.Equal(expected, raw.Span.ToArray());
+        }
+    }
+    [Fact]
     public void PoleRecurrencesPreserveExtendedRangeAndPreviewReset()
     {
         foreach (var variant in Enumerable.Range(0, 4))
@@ -110,7 +122,7 @@ public sealed class TwoPoleNumericalTests
         }
     }
     public static IEnumerable<object[]> Cases => IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
-        .Where(c => new[] { typeof(Ehlers2PoleButterworthFilterV1), typeof(Ehlers2PoleButterworthFilterV2), typeof(Ehlers2PoleSuperSmootherFilterV1), typeof(Ehlers2PoleSuperSmootherFilterV2) }.Contains(c.IndicatorType)).Select(c => new object[] { c });
+        .Where(c => new[] { typeof(ButterworthFilter), typeof(Ehlers2PoleButterworthFilterV1), typeof(Ehlers2PoleButterworthFilterV2), typeof(Ehlers2PoleSuperSmootherFilterV1), typeof(Ehlers2PoleSuperSmootherFilterV2) }.Contains(c.IndicatorType)).Select(c => new object[] { c });
     public static IEnumerable<object[]> Routes => Cases.SelectMany(c => new[] { "batch", "fast", "arm", "native", "streaming" }.Select(route => new object[] { c[0], route }));
     [Theory, MemberData(nameof(Routes))]
     public void AllRoutesMatchIndependentFormulasIncludingPreviewAndReset(IndicatorValidationCase testCase, string route) =>
