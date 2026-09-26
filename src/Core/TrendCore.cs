@@ -339,37 +339,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VerticalHorizontalFilter(ReadOnlySpan<double> close, Span<double> output, int length = 28)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var highest = double.MinValue;
-            var lowest = double.MaxValue;
-            double sumAbsChange = 0;
-
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (close[j] > highest) highest = close[j];
-                if (close[j] < lowest) lowest = close[j];
-
-                if (j > i - length + 1)
-                {
-                    sumAbsChange += Math.Abs(close[j] - close[j - 1]);
-                }
-            }
-
-            var numerator = highest - lowest;
-            output[i] = sumAbsChange != 0 ? numerator / sumAbsChange : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VerticalHorizontalWindow(length, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

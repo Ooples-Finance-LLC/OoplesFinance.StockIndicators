@@ -588,55 +588,23 @@ public static partial class Calculations
     public static StockData CalculateVerticalHorizontalFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 18, int signalLength = 6)
     {
-        length = Math.Max(1, length);
-        List<double> vhfList = new(stockData.Count);
-        List<double> changeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum changeSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = length == 1 ? (inputList, inputList) : GetMaxAndMinValuesList(inputList, length);
-
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); signalLength = Math.Max(1, signalLength);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VerticalHorizontalWindow(length, Math.Max(1, input.Count));
+        var priceMean = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        var line = input.Select(price => window.Next(price, true)).ToList();
+        var signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), signalLength)?.ToList();
+        if (signal is null && StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var highestPrice = highestList[i];
-            var lowestPrice = lowestList[i];
-            var numerator = Math.Abs(highestPrice - lowestPrice);
-
-            var priceChange = Math.Abs(MinPastValues(i, 1, currentValue - prevValue));
-            changeList.Add(priceChange);
-            changeSumWindow.Add(priceChange);
-
-            var denominator = changeSumWindow.Sum(length);
-            var vhf = denominator != 0 ? numerator / denominator : 0;
-            vhfList.Add(vhf);
+            var values = new double[input.Count];
+            VerticalHorizontalWindow.SmoothSignal(SpanCompat.AsReadOnlySpan(line), values, maType, signalLength);
+            signal = values.ToList();
         }
-
-        var vhfWmaList = GetMovingAverageList(stockData, maType, signalLength, vhfList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentWma = wmaList[i];
-            var prevWma = i >= 1 ? wmaList[i - 1] : 0;
-            var vhfWma = vhfWmaList[i];
-            var vhf = vhfList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentWma, prevValue - prevWma, vhf, vhfWma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vhf", vhfList },
-            { "Signal", vhfWmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vhfList);
-        stockData.IndicatorName = IndicatorName.VerticalHorizontalFilter;
-
+        signal ??= GetMovingAverageList(stockData, maType, signalLength, line);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetVolatilitySignal(input[i] - priceMean[i], i == 0 ? 0 : input[i - 1] - priceMean[i - 1], line[i], signal[i]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vhf", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VerticalHorizontalFilter;
         return stockData;
     }
 

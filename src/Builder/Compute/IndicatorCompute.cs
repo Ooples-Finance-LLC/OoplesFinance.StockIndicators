@@ -329,7 +329,7 @@ internal static partial class IndicatorCompute
             LinRegSlopeSpecOptions lrs => ComputeLinRegSlopeFast(data, context, lrs.Length),
             RSquaredSpecOptions rsq => ComputeRSquaredFast(data, context, rsq.Length),
             VhfSpecOptions vhf => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeVhfFast(data, context, vhf.Length), 6, MovingAvgType.WeightedMovingAverage)
+                ? ComputeVerticalHorizontalFilterFast(data, context, vhf.Length, MovingAvgType.WeightedMovingAverage, 6, true)
                 : ComputeVhfFast(data, context, vhf.Length),
 
             // Additional Oscillators
@@ -1590,7 +1590,7 @@ internal static partial class IndicatorCompute
             DidiIndexSpecOptions didi => ComputeDidiIndexFast(data, context, didi.ShortLength,
                 didi.MediumLength, didi.MaType, didi.LongLength, spec.OutputKey),
             VerticalHorizontalFilterSpecOptions vhf => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeVerticalHorizontalFilterFast(data, context, vhf.Length), 6, vhf.MaType)
+                ? ComputeVerticalHorizontalFilterFast(data, context, vhf.Length, vhf.MaType, 6, true)
                 : ComputeVerticalHorizontalFilterFast(data, context, vhf.Length),
             LinearRegressionSlopeSpecOptions lrs => ComputeLinearRegressionSlopeFast(data, context, lrs.Length),
             LinearRegressionInterceptSpecOptions lri => ComputeLinearRegressionInterceptFast(data, context, lri.Length),
@@ -19278,31 +19278,29 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Vertical Horizontal Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(StockData data, ComputeContext context, int length = 18)
+    internal static ComputeBuffer ComputeVerticalHorizontalFilterFast(StockData data, ComputeContext context, int length = 18, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int signalLength = 6, bool signal = false)
     {
-        // CalculateVerticalHorizontalFilter divides how far the chained series travelled over its window by
-        // how far it moved bar to bar, so a straight run reads near one and a chop reads near zero. Its
-        // moving average only smooths the signal line, which this spec does not address.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length, 1));
-        var changeSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var window = new VerticalHorizontalWindow(length, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        if (!signal) return buffer;
+        using var raw = buffer; var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides)
         {
-            window.Add(input[i]);
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            changeSumWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue)));
-
-            var denominator = changeSumWindow.Sum(length);
-            output[i] = denominator != 0 ? Math.Abs(window.Max - window.Min) / denominator : 0;
+            using var priceMean = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), priceMean.WritableSpan);
         }
-
-        return buffer;
+        var substitute = ComponentAverage.Take(raw.Span, signalLength);
+        if (substitute is not null)
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = substitute[i];
+        else if (StrengthWindow.Supports(maType)) VerticalHorizontalWindow.SmoothSignal(raw.Span, result.WritableSpan, maType, signalLength);
+        else
+        {
+            var values = CalculationsHelper.GetMovingAverageList(data, maType, signalLength, raw.Span.ToArray().ToList());
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = values[i];
+        }
+        return result;
     }
 
     /// <summary>
