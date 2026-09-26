@@ -604,36 +604,23 @@ public static partial class Calculations
     public static StockData CalculateZeroLagTripleExponentialMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14)
     {
-        List<double> zlTemaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var tma1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var tma2List = GetMovingAverageList(stockData, maType, length, tma1List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || (maType != MovingAvgType.TripleExponentialMovingAverage && !StrengthWindow.Supports(maType));
+        List<double>? first = null, second = null;
+        using var window = new ZeroLagTripleWindow(maType, length);
+        if (custom)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var tma1 = tma1List[i];
-            var tma2 = tma2List[i];
-            var diff = tma1 - tma2;
-
-            var prevZltema = GetLastOrDefault(zlTemaList);
-            var zltema = tma1 + diff;
-            zlTemaList.Add(zltema);
-
-            var signal = GetCompareSignal(currentValue - zltema, prevValue - prevZltema);
-            signalsList?.Add(signal);
+            first = GetMovingAverageList(stockData, maType, length, input);
+            second = GetMovingAverageList(stockData, maType, length, first);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ztema", zlTemaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zlTemaList);
-        stockData.IndicatorName = IndicatorName.ZeroLagTripleExponentialMovingAverage;
-
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(input[i], true, first?[i], second?[i]);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ztema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ZeroLagTripleExponentialMovingAverage;
         return stockData;
     }
 

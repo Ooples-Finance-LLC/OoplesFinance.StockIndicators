@@ -10569,5 +10569,88 @@
     "after": "",
     "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class PentupleExponentialMovingAverageState"
+  },
+  {
+    "id": "zero-triple-wrong-outer-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "first.AddTo(ref total, 2)",
+    "after": "first.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-adds-second-tema",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "second.AddTo(ref total, -1)",
+    "after": "second.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-skips-second-ema",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "Next(second, commit)",
+    "after": "Next(first, commit)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-wrong-inner-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "first.AddTo(ref total, 3)",
+    "after": "first.AddTo(ref total, 2)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-publishes-first-tema",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "Smooth(first, 1, commit)",
+    "after": "Smooth(new RocBankValue(first.Publish()), 1, commit)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "_averages[stage * 3].Next(value, commit)",
+    "after": "_averages[stage * 3].Next(value, true)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-stale-stages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagTripleWindow.cs",
+    "before": "if (_averages is not null) foreach (var average in _averages) average.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-triple-reuses-first-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, first.Span, second.WritableSpan",
+    "after": "length, SpanCompat.AsReadOnlySpan(input), second.WritableSpan",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CustomerStagesRemainSequential",
+    "scope": "internal static ComputeBuffer ComputeZeroLagTripleExponentialMovingAverageFast("
+  },
+  {
+    "id": "zero-triple-registry-commits-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_window.Next(value, isFinal)",
+    "after": "_window.Next(value, true)",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal sealed class ZeroLagTripleExponentialMovingAverageSmoother"
+  },
+  {
+    "id": "zero-triple-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLagTripleNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ZeroLagTripleExponentialMovingAverageState"
   }
 ]

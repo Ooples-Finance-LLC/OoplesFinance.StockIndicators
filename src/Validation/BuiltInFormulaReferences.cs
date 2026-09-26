@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ZeroLagTripleExponentialMovingAverage && AverageKind(builtIn.CreateOptions(), 5) is 1 or 2 or 3 or 5 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZeroLagTripleOutputs(bars, builtIn)["Ztema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.QuadrupleExponentialMovingAverage or IndicatorName.PentupleExponentialMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BinomialCascadeOutputs(bars, builtIn).Values.Single(), IndicatorErrorBudget.Exact);

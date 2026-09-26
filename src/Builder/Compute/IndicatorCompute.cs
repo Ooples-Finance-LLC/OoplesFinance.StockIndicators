@@ -16606,11 +16606,18 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeZeroLagTripleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ZeroLagTripleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides;
+        using var window = new ZeroLagTripleWindow(MovingAvgType.TripleExponentialMovingAverage, length);
+        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
+        if (custom)
+        {
+            MovingAverage(data, MovingAvgType.TripleExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, MovingAvgType.TripleExponentialMovingAverage, length, first.Span, second.WritableSpan);
+        }
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+        return result;
     }
 
     #endregion

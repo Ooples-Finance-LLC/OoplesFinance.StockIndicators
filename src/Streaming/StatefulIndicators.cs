@@ -13033,31 +13033,11 @@ internal sealed class TripleExponentialMovingAverageSmoother : IMovingAverageSmo
 
 internal sealed class ZeroLagTripleExponentialMovingAverageSmoother : IMovingAverageSmoother
 {
-    private readonly TripleExponentialMovingAverageSmoother _tema1;
-    private readonly TripleExponentialMovingAverageSmoother _tema2;
-
-    public ZeroLagTripleExponentialMovingAverageSmoother(int length)
-    {
-        _tema1 = new TripleExponentialMovingAverageSmoother(length);
-        _tema2 = new TripleExponentialMovingAverageSmoother(length);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var tema1 = _tema1.Next(value, isFinal);
-        var tema2 = _tema2.Next(tema1, isFinal);
-        return tema1 + (tema1 - tema2);
-    }
-
-    public void Reset()
-    {
-        _tema1.Reset();
-        _tema2.Reset();
-    }
-
-    public void Dispose()
-    {
-    }
+    private readonly ZeroLagTripleWindow _window;
+    public ZeroLagTripleExponentialMovingAverageSmoother(int length) => _window = new(MovingAvgType.TripleExponentialMovingAverage, length);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class McNichollMovingAverageSmoother : IMovingAverageSmoother
