@@ -68,70 +68,17 @@ public sealed class MovingAverageAdaptiveQState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Mabw")]
 public sealed class MovingAverageBandWidthState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly RollingWindowSum _sqSum;
-    private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-
-    public MovingAverageBandWidthState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 10,
-        int slowLength = 50, double mult = 1)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, resolvedFast);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSlow);
-        _sqSum = new RollingWindowSum(resolvedFast);
-        _mult = mult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MovingAverageBandWindow _window;
+    public MovingAverageBandWidthState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 10, int slowLength = 50, double mult = 1) => _window = new(maType, fastLength, slowLength, mult);
     public IndicatorName Name => IndicatorName.MovingAverageBandWidth;
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _sqSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var fast = _fastSmoother.Next(value, isFinal);
-        var slow = _slowSmoother.Next(value, isFinal);
-        var diff = slow - fast;
-        var sq = diff * diff;
-        int countAfter;
-        var sum = isFinal ? _sqSum.Add(sq, out countAfter) : _sqSum.Preview(sq, out countAfter);
-        var dev = MathHelper.Sqrt(countAfter > 0 ? sum / countAfter : 0) * _mult;
-        var upper = slow + dev;
-        var lower = slow - dev;
-        // Divided by the average the bands are centred on, which is the slow one: they are slow +/- dev.
-        // This divided by the fast average instead, and agreed with the batch only because the batch read
-        // it from MovingAverageBands' MiddleBand, which was publishing the fast average rather than the
-        // centre. With that corrected the batch moved and this had to follow, which is the clearest sign
-        // the mislabelled band was not merely cosmetic: a second indicator was dividing by it.
-        var mabw = slow != 0 ? (upper - lower) / slow * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mabw", mabw }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mabw, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Width, includeOutputs ? new Dictionary<string, double> { { "Mabw", value.Width } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-        _sqSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Macd")]

@@ -181,40 +181,23 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageBandWidth(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 10, int slowLength = 50, double mult = 1)
     {
-        List<double> mabwList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var mabList = CalculateMovingAverageBands(stockData, maType, fastLength, slowLength, mult);
-        var ubList = mabList.ChainedOutputs["UpperBand"];
-        var lbList = mabList.ChainedOutputs["LowerBand"];
-        var maList = mabList.ChainedOutputs["MiddleBand"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new MovingAverageBandWindow(maType, fastLength, slowLength, mult, external);
+        var fastAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), fastLength)?.ToList() ?? GetMovingAverageList(stockData, maType, fastLength, input) : null;
+        var slowAverage = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), slowLength)?.ToList() ?? GetMovingAverageList(stockData, maType, slowLength, input) : null;
+        List<double> upper = new(stockData.Count), middle = new(stockData.Count), lower = new(stockData.Count), fast = new(stockData.Count), bandwidth = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var mb = maList[i];
-            var ub = ubList[i];
-            var lb = lbList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevMb = i >= 1 ? maList[i - 1] : 0;
-            var prevUb = i >= 1 ? ubList[i - 1] : 0;
-            var prevLb = i >= 1 ? lbList[i - 1] : 0;
-
-            var mabw = mb != 0 ? (ub - lb) / mb * 100 : 0;
-            mabwList.Add(mabw);
-
-            var signal = GetBollingerBandsSignal(currentValue - mb, prevValue - prevMb, currentValue, prevValue, ub, prevUb, lb, prevLb);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, fastAverage?[i], slowAverage?[i]);
+            var center = value.Middle;
+            var previousCenter = i == 0 ? 0 : middle[i - 1];
+            signals?.Add(GetBollingerBandsSignal(input[i] - center, i == 0 ? 0 : input[i - 1] - previousCenter, input[i], i == 0 ? 0 : input[i - 1], value.Upper, i == 0 ? 0 : upper[i - 1], value.Lower, i == 0 ? 0 : lower[i - 1]));
+            upper.Add(value.Upper); middle.Add(value.Middle); lower.Add(value.Lower); fast.Add(value.Fast); bandwidth.Add(value.Width);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mabw", mabwList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mabwList);
-        stockData.IndicatorName = IndicatorName.MovingAverageBandWidth;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mabw", bandwidth } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(bandwidth); stockData.IndicatorName = IndicatorName.MovingAverageBandWidth;
         return stockData;
     }
 
