@@ -1049,57 +1049,16 @@ public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
 [PrimaryOutput("Wad")]
 public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorState
 {
-    private double _prevClose;
-    private double _prevWad;
-    private bool _hasPrev;
-
+    private readonly WilliamsAccumulationWindow _window = new();
     public IndicatorName Name => IndicatorName.WilliamsAccumulationDistribution;
-
-    public void Reset()
-    {
-        _prevClose = 0;
-        _prevWad = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset();  }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var close = bar.Close;
-
-        // The bar's contribution is measured against the true range high and low, and an unchanged close
-        // contributes nothing without discarding the total. See CalculateWilliamsAccumulationDistribution.
-        double wad;
-        if (!_hasPrev)
-        {
-            wad = 0;
-        }
-        else
-        {
-            var trueRangeHigh = Math.Max(bar.High, _prevClose);
-            var trueRangeLow = Math.Min(bar.Low, _prevClose);
-            wad = close > _prevClose ? _prevWad + close - trueRangeLow
-                : close < _prevClose ? _prevWad + close - trueRangeHigh
-                : _prevWad;
-        }
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _prevWad = wad;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Wad", wad }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(wad, outputs);
+        var wide = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        var value = wide.Publish();
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Wad", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 }
 

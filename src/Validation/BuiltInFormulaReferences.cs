@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution || builtIn.BatchName == IndicatorName.SmoothedWilliamsAccumulationDistribution && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var accumulationKeys = builtIn.BatchName == IndicatorName.WilliamsAccumulationDistribution ? new[] { "Wad" } : new[] { "Swad", "Signal" };
+            for (var slot = 0; slot < accumulationKeys.Length; slot++)
+            {
+                var key = accumulationKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => WilliamsAccumulationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.UlcerIndex || builtIn.BatchName == IndicatorName.MartinRatio && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
         {
             var key = builtIn.BatchName == IndicatorName.UlcerIndex ? "Ui" : "Mr";
