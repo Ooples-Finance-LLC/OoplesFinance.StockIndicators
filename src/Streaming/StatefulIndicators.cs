@@ -1650,79 +1650,16 @@ public sealed class Dema2LinesState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class DynamicSupportAndResistanceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _mult;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public DynamicSupportAndResistanceState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 25)
-    {
-        var resolved = Math.Max(1, length);
-        _mult = MathHelper.Sqrt(resolved);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DynamicSupportWindow _window;
+    public DynamicSupportAndResistanceState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 25) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.DynamicSupportAndResistance;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        int highCount;
-        int lowCount;
-        var highest = isFinal ? _highWindow.Add(bar.High, out highCount) : _highWindow.Preview(bar.High, out highCount);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out lowCount) : _lowWindow.Preview(bar.Low, out lowCount);
-
-        var support = highest - (atr * _mult);
-        var resistance = lowest + (atr * _mult);
-        var middle = (support + resistance) / 2;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Support", support },
-                { "Resistance", resistance },
-                { "MiddleBand", middle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "Support", point.Support }, { "Resistance", point.Resistance }, { "MiddleBand", point.Middle } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("UpperBand")]

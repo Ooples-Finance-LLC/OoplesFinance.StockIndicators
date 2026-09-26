@@ -140,49 +140,23 @@ public static partial class Calculations
     public static StockData CalculateDynamicSupportAndResistance(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 25)
     {
-        List<double> supportList = new(stockData.Count);
-        List<double> resistanceList = new(stockData.Count);
-        List<double> middleList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = length <= 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length);
-
-        var mult = Sqrt(length);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? atr = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var currentAvgTrueRange = atrList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var support = highestHigh - (currentAvgTrueRange * mult);
-            supportList.Add(support);
-
-            var resistance = lowestLow + (currentAvgTrueRange * mult);
-            resistanceList.Add(resistance);
-
-            var prevMiddle = GetLastOrDefault(middleList);
-            var middle = (support + resistance) / 2;
-            middleList.Add(middle);
-
-            var signal = GetCompareSignal(currentValue - middle, prevValue - prevMiddle);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, ranges);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Support", supportList },
-            { "Resistance", resistanceList },
-            { "MiddleBand", middleList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.DynamicSupportAndResistance;
-
-        return stockData;
+        using var window = new DynamicSupportWindow(maType, length, external, Math.Max(1, input.Count));
+        List<double> support = new(input.Count), resistance = new(input.Count), middle = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr![i]) : null);
+            signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            support.Add(point.Support); resistance.Add(point.Resistance); middle.Add(point.Middle);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Support", support }, { "Resistance", resistance }, { "MiddleBand", middle } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.DynamicSupportAndResistance; return stockData;
     }
 
 

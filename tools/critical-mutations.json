@@ -19607,5 +19607,121 @@
     "before": "pct.MaType, pct.Length, pct.BbLength, pct.StdDevMult",
     "after": "pct.MaType, pct.BbLength, pct.Length, pct.StdDevMult",
     "filter": "FullyQualifiedName~AtrPercentBandNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "dynamic-support-root-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "Math.Sqrt(length)",
+    "after": "length",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "new(kind, length, length, kind, capacityHint)",
+    "after": "new(kind, length, length + 1, kind, capacityHint)",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-high-window",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "_high = new(length);",
+    "after": "_high = new(length + 1);",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-low-window",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "_low = new(length);",
+    "after": "_low = new(length + 1);",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-support-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "support.AddProduct(atr.Mantissa, _multiplier, -1)",
+    "after": "support.AddProduct(atr.Mantissa, _multiplier, 1)",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-resistance-origin",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "resistance.Add(lowest)",
+    "after": "resistance.Add(highest)",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-early-midpoint-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "middle.Mean(2)",
+    "after": "(support.Mean(1) + resistance.Mean(1)) / 2",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-high-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "var highest = commit ?",
+    "after": "var highest = true ?",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-low-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "var lowest = commit ?",
+    "after": "var lowest = true ?",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicSupportWindow.cs",
+    "before": "_range?.Reset(); _high.Reset(); _low.Reset();",
+    "after": "_range?.Reset();",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother"
+  },
+  {
+    "id": "dynamic-support-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother",
+    "scope": "internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast("
+  },
+  {
+    "id": "dynamic-support-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother",
+    "scope": "public static StockData CalculateDynamicSupportAndResistance("
+  },
+  {
+    "id": "dynamic-support-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother",
+    "scope": "public sealed class DynamicSupportAndResistanceState :"
+  },
+  {
+    "id": "dynamic-support-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~DynamicSupportNumericalTests.RollingExtremaAndAtrOffsetsPreserveTheExactMidpoint|FullyQualifiedName~DynamicSupportNumericalTests.SelectedClosesAndCustomerRangesPreserveExtremaAndPeriod|FullyQualifiedName~DynamicSupportNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DynamicSupportNumericalTests.LegacyBatchOnlyAveragesRetainTheirRangeSmoother",
+    "scope": "internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast("
   }
 ]

@@ -22118,40 +22118,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDynamicSupportAndResistanceFast(StockData data, ComputeContext context, int length = 25,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, SupportResistanceBand band = SupportResistanceBand.Middle)
     {
-        // CalculateDynamicSupportAndResistance measures the support down from the highest high of the window
-        // and the resistance up from its lowest low, each by the average true range scaled by the square root
-        // of the length. The middle is their average. None of it is a moving average of the close.
-        var count = data.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        length = Math.Max(length, 1);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-        var mult = MathHelper.Sqrt(length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var atr = context.Rent(count);
+        if (external)
+        {
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+        }
+        var result = context.Rent(count); using var window = new DynamicSupportWindow(maType, length, external, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var offset = atr[i] * mult;
-            var support = highWindow.Max - offset;
-            var resistance = lowWindow.Min + offset;
-            output[i] = band switch
-            {
-                SupportResistanceBand.Support => support,
-                SupportResistanceBand.Resistance => resistance,
-                _ => (support + resistance) / 2
-            };
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr.Span[i]) : null);
+            result.WritableSpan[i] = band == SupportResistanceBand.Support ? point.Support : band == SupportResistanceBand.Resistance ? point.Resistance : point.Middle;
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>
