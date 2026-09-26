@@ -14645,5 +14645,194 @@
     "before": "new EfficiencyOutputWindow(length, true, fastAlpha, slowAlpha)",
     "after": "new EfficiencyOutputWindow(14, true, fastAlpha, slowAlpha)",
     "filter": "FullyQualifiedName~EfficientAutoLineNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "volume-adjusted-ignores-zero-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_zeroFactor = factor == 0",
+    "after": "_zeroFactor = false",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-wrong-weighted-retention",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "weighted.Subtract(sum);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-premature-simple-mean",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_count + 1 < _length ? 0 : sum.Mean(_length)",
+    "after": "sum.Mean(_length)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-wrong-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 1L)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-omits-ema-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "&& _count < _length",
+    "after": "&& _count < 0",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-wrong-mean-retention",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "next.Add(_previousMean, _length - 1)",
+    "after": "next.Add(_previousMean, 1 - _length)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-drops-product-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "product.ScaleByPowerOfTwo(weight.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-retains-expired-weight",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "old.Weight.AddTo(ref mass, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-retains-expired-product",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "sum.Subtract(old.Product);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-wrong-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "RocBankValue.Round(numerator, average)",
+    "after": "RocBankValue.Round(numerator)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-volumes-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_volumes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-terms-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_terms.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-volume-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_volumeSum = _weightedVolume",
+    "after": "_weightedVolume",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-weighted-volume-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_weightedVolume = _mass",
+    "after": "_mass",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-mass-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_mass = _sum = default",
+    "after": "_sum = default",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_sum = default",
+    "after": "default",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_previousMean = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "scope": "private double Average(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-commits-weight-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdjustedWindow.cs",
+    "scope": "internal double NextWithAverage(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VolumeAdjustedMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
+  },
+  {
+    "id": "volume-adjusted-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolumeAdjustedMovingAverageFast(",
+    "before": "new VolumeAdjustedWindow(maType, length, factor, false)",
+    "after": "new VolumeAdjustedWindow(maType, 14, factor, false)",
+    "filter": "FullyQualifiedName~VolumeAdjustedNumericalTests"
   }
 ]

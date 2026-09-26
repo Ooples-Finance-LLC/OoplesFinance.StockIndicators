@@ -337,6 +337,8 @@ internal static partial class StatefulIndicatorFactory
             ModularFilterSpecOptions modular => new ModularFilterState(modular.Length, modular.Beta, modular.Z),
             ParametricCorrectiveLinearMovingAverageSpecOptions parametric => new ParametricCorrectiveLinearMovingAverageState(parametric.Length),
             EhlersKaufmanAdaptiveMovingAverageSpecOptions ekama => new EhlersKaufmanAdaptiveMovingAverageState(ekama.Length),
+            VolumeAdjustedMovingAverageSpecOptions volumeAdjusted => new VolumeAdjustedMovingAverageState(volumeAdjusted.MaType, volumeAdjusted.Length, volumeAdjusted.Factor),
+            VolumeAdjustedMaSpecOptions volumeAdjustedAlias => new VolumeAdjustedMovingAverageState(length: volumeAdjustedAlias.Length),
             WellRoundedMovingAverageSpecOptions wellRounded => new WellRoundedMovingAverageState(wellRounded.Length),
             EhlersBetterExponentialMovingAverageSpecOptions better => new EhlersBetterExponentialMovingAverageState(better.Length),
             MovingAverageSupportResistanceSpecOptions support => new MovingAverageSupportResistanceState(support.MaType, support.Length),

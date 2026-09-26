@@ -1872,60 +1872,15 @@ public sealed class VolumeAdaptiveBandsState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Vama")]
 public sealed class VolumeAdjustedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _factor;
-    private readonly IMovingAverageSmoother _volumeSma;
-    private readonly RollingWindowSum _volumeRatioSum;
-    private readonly RollingWindowSum _priceVolumeRatioSum;
-    private readonly StreamingInputResolver _input;
-
-    public VolumeAdjustedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double factor = 0.67)
-    {
-        var resolved = Math.Max(1, length);
-        _factor = factor;
-        _volumeSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _volumeRatioSum = new RollingWindowSum(resolved);
-        _priceVolumeRatioSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeAdjustedWindow _window;
+    public VolumeAdjustedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double factor = .67) => _window = new(maType, length, factor);
     public IndicatorName Name => IndicatorName.VolumeAdjustedMovingAverage;
-
-    public void Reset()
-    {
-        _volumeSma.Reset();
-        _volumeRatioSum.Reset();
-        _priceVolumeRatioSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volumeSma = _volumeSma.Next(bar.Volume, isFinal);
-        var volumeIncrement = volumeSma * _factor;
-        var volumeRatio = volumeIncrement != 0 ? bar.Volume / volumeIncrement : 0;
-        var volumeRatioSum = isFinal ? _volumeRatioSum.Add(volumeRatio, out _) : _volumeRatioSum.Preview(volumeRatio, out _);
-        var priceVolumeRatio = value * volumeRatio;
-        var priceVolumeRatioSum = isFinal ? _priceVolumeRatioSum.Add(priceVolumeRatio, out _) : _priceVolumeRatioSum.Preview(priceVolumeRatio, out _);
-        var vama = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vama", vama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vama, outputs);
-    }
-
-    public void Dispose()
-    {
-        _volumeSma.Dispose();
-        _volumeRatioSum.Dispose();
-        _priceVolumeRatioSum.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Vama", value } } : null);
     }
 }
 

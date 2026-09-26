@@ -1070,29 +1070,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> input, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            double sumPriceVolume = 0;
-            double sumVolume = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sumPriceVolume += input[j] * volume[j];
-                sumVolume += volume[j];
-            }
-
-            output[i] = sumVolume > 0 ? sumPriceVolume / sumVolume : input[i];
-        }
+        VolumeAdjustedMovingAverage(input, volume, output, length, .67);
     }
 
     /// <summary>
@@ -4284,51 +4262,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VolumeAdjustedMovingAverage(ReadOnlySpan<double> price, ReadOnlySpan<double> volume, Span<double> output, int length = 14, double factor = 0.67)
     {
-        if (output.Length < price.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var pool = ArrayPool<double>.Shared;
-        var volumeSmaArray = pool.Rent(price.Length);
-
-        try
-        {
-            var volumeSma = volumeSmaArray.AsSpan(0, price.Length);
-            SimpleMovingAverage(volume, volumeSma, length);
-
-            double volumeRatioSum = 0;
-            double priceVolumeRatioSum = 0;
-            var volumeRatioWindow = new double[length];
-            var priceVolumeRatioWindow = new double[length];
-            var windowIdx = 0;
-            var windowCount = 0;
-
-            for (var i = 0; i < price.Length; i++)
-            {
-                var currentVolume = volume[i];
-                var volumeIncrement = volumeSma[i] * factor;
-                var volumeRatio = volumeIncrement != 0 ? currentVolume / volumeIncrement : 0;
-                var priceVolumeRatio = price[i] * volumeRatio;
-
-                // Update rolling sums
-                if (windowCount >= length)
-                {
-                    volumeRatioSum -= volumeRatioWindow[windowIdx];
-                    priceVolumeRatioSum -= priceVolumeRatioWindow[windowIdx];
-                }
-                volumeRatioWindow[windowIdx] = volumeRatio;
-                priceVolumeRatioWindow[windowIdx] = priceVolumeRatio;
-                volumeRatioSum += volumeRatio;
-                priceVolumeRatioSum += priceVolumeRatio;
-                windowIdx = (windowIdx + 1) % length;
-                if (windowCount < length) windowCount++;
-
-                output[i] = volumeRatioSum != 0 ? priceVolumeRatioSum / volumeRatioSum : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(volumeSmaArray);
-        }
+        if (output.Length < price.Length || volume.Length < price.Length) throw new ArgumentException("Output and volume spans must be at least input length.");
+        using var window = new VolumeAdjustedWindow(MovingAvgType.SimpleMovingAverage, length, factor);
+        for (var i = 0; i < price.Length; i++) output[i] = window.Next(price[i], volume[i], true);
     }
 
     /// <summary>
