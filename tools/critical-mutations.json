@@ -11761,5 +11761,120 @@
     "after": "",
     "filter": "FullyQualifiedName~HullNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class HullMovingAverageState"
+  },
+  {
+    "id": "three-hull-truncates-main-period",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Math.Ceiling(length / 2d)",
+    "after": "Math.Floor(length / 2d)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-truncates-third-period",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Math.Ceiling(period / 3d)",
+    "after": "Math.Floor(period / 3d)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-truncates-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Math.Ceiling(period / 2d)",
+    "after": "Math.Floor(period / 2d)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-wrong-final-period",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Third(p), Half(p), p, p",
+    "after": "Third(p), Half(p), p, Math.Max(1, (int)Math.Ceiling(Math.Sqrt(p)))",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-wrong-first-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "first.AddTo(ref total, 3)",
+    "after": "first.AddTo(ref total, 2)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-wrong-second-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "second.AddTo(ref total, -1)",
+    "after": "second.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-wrong-third-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "third.AddTo(ref total, -1)",
+    "after": "third.AddTo(ref total, 1)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-sequential-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Smooth(input, 1, commit)",
+    "after": "Smooth(first, 1, commit)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-premature-adjustment-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "Smooth(RocBankValue.Round(total), 3, commit)",
+    "after": "Smooth(new RocBankValue(total.Mean(1)), 3, commit)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "_averages[stage].Next(value, commit)",
+    "after": "_averages[stage].Next(value, true)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-stale-averages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ThreeHullWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "three-hull-raw-sequential-customer-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ThreeHullWindow.Half(p), SpanCompat.AsReadOnlySpan(input), second.WritableSpan",
+    "after": "ThreeHullWindow.Half(p), first.Span, second.WritableSpan",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CustomerStagesReceiveOriginalThenAdjustedInputsInOrder",
+    "scope": "internal static ComputeBuffer ComputeThreeHmaFast("
+  },
+  {
+    "id": "three-hull-batch-bypasses-customer",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.CustomerStagesReceiveOriginalThenAdjustedInputsInOrder",
+    "scope": "public static StockData Calculate3HMA("
+  },
+  {
+    "id": "three-hull-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ThreeHullNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class _3HMAState"
   }
 ]

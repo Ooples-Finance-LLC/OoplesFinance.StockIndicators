@@ -8109,63 +8109,17 @@ public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorStat
 [PrimaryOutput("3hma")]
 public sealed class _3HMAState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _wma1;
-    private readonly IMovingAverageSmoother _wma2;
-    private readonly IMovingAverageSmoother _wma3;
-    private readonly IMovingAverageSmoother _final;
-    private readonly StreamingInputResolver _input;
-
-    public _3HMAState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 50)
-    {
-        var p = (int)Math.Max(1, Math.Ceiling((double)length / 2));
-        var p1 = (int)Math.Max(1, Math.Ceiling((double)p / 3));
-        var p2 = (int)Math.Max(1, Math.Ceiling((double)p / 2));
-
-        _wma1 = MovingAverageSmootherFactory.Create(maType, p1);
-        _wma2 = MovingAverageSmootherFactory.Create(maType, p2);
-        _wma3 = MovingAverageSmootherFactory.Create(maType, p);
-        _final = MovingAverageSmootherFactory.Create(maType, p);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ThreeHullWindow _window;
+    public _3HMAState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 50) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName._3HMA;
-
-    public void Reset()
-    {
-        _wma1.Reset();
-        _wma2.Reset();
-        _wma3.Reset();
-        _final.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var wma1 = _wma1.Next(value, isFinal);
-        var wma2 = _wma2.Next(value, isFinal);
-        var wma3 = _wma3.Next(value, isFinal);
-        var mid = (wma1 * 3) - wma2 - wma3;
-        var hma = _final.Next(mid, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "3hma", hma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "3hma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _wma1.Dispose();
-        _wma2.Dispose();
-        _wma3.Dispose();
-        _final.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Macd1")]

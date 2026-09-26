@@ -16051,11 +16051,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeThreeHMAFast(StockData data, ComputeContext context, int length = 50)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.ThreeHMA(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeThreeHmaFast(data, context, length);
     }
 
     /// <summary>
@@ -17310,11 +17306,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTripleHullMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        TrendCore.TripleHullMovingAverage(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeThreeHmaFast(data, context, length);
     }
 
     /// <summary>
@@ -19505,35 +19497,24 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeThreeHmaFast(StockData data, ComputeContext context, int length = 50,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // Calculate3HMA halves the length, then takes a third and a half of that half, and smooths the
-        // combination 3*wma(p1) - wma(p2) - wma(p) once more over p, with each derived period at least one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var p = (int)Math.Max(1, Math.Ceiling((double)length / 2));
-        var p1 = (int)Math.Max(1, Math.Ceiling((double)p / 3));
-        var p2 = (int)Math.Max(1, Math.Ceiling((double)p / 2));
-
-        using var first = context.Rent(count);
-        using var second = context.Rent(count);
-        using var third = context.Rent(count);
-        MovingAverage(data, maType, p1, input, first.WritableSpan);
-        MovingAverage(data, maType, p2, input, second.WritableSpan);
-        MovingAverage(data, maType, p, input, third.WritableSpan);
-
-        using var combined = context.Rent(count);
-        var mid = combined.WritableSpan;
-        var wma1 = first.Span;
-        var wma2 = second.Span;
-        var wma3 = third.Span;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
+            var p = ThreeHullWindow.Period(length);
+            using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
+            using var third = context.Rent(input.Count); using var adjusted = context.Rent(input.Count);
+            MovingAverage(data, maType, ThreeHullWindow.Third(p), SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, maType, ThreeHullWindow.Half(p), SpanCompat.AsReadOnlySpan(input), second.WritableSpan);
+            MovingAverage(data, maType, p, SpanCompat.AsReadOnlySpan(input), third.WritableSpan);
+            for (var i = 0; i < input.Count; i++) adjusted.WritableSpan[i] = ThreeHullWindow.Combine(first.Span[i], second.Span[i], third.Span[i]);
+            MovingAverage(data, maType, p, adjusted.Span, buffer.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, p, combined.Span, buffer.WritableSpan);
+        else
+        {
+            using var window = new ThreeHullWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        }
         return buffer;
     }
 

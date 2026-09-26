@@ -2621,44 +2621,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ThreeHMA(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var p = Math.Max((int)Math.Ceiling((double)length / 2), 1);
-        var p1 = Math.Max((int)Math.Ceiling((double)p / 3), 1);
-        var p2 = Math.Max((int)Math.Ceiling((double)p / 2), 1);
-
-        var wma1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var wma3Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var midBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var wma1 = wma1Buffer.AsSpan(0, input.Length);
-            var wma2 = wma2Buffer.AsSpan(0, input.Length);
-            var wma3 = wma3Buffer.AsSpan(0, input.Length);
-            var mid = midBuffer.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, p1);
-            WeightedMovingAverage(input, wma2, p2);
-            WeightedMovingAverage(input, wma3, p);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (wma1[i] * 3) - wma2[i] - wma3[i];
-            }
-
-            WeightedMovingAverage(mid, output, p);
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(wma1Buffer);
-            ArrayPool<double>.Shared.Return(wma2Buffer);
-            ArrayPool<double>.Shared.Return(wma3Buffer);
-            ArrayPool<double>.Shared.Return(midBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -5429,47 +5394,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ThreeHma(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var p = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-        var p1 = Math.Max(1, (int)Math.Ceiling((double)p / 3));
-        var p2 = Math.Max(1, (int)Math.Ceiling((double)p / 2));
-        var sqrtP = Math.Max(1, (int)Math.Ceiling(Math.Sqrt(p)));
-
-        var wma1Array = pool.Rent(input.Length);
-        var wma2Array = pool.Rent(input.Length);
-        var wma3Array = pool.Rent(input.Length);
-        var midArray = pool.Rent(input.Length);
-
-        try
-        {
-            var wma1 = wma1Array.AsSpan(0, input.Length);
-            var wma2 = wma2Array.AsSpan(0, input.Length);
-            var wma3 = wma3Array.AsSpan(0, input.Length);
-            var mid = midArray.AsSpan(0, input.Length);
-
-            WeightedMovingAverage(input, wma1, p1);
-            WeightedMovingAverage(input, wma2, p2);
-            WeightedMovingAverage(input, wma3, p);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                mid[i] = (3 * wma1[i]) - wma2[i] - wma3[i];
-            }
-
-            WeightedMovingAverage(mid, output, sqrtP);
-        }
-        finally
-        {
-            pool.Return(wma1Array);
-            pool.Return(wma2Array);
-            pool.Return(wma3Array);
-            pool.Return(midArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ThreeHullWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
