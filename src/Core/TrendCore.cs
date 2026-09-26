@@ -520,52 +520,11 @@ internal static class TrendCore
     /// <summary>
     /// Computes Trend Intensity Index.
     /// </summary>
-    internal static void TrendIntensityIndex(ReadOnlySpan<double> close, Span<double> output, int length = 30)
+    internal static void TrendIntensityIndex(ReadOnlySpan<double> close, Span<double> output, int fastLength = 30, int slowLength = 60, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 50;
-                    continue;
-                }
-
-                var upCount = 0;
-                var downCount = 0;
-
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (close[j] > sma[j])
-                    {
-                        upCount++;
-                    }
-                    else if (close[j] < sma[j])
-                    {
-                        downCount++;
-                    }
-                }
-
-                var total = upCount + downCount;
-                output[i] = total != 0 ? (double)upCount / total * 100 : 50;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

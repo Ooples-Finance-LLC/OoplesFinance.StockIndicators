@@ -170,59 +170,18 @@ public sealed class TrendImpulseFilterState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Tii")]
 public sealed class TrendIntensityIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly RollingWindowSum _upSum;
-    private readonly RollingWindowSum _downSum;
-    private readonly StreamingInputResolver _input;
-
-    public TrendIntensityIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int fastLength = 30, int slowLength = 60)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _upSum = new RollingWindowSum(resolvedFast);
-        _downSum = new RollingWindowSum(resolvedFast);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendIntensityWindow _window;
+    public TrendIntensityIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 30, int slowLength = 60)
+        => _window = new TrendIntensityWindow(maType, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.TrendIntensityIndex;
-
-    public void Reset()
-    {
-        _slowSmoother.Reset();
-        _upSum.Reset();
-        _downSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _slowSmoother.Next(value, isFinal);
-        var deviationUp = value > sma ? value - sma : 0;
-        var deviationDown = value < sma ? sma - value : 0;
-
-        var upSum = isFinal ? _upSum.Add(deviationUp, out _) : _upSum.Preview(deviationUp, out _);
-        var downSum = isFinal ? _downSum.Add(deviationDown, out _) : _downSum.Preview(deviationDown, out _);
-        var tii = upSum + downSum != 0 ? upSum / (upSum + downSum) * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tii", tii }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tii, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Tii", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _slowSmoother.Dispose();
-        _upSum.Dispose();
-        _downSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tpr")]

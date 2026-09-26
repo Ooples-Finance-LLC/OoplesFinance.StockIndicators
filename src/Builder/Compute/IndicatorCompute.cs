@@ -5471,35 +5471,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTrendIntensityIndexFast(StockData data, ComputeContext context, int fastLength = 30,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int slowLength = 60)
     {
-        // CalculateTrendIntensityIndex splits the chained series into how far it sits above and below its
-        // slow moving average, sums each over the fast window, and reports the upward share as a percentage.
-        // The TrendCore routine this replaced read the close and used one length for both.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, slowLength, input, smoothed.WritableSpan);
-        var sma = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var deviationUpSum = new RollingSum();
-        var deviationDownSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            deviationUpSum.Add(input[i] > sma[i] ? input[i] - sma[i] : 0);
-            deviationDownSum.Add(input[i] < sma[i] ? sma[i] - input[i] : 0);
-
-            var sdPlus = deviationUpSum.Sum(fastLength);
-            var sdMinus = deviationDownSum.Sum(fastLength);
-            output[i] = sdPlus + sdMinus != 0 ? sdPlus / (sdPlus + sdMinus) * 100 : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(input.Count);
+        if (custom) MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), means.WritableSpan);
+        var output = context.Rent(input.Count);
+        using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        return output;
     }
 
     /// <summary>

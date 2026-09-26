@@ -7802,5 +7802,71 @@
     "after": "",
     "filter": "FullyQualifiedName~PriceVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class PriceVolumeOscillatorState"
+  },
+  {
+    "id": "trend-intensity-negative-residual-as-gain",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "if (price > mean)",
+    "after": "if (price != mean)",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences"
+  },
+  {
+    "id": "trend-intensity-signed-total",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "price >= mean ? weight : -weight",
+    "after": "weight",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences"
+  },
+  {
+    "id": "trend-intensity-keeps-expired-residuals",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "if (_window.Count == _window.Capacity)",
+    "after": "if (_window.Count > _window.Capacity)",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences"
+  },
+  {
+    "id": "trend-intensity-wrong-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "new StrengthAverage(kind, slowLength)",
+    "after": "new StrengthAverage(kind, fastLength)",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences"
+  },
+  {
+    "id": "trend-intensity-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "if (commit) { _window.TryAdd",
+    "after": "if (_window.Capacity > 0) { _window.TryAdd",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences"
+  },
+  {
+    "id": "trend-intensity-skips-customer-center",
+    "module": "numerical",
+    "file": "src/Helpers/TrendIntensityWindow.cs",
+    "before": "var mean = customerMean ??",
+    "after": "var mean = (double?)null ??",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.CustomerMeanControlsResidualSigns"
+  },
+  {
+    "id": "trend-intensity-core-discards-slow-period",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "new TrendIntensityWindow(maType, fastLength, slowLength)",
+    "after": "new TrendIntensityWindow(maType, fastLength, fastLength)",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.ExactResidualSharesKeepBothPeriodsAndWideDifferences",
+    "scope": "internal static void TrendIntensityIndex("
+  },
+  {
+    "id": "trend-intensity-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendIntensityNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrendIntensityIndexState"
   }
 ]
