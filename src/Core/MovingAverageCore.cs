@@ -2434,20 +2434,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DoubleExponentialSmoothing(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.01, double gamma = 0.9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var x = input[i];
-            var prevS = i >= 1 ? output[i - 1] : 0;
-            var prevS2 = i >= 2 ? output[i - 2] : 0;
-            var sChg = prevS - prevS2;
-
-            output[i] = (alpha * x) + ((1 - alpha) * (prevS + (gamma * (sChg + ((1 - gamma) * sChg)))));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DoubleSmoothingWindow(alpha, gamma);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

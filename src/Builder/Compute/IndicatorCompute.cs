@@ -13620,30 +13620,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDoubleExponentialSmoothingFast(StockData data, ComputeContext context)
     {
-        // CalculateDoubleExponentialSmoothing takes no length: its two constants are fixed, and the trend it
-        // carries forward is the change in its own last two values, damped by gamma. That is why the spec
-        // marks its length as having no effect, and why it is no longer passed here.
-        // OscillatorCore.DoubleExponentialSmoothing seeded its first bar with the close instead of starting
-        // from nothing, so the two series never met.
-        const double alpha = 0.01;
-        const double gamma = 0.9;
-
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var s = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var prevS = i >= 1 ? s[i - 1] : 0;
-            var prevS2 = i >= 2 ? s[i - 2] : 0;
-            var sChg = prevS - prevS2;
-
-            s[i] = (alpha * input[i]) + ((1 - alpha) * (prevS + (gamma * (sChg + ((1 - gamma) * sChg)))));
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.DoubleExponentialSmoothing(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan);
         return buffer;
     }
 

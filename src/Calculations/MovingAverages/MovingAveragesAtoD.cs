@@ -1059,32 +1059,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDoubleExponentialSmoothing(this StockData stockData, double alpha = 0.01, double gamma = 0.9)
     {
-        List<double> sList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new DoubleSmoothingWindow(alpha, gamma);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var x = inputList[i];
-            var prevX = i >= 1 ? inputList[i - 1] : 0;
-            var prevS = i >= 1 ? sList[i - 1] : 0;
-            var prevS2 = i >= 2 ? sList[i - 2] : 0;
-            var sChg = prevS - prevS2;
-
-            var s = (alpha * x) + ((1 - alpha) * (prevS + (gamma * (sChg + ((1 - gamma) * sChg)))));
-            sList.Add(s);
-
-            var signal = GetCompareSignal(x - s, prevX - prevS);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Des", sList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sList);
-        stockData.IndicatorName = IndicatorName.DoubleExponentialSmoothing;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Des", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DoubleExponentialSmoothing;
         return stockData;
     }
 

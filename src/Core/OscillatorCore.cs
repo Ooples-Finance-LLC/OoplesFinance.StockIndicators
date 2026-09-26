@@ -6798,23 +6798,9 @@ internal static class OscillatorCore
     /// <param name="gamma">Trend smoothing factor (0-1).</param>
     internal static void DoubleExponentialSmoothing(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.01, double gamma = 0.9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (input.Length == 0) return;
-
-        output[0] = input[0];
-        if (input.Length == 1) return;
-
-        output[1] = (alpha * input[1]) + ((1 - alpha) * output[0]);
-
-        for (var i = 2; i < input.Length; i++)
-        {
-            var sChg = output[i - 1] - output[i - 2];
-            output[i] = (alpha * input[i]) + ((1 - alpha) * (output[i - 1] + (gamma * (sChg + ((1 - gamma) * sChg)))));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DoubleSmoothingWindow(alpha, gamma);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
