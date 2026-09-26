@@ -850,6 +850,12 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
+        if (_stableFit is not null)
+        {
+            var stable = _stableFit.Next(value, _forecastLength, isFinal);
+            return new(stable.Value, includeOutputs ? new Dictionary<string, double> { { "Qlma", stable.Value }, { "Forecast", stable.Forecast } } : null);
+        }
+
         var n = (double)_index;
         var n2 = n * n;
         var nn2 = n * n2;

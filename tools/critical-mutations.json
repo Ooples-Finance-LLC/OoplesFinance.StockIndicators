@@ -17833,5 +17833,139 @@
     "after": "SpanCompat.AsReadOnlySpan(input), length + 1",
     "filter": "FullyQualifiedName~AdaptiveEmaNumericalTests.OhlcRangesStartupAndExtendedFeedbackMatchEveryRoute|FullyQualifiedName~AdaptiveEmaNumericalTests.CustomerSeedIsUsedThroughTheInclusiveStartupBoundary|FullyQualifiedName~AdaptiveEmaNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
     "scope": "public static StockData CalculateAdaptiveExponentialMovingAverage("
+  },
+  {
+    "id": "qfit-wrong-linear-normalization",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "n * _meanSquare / 3",
+    "after": "n * _meanSquare / 2",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-quadratic-normalization",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "4 * n * _meanSquare * (n * n - 4) / 5",
+    "after": "4 * n * _meanSquare * (n * n - 4) / 3",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-retains-expired-price",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "_values.Count == _length ?",
+    "after": "_values.Count > _length ?",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-linear-shift",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "retainedLinear - 2 * retained",
+    "after": "retainedLinear - retained",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-quadratic-shift",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "- 12 * retainedLinear + 12 * retained",
+    "after": "- 6 * retainedLinear + 12 * retained",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-horizon",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "_edge + 2L * horizon",
+    "after": "_edge + horizon",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-mean-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "UnitRatio(sum, new BigInteger(_length))",
+    "after": "UnitRatio(sum, new BigInteger(_length + 1))",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-wrong-startup",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "_values.Count + 1 >= _length",
+    "after": "_values.Count >= _length",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-commits-preview",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "if (isFinal) {",
+    "after": "{",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-stale-quadratic-reset",
+    "module": "numerical",
+    "file": "src/Streaming/QuadraticLeastSquaresWindow.cs",
+    "before": "_sum = _linear = _quadratic = default",
+    "after": "_sum = _linear = default",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "qfit-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "var value = bar.Volume < 0 && bar.Volume > 0 ? _input.GetValue(bar) : bar.Close;",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class QuadraticLeastSquaresMovingAverageState :"
+  },
+  {
+    "id": "qfit-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast("
+  },
+  {
+    "id": "qfit-wrong-forecast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "series == QuadraticFitSeries.Forecast ? point.Forecast : point.Value",
+    "after": "point.Value",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast("
+  },
+  {
+    "id": "qfit-wrong-customer-moment",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, squareValues.Span, squareValueAverage.WritableSpan",
+    "after": "length, cubes.Span, squareValueAverage.WritableSpan",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeQuadraticLeastSquaresMovingAverageFast("
+  },
+  {
+    "id": "qfit-ignores-customer-slots",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "before": "if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)",
+    "after": "if (maType == MovingAvgType.SimpleMovingAverage)",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public static StockData CalculateQuadraticLeastSquaresMovingAverage("
+  },
+  {
+    "id": "qfit-core-identity",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "output[i] = window.Next(input[i], 14, true).Value",
+    "after": "output[i] = input[i]",
+    "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static void QuadraticLeastSquaresMovingAverage("
   }
 ]

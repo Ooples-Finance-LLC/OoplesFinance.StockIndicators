@@ -32,6 +32,16 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.QuadraticLeastSquaresMovingAverage)
+        {
+            var quadraticKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < quadraticKeys.Length; slot++)
+            {
+                var key = quadraticKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => QuadraticFitOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AdaptiveExponentialMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveEmaOutputs(bars, builtIn)["Aema"], IndicatorErrorBudget.Exact);

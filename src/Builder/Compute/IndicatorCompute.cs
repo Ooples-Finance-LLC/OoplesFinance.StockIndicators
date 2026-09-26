@@ -15170,9 +15170,9 @@ internal static partial class IndicatorCompute
         MovingAverage(data, maType, length, input, average.WritableSpan);
         MovingAverage(data, maType, length, indices.Span, indexAverage.WritableSpan);
         MovingAverage(data, maType, length, squares.Span, squareAverage.WritableSpan);
-        MovingAverage(data, maType, length, cubes.Span, cubeAverage.WritableSpan);
         MovingAverage(data, maType, length, squareValues.Span, squareValueAverage.WritableSpan);
         MovingAverage(data, maType, length, indexValues.Span, indexValueAverage.WritableSpan);
+        MovingAverage(data, maType, length, cubes.Span, cubeAverage.WritableSpan);
         var sma = average.Span;
         var nSma = indexAverage.Span;
         var n2Sma = squareAverage.Span;

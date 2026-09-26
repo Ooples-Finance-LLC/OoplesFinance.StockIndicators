@@ -260,6 +260,20 @@ public static partial class Calculations
     public static StockData CalculateQuadraticLeastSquaresMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 50, int forecastLength = 14)
     {
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData);
+            using var exact = new Streaming.QuadraticLeastSquaresWindow(length);
+            List<double> values = new(prices.Count), forecasts = new(prices.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < prices.Count; i++)
+            {
+                var point = exact.Next(prices[i], forecastLength, true); values.Add(point.Value); forecasts.Add(point.Forecast);
+                signals?.Add(GetCompareSignal(prices[i] - point.Value, (i > 0 ? prices[i - 1] : 0) - (i > 0 ? values[i - 1] : 0)));
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Qlma", values }, { "Forecast", forecasts } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.QuadraticLeastSquaresMovingAverage;
+            return stockData;
+        }
         List<double> nList = new(stockData.Count);
         List<double> n2List = new(stockData.Count);
         List<double> nn2List = new(stockData.Count);
@@ -273,8 +287,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        using var stableFit = maType == MovingAvgType.SimpleMovingAverage ? new Streaming.QuadraticLeastSquaresWindow(length) : null;
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
+        using var stableFit = maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides ? new Streaming.QuadraticLeastSquaresWindow(length) : null;
+        var smaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -296,11 +310,11 @@ public static partial class Calculations
             nvList.Add(nv);
         }
 
-        var nSmaList = GetMovingAverageList(stockData, maType, length, nList);
-        var n2SmaList = GetMovingAverageList(stockData, maType, length, n2List);
-        var n2vSmaList = GetMovingAverageList(stockData, maType, length, n2vList);
-        var nvSmaList = GetMovingAverageList(stockData, maType, length, nvList);
-        var nn2SmaList = GetMovingAverageList(stockData, maType, length, nn2List);
+        var nSmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(nList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, nList);
+        var n2SmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(n2List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, n2List);
+        var n2vSmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(n2vList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, n2vList);
+        var nvSmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(nvList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, nvList);
+        var nn2SmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(nn2List), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, nn2List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var nSma = nSmaList[i];
