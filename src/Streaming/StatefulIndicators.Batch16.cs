@@ -941,82 +941,17 @@ public sealed class LeoMovingAverageState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Llsma")]
 public sealed class LightLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _sma1;
-    private readonly IMovingAverageSmoother _sma2;
-    private readonly IMovingAverageSmoother _indexMa;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingStandardDeviation _indexStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _indexValue;
-    private int _index;
-
-    public LightLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 250)
-    {
-        _length = Math.Max(1, length);
-        var length1 = Math.Max(1, (int)Math.Ceiling(_length / 2d));
-        _sma1 = MovingAverageSmootherFactory.Create(maType, _length);
-        _sma2 = MovingAverageSmootherFactory.Create(maType, length1);
-        _indexMa = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new RollingStandardDeviation(_length);
-        _indexStdDev = new RollingStandardDeviation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LightLeastSquaresWindow _window;
+    public LightLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 250) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.LightLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _sma1.Reset();
-        _sma2.Reset();
-        _indexMa.Reset();
-        _stdDev.Reset();
-        _indexStdDev.Reset();
-        _indexValue = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var index = (double)_index;
-        _indexValue = index;
-
-        var sma1 = _sma1.Next(value, isFinal);
-        var sma2 = _sma2.Next(value, isFinal);
-        var stdDev = _stdDev.Next(value, isFinal);
-        var indexStdDev = _indexStdDev.Next(_indexValue, isFinal);
-        var indexMa = _indexMa.Next(index, isFinal);
-
-        var c = stdDev != 0 ? (sma2 - sma1) / stdDev : 0;
-        var z = indexStdDev != 0 && c != 0 ? (index - indexMa) / indexStdDev * c : 0;
-        var y = sma1 + (z * stdDev);
-
-        if (isFinal)
-        {
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Llsma", y }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(y, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Llsma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma1.Dispose();
-        _sma2.Dispose();
-        _indexMa.Dispose();
-        _stdDev.Dispose();
-        _indexStdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("LindaMacd")]

@@ -16285,5 +16285,122 @@
     "before": "EhlersLeadingIndicator(input, output, .25, .33);",
     "after": "EhlersLeadingIndicator(input, output, .25, .5);",
     "filter": "FullyQualifiedName~LeadingNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-half-period-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "Math.Max(2, Math.Min(530",
+    "after": "Math.Max(1, Math.Min(530",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-half-period-cap",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(531,",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-wrong-index-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "<< 2148, 12)",
+    "after": "<< 2148, 6)",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-wrong-correction-sign",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "Product(ref numerator, index, first, -1)",
+    "after": "Product(ref numerator, index, first, 1)",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-drops-index-mean",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "Product(ref numerator, indexMean, second, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-drops-constant-guard",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "&& run < _length",
+    "after": "",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "if (commit) { _index++;",
+    "after": "if (true) { _index++;",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-stale-index-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "_index = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-stale-average-reset",
+    "module": "numerical",
+    "file": "src/Helpers/LightLeastSquaresWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "scope": "public sealed class LightLeastSquaresMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-ignores-average",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "scope": "public static StockData CalculateLightLeastSquaresMovingAverage(",
+    "before": "new LightLeastSquaresWindow(maType, length,",
+    "after": "new LightLeastSquaresWindow(MovingAvgType.SimpleMovingAverage, length,",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-ignores-customer-batch",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "scope": "public static StockData CalculateLightLeastSquaresMovingAverage(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || ",
+    "after": "",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "light-ignores-customer-fast",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (ComponentAverage.HasOverrides && inputList.Count < 0)",
+    "filter": "FullyQualifiedName~LightLeastSquaresNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]
