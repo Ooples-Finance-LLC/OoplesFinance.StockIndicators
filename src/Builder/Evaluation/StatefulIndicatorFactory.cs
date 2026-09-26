@@ -138,6 +138,7 @@ internal static partial class StatefulIndicatorFactory
             ClosedFormDistanceVolatilitySpecOptions distance => new ClosedFormDistanceVolatilityState(distance.MaType, distance.Length),
             MotionSmoothnessIndexSpecOptions motion => new MotionSmoothnessIndexState(motion.Length),
             NaturalMarketSlopeSpecOptions natural => new NaturalMarketSlopeState(natural.Length),
+            AccumulativeSwingIndexSpecOptions swing => new AccumulativeSwingIndexState(swing.MaType, swing.Length, swing.LimitMove),
             AbsoluteStrengthMTFIndicatorSpecOptions strengthMtf => new AbsoluteStrengthMTFIndicatorState(strengthMtf.MaType, strengthMtf.Length, strengthMtf.SmoothLength),
             AbsoluteStrengthIndexSpecOptions absoluteStrength => new AbsoluteStrengthIndexState(absoluteStrength.Length),
             NarrowBandpassFilterSpecOptions narrowBandpass => new NarrowBandpassFilterState(narrowBandpass.Length),
