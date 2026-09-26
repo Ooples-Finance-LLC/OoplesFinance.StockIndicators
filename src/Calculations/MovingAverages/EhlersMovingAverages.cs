@@ -1003,32 +1003,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersOptimumEllipticFilter(this StockData stockData)
     {
-        List<double> oefList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var window = new EllipticWindow(false);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevOef1 = i >= 1 ? oefList[i - 1] : 0;
-            var prevOef2 = i >= 2 ? oefList[i - 2] : 0;
-
-            var oef = (0.13785 * currentValue) + (0.0007 * prevValue1) + (0.13785 * prevValue2) + (1.2103 * prevOef1) - (0.4867 * prevOef2);
-            oefList.Add(oef);
-
-            var signal = GetCompareSignal(currentValue - oef, prevValue1 - prevOef1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Emoef", oefList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(oefList);
-        stockData.IndicatorName = IndicatorName.EhlersOptimumEllipticFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Emoef", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersOptimumEllipticFilter;
         return stockData;
     }
 
@@ -1040,34 +1024,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersModifiedOptimumEllipticFilter(this StockData stockData)
     {
-        List<double> moefList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var window = new EllipticWindow(true);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : currentValue;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : prevValue1;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : prevValue2;
-            var prevMoef1 = i >= 1 ? moefList[i - 1] : currentValue;
-            var prevMoef2 = i >= 2 ? moefList[i - 2] : prevMoef1;
-
-            var moef = (0.13785 * ((2 * currentValue) - prevValue1)) + (0.0007 * ((2 * prevValue1) - prevValue2)) +
-                (0.13785 * ((2 * prevValue2) - prevValue3)) + (1.2103 * prevMoef1) - (0.4867 * prevMoef2);
-            moefList.Add(moef);
-
-            var signal = GetCompareSignal(currentValue - moef, prevValue1 - prevMoef1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Emoef", moefList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(moefList);
-        stockData.IndicatorName = IndicatorName.EhlersModifiedOptimumEllipticFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Emoef", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersModifiedOptimumEllipticFilter;
         return stockData;
     }
 

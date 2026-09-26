@@ -1328,63 +1328,14 @@ public sealed class EhlersMesaPredictIndicatorV2State : IStreamingIndicatorState
 [PrimaryOutput("Emoef")]
 public sealed class EhlersModifiedOptimumEllipticFilterState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevValue3;
-    private double _prevMoef1;
-    private double _prevMoef2;
-    private int _index;
-
-    public EhlersModifiedOptimumEllipticFilterState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EllipticWindow _window = new(true);
     public IndicatorName Name => IndicatorName.EhlersModifiedOptimumEllipticFilter;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevValue3 = 0;
-        _prevMoef1 = 0;
-        _prevMoef2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : value;
-        var prevValue2 = _index >= 2 ? _prevValue2 : prevValue1;
-        var prevValue3 = _index >= 3 ? _prevValue3 : prevValue2;
-        var prevMoef1 = _index >= 1 ? _prevMoef1 : value;
-        var prevMoef2 = _index >= 2 ? _prevMoef2 : prevMoef1;
-
-        var moef = (0.13785 * ((2 * value) - prevValue1)) + (0.0007 * ((2 * prevValue1) - prevValue2)) +
-            (0.13785 * ((2 * prevValue2) - prevValue3)) + (1.2103 * prevMoef1) - (0.4867 * prevMoef2);
-
-        if (isFinal)
-        {
-            _prevValue3 = _prevValue2;
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevMoef2 = _prevMoef1;
-            _prevMoef1 = moef;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Emoef", moef }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(moef, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Emoef", value } } : null);
     }
 }
 
@@ -1685,59 +1636,14 @@ public sealed class EhlersNoiseEliminationTechnologyState : IStreamingIndicatorS
 [PrimaryOutput("Emoef")]
 public sealed class EhlersOptimumEllipticFilterState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevOef1;
-    private double _prevOef2;
-    private int _index;
-
-    public EhlersOptimumEllipticFilterState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EllipticWindow _window = new(false);
     public IndicatorName Name => IndicatorName.EhlersOptimumEllipticFilter;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevOef1 = 0;
-        _prevOef2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevOef1 = _index >= 1 ? _prevOef1 : 0;
-        var prevOef2 = _index >= 2 ? _prevOef2 : 0;
-
-        var oef = (0.13785 * value) + (0.0007 * prevValue1) + (0.13785 * prevValue2) +
-            (1.2103 * prevOef1) - (0.4867 * prevOef2);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevOef2 = _prevOef1;
-            _prevOef1 = oef;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Emoef", oef }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(oef, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Emoef", value } } : null);
     }
 }
 
