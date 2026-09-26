@@ -765,80 +765,17 @@ public sealed class PeakValleyEstimationState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Pema")]
 public sealed class PentupleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly IMovingAverageSmoother _ema3;
-    private readonly IMovingAverageSmoother _ema4;
-    private readonly IMovingAverageSmoother _ema5;
-    private readonly IMovingAverageSmoother _ema6;
-    private readonly IMovingAverageSmoother _ema7;
-    private readonly IMovingAverageSmoother _ema8;
-    private readonly StreamingInputResolver _input;
-
-    public PentupleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _ema1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema2 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema3 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema4 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema5 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema6 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema7 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema8 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BinomialCascadeWindow _window;
+    public PentupleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20) => _window = new(maType, length, true);
     public IndicatorName Name => IndicatorName.PentupleExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-        _ema3.Reset();
-        _ema4.Reset();
-        _ema5.Reset();
-        _ema6.Reset();
-        _ema7.Reset();
-        _ema8.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema1 = _ema1.Next(value, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var ema3 = _ema3.Next(ema2, isFinal);
-        var ema4 = _ema4.Next(ema3, isFinal);
-        var ema5 = _ema5.Next(ema4, isFinal);
-        var ema6 = _ema6.Next(ema5, isFinal);
-        var ema7 = _ema7.Next(ema6, isFinal);
-        var ema8 = _ema8.Next(ema7, isFinal);
-        var pema = (8 * ema1) - (28 * ema2) + (56 * ema3) - (70 * ema4) + (56 * ema5) - (28 * ema6) + (8 * ema7) - ema8;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pema", pema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pema", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _ema3.Dispose();
-        _ema4.Dispose();
-        _ema5.Dispose();
-        _ema6.Dispose();
-        _ema7.Dispose();
-        _ema8.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ppo")]

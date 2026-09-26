@@ -10482,5 +10482,92 @@
     "after": "",
     "filter": "FullyQualifiedName~TrixNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TrixState"
+  },
+  {
+    "id": "binomial-wrong-qema-order",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "length, false);",
+    "after": "length, true);",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal static void QuadrupleExponentialMovingAverage("
+  },
+  {
+    "id": "binomial-wrong-pema-order",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "length, true);",
+    "after": "length, false);",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal static void PentupleExponentialMovingAverage("
+  },
+  {
+    "id": "binomial-wrong-qema-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/BinomialCascadeWindow.cs",
+    "before": "5, -10, 10, -5, 1",
+    "after": "4, -10, 10, -5, 1",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal BinomialCascadeWindow("
+  },
+  {
+    "id": "binomial-wrong-pema-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/BinomialCascadeWindow.cs",
+    "before": "8, -28, 56, -70, 56, -28, 8, -1",
+    "after": "8, -28, 56, -69, 56, -28, 8, -1",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal BinomialCascadeWindow("
+  },
+  {
+    "id": "binomial-unrounded-products-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/BinomialCascadeWindow.cs",
+    "before": "total.AddProduct(stages[i], weights[i])",
+    "after": "total.Add(stages[i] * weights[i])",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "binomial-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BinomialCascadeWindow.cs",
+    "before": "_averages[i].Next(stage, commit)",
+    "after": "_averages[i].Next(stage, true)",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "binomial-stale-stages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BinomialCascadeWindow.cs",
+    "before": "if (_averages is not null) foreach (var average in _averages) average.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "binomial-reuses-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "second.Span, third.WritableSpan",
+    "after": "first.Span, third.WritableSpan",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.CustomerStagesRemainSequential",
+    "scope": "internal static ComputeBuffer ComputeQuadrupleExponentialMovingAverageFast("
+  },
+  {
+    "id": "binomial-qema-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class QuadrupleExponentialMovingAverageState"
+  },
+  {
+    "id": "binomial-pema-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~BinomialCascadeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PentupleExponentialMovingAverageState"
   }
 ]

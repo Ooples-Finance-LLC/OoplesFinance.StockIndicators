@@ -258,7 +258,7 @@ public static partial class Calculations
             var ema5 = ema5List[i];
 
             var prevQema = GetLastOrDefault(qemaList);
-            var qema = (5 * ema1) - (10 * ema2) + (10 * ema3) - (5 * ema4) + ema5;
+            var qema = BinomialCascadeWindow.Combine(false, ema1, ema2, ema3, ema4, ema5);
             qemaList.Add(qema);
 
             var signal = GetCompareSignal(currentValue - qema, prevValue - prevQema);
@@ -647,7 +647,7 @@ public static partial class Calculations
             var ema8 = ema8List[i];
 
             var prevPema = GetLastOrDefault(pemaList);
-            var pema = (8 * ema1) - (28 * ema2) + (56 * ema3) - (70 * ema4) + (56 * ema5) - (28 * ema6) + (8 * ema7) - ema8;
+            var pema = BinomialCascadeWindow.Combine(true, ema1, ema2, ema3, ema4, ema5, ema6, ema7, ema8);
             pemaList.Add(pema);
 
             var signal = GetCompareSignal(currentValue - pema, prevValue - prevPema);

@@ -1582,40 +1582,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void PentupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-        var ema5 = pool.Rent(input.Length);
-
-        try
-        {
-            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema4.AsSpan(0, input.Length), ema5.AsSpan(0, input.Length), length);
-
-            // PEMA = 5*EMA1 - 10*EMA2 + 10*EMA3 - 5*EMA4 + EMA5
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = 5 * ema1[i] - 10 * ema2[i] + 10 * ema3[i] - 5 * ema4[i] + ema5[i];
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-            pool.Return(ema5);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BinomialCascadeWindow(MovingAvgType.ExponentialMovingAverage, length, true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1624,37 +1593,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadrupleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1 = pool.Rent(input.Length);
-        var ema2 = pool.Rent(input.Length);
-        var ema3 = pool.Rent(input.Length);
-        var ema4 = pool.Rent(input.Length);
-
-        try
-        {
-            ExponentialMovingAverage(input, ema1.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema1.AsSpan(0, input.Length), ema2.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema2.AsSpan(0, input.Length), ema3.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(ema3.AsSpan(0, input.Length), ema4.AsSpan(0, input.Length), length);
-
-            // QEMA = 4*EMA1 - 6*EMA2 + 4*EMA3 - EMA4
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = 4 * ema1[i] - 6 * ema2[i] + 4 * ema3[i] - ema4[i];
-            }
-        }
-        finally
-        {
-            pool.Return(ema1);
-            pool.Return(ema2);
-            pool.Return(ema3);
-            pool.Return(ema4);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BinomialCascadeWindow(MovingAvgType.ExponentialMovingAverage, length, false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     #endregion

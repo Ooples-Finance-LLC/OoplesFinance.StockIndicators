@@ -12848,8 +12848,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (8 * first.Span[i]) - (28 * second.Span[i]) + (56 * third.Span[i]) - (70 * fourth.Span[i]) +
-                (56 * fifth.Span[i]) - (28 * sixth.Span[i]) + (8 * seventh.Span[i]) - eighth.Span[i];
+            output[i] = BinomialCascadeWindow.Combine(true, first.Span[i], second.Span[i], third.Span[i], fourth.Span[i], fifth.Span[i], sixth.Span[i], seventh.Span[i], eighth.Span[i]);
         }
 
         return buffer;
@@ -12887,7 +12886,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = (5 * ema1[i]) - (10 * ema2[i]) + (10 * ema3[i]) - (5 * ema4[i]) + ema5[i];
+            output[i] = BinomialCascadeWindow.Combine(false, ema1[i], ema2[i], ema3[i], ema4[i], ema5[i]);
         }
 
         return buffer;
