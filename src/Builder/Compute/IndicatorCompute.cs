@@ -15227,10 +15227,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeQuadraticRegressionFast(StockData data, ComputeContext context, int length = 50,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(inputList.Count);
-        QuadraticRegression(data, context, SpanCompat.AsReadOnlySpan(inputList), length, maType, buffer.WritableSpan);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length); var count = input.Count;
+        using var xm = context.Rent(count); using var qm = context.Rent(count); using var ym = context.Rent(count);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        if (external)
+        {
+            using var indices = context.Rent(count); using var squares = context.Rent(count);
+            for (var i = 0; i < count; i++) { indices.WritableSpan[i] = i; squares.WritableSpan[i] = (double)i * i; }
+            MovingAverage(data, maType, length, indices.Span, xm.WritableSpan); MovingAverage(data, maType, length, squares.Span, qm.WritableSpan);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), ym.WritableSpan);
+        }
+        var result = context.Rent(count); using var window = new QuadraticProjectionWindow(maType, length, Math.Max(1, count));
+        for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(input[i], true, external ? xm.Span[i] : null, external ? qm.Span[i] : null, external ? ym.Span[i] : null);
+        return result;
     }
 
     /// <summary>

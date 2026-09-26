@@ -398,29 +398,24 @@ public static partial class Calculations
     public static StockData CalculateQuadraticRegression(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 500)
     {
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        length = Math.Max(1, length);
-        var indices = Enumerable.Range(0, stockData.Count).Select(i => (double)i).ToList();
-        var squares = indices.Select(i => i * i).ToList();
-        var xAverage = GetMovingAverageList(stockData, maType, length, indices);
-        var squareAverage = GetMovingAverageList(stockData, maType, length, squares);
-        var priceAverage = GetMovingAverageList(stockData, maType, length, inputList);
-        List<double> values = new(stockData.Count);
-        var signals = CreateSignalsList(stockData);
-        using var window = new Streaming.QuadraticRegressionWindow(length);
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); length = Math.Max(1, length);
+        List<double>? xm = null, qm = null, ym = null;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var previous = i == 0 ? 0 : values[i - 1];
-            var fit = Streaming.QuadraticRegressionWindow.Evaluate(window.Next(inputList[i], true), i,
-                xAverage[i], squareAverage[i], priceAverage[i]);
-            values.Add(fit);
-            signals?.Add(GetCompareSignal(inputList[i] - fit, (i == 0 ? 0 : inputList[i - 1]) - previous));
+            var indices = Enumerable.Range(0, input.Count).Select(i => (double)i).ToList(); var squares = indices.Select(i => i * i).ToList();
+            xm = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(indices), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, indices);
+            qm = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(squares), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, squares);
+            ym = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
         }
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "QuadReg", values } });
-        stockData.SetSignals(signals);
-        stockData.SetCustomValues(values);
-        stockData.IndicatorName = IndicatorName.QuadraticRegression;
-        return stockData;
+        using var window = new QuadraticProjectionWindow(maType, length, Math.Max(1, input.Count));
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var fit = window.Next(input[i], true, xm?[i], qm?[i], ym?[i]);
+            signals?.Add(GetCompareSignal(input[i] - fit, i == 0 ? 0 : input[i - 1] - values[i - 1])); values.Add(fit);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "QuadReg", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.QuadraticRegression; return stockData;
     }
 
 

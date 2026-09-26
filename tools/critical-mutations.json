@@ -17967,5 +17967,137 @@
     "after": "output[i] = input[i]",
     "filter": "FullyQualifiedName~QuadraticFitNumericalTests.SlidingMomentsAndForecastsMatchIndependentNormalEquations|FullyQualifiedName~QuadraticFitNumericalTests.SelectedInputAndSixCustomerMomentsKeepTheirOrder|FullyQualifiedName~QuadraticFitNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static void QuadraticLeastSquaresMovingAverage("
+  },
+  {
+    "id": "qreg-wrong-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "var expiredX = x - _length;",
+    "after": "var expiredX = x - _length + 1;",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-retains-expired-price",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_prices.Count == _length ?",
+    "after": "_prices.Count > _length ?",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-linear-moment",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_linear + x * incoming",
+    "after": "_linear + incoming",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-square-moment",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_square + q * incoming",
+    "after": "_square + x * incoming",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-fourth-power-sum",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "3 * n * n + 3 * n - 1",
+    "after": "3 * n * n + 3 * n + 1",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-determinant",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "xx * qq - xq * xq",
+    "after": "xx * qq + xq * xq",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-omits-curvature",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "+ curvature * ((q << 1074) - Units(qm))",
+    "after": "+ 0 * curvature * ((q << 1074) - Units(qm))",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-center",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "((x << 1074) - Units(xm))",
+    "after": "((x << 1074) + Units(xm))",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-wrong-rank-startup",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_length >= 3 && _index >= 2",
+    "after": "_length >= 3 && _index >= 3",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "if (commit) { _prices.TryAdd",
+    "after": "{ _prices.TryAdd",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-stale-moments-reset",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_sum = _linear = _square = default; _index = 0;",
+    "after": "_sum = _linear = default; _index = 0;",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-stale-seed-reset",
+    "module": "numerical",
+    "file": "src/Helpers/QuadraticProjectionWindow.cs",
+    "before": "_yMean?.Reset();",
+    "after": "/* retain price seed */",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState"
+  },
+  {
+    "id": "qreg-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "public sealed class QuadraticRegressionState :"
+  },
+  {
+    "id": "qreg-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeQuadraticRegressionFast("
+  },
+  {
+    "id": "qreg-wrong-customer-center",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "before": "SpanCompat.AsReadOnlySpan(squares), length",
+    "after": "SpanCompat.AsReadOnlySpan(indices), length",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState",
+    "scope": "public static StockData CalculateQuadraticRegression("
+  },
+  {
+    "id": "qreg-core-linear-fallback",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "output[i] = window.Next(input[i], true);",
+    "after": "output[i] = input[i];",
+    "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState|FullyQualifiedName~QuadraticProjectionNumericalTests.IntegerScaledOracleMatchesDirectFractionOrthogonalization",
+    "scope": "internal static void QuadraticRegression("
   }
 ]
