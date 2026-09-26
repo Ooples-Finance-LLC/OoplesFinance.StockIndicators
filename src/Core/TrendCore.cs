@@ -798,38 +798,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VortexPositive(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tr = trArray.AsSpan(0, close.Length);
-            VolatilityCore.TrueRange(high, low, close, tr);
-
-            // Sum the available window; the first bar has no preceding vortex movement.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double vmPlus = 0;
-                double sumTr = 0;
-
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    vmPlus += j == 0 ? 0 : Math.Abs(high[j] - low[j - 1]);
-                    sumTr += tr[j];
-                }
-
-                output[i] = sumTr != 0 ? vmPlus / sumTr : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(trArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -837,38 +808,9 @@ internal static class TrendCore
     /// </summary>
     internal static void VortexNegative(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var trArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tr = trArray.AsSpan(0, close.Length);
-            VolatilityCore.TrueRange(high, low, close, tr);
-
-            // Sum the available window; the first bar has no preceding vortex movement.
-            for (var i = 0; i < close.Length; i++)
-            {
-                double vmMinus = 0;
-                double sumTr = 0;
-
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    vmMinus += j == 0 ? 0 : Math.Abs(low[j] - high[j - 1]);
-                    sumTr += tr[j];
-                }
-
-                output[i] = sumTr != 0 ? vmMinus / sumTr : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(trArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>

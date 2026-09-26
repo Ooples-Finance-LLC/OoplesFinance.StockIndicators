@@ -739,27 +739,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexPlus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Sum the available window; the first bar has no preceding vortex movement.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double vmPlus = 0;
-            double trSum = 0;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var prevLow = j > 0 ? low[j - 1] : 0;
-                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                vmPlus += j == 0 ? 0 : Math.Abs(high[j] - prevLow);
-            }
-
-            output[i] = trSum != 0 ? vmPlus / trSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -767,27 +749,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexMinus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Sum the available window; the first bar has no preceding vortex movement.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double vmMinus = 0;
-            double trSum = 0;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var prevHigh = j > 0 ? high[j - 1] : 0;
-                trSum += Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                vmMinus += j == 0 ? 0 : Math.Abs(low[j] - prevHigh);
-            }
-
-            output[i] = trSum != 0 ? vmMinus / trSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>
@@ -7872,35 +7836,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexIndicatorPlus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var vmPlusSum = new RollingSum();
-        var trSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
-            // opening true range the plain high-low span. Falling back to zero instead made it the whole
-            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-
-            var vmPlus = i == 0 ? 0 : Math.Abs(currentHigh - prevLow);
-            vmPlusSum.Add(vmPlus);
-
-            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
-            trSum.Add(tr);
-
-            var vmPlusSumVal = vmPlusSum.Sum(length);
-            var trSumVal = trSum.Sum(length);
-
-            output[i] = trSumVal != 0 ? vmPlusSumVal / trSumVal : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Plus;
     }
 
     /// <summary>
@@ -7908,35 +7846,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void VortexIndicatorMinus(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var vmMinusSum = new RollingSum();
-        var trSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentHigh = high[i];
-            var currentLow = low[i];
-            // CalculateVortexIndicator falls back to the current close on the first bar, which makes the
-            // opening true range the plain high-low span. Falling back to zero instead made it the whole
-            // high, an outlier that stayed in the rolling sum for the first fourteen bars.
-            var prevClose = i >= 1 ? close[i - 1] : close[i];
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
-
-            var vmMinus = i == 0 ? 0 : Math.Abs(currentLow - prevHigh);
-            vmMinusSum.Add(vmMinus);
-
-            var tr = Math.Max(currentHigh - currentLow, Math.Max(Math.Abs(currentHigh - prevClose), Math.Abs(currentLow - prevClose)));
-            trSum.Add(tr);
-
-            var vmMinusSumVal = vmMinusSum.Sum(length);
-            var trSumVal = trSum.Sum(length);
-
-            output[i] = trSumVal != 0 ? vmMinusSumVal / trSumVal : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VortexWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Minus;
     }
 
     /// <summary>

@@ -8424,5 +8424,104 @@
     "after": "",
     "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TwiggsMoneyFlowState"
+  },
+  {
+    "id": "vortex-wrong-positive-reference",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "BigInteger.Abs(h - _previousLow)",
+    "after": "BigInteger.Abs(h - _previousHigh)",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-wrong-negative-reference",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "BigInteger.Abs(l - _previousHigh)",
+    "after": "BigInteger.Abs(l - _previousLow)",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-ignores-price-gaps",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "var range = BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - previousClose), BigInteger.Abs(l - previousClose)));",
+    "after": "var range = BigInteger.Max(h - l, BigInteger.Abs(previousClose - previousClose));",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-nonzero-first-movement",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "_hasPrevious ? BigInteger.Abs(h - _previousLow) : BigInteger.Zero",
+    "after": "BigInteger.Abs(h - _previousLow)",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-keeps-expired-movements",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "_plus + plusChange - expired.Plus",
+    "after": "_plus + plusChange",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-keeps-expired-range",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "_range + range - expired.Range",
+    "after": "_range + range",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "if (commit)",
+    "after": "if (_window.Capacity > 0)",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-stale-state-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VortexWindow.cs",
+    "before": "_plus = _minus = _range = _previousHigh = _previousLow = _previousClose = 0;",
+    "after": "_previousHigh = _previousLow = _previousClose = 0;",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices"
+  },
+  {
+    "id": "vortex-raw-negative-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices",
+    "scope": "internal static ComputeBuffer ComputeVortexIndicatorMinusFast("
+  },
+  {
+    "id": "vortex-core-swaps-legs",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": ".Plus;",
+    "after": ".Minus;",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllAliasesAndCoresPreserveWideMovementAndSelectedPreviousPrices",
+    "scope": "internal static void VortexPositive("
+  },
+  {
+    "id": "vortex-alias-discards-period",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "new VortexIndicatorState(vim.Length)",
+    "after": "new VortexIndicatorState(1)",
+    "filter": "FullyQualifiedName~VortexNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "vortex-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VortexNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class VortexIndicatorState"
   }
 ]

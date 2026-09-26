@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.VortexIndicator)
+        {
+            var key = builtIn.BatchOutputKey ?? "ViPlus";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VortexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VolumeAccumulationPercent || builtIn.BatchName == IndicatorName.TwiggsMoneyFlow && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var key = builtIn.BatchName == IndicatorName.VolumeAccumulationPercent ? "Vapc" : "Tmf";
