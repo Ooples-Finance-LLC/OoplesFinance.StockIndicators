@@ -8068,67 +8068,17 @@ public sealed class AcceleratorOscillatorState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Trix")]
 public sealed class TrixState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly IMovingAverageSmoother _ema3;
-    private readonly StreamingInputResolver _input;
-    private double _prevEma3;
-    private bool _hasPrev;
-
-    // Three exponential averages in succession, as the batch indicator defaults to.
-    public TrixState(int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
-    {
-        var resolved = Math.Max(1, length);
-        _ema1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema2 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ema3 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrixWindow _window;
+    public TrixState(int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.Trix;
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-        _ema3.Reset();
-        _prevEma3 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema1 = _ema1.Next(value, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var ema3 = _ema3.Next(ema2, isFinal);
-        var prevEma3 = _hasPrev ? _prevEma3 : 0;
-        var trix = CalculationsHelper.CalculatePercentChange(ema3, prevEma3);
-
-        if (isFinal)
-        {
-            _prevEma3 = ema3;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Trix", trix }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trix, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal).Publish();
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Trix", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _ema3.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("1lsma")]

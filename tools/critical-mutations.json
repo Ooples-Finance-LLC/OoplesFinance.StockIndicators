@@ -10382,5 +10382,105 @@
     "after": "",
     "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class GeneralizedDoubleExponentialMovingAverageState"
+  },
+  {
+    "id": "trix-wrong-percentage-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "third.AddTo(ref numerator, 100); _previous.AddTo(ref numerator, -100);",
+    "after": "third.AddTo(ref numerator, 10000); _previous.AddTo(ref numerator, -10000);",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-signed-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "Math.Abs(_previous.Publish())",
+    "after": "_previous.Publish()",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-wrong-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "_previous.Mantissa == 0 ? default",
+    "after": "_previous.Mantissa == 0 ? third",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-skips-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "Smooth(second, 2, customerThird)",
+    "after": "Smooth(first, 2, customerThird)",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "_averages[stage].Next(value, commit)",
+    "after": "_averages[stage].Next(value, true)",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-commits-previous-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "if (commit) _previous = third;",
+    "after": "if (true) _previous = third;",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-stale-averages-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrixWindow.cs",
+    "before": "if (_averages is not null) foreach (var average in _averages) average.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery"
+  },
+  {
+    "id": "trix-skips-fourth-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (input.Count < 0)",
+    "filter": "FullyQualifiedName~TrixNumericalTests.CustomerAveragesConsumeAllFourStagesInOrder",
+    "scope": "internal static ComputeBuffer ComputeTrixFast("
+  },
+  {
+    "id": "trix-poisons-signal-after-overflow",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/ClassicOscillators.cs",
+    "before": "signalAverage.Next(value, true)",
+    "after": "signalAverage.Next(new RocBankValue(value.Publish()), true)",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery",
+    "scope": "public static StockData CalculateTrix("
+  },
+  {
+    "id": "trix-indexes-empty-core",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "using var window = new TrixWindow(MovingAvgType.ExponentialMovingAverage, length);",
+    "after": "output[0] = 0; using var window = new TrixWindow(MovingAvgType.ExponentialMovingAverage, length);",
+    "filter": "FullyQualifiedName~TrixNumericalTests.TripleSmoothingPreservesSignedPercentageChangesAndRecovery",
+    "scope": "internal static void Trix("
+  },
+  {
+    "id": "trix-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrixNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrixState"
   }
 ]

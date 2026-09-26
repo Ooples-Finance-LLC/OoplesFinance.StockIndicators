@@ -658,38 +658,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Trix(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1Array = pool.Rent(input.Length);
-        var ema2Array = pool.Rent(input.Length);
-        var ema3Array = pool.Rent(input.Length);
-
-        try
-        {
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-            var ema2 = ema2Array.AsSpan(0, input.Length);
-            var ema3 = ema3Array.AsSpan(0, input.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(input, ema1, length);
-            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, length);
-            MovingAverageCore.ExponentialMovingAverage(ema2, ema3, length);
-
-            output[0] = 0;
-            for (var i = 1; i < input.Length; i++)
-            {
-                output[i] = ema3[i - 1] != 0 ? 10000 * (ema3[i] - ema3[i - 1]) / ema3[i - 1] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-            pool.Return(ema3Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new TrixWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Publish();
     }
 
     /// <summary>

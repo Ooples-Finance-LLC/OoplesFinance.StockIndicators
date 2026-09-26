@@ -618,42 +618,27 @@ public static partial class Calculations
     public static StockData CalculateTrix(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 15, int signalLength = 9)
     {
-        List<double> trixList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var ema1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, length, ema1List);
-        var ema3List = GetMovingAverageList(stockData, maType, length, ema2List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? first = null, second = null, third = null;
+        if (custom)
         {
-            var ema3 = ema3List[i];
-            var prevEma3 = i >= 1 ? ema3List[i - 1] : 0;
-
-            var trix = CalculatePercentChange(ema3, prevEma3);
-            trixList.Add(trix);
+            first = GetMovingAverageList(stockData, maType, length, input);
+            second = GetMovingAverageList(stockData, maType, length, first);
+            third = GetMovingAverageList(stockData, maType, length, second);
         }
-
-        var trixSignalList = GetMovingAverageList(stockData, maType, signalLength, trixList);
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count), signal = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new TrixWindow(maType, length);
+        using var signalAverage = custom ? null : new RocBankAverage(maType, signalLength, int.MaxValue);
+        for (var i = 0; i < input.Count; i++)
         {
-            var trix = trixList[i];
-            var trixSignal = trixSignalList[i];
-            var prevTrix = i >= 1 ? trixList[i - 1] : 0;
-            var prevTrixSignal = i >= 1 ? trixSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(trix - trixSignal, prevTrix - prevTrixSignal);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true, first?[i], second?[i], third?[i]); line.Add(value.Publish());
+            if (signalAverage is not null) signal.Add(signalAverage.Next(value, true).Publish());
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Trix", trixList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trixList);
-        stockData.IndicatorName = IndicatorName.Trix;
-
+        if (custom) signal = GetMovingAverageList(stockData, maType, signalLength, line);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Trix", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Trix;
         return stockData;
     }
 
