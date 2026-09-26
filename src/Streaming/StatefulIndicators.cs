@@ -8113,66 +8113,16 @@ public sealed class AlphaDecreasingExponentialMovingAverageState : IStreamingInd
 [PrimaryOutput("MiddleBand")]
 public sealed class AdaptivePriceZoneIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _pct;
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly IMovingAverageSmoother _xhlEma1;
-    private readonly IMovingAverageSmoother _xhlEma2;
-    private readonly StreamingInputResolver _input;
-
-    public AdaptivePriceZoneIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20,
-        double pct = 2)
-    {
-        var nP = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(length)));
-        _pct = pct;
-        _ema1 = MovingAverageSmootherFactory.Create(maType, nP);
-        _ema2 = MovingAverageSmootherFactory.Create(maType, nP);
-        _xhlEma1 = MovingAverageSmootherFactory.Create(maType, nP);
-        _xhlEma2 = MovingAverageSmootherFactory.Create(maType, nP);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AdaptiveZoneWindow _window;
+    public AdaptivePriceZoneIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, double pct = 2) => _window = new(maType, length, pct);
     public IndicatorName Name => IndicatorName.AdaptivePriceZoneIndicator;
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-        _xhlEma1.Reset();
-        _xhlEma2.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var xVal1 = _ema2.Next(_ema1.Next(value, isFinal), isFinal);
-        var xhl = bar.High - bar.Low;
-        var xVal2 = _xhlEma2.Next(_xhlEma1.Next(xhl, isFinal), isFinal);
-        var upper = (xVal2 * _pct) + xVal1;
-        var lower = xVal1 - (xVal2 * _pct);
-        var middle = (upper + lower) / 2;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _xhlEma1.Dispose();
-        _xhlEma2.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Arsi")]

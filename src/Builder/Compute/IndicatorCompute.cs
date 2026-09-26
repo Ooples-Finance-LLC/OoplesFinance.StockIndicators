@@ -22196,49 +22196,23 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptivePriceZoneFast(StockData data, ComputeContext context, int length = 20, double pct = 2,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateAdaptivePriceZoneIndicator smooths twice over the square root of the length, once on the
-        // chained series and once on the bar range, and steps the outer bands by pct of the second. Its middle
-        // band is the half sum of those two, which reduces to the double smoothed series itself.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        var nP = MathHelper.MinOrMax((int)Math.Ceiling(MathHelper.Sqrt(length)));
-
-        using var firstPass = context.Rent(count);
-        MovingAverage(data, maType, nP, input, firstPass.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, nP, firstPass.Span, output);
-
-        if (band == ChannelBand.Middle)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count; var period = AdaptiveZoneWindow.Period(length);
+        using var center = context.Rent(count); using var width = context.Rent(count);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        if (external)
         {
-            return buffer;
+            using var first = context.Rent(count); using var range = context.Rent(count); using var rangeFirst = context.Rent(count);
+            MovingAverage(data, maType, period, SpanCompat.AsReadOnlySpan(input), first.WritableSpan); MovingAverage(data, maType, period, first.Span, center.WritableSpan);
+            for (var i = 0; i < count; i++) range.WritableSpan[i] = high[i] - low[i];
+            MovingAverage(data, maType, period, range.Span, rangeFirst.WritableSpan); MovingAverage(data, maType, period, rangeFirst.Span, width.WritableSpan);
         }
-
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-
-        using var barRange = context.Rent(count);
-        var xHL = barRange.WritableSpan;
+        var result = context.Rent(count); using var window = new AdaptiveZoneWindow(maType, length, pct, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            xHL[i] = highs[i] - lows[i];
+            var point = external ? AdaptiveZoneWindow.Bands(new RocBankValue(center.Span[i]), new RocBankValue(width.Span[i]), pct) : window.Next(input[i], high[i], low[i], true);
+            result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
         }
-
-        using var rangeFirstPass = context.Rent(count);
-        MovingAverage(data, maType, nP, barRange.Span, rangeFirstPass.WritableSpan);
-
-        using var rangeSecondPass = context.Rent(count);
-        MovingAverage(data, maType, nP, rangeFirstPass.Span, rangeSecondPass.WritableSpan);
-
-        var multiplier = band == ChannelBand.Upper ? pct : -pct;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] += multiplier * rangeSecondPass.Span[i];
-        }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

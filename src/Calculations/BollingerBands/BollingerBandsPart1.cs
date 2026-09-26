@@ -74,63 +74,23 @@ public static partial class Calculations
     public static StockData CalculateAdaptivePriceZoneIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 20, double pct = 2)
     {
-        List<double> xHLList = new(stockData.Count);
-        List<double> outerUpBandList = new(stockData.Count);
-        List<double> outerDnBandList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var nP = MinOrMax((int)Math.Ceiling(Sqrt(length)));
-
-        var ema1List = GetMovingAverageList(stockData, maType, nP, inputList);
-        var ema2List = GetMovingAverageList(stockData, maType, nP, ema1List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var period = AdaptiveZoneWindow.Period(length);
+        List<double>? center = null, width = null;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-
-            var xHL = currentHigh - currentLow;
-            xHLList.Add(xHL);
+            List<double> Mean(List<double> values) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), period)?.ToList() ?? GetMovingAverageList(stockData, maType, period, values);
+            center = Mean(Mean(input)); width = Mean(Mean(high.Select((v, i) => v - low[i]).ToList()));
         }
-
-        var xHLEma1List = GetMovingAverageList(stockData, maType, nP, xHLList);
-        var xHLEma2List = GetMovingAverageList(stockData, maType, nP, xHLEma1List);
-        for (var i = 0; i < stockData.Count; i++)
+        using var window = new AdaptiveZoneWindow(maType, length, pct, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var xVal1 = ema2List[i];
-            var xVal2 = xHLEma2List[i];
-
-            var prevUpBand = GetLastOrDefault(outerUpBandList);
-            var outerUpBand = (pct * xVal2) + xVal1;
-            outerUpBandList.Add(outerUpBand);
-
-            var prevDnBand = GetLastOrDefault(outerDnBandList);
-            var outerDnBand = xVal1 - (pct * xVal2);
-            outerDnBandList.Add(outerDnBand);
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (outerUpBand + outerDnBand) / 2;
-            middleBandList.Add(middleBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, outerUpBand,
-                prevUpBand, outerDnBand, prevDnBand);
-            signalsList?.Add(signal);
+            var point = center is null ? window.Next(input[i], high[i], low[i], true) : AdaptiveZoneWindow.Bands(new RocBankValue(center[i]), new RocBankValue(width![i]), pct);
+            signals?.Add(GetBollingerBandsSignal(input[i] - point.Middle, i == 0 ? 0 : input[i - 1] - middle[i - 1], input[i], i == 0 ? 0 : input[i - 1], point.Upper, i == 0 ? 0 : upper[i - 1], point.Lower, i == 0 ? 0 : lower[i - 1]));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", outerUpBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", outerDnBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.AdaptivePriceZoneIndicator;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.AdaptivePriceZoneIndicator; return stockData;
     }
 
 

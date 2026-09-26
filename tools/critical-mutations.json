@@ -18240,5 +18240,139 @@
     "before": "window.Next(highs[i], lows[i], prices[i], true)",
     "after": "window.Next(highs[i], lows[i], data.ClosePrices[i], true)",
     "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder"
+  },
+  {
+    "id": "apz-wrong-root-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "Math.Ceiling(Math.Sqrt(Math.Max(1, length)))",
+    "after": "Math.Floor(Math.Sqrt(Math.Max(1, length)))",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-wrong-period-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "Math.Max(2, Math.Min(530",
+    "after": "Math.Max(1, Math.Min(530",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-omits-second-price-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "Stage(1, Stage(0, new RocBankValue(price), commit), commit)",
+    "after": "Stage(0, new RocBankValue(price), commit)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-omits-second-range-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "Stage(3, Stage(2, RocBankValue.Round(difference), commit), commit)",
+    "after": "Stage(2, RocBankValue.Round(difference), commit)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-premature-range-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "difference.Add(high); difference.Add(low, -1);",
+    "after": "difference.Add(high - low);",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-ignores-width-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "width.Multiply(pct)",
+    "after": "width.Multiply(1)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-wrong-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "distance.AddTo(ref lower, -1)",
+    "after": "distance.AddTo(ref lower)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-overflowing-middle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "center.Publish(), lower.Mean(1)",
+    "after": "(upper.Mean(1) + lower.Mean(1)) / 2, lower.Mean(1)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "_exact[slot].Next(value, commit)",
+    "after": "_exact[slot].Next(value, true)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveZoneWindow.cs",
+    "before": "if (_exact is not null) foreach (var stage in _exact) stage.Reset();",
+    "after": "if (_exact is not null) foreach (var stage in _exact.Take(1)) stage.Reset();",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "apz-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class AdaptivePriceZoneIndicatorState :"
+  },
+  {
+    "id": "apz-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(input[i], high[i], low[i], true)",
+    "after": "window.Next(data.ClosePrices[i], high[i], low[i], true)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptivePriceZoneFast("
+  },
+  {
+    "id": "apz-wrong-upper-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "band == ChannelBand.Upper ? point.Upper",
+    "after": "band == ChannelBand.Upper ? point.Lower",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptivePriceZoneFast("
+  },
+  {
+    "id": "apz-wrong-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, period, first.Span",
+    "after": "MovingAverage(data, maType, period + 1, first.Span",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptivePriceZoneFast("
+  },
+  {
+    "id": "apz-wrong-customer-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "range.WritableSpan[i] = high[i] - low[i]",
+    "after": "range.WritableSpan[i] = low[i]",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptivePriceZoneFast("
+  },
+  {
+    "id": "apz-wrong-batch-middle",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart1.cs",
+    "before": "middle.Add(point.Middle)",
+    "after": "middle.Add(point.Upper)",
+    "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public static StockData CalculateAdaptivePriceZoneIndicator("
   }
 ]
