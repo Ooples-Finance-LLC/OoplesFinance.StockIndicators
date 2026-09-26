@@ -13031,6 +13031,15 @@ internal sealed class TripleExponentialMovingAverageSmoother : IMovingAverageSmo
     }
 }
 
+internal sealed class EhlersZeroLagMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly EhlersZeroLagWindow _window;
+    public EhlersZeroLagMovingAverageSmoother(int length) => _window = new(MovingAvgType.ExponentialMovingAverage, length);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
+}
+
 internal sealed class ZeroLowLagMovingAverageSmoother : IMovingAverageSmoother
 {
     private readonly ZeroLowLagWindow _window;
@@ -13228,6 +13237,7 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.TripleExponentialMovingAverage => new TripleExponentialMovingAverageSmoother(length),
             MovingAvgType.ZeroLagTripleExponentialMovingAverage => new ZeroLagTripleExponentialMovingAverageSmoother(length),
             MovingAvgType.ZeroLowLagMovingAverage => new ZeroLowLagMovingAverageSmoother(length),
+            MovingAvgType.EhlersZeroLagExponentialMovingAverage => new EhlersZeroLagMovingAverageSmoother(length),
             MovingAvgType.McNichollMovingAverage => new McNichollMovingAverageSmoother(length),
             MovingAvgType.WeightedMovingAverage => new WeightedMovingAverageSmoother(length),
             MovingAvgType.WildersSmoothingMethod => new WilderMovingAverageSmoother(length),

@@ -4036,58 +4036,17 @@ public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicator
 [PrimaryOutput("Ezlema")]
 public sealed class EhlersZeroLagExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _lag;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersZeroLagExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _lag = (resolved - 1) / 2;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _values = new PooledRingBuffer<double>(Math.Max(1, _lag));
-    }
-
+    private readonly EhlersZeroLagWindow _window;
+    public EhlersZeroLagExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.EhlersZeroLagExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _lag);
-        var d = value + (_values.Count >= _lag ? value - prevValue : 0);
-        var zema = _smoother.Next(d, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ezlema", zema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ezlema", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Voss")]

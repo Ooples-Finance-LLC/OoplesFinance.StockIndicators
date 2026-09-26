@@ -1672,18 +1672,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersZeroLagExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        length = Math.Max(1, length);
-        var lag = (length - 1) / 2;
-        var corrected = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            for (var i = 0; i < input.Length; i++)
-                corrected[i] = i < lag ? input[i] : input[i] + (input[i] - input[i - lag]);
-            ExponentialMovingAverage(corrected.AsSpan(0, input.Length), output, length);
-        }
-        finally { ArrayPool<double>.Shared.Return(corrected); }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EhlersZeroLagWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

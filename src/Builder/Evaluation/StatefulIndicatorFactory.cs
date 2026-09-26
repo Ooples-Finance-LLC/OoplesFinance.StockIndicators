@@ -658,6 +658,8 @@ internal static partial class StatefulIndicatorFactory
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
+            EhlersZeroLagEmaSpecOptions ehlersZero => new EhlersZeroLagExponentialMovingAverageState(length: ehlersZero.Length),
+            EhlersZeroLagExponentialMovingAverageSpecOptions ehlersZeroFull => new EhlersZeroLagExponentialMovingAverageState(length: ehlersZeroFull.Length, maType: ehlersZeroFull.MaType),
             ZeroLowLagMovingAverageSpecOptions zeroLow => new ZeroLowLagMovingAverageState(length: zeroLow.Length),
             DoubleExponentialSmoothingSpecOptions => new DoubleExponentialSmoothingState(),
             McNichollMovingAverageSpecOptions mcNicholl => new McNichollMovingAverageState(length: mcNicholl.Length, maType: mcNicholl.MaType),
