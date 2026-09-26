@@ -1333,19 +1333,7 @@ internal static class TrendCore
     /// </summary>
     internal static void AhrensMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = close[0];
-        var k = 2.0 / (length + 1);
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var diff = close[i] - output[i - 1];
-            output[i] = output[i - 1] + k * diff * (1 + Math.Abs(diff) / (Math.Abs(close[i]) + 1e-10));
-        }
+        MovingAverageCore.AhrensMovingAverage(close, output, length);
     }
 
     #region Batch 16 - Additional Trend Indicators

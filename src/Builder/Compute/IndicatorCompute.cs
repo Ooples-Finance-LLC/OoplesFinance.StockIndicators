@@ -7544,29 +7544,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeAhrensMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateAhrensMovingAverage steps its own last value towards the chained series by a length-th of
-        // the distance from the midpoint between that last value and the one a whole length ago. Before a full
-        // length has passed the prior value is the current bar itself, so the average starts from nothing
-        // rather than from price. TrendCore.AhrensMovingAverage read the close and seeded with it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var ahma = buffer.WritableSpan;
-
-        double previousAhma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorAhma = i >= length ? ahma[i - length] : currentValue;
-
-            previousAhma += (currentValue - ((previousAhma + priorAhma) / 2)) / length;
-            ahma[i] = previousAhma;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.AhrensMovingAverage(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     #endregion

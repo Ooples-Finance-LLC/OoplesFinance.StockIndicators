@@ -9802,5 +9802,86 @@
     "after": "",
     "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class OCHistogramState"
+  },
+  {
+    "id": "ahrens-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "_history[0] : new RocBankValue(price)",
+    "after": "_history[0] : default",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "_history[0]",
+    "after": "_history[_history.Count - 1]",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-wrong-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "count: 2",
+    "after": "count: 3",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-wrong-gap-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "center.AddTo(ref gap, -1);",
+    "after": "center.AddTo(ref gap);",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-wrong-length",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "count: _history.Capacity",
+    "after": "count: _history.Capacity + 1L",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-premature-state-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AhrensWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.RoundedLaggedRecurrencePreservesStartupAndExtremeCancellation"
+  },
+  {
+    "id": "ahrens-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~AhrensNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AhrensMovingAverageState"
   }
 ]

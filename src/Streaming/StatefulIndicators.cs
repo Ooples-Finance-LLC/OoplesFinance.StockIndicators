@@ -9124,58 +9124,17 @@ public sealed class AdaptiveAutonomousRecursiveTrailingStopState : IStreamingInd
 [PrimaryOutput("Ahma")]
 public sealed class AhrensMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
-    private readonly StreamingInputResolver _input;
-    private double _prevAhma;
-    private bool _hasPrev;
-
-    public AhrensMovingAverageState(int length = 9)
-    {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AhrensWindow _window;
+    public AhrensMovingAverageState(int length = 9) => _window = new(length);
     public IndicatorName Name => IndicatorName.AhrensMovingAverage;
-
-    public void Reset()
-    {
-        _window.Clear();
-        _prevAhma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorAhma = _window.Count >= _length ? _window[0] : value;
-        var prevAhma = _hasPrev ? _prevAhma : 0;
-        var ahma = prevAhma + ((value - ((prevAhma + priorAhma) / 2)) / _length);
-
-        if (isFinal)
-        {
-            _window.TryAdd(ahma, out _);
-            _prevAhma = ahma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ahma", ahma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ahma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ahma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Alma")]
