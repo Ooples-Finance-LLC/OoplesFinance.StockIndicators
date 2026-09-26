@@ -25021,26 +25021,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeOCHistogramFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateOCHistogram holds an average of the chained series against the same average of the open.
-        // The arm this replaced averaged the close alone, so the histogram was the constant zero, and its
-        // switch silently fell back to a simple average for every type but one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-
-        using var openAverages = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), openAverages.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), output);
-
-        var openAverage = openAverages.Span;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var open = context.Rent(input.Count); using var close = context.Rent(input.Count);
+        if (custom)
         {
-            output[i] -= openAverage[i];
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.OpenPrices), open.WritableSpan);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), close.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(input.Count); using var window = new OpenCloseHistogramWindow(maType, length);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(data.OpenPrices[i], input[i], true, custom ? open.Span[i] : null, custom ? close.Span[i] : null);
+        return result;
     }
 
     /// <summary>

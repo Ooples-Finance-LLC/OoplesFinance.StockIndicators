@@ -969,33 +969,23 @@ public static partial class Calculations
     public static StockData CalculateOCHistogram(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 10)
     {
-        List<double> ocHistogramList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        var openEmaList = GetMovingAverageList(stockData, maType, length, openList);
-        var closeEmaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var opens = stockData.OpenPrices;
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? customerOpen = null, customerClose = null;
+        if (custom)
         {
-            var currentCloseEma = closeEmaList[i];
-            var currentOpenEma = openEmaList[i];
-
-            var prevOcHistogram = GetLastOrDefault(ocHistogramList);
-            var ocHistogram = currentCloseEma - currentOpenEma;
-            ocHistogramList.Add(ocHistogram);
-
-            var signal = GetCompareSignal(ocHistogram, prevOcHistogram);
-            signalsList?.Add(signal);
+            customerOpen = GetMovingAverageList(stockData, maType, length, opens);
+            customerClose = GetMovingAverageList(stockData, maType, length, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "OcHistogram", ocHistogramList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ocHistogramList);
-        stockData.IndicatorName = IndicatorName.OCHistogram;
-
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new OpenCloseHistogramWindow(maType, length);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(opens[i], input[i], true, customerOpen?[i], customerClose?[i]);
+            signals?.Add(GetCompareSignal(value, i == 0 ? 0 : line[i - 1])); line.Add(value);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "OcHistogram", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.OCHistogram;
         return stockData;
     }
 

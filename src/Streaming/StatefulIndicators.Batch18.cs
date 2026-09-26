@@ -1516,50 +1516,17 @@ public sealed class OceanIndicatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("OcHistogram")]
 public sealed class OCHistogramState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _openSmoother;
-    private readonly IMovingAverageSmoother _closeSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public OCHistogramState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 10)
-    {
-        var resolved = Math.Max(1, length);
-        _openSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _closeSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OpenCloseHistogramWindow _window;
+    public OCHistogramState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 10) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.OCHistogram;
-
-    public void Reset()
-    {
-        _openSmoother.Reset();
-        _closeSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var openEma = _openSmoother.Next(bar.Open, isFinal);
-        var closeEma = _closeSmoother.Next(close, isFinal);
-        var ocHistogram = closeEma - openEma;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "OcHistogram", ocHistogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ocHistogram, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "OcHistogram", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _openSmoother.Dispose();
-        _closeSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Or")]

@@ -1092,3 +1092,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Eighteen configurations across Qstick, Chande Quick Stick and Delta Moving Average preserve original opens independently of selected closes. Rounded body differences retain extended range through smoothing and Delta histogram subtraction. Independent references cover SMA/weighted startup, lagged opens, customer smoothing, direct core/raw, native/live preview/reset and invalid fields.
 - **151/151** checks passed (`open-close-average-final2.trx`); campaign288 passed its baseline and caught **13/13** injected faults. All 15 staged files match its archive. **1,144** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `9c477ff3cef02326a802929e68d51cc9fa26420f5a6433a1d6145e15852a0bd3` / `bd26e8f352fc1779882aa0d854cc01873e70860b2432f3d097f0144cee25e2bf`.
 - Inventory: **3,963/7,131**, **3,168** omissions across **558** types; no construction failures. DLL SHA256 `0DDF1E271337BC348FC4CE8FD94CE79C0FB294B7AAF85C30DB5240BDE0390B85`. Sixty-eight grouped batches cover **1,133 configurations / 187 types**. Full library coverage remains incomplete.
+
+
+### OC Histogram numerical contracts
+
+- Five configurations retain separately rounded open and close averages before subtraction. Independent references cover extreme equality/cancellation, customer component order, selected closes with original opens, direct raw, native/live preview/reset and invalid fields.
+- **46/46** checks passed (`open-close-histogram.trx`); campaign289 passed its baseline and caught **8/8** injected faults. All 12 staged files match its archive. **1,152** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `29713f13385bc72788a57476b5ddbd52dae2507177c0a93f219c2e9cc0f698d0` / `6c14160a0218e2f5f2735cd5893ea64d53c7ad41fd41fece893dd9d3effda590`.
+- Inventory: **3,968/7,131**, **3,163** omissions across **557** types; no construction failures. DLL SHA256 `A7C2C97834F1F46FDEE80BF977E09814BA3DFAB40BF2E7BA039ECBD0FAC5AE18`. Sixty-nine grouped batches cover **1,138 configurations / 188 types**. Full library coverage remains incomplete.
