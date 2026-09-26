@@ -15544,36 +15544,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(StockData data, ComputeContext context, int length = 50,
         double pctWidth = 60)
     {
-        // CalculateRightSidedRickerMovingAverage accumulates its Ricker weight across the window and
-        // multiplies each bar by the running total rather than by that bar's own weight, so the kernel is a
-        // cumulative one. Reproduce it exactly - the core routine used the textbook per-bar weight and the
-        // width the percentage names was not reachable at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var width = pctWidth / 100 * length;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double w = 0, vw = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? input[i - j] : 0;
-                // Each bar is weighted by its own Ricker weight, not by the running total of every weight up
-                // to it - against the running total the divisor no longer matches the numerator.
-                var weight = (1 - MathHelper.Pow(j / width, 2)) * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
-                w += weight;
-                vw += prevV * weight;
-            }
-
-            output[i] = w != 0 ? vw / w : input[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.RightSidedRickerMovingAverage(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length, pctWidth);
+        return result;
     }
 
     /// <summary>

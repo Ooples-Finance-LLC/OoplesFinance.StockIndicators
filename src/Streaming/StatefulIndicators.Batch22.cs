@@ -58,92 +58,17 @@ public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Rsrma")]
 public sealed class RightSidedRickerMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public RightSidedRickerMovingAverageState(int length = 50, double pctWidth = 60)
-    {
-        _length = Math.Max(1, length);
-        var width = pctWidth / 100d * _length;
-        // Each bar carries its own Ricker weight, not the running total of every weight up to it: against a
-        // running total the divisor no longer matches the numerator and the filter has a gain of 53.
-        _weights = new double[_length];
-        double total = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var weight = (1 - MathHelper.Pow(j / width, 2))
-                * MathHelper.Exp(-(MathHelper.Pow(j, 2) / (2 * MathHelper.Pow(width, 2))));
-            _weights[j] = weight;
-            total += weight;
-        }
-
-        _weightSum = total;
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RickerWindow _window;
+    public RightSidedRickerMovingAverageState(int length = 50, double pctWidth = 60) => _window = new(length, pctWidth);
     public IndicatorName Name => IndicatorName.RightSidedRickerMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        var count = _values.Count;
-        double vw = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            double prevV;
-            if (isFinal)
-            {
-                var idx = count - 1 - j;
-                prevV = idx >= 0 ? _values[idx] : 0;
-            }
-            else
-            {
-                if (j == 0)
-                {
-                    prevV = value;
-                }
-                else
-                {
-                    var idx = count - j;
-                    prevV = idx >= 0 ? _values[idx] : 0;
-                }
-            }
-
-            vw += prevV * _weights[j];
-        }
-
-        var rrma = _weightSum != 0 ? vw / _weightSum : value;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rsrma", rrma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rrma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Rsrma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rwo")]
