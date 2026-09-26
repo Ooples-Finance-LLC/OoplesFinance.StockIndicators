@@ -2241,11 +2241,6 @@ OoplesFinance.StockIndicators.Indicators.PriceLineChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.PriceZoneOscillator/default
-OoplesFinance.StockIndicators.Indicators.PriceZoneOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.PriceZoneOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PriceZoneOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.PriceZoneOscillator/weighted-average
 OoplesFinance.StockIndicators.Indicators.PrimeNumberBands/default
 OoplesFinance.StockIndicators.Indicators.PrimeNumberBands/longer-periods
 OoplesFinance.StockIndicators.Indicators.PrimeNumberBands/minimum-periods
@@ -2277,10 +2272,6 @@ OoplesFinance.StockIndicators.Indicators.PseudoPolynomialChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.PseudoPolynomialChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PseudoPolynomialChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PseudoPolynomialChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.Pzo/default
-OoplesFinance.StockIndicators.Indicators.Pzo/longer-periods
-OoplesFinance.StockIndicators.Indicators.Pzo/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Pzo/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Qstick/default
 OoplesFinance.StockIndicators.Indicators.Qstick/longer-periods
 OoplesFinance.StockIndicators.Indicators.Qstick/minimum-periods

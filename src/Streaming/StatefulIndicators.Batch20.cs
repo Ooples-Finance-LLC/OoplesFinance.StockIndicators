@@ -349,63 +349,17 @@ public sealed class PriceVolumeTrendState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Pzo")]
 public sealed class PriceZoneOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _vmaSmoother;
-    private readonly IMovingAverageSmoother _dvmaSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public PriceZoneOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _vmaSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dvmaSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PriceZoneWindow _window;
+    public PriceZoneOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.PriceZoneOscillator;
-
-    public void Reset()
-    {
-        _vmaSmoother.Reset();
-        _dvmaSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var dvol = Math.Sign(diff) * value;
-        var vma = _vmaSmoother.Next(value, isFinal);
-        var dvma = _dvmaSmoother.Next(dvol, isFinal);
-        var pzo = vma != 0 ? MathHelper.MinOrMax(100 * dvma / vma, 100, -100) : 0;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pzo", pzo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pzo, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Pzo", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _vmaSmoother.Dispose();
-        _dvmaSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("UpperBand")]

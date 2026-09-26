@@ -4961,36 +4961,22 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePriceZoneOscillatorFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculatePriceZoneOscillator publishes "Pzo": the moving average of the chained series signed by the
-        // direction of each bar, expressed as a percentage of the plain moving average of that series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var vma = average.Span;
-
-        using var directional = context.Rent(count);
-        var dvol = directional.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            dvol[i] = Math.Sign(CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue)) * input[i];
+            using var window = new PriceZoneWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
+            return output;
         }
-
-        using var directionalAverage = context.Rent(count);
-        MovingAverage(data, maType, length, directional.Span, directionalAverage.WritableSpan);
-        var dvma = directionalAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = vma[i] != 0 ? MathHelper.MinOrMax(100 * dvma[i] / vma[i], 100, -100) : 0;
-        }
-
-        return buffer;
+        using var price = context.Rent(input.Count);
+        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), price.WritableSpan);
+        using var signed = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) signed.WritableSpan[i] = i == 0 ? 0 : input[i].CompareTo(input[i - 1]) * input[i];
+        using var directional = context.Rent(input.Count);
+        MovingAverage(data, maType, length, signed.Span, directional.WritableSpan);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = PriceZoneWindow.Ratio(directional.Span[i], price.Span[i]);
+        return output;
     }
 
     /// <summary>

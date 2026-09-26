@@ -8964,5 +8964,79 @@
     "before": "rounded._numerator << shift",
     "after": "rounded._numerator",
     "filter": "FullyQualifiedName~VolumeIndexNumericalTests.DirectExponentRoundingMatchesIndependentStepwiseReduction"
+  },
+  {
+    "id": "price-zone-wrong-direction",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "value.CompareTo(_previous) * value",
+    "after": "_previous.CompareTo(value) * value",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests|FullyQualifiedName~GoldenFileTests.PriceZoneOscillator|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "price-zone-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "_hasPrevious ? value.CompareTo(_previous) * value : 0",
+    "after": "(_hasPrevious || value != 0) ? value.CompareTo(_previous) * value : 0",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-premature-percent-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "numerator.Add(directional, 100)",
+    "after": "numerator.Add(directional * 100)",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-missing-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "MathHelper.MinOrMax(numerator.Ratio(denominator), 100, -100)",
+    "after": "numerator.Ratio(denominator)",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "if (commit) { _previous",
+    "after": "if (value != 0) { _previous",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-stale-state-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/PriceZoneWindow.cs",
+    "before": "_directional = new(kind, length, int.MaxValue)",
+    "after": "_directional = new(kind, 1, int.MaxValue)",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.SignedPricesAndSafePercentRatioMatchIndependentFormulas"
+  },
+  {
+    "id": "price-zone-customer-reversed-stages",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "PriceZoneWindow.Ratio(directional.Span[i], price.Span[i])",
+    "after": "PriceZoneWindow.Ratio(price.Span[i], directional.Span[i])",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.CustomerAveragesReceivePriceThenDirectionalPrice",
+    "scope": "internal static ComputeBuffer ComputePriceZoneOscillatorFast("
+  },
+  {
+    "id": "price-zone-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceZoneNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PriceZoneOscillatorState"
   }
 ]
