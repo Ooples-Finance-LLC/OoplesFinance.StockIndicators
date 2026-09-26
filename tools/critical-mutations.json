@@ -11069,5 +11069,78 @@
     "after": "",
     "filter": "FullyQualifiedName~RecursiveTrendNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class RecursiveMovingTrendAverageState"
+  },
+  {
+    "id": "damped-sine-wrong-frequency",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "Math.Sin(2 * Math.PI",
+    "after": "Math.Sin(Math.PI",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-missing-damping",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "/ length) / (lag + 1d)",
+    "after": "/ length)",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-wrong-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "Math.Max(3, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-wrong-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "denominator.Add(_weights[lag]);",
+    "after": "denominator.Add(1);",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.FullConstantWindowsRetainUnitGainDespiteSignedWeights"
+  },
+  {
+    "id": "damped-sine-wrong-history",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "_values[_values.Count - lag]",
+    "after": "_values[0]",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-rounded-products",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "sum.AddProduct(lag == 0 ? value : _values[_values.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? value : _values[_values.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DampedSineWindow.cs",
+    "before": "internal void Reset() => _values.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "damped-sine-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DampedSineNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class DampedSineWaveWeightedFilterState"
   }
 ]

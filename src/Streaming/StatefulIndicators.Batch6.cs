@@ -342,83 +342,17 @@ public sealed class ConfluenceIndicatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Dswwf")]
 public sealed class DampedSineWaveWeightedFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double[] _weights;
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public DampedSineWaveWeightedFilterState(int length = 50)
-    {
-        _length = Math.Max(3, length);
-        _weights = new double[_length];
-        double sum = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var w = Math.Sin(2 * Math.PI * j / _length) / j;
-            _weights[j - 1] = w;
-            sum += w;
-        }
-
-        _weightSum = sum;
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DampedSineWindow _window;
+    public DampedSineWaveWeightedFilterState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.DampedSineWaveWeightedFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double wvSum = 0;
-        for (var j = 0; j < _length; j++)
-        {
-            double sample;
-            if (j == 0)
-            {
-                sample = value;
-            }
-            else if (_values.Count >= j)
-            {
-                sample = _values[_values.Count - j];
-            }
-            else
-            {
-                sample = 0;
-            }
-
-            wvSum += _weights[j] * sample;
-        }
-
-        var dswwf = _weightSum != 0 ? wvSum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Dswwf", dswwf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dswwf, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Dswwf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dpbsto")]

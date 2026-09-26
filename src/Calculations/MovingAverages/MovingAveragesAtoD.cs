@@ -1009,42 +1009,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDampedSineWaveWeightedFilter(this StockData stockData, int length = 50)
     {
-        // A sampled full sine needs at least three points to have a nonzero normalized kernel.
-        length = Math.Max(3, length);
-        List<double> dswwfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new DampedSineWindow(length);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double w, wSum = 0, wvSum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevValue = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-
-                w = Math.Sin(2 * Math.PI * j / length) / j;
-                wvSum += w * prevValue;
-                wSum += w;
-            }
-
-            var prevDswwf = GetLastOrDefault(dswwfList);
-            var dswwf = wSum != 0 ? wvSum / wSum : 0;
-            dswwfList.Add(dswwf);
-
-            var signal = GetCompareSignal(currentValue - dswwf, prevVal - prevDswwf);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dswwf", dswwfList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dswwfList);
-        stockData.IndicatorName = IndicatorName.DampedSineWaveWeightedFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dswwf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DampedSineWaveWeightedFilter;
         return stockData;
     }
 

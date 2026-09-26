@@ -1979,26 +1979,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void DampedSineWaveWeightedFilter(ReadOnlySpan<double> input, Span<double> output, int length = 50)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(3, length);
-        for (var i = 0; i < input.Length; i++)
-        {
-            // Bars before the series starts count as zero and the divisor stays the full weight sum,
-            // which is what the batch indicator does, so the run-in is damped rather than blank.
-            double wSum = 0, wvSum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var ratio = (double)j / length;
-                var w = Math.Sin(2 * Math.PI * ratio) / j;
-                wvSum += i >= j - 1 ? w * input[i - (j - 1)] : 0;
-                wSum += w;
-            }
-            output[i] = wSum != 0 ? wvSum / wSum : 0;
-        }
+        DampedSineWindow.Compute(input, output, length);
     }
 
     /// <summary>

@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.DampedSineWaveWeightedFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DampedSineOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 50))["Dswwf"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RecursiveMovingTrendAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveTrendOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Rmta"], IndicatorErrorBudget.Exact);
