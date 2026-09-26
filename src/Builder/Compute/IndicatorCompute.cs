@@ -12536,10 +12536,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSpencer15PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Spencer15PointMovingAverage(close, buffer.WritableSpan, 15);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Spencer15PointMovingAverage(SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+        return result;
     }
 
     /// <summary>
@@ -12547,10 +12547,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSpencer21PointMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Spencer21PointMovingAverage(close, buffer.WritableSpan, 21);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Spencer21PointMovingAverage(SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+        return result;
     }
 
     /// <summary>

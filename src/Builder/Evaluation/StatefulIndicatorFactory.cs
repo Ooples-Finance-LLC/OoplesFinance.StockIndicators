@@ -658,6 +658,8 @@ internal static partial class StatefulIndicatorFactory
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
+            Spencer15PointMovingAverageSpecOptions => new Spencer15PointMovingAverageState(),
+            Spencer21PointMovingAverageSpecOptions => new Spencer21PointMovingAverageState(),
             AlphaDecreasingEmaSpecOptions => new AlphaDecreasingExponentialMovingAverageState(),
             AhrensMovingAverageSpecOptions ahrens => new AhrensMovingAverageState(ahrens.Length),
             OCHistogramSpecOptions openCloseHistogram => new OCHistogramState(openCloseHistogram.MaType, openCloseHistogram.Length),

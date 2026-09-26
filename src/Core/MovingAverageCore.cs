@@ -1291,31 +1291,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Spencer15PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Spencer 15-point weights (symmetric)
-        var weights = new double[] { -3, -6, -5, 3, 21, 46, 67, 74, 67, 46, 21, 3, -5, -6, -3 };
-        const double weightSum = 320; // Sum of the weights
-
-        // Trailing, not centred. Spencer's graduation formula is classically applied about the middle of
-        // the window, but a centred window reads bars the caller has not seen yet, so the streaming state
-        // could never reproduce it and the batch indicator does not try to: both weight bar i-j. Bars
-        // before the series starts count as zero and the divisor stays the full weight sum, which is what
-        // CalculateSpencer15PointMovingAverage does, so the run-in is damped rather than undefined.
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j < weights.Length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                sum += prevValue * weights[j];
-            }
-
-            output[i] = sum / weightSum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SpencerWindow(false);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1324,28 +1302,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Spencer21PointMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 21)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Spencer 21-point weights (symmetric)
-        var weights = new double[] { -1, -3, -5, -5, -2, 6, 18, 33, 47, 57, 60, 57, 47, 33, 18, 6, -2, -5, -5, -3, -1 };
-        const double weightSum = 350; // Sum of the weights
-
-        // Trailing, for the reason given on the 15-point form: a centred window is not causal, so neither
-        // the streaming state nor CalculateSpencer21PointMovingAverage computes one.
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0;
-            for (var j = 0; j < weights.Length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                sum += prevValue * weights[j];
-            }
-
-            output[i] = sum / weightSum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new SpencerWindow(true);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

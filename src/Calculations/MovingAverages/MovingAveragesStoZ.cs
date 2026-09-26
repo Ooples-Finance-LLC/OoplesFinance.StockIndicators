@@ -1396,64 +1396,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer21PointMovingAverage(this StockData stockData)
     {
-        List<double> spmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new SpencerWindow(true);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= 20; j++)
-            {
-                var weight = j switch
-                {
-                    0 => -1,
-                    1 => -3,
-                    2 => -5,
-                    3 => -5,
-                    4 => -2,
-                    5 => 6,
-                    6 => 18,
-                    7 => 33,
-                    8 => 47,
-                    9 => 57,
-                    10 => 60,
-                    11 => 57,
-                    12 => 47,
-                    13 => 33,
-                    14 => 18,
-                    15 => 6,
-                    16 => -2,
-                    17 => -5,
-                    18 => -5,
-                    19 => -3,
-                    20 => -1,
-                    _ => 0,
-                };
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevSpma = GetLastOrDefault(spmaList);
-            var spma = weightedSum != 0 ? sum / weightedSum : 0;
-            spmaList.Add(spma);
-
-            var signal = GetCompareSignal(currentValue - spma, prevVal - prevSpma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "S21ma", spmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(spmaList);
-        stockData.IndicatorName = IndicatorName.Spencer21PointMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "S21ma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Spencer21PointMovingAverage;
         return stockData;
     }
 
@@ -1466,58 +1417,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSpencer15PointMovingAverage(this StockData stockData)
     {
-        List<double> spmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new SpencerWindow(false);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= 14; j++)
-            {
-                var weight = j switch
-                {
-                    0 => -3,
-                    1 => -6,
-                    2 => -5,
-                    3 => 3,
-                    4 => 21,
-                    5 => 46,
-                    6 => 67,
-                    7 => 74,
-                    8 => 67,
-                    9 => 46,
-                    10 => 21,
-                    11 => 3,
-                    12 => -5,
-                    13 => -6,
-                    14 => -3,
-                    _ => 0,
-                };
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var prevSpma = GetLastOrDefault(spmaList);
-            var spma = weightedSum != 0 ? sum / weightedSum : 0;
-            spmaList.Add(spma);
-
-            var signal = GetCompareSignal(currentValue - spma, prevVal - prevSpma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "S15ma", spmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(spmaList);
-        stockData.IndicatorName = IndicatorName.Spencer15PointMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "S15ma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Spencer15PointMovingAverage;
         return stockData;
     }
 
