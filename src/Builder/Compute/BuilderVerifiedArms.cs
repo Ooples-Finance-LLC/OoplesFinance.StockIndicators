@@ -496,6 +496,8 @@ internal static class BuilderVerifiedArms
         typeof(RepulseSpecOptions),
         typeof(RepulsionMovingAverageSpecOptions),
         typeof(RetentionAccelerationFilterSpecOptions),
+        typeof(OmegaRatioSpecOptions),
+        typeof(UpsidePotentialRatioSpecOptions),
         typeof(ReversalPointsSpecOptions),
         typeof(RexOscillatorSpecOptions),
         typeof(RightSidedRickerMovingAverageSpecOptions),

@@ -7332,5 +7332,87 @@
     "after": "",
     "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TrendDirectionForceIndexState"
+  },
+  {
+    "id": "target-return-ignores-benchmark",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "Math.Pow(1 + benchmark, length / 360d) - 1",
+    "after": "0d",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-wrong-price-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "_prices[0] : 0",
+    "after": "_prices[_prices.Count - 1] : 0",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-zero-price-wrong-return",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "var relative = previous == 0 ? default :",
+    "after": "var relative = previous == 0 ? new Fraction(1, BigInteger.One) :",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-linear-downside",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "_potential ? difference.Square()",
+    "after": "_potential ? new Fraction(-difference.N, difference.D)",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-drops-root-period",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "up.D * up.D * _prices.Capacity * down.N",
+    "after": "up.D * up.D * down.N",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-keeps-expired-returns",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "_returns.Count == _returns.Capacity ? _returns[0]",
+    "after": "_returns.Count > _returns.Capacity ? _returns[0]",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "if (commit) { _prices.TryAdd",
+    "after": "if (_prices.Capacity > 0) { _prices.TryAdd",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
+  },
+  {
+    "id": "target-return-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag",
+    "scope": "internal static ComputeBuffer ComputeTargetReturnFast("
+  },
+  {
+    "id": "target-return-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class UpsidePotentialRatioState"
+  },
+  {
+    "id": "target-return-unsigned-return-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/TargetReturnWindow.cs",
+    "before": "ExactVarianceWindow.Units(previous));",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(previous)));",
+    "filter": "FullyQualifiedName~TargetReturnNumericalTests.ExactReturnsNormalizeBeforeOverflowAndPreservePaddingAndLag"
   }
 ]

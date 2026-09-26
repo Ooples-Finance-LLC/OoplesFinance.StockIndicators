@@ -13,48 +13,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUpsidePotentialRatio(this StockData stockData, int length = 30, double bmk = 0.05)
     {
-        List<double> retList = new(stockData.Count);
-        List<double> upsidePotentialList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double barMin = 60 * 24;
-        double minPerYr = 60 * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        var ratio = (double)1 / length;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TargetReturnWindow(length, bmk, true);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.Add(ret);
-
-            double downSide = 0, upSide = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var iValue = i >= j ? retList[i - j] : 0;
-                downSide += iValue < bench ? Pow(iValue - bench, 2) * ratio : 0;
-                upSide += iValue > bench ? (iValue - bench) * ratio : 0;
-            }
-
-            var prevUpsidePotential = GetLastOrDefault(upsidePotentialList);
-            var upsidePotential = downSide > 0 ? upSide / Sqrt(downSide) : 0;
-            upsidePotentialList.Add(upsidePotential);
-
-            var signal = GetCompareSignal(upsidePotential - 5, prevUpsidePotential - 5);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 5, previous - 5));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Upr", upsidePotentialList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(upsidePotentialList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Upr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.UpsidePotentialRatio;
-
         return stockData;
     }
 

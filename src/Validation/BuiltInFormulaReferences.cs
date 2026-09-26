@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.OmegaRatio or IndicatorName.UpsidePotentialRatio)
+        {
+            var key = builtIn.BatchName == IndicatorName.OmegaRatio ? "Or" : "Upr";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TargetReturnsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendDirectionForceIndex && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.Reference(0, bars => TrendForceOutputs(bars, builtIn)["Tdfi"], IndicatorErrorBudget.Exact);
