@@ -359,45 +359,16 @@ public static partial class Calculations
     public static StockData CalculateDonchianChannelWidth(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
         int smoothLength = 22)
     {
-        List<double> donchianWidthList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var upper = highestList[i];
-            var lower = lowestList[i];
-
-            var donchianWidth = upper - lower;
-            donchianWidthList.Add(donchianWidth);
-        }
-
-        var donchianWidthSmaList = GetMovingAverageList(stockData, maType, smoothLength, donchianWidthList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentSma = smaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var donchianWidth = donchianWidthList[i];
-            var donchianWidthSma = donchianWidthSmaList[i];
-
-            var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, donchianWidth, donchianWidthSma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dcw", donchianWidthList },
-            { "Signal", donchianWidthSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(donchianWidthList);
-        stockData.IndicatorName = IndicatorName.DonchianChannelWidth;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? centerOverride = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new DonchianWidthWindow(maType, length, smoothLength, external, Math.Max(1, input.Count));
+        List<double> width = new(input.Count), signal = new(input.Count), center = new(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); width.Add(point.Width); signal.Add(point.Signal); center.Add(point.Center); }
+        if (external) { center = centerOverride!; signal = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(width), Math.Max(1, smoothLength))?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, width); }
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetVolatilitySignal(input[i] - center[i], i > 0 ? input[i - 1] - center[i - 1] : 0, width[i], signal[i]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dcw", width }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(width); stockData.IndicatorName = IndicatorName.DonchianChannelWidth; return stockData;
     }
 
 }

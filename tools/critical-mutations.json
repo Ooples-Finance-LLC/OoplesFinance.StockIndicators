@@ -19864,5 +19864,122 @@
     "after": "",
     "filter": "FullyQualifiedName~SmoothedVolatilityNumericalTests.IndependentPeriodsAndAsymmetricWidthsSurviveExtremeProducts|FullyQualifiedName~SmoothedVolatilityNumericalTests.CustomerStagesConsumeRangeThenBasisThenMiddleWithSelectedCloses|FullyQualifiedName~SmoothedVolatilityNumericalTests.InvalidInputsAndUnrepresentableDerivedPeriodsAreRejected|FullyQualifiedName~SmoothedVolatilityNumericalTests.LegacyBatchOnlyAveragesRetainAllThreeStages",
     "scope": "internal static ComputeBuffer ComputeSmoothedVolatilityBandsFast("
+  },
+  {
+    "id": "donchian-width-high-period",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_high = new(Math.Max(1, length));",
+    "after": "_high = new(Math.Max(1, length + 1));",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-low-period",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_low = new(Math.Max(1, length));",
+    "after": "_low = new(Math.Max(1, length + 1));",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_signal = new(kind, smoothLength, capacityHint);",
+    "after": "_signal = new(kind, length, capacityHint);",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "range.Add(lowest, -1)",
+    "after": "range.Add(lowest, 1)",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-early-width-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_signal.Next(width, commit)",
+    "after": "_signal.Next(new RocBankValue(width.Publish()), commit)",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-high-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "var highest = commit ?",
+    "after": "var highest = true ?",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-signal-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_signal.Next(width, commit)",
+    "after": "_signal.Next(width, true)",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DonchianWidthWindow.cs",
+    "before": "_high.Reset(); _low.Reset(); _signal?.Reset();",
+    "after": "/* retain extrema and signal */",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth"
+  },
+  {
+    "id": "donchian-width-customer-price-period",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(input), Math.Max(1, smoothLength))",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth",
+    "scope": "public static StockData CalculateDonchianChannelWidth("
+  },
+  {
+    "id": "donchian-width-customer-signal-period",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(width), Math.Max(1, smoothLength))",
+    "after": "SpanCompat.AsReadOnlySpan(width), Math.Max(1, length))",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth",
+    "scope": "public static StockData CalculateDonchianChannelWidth("
+  },
+  {
+    "id": "donchian-width-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth",
+    "scope": "public sealed class DonchianChannelWidthState :"
+  },
+  {
+    "id": "donchian-width-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth",
+    "scope": "internal static ComputeBuffer ComputeDonchianChannelWidthFast("
+  },
+  {
+    "id": "donchian-width-core-period",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "before": "SimpleMovingAverage, length, 1",
+    "after": "SimpleMovingAverage, length + 1, 1",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.ExtendedWidthsRecoverAfterEvictionAndHonorIndependentSignalPeriods|FullyQualifiedName~DonchianWidthNumericalTests.CustomerPriceThenWidthStagesUseSelectedClosesAndSeparatePeriods|FullyQualifiedName~DonchianWidthNumericalTests.InvalidInputsNeverAdvanceNativeState|FullyQualifiedName~DonchianWidthNumericalTests.LegacyBatchOnlyAveragesStillSmoothTheWidth",
+    "scope": "internal static void DonchianChannelWidth("
+  },
+  {
+    "id": "donchian-width-signal-route",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "dcw.MaType, signalOutput: true",
+    "after": "dcw.MaType, signalOutput: false",
+    "filter": "FullyQualifiedName~DonchianWidthNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
   }
 ]

@@ -1134,8 +1134,8 @@ internal static partial class IndicatorCompute
             BollingerBandsWidthSpecOptions bbw => ComputeBollingerBandsWidthFast(data, context, bbw.Length),
             DonchianChannelWidthSpecOptions dcw => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeDonchianChannelWidthFast(data, context, dcw.Length), 22, dcw.MaType),
-                _ => ComputeDonchianChannelWidthFast(data, context, dcw.Length)
+                "Signal" => ComputeDonchianChannelWidthFast(data, context, dcw.Length, dcw.MaType, signalOutput: true),
+                _ => ComputeDonchianChannelWidthFast(data, context, dcw.Length, dcw.MaType)
             },
             KeltnerChannelWidthSpecOptions kcw => ComputeKeltnerChannelWidthFast(data, context, kcw.Length),
             MassIndexCoreSpecOptions mic => spec.OutputKey switch
@@ -5857,13 +5857,16 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Donchian Channel Width using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDonchianChannelWidthFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeDonchianChannelWidthFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signalOutput = false, int smoothLength = 22)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        VolatilityCore.DonchianChannelWidth(high, low, buffer.WritableSpan, length);
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var center = context.Rent(count); using var signal = context.Rent(count);
+        if (external) MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
+        var result = context.Rent(count); using var window = new DonchianWidthWindow(maType, length, smoothLength, external, Math.Max(1, count));
+        for (var i = 0; i < count; i++) { var point = window.Next(high[i], low[i], input[i], true); result.WritableSpan[i] = point.Width; signal.WritableSpan[i] = point.Signal; }
+        if (external) MovingAverage(data, maType, Math.Max(1, smoothLength), result.Span, signal.WritableSpan);
+        if (signalOutput) signal.Span.CopyTo(result.WritableSpan);
+        return result;
     }
 
     /// <summary>

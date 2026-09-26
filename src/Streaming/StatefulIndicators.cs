@@ -4041,63 +4041,16 @@ public sealed class ClosedFormDistanceVolatilityState : IStreamingIndicatorState
 [PrimaryOutput("Dcw")]
 public sealed class DonchianChannelWidthState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _priceSmoother;
-    private readonly IMovingAverageSmoother _widthSmoother;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
-    public DonchianChannelWidthState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
-        int smoothLength = 22)
-    {
-        var resolved = Math.Max(1, length);
-        _priceSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _widthSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DonchianWidthWindow _window;
+    public DonchianChannelWidthState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, int smoothLength = 22) { _window = new(maType, length, smoothLength); }
     public IndicatorName Name => IndicatorName.DonchianChannelWidth;
-
-    public void Reset()
-    {
-        _priceSmoother.Reset();
-        _widthSmoother.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _ = _priceSmoother.Next(value, isFinal);
-
-        var upper = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lower = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var width = upper - lower;
-        var signal = _widthSmoother.Next(width, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Dcw", width },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(width, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Width, includeOutputs ? new Dictionary<string, double> { { "Dcw", point.Width }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _priceSmoother.Dispose();
-        _widthSmoother.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Hv")]

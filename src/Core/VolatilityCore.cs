@@ -405,26 +405,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void DonchianChannelWidth(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 20)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // GetMaxAndMinValuesList, which CalculateDonchianChannelWidth reads its extremes from, measures over
-        // however many bars have arrived, so the channel has a width from the first bar rather than none.
-        for (var i = 0; i < high.Length; i++)
-        {
-            var start = Math.Max(0, i - length + 1);
-            var hh = high[start];
-            var ll = low[start];
-            for (var j = start + 1; j <= i; j++)
-            {
-                if (high[j] > hh) hh = high[j];
-                if (low[j] < ll) ll = low[j];
-            }
-
-            output[i] = hh - ll;
-        }
+        if (output.Length < high.Length || low.Length < high.Length) throw new ArgumentException("Low and output spans must cover the high series.");
+        using var window = new DonchianWidthWindow(MovingAvgType.SimpleMovingAverage, length, 1, external: true);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], 0, true).Width;
     }
 
     /// <summary>

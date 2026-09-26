@@ -584,6 +584,7 @@ internal static partial class StatefulIndicatorFactory
             BollingerBandsWidthSpecOptions bbWidth => new BollingerBandsWidthState(length: bbWidth.Length),
 
             // Volatility - using named parameters where MovingAvgType is first
+            DonchianChannelWidthSpecOptions width => new DonchianChannelWidthState(width.MaType, width.Length),
             SmoothedVolatilityBandsSpecOptions volatility => new SmoothedVolatilityBandsState(volatility.MaType, volatility.Length1, volatility.Length2, volatility.Deviation, volatility.BandAdjust),
             DynamicSupportAndResistanceSpecOptions support => new DynamicSupportAndResistanceState(support.MaType, support.Length),
             BollingerBandsWithAtrPctSpecOptions pct => new BollingerBandsWithAtrPctState(pct.MaType, pct.Length, pct.BbLength, pct.StdDevMult),
