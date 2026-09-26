@@ -1117,3 +1117,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Campaign291 source/archive SHA256: `8abc134a80660a5632c3bdcf48e2fdbaa64baf75957ae5e5a3be31404a9a5aba` / `30a92ca32da1271e3a99fa11efa25a5b676f9273dd07e1495fc5a76d0c9021f6`.
 - Campaign293 source/archive SHA256: `6af6ca977a0a0bb9bde2732bd4a97e21efbc4a31a63f400167387fbbf19a5d6e` / `ecbad5a131dc23e7763de1badf21a35d3811c8305ae73a1554ac08ae820524d6`.
 - Campaign294 source/archive SHA256: `efdf800078d7a75ba22563373e70c6dc85458643c4ab2fe7b7a90786368d80de` / `fe1401e9cfa1849ae69a40bbf7ae66f52fbf92767edf7c942283fdc65f651efc`.
+
+
+### Spencer filter numerical contracts
+
+- Eight configurations use exact weighted sums for both fixed Spencer coefficient tables, retaining causal trailing windows, zero-filled startup and the full divisor. Independent references cover impulse taps, extreme constant cancellation, selected inputs, ignored legacy lengths, direct cores/raw, native/live preview/reset and invalid fields.
+- **70/70** checks passed (`spencer.trx`); campaign292 passed its baseline and caught **13/13** injected faults. All 13 staged files match its archive except the previously published Alpha Decreasing mutation replacements, retained from HEAD. **1,186** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `bd04c7634ec670456bee17ceb474f5612ad509ecf44da0f5ed7f516f3d964a02` / `1e1721d45cec5ce2ee1d8d538828313a2c8c53cf75c6ddcacdec4ce13cf2a13f`.
+- Inventory: **3,984/7,131**, **3,147** omissions across **553** types; no construction failures. DLL SHA256 `4E4B652321C2223356786C04ACEEF4EADC55F6E2F27E964A6D47F320EB5713E3`. Seventy-two grouped batches cover **1,154 configurations / 192 types**. Full library coverage remains incomplete.

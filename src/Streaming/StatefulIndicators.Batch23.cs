@@ -336,145 +336,31 @@ public sealed class SpearmanIndicatorState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("S15ma")]
 public sealed class Spencer15PointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private static readonly double[] Weights =
-    {
-        -3, -6, -5, 3, 21, 46, 67, 74, 67, 46, 21, 3, -5, -6, -3
-    };
-
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public Spencer15PointMovingAverageState()
-    {
-        _weightSum = SumWeights();
-        _values = new PooledRingBuffer<double>(Weights.Length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SpencerWindow _window = new(false);
     public IndicatorName Name => IndicatorName.Spencer15PointMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < Weights.Length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * Weights[j];
-        }
-
-        var spma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "S15ma", spma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(spma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "S15ma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static double SumWeights()
-    {
-        double sum = 0;
-        for (var i = 0; i < Weights.Length; i++)
-        {
-            sum += Weights[i];
-        }
-
-        return sum;
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("S21ma")]
 public sealed class Spencer21PointMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private static readonly double[] Weights =
-    {
-        -1, -3, -5, -5, -2, 6, 18, 33, 47, 57, 60, 57, 47, 33, 18, 6, -2, -5, -5, -3, -1
-    };
-
-    private readonly double _weightSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public Spencer21PointMovingAverageState()
-    {
-        _weightSum = SumWeights();
-        _values = new PooledRingBuffer<double>(Weights.Length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SpencerWindow _window = new(true);
     public IndicatorName Name => IndicatorName.Spencer21PointMovingAverage;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        for (var j = 0; j < Weights.Length; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            sum += prevValue * Weights[j];
-        }
-
-        var spma = _weightSum != 0 ? sum / _weightSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "S21ma", spma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(spma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "S21ma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static double SumWeights()
-    {
-        double sum = 0;
-        for (var i = 0; i < Weights.Length; i++)
-        {
-            sum += Weights[i];
-        }
-
-        return sum;
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Srwma")]
