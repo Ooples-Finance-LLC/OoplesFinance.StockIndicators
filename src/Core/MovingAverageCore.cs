@@ -3752,37 +3752,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ParametricCorrectiveLinearMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var lsmaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            // Preserve this regression-based variant's partial-window fit.
-            LinearRegression(input, lsmaBuffer.AsSpan(0, input.Length), length);
-            ExponentialMovingAverage(input, emaBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var lsma = lsmaBuffer[i];
-                var ema = emaBuffer[i];
-
-                // Parametric correction based on deviation
-                var error = currentValue - lsma;
-                var emaError = currentValue - ema;
-
-                // Blend LSMA with correction factor
-                var correction = error != 0 ? Math.Min(Math.Abs(emaError / error), 2) : 1;
-                output[i] = lsma + (error * correction * 0.5);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(lsmaBuffer);
-            ArrayPool<double>.Shared.Return(emaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ParametricCorrectiveWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

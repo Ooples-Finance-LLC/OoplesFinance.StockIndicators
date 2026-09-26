@@ -14862,32 +14862,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(StockData data, ComputeContext context, int length = 50,
         double alpha = 1, double per = 35)
     {
-        // CalculateParametricCorrectiveLinearMovingAverage weights the value of length bars ago by how far the
-        // bar sits past a percentile of the window, correcting the weight by alpha where it falls negative, and
-        // divides the weighted sum by the sum of the weights. The second average it also builds, from the
-        // complementary percentile, feeds nothing this arm publishes, so per is the only percentile here.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var weightSum = new RollingSum();
-        var weightedValueSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= length ? input[i - length] : 0;
-            var position = i + 1 - (per / 100 * length);
-            var weight = position >= 0 ? position : alpha * position;
-
-            weightSum.Add(weight);
-            weightedValueSum.Add(previousValue * weight);
-
-            var weights = weightSum.Sum(length);
-            output[i] = weights != 0 ? weightedValueSum.Sum(length) / weights : 0;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new ParametricCorrectiveWindow(length, alpha, per); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

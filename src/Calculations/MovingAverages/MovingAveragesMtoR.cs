@@ -701,65 +701,17 @@ public static partial class Calculations
     public static StockData CalculateParametricCorrectiveLinearMovingAverage(this StockData stockData, int length = 50, double alpha = 1,
         double per = 35)
     {
-        List<double> w1List = new(stockData.Count);
-        List<double> w2List = new(stockData.Count);
-        List<double> vw1List = new(stockData.Count);
-        List<double> vw2List = new(stockData.Count);
-        List<double> rrma1List = new(stockData.Count);
-        List<double> rrma2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum w1SumWindow = new();
-        RollingSum w2SumWindow = new();
-        RollingSum vw1SumWindow = new();
-        RollingSum vw2SumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var first = new ParametricCorrectiveWindow(length, alpha, per); var second = new ParametricCorrectiveWindow(length, alpha, per, true);
+        double previousDifference = 0;
+        for (var i = 0; i < input.Count; i++)
         {
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var p1 = i + 1 - (per / 100 * length);
-            var p2 = i + 1 - ((100 - per) / 100 * length);
-
-            var w1 = p1 >= 0 ? p1 : alpha * p1;
-            w1List.Add(w1);
-            w1SumWindow.Add(w1);
-
-            var w2 = p2 >= 0 ? p2 : alpha * p2;
-            w2List.Add(w2);
-            w2SumWindow.Add(w2);
-
-            var vw1 = prevValue * w1;
-            vw1List.Add(vw1);
-            vw1SumWindow.Add(vw1);
-
-            var vw2 = prevValue * w2;
-            vw2List.Add(vw2);
-            vw2SumWindow.Add(vw2);
-
-            var wSum1 = w1SumWindow.Sum(length);
-            var wSum2 = w2SumWindow.Sum(length);
-            var sum1 = vw1SumWindow.Sum(length);
-            var sum2 = vw2SumWindow.Sum(length);
-
-            var prevRrma1 = GetLastOrDefault(rrma1List);
-            var rrma1 = wSum1 != 0 ? sum1 / wSum1 : 0;
-            rrma1List.Add(rrma1);
-
-            var prevRrma2 = GetLastOrDefault(rrma2List);
-            var rrma2 = wSum2 != 0 ? sum2 / wSum2 : 0;
-            rrma2List.Add(rrma2);
-
-            var signal = GetCompareSignal(rrma1 - rrma2, prevRrma1 - prevRrma2);
-            signalsList?.Add(signal);
+            var value = first.Next(input[i], true); var other = second.Next(input[i], true); var difference = value - other;
+            signals?.Add(GetCompareSignal(difference, previousDifference)); previousDifference = difference; line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pclma", rrma1List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rrma1List);
-        stockData.IndicatorName = IndicatorName.ParametricCorrectiveLinearMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pclma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ParametricCorrectiveLinearMovingAverage;
         return stockData;
     }
 

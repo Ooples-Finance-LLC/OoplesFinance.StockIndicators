@@ -14153,5 +14153,152 @@
     "before": "new WellRoundedWindow(length)",
     "after": "new WellRoundedWindow(14)",
     "filter": "FullyQualifiedName~WellRoundedNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "parametric-corrective-wrong-percent-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "count: 100",
+    "after": "count: 10",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-wrong-weight-origin",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "new System.Numerics.BigInteger(_index) + 1",
+    "after": "new System.Numerics.BigInteger(_index) + 2",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-wrong-offset-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_offset.AddTo(ref displacement, -1)",
+    "after": "_offset.AddTo(ref displacement, 1)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-ignores-negative-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "weight = weight.Multiply(_alpha)",
+    "after": "weight = weight.Multiply(1)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-uses-current-input",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_lag.Count == _length ? _lag.Peek() : 0",
+    "after": "price",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-drops-product-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "product.ScaleByPowerOfTwo(weight.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-wrong-expired-weight-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "oldest.Weight.AddTo(ref mass, -1)",
+    "after": "oldest.Weight.AddTo(ref mass, 1)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-retains-expired-products",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "sum.Subtract(oldest.Product);",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-wrong-quotient",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "sum.Ratio(mass)",
+    "after": "mass.Ratio(sum)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-stale-lag-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_lag.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-stale-terms-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_terms.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-stale-mass-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_mass = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-stale-sum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_sum = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-stale-index-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ParametricCorrectiveWindow.cs",
+    "before": "_index = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.Signed"
+  },
+  {
+    "id": "parametric-corrective-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class ParametricCorrectiveLinearMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "parametric-corrective-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "parametric-corrective-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeParametricCorrectiveLinearMovingAverageFast(",
+    "before": "new ParametricCorrectiveWindow(length, alpha, per)",
+    "after": "new ParametricCorrectiveWindow(14, alpha, per)",
+    "filter": "FullyQualifiedName~ParametricCorrectiveNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
   }
 ]
