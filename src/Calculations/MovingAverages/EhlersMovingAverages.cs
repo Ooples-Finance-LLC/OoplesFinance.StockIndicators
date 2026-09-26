@@ -1224,33 +1224,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersInfiniteImpulseResponseFilter(this StockData stockData, int length = 14)
     {
-        List<double> filterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-        var lag = MinOrMax((int)Math.Ceiling((1 / alpha) - 1));
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new EhlersIirWindow(length);
+        var alpha = 2d / (Math.Max(1, length) + 1d);
+        var lag = Math.Min(530, Math.Max(2, (int)Math.Ceiling(1 / alpha - 1)));
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= lag ? inputList[i - lag] : 0;
-            var prevFilter1 = i >= 1 ? filterList[i - 1] : 0;
-
-            var filter = (alpha * (currentValue + MinPastValues(i, lag, currentValue - prevValue))) + ((1 - alpha) * prevFilter1);
-            filterList.Add(filter);
-
-            var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, (i >= lag ? input[i - lag] : 0) - (i == 0 ? 0 : line[i - 1]))); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eiirf", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersInfiniteImpulseResponseFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eiirf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersInfiniteImpulseResponseFilter;
         return stockData;
     }
 
