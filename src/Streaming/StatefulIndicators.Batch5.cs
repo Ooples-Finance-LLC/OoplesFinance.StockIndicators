@@ -1222,47 +1222,16 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Eom")]
 public sealed class EaseOfMovementState : IStreamingIndicatorState
 {
-    private readonly double _divisor;
-    private double _prevMidpoint;
-    private bool _hasPrev;
-
-    public EaseOfMovementState(double divisor = 1000000)
-    {
-        _divisor = divisor;
-    }
-
+    private readonly EaseWindow _window;
+    public EaseOfMovementState(double divisor = 1000000) => _window = new EaseWindow(divisor);
     public IndicatorName Name => IndicatorName.EaseOfMovement;
-
-    public void Reset()
-    {
-        _prevMidpoint = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var midpoint = (bar.High + bar.Low) / 2;
-        var midpointMove = _hasPrev ? midpoint - _prevMidpoint : 0;
-        var boxRatio = bar.High != bar.Low ? bar.Volume / (bar.High - bar.Low) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
-        var emv = boxRatio == 0 ? 0 : _divisor * midpointMove / boxRatio;
-
-        if (isFinal)
-        {
-            _prevMidpoint = midpoint;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eom", emv }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(emv, outputs);
+        var value = _window.Next(bar.High, bar.Low, bar.Volume, isFinal).Publish();
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Eom", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
 }
 

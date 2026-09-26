@@ -1629,9 +1629,9 @@ internal static partial class IndicatorCompute
                 "Signal" => ComputeChandeMomentumOscillatorSignalFast(data, context, cmo2.Length, cmo2.SignalLength, cmo2.MaType),
                 _ => ComputeChandeMomentumOscillatorFast(data, context, cmo2.Length)
             },
-            // Length and MaType reach only the Signal line of CalculateEaseOfMovement, not the series
+            // Length and MaType govern legacy trading signals, not the raw Eom series
             // this spec is bound to, so neither is passed.
-            EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Divisor),
+            EaseOfMovementSpecOptions eom => ComputeEaseOfMovementFast(data, context, eom.Divisor, eom.Length, eom.MaType),
             EhlersZeroLagExponentialMovingAverageSpecOptions ezlema => ComputeEhlersZeroLagEmaFast(data, context, ezlema.Length,
                 ezlema.MaType),
             HullMovingAverageSpecOptions hma2 => ComputeHullMovingAverageFast(data, context, hma2.Length, hma2.MaType),
@@ -20302,26 +20302,19 @@ internal static partial class IndicatorCompute
     /// Computes Ease of Movement using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeEaseOfMovementFast(StockData data, ComputeContext context,
-        double divisor = 1000000)
+        double divisor = 1000000, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateEaseOfMovement publishes the raw series. Length and MaType only smooth its Signal line,
-        // which is a different output from the one this arm is bound to, so neither reaches this series.
-        var (_, highList, lowList, _, volumeList) = CalculationsHelper.GetInputValuesList(data);
-        var high = SpanCompat.AsReadOnlySpan(highList);
-        var low = SpanCompat.AsReadOnlySpan(lowList);
-        var volume = SpanCompat.AsReadOnlySpan(volumeList);
-        var count = highList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var window = new EaseWindow(divisor); var output = context.Rent(data.Count);
+        for (var i = 0; i < data.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], data.Volumes[i], true).Publish();
+        // The averages govern legacy trading signals; the published Eom remains raw.
+        // Consume declared customer stages in order even when only Eom is requested.
+        if (ComponentAverage.HasOverrides)
         {
-            var midpointMove = i == 0 ? 0 : ((high[i] + low[i]) - (high[i - 1] + low[i - 1])) / 2;
-            var boxRatio = high[i] != low[i] ? volume[i] / (high[i] - low[i]) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
-            output[i] = boxRatio == 0 ? 0 : divisor * midpointMove / boxRatio;
+            using var first = context.Rent(data.Count); using var second = context.Rent(data.Count);
+            MovingAverage(data, maType, Math.Max(1, length), output.Span, first.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), first.Span, second.WritableSpan);
         }
-
-        return buffer;
+        return output;
     }
 
     /// <summary>

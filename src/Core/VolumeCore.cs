@@ -85,34 +85,11 @@ internal static class VolumeCore
     /// <summary>
     /// Computes Ease of Movement.
     /// </summary>
-    internal static void EaseOfMovement(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
+    internal static void EaseOfMovement(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> volume, Span<double> output, double divisor = 1000000)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rawEmvArray = pool.Rent(high.Length);
-
-        try
-        {
-            var rawEmv = rawEmvArray.AsSpan(0, high.Length);
-
-            rawEmv[0] = 0;
-            for (var i = 1; i < high.Length; i++)
-            {
-                var dm = ((high[i] + low[i]) / 2) - ((high[i - 1] + low[i - 1]) / 2);
-                var br = volume[i] / 100000000 / (high[i] - low[i]);
-                rawEmv[i] = br != 0 ? dm / br : 0;
-            }
-
-            MovingAverageCore.SimpleMovingAverage(rawEmv, output, length);
-        }
-        finally
-        {
-            pool.Return(rawEmvArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EaseWindow(divisor);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], volume[i], true).Publish();
     }
 
     /// <summary>

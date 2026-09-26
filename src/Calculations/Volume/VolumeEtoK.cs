@@ -130,42 +130,27 @@ public static partial class Calculations
     public static StockData CalculateEaseOfMovement(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
         double divisor = 1000000)
     {
-        List<double> emvList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var window = new EaseWindow(divisor);
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var first = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
+        using var second = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentVolume = volumeList[i];
-            var midpointMove = i == 0 ? 0
-                : ((currentHigh + currentLow) - (highList[i - 1] + lowList[i - 1])) / 2;
-            var boxRatio = currentHigh != currentLow ? currentVolume / (currentHigh - currentLow) : 0; // NOSONAR: S1244 - Only an exactly zero candle range has zero box ratio.
-            var emv = boxRatio == 0 ? 0 : divisor * midpointMove / boxRatio;
-            emvList.Add(emv);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], stockData.Volumes[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(second!.Next(first!.Next(value, true), true).Publish());
         }
-
-        var emvSmaList = GetMovingAverageList(stockData, maType, length, emvList);
-        var emvSignalList = GetMovingAverageList(stockData, maType, length, emvSmaList);
-        for (var i = 0; i < stockData.Count; i++)
+        if (!standard)
         {
-            var emv = emvList[i];
-            var emvSignal = emvSignalList[i];
-            var prevEmv = i >= 1 ? emvList[i - 1] : 0;
-            var prevEmvSignal = i >= 1 ? emvSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(emv - emvSignal, prevEmv - prevEmvSignal);
-            signalsList?.Add(signal);
+            var firstMean = GetMovingAverageList(stockData, maType, length, output);
+            signal = GetMovingAverageList(stockData, maType, length, firstMean);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eom", emvList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(emvList);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eom", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.EaseOfMovement;
-
         return stockData;
     }
 
