@@ -14447,5 +14447,203 @@
     "before": "new EhlersKaufmanWindow(length)",
     "after": "new EhlersKaufmanWindow(14)",
     "filter": "FullyQualifiedName~EhlersKaufmanNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "efficiency-derived-premature-efficiency",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "if (_prices.Count == _length) { displacement",
+    "after": "if (_prices.Count > 0) { displacement",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-signed-travel",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "change = Absolute(change);",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-retains-expired-change",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "travel.Subtract(_changes.Peek());",
+    "after": "{}",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-retains-expired-price",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "if (_prices.Count == _length) _prices.Dequeue();",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-wrong-displacement-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "displacement.Add(_prices.Peek(), -1)",
+    "after": "displacement.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-wrong-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_previous = price;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-drops-cumulative-output",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_output.AddTo(ref total);",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-overflows-increment",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "RocBankValue.Round(displacement).Multiply(efficiency)",
+    "after": "new RocBankValue(displacement.Mean(1) * efficiency)",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-ignores-fast-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "threshold.AddProduct(_fast, efficiency);",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-wrong-threshold-retention",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "threshold.AddProduct(_slow, -efficiency)",
+    "after": "threshold.AddProduct(_slow, efficiency)",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-inclusive-deadband",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "distance.Sign > 0",
+    "after": "distance.Sign >= 0",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-extra-startup-bar",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_count < 9",
+    "after": "_count < 10",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-stale-prices-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-stale-changes-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_changes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-stale-travel-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_travel = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-stale-output-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_output = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EfficiencyOutputWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.EfficiencyOutputs|FullyQualifiedName~EfficientAutoLineNumericalTests.Deadband"
+  },
+  {
+    "id": "efficiency-derived-EfficientPrice-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class EfficientPriceState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "efficiency-derived-EfficientPrice-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "scope": "internal static ComputeBuffer ComputeEfficientPrice(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "efficiency-derived-EfficientPrice-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "scope": "internal static ComputeBuffer ComputeEfficientPrice(",
+    "before": "new EfficiencyOutputWindow(length)",
+    "after": "new EfficiencyOutputWindow(14)",
+    "filter": "FullyQualifiedName~EfficientPriceNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "efficiency-derived-EfficientAutoLine-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class EfficientAutoLineState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EfficientAutoLineNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "efficiency-derived-EfficientAutoLine-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "scope": "internal static ComputeBuffer ComputeEfficientAutoLine(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EfficientAutoLineNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "efficiency-derived-EfficientAutoLine-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.Efficiency.cs",
+    "scope": "internal static ComputeBuffer ComputeEfficientAutoLine(",
+    "before": "new EfficiencyOutputWindow(length, true, fastAlpha, slowAlpha)",
+    "after": "new EfficiencyOutputWindow(14, true, fastAlpha, slowAlpha)",
+    "filter": "FullyQualifiedName~EfficientAutoLineNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
   }
 ]

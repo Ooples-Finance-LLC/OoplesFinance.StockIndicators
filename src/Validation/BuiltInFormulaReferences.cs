@@ -22,6 +22,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ParametricCorrectiveOutputs(bars, builtIn)["Pclma"], IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.EfficientPrice or IndicatorName.EfficientAutoLine)
+        {
+            var key = builtIn.BatchName == IndicatorName.EfficientPrice ? "Ep" : "Eal";
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EfficiencyDerivedOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersKaufmanAdaptiveMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EhlersKaufmanOutputs(bars, builtIn)["Ekama"], IndicatorErrorBudget.Exact);

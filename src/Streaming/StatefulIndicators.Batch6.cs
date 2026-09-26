@@ -1116,125 +1116,30 @@ public sealed class EdgePreservingFilterState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Eal")]
 public sealed class EfficientAutoLineState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
-    private double _prevA;
-    private bool _hasPrev;
-    private int _index;
-
-    public EfficientAutoLineState(int length = 19, double fastAlpha = 0.0001, double slowAlpha = 0.005)
-    {
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        _fastAlpha = fastAlpha;
-        _slowAlpha = slowAlpha;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EfficiencyOutputWindow _window;
+    public EfficientAutoLineState(int length = 19, double fastAlpha = .0001, double slowAlpha = .005) => _window = new(length, true, fastAlpha, slowAlpha);
     public IndicatorName Name => IndicatorName.EfficientAutoLine;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevA = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var dev = (er * _fastAlpha) + ((1 - er) * _slowAlpha);
-
-        var prevA = _hasPrev ? _prevA : 0;
-        var a = _index < 9 ? value : value > prevA + dev ? value : value < prevA - dev ? value : prevA;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eal", a }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
-    }
-
-    public void Dispose()
-    {
-        _er.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eal", value } } : null);
     }
 }
 
 [PrimaryOutput("Ep")]
 public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly EfficiencyRatioState _er;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _chgErSum;
-    private int _index;
-
-    public EfficientPriceState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _er = new EfficiencyRatioState(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EfficiencyOutputWindow _window;
+    public EfficientPriceState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.EfficientPrice;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _values.Clear();
-        _chgErSum = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
+    public void Dispose() { }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var prevValue = _index >= _length && _values.Count >= _length ? _values[_values.Count - _length] : 0;
-        var chgEr = _index >= _length ? (value - prevValue) * er : 0;
-        var ep = _chgErSum + chgEr;
-
-        if (isFinal)
-        {
-            _chgErSum = ep;
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ep", ep }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ep, outputs);
-    }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-        _values.Dispose();
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ep", value } } : null);
     }
 }
 
