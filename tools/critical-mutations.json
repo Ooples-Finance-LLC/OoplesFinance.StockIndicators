@@ -9120,5 +9120,96 @@
     "after": "",
     "filter": "FullyQualifiedName~MeannessNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class MarketMeannessIndexState"
+  },
+  {
+    "id": "stochastic-momentum-overflowing-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "middle.Mean(2)",
+    "after": "(high + low) / 2",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-wrong-distance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "distance.Add(middle.Mean(2), -1)",
+    "after": "distance.Add(middle.Mean(2), 1)",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-premature-range-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "range.Add(high); range.Add(low, -1);",
+    "after": "range.Add(high - low);",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-wrong-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "distance.AddTo(ref numerator, 200)",
+    "after": "distance.AddTo(ref numerator, 100)",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-discarded-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "firstLength, firstLength, secondLength, secondLength, signalLength",
+    "after": "firstLength, firstLength, firstLength, firstLength, signalLength",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "firstLength, firstLength, secondLength, secondLength, signalLength",
+    "after": "firstLength, firstLength, secondLength, secondLength, 1",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-commits-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "_high.Preview(high, out _)",
+    "after": "_high.Add(high, out _)",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-stale-high-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticMomentumWindow.cs",
+    "before": "_high.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle"
+  },
+  {
+    "id": "stochastic-momentum-raw-uses-close-as-high",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true)",
+    "after": "window.Next(input[i], input[i], data.LowPrices[i], true)",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.DoubleSmoothedDistanceAndRangePreserveEveryPeriodAndCandle",
+    "scope": "internal static ComputeBuffer ComputeStochasticMomentumIndexFast("
+  },
+  {
+    "id": "stochastic-momentum-skips-fifth-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, smoothLength2, line.Span, signal.WritableSpan);",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.CustomerComponentsConsumeAllFiveStagesInOrder",
+    "scope": "internal static ComputeBuffer ComputeStochasticMomentumIndexFast("
+  },
+  {
+    "id": "stochastic-momentum-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class StochasticMomentumIndexState"
   }
 ]

@@ -4260,83 +4260,18 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 [PrimaryOutput("Smi")]
 public sealed class StochasticMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _diffSmoother1;
-    private readonly IMovingAverageSmoother _diffSmoother2;
-    private readonly IMovingAverageSmoother _rangeSmoother1;
-    private readonly IMovingAverageSmoother _rangeSmoother2;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public StochasticMomentumIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
-    {
-        _length = Math.Max(1, length1);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _diffSmoother1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _diffSmoother2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
-        _rangeSmoother1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _rangeSmoother2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength1));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly StochasticMomentumWindow _window;
+    public StochasticMomentumIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
+        => _window = new(maType, length1, length2, smoothLength1, smoothLength2);
     public IndicatorName Name => IndicatorName.StochasticMomentumIndex;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _diffSmoother1.Reset();
-        _diffSmoother2.Reset();
-        _rangeSmoother1.Reset();
-        _rangeSmoother2.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var median = (highest + lowest) / 2;
-        var diff = value - median;
-        var range = highest - lowest;
-
-        var diffEma = _diffSmoother1.Next(diff, isFinal);
-        var rangeEma = _rangeSmoother1.Next(range, isFinal);
-        var diffSmooth = _diffSmoother2.Next(diffEma, isFinal);
-        var rangeSmooth = _rangeSmoother2.Next(rangeEma, isFinal);
-        var halfRange = rangeSmooth / 2;
-        var smi = halfRange != 0 ? MathHelper.MinOrMax(100 * diffSmooth / halfRange, 100, -100) : 0;
-        var signal = _signalSmoother.Next(smi, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Smi", smi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(smi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Smi", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _diffSmoother1.Dispose();
-        _diffSmoother2.Dispose();
-        _rangeSmoother1.Dispose();
-        _rangeSmoother2.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [IndicatorBounds(double.NegativeInfinity, double.PositiveInfinity)]

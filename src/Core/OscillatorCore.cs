@@ -10230,73 +10230,9 @@ internal static class OscillatorCore
     internal static void StochasticMomentumIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
         ReadOnlySpan<double> close, Span<double> output, int length = 13, int smoothLength1 = 25, int smoothLength2 = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        var pool = ArrayPool<double>.Shared;
-        var hlDiffArray = pool.Rent(close.Length);
-        var midRangeArray = pool.Rent(close.Length);
-        var emaHlArray = pool.Rent(close.Length);
-        var emaMidArray = pool.Rent(close.Length);
-        var emaHl2Array = pool.Rent(close.Length);
-        var emaMid2Array = pool.Rent(close.Length);
-        try
-        {
-            var hlDiff = hlDiffArray.AsSpan(0, close.Length);
-            var midRange = midRangeArray.AsSpan(0, close.Length);
-            var emaHl = emaHlArray.AsSpan(0, close.Length);
-            var emaMid = emaMidArray.AsSpan(0, close.Length);
-            var emaHl2 = emaHl2Array.AsSpan(0, close.Length);
-            var emaMid2 = emaMid2Array.AsSpan(0, close.Length);
-
-            // Calculate highest high and lowest low
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    hlDiff[i] = 0;
-                    midRange[i] = 0;
-                    continue;
-                }
-
-                double hh = double.MinValue;
-                double ll = double.MaxValue;
-                for (var j = 0; j < length; j++)
-                {
-                    if (high[i - j] > hh) hh = high[i - j];
-                    if (low[i - j] < ll) ll = low[i - j];
-                }
-
-                hlDiff[i] = hh - ll;
-                midRange[i] = close[i] - ((hh + ll) / 2);
-            }
-
-            // Double EMA smoothing
-            MovingAverageCore.ExponentialMovingAverage(hlDiff, emaHl, smoothLength1);
-            MovingAverageCore.ExponentialMovingAverage(midRange, emaMid, smoothLength1);
-            MovingAverageCore.ExponentialMovingAverage(emaHl, emaHl2, smoothLength2);
-            MovingAverageCore.ExponentialMovingAverage(emaMid, emaMid2, smoothLength2);
-
-            // SMI = 100 * emaMid2 / (emaHl2 / 2)
-            for (var i = 0; i < close.Length; i++)
-            {
-                var halfRange = emaHl2[i] / 2;
-                output[i] = halfRange != 0 ? 100 * emaMid2[i] / halfRange : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(hlDiffArray);
-            pool.Return(midRangeArray);
-            pool.Return(emaHlArray);
-            pool.Return(emaMidArray);
-            pool.Return(emaHl2Array);
-            pool.Return(emaMid2Array);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new StochasticMomentumWindow(MovingAvgType.ExponentialMovingAverage, length, smoothLength1, smoothLength2, 1);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true).Line;
     }
 
     #endregion

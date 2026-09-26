@@ -657,6 +657,7 @@ internal static partial class StatefulIndicatorFactory
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
+            StochasticMomentumIndexSpecOptions smi => new StochasticMomentumIndexState(smi.MaType, smi.Length1, smi.Length2, smi.SmoothLength1, smi.SmoothLength2),
             MarketMeannessIndexSpecOptions mmi => new MarketMeannessIndexState(mmi.MaType, mmi.Length),
             PzoSpecOptions pzo => new PriceZoneOscillatorState(length: pzo.Length),
             PriceZoneOscillatorSpecOptions pzoNamed => new PriceZoneOscillatorState(pzoNamed.MaType, pzoNamed.Length),
