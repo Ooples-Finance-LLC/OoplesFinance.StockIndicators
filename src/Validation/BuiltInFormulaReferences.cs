@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.PriceVolumeOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => PriceVolumeOutputs(bars, builtIn)["Po"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.Reference(1, bars => PriceVolumeOutputs(bars, builtIn)["Vo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ShinoharaIntensityRatio)
         {
             var key = builtIn.CreateOptions() is ShinoharaIntensityRatioBSpecOptions ? "BRatio" : "ARatio";

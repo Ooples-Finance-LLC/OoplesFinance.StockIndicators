@@ -2303,10 +2303,6 @@ OoplesFinance.StockIndicators.Indicators.PriceLineChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PriceLineChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.PriceVolumeOscillator/default
-OoplesFinance.StockIndicators.Indicators.PriceVolumeOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.PriceVolumeOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PriceVolumeOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PriceVolumeTrend/default
 OoplesFinance.StockIndicators.Indicators.PriceVolumeTrend/longer-periods
 OoplesFinance.StockIndicators.Indicators.PriceVolumeTrend/minimum-periods

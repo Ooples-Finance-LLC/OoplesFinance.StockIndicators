@@ -603,65 +603,20 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePriceVolumeOscillator(this StockData stockData, int length1 = 50, int length2 = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> absAList = new(stockData.Count);
-        List<double> absBList = new(stockData.Count);
-        List<double> oscAList = new(stockData.Count);
-        List<double> oscBList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum aSumWindow = new();
-        RollingSum bSumWindow = new();
-        RollingSum absASumWindow = new();
-        RollingSum absBSumWindow = new();
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> prices = new(stockData.Count), volumes = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var priceWindow = new LaggedBalanceWindow(length1);
+        using var volumeWindow = new LaggedBalanceWindow(length2);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-            var prevVolume = i >= length2 ? volumeList[i - length2] : 0;
-
-            var a = MinPastValues(i, length1, currentValue - prevValue);
-            aList.Add(a);
-            aSumWindow.Add(a);
-
-            var b = MinPastValues(i, length2, currentVolume - prevVolume);
-            bList.Add(b);
-            bSumWindow.Add(b);
-
-            var absA = Math.Abs(a);
-            absAList.Add(absA);
-            absASumWindow.Add(absA);
-
-            var absB = Math.Abs(b);
-            absBList.Add(absB);
-            absBSumWindow.Add(absB);
-
-            var aSum = aSumWindow.Sum(length1);
-            var bSum = bSumWindow.Sum(length2);
-            var absASum = absASumWindow.Sum(length1);
-            var absBSum = absBSumWindow.Sum(length2);
-
-            var oscA = absASum != 0 ? aSum / absASum : 0;
-            oscAList.Add(oscA);
-
-            var oscB = absBSum != 0 ? bSum / absBSum : 0;
-            oscBList.Add(oscB);
-
-            var signal = GetConditionSignal(oscA > 0 && oscB > 0, oscA < 0 && oscB > 0);
-            signalsList?.Add(signal);
+            var price = priceWindow.Next(input[i], true); var volume = volumeWindow.Next(stockData.Volumes[i], true);
+            prices.Add(price); volumes.Add(volume);
+            signals?.Add(GetConditionSignal(price > 0 && volume > 0, price < 0 && volume > 0));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Po", oscAList },
-            { "Vo", oscBList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Po", prices }, { "Vo", volumes } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.PriceVolumeOscillator;
-
         return stockData;
     }
 

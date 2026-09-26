@@ -10231,29 +10231,11 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePriceVolumeOscillatorFast(StockData data, ComputeContext context, int length1 = 50, bool volume = false)
     {
-        // Each output independently normalizes its lagged changes by their absolute sum.
-        var inputList = volume ? data.Volumes : data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var changeSum = new RollingSum();
-        var absoluteChangeSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= length1 ? input[i - length1] : 0;
-            var change = CalculationsHelper.MinPastValues(i, length1, input[i] - previousValue);
-            changeSum.Add(change);
-            absoluteChangeSum.Add(Math.Abs(change));
-
-            var absoluteSum = absoluteChangeSum.Sum(length1);
-            output[i] = absoluteSum != 0 ? changeSum.Sum(length1) / absoluteSum : 0;
-        }
-
-        return buffer;
+        var input = volume ? data.Volumes : data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        using var window = new LaggedBalanceWindow(length1);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
+        return output;
     }
 
     #endregion
