@@ -7627,43 +7627,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveEmaFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateAdaptiveExponentialMovingAverage scales the exponential rate by where the value sits in the
-        // high/low range of the window, and seeds the first length bars from a plain average rather than from
-        // the recursion. The core routine read the close and knew neither part.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        var mltp1 = (double)2 / (length + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var currentValue = input[i];
-            var hh = highWindow.Max;
-            var ll = lowWindow.Min;
-            var mltp2 = hh - ll != 0 ? MathHelper.MinOrMax(Math.Abs((2 * currentValue) - ll - hh) / (hh - ll), 1, 0) : 0;
-            var rate = mltp1 * (1 + mltp2);
-
-            var prevAema = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = i <= length ? sma[i] : prevAema + (rate * (currentValue - prevAema));
-        }
-
-        return buffer;
+        return ComputeAdaptiveExponentialMovingAverageFast(data, context, length, maType);
     }
 
     /// <summary>
@@ -19168,42 +19132,13 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveExponentialMovingAverageFast(StockData data, ComputeContext context,
         int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateAdaptiveExponentialMovingAverage seeds itself with an average of the given type for the
-        // first length bars and only then starts following the price, at a rate that widens as the bar sits
-        // further from the middle of its high-low range.
-        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var highestBuffer = context.Rent(count);
-        using var lowestBuffer = context.Rent(count);
-        var highest = highestBuffer.WritableSpan;
-        var lowest = lowestBuffer.WritableSpan;
-        HighestAndLowest(highList, lowList, highest, lowest, length);
-
-        using var seedBuffer = context.Rent(count);
-        var seed = seedBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, seed);
-
-        var baseRate = (double)2 / (length + 1);
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var range = highest[i] - lowest[i];
-            var offset = range != 0
-                ? MathHelper.MinOrMax(Math.Abs((2 * currentValue) - lowest[i] - highest[i]) / range, 1, 0)
-                : 0;
-            var rate = baseRate * (1 + offset);
-
-            // Until the seed window has filled the average IS the seed, so there is nothing to follow yet.
-            var previous = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = i <= length ? seed[i] : previous + (rate * (currentValue - previous));
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
+        using var seed = context.Rent(input.Count);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), seed.WritableSpan);
+        var result = context.Rent(input.Count); using var window = new AdaptiveEmaWindow(maType, length, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], high[i], low[i], true, external ? seed.Span[i] : null);
+        return result;
     }
 
     /// <summary>

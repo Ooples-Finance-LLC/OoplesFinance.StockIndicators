@@ -900,22 +900,13 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = input[0];
-        var baseAlpha = 2.0 / (length + 1);
-
-        for (var i = 1; i < input.Length; i++)
-        {
-            // Adapt alpha based on absolute percentage change
-            var change = input[i - 1] > 0 ? Math.Abs((input[i] - input[i - 1]) / input[i - 1]) : 0;
-            var adaptedAlpha = baseAlpha * (1 + 10 * change);
-            adaptedAlpha = Math.Min(1.0, adaptedAlpha);
-            output[i] = adaptedAlpha * input[i] + (1 - adaptedAlpha) * output[i - 1];
-        }
+        AdaptiveExponentialMovingAverage(input, input, input, output, length);
+    }
+    internal static void AdaptiveExponentialMovingAverage(ReadOnlySpan<double> input, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length)
+    {
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveEmaWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], high[i], low[i], true);
     }
 
     /// <summary>

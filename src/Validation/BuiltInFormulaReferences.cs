@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AdaptiveExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AdaptiveEmaOutputs(bars, builtIn)["Aema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.PoweredKaufmanAdaptiveMovingAverage or IndicatorName.AdaptiveTrailingStop)
         {
             var poweredKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
