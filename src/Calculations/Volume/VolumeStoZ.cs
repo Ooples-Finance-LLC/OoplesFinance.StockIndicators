@@ -450,47 +450,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeAccumulationPercent(this StockData stockData, int length = 10)
     {
-        List<double> vapcList = new(stockData.Count);
-        List<double> tvaList = new(stockData.Count);
-        List<double> tempVolumeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeSumWindow = new();
-        RollingSum tvaSumWindow = new();
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new MoneyFlowPercentWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-
-            var currentVolume = volumeList[i];
-            tempVolumeList.Add(currentVolume);
-            volumeSumWindow.Add(currentVolume);
-
-            var xt = currentHigh - currentLow != 0 ? ((2 * currentClose) - currentHigh - currentLow) / (currentHigh - currentLow) : 0;
-            var tva = currentVolume * xt;
-            tvaList.Add(tva);
-            tvaSumWindow.Add(tva);
-
-            var volumeSum = volumeSumWindow.Sum(length);
-            var tvaSum = tvaSumWindow.Sum(length);
-
-            var prevVapc = i >= 1 ? vapcList[i - 1] : 0;
-            var vapc = volumeSum != 0 ? MinOrMax(100 * tvaSum / volumeSum, 100, -100) : 0;
-            vapcList.Add(vapc);
-
-            var signal = GetCompareSignal(vapc, prevVapc);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetCompareSignal(value, previous)); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vapc", vapcList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vapcList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vapc", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.VolumeAccumulationPercent;
-
         return stockData;
     }
 
@@ -604,49 +576,19 @@ public static partial class Calculations
     public static StockData CalculateTwiggsMoneyFlow(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 21)
     {
-        List<double> adList = new(stockData.Count);
-        List<double> tmfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        var volumeEmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new MoneyFlowPercentWindow(length, maType);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentPrice = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentVolume = volumeList[i];
-            var prevPrice = i >= 1 ? inputList[i - 1] : 0;
-            var trh = Math.Max(currentHigh, prevPrice);
-            var trl = Math.Min(currentLow, prevPrice);
-
-            var ad = trh - trl != 0 && currentVolume != 0 ? (currentPrice - trl - (trh - currentPrice)) / (trh - trl) * currentVolume : 0;
-            adList.Add(ad);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetRsiSignal(value - previous, previous - (i < 2 ? 0 : output[i - 2]), value, previous, .2, -.2)); output.Add(value);
         }
-
-        var smoothAdList = GetMovingAverageList(stockData, maType, length, adList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentEmaVolume = volumeEmaList[i];
-            var smoothAd = smoothAdList[i];
-            var prevTmf1 = i >= 1 ? tmfList[i - 1] : 0;
-            var prevTmf2 = i >= 2 ? tmfList[i - 2] : 0;
-
-            var tmf = currentEmaVolume != 0 ? MinOrMax(smoothAd / currentEmaVolume, 1, -1) : 0;
-            tmfList.Add(tmf);
-
-            var signal = GetRsiSignal(tmf - prevTmf1, prevTmf1 - prevTmf2, tmf, prevTmf1, 0.2, -0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tmf", tmfList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tmfList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tmf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TwiggsMoneyFlow;
-
         return stockData;
     }
 

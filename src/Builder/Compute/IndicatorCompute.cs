@@ -581,6 +581,7 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Volume indicators
             MfiCoreSpecOptions mfic => ComputeMfiCoreFast(data, context, mfic.Length),
+            VolumeAccumulationPercentSpecOptions vap => ComputeVolumeAccumulationPercentFast(data, context, vap.Length),
             TwiggsMoneyFlowSpecOptions tmf => ComputeTwiggsMoneyFlowFast(data, context, tmf.Length, tmf.MaType),
             DemandIndexSpecOptions dmidx => ComputeDemandIndexFast(data, context, dmidx.Length),
             WilliamsADSpecOptions wad => ComputeWilliamsADFast(data, context, wad.Length),
@@ -5603,50 +5604,36 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Twiggs Money Flow using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeVolumeAccumulationPercentFast(StockData data, ComputeContext context, int length = 10)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new MoneyFlowPercentWindow(length);
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true);
+        return output;
+    }
+
     internal static ComputeBuffer ComputeTwiggsMoneyFlowFast(StockData data, ComputeContext context, int length = 21,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateTwiggsMoneyFlow accumulates volume over the true range measured against the PREVIOUS
-        // bar's price - trh is the higher of this bar's high and that price, trl the lower of this bar's low
-        // and it - then divides the moving average of that accumulation by the moving average of volume.
-        // VolumeCore.TwiggsMoneyFlow read the close rather than the chained series and smoothed neither leg
-        // with the requested average type.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var accumulation = context.Rent(count);
-        var ad = accumulation.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new MoneyFlowPercentWindow(length, maType);
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var volumes = context.Rent(input.Count); using var flows = context.Rent(input.Count);
+        if (custom)
         {
-            var price = input[i];
-            var prevPrice = i >= 1 ? input[i - 1] : 0;
-            var trh = Math.Max(highs[i], prevPrice);
-            var trl = Math.Min(lows[i], prevPrice);
-            var range = trh - trl;
-            ad[i] = range != 0 && volumes[i] != 0 ? (price - trl - (trh - price)) / range * volumes[i] : 0;
+            using var contributions = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var previous = i == 0 ? 0 : input[i - 1];
+                contributions.WritableSpan[i] = MoneyFlowAccumulationWindow.Flow(Math.Max(data.HighPrices[i], previous), Math.Min(data.LowPrices[i], previous), input[i], data.Volumes[i]).Publish();
+            }
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(data.Volumes), volumes.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), contributions.Span, flows.WritableSpan);
         }
-
-        using var smoothedAccumulation = context.Rent(count);
-        MovingAverage(data, maType, length, accumulation.Span, smoothedAccumulation.WritableSpan);
-        var smoothAd = smoothedAccumulation.Span;
-
-        using var smoothedVolume = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
-        var volumeAverage = smoothedVolume.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = volumeAverage[i] != 0 ? MathHelper.MinOrMax(smoothAd[i] / volumeAverage[i], 1, -1) : 0;
-        }
-
-        return buffer;
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, custom ? volumes.Span[i] : null, custom ? flows.Span[i] : null);
+        return output;
     }
 
     /// <summary>

@@ -1779,51 +1779,19 @@ public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState
 [PrimaryOutput("Vapc")]
 public sealed class VolumeAccumulationPercentState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _volumeSum;
-    private readonly RollingWindowSum _tvaSum;
-    private readonly StreamingInputResolver _input;
-
+    private readonly MoneyFlowPercentWindow _window;
     public VolumeAccumulationPercentState(int length = 10)
-    {
-        _volumeSum = new RollingWindowSum(Math.Max(1, length));
-        _tvaSum = new RollingWindowSum(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new MoneyFlowPercentWindow(length);
     public IndicatorName Name => IndicatorName.VolumeAccumulationPercent;
-
-    public void Reset()
-    {
-        _volumeSum.Reset();
-        _tvaSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var xt = bar.High - bar.Low != 0 ? ((2 * close) - bar.High - bar.Low) / (bar.High - bar.Low) : 0;
-        var tva = bar.Volume * xt;
-        var volumeSum = isFinal ? _volumeSum.Add(bar.Volume, out _) : _volumeSum.Preview(bar.Volume, out _);
-        var tvaSum = isFinal ? _tvaSum.Add(tva, out _) : _tvaSum.Preview(tva, out _);
-        var vapc = volumeSum != 0 ? MathHelper.MinOrMax(100 * tvaSum / volumeSum, 100, -100) : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vapc", vapc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vapc, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Vapc", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _volumeSum.Dispose();
-        _tvaSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

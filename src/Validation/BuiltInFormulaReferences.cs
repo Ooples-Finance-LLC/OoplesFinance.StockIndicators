@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.VolumeAccumulationPercent || builtIn.BatchName == IndicatorName.TwiggsMoneyFlow && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
+        {
+            var key = builtIn.BatchName == IndicatorName.VolumeAccumulationPercent ? "Vapc" : "Tmf";
+            yield return IndicatorValidationRule.Reference(0, bars => MoneyFlowPercentOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.AccumulationDistributionLine or IndicatorName.ChaikinOscillator && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             var moneyFlowKeys = builtIn.BatchName == IndicatorName.AccumulationDistributionLine ? new[] { "Adl", "AdlSignal" } : new[] { "ChaikinOsc" };

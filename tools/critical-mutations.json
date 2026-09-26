@@ -8324,5 +8324,105 @@
     "after": "",
     "filter": "FullyQualifiedName~MoneyFlowAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ChaikinOscillatorState"
+  },
+  {
+    "id": "moneyflow-percent-uses-current-price-range",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "Math.Max(high, _previous)",
+    "after": "Math.Max(high, close)",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-keeps-expired-flow",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "expired.Flow.AddTo(ref numerator, -100)",
+    "after": "expired.Flow.AddTo(ref numerator, 0)",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-unsigned-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "denominator.Add(volume);",
+    "after": "denominator.Add(Math.Abs(volume));",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-loses-percent-scale",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "value.AddTo(ref numerator, 100)",
+    "after": "value.AddTo(ref numerator, 1)",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-wrong-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "Math.Min(bound, Math.Max(-bound, numerator.Ratio(denominator)))",
+    "after": "Math.Min(bound / 2, Math.Max(-bound / 2, numerator.Ratio(denominator)))",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "if (commit) { _window?",
+    "after": "if (_twiggs || _window is not null) { _window?",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "_flow = _volume = default; _previous = 0;",
+    "after": "_flow = _volume = default;",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes"
+  },
+  {
+    "id": "moneyflow-percent-customer-flows-use-volume",
+    "module": "numerical",
+    "file": "src/Helpers/MoneyFlowPercentWindow.cs",
+    "before": "new RocBankValue(customerFlow.Value)",
+    "after": "new RocBankValue(customerVolume!.Value)",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.CustomerAveragesConsumeVolumeThenTrueRangeFlow"
+  },
+  {
+    "id": "moneyflow-percent-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "contributions.Span, flows.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(data.Volumes), flows.WritableSpan",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.CustomerAveragesConsumeVolumeThenTrueRangeFlow",
+    "scope": "internal static ComputeBuffer ComputeTwiggsMoneyFlowFast("
+  },
+  {
+    "id": "moneyflow-percent-core-ignores-average",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "before": "new MoneyFlowPercentWindow(length, maType)",
+    "after": "new MoneyFlowPercentWindow(length, MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.ExactPercentagesKeepTrueRangesPeriodsAndSignedVolumes",
+    "scope": "internal static void TwiggsMoneyFlow("
+  },
+  {
+    "id": "moneyflow-percent-volumeaccumulationpercent-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class VolumeAccumulationPercentState"
+  },
+  {
+    "id": "moneyflow-percent-twiggsmoneyflow-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MoneyFlowPercentNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TwiggsMoneyFlowState"
   }
 ]

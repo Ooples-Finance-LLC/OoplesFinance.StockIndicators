@@ -1190,67 +1190,19 @@ public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Tmf")]
 public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _adSmoother;
-    private readonly IMovingAverageSmoother _volumeSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevPrice;
-    private bool _hasPrev;
-
+    private readonly MoneyFlowPercentWindow _window;
     public TwiggsMoneyFlowState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21)
-    {
-        var resolved = Math.Max(1, length);
-        _adSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _volumeSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new MoneyFlowPercentWindow(length, maType);
     public IndicatorName Name => IndicatorName.TwiggsMoneyFlow;
-
-    public void Reset()
-    {
-        _adSmoother.Reset();
-        _volumeSmoother.Reset();
-        _prevPrice = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var price = _input.GetValue(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var volume = bar.Volume;
-        var prevPrice = _hasPrev ? _prevPrice : 0;
-        var trh = Math.Max(high, prevPrice);
-        var trl = Math.Min(low, prevPrice);
-        var ad = trh - trl != 0 && volume != 0 ? (price - trl - (trh - price)) / (trh - trl) * volume : 0;
-        var smoothAd = _adSmoother.Next(ad, isFinal);
-        var smoothVolume = _volumeSmoother.Next(volume, isFinal);
-        var tmf = smoothVolume != 0 ? MathHelper.MinOrMax(smoothAd / smoothVolume, 1, -1) : 0;
-
-        if (isFinal)
-        {
-            _prevPrice = price;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tmf", tmf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tmf, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Tmf", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _adSmoother.Dispose();
-        _volumeSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Uti")]
