@@ -8360,80 +8360,16 @@ public sealed class AdaptiveStochasticState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Ts")]
 public sealed class AdaptiveTrailingStopState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _factor;
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private double _prevB;
-    private double _prevUp;
-    private double _prevDn;
-    private double _prevOs;
-    private bool _hasPrev;
-
-    public AdaptiveTrailingStopState(int length = 100, double factor = 3)
-    {
-        _factor = factor;
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PoweredKaufmanWindow _window;
+    public AdaptiveTrailingStopState(int length = 100, double factor = 3) => _window = new(length, factor);
     public IndicatorName Name => IndicatorName.AdaptiveTrailingStop;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevA = 0;
-        _prevB = 0;
-        _prevUp = 0;
-        _prevDn = 0;
-        _prevOs = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var per = MathHelper.Pow(er, _factor);
-
-        var prevA = _hasPrev ? _prevA : value;
-        var a = Math.Max(value, prevA) - (Math.Abs(value - prevA) * per);
-        var prevB = _hasPrev ? _prevB : value;
-        var b = Math.Min(value, prevB) + (Math.Abs(value - prevB) * per);
-        var prevUp = _hasPrev ? _prevUp : 0;
-        var up = a > prevA ? a : a < prevA && b < prevB ? a : prevUp;
-        var prevDn = _hasPrev ? _prevDn : 0;
-        var dn = b < prevB ? b : b > prevB && a > prevA ? b : prevDn;
-        var prevOs = _hasPrev ? _prevOs : 0;
-        var os = up > value ? 1 : dn > value ? 0 : prevOs;
-        var ts = (os * dn) + ((1 - os) * up);
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _prevUp = up;
-            _prevDn = dn;
-            _prevOs = os;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ts", ts }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ts, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value.Stop, includeOutputs ? new Dictionary<string, double> { { "Ts", value.Stop } } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ts")]

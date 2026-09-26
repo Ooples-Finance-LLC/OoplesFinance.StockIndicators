@@ -3653,37 +3653,11 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Powered Kaufman Adaptive Moving Average using span-based computation.
     /// </summary>
-    internal static void PoweredKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 2)
+    internal static void PoweredKaufmanAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double power = 3)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var kamaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            KaufmanAdaptiveMovingAverage(input, kamaBuffer.AsSpan(0, input.Length), length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var kama = kamaBuffer[i];
-                var prevPkama = i >= 1 ? output[i - 1] : currentValue;
-
-                // Apply power to the adaptive factor
-                var diff = currentValue - prevPkama;
-                var adaptiveFactor = kama != 0 ? Math.Pow(Math.Abs(currentValue - kama) / Math.Abs(kama), 1.0 / power) : 0;
-                adaptiveFactor = Math.Min(adaptiveFactor, 1);
-
-                var alpha = 2.0 / (length + 1) * (1 + adaptiveFactor);
-                alpha = Math.Min(alpha, 0.99);
-
-                output[i] = prevPkama + (alpha * diff);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(kamaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PoweredKaufmanWindow(length, power);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Average;
     }
 
     /// <summary>
@@ -4542,52 +4516,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveTrailingStop(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14, double multiplier = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            var trend = 1;
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentClose = close[i];
-                var currentAtr = atr[i] * multiplier;
-                var prevStop = i > 0 ? output[i - 1] : currentClose;
-
-                if (trend == 1)
-                {
-                    var newStop = currentClose - currentAtr;
-                    output[i] = Math.Max(newStop, prevStop);
-                    if (currentClose < output[i])
-                    {
-                        trend = -1;
-                        output[i] = currentClose + currentAtr;
-                    }
-                }
-                else
-                {
-                    var newStop = currentClose + currentAtr;
-                    output[i] = Math.Min(newStop, prevStop);
-                    if (currentClose > output[i])
-                    {
-                        trend = 1;
-                        output[i] = currentClose - currentAtr;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new PoweredKaufmanWindow(length, multiplier);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Stop;
     }
 
     /// <summary>

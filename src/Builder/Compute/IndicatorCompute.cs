@@ -15132,43 +15132,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 100,
         double factor = 3, bool powered = false)
     {
-        // CalculatePoweredKaufmanAdaptiveMovingAverage raises Kaufman's efficiency ratio to a fixed power to
-        // get its smoothing factor, and seeds the recursion from the first value rather than from zero. The
-        // core routine used Kaufman's own fast and slow alphas instead.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        // The average is recursive, so it needs a home of its own whenever the caller asked for the ratio.
-        using var averageBuffer = context.Rent(count);
-        var averages = powered ? averageBuffer.WritableSpan : output;
-
-        var volatilityWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-
-            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)));
-            var volatilitySum = volatilityWindow.Sum(length);
-            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
-            var er = volatilitySum != 0 ? momentum / volatilitySum : 0;
-
-            var per = MathHelper.Pow(er, factor);
-
-            // The powered efficiency ratio is the batch's Per key; it was computed here and discarded, so
-            // that key answered with the average instead.
-            var prevA = i >= 1 ? averages[i - 1] : currentValue;
-            averages[i] = (per * currentValue) + ((1 - per) * prevA);
-            output[i] = powered ? per : averages[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count); using var window = new PoweredKaufmanWindow(length, factor);
+        for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = powered ? value.Power : value.Average; }
+        return result;
     }
 
     /// <summary>
@@ -18978,46 +18945,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveTrailingStopFast(StockData data, ComputeContext context, int length = 100,
         double factor = 3)
     {
-        // CalculateAdaptiveTrailingStop drives an upper and a lower envelope toward the chained series at the
-        // rate of the powered Kaufman efficiency ratio - the Per series of
-        // CalculatePoweredKaufmanAdaptiveMovingAverage - holds each at its last turn, and publishes whichever
-        // side the price is not on. MovingAverageCore.AdaptiveTrailingStop stepped a fixed multiple of range
-        // off the close, which is a different indicator.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var volatilityWindow = new RollingSum();
-        double a = 0, b = 0, up = 0, dn = 0, os = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-
-            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue)));
-            var volatilitySum = volatilityWindow.Sum(length);
-            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
-            var efficiencyRatio = volatilitySum != 0 ? momentum / volatilitySum : 0;
-            var per = MathHelper.Pow(efficiencyRatio, factor);
-
-            var prevA = i >= 1 ? a : currentValue;
-            var prevB = i >= 1 ? b : currentValue;
-            a = Math.Max(currentValue, prevA) - (Math.Abs(currentValue - prevA) * per);
-            b = Math.Min(currentValue, prevB) + (Math.Abs(currentValue - prevB) * per);
-
-            up = a > prevA ? a : a < prevA && b < prevB ? a : up;
-            dn = b < prevB ? b : b > prevB && a > prevA ? b : dn;
-            os = up > currentValue ? 1 : dn > currentValue ? 0 : os;
-
-            output[i] = (os * dn) + ((1 - os) * up);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count); using var window = new PoweredKaufmanWindow(length, factor);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Stop;
+        return result;
     }
 
     /// <summary>
