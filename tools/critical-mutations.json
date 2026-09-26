@@ -17074,5 +17074,119 @@
     "after": "output[i] = input[i]",
     "filter": "FullyQualifiedName~NarrowBandpassNumericalTests.SignedWeightsAndZeroPaddingPreserveAllScales|FullyQualifiedName~NarrowBandpassNumericalTests.SelectedInputFeedsTheFilter|FullyQualifiedName~NarrowBandpassNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static void NarrowBandpassFilter("
+  },
+  {
+    "id": "asi-drops-gains",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "gains + RocBankValue.RoundUnits",
+    "after": "BigInteger.Zero + RocBankValue.RoundUnits",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-rise-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "(current - previous) << 1074, previous",
+    "after": "(current - previous) << 1074, current",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-fall-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "(previous - current) << 1074, current",
+    "after": "(previous - current) << 1074, previous",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-tie-mass",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "Units(1d / _length)",
+    "after": "Units(1d)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-strength",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "gains + losses + 2 * ties",
+    "after": "gains + losses + ties",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-first-strength",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "(losses + ties).IsZero ? 1 :",
+    "after": "(losses + ties).IsZero ? 0 :",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "Blend(strength, _mean, _meanLength)",
+    "after": "Blend(strength, _mean, _length)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-second-input",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "Blend(first, _second, _signalLength)",
+    "after": "Blend(residual, _second, _signalLength)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-mcnicholl",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "2L * _signalLength * Units(first) - (_signalLength + 1L) * Units(second)",
+    "after": "2L * _signalLength * (Units(first) - Units(second))",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-wrong-residual",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "Units(residual) - Units(smooth)",
+    "after": "Units(residual) + Units(smooth)",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "if (commit) { _gains",
+    "after": "{ _gains",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteStrengthWindow.cs",
+    "before": "_gains = _losses = _ties = default;",
+    "after": "_gains = _ties = default;",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "asi-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AbsoluteStrengthIndexState :"
+  },
+  {
+    "id": "asi-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~AbsoluteStrengthNumericalTests.ExtremeReturnsAndAllPeriodsPreserveTheCumulativeFormula|FullyQualifiedName~AbsoluteStrengthNumericalTests.SelectedPositiveInputsAndDomainRejectionsAreConsistent|FullyQualifiedName~AbsoluteStrengthNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeAbsoluteStrengthIndexFast("
   }
 ]
