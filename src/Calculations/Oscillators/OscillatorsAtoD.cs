@@ -179,69 +179,14 @@ public static partial class Calculations
     public static StockData CalculateAdaptiveErgodicCandlestickOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int smoothLength = 5, int stochLength = 14, int signalLength = 9)
     {
-        List<double> came1List = new(stockData.Count);
-        List<double> came2List = new(stockData.Count);
-        List<double> came11List = new(stockData.Count);
-        List<double> came22List = new(stockData.Count);
-        List<double> ecoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        var mep = (double)2 / (smoothLength + 1);
-        double ce = (stochLength + smoothLength) * 2;
-
-        var stochList = CalculateStochasticOscillator(stockData, maType, length: stochLength).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stoch = stochList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            var vrb = Math.Abs(stoch - 50) / 50;
-
-            var prevCame1 = GetLastOrDefault(came1List);
-            var came1 = i < ce ? currentClose - currentOpen : prevCame1 + (mep * vrb * (currentClose - currentOpen - prevCame1));
-            came1List.Add(came1);
-
-            var prevCame2 = GetLastOrDefault(came2List);
-            var came2 = i < ce ? currentHigh - currentLow : prevCame2 + (mep * vrb * (currentHigh - currentLow - prevCame2));
-            came2List.Add(came2);
-
-            var prevCame11 = GetLastOrDefault(came11List);
-            var came11 = i < ce ? came1 : prevCame11 + (mep * vrb * (came1 - prevCame11));
-            came11List.Add(came11);
-
-            var prevCame22 = GetLastOrDefault(came22List);
-            var came22 = i < ce ? came2 : prevCame22 + (mep * vrb * (came2 - prevCame22));
-            came22List.Add(came22);
-
-            var eco = came22 != 0 ? came11 / came22 * 100 : 0;
-            ecoList.Add(eco);
-        }
-
-        var seList = GetMovingAverageList(stockData, maType, signalLength, ecoList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var eco = ecoList[i];
-            var se = seList[i];
-            var prevEco = i >= 1 ? ecoList[i - 1] : 0;
-            var prevSe = i >= 1 ? seList[i - 1] : 0;
-
-            var signal = GetCompareSignal(eco - se, prevEco - prevSe);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eco", ecoList },
-            { "Signal", seList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ecoList);
-        stockData.IndicatorName = IndicatorName.AdaptiveErgodicCandlestickOscillator;
-
-        return stockData;
+        var (input, high, low, open, _) = GetInputValuesList(stockData);
+        using var window = new AdaptiveCandleWindow(maType, smoothLength, stochLength, signalLength, Math.Max(1, input.Count));
+        List<double> eco = new(input.Count), line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(open[i], high[i], low[i], input[i], true); eco.Add(point.Eco.Publish()); line.Add(point.Signal); }
+        if (Builder.Compute.ComponentAverage.HasOverrides) line = (Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(eco), Math.Max(1, signalLength)) ?? line).ToList();
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(eco[i] - line[i], i == 0 ? 0 : eco[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eco", eco }, { "Signal", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(eco); stockData.IndicatorName = IndicatorName.AdaptiveErgodicCandlestickOscillator; return stockData;
     }
 
 

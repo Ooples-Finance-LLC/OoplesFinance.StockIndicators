@@ -6044,83 +6044,17 @@ public sealed class DetrendedPriceOscillatorState : IStreamingIndicatorState, ID
 [PrimaryOutput("Eco")]
 public sealed class AdaptiveErgodicCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _mep;
-    private readonly double _ce;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly StochasticOscillatorState _stoch;
-    private double _came1;
-    private double _came2;
-    private double _came11;
-    private double _came22;
-    private int _index;
-
-    public AdaptiveErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int smoothLength = 5, int stochLength = 14, int signalLength = 9)
-    {
-        _mep = (double)2 / (Math.Max(1, smoothLength) + 1);
-        _ce = (stochLength + smoothLength) * 2d;
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _stoch = new StochasticOscillatorState(maType, stochLength, 3, 3);
-    }
-
+    private readonly AdaptiveCandleWindow _window;
+    public AdaptiveErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 5, int stochLength = 14, int signalLength = 9)
+        => _window = new(maType, smoothLength, stochLength, signalLength);
     public IndicatorName Name => IndicatorName.AdaptiveErgodicCandlestickOscillator;
-
-    public void Reset()
-    {
-        _signal.Reset();
-        _stoch.Reset();
-        _came1 = 0;
-        _came2 = 0;
-        _came11 = 0;
-        _came22 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var stoch = _stoch.Update(bar, isFinal, includeOutputs: false).Value;
-        var vrb = Math.Abs(stoch - 50) / 50;
-        var currentHigh = bar.High;
-        var currentLow = bar.Low;
-        var currentOpen = bar.Open;
-        var currentClose = bar.Close;
-
-        var useSeed = _index < _ce;
-        var came1 = useSeed ? currentClose - currentOpen : _came1 + (_mep * vrb * (currentClose - currentOpen - _came1));
-        var came2 = useSeed ? currentHigh - currentLow : _came2 + (_mep * vrb * (currentHigh - currentLow - _came2));
-        var came11 = useSeed ? came1 : _came11 + (_mep * vrb * (came1 - _came11));
-        var came22 = useSeed ? came2 : _came22 + (_mep * vrb * (came2 - _came22));
-        var eco = came22 != 0 ? came11 / came22 * 100 : 0;
-        var signal = _signal.Next(eco, isFinal);
-
-        if (isFinal)
-        {
-            _came1 = came1;
-            _came2 = came2;
-            _came11 = came11;
-            _came22 = came22;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eco", eco },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(eco, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, isFinal); var value = point.Eco.Publish();
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Eco", value }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signal.Dispose();
-        _stoch.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Bulls")]

@@ -2180,10 +2180,8 @@ internal static partial class IndicatorCompute
                 : ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
 
             // Batch 24 - Complex Oscillators and Ehlers Indicators
-            AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context,
-                    aeco.SmoothLength, aeco.StochLength), aeco.SignalLength, aeco.MaType)
-                : ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context, aeco.SmoothLength, aeco.StochLength),
+            AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context,
+                aeco.SmoothLength, aeco.StochLength, aeco.SignalLength, aeco.MaType, spec.OutputKey == "Signal"),
             ConfluenceIndicatorSpecOptions ci2 => ComputeConfluenceIndicatorFast(data, context, ci2.Length, ci2.MaType),
             ConstanceBrownCompositeIndexSpecOptions cbci => spec.OutputKey is "FastSignal" or "SlowSignal"
                 ? SmoothPublished(data, context, ComputeConstanceBrownCompositeIndexFast(data, context,
@@ -24500,53 +24498,14 @@ internal static partial class IndicatorCompute
     // Batch 24 - Complex Oscillators and Ehlers Indicators
 
     internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast(StockData data, ComputeContext context,
-        int smoothLength = 5, int stochLength = 14)
+        int smoothLength = 5, int stochLength = 14, int signalLength = 9, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // CalculateAdaptiveErgodicCandlestickOscillator smooths the body and the range of each candle twice,
-        // at a rate the stochastic's distance from its midpoint sets bar by bar, and publishes their ratio.
-        // The signal length and the average type only reach the separate "Signal" series, so the arm takes
-        // neither. The stochastic is the verified arm rather than a second derivation.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var close = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        var rate = (double)2 / (smoothLength + 1);
-        double settleBars = (stochLength + smoothLength) * 2;
-
-        using var stochastic = ComputeStochasticOscillatorFast(data, context, stochLength);
-        var stoch = stochastic.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double body = 0;
-        double range = 0;
-        double smoothedBody = 0;
-        double smoothedRange = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var vigour = Math.Abs(stoch[i] - 50) / 50;
-            var currentBody = close[i] - opens[i];
-            var currentRange = highs[i] - lows[i];
-
-            var previousBody = body;
-            var previousRange = range;
-            var previousSmoothedBody = smoothedBody;
-            var previousSmoothedRange = smoothedRange;
-
-            // Until the filter has settled it simply tracks the candle, which is what the batch's i < ce says.
-            body = i < settleBars ? currentBody : previousBody + (rate * vigour * (currentBody - previousBody));
-            range = i < settleBars ? currentRange : previousRange + (rate * vigour * (currentRange - previousRange));
-            smoothedBody = i < settleBars ? body : previousSmoothedBody + (rate * vigour * (body - previousSmoothedBody));
-            smoothedRange = i < settleBars ? range : previousSmoothedRange + (rate * vigour * (range - previousSmoothedRange));
-
-            output[i] = smoothedRange != 0 ? smoothedBody / smoothedRange * 100 : 0;
-        }
-
-        return buffer;
+        var (input, high, low, open, _) = CalculationsHelper.GetInputValuesList(data);
+        var result = context.Rent(input.Count); using var values = context.Rent(input.Count);
+        using var window = new AdaptiveCandleWindow(maType, smoothLength, stochLength, signalLength, Math.Max(1, input.Count));
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(open[i], high[i], low[i], input[i], true); values.WritableSpan[i] = point.Eco.Publish(); result.WritableSpan[i] = signal ? point.Signal : values.Span[i]; }
+        if (signal && ComponentAverage.HasOverrides) MovingAverage(data, maType, Math.Max(1, signalLength), values.Span, result.WritableSpan);
+        return result;
     }
 
     internal static ComputeBuffer ComputeConfluenceIndicatorFast(StockData data, ComputeContext context, int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)

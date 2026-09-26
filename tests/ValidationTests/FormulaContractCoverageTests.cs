@@ -2306,8 +2306,9 @@ public sealed class FormulaContractCoverageTests
         Check(new AdaptiveRelativeStrengthIndex(2), reversal, new[] { 1d, 2, 5d / 3 });
         Check(new AdaptivePriceZoneIndicator(4), prices, new[] { 1d, 1.25, 91d / 36 },
             new[] { 1d, 1.25, 91d / 36 }, new[] { 1d, 1.25, 91d / 36 });
+        // The candle ratio rounds before percentage scaling, then the signal rounds its EMA update.
         Check(new AdaptiveErgodicCandlestickOscillator(2, 2, 2), bars,
-            new[] { 100d / 3, 100d / 3, -25 }, new[] { 100d / 3, 100d / 3, -50d / 9 });
+            new[] { 33.33333333333333, 33.33333333333333, -25 }, new[] { 33.33333333333333, 33.33333333333333, -5.555555555555557 });
         Check(new ApirineSlowRelativeStrengthIndex(2, 2), reversal, new[] { 100d, 100, 80 });
         Check(new Ama(2), prices, new[] { 4d / 225, 364d / 405, 1660d / 729 });
         Check(new PoweredKaufmanAdaptiveMovingAverage(2), prices, new[] { 0d, 0, 1 }, new[] { 1d, 1, 4 });

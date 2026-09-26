@@ -18374,5 +18374,145 @@
     "after": "middle.Add(point.Upper)",
     "filter": "FullyQualifiedName~AdaptiveZoneNumericalTests.DoubleSmoothingRangeAndFiniteCenterMatchIndependentFractions|FullyQualifiedName~AdaptiveZoneNumericalTests.SelectedInputAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~AdaptiveZoneNumericalTests.InvalidFieldsNeverAdvanceState",
     "scope": "public static StockData CalculateAdaptivePriceZoneIndicator("
+  },
+  {
+    "id": "aeco-wrong-high-window",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_high = new(Math.Min(stochLength, Math.Max(1, capacityHint)))",
+    "after": "_high = new(Math.Min(stochLength + 1, Math.Max(1, capacityHint)))",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-base-rate",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_rate = 2 / (smoothLength + 1d)",
+    "after": "_rate = 1 / (smoothLength + 1d)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-settling-length",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_settle = 2L *",
+    "after": "_settle = 1L *",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-startup-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_count < _settle",
+    "after": "_count <= _settle",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-candle-body",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "Difference(close, open)",
+    "after": "Difference(high, open)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-candle-range",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "Difference(high, low)",
+    "after": "Difference(high, close)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "sum.Add(a); sum.Add(b, -1);",
+    "after": "sum.Add(a - b);",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-stochastic-center",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "Math.Abs(stochastic - 50) / 50",
+    "after": "Math.Abs(stochastic - 25) / 50",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-omits-second-body-filter",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "seed ? body : Blend(_body2, body, gain)",
+    "after": "body",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-omits-second-range-filter",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "seed ? range : Blend(_range2, range, gain)",
+    "after": "range",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "if (commit) { _body = body;",
+    "after": "{ _body = body;",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_count = 0;",
+    "after": "/* retain age */",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCandleWindow.cs",
+    "before": "_signal = new(kind, signalLength, capacityHint)",
+    "after": "_signal = new(kind, signalLength + 1, capacityHint)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "aeco-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class AdaptiveErgodicCandlestickOscillatorState :"
+  },
+  {
+    "id": "aeco-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(open[i], high[i], low[i], input[i], true)",
+    "after": "window.Next(open[i], high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast("
+  },
+  {
+    "id": "aeco-wrong-signal-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "signal ? point.Signal : values.Span[i]",
+    "after": "values.Span[i]",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveErgodicCandlestickOscillatorFast("
+  },
+  {
+    "id": "aeco-wrong-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(eco), Math.Max(1, signalLength)",
+    "after": "SpanCompat.AsReadOnlySpan(eco), Math.Max(1, signalLength + 1)",
+    "filter": "FullyQualifiedName~AdaptiveCandleNumericalTests.AdaptiveFiltersColdBoundaryAndExtendedRatiosMatchFractions|FullyQualifiedName~AdaptiveCandleNumericalTests.SelectedClosesAndCustomerSignalPreserveTheirInputs|FullyQualifiedName~AdaptiveCandleNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public static StockData CalculateAdaptiveErgodicCandlestickOscillator("
   }
 ]

@@ -583,6 +583,7 @@ internal static partial class StatefulIndicatorFactory
 
             // Volatility - using named parameters where MovingAvgType is first
             AtrSpecOptions atr => new AverageTrueRangeState(length: atr.Length, maType: atr.MaType),
+            AdaptiveErgodicCandlestickOscillatorSpecOptions candle => new AdaptiveErgodicCandlestickOscillatorState(candle.MaType, candle.SmoothLength, candle.StochLength, candle.SignalLength),
             AdaptivePriceZoneIndicatorSpecOptions zone => new AdaptivePriceZoneIndicatorState(zone.MaType, zone.Length, zone.Pct),
             AverageDirectionalIndexSpecOptions adxAlias => new AverageDirectionalIndexState(length: adxAlias.Length, maType: adxAlias.MaType),
             AdxSpecOptions adx => new AverageDirectionalIndexState(length: adx.Length, maType: adx.MaType),
