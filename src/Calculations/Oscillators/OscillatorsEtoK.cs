@@ -3427,40 +3427,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEfficientPrice(this StockData stockData, int length = 50)
     {
-        List<double> epList = new(stockData.Count);
-        List<double> chgErList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double chgErSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new EfficiencyOutputWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var er = erList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var prevEp1 = i >= 1 ? epList[i - 1] : 0;
-            var prevEp2 = i >= 2 ? epList[i - 2] : 0;
-
-            var chgEr = MinPastValues(i, length, currentValue - prevValue) * er;
-            chgErList.Add(chgEr);
-            chgErSum += chgEr;
-
-            var ep = chgErSum;
-            epList.Add(ep);
-
-            var signal = GetCompareSignal(ep - prevEp1, prevEp1 - prevEp2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(value - (i == 0 ? 0 : line[i - 1]), i == 0 ? 0 : line[i - 1] - (i < 2 ? 0 : line[i - 2]))); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ep", epList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(epList);
-        stockData.IndicatorName = IndicatorName.EfficientPrice;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ep", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EfficientPrice;
         return stockData;
     }
 
@@ -3476,34 +3451,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEfficientAutoLine(this StockData stockData, int length = 19, double fastAlpha = 0.0001, double slowAlpha = 0.005)
     {
-        List<double> aList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new EfficiencyOutputWindow(length, true, fastAlpha, slowAlpha);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var er = erList[i];
-            var dev = (er * fastAlpha) + ((1 - er) * slowAlpha);
-
-            var prevA = GetLastOrDefault(aList);
-            var a = i < 9 ? currentValue : currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
-            aList.Add(a);
-
-            var signal = GetCompareSignal(currentValue - a, prevValue - prevA);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eal", aList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName.EfficientAutoLine;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eal", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EfficientAutoLine;
         return stockData;
     }
 }
