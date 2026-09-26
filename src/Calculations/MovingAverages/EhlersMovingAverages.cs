@@ -1202,38 +1202,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersFiniteImpulseResponseFilter(this StockData stockData, double coef1 = 1, double coef2 = 3.5, double coef3 = 4.5,
         double coef4 = 3, double coef5 = 0.5, double coef6 = -0.5, double coef7 = -1.5)
     {
-        List<double> filterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var coefSum = coef1 + coef2 + coef3 + coef4 + coef5 + coef6 + coef7;
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new EhlersFirWindow(coef1, coef2, coef3, coef4, coef5, coef6, coef7);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevValue4 = i >= 4 ? inputList[i - 4] : 0;
-            var prevValue5 = i >= 5 ? inputList[i - 5] : 0;
-            var prevValue6 = i >= 6 ? inputList[i - 6] : 0;
-
-            var prevFilter = GetLastOrDefault(filterList);
-            var filter = ((coef1 * currentValue) + (coef2 * prevValue1) + (coef3 * prevValue2) + (coef4 * prevValue3) + 
-                          (coef5 * prevValue4) + (coef6 * prevValue5) + (coef7 * prevValue6)) / coefSum;
-            filterList.Add(filter);
-
-            var signal = GetCompareSignal(currentValue - filter, prevValue1 - prevFilter);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Efirf", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersFiniteImpulseResponseFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Efirf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersFiniteImpulseResponseFilter;
         return stockData;
     }
 

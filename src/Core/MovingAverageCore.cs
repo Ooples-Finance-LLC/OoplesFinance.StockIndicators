@@ -2486,24 +2486,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersFiniteImpulseResponseFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double sum = 0, coefSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevValue = i >= j ? input[i - j] : 0;
-                var coef = 1 - ((double)j / length);
-                sum += coef * prevValue;
-                coefSum += coef;
-            }
-
-            output[i] = coefSum != 0 ? sum / coefSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new EhlersFirWindow();
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
