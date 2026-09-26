@@ -12734,32 +12734,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV1Fast(StockData data, ComputeContext context,
         int length = 40, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double mult = 20)
     {
-        // CalculateElasticVolumeWeightedMovingAverageV1 treats a multiple of the smoothed volume as a float
-        // and exchanges the bar's own volume out of it each bar, seeding at the first value.
-        // MovingAverageCore.ElasticVolumeWeightedMovingAverageV1 took the close, never smoothed the volume and
-        // had no multiplier, so it diverged from the opening bars onward.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var averageVolume = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, averageVolume.WritableSpan);
-        var volumeAverage = averageVolume.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        using var window = new ElasticVolumeAverageWindow(maType, length, mult, initializeFallback: false);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = input[i];
-            var currentVolume = volumes[i];
-            var n = volumeAverage[i] * mult;
-
-            var previous = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = n > 0 ? previous + currentVolume / n * (currentValue - previous) : previous;
+            using var average = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.NextWithAverage(input[i], data.Volumes[i], new RocBankValue(average.Span[i]), true);
         }
-
+        else for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], data.Volumes[i], true);
         return buffer;
     }
 

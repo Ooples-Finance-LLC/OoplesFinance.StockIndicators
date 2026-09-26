@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ElasticVolumeWeightedMovingAverageV1 && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElasticVolumeAverageOutputs(bars, builtIn)["Evwma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ElasticVolumeWeightedMovingAverageV2)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElasticVolumeOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Evwma"], IndicatorErrorBudget.Exact);

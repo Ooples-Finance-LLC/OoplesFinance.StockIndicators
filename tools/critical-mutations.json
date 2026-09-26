@@ -12167,5 +12167,112 @@
     "after": "",
     "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ElasticVolumeWeightedMovingAverageV2State"
+  },
+  {
+    "id": "elastic-volume-average-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_started ? _previous : new RocBankValue(price)",
+    "after": "_started ? _previous : default",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-averages-price-instead-of-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_average.Next(new RocBankValue(volume), commit)",
+    "after": "_average.Next(new RocBankValue(price), commit)",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-ignores-multiplier",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_multiplier = ExactVarianceWindow.Units(multiplier)",
+    "after": "_multiplier = ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-wrong-current-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "top.Add(price, current)",
+    "after": "top.Add(price, denominator)",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-wrong-previous-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "(denominator - current) << previous.UpperShift",
+    "after": "denominator << previous.UpperShift",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-updates-on-negative-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "denominator.Sign > 0",
+    "after": "denominator.Sign != 0",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.FiniteMultipliersRetainTheExactUpdateAndInvalidMultipliersAreRejected"
+  },
+  {
+    "id": "elastic-volume-average-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_started = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-average-premature-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeAverageWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.FiniteMultipliersRetainTheExactUpdateAndInvalidMultipliersAreRejected"
+  },
+  {
+    "id": "elastic-volume-average-customer-gets-prices",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SpanCompat.AsReadOnlySpan(data.Volumes), average.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(input), average.WritableSpan",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.CustomerAverageReceivesVolumeAndBatchOnlyAveragesRemainUsable",
+    "scope": "internal static ComputeBuffer ComputeElasticVolumeWeightedMovingAverageV1Fast("
+  },
+  {
+    "id": "elastic-volume-average-eagerly-constructs-batch-fallback",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesEtoL.cs",
+    "before": "initializeFallback: false",
+    "after": "initializeFallback: true",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.CustomerAverageReceivesVolumeAndBatchOnlyAveragesRemainUsable",
+    "scope": "public static StockData CalculateElasticVolumeWeightedMovingAverageV1("
+  },
+  {
+    "id": "elastic-volume-average-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ElasticVolumeWeightedMovingAverageV1State"
   }
 ]
