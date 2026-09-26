@@ -28753,6 +28753,18 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
 
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var result = context.Rent(count);
+            using var window = new ReversalPointsWindow(maType, length);
+            for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+            return result;
+        }
+        if (ComponentAverage.HasOverrides)
+        {
+            using var priceMean = context.Rent(count);
+            MovingAverage(data, maType, length1, input, priceMean.WritableSpan);
+        }
         using var barRange = context.Rent(count);
         var a = barRange.WritableSpan;
         for (var i = 0; i < count; i++)

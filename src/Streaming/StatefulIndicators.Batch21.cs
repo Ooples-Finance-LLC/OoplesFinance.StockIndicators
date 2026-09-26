@@ -1612,72 +1612,18 @@ public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorStat
 [PrimaryOutput("Rp")]
 public sealed class ReversalPointsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _aEma1;
-    private readonly IMovingAverageSmoother _aEma2;
-    private readonly RollingWindowSum _bSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public ReversalPointsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 100)
-    {
-        _length = Math.Max(1, length);
-        var length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2));
-        _aEma1 = MovingAverageSmootherFactory.Create(maType, length1);
-        _aEma2 = MovingAverageSmootherFactory.Create(maType, length1);
-        _bSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ReversalPointsWindow _window;
+    public ReversalPointsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 100)
+        => _window = new ReversalPointsWindow(maType, length);
     public IndicatorName Name => IndicatorName.ReversalPoints;
-
-    public void Reset()
-    {
-        _aEma1.Reset();
-        _aEma2.Reset();
-        _bSum.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var max = Math.Max(value, prevValue);
-        var min = Math.Min(value, prevValue);
-        var a = max - min;
-        var aEma1 = _aEma1.Next(a, isFinal);
-        var aEma2 = _aEma2.Next(aEma1, isFinal);
-        var b = aEma2 != 0 ? aEma1 / aEma2 : 0;
-        var bSum = isFinal ? _bSum.Add(b, out _) : _bSum.Preview(b, out _);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rp", bSum }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bSum, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Rp", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _aEma1.Dispose();
-        _aEma2.Dispose();
-        _bSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rersi")]
