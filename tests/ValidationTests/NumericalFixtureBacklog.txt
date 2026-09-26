@@ -2958,11 +2958,6 @@ OoplesFinance.StockIndicators.Indicators.TrendDetectionIndex/minimum-length1
 OoplesFinance.StockIndicators.Indicators.TrendDetectionIndex/minimum-length2
 OoplesFinance.StockIndicators.Indicators.TrendDetectionIndex/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TrendDetectionIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TrendIntensityIndex/default
-OoplesFinance.StockIndicators.Indicators.TrendIntensityIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.TrendIntensityIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TrendIntensityIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TrendIntensityIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.TrendStep/default
 OoplesFinance.StockIndicators.Indicators.TrendStep/longer-periods
 OoplesFinance.StockIndicators.Indicators.TrendStep/minimum-periods

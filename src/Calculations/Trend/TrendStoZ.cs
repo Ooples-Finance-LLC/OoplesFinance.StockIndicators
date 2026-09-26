@@ -620,47 +620,19 @@ public static partial class Calculations
     public static StockData CalculateTrendIntensityIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int fastLength = 30, int slowLength = 60)
     {
-        List<double> tiiList = new(stockData.Count);
-        List<double> deviationUpList = new(stockData.Count);
-        List<double> deviationDownList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum deviationUpSum = new();
-        RollingSum deviationDownSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TrendIntensityWindow(maType, fastLength, slowLength);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentSma = smaList[i];
-            var prevTii1 = i >= 1 ? tiiList[i - 1] : 0;
-            var prevTii2 = i >= 2 ? tiiList[i - 2] : 0;
-
-            var deviationUp = currentValue > currentSma ? currentValue - currentSma : 0;
-            deviationUpList.Add(deviationUp);
-            deviationUpSum.Add(deviationUp);
-
-            var deviationDown = currentValue < currentSma ? currentSma - currentValue : 0;
-            deviationDownList.Add(deviationDown);
-            deviationDownSum.Add(deviationDown);
-
-            var sdPlus = deviationUpSum.Sum(fastLength);
-            var sdMinus = deviationDownSum.Sum(fastLength);
-            var tii = sdPlus + sdMinus != 0 ? sdPlus / (sdPlus + sdMinus) * 100 : 0;
-            tiiList.Add(tii);
-
-            var signal = GetRsiSignal(tii - prevTii1, prevTii1 - prevTii2, tii, prevTii1, 80, 20);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1]; var beforePrevious = i < 2 ? 0 : output[i - 2];
+            output.Add(value); signals?.Add(GetRsiSignal(value - previous, previous - beforePrevious, value, previous, 80, 20));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tii", tiiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tiiList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tii", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TrendIntensityIndex;
-
         return stockData;
     }
 
