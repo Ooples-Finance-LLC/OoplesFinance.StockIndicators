@@ -2811,33 +2811,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ZeroLagTripleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // The same as CalculateZeroLagTripleExponentialMovingAverage: 2 * TEMA - TEMA(TEMA). This fast path
-        // took the second average as an EMA of the TEMA, a different line from the indicator of the same name.
-        var tema1Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var tema2Buffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var tema1 = tema1Buffer.AsSpan(0, input.Length);
-            var tema2 = tema2Buffer.AsSpan(0, input.Length);
-
-            TripleExponentialMovingAverage(input, tema1, length);
-            TripleExponentialMovingAverage(tema1, tema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = tema1[i] + (tema1[i] - tema2[i]);
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(tema1Buffer);
-            ArrayPool<double>.Shared.Return(tema2Buffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ZeroLagTripleWindow(MovingAvgType.TripleExponentialMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

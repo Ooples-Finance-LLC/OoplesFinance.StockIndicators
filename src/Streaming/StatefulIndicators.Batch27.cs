@@ -1586,53 +1586,17 @@ public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ztema")]
 public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _tma1;
-    private readonly IMovingAverageSmoother _tma2;
-    private readonly StreamingInputResolver _input;
-
-    public ZeroLagTripleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14)
-    {
-        var resolvedType = maType == MovingAvgType.ZeroLagTripleExponentialMovingAverage
-            ? MovingAvgType.TripleExponentialMovingAverage
-            : maType;
-        var resolved = Math.Max(1, length);
-        _tma1 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
-        _tma2 = MovingAverageSmootherFactory.Create(resolvedType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ZeroLagTripleWindow _window;
+    public ZeroLagTripleExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.TripleExponentialMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.ZeroLagTripleExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _tma1.Reset();
-        _tma2.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var tma1 = _tma1.Next(value, isFinal);
-        var tma2 = _tma2.Next(tma1, isFinal);
-        var zltema = tma1 + (tma1 - tma2);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ztema", zltema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zltema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ztema", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _tma1.Dispose();
-        _tma2.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Zllma")]
