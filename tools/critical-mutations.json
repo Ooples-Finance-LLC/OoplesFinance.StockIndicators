@@ -14006,5 +14006,152 @@
     "before": "new BetterEmaWindow(length)",
     "after": "new BetterEmaWindow(14)",
     "filter": "FullyQualifiedName~BetterEmaNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "well-rounded-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-first-integrator-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Increment(_a, _residualY, _alpha)",
+    "after": "Increment(_a, _residualMean, _alpha)",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-second-integrator-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Increment(_b, _residualMean, _alpha)",
+    "after": "Increment(_b, _residualY, _alpha)",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-output-gain",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Round(sum), _y, .99",
+    "after": "Round(sum), _y, 1",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-unclamped-mean-gain",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Math.Min(.99, Math.Max(.01, _alpha))",
+    "after": "_alpha",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-retention-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "Product(ref sum, previous, -gain)",
+    "after": "Product(ref sum, previous, gain)",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-drops-extended-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "negative.ScaleByPowerOfTwo(value.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-publishes-private-residual",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_residualY = residualY;",
+    "after": "_residualY = new RocBankValue(residualY.Publish());",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-a-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_a = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-b-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_b = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-y-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_y = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-mean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_mean = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-residualY-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_residualY = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-stale-residualMean-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WellRoundedWindow.cs",
+    "before": "_residualMean = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.IntegratorFeedbackPreservesPreviewResetAndExtendedRange"
+  },
+  {
+    "id": "well-rounded-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WellRoundedMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "well-rounded-raw-ignores-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWellRoundedMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
+  },
+  {
+    "id": "well-rounded-raw-ignores-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWellRoundedMovingAverageFast(",
+    "before": "new WellRoundedWindow(length)",
+    "after": "new WellRoundedWindow(14)",
+    "filter": "FullyQualifiedName~WellRoundedNumericalTests.RawAndBatchRespectSelectedInputBeforeCloses"
   }
 ]

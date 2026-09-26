@@ -16246,34 +16246,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWellRoundedMovingAverageFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateWellRoundedMovingAverage runs two integrators over the previous bar's residuals - one from
-        // the output itself, one from an exponential average of the output - and publishes an almost
-        // unsmoothed exponential average of their sum, since CalculateEMA at length 1 clamps its weight to
-        // 0.99. MovingAverageCore.WellRoundedMovingAverage implemented a different average entirely.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var alpha = (double)2 / (length + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double a = 0, b = 0, y = 0, yEma = 0, previousSrcY = 0, previousSrcEma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            a += alpha * previousSrcY;
-            b += alpha * previousSrcEma;
-
-            y = CalculationsHelper.CalculateEMA(a + b, y, 1);
-            yEma = CalculationsHelper.CalculateEMA(y, yEma, length);
-
-            previousSrcY = input[i] - y;
-            previousSrcEma = input[i] - yEma;
-            output[i] = y;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); var window = new WellRoundedWindow(length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 
