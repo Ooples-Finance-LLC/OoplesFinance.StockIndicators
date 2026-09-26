@@ -21817,6 +21817,16 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeMovingAverageChannelFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result = context.Rent(data.Count); using var window = new PriceAverageChannelWindow(maType, length);
+            for (var i = 0; i < data.Count; i++)
+            {
+                var value = window.Next(data.HighPrices[i], data.LowPrices[i], true);
+                result.WritableSpan[i] = band == ChannelBand.Upper ? value.Upper : band == ChannelBand.Lower ? value.Lower : value.Middle;
+            }
+            return result;
+        }
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var count = data.Count;
@@ -21838,7 +21848,7 @@ internal static partial class IndicatorCompute
             for (var i = 0; i < count; i++)
             {
                 buffer.WritableSpan[i] = band == ChannelBand.Upper ? highMaSpan[i]
-                    : band == ChannelBand.Lower ? lowMaSpan[i] : (highMaSpan[i] + lowMaSpan[i]) / 2;
+                    : band == ChannelBand.Lower ? lowMaSpan[i] : HighLowAverageWindow.Midpoint(highMaSpan[i], lowMaSpan[i]);
             }
 
             return buffer;

@@ -335,6 +335,7 @@ internal static partial class StatefulIndicatorFactory
             OscarIndicatorSpecOptions oscar => new OscarIndicatorState(oscar.Length),
             KarobeinOscillatorSpecOptions karobein => new KarobeinOscillatorState(karobein.MaType, karobein.Length),
             ModularFilterSpecOptions modular => new ModularFilterState(modular.Length, modular.Beta, modular.Z),
+            MovingAverageChannelSpecOptions channel => new MovingAverageChannelState(channel.MaType, channel.Length),
             AlligatorJawSpecOptions jaw => new AlligatorIndexState(jawLength: jaw.Length),
             AlligatorTeethSpecOptions teeth => new AlligatorIndexState(teethLength: teeth.Length),
             AlligatorLipsSpecOptions lips => new AlligatorIndexState(lipsLength: lips.Length),

@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.MovingAverageChannel && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var channelKeys = builtIn.BatchOutputKey is { } channelKey ? new[] { channelKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < channelKeys.Length; slot++)
+            {
+                var key = channelKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PriceAverageChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AlligatorIndex && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
             var alligatorKeys = builtIn.BatchOutputKey is { } alligatorKey ? new[] { alligatorKey } : new[] { "Lips", "Teeth", "Jaws" };

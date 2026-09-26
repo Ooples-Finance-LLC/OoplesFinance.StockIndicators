@@ -3583,52 +3583,17 @@ public sealed class PriceChannelState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class MovingAverageChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _highSmoother;
-    private readonly IMovingAverageSmoother _lowSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public MovingAverageChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PriceAverageChannelWindow _window;
+    public MovingAverageChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.MovingAverageChannel;
-
-    public void Reset()
-    {
-        _highSmoother.Reset();
-        _lowSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var upper = _highSmoother.Next(bar.High, isFinal);
-        var lower = _lowSmoother.Next(bar.Low, isFinal);
-        var middle = (upper + lower) / 2;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", value.Upper }, { "MiddleBand", value.Middle }, { "LowerBand", value.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _highSmoother.Dispose();
-        _lowSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 [IndicatorBounds(0, 100, CanBeNegative = false)]
 [IndicatorCategory("Oscillator", SubCategory = "Momentum")]

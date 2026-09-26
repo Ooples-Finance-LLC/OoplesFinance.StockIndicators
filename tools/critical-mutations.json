@@ -13432,5 +13432,95 @@
     "before": "GetInputValuesList(InputName.MedianPrice, data)",
     "after": "GetInputValuesList(InputName.Close, data)",
     "filter": "FullyQualifiedName~AlligatorNumericalTests.CustomerAveragesReceiveMedianPricesInThreeSlots"
+  },
+  {
+    "id": "price-average-channel-upper-uses-low",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "new RocBankValue(high)",
+    "after": "new RocBankValue(low)",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "price-average-channel-lower-uses-high",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "new RocBankValue(low)",
+    "after": "new RocBankValue(high)",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllRoutesMatchIndependentFormulasIncludingPreviewAndReset"
+  },
+  {
+    "id": "price-average-channel-wrong-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(upper, lower)",
+    "after": "HighLowAverageWindow.Midpoint(upper, lower) * 2",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-overflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(upper, lower)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-underflows-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "HighLowAverageWindow.Midpoint(upper, lower)",
+    "after": "upper / 2 + lower / 2",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-commits-upper-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "_upper.Next(new RocBankValue(high), commit)",
+    "after": "_upper.Next(new RocBankValue(high), true)",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-commits-lower-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "_lower.Next(new RocBankValue(low), commit)",
+    "after": "_lower.Next(new RocBankValue(low), true)",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-stale-upper-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "_upper?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-stale-lower-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceAverageChannelWindow.cs",
+    "before": "_lower?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.AllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "price-average-channel-customer-gets-high-twice",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMovingAverageChannelFast(",
+    "before": "length, low, lowMaSpan",
+    "after": "length, high, lowMaSpan",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.CustomerAveragesReceiveCandleHighsAndLowsIndependently"
+  },
+  {
+    "id": "price-average-channel-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class MovingAverageChannelState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceAverageChannelNumericalTests.InvalidFieldsNeverAdvanceAnyState"
   }
 ]
