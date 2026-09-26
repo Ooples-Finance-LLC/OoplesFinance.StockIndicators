@@ -720,61 +720,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrendContinuationFactor(this StockData stockData, int length = 35)
     {
-        List<double> tcfPlusList = new(stockData.Count);
-        List<double> tcfMinusList = new(stockData.Count);
-        List<double> cfPlusList = new(stockData.Count);
-        List<double> cfMinusList = new(stockData.Count);
-        List<double> diffPlusList = new(stockData.Count);
-        List<double> diffMinusList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum diffPlusSum = new();
-        RollingSum diffMinusSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> plus = new(stockData.Count), minus = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new TrendContinuationWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priceChg = MinPastValues(i, 1, currentValue - prevValue);
-            var chgPlus = priceChg > 0 ? priceChg : 0;
-            var chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
-
-            var prevCfPlus = i >= 1 ? cfPlusList[i - 1] : 0;
-            var cfPlus = chgPlus == 0 ? 0 : chgPlus + prevCfPlus;
-            cfPlusList.Add(cfPlus);
-
-            var prevCfMinus = i >= 1 ? cfMinusList[i - 1] : 0;
-            var cfMinus = chgMinus == 0 ? 0 : chgMinus + prevCfMinus;
-            cfMinusList.Add(cfMinus);
-
-            var diffPlus = chgPlus - cfMinus;
-            diffPlusList.Add(diffPlus);
-            diffPlusSum.Add(diffPlus);
-
-            var diffMinus = chgMinus - cfPlus;
-            diffMinusList.Add(diffMinus);
-            diffMinusSum.Add(diffMinus);
-
-            var prevTcfPlus = i >= 1 ? tcfPlusList[i - 1] : 0;
-            var tcfPlus = diffPlusSum.Sum(length);
-            tcfPlusList.Add(tcfPlus);
-
-            var prevTcfMinus = i >= 1 ? tcfMinusList[i - 1] : 0;
-            var tcfMinus = diffMinusSum.Sum(length);
-            tcfMinusList.Add(tcfMinus);
-
-            var signal = GetCompareSignal(tcfPlus - tcfMinus, prevTcfPlus - prevTcfMinus);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); plus.Add(value.Plus); minus.Add(value.Minus);
+            signals?.Add(GetCompareSignal(value.Plus - value.Minus, i == 0 ? 0 : plus[i - 1] - minus[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "TcfPlus", tcfPlusList },
-            { "TcfMinus", tcfMinusList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.TrendContinuationFactor;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "TcfPlus", plus }, { "TcfMinus", minus } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.TrendContinuationFactor;
         return stockData;
     }
 

@@ -740,13 +740,14 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var window = new WilderSummationWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevSum = GetLastOrDefault(sumList);
-            var sum = prevSum - (prevSum / length) + currentValue;
+            var sum = window.Next(currentValue, true);
             sumList.Add(sum);
 
             var signal = GetCompareSignal(currentValue - sum, prevValue - prevSum);

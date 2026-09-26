@@ -1602,80 +1602,17 @@ public sealed class TrendAnalysisIndicatorState : IStreamingIndicatorState, IDis
 [PrimaryOutput("TcfPlus")]
 public sealed class TrendContinuationFactorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _diffPlusSum;
-    private readonly RollingWindowSum _diffMinusSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevCfPlus;
-    private double _prevCfMinus;
-    private bool _hasPrev;
-
-    public TrendContinuationFactorState(int length = 35)
-    {
-        var resolved = Math.Max(1, length);
-        _diffPlusSum = new RollingWindowSum(resolved);
-        _diffMinusSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendContinuationWindow _window;
+    public TrendContinuationFactorState(int length = 35) => _window = new(length);
     public IndicatorName Name => IndicatorName.TrendContinuationFactor;
-
-    public void Reset()
-    {
-        _diffPlusSum.Reset();
-        _diffMinusSum.Reset();
-        _prevValue = 0;
-        _prevCfPlus = 0;
-        _prevCfMinus = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priceChg = _hasPrev ? value - prevValue : 0;
-        var chgPlus = priceChg > 0 ? priceChg : 0;
-        var chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
-
-        var prevCfPlus = _hasPrev ? _prevCfPlus : 0;
-        var cfPlus = chgPlus == 0 ? 0 : chgPlus + prevCfPlus;
-        var prevCfMinus = _hasPrev ? _prevCfMinus : 0;
-        var cfMinus = chgMinus == 0 ? 0 : chgMinus + prevCfMinus;
-
-        var diffPlus = chgPlus - cfMinus;
-        var diffMinus = chgMinus - cfPlus;
-
-        int _;
-        var tcfPlus = isFinal ? _diffPlusSum.Add(diffPlus, out _) : _diffPlusSum.Preview(diffPlus, out _);
-        var tcfMinus = isFinal ? _diffMinusSum.Add(diffMinus, out _) : _diffMinusSum.Preview(diffMinus, out _);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevCfPlus = cfPlus;
-            _prevCfMinus = cfMinus;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "TcfPlus", tcfPlus },
-                { "TcfMinus", tcfMinus }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tcfPlus, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Plus, includeOutputs ? new Dictionary<string, double> { { "TcfPlus", value.Plus }, { "TcfMinus", value.Minus } } : null);
     }
-
-    public void Dispose()
-    {
-        _diffPlusSum.Dispose();
-        _diffMinusSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tdi")]

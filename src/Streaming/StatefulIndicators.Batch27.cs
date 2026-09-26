@@ -857,43 +857,15 @@ public sealed class WaveTrendOscillatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Wws")]
 public sealed class WellesWilderSummationState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private double _prevSum;
-
-    public WellesWilderSummationState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly WilderSummationWindow _window;
+    public WellesWilderSummationState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.WellesWilderSummation;
-
-    public void Reset()
-    {
-        _prevSum = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sum = _prevSum - (_prevSum / _length) + value;
-
-        if (isFinal)
-        {
-            _prevSum = sum;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Wws", sum }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sum, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Wws", value } } : null);
     }
 }
 

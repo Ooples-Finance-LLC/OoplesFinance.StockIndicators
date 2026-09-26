@@ -3039,25 +3039,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WildersSummationMethod(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevSum = i >= 1 ? output[i - 1] : 0;
-
-            if (i < length)
-            {
-                output[i] = prevSum + currentValue;
-            }
-            else
-            {
-                output[i] = prevSum - (prevSum / length) + currentValue;
-            }
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilderSummationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -6095,20 +6079,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WellesWilderSummation(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        double sum = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            sum = sum - (sum / length) + currentValue;
-            output[i] = sum;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilderSummationWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

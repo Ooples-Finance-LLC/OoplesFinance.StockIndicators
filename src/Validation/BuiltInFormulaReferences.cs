@@ -17,6 +17,21 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.WellesWilderSummation)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WilderSummationOutputs(bars, builtIn)["Wws"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.TrendContinuationFactor)
+        {
+            var continuationKeys = builtIn.BatchOutputKey is { } continuationKey ? new[] { continuationKey } : new[] { "TcfPlus", "TcfMinus" };
+            for (var slot = 0; slot < continuationKeys.Length; slot++)
+            {
+                var key = continuationKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendContinuationOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TrendDetectionIndex)
         {
             var detectionKeys = builtIn.BatchOutputKey is { } detectionKey ? new[] { detectionKey } : new[] { "Tdi", "TdiDirection" };

@@ -290,8 +290,7 @@ internal static partial class IndicatorCompute
             },
             AdlSpecOptions adl => spec.OutputKey switch
             {
-                "AdlSignal" => SmoothPublished(data, context, ComputeAdlFast(data, context, adl.Length),
-                    adl.Length, MovingAvgType.ExponentialMovingAverage),
+                "AdlSignal" => ComputeAccumulationDistributionLineFast(data, context, adl.Length, MovingAvgType.ExponentialMovingAverage, "AdlSignal"),
                 _ => ComputeAdlFast(data, context, adl.Length)
             },
             CmfSpecOptions cmf => ComputeCmfFast(data, context, cmf.Length),
@@ -3456,23 +3455,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeAdlFast(StockData data, ComputeContext context, int length = 14)
     {
-        _ = length;
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.AccumulationDistributionLine(high, low, close, volume, buffer.WritableSpan);
-        return buffer;
+        return ComputeAccumulationDistributionLineFast(data, context, length);
     }
 
     /// <summary>
@@ -6657,7 +6640,7 @@ internal static partial class IndicatorCompute
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         VolumeCore.WilliamsAD(high, low, close, buffer.WritableSpan);
         return buffer;
@@ -8030,33 +8013,13 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTrendContinuationFactorFast(StockData data, ComputeContext context, int length = 35,
         TrendContinuationLeg leg = TrendContinuationLeg.Plus)
     {
-        // CalculateTrendContinuationFactor carries a running total of consecutive rises and of consecutive
-        // falls, each reset to zero the moment its direction fails to appear, then sums the gap between each
-        // bar's move and the opposite running total over the window. The arm this replaced delegated to
-        // OscillatorCore.TrendContinuationFactor and read the close rather than the chained series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var diffSum = new RollingSum();
-        double cfPlus = 0, cfMinus = 0;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new TrendContinuationWindow(length); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
         {
-            var priceChg = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
-            var chgPlus = priceChg > 0 ? priceChg : 0;
-            var chgMinus = priceChg < 0 ? Math.Abs(priceChg) : 0;
-
-            cfPlus = chgPlus == 0 ? 0 : chgPlus + cfPlus;
-            cfMinus = chgMinus == 0 ? 0 : chgMinus + cfMinus;
-
-            diffSum.Add(leg == TrendContinuationLeg.Plus ? chgPlus - cfMinus : chgMinus - cfPlus);
-            output[i] = diffSum.Sum(length);
+            var value = window.Next(input[i], true); output.WritableSpan[i] = leg == TrendContinuationLeg.Minus ? value.Minus : value.Plus;
         }
-
-        return buffer;
+        return output;
     }
 
     internal static ComputeBuffer ComputeTrendPersistenceRateFast(StockData data, ComputeContext context, int length = 20,
@@ -16692,25 +16655,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWildersSummationMethodFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateWellesWilderSummation keeps a running total that sheds a length-th of itself before each new
-        // value joins it, so it carries a value from the very first bar. MovingAverageCore.WildersSummationMethod
-        // sheds a different share and the two parted company at bar one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var sum = buffer.WritableSpan;
-
-        double previousSum = 0;
-        for (var i = 0; i < count; i++)
-        {
-            previousSum = previousSum - (previousSum / length) + input[i];
-            sum[i] = previousSum;
-        }
-
-        return buffer;
+        return ComputeWellesWilderSummationFast(data, context, length);
     }
 
     /// <summary>
