@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.IIRLeastSquaresEstimate)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => IirLeastSquaresOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 100))["IIRLse"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.HullEstimate)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HullEstimateOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 50))["He"], IndicatorErrorBudget.Exact);

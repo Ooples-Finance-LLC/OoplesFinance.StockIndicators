@@ -1763,58 +1763,15 @@ public sealed class IchimokuCloudState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("IIRLse")]
 public sealed class IIRLeastSquaresEstimateState : IStreamingIndicatorState
 {
-    private readonly double _a;
-    private readonly int _halfLength;
-    private readonly StreamingInputResolver _input;
-    private double _prevS;
-    private double _prevSEma;
-    private bool _hasPrev;
-
-    public IIRLeastSquaresEstimateState(int length = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _a = (double)4 / (resolved + 2);
-        _halfLength = MathHelper.MinOrMax((int)Math.Ceiling((double)resolved / 2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly IirLeastSquaresWindow _window;
+    public IIRLeastSquaresEstimateState(int length = 100) => _window = new(length);
     public IndicatorName Name => IndicatorName.IIRLeastSquaresEstimate;
-
-    public void Reset()
-    {
-        _prevS = 0;
-        _prevSEma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevS = _hasPrev ? _prevS : value;
-        var prevSEma = _prevSEma;
-        var sEma = CalculationsHelper.CalculateEMA(prevS, prevSEma, _halfLength);
-        var s = (_a * value) + prevS - (_a * sEma);
-
-        if (isFinal)
-        {
-            _prevS = s;
-
-            // Keep the value just computed, not the one it came from. Storing prevSEma left this
-            // pinned at zero and the estimate diverged, matching the batch defect it mirrored.
-            _prevSEma = sEma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "IIRLse", s }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(s, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "IIRLse", value } } : null);
     }
 }
 

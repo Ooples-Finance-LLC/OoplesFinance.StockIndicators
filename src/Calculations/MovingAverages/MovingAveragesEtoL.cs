@@ -713,43 +713,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateIIRLeastSquaresEstimate(this StockData stockData, int length = 100)
     {
-        List<double> sList = new(stockData.Count);
-        List<double> sEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = (double)4 / (length + 2);
-        var halfLength = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new IirLeastSquaresWindow(length);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevS = i >= 1 ? sList[i - 1] : currentValue;
-            var prevSEma = GetLastOrDefault(sEmaList);
-            var sEma = CalculateEMA(prevS, prevSEma, halfLength);
-
-            // Record the value just computed, not the one it was computed from. Adding prevSEma left
-            // the list pinned at its initial zero, so every sEma was taken against zero rather than
-            // against a running average, and the estimate diverged - 2024 and climbing on a market
-            // priced at 100.
-            sEmaList.Add(sEma);
-
-            var s = (a * currentValue) + prevS - (a * sEma);
-            sList.Add(s);
-
-            var signal = GetCompareSignal(currentValue - s, prevValue - prevS);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? -input[i] : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "IIRLse", sList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sList);
-        stockData.IndicatorName = IndicatorName.IIRLeastSquaresEstimate;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "IIRLse", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.IIRLeastSquaresEstimate;
         return stockData;
     }
 
