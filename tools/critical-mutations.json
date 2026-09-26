@@ -15303,5 +15303,23 @@
     "before": "new RickerWindow(length, pctWidth)",
     "after": "new RickerWindow(length, 60)",
     "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "polynomial-component-regression-fallback",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct PolyLsmaCore",
+    "before": "var window = new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(length);\n        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);",
+    "after": "MovingAverageCore.PolynomialLeastSquaresMovingAverage(input, output, length);",
+    "filter": "FullyQualifiedName~PolynomialComponentNumericalTests"
+  },
+  {
+    "id": "polynomial-component-ignores-period",
+    "module": "numerical",
+    "file": "src/Core/Registry/MovingAverageRegistry.cs",
+    "scope": "public readonly struct PolyLsmaCore",
+    "before": "new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(length)",
+    "after": "new OoplesFinance.StockIndicators.Helpers.PolynomialCellWindow(14)",
+    "filter": "FullyQualifiedName~PolynomialComponentNumericalTests"
   }
 ]
