@@ -13339,10 +13339,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersHighPassFilterV1Fast(StockData data, ComputeContext context, int length = 125)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersHighPassFilterV1(close, buffer.WritableSpan, length, 1);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.EhlersHighPassFilterV1(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -16549,27 +16549,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     private static ComputeBuffer EhlersHighPassFilterV1(ComputeContext context, ReadOnlySpan<double> input, int length, double mult)
     {
-        var count = input.Length;
-        length = Math.Max(length, 1);
-
-        var alpha = EhlersFirstOrderCoefficient.Alpha(mult * length * Math.Sqrt(2));
-        var pow1 = MathHelper.Pow(1 - (alpha / 2), 2);
-        var pow2 = MathHelper.Pow(1 - alpha, 2);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue1 = i >= 1 ? input[i - 1] : 0;
-            var previousValue2 = i >= 2 ? input[i - 2] : 0;
-            var previousHp1 = i >= 1 ? output[i - 1] : 0;
-            var previousHp2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (pow1 * (input[i] - (2 * previousValue1) + previousValue2)) + (2 * (1 - alpha) * previousHp1) -
-                (pow2 * previousHp2);
-        }
-
-        return buffer;
+        var result = context.Rent(input.Length);
+        MovingAverageCore.EhlersHighPassFilterV1(input, result.WritableSpan, length, mult);
+        return result;
     }
 
     /// <summary>

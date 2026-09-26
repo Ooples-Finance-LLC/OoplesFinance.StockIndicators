@@ -271,37 +271,15 @@ public sealed class EhlersHannWindowIndicatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Hp")]
 public sealed class EhlersHighPassFilterV1State : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private readonly HighPassFilterV1Engine _engine;
-
-    public EhlersHighPassFilterV1State(int length = 125, double mult = 1)
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _engine = new HighPassFilterV1Engine(Math.Max(1, length), mult);
-    }
-
+    private readonly HighPassWindow _window;
+    public EhlersHighPassFilterV1State(int length = 125, double mult = 1) => _window = new(length, mult);
     public IndicatorName Name => IndicatorName.EhlersHighPassFilterV1;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var hp = _engine.Next(value, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hp", hp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hp, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Hp", value } } : null);
     }
 }
 

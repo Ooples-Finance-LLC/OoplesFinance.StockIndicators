@@ -1441,52 +1441,10 @@ public sealed class EhlersBetterExponentialMovingAverageState : IStreamingIndica
 
 internal sealed class HighPassFilterV1Engine
 {
-    private readonly double _alpha;
-    private readonly double _pow1;
-    private readonly double _pow2;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevHp1;
-    private double _prevHp2;
-    private int _index;
-
-    public HighPassFilterV1Engine(int length, double mult)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = EhlersFirstOrderCoefficient.Alpha(mult * resolved * Math.Sqrt(2));
-        _pow1 = MathHelper.Pow(1 - (_alpha / 2), 2);
-        _pow2 = MathHelper.Pow(1 - _alpha, 2);
-    }
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _index = 0;
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevHp2 = _index >= 2 ? _prevHp2 : 0;
-        var hp = (_pow1 * (value - (2 * prevValue1) + prevValue2)) +
-                 (2 * (1 - _alpha) * prevHp1) - (_pow2 * prevHp2);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevHp2 = _prevHp1;
-            _prevHp1 = hp;
-            _index++;
-        }
-
-        return hp;
-    }
+    private readonly HighPassWindow _window;
+    public HighPassFilterV1Engine(int length, double mult) => _window = new(length, mult);
+    public void Reset() => _window.Reset();
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
 }
 
 internal sealed class HighPassFilterV2Engine : IDisposable

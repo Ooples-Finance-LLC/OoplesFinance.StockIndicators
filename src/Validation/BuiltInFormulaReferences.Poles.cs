@@ -84,7 +84,7 @@ internal static partial class BuiltInFormulaReferences
             PoleTrajectory(Closes(bars), length, order, angleScale, binomialOrder, startup))));
     }
 
-    private static double[] HighPassV1Trajectory(double[] prices, int length, double multiplier)
+    internal static double[] HighPassV1Trajectory(double[] prices, int length, double multiplier)
     {
         var period = Math.Sqrt(2) * multiplier * Math.Max(1, length);
         if (period <= 2) return new double[prices.Length];
