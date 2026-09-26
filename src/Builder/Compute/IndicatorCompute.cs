@@ -14110,35 +14110,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersKaufmanAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 20)
     {
-        // CalculateEhlersKaufmanAdaptiveMovingAverage squares Ehlers' own rescaling of the efficiency ratio
-        // rather than interpolating between a fast and a slow alpha, which is what the core routine did.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorValue = i >= length - 1 ? input[i - (length - 1)] : 0;
-
-            double deltaSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var cValue = i >= j ? input[i - j] : 0;
-                var pValue = i >= j + 1 ? input[i - (j + 1)] : 0;
-                deltaSum += Math.Abs(cValue - pValue);
-            }
-
-            var ef = deltaSum != 0 ? Math.Min(Math.Abs(currentValue - priorValue) / deltaSum, 1) : 0;
-            var s = MathHelper.Pow((0.6667 * ef) + 0.0645, 2);
-
-            var prevKama = i >= 1 ? output[i - 1] : 0;
-            output[i] = (s * currentValue) + ((1 - s) * prevKama);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); var window = new EhlersKaufmanWindow(length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

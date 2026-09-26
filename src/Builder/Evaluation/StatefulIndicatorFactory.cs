@@ -336,6 +336,7 @@ internal static partial class StatefulIndicatorFactory
             KarobeinOscillatorSpecOptions karobein => new KarobeinOscillatorState(karobein.MaType, karobein.Length),
             ModularFilterSpecOptions modular => new ModularFilterState(modular.Length, modular.Beta, modular.Z),
             ParametricCorrectiveLinearMovingAverageSpecOptions parametric => new ParametricCorrectiveLinearMovingAverageState(parametric.Length),
+            EhlersKaufmanAdaptiveMovingAverageSpecOptions ekama => new EhlersKaufmanAdaptiveMovingAverageState(ekama.Length),
             WellRoundedMovingAverageSpecOptions wellRounded => new WellRoundedMovingAverageState(wellRounded.Length),
             EhlersBetterExponentialMovingAverageSpecOptions better => new EhlersBetterExponentialMovingAverageState(better.Length),
             MovingAverageSupportResistanceSpecOptions support => new MovingAverageSupportResistanceState(support.MaType, support.Length),
