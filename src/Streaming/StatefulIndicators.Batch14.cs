@@ -1400,56 +1400,15 @@ public sealed class HirashimaSugitaRSState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Hema")]
 public sealed class HoltExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _gamma;
-    private readonly StreamingInputResolver _input;
-    private double _prevB;
-    private double _prevHema;
-    private bool _hasPrev;
-
-    public HoltExponentialMovingAverageState(int alphaLength = 20, int gammaLength = 20)
-    {
-        var resolvedAlpha = Math.Max(1, alphaLength);
-        var resolvedGamma = Math.Max(1, gammaLength);
-        _alpha = (double)2 / (resolvedAlpha + 1);
-        _gamma = (double)2 / (resolvedGamma + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HoltWindow _window;
+    public HoltExponentialMovingAverageState(int alphaLength = 20, int gammaLength = 20) => _window = new(alphaLength, gammaLength);
     public IndicatorName Name => IndicatorName.HoltExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _prevB = 0;
-        _prevHema = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevB = _hasPrev ? _prevB : value;
-        var prevHema = _hasPrev ? _prevHema : 0;
-        var hema = ((1 - _alpha) * (prevHema + prevB)) + (_alpha * value);
-        var b = ((1 - _gamma) * prevB) + (_gamma * (hema - prevHema));
-
-        if (isFinal)
-        {
-            _prevB = b;
-            _prevHema = hema;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Hema", hema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hema, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Hema", value } } : null);
     }
 }
 

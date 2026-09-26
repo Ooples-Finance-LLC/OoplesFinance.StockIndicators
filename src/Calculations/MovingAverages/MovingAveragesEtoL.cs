@@ -912,38 +912,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateHoltExponentialMovingAverage(this StockData stockData, int alphaLength = 20, int gammaLength = 20)
     {
-        List<double> hemaList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (alphaLength + 1);
-        var gamma = (double)2 / (gammaLength + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new HoltWindow(alphaLength, gammaLength);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevHema = GetLastOrDefault(hemaList);
-            var hema = ((1 - alpha) * (prevHema + prevB)) + (alpha * currentValue);
-            hemaList.Add(hema);
-
-            var b = ((1 - gamma) * prevB) + (gamma * (hema - prevHema));
-            bList.Add(b);
-
-            var signal = GetCompareSignal(currentValue - hema, prevValue - prevHema);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Hema", hemaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hemaList);
-        stockData.IndicatorName = IndicatorName.HoltExponentialMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Hema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.HoltExponentialMovingAverage;
         return stockData;
     }
 

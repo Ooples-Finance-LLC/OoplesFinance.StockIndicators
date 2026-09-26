@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.HoltExponentialMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HoltOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 20))["Hema"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.HendersonWeightedMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HendersonOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 7))["Hwma"], IndicatorErrorBudget.Exact);

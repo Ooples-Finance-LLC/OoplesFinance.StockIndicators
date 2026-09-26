@@ -1527,27 +1527,11 @@ internal static class MovingAverageCore
     /// Computes Holt Exponential Moving Average.
     /// Double exponential smoothing with trend component.
     /// </summary>
-    internal static void HoltExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double alpha = 0.5, double beta = 0.5)
+    internal static void HoltExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20, int? gammaLength = null)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var a = 2.0 / (length + 1);
-        var b = beta * a;
-
-        double level = input[0];
-        double trend = 0;
-        output[0] = level;
-
-        for (var i = 1; i < input.Length; i++)
-        {
-            var prevLevel = level;
-            level = a * input[i] + (1 - a) * (level + trend);
-            trend = b * (level - prevLevel) + (1 - b) * trend;
-            output[i] = level + trend;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new HoltWindow(length, gammaLength ?? length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
