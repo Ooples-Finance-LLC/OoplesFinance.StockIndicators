@@ -1481,11 +1481,6 @@ OoplesFinance.StockIndicators.Indicators.HawkeyeVolumeIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.HawkeyeVolumeIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.HawkeyeVolumeIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.HerrickPayoffIndex/default
-OoplesFinance.StockIndicators.Indicators.HighLowBands/default
-OoplesFinance.StockIndicators.Indicators.HighLowBands/longer-periods
-OoplesFinance.StockIndicators.Indicators.HighLowBands/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HighLowBands/shorter-periods
-OoplesFinance.StockIndicators.Indicators.HighLowBands/weighted-average
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/default
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/longer-periods
 OoplesFinance.StockIndicators.Indicators.HirashimaSugitaRS/minimum-periods

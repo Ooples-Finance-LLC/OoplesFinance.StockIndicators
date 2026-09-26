@@ -21989,10 +21989,17 @@ internal static partial class IndicatorCompute
     {
         // CalculateHighLowBands centres its bands on the chained series smoothed twice, not on the close
         // smoothed once, and shifts them by a percentage of that centre. A shift of zero is the centre itself.
+        HighLowBandsWindow.ValidateShift(pctShift);
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var result = context.Rent(count); using var window = new HighLowBandsWindow(maType, length);
+            for (var i = 0; i < count; i++) result.WritableSpan[i] = HighLowBandsWindow.Shift(window.Next(inputList[i], true), pctShift);
+            return result;
+        }
         using var smoothed = context.Rent(count);
         MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
 
@@ -22004,7 +22011,7 @@ internal static partial class IndicatorCompute
         var output = buffer.WritableSpan;
         for (var i = 0; i < count; i++)
         {
-            output[i] = tma[i] + (tma[i] * pctShift / 100);
+            output[i] = HighLowBandsWindow.Shift(tma[i], pctShift);
         }
 
         return buffer;

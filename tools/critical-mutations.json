@@ -13003,5 +13003,104 @@
     "after": "",
     "filter": "FullyQualifiedName~HighLowAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class HighLowMovingAverageState"
+  },
+  {
+    "id": "high-low-bands-wrong-percentage-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "return total.Mean(100);",
+    "after": "return total.Mean(99);",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "high-low-bands-missing-middle",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "total.Add(middle, 100);",
+    "after": "total.Add(middle, 99);",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "high-low-bands-overflows-product",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "total.AddProduct(middle, percent);",
+    "after": "total.Add(middle * percent);",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "high-low-bands-early-percentage-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "total.AddProduct(middle, percent);",
+    "after": "total.AddProduct(middle, (percent / 100) * 100);",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
+  },
+  {
+    "id": "high-low-bands-second-gets-price",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "_second.Next(new RocBankValue(first), commit)",
+    "after": "_second.Next(new RocBankValue(price), commit)",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-bands-commits-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "_first.Next(new RocBankValue(price), commit)",
+    "after": "_first.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-bands-commits-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "_second.Next(new RocBankValue(first), commit)",
+    "after": "_second.Next(new RocBankValue(first), true)",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-bands-stale-first-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-bands-stale-second-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HighLowBandsWindow.cs",
+    "before": "_second?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CascadesAndAllBandsPreservePreviewResetAndCancellation"
+  },
+  {
+    "id": "high-low-bands-customer-gets-price-twice",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "length, smoothed.Span, twiceSmoothed.WritableSpan",
+    "after": "length, SpanCompat.AsReadOnlySpan(inputList), twiceSmoothed.WritableSpan",
+    "scope": "internal static ComputeBuffer ComputeHighLowBandsFast(",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.CustomerAveragesReceivePriceThenFirstAverage"
+  },
+  {
+    "id": "high-low-bands-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "scope": "public sealed class HighLowBandsState",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "high-low-bands-wrong-lower-direction",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "HighLowBandsWindow.Shift(middle, -_pctShift)",
+    "after": "HighLowBandsWindow.Shift(middle, _pctShift)",
+    "scope": "public sealed class HighLowBandsState",
+    "filter": "FullyQualifiedName~HighLowBandsNumericalTests.PercentageShiftRoundsOnlyTheFinalResult"
   }
 ]
