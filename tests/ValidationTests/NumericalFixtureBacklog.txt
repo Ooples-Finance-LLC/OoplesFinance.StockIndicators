@@ -2270,10 +2270,6 @@ OoplesFinance.StockIndicators.Indicators.RecursiveStochastic/default
 OoplesFinance.StockIndicators.Indicators.RecursiveStochastic/longer-periods
 OoplesFinance.StockIndicators.Indicators.RecursiveStochastic/minimum-periods
 OoplesFinance.StockIndicators.Indicators.RecursiveStochastic/shorter-periods
-OoplesFinance.StockIndicators.Indicators.RegularizedEma/default
-OoplesFinance.StockIndicators.Indicators.RegularizedEma/longer-periods
-OoplesFinance.StockIndicators.Indicators.RegularizedEma/minimum-periods
-OoplesFinance.StockIndicators.Indicators.RegularizedEma/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/default
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/longer-fastLength
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/longer-length

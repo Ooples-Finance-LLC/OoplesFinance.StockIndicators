@@ -1031,33 +1031,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRegularizedExponentialMovingAverage(this StockData stockData, int length = 14, double lambda = 0.5)
     {
-        List<double> remaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new RegularizedWindow(length, lambda);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevRema1 = i >= 1 ? remaList[i - 1] : 0;
-            var prevRema2 = i >= 2 ? remaList[i - 2] : 0;
-
-            var rema = (prevRema1 + (alpha * (currentValue - prevRema1)) + (lambda * ((2 * prevRema1) - prevRema2))) / (lambda + 1);
-            remaList.Add(rema);
-
-            var signal = GetCompareSignal(currentValue - rema, prevValue - prevRema1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rema", remaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(remaList);
-        stockData.IndicatorName = IndicatorName.RegularizedExponentialMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RegularizedExponentialMovingAverage;
         return stockData;
     }
 
