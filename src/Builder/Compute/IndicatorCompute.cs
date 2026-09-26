@@ -12769,30 +12769,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeHoltExponentialMovingAverageFast(StockData data, ComputeContext context, int alphaLength = 20,
         int gammaLength = 20)
     {
-        // CalculateHoltExponentialMovingAverage carries a trend term alongside the level and smooths each with
-        // its own alpha, seeding the trend at the first value and the level at zero.
-        // MovingAverageCore.HoltExponentialMovingAverage took the close and had a single smoothing constant.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var alpha = (double)2 / (Math.Max(alphaLength, 1) + 1);
-        var gamma = (double)2 / (Math.Max(gammaLength, 1) + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double level = 0, trend = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevTrend = i >= 1 ? trend : currentValue;
-            var prevLevel = level;
-
-            level = ((1 - alpha) * (prevLevel + prevTrend)) + (alpha * currentValue);
-            trend = ((1 - gamma) * prevTrend) + (gamma * (level - prevLevel));
-            output[i] = level;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.HoltExponentialMovingAverage(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, alphaLength, gammaLength);
         return buffer;
     }
 

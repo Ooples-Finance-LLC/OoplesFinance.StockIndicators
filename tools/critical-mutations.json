@@ -11360,5 +11360,104 @@
     "after": "",
     "filter": "FullyQualifiedName~HendersonNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class HendersonWeightedMovingAverageState"
+  },
+  {
+    "id": "holt-wrong-startup-trend",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "_hasPrevious ? _trend : new RocBankValue(price)",
+    "after": "_hasPrevious ? _trend : default",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-gamma-uses-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "Math.Max(1, gammaLength)",
+    "after": "Math.Max(1, alphaLength)",
+    "filter": "FullyQualifiedName~HoltNumericalTests.IndependentPeriodsControlLevelAndTrend"
+  },
+  {
+    "id": "holt-alpha-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "Math.Max(1, alphaLength) + 1d",
+    "after": "Math.Max(1, alphaLength) + 1",
+    "filter": "FullyQualifiedName~HoltNumericalTests.IndependentPeriodsControlLevelAndTrend"
+  },
+  {
+    "id": "holt-gamma-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "Math.Max(1, gammaLength) + 1d",
+    "after": "Math.Max(1, gammaLength) + 1",
+    "filter": "FullyQualifiedName~HoltNumericalTests.IndependentPeriodsControlLevelAndTrend"
+  },
+  {
+    "id": "holt-publishes-level-plus-trend",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "return level.Publish();",
+    "after": "return Add(level, trend).Publish();",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-premature-level-publication",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "_level = level;",
+    "after": "_level = new RocBankValue(level.Publish());",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-stale-level-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "_level = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HoltWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "holt-wrong-registry-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "gammaLength ?? length",
+    "after": "gammaLength ?? 20",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal static void HoltExponentialMovingAverage("
+  },
+  {
+    "id": "holt-indexes-empty-core",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "var window = new HoltWindow(length, gammaLength ?? length);",
+    "after": "output[0] = 0; var window = new HoltWindow(length, gammaLength ?? length);",
+    "filter": "FullyQualifiedName~HoltNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal static void HoltExponentialMovingAverage("
+  },
+  {
+    "id": "holt-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~HoltNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class HoltExponentialMovingAverageState"
   }
 ]
