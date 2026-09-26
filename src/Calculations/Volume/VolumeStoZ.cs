@@ -262,46 +262,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUpsideDownsideVolume(this StockData stockData, int length = 50)
     {
-        List<double> upVolList = new(stockData.Count);
-        List<double> downVolList = new(stockData.Count);
-        List<double> upDownVolumeList = new(stockData.Count);
-        var upVolSumWindow = new RollingSum();
-        var downVolSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.UpsideDownside);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var upVol = currentValue > prevValue ? currentVolume : 0;
-            upVolList.Add(upVol);
-            upVolSumWindow.Add(upVol);
-
-            var downVol = currentValue < prevValue ? currentVolume * -1 : 0;
-            downVolList.Add(downVol);
-            downVolSumWindow.Add(downVol);
-
-            var upVolSum = upVolSumWindow.Sum(length);
-            var downVolSum = downVolSumWindow.Sum(length);
-
-            var prevUpDownVol = i >= 1 ? upDownVolumeList[i - 1] : 0;
-            var upDownVol = downVolSum != 0 ? upVolSum / downVolSum : 0;
-            upDownVolumeList.Add(upDownVol);
-
-            var signal = GetCompareSignal(upDownVol, prevUpDownVol);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value, previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Udv", upDownVolumeList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(upDownVolumeList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Udv", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.UpsideDownsideVolume;
-
         return stockData;
     }
 
@@ -451,39 +424,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVolumeAccumulationOscillator(this StockData stockData, int length = 14)
     {
-        List<double> vaoList = new(stockData.Count);
-        List<double> vaoSumList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum vaoSumWindow = new();
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentVolume = volumeList[i];
-            var medianValue = (currentHigh + currentLow) / 2;
-
-            var vao = currentVolume * (currentValue - medianValue);
-            vaoList.Add(vao);
-            vaoSumWindow.Add(vao);
-
-            var prevVaoSum = i >= 1 ? vaoSumList[i - 1] : 0;
-            var vaoSum = vaoSumWindow.Average(length);
-            vaoSumList.Add(vaoSum);
-
-            var signal = GetCompareSignal(vaoSum, prevVaoSum);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value, previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vao", vaoSumList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vaoSumList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vao", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.VolumeAccumulationOscillator;
-
         return stockData;
     }
 
@@ -760,38 +713,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTFSVolumeOscillator(this StockData stockData, int length = 7)
     {
-        List<double> totvList = new(stockData.Count);
-        List<double> tfsvoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum totvSumWindow = new();
-        var (inputList, _, _, openList, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Tfs);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var open = openList[i];
-            var close = inputList[i];
-            var volume = volumeList[i];
-
-            var totv = close > open ? volume : close < open ? -volume : 0;
-            totvList.Add(totv);
-            totvSumWindow.Add(totv);
-
-            var totvSum = totvSumWindow.Sum(length);
-            var prevTfsvo = i >= 1 ? tfsvoList[i - 1] : 0;
-            var tfsvo = length != 0 ? totvSum / length : 0;
-            tfsvoList.Add(tfsvo);
-
-            var signal = GetCompareSignal(tfsvo, prevTfsvo);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value, previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tfsvo", tfsvoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tfsvoList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tfsvo", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.TFSVolumeOscillator;
-
         return stockData;
     }
 

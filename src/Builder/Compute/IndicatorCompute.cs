@@ -10542,30 +10542,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeVolumeAccumulationOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateVolumeAccumulationOscillator weights volume by how far the chained series sits from the
-        // bar's median and publishes the average of that over the window - a single length, not the two the
-        // core routine was being given.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var medianValue = (highs[i] + lows[i]) / 2;
-
-            window.Add(volumes[i] * (currentValue - medianValue));
-            output[i] = window.Average(length);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
+        for (var i = 0; i < input.Count; i++)
+            output.WritableSpan[i] = window.Next(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true);
+        return output;
     }
 
     #endregion
@@ -12625,30 +12607,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTFSVolumeOscillatorFast(StockData data, ComputeContext context, int length = 7)
     {
-        // CalculateTFSVolumeOscillator signs each bar's volume by whether the chained series closed above or
-        // below the open and averages that over the window. OscillatorCore.TFSVolumeOscillator differenced two
-        // averages of the raw volume instead, and never looked at the price at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var signedVolume = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var close = input[i];
-            var open = opens[i];
-            var volume = volumes[i];
-
-            signedVolume.Add(close > open ? volume : close < open ? -volume : 0);
-            output[i] = length != 0 ? signedVolume.Sum(length) / length : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Tfs);
+        for (var i = 0; i < input.Count; i++)
+            output.WritableSpan[i] = window.Next(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true);
+        return output;
     }
 
     /// <summary>
@@ -18114,11 +18078,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeUpsideDownsideVolumeFast(StockData data, ComputeContext context, int length = 50)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.UpsideDownsideVolume(close, volume, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.UpsideDownside);
+        for (var i = 0; i < input.Count; i++)
+            output.WritableSpan[i] = window.Next(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true);
+        return output;
     }
 
     /// <summary>

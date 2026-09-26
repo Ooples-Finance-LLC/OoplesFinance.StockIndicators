@@ -5324,15 +5324,10 @@ internal static class OscillatorCore
     internal static void VolumeAccumulationOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low,
         ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        length = Math.Max(1, length);
-        var sum = new RollingSum();
-        for (var i = 0; i < close.Length; i++)
-        {
-            sum.Add(volume[i] * (close[i] - (high[i] + low[i]) / 2));
-            output[i] = sum.Average(length);
-        }
+        if (volume.Length != close.Length || high.Length != close.Length || low.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, high[i], low[i], close[i], volume[i], true);
     }
 
     #endregion
@@ -6941,36 +6936,12 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes TFS Volume Oscillator.
     /// </summary>
-    internal static void TFSVolumeOscillator(ReadOnlySpan<double> volume, Span<double> output, int fastLength = 13, int slowLength = 55)
+    internal static void TFSVolumeOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 7)
     {
-        if (output.Length < volume.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(volume.Length);
-        var slowEmaArray = pool.Rent(volume.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, volume.Length);
-            var slowEma = slowEmaArray.AsSpan(0, volume.Length);
-
-            MovingAverageCore.ExponentialMovingAverage(volume, fastEma, fastLength);
-            MovingAverageCore.ExponentialMovingAverage(volume, slowEma, slowLength);
-
-            // Volume oscillator = ((fast - slow) / slow) * 100
-            for (var i = 0; i < volume.Length; i++)
-            {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if (volume.Length != close.Length || open.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.Tfs);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], 0, 0, close[i], volume[i], true);
     }
 
     /// <summary>
@@ -7924,31 +7895,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UpsideDownsideVolume(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 50)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var upVolSum = new RollingSum();
-        var downVolSum = new RollingSum();
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentClose = close[i];
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-            var currentVolume = volume[i];
-
-            var upVol = currentClose > prevClose ? currentVolume : 0;
-            var downVol = currentClose < prevClose ? -currentVolume : 0;
-
-            upVolSum.Add(upVol);
-            downVolSum.Add(downVol);
-
-            var upSum = upVolSum.Sum(length);
-            var downSum = downVolSum.Sum(length);
-
-            output[i] = downSum != 0 ? upSum / downSum : 0;
-        }
+        if (volume.Length != close.Length || output.Length < close.Length)
+            throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        using var window = new VolumeBalanceWindow(length, VolumeBalanceKind.UpsideDownside);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(0, 0, 0, close[i], volume[i], true);
     }
 
     /// <summary>

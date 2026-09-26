@@ -9,65 +9,17 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Udv")]
 public sealed class UpsideDownsideVolumeState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _upSum;
-    private readonly RollingWindowSum _downSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public UpsideDownsideVolumeState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _upSum = new RollingWindowSum(_length);
-        _downSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeBalanceWindow _window;
+    public UpsideDownsideVolumeState(int length = 50) => _window = new VolumeBalanceWindow(length, VolumeBalanceKind.UpsideDownside);
     public IndicatorName Name => IndicatorName.UpsideDownsideVolume;
-
-    public void Reset()
-    {
-        _upSum.Reset();
-        _downSum.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var upVol = value > prevValue ? volume : 0;
-        var downVol = value < prevValue ? volume * -1 : 0;
-        var upSum = isFinal ? _upSum.Add(upVol, out _) : _upSum.Preview(upVol, out _);
-        var downSum = isFinal ? _downSum.Add(downVol, out _) : _downSum.Preview(downVol, out _);
-        var udv = downSum != 0 ? upSum / downSum : 0;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Udv", udv }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(udv, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Udv", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _upSum.Dispose();
-        _downSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Upr")]
@@ -1811,47 +1763,17 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 [PrimaryOutput("Vao")]
 public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _vaoSum;
-    private readonly StreamingInputResolver _input;
-
-    public VolumeAccumulationOscillatorState(int length = 14)
-    {
-        _vaoSum = new RollingWindowSum(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeBalanceWindow _window;
+    public VolumeAccumulationOscillatorState(int length = 14) => _window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
     public IndicatorName Name => IndicatorName.VolumeAccumulationOscillator;
-
-    public void Reset()
-    {
-        _vaoSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var medianValue = (bar.High + bar.Low) / 2d;
-        var vao = bar.Volume * (value - medianValue);
-        int countAfter;
-        var vaoSum = isFinal ? _vaoSum.Add(vao, out countAfter) : _vaoSum.Preview(vao, out countAfter);
-        var vaoAvg = countAfter > 0 ? vaoSum / countAfter : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vao", vaoAvg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vaoAvg, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Vao", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _vaoSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vapc")]

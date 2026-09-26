@@ -2825,10 +2825,6 @@ OoplesFinance.StockIndicators.Indicators.T3/longer-periods
 OoplesFinance.StockIndicators.Indicators.T3/minimum-periods
 OoplesFinance.StockIndicators.Indicators.T3/shorter-periods
 OoplesFinance.StockIndicators.Indicators.T3/weighted-average
-OoplesFinance.StockIndicators.Indicators.TFSVolumeOscillator/default
-OoplesFinance.StockIndicators.Indicators.TFSVolumeOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.TFSVolumeOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TFSVolumeOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/minimum-periods
@@ -3118,10 +3114,6 @@ OoplesFinance.StockIndicators.Indicators.UniChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.UniChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.UniChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UniChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/default
-OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/longer-periods
-OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/minimum-periods
-OoplesFinance.StockIndicators.Indicators.UpsideDownsideVolume/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/default
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/longer-periods
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/minimum-periods
@@ -3262,10 +3254,6 @@ OoplesFinance.StockIndicators.Indicators.VolatilityWaveMovingAverage/longer-peri
 OoplesFinance.StockIndicators.Indicators.VolatilityWaveMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.VolatilityWaveMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.VolatilityWaveMovingAverage/weighted-average
-OoplesFinance.StockIndicators.Indicators.VolumeAccumulationOscillator/default
-OoplesFinance.StockIndicators.Indicators.VolumeAccumulationOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.VolumeAccumulationOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.VolumeAccumulationOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.VolumeAccumulationPercent/default
 OoplesFinance.StockIndicators.Indicators.VolumeAccumulationPercent/longer-periods
 OoplesFinance.StockIndicators.Indicators.VolumeAccumulationPercent/minimum-periods
