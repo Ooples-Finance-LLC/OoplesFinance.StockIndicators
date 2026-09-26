@@ -949,72 +949,14 @@ public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState
 [PrimaryOutput("Wrma")]
 public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private double _prevB;
-    private double _prevY;
-    private double _prevSrcY;
-    private double _prevSrcEma;
-    private double _prevYEma;
-    private bool _hasPrev;
-
-    public WellRoundedMovingAverageState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _alpha = 2d / (_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly WellRoundedWindow _window;
+    public WellRoundedMovingAverageState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.WellRoundedMovingAverage;
-
-    public void Reset()
-    {
-        _prevA = 0;
-        _prevB = 0;
-        _prevY = 0;
-        _prevSrcY = 0;
-        _prevSrcEma = 0;
-        _prevYEma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevSrcY = _hasPrev ? _prevSrcY : 0;
-        var prevSrcEma = _hasPrev ? _prevSrcEma : 0;
-
-        var a = _prevA + (_alpha * prevSrcY);
-        var b = _prevB + (_alpha * prevSrcEma);
-        var ab = a + b;
-        var y = CalculationsHelper.CalculateEMA(ab, _prevY, 1);
-        var srcY = value - y;
-        var yEma = CalculationsHelper.CalculateEMA(y, _prevYEma, _length);
-        var srcEma = value - yEma;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _prevY = y;
-            _prevSrcY = srcY;
-            _prevSrcEma = srcEma;
-            _prevYEma = yEma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Wrma", y }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(y, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Wrma", value } } : null);
     }
 }
 

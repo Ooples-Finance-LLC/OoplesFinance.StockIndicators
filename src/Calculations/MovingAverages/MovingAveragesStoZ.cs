@@ -635,58 +635,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWellRoundedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> yList = new(stockData.Count);
-        List<double> srcYList = new(stockData.Count);
-        List<double> srcEmaList = new(stockData.Count);
-        List<double> yEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new WellRoundedWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSrcY = i >= 1 ? srcYList[i - 1] : 0;
-            var prevSrcEma = i >= 1 ? srcEmaList[i - 1] : 0;
-
-            var prevA = GetLastOrDefault(aList);
-            var a = prevA + (alpha * prevSrcY);
-            aList.Add(a);
-
-            var prevB = GetLastOrDefault(bList);
-            var b = prevB + (alpha * prevSrcEma);
-            bList.Add(b);
-
-            var ab = a + b;
-            var prevY = GetLastOrDefault(yList);
-            var y = CalculateEMA(ab, prevY, 1);
-            yList.Add(y);
-
-            var srcY = currentValue - y;
-            srcYList.Add(srcY);
-
-            var prevYEma = GetLastOrDefault(yEmaList);
-            var yEma = CalculateEMA(y, prevYEma, length);
-            yEmaList.Add(yEma);
-
-            var srcEma = currentValue - yEma;
-            srcEmaList.Add(srcEma);
-
-            var signal = GetCompareSignal(currentValue - y, prevValue - prevY);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wrma", yList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(yList);
-        stockData.IndicatorName = IndicatorName.WellRoundedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wrma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.WellRoundedMovingAverage;
         return stockData;
     }
 

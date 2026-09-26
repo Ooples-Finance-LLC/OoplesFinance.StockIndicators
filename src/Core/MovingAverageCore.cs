@@ -2693,31 +2693,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void WellRoundedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var emaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            var ema = emaBuffer.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma, length);
-            ExponentialMovingAverage(input, ema, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = (sma[i] + ema[i]) / 2;
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-            ArrayPool<double>.Shared.Return(emaBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WellRoundedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
