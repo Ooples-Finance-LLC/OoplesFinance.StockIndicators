@@ -813,48 +813,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateWilliamsAccumulationDistribution(this StockData stockData)
     {
-        List<double> wadList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new WilliamsAccumulationWindow();
         for (var i = 0; i < stockData.Count; i++)
         {
-            var close = inputList[i];
-            var prevWad = GetLastOrDefault(wadList);
-
-            // Williams' accumulation/distribution is a running total of one bar's contribution, and that
-            // contribution is measured against the true range high and low - the previous close pulled up to
-            // the bar's high, or down to its low - not against the previous bar's own high and low. An
-            // unchanged close contributes nothing; it does not discard the total accumulated so far. The
-            // first bar has no previous close, so it contributes nothing either.
-            double wad;
-            if (i == 0)
-            {
-                wad = 0;
-            }
-            else
-            {
-                var prevClose = inputList[i - 1];
-                var trueRangeHigh = Math.Max(highList[i], prevClose);
-                var trueRangeLow = Math.Min(lowList[i], prevClose);
-                wad = close > prevClose ? prevWad + close - trueRangeLow
-                    : close < prevClose ? prevWad + close - trueRangeHigh
-                    : prevWad;
-            }
-
-            wadList.Add(wad);
-
-            var signal = GetCompareSignal(wad, prevWad);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true).Publish();
+            signals?.Add(GetCompareSignal(value, i == 0 ? 0 : output[i - 1])); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Wad", wadList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(wadList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Wad", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.WilliamsAccumulationDistribution;
-
         return stockData;
     }
 
@@ -3262,30 +3232,23 @@ public static partial class Calculations
     public static StockData CalculateSmoothedWilliamsAccumulationDistribution(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var wadList = CalculateWilliamsAccumulationDistribution(stockData).ChainedValues;
-        var wadSignalList = GetMovingAverageList(stockData, maType, length, wadList);
-
+        List<double> output = new(stockData.Count), signal = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new WilliamsAccumulationWindow();
+        var standard = StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, stockData.Count) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var wad = wadList[i];
-            var wadSma = wadSignalList[i];
-            var prevWad = i >= 1 ? wadList[i - 1] : 0;
-            var prevWadSma = i >= 1 ? wadSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(wad - wadSma, prevWad - prevWadSma);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            output.Add(value.Publish());
+            if (standard) signal.Add(average!.Next(value, true).Publish());
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Swad", wadList },
-            { "Signal", wadSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(wadList);
+        if (!standard) signal = GetMovingAverageList(stockData, maType, length, output);
+        for (var i = 0; i < stockData.Count; i++) signals?.Add(GetCompareSignal(output[i] - signal[i], i == 0 ? 0 : output[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Swad", output }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.SmoothedWilliamsAccumulationDistribution;
-
         return stockData;
     }
 

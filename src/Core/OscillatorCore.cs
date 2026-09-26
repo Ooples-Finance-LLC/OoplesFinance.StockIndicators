@@ -8450,40 +8450,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void WilliamsAccumulationDistribution(ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        // The first bar has no previous close, so it contributes nothing. Treating the missing previous close
-        // as zero made every close look like an advance and seeded the running total with the whole first
-        // close price. Each later bar is measured against the true range high and low - the previous close
-        // pulled up to this bar's high, or down to its low - not against the previous bar's own high and low,
-        // and an unchanged close contributes nothing rather than resetting the total.
-        output[0] = 0;
-        double wad = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var trueRangeHigh = Math.Max(high[i], close[i - 1]);
-            var trueRangeLow = Math.Min(low[i], close[i - 1]);
-
-            if (close[i] > close[i - 1])
-            {
-                wad += close[i] - trueRangeLow;
-            }
-            else if (close[i] < close[i - 1])
-            {
-                wad += close[i] - trueRangeHigh;
-            }
-
-            output[i] = wad;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilliamsAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Publish();
     }
 
     /// <summary>

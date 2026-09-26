@@ -159,77 +159,26 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Swad")]
 public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private double _prevWad;
-    private bool _hasPrev;
-
-    public SmoothedWilliamsAccumulationDistributionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 14)
+    private readonly WilliamsAccumulationWindow _window = new();
+    private readonly RocBankAverage? _average;
+    private readonly IMovingAverageSmoother? _fallback;
+    public SmoothedWilliamsAccumulationDistributionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
+        if (StrengthWindow.Supports(maType)) _average = new RocBankAverage(maType, length, int.MaxValue);
+        else _fallback = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
-
     public IndicatorName Name => IndicatorName.SmoothedWilliamsAccumulationDistribution;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevClose = 0;
-        _prevWad = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset(); _average?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-
-        // The first bar has no previous close, so it contributes nothing and the total starts at zero.
-        // Treating a missing previous close as zero made that bar look like an advance and seeded the total
-        // with the whole close price. Every later bar is measured against the true range high and low - the
-        // previous close pulled up to this bar's high, or down to its low - not against the previous bar's own
-        // high and low, and an unchanged close leaves the total alone instead of discarding it.
-        double wad;
-        if (!_hasPrev)
-        {
-            wad = 0;
-        }
-        else
-        {
-            var trueRangeHigh = Math.Max(bar.High, _prevClose);
-            var trueRangeLow = Math.Min(bar.Low, _prevClose);
-            wad = close > _prevClose ? _prevWad + close - trueRangeLow :
-                close < _prevClose ? _prevWad + close - trueRangeHigh : _prevWad;
-        }
-
-        var signal = _signalSmoother.Next(wad, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _prevWad = wad;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Swad", wad },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(wad, outputs);
+        StreamingInputValidation.Validate(bar);
+        var wide = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        var value = wide.Publish();
+        var signal = _average is null ? _fallback!.Next(value, isFinal) : _average.Next(wide, isFinal).Publish();
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Swad", value }, { "Signal", signal } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() { _average?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Sr")]

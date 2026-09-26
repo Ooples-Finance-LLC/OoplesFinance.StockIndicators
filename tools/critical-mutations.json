@@ -8131,5 +8131,97 @@
     "after": "",
     "filter": "FullyQualifiedName~DrawdownNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class MartinRatioState"
+  },
+  {
+    "id": "williams-accumulation-wrong-rise-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "Math.Min(low, _previous)",
+    "after": "Math.Max(low, _previous)",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-wrong-fall-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "Math.Max(high, _previous)",
+    "after": "Math.Min(high, _previous)",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-nonzero-startup",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "if (_hasPrevious && close != _previous)",
+    "after": "if ((_hasPrevious || close != 0) && close != _previous)",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-drops-running-total",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "var total = _total;",
+    "after": "var total = new ExactMeanAccumulator();",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-rounds-away-recovery",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "_total = total;",
+    "after": "_total = default; _total.Add(result.Publish());",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "if (commit) { _total",
+    "after": "if (true) { _total",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-stale-total-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WilliamsAccumulationWindow.cs",
+    "before": "_total = default; _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow"
+  },
+  {
+    "id": "williams-accumulation-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.ExactTotalsPreserveCandleReferencesAndRecoverAfterOverflow",
+    "scope": "internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast("
+  },
+  {
+    "id": "williams-accumulation-skips-customer-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (!standard) MovingAverage(data, maType, Math.Max(1, length), values.Span, signals.WritableSpan);",
+    "after": "if (!standard) signals.WritableSpan.Clear();",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.CustomerAverageControlsOnlySignalAndIsConsumedForEitherOutput",
+    "scope": "internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast("
+  },
+  {
+    "id": "williams-accumulation-williamsaccumulationdistribution-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class WilliamsAccumulationDistributionState"
+  },
+  {
+    "id": "williams-accumulation-smoothedwilliamsaccumulationdistribution-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~WilliamsAccumulationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class SmoothedWilliamsAccumulationDistributionState"
   }
 ]

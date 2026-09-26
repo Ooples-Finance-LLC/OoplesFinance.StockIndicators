@@ -2393,9 +2393,7 @@ internal static partial class IndicatorCompute
                     "OsLevel" => SelfAdjustingRsiSeries.OsLevel,
                     _ => SelfAdjustingRsiSeries.SaRsi
                 }),
-            SmoothedWilliamsAccumulationDistributionSpecOptions swad => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType), swad.Length, swad.MaType)
-                : ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType),
+            SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType, spec.OutputKey),
             StatisticalVolatilitySpecOptions sv => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2), sv.Length1, sv.MaType)
                 : ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2),
@@ -18362,7 +18360,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeWilliamsAccumulationDistributionFast(StockData data, ComputeContext context)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
         var buffer = context.Rent(data.Count);
@@ -28162,19 +28160,23 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeSmoothedWilliamsAccumulationDistributionFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        // The primary series of CalculateSmoothedWilliamsAccumulationDistribution is the raw accumulation
-        // total; the moving average it takes of that total is published as the Signal series, so length and
-        // maType do not reach this output.
-        _ = length;
-        _ = maType;
-        VolumeCore.WilliamsAD(high, low, close, buffer.WritableSpan);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new WilliamsAccumulationWindow();
+        var standard = StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides;
+        using var average = standard ? new RocBankAverage(maType, length, input.Count) : null;
+        using var values = context.Rent(input.Count); using var signals = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var value = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true);
+            values.WritableSpan[i] = value.Publish();
+            if (standard) signals.WritableSpan[i] = average!.Next(value, true).Publish();
+        }
+        if (!standard) MovingAverage(data, maType, Math.Max(1, length), values.Span, signals.WritableSpan);
+        var output = context.Rent(input.Count);
+        (outputKey == "Signal" ? signals.Span : values.Span).CopyTo(output.WritableSpan);
+        return output;
     }
 
     internal static ComputeBuffer ComputeStatisticalVolatilityFast(StockData data, ComputeContext context, int length1 = 30,

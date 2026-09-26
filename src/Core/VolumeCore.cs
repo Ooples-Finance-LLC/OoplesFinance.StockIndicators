@@ -635,35 +635,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void WilliamsAD(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 0;
-        double wad = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            double trueRangeHigh = Math.Max(high[i], close[i - 1]);
-            double trueRangeLow = Math.Min(low[i], close[i - 1]);
-
-            if (close[i] > close[i - 1])
-            {
-                wad += close[i] - trueRangeLow;
-            }
-            else if (close[i] < close[i - 1])
-            {
-                wad += close[i] - trueRangeHigh;
-            }
-
-            output[i] = wad;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new WilliamsAccumulationWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Publish();
     }
 
     /// <summary>
