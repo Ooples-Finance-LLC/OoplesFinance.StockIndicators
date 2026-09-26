@@ -14789,10 +14789,19 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeOvershootReductionMovingAverageFast(StockData data, ComputeContext context,
         int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
+        length = Math.Max(1, length);
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var buffer = context.Rent(input.Count);
-        using var state = new OoplesFinance.StockIndicators.Streaming.OvershootReductionMovingAverageState(maType, length);
-        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = state.NextValue(input[i], isFinal: true);
+        using var window = new OvershootWindow(maType, length, initializeFallback: false);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        {
+            using var indexMean = context.Rent(input.Count); using var priceMean = context.Rent(input.Count);
+            var indices = Enumerable.Range(0, input.Count).Select(i => (double)i).ToArray();
+            MovingAverage(data, maType, length, indices, indexMean.WritableSpan);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), priceMean.WritableSpan);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true, priceMean.Span[i], indexMean.Span[i]);
+        }
+        else for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 
