@@ -799,48 +799,18 @@ public static partial class Calculations
     public static StockData CalculateCompoundRatioMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length = 20)
     {
-        List<double> coraRawList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var r = Pow(length, ((double)1 / (length - 1)) - 1);
-        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new CompoundRatioWindow(maType, length, initializeFallback: false);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            double sum = 0, weightedSum = 0, bas = 1 + (r * 2);
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var weight = Pow(bas, length - j);
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            var coraRaw = weightedSum != 0 ? sum / weightedSum : 0;
-            coraRawList.Add(coraRaw);
+            var raw = input.Select(price => window.Raw(price, true)).ToList();
+            line = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(raw), CompoundRatioWindow.SmoothPeriod(length))?.ToList() ?? GetMovingAverageList(stockData, maType, CompoundRatioWindow.SmoothPeriod(length), raw);
         }
-
-        var coraWaveList = GetMovingAverageList(stockData, maType, smoothLength, coraRawList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var coraWave = coraWaveList[i];
-            var prevCoraWave = i >= 1 ? coraWaveList[i - 1] : 0;
-
-            var signal = GetCompareSignal(currentValue - coraWave, prevValue - prevCoraWave);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Crma", coraWaveList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(coraWaveList);
-        stockData.IndicatorName = IndicatorName.CompoundRatioMovingAverage;
-
+        else foreach (var price in input) line.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Crma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.CompoundRatioMovingAverage;
         return stockData;
     }
 

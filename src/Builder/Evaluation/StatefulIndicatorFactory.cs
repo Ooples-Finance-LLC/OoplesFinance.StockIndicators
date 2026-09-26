@@ -416,6 +416,7 @@ internal static partial class StatefulIndicatorFactory
             WmaSpecOptions wma => new WeightedMovingAverageState(wma.Length),
             DemaSpecOptions dema => new DoubleExponentialMovingAverageState(length: dema.Length),
             TemaSpecOptions tema => new TripleExponentialMovingAverageState(length: tema.Length),
+            CompoundRatioMovingAverageSpecOptions compoundRatio => new CompoundRatioMovingAverageState(compoundRatio.MaType, compoundRatio.Length),
             RepulsionMovingAverageSpecOptions repulsion => new RepulsionMovingAverageState(repulsion.MaType, repulsion.Length),
             ElasticVolumeWeightedMovingAverageV1SpecOptions elasticAverage => new ElasticVolumeWeightedMovingAverageV1State(elasticAverage.MaType, elasticAverage.Length),
             ElasticVolumeWeightedMovingAverageV2SpecOptions elasticVolume => new ElasticVolumeWeightedMovingAverageV2State(elasticVolume.Length),

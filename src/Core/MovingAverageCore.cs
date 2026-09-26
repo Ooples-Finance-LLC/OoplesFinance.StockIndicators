@@ -2309,40 +2309,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void CompoundRatioMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var r = Math.Pow(length, (1.0 / (length - 1)) - 1);
-        var bas = 1 + (r * 2);
-        var smoothLength = Math.Max((int)Math.Round(Math.Sqrt(length)), 1);
-
-        // First pass: compute raw weighted average
-        var rawBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var raw = rawBuffer.AsSpan(0, input.Length);
-            for (var i = 0; i < input.Length; i++)
-            {
-                double sum = 0, weightedSum = 0;
-                for (var j = 0; j <= length - 1; j++)
-                {
-                    var weight = Math.Pow(bas, length - j);
-                    var prevValue = i >= j ? input[i - j] : 0;
-                    sum += prevValue * weight;
-                    weightedSum += weight;
-                }
-                raw[i] = weightedSum != 0 ? sum / weightedSum : 0;
-            }
-
-            // Second pass: smooth with WMA
-            WeightedMovingAverage(raw, output, smoothLength);
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(rawBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new CompoundRatioWindow(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
