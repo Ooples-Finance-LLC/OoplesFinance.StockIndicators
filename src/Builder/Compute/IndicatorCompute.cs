@@ -2925,6 +2925,15 @@ internal static partial class IndicatorCompute
     private static (ComputeBuffer Plus, ComputeBuffer Minus) DirectionalIndicators(StockData data,
         ComputeContext context, int length, MovingAvgType maType)
     {
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+            using var window = new DirectionalIndexWindow(maType, Math.Max(1, length), Math.Max(1, prices.Count));
+            var plus = context.Rent(prices.Count); var minus = context.Rent(prices.Count);
+            for (var i = 0; i < prices.Count; i++) { var point = window.Next(highs[i], lows[i], prices[i], true); plus.WritableSpan[i] = point.Plus; minus.WritableSpan[i] = point.Minus; }
+            return (plus, minus);
+        }
+
         // The pair CalculateAverageDirectionalIndex publishes as DiPlus and DiMinus: how much of the smoothed
         // true range each direction's movement accounts for. The index itself and every indicator that reads
         // the pair start here, so they cannot drift apart.
@@ -3009,6 +3018,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdxFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        if (!ComponentAverage.HasOverrides && StrengthWindow.Supports(maType))
+        {
+            var (prices, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+            using var window = new DirectionalIndexWindow(maType, Math.Max(1, length), Math.Max(1, prices.Count));
+            var result = context.Rent(prices.Count);
+            for (var i = 0; i < prices.Count; i++) result.WritableSpan[i] = window.Next(highs[i], lows[i], prices[i], true).Adx;
+            return result;
+        }
+
         // CalculateAverageDirectionalIndex smooths how far apart the two directional indicators are with
         // whichever average it was given, so the core's hardcoded Wilder's smoothing answered for one type
         // only.

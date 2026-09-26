@@ -210,78 +210,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageDirectionalIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var k = 1.0 / length;
-        double prevPlusDm = 0;
-        double prevMinusDm = 0;
-        double prevTr = 0;
-        double prevAdx = 0;
-        double plusDmSum = 0;
-        double minusDmSum = 0;
-        double trSum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate +DM, -DM, TR
-            var upMove = high[i] - high[i - 1];
-            var downMove = low[i - 1] - low[i];
-            var plusDm = (upMove > downMove && upMove > 0) ? upMove : 0;
-            var minusDm = (downMove > upMove && downMove > 0) ? downMove : 0;
-
-            var highLow = high[i] - low[i];
-            var highClose = Math.Abs(high[i] - close[i - 1]);
-            var lowClose = Math.Abs(low[i] - close[i - 1]);
-            var tr = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-            if (i < length)
-            {
-                plusDmSum += plusDm;
-                minusDmSum += minusDm;
-                trSum += tr;
-                output[i] = 0;
-            }
-            else if (i == length)
-            {
-                plusDmSum += plusDm;
-                minusDmSum += minusDm;
-                trSum += tr;
-                prevPlusDm = plusDmSum;
-                prevMinusDm = minusDmSum;
-                prevTr = trSum;
-
-                var plusDi = prevTr != 0 ? 100 * prevPlusDm / prevTr : 0;
-                var minusDi = prevTr != 0 ? 100 * prevMinusDm / prevTr : 0;
-                var diSum = plusDi + minusDi;
-                var dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
-                prevAdx = dx;
-                output[i] = dx;
-            }
-            else
-            {
-                // Wilder's smoothing
-                prevPlusDm = prevPlusDm - (prevPlusDm / length) + plusDm;
-                prevMinusDm = prevMinusDm - (prevMinusDm / length) + minusDm;
-                prevTr = prevTr - (prevTr / length) + tr;
-
-                var plusDi = prevTr != 0 ? 100 * prevPlusDm / prevTr : 0;
-                var minusDi = prevTr != 0 ? 100 * prevMinusDm / prevTr : 0;
-                var diSum = plusDi + minusDi;
-                var dx = diSum != 0 ? 100 * Math.Abs(plusDi - minusDi) / diSum : 0;
-
-                prevAdx = ((prevAdx * (length - 1)) + dx) / length;
-                output[i] = prevAdx;
-            }
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new DirectionalIndexWindow(MovingAvgType.WildersSmoothingMethod, Math.Max(1, length), Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Adx;
     }
 
     /// <summary>

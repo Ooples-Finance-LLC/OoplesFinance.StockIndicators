@@ -28,11 +28,6 @@ OoplesFinance.StockIndicators.Indicators.AdaptiveStochastic/minimum-maxLength
 OoplesFinance.StockIndicators.Indicators.AdaptiveStochastic/minimum-minLength
 OoplesFinance.StockIndicators.Indicators.AdaptiveStochastic/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AdaptiveStochastic/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Adx/default
-OoplesFinance.StockIndicators.Indicators.Adx/longer-periods
-OoplesFinance.StockIndicators.Indicators.Adx/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Adx/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Adx/weighted-average
 OoplesFinance.StockIndicators.Indicators.Ama/default
 OoplesFinance.StockIndicators.Indicators.Ama/longer-periods
 OoplesFinance.StockIndicators.Indicators.Ama/minimum-periods
@@ -106,11 +101,6 @@ OoplesFinance.StockIndicators.Indicators.AverageAbsoluteErrorNormalization/defau
 OoplesFinance.StockIndicators.Indicators.AverageAbsoluteErrorNormalization/longer-periods
 OoplesFinance.StockIndicators.Indicators.AverageAbsoluteErrorNormalization/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AverageAbsoluteErrorNormalization/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AverageDirectionalIndex/default
-OoplesFinance.StockIndicators.Indicators.AverageDirectionalIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.AverageDirectionalIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AverageDirectionalIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AverageDirectionalIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/default
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/minimum-periods

@@ -4872,6 +4872,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Adx")]
 public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDisposable
 {
+    private readonly DirectionalIndexWindow? _exact;
     private readonly IMovingAverageSmoother _dmPlus;
     private readonly IMovingAverageSmoother _dmMinus;
     private readonly IMovingAverageSmoother _tr;
@@ -4885,6 +4886,7 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDi
     public AverageDirectionalIndexState(int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
         var resolved = Math.Max(1, length);
+        if (StrengthWindow.Supports(maType)) _exact = new(maType, resolved);
         _dmPlus = MovingAverageSmootherFactory.Create(maType, resolved);
         _dmMinus = MovingAverageSmootherFactory.Create(maType, resolved);
         _tr = MovingAverageSmootherFactory.Create(maType, resolved);
@@ -4895,6 +4897,7 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDi
 
     public void Reset()
     {
+        _exact?.Reset();
         _dmPlus.Reset();
         _dmMinus.Reset();
         _tr.Reset();
@@ -4908,6 +4911,11 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDi
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var point = _exact.Next(bar.High, bar.Low, bar.Close, isFinal);
+            return new(point.Adx, includeOutputs ? new Dictionary<string, double> { { "DiPlus", point.Plus }, { "DiMinus", point.Minus }, { "Adx", point.Adx } } : null);
+        }
         var prevHigh = _hasPrev ? _prevHigh : bar.High;
         var prevLow = _hasPrev ? _prevLow : bar.Low;
         // For TrueRange on first bar, use current close
@@ -4955,6 +4963,7 @@ public sealed class AverageDirectionalIndexState : IStreamingIndicatorState, IDi
 
     public void Dispose()
     {
+        _exact?.Dispose();
         _dmPlus.Dispose();
         _dmMinus.Dispose();
         _tr.Dispose();

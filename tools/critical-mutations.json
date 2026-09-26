@@ -18099,5 +18099,146 @@
     "after": "output[i] = input[i];",
     "filter": "FullyQualifiedName~QuadraticProjectionNumericalTests.RollingSlopesAndSelectedCentersMatchIndependentOrthogonalProjection|FullyQualifiedName~QuadraticProjectionNumericalTests.SelectedPricesAndThreeCustomerCentersKeepTheirOrder|FullyQualifiedName~QuadraticProjectionNumericalTests.EmptyAndInvalidInputsDoNotAdvanceState|FullyQualifiedName~QuadraticProjectionNumericalTests.IntegerScaledOracleMatchesDirectFractionOrthogonalization",
     "scope": "internal static void QuadraticRegression("
+  },
+  {
+    "id": "adx-wrong-up-selection",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "up > down && up.Sign > 0",
+    "after": "up < down && up.Sign > 0",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-wrong-down-selection",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "down > up && down.Sign > 0",
+    "after": "down < up && down.Sign > 0",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-includes-ties",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "up > down && up.Sign > 0",
+    "after": "up >= down && up.Sign > 0",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-drops-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "if (highGap > span && highGap >= lowGap)",
+    "after": "if (highGap < 0)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-drops-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "else if (lowGap > span)",
+    "after": "else if (lowGap < 0)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-wrong-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "_hasPrevious ? _close : close",
+    "after": "close",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "sum.Add(a); sum.Add(b, -1);",
+    "after": "sum.Add(a - b);",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-wrong-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "numerator.AddTo(ref top, 100)",
+    "after": "numerator.AddTo(ref top, 10)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-wrong-dx-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "bottom.Add(positive); bottom.Add(negative);",
+    "after": "bottom.Add(positive);",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-wrong-adx-period",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "_adx = new(kind, length, capacityHint)",
+    "after": "_adx = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "if (commit) { _high = high;",
+    "after": "{ _high = high;",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-stale-adx-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DirectionalIndexWindow.cs",
+    "before": "_adx.Reset();",
+    "after": "/* retain ADX history */",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "adx-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public sealed class AverageDirectionalIndexState :"
+  },
+  {
+    "id": "adx-wrong-plus-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "plus.WritableSpan[i] = point.Plus",
+    "after": "plus.WritableSpan[i] = point.Minus",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "private static (ComputeBuffer Plus, ComputeBuffer Minus) DirectionalIndicators("
+  },
+  {
+    "id": "adx-wrong-customer-range",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "before": "Compatibility.SpanCompat.AsReadOnlySpan(trList), length",
+    "after": "Compatibility.SpanCompat.AsReadOnlySpan(dmMinusList), length",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "public static StockData CalculateAverageDirectionalIndex("
+  },
+  {
+    "id": "adx-core-wrong-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "Math.Max(1, length), Math.Max(1, close.Length)",
+    "after": "Math.Max(1, length + 1), Math.Max(1, close.Length)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.DirectionalTiesRangesAndSmoothingMatchIndependentFormulas|FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder|FullyQualifiedName~DirectionalIndexNumericalTests.InvalidFieldsNeverAdvanceState",
+    "scope": "internal static void AverageDirectionalIndex("
+  },
+  {
+    "id": "adx-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static (ComputeBuffer Plus, ComputeBuffer Minus) DirectionalIndicators(",
+    "before": "window.Next(highs[i], lows[i], prices[i], true)",
+    "after": "window.Next(highs[i], lows[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~DirectionalIndexNumericalTests.SelectedClosesAndFourCustomerStagesKeepTheirOrder"
   }
 ]
