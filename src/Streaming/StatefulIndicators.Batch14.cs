@@ -1415,50 +1415,17 @@ public sealed class HoltExponentialMovingAverageState : IStreamingIndicatorState
 [PrimaryOutput("He")]
 public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _wma;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly StreamingInputResolver _input;
-
-    public HullEstimateState(int length = 50)
-    {
-        var maLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _wma = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, maLength);
-        _ema = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, maLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HullEstimateWindow _window;
+    public HullEstimateState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.HullEstimate;
-
-    public void Reset()
-    {
-        _wma.Reset();
-        _ema.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var wma = _wma.Next(value, isFinal);
-        var ema = _ema.Next(value, isFinal);
-        var he = (3 * wma) - (2 * ema);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "He", he }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(he, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "He", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _wma.Dispose();
-        _ema.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

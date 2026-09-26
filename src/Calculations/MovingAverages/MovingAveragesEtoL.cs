@@ -952,7 +952,7 @@ public static partial class Calculations
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
             var prevHema = GetLastOrDefault(hemaList);
-            var hema = (3 * currentWma) - (2 * currentEma);
+            var hema = HullEstimateWindow.Combine(currentWma, currentEma);
             hemaList.Add(hema);
 
             var signal = GetCompareSignal(currentValue - hema, prevValue - prevHema);

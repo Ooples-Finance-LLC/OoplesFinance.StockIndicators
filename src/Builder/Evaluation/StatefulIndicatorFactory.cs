@@ -658,6 +658,7 @@ internal static partial class StatefulIndicatorFactory
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
+            HullEstimateSpecOptions hullEstimate => new HullEstimateState(length: hullEstimate.Length),
             HoltExponentialMovingAverageSpecOptions holt => new HoltExponentialMovingAverageState(holt.Length, holt.Length),
             HendersonWeightedMovingAverageSpecOptions henderson => new HendersonWeightedMovingAverageState(length: henderson.Length),
             RegularizedEmaSpecOptions regularized => new RegularizedExponentialMovingAverageState(length: regularized.Length),
