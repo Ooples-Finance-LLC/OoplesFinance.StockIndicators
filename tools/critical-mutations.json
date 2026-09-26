@@ -17577,5 +17577,138 @@
     "after": "data.InputValues",
     "filter": "FullyQualifiedName~AdaptiveAutonomousNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~AdaptiveAutonomousNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~AdaptiveAutonomousNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "internal static ComputeBuffer ComputeAdaptiveAutonomousRecursiveTrailingStopFast("
+  },
+  {
+    "id": "powered-wrong-efficiency-period",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "new(Math.Max(1, length))",
+    "after": "new(Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-ignores-power",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "_factor = factor",
+    "after": "_factor = 1",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-wrong-seed",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "_started ? _average : price",
+    "after": "_started ? _average : 0",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-premature-price-difference",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "var sum = new ExactMeanAccumulator(); sum.Add(previous); sum.AddProduct(current, gain); sum.AddProduct(previous, gain, -1);",
+    "after": "var sum = new ExactMeanAccumulator(); sum.Add(previous); sum.AddProduct(current - previous, gain);",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-wrong-upper-blend",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "Blend(Math.Max(price, previousA), Math.Min(price, previousA), gain)",
+    "after": "Blend(Math.Min(price, previousA), Math.Max(price, previousA), gain)",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-wrong-lower-blend",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "Blend(Math.Min(price, previousB), Math.Max(price, previousB), gain)",
+    "after": "Blend(Math.Max(price, previousB), Math.Min(price, previousB), gain)",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-drops-upper-turn",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "a > previousA || a < previousA && b < previousB",
+    "after": "a > previousA",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-drops-lower-turn",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "b < previousB || b > previousB && a > previousA",
+    "after": "b < previousB",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-wrong-side",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "var stop = side ? lower : upper;",
+    "after": "var stop = side ? upper : lower;",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "var gain = MathHelper.Pow",
+    "after": "commit = true; var gain = MathHelper.Pow",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PoweredKaufmanWindow.cs",
+    "before": "_average = _a = _b = _upper = _lower = 0",
+    "after": "_average = _a = _b = 0",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "powered-invalid-average-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.\n        ",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class PoweredKaufmanAdaptiveMovingAverageState :"
+  },
+  {
+    "id": "powered-invalid-stop-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.\n        ",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class AdaptiveTrailingStopState :"
+  },
+  {
+    "id": "powered-selected-average-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast("
+  },
+  {
+    "id": "powered-selected-stop-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveTrailingStopFast("
+  },
+  {
+    "id": "powered-wrong-power-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "powered ? value.Power : value.Average",
+    "after": "value.Average",
+    "filter": "FullyQualifiedName~PoweredKaufmanNumericalTests.EfficiencyStartupAndExtendedBandsPreserveEveryRoute|FullyQualifiedName~PoweredKaufmanNumericalTests.SelectedPricesAndHandCalculatedStartupArePreserved|FullyQualifiedName~PoweredKaufmanNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputePoweredKaufmanAdaptiveMovingAverageFast("
   }
 ]

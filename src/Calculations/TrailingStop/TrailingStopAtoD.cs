@@ -13,58 +13,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveTrailingStop(this StockData stockData, int length = 100, double factor = 3)
     {
-        List<double> upList = new(stockData.Count);
-        List<double> dnList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> osList = new(stockData.Count);
-        List<double> tsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var perList = CalculatePoweredKaufmanAdaptiveMovingAverage(stockData, length, factor).ChainedOutputs["Per"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new PoweredKaufmanWindow(length, factor);
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var per = perList[i];
-
-            var prevA = i >= 1 ? GetLastOrDefault(aList) : currentValue;
-            var a = Math.Max(currentValue, prevA) - (Math.Abs(currentValue - prevA) * per);
-            aList.Add(a);
-
-            var prevB = i >= 1 ? GetLastOrDefault(bList) : currentValue;
-            var b = Math.Min(currentValue, prevB) + (Math.Abs(currentValue - prevB) * per);
-            bList.Add(b);
-
-            var prevUp = GetLastOrDefault(upList);
-            var up = a > prevA ? a : a < prevA && b < prevB ? a : prevUp;
-            upList.Add(up);
-
-            var prevDn = GetLastOrDefault(dnList);
-            var dn = b < prevB ? b : b > prevB && a > prevA ? b : prevDn;
-            dnList.Add(dn);
-
-            var prevOs = GetLastOrDefault(osList);
-            var os = up > currentValue ? 1 : dn > currentValue ? 0 : prevOs;
-            osList.Add(os);
-
-            var prevTs = GetLastOrDefault(tsList);
-            var ts = (os * dn) + ((1 - os) * up);
-            tsList.Add(ts);
-
-            var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true).Stop; line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i > 0 ? input[i - 1] : 0) - (i > 0 ? line[i - 1] : 0)));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ts", tsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsList);
-        stockData.IndicatorName = IndicatorName.AdaptiveTrailingStop;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ts", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AdaptiveTrailingStop;
         return stockData;
     }
 

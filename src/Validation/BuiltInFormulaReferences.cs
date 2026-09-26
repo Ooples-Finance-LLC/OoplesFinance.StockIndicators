@@ -32,6 +32,16 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.PoweredKaufmanAdaptiveMovingAverage or IndicatorName.AdaptiveTrailingStop)
+        {
+            var poweredKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < poweredKeys.Length; slot++)
+            {
+                var key = poweredKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => PoweredKaufmanOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.AdaptiveAutonomousRecursiveMovingAverage or IndicatorName.AdaptiveAutonomousRecursiveTrailingStop)
         {
             var autonomousKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

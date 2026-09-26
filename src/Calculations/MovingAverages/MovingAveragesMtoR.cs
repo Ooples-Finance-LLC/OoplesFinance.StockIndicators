@@ -106,45 +106,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePoweredKaufmanAdaptiveMovingAverage(this StockData stockData, int length = 100, double factor = 3)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> aSpList = new(stockData.Count);
-        List<double> perList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new PoweredKaufmanWindow(length, factor);
+        List<double> line = new(input.Count), power = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var er = erList[i];
-            var powSp = er != 0 ? 1 / er : factor;
-            var perSp = Pow(er, powSp);
-
-            var per = Pow(er, factor);
-            perList.Add(per);
-
-            var prevA = i >= 1 ? GetLastOrDefault(aList) : currentValue;
-            var a = (per * currentValue) + ((1 - per) * prevA);
-            aList.Add(a);
-
-            var prevASp = i >= 1 ? GetLastOrDefault(aSpList) : currentValue;
-            var aSp = (perSp * currentValue) + ((1 - perSp) * prevASp);
-            aSpList.Add(aSp);
-
-            var signal = GetCompareSignal(currentValue - a, prevValue - prevA);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? input[i] : line[i - 1]; var value = window.Next(input[i], true);
+            line.Add(value.Average); power.Add(value.Power);
+            signals?.Add(GetCompareSignal(input[i] - value.Average, (i > 0 ? input[i - 1] : 0) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Per", perList },
-            { "Pkama", aList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName.PoweredKaufmanAdaptiveMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Per", power }, { "Pkama", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.PoweredKaufmanAdaptiveMovingAverage;
         return stockData;
     }
 

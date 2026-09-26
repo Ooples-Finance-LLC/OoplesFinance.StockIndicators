@@ -1254,68 +1254,16 @@ public sealed class PositiveVolumeIndexState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Pkama")]
 public sealed class PoweredKaufmanAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly StreamingInputResolver _input;
-    private readonly double _factor;
-    private double _prevPkama;
-    private double _prevPkamaSp;
-    private bool _hasPrev;
-
-    public PoweredKaufmanAdaptiveMovingAverageState(int length = 100, double factor = 3)
-    {
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        _factor = factor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PoweredKaufmanWindow _window;
+    public PoweredKaufmanAdaptiveMovingAverageState(int length = 100, double factor = 3) => _window = new(length, factor);
     public IndicatorName Name => IndicatorName.PoweredKaufmanAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _prevPkama = 0;
-        _prevPkamaSp = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var er = _er.Next(value, isFinal);
-        var powSp = er != 0 ? 1 / er : _factor;
-        var perSp = MathHelper.Pow(er, powSp);
-        var per = MathHelper.Pow(er, _factor);
-
-        var prevPkama = _hasPrev ? _prevPkama : value;
-        var pkama = (per * value) + ((1 - per) * prevPkama);
-
-        var prevPkamaSp = _hasPrev ? _prevPkamaSp : value;
-        var pkamaSp = (perSp * value) + ((1 - perSp) * prevPkamaSp);
-
-        if (isFinal)
-        {
-            _prevPkama = pkama;
-            _prevPkamaSp = pkamaSp;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Per", per },
-                { "Pkama", pkama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pkama, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value.Average, includeOutputs ? new Dictionary<string, double> { { "Per", value.Power }, { "Pkama", value.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class VariableIndexDynamicAverageEngine : IMovingAverageSmoother
