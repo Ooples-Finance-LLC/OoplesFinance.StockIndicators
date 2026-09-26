@@ -1677,11 +1677,6 @@ OoplesFinance.StockIndicators.Indicators.InertiaIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.InertiaIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.InertiaIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.InertiaIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.InformationRatio/default
-OoplesFinance.StockIndicators.Indicators.InformationRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.InformationRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.InformationRatio/shorter-periods
-OoplesFinance.StockIndicators.Indicators.InformationRatio/weighted-average
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/default
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/longer-bbLength
 OoplesFinance.StockIndicators.Indicators.InsyncIndex/longer-cciLength
@@ -2630,11 +2625,6 @@ OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ShapeshiftingMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SharpeRatio/default
-OoplesFinance.StockIndicators.Indicators.SharpeRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.SharpeRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SharpeRatio/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SharpeRatio/weighted-average
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/default
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/longer-periods
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/minimum-periods

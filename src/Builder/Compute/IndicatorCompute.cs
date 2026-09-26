@@ -22244,43 +22244,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSharpeRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateSharpeRatio takes the return of the chained series over the whole window, less the
-        // benchmark compounded across that window, and divides its moving average by its standard deviation.
-        // The arm this replaced measured bar-to-bar returns against a daily benchmark, which is neither.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        const double barMin = 60 * 24;
-        const double minPerYr = 60 * 24 * 30 * 12;
-        const double barsPerYr = minPerYr / barMin;
-        var bench = MathHelper.Pow(1 + bmk, length / barsPerYr) - 1;
-
-        using var returns = context.Rent(count);
-        var ret = returns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length);
+        using var window = new ReturnScoreWindow(maType, length, bmk, false);
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var prevValue = i >= length ? input[i - length] : 0;
-            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 - bench : 0;
+            using var returns = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) returns.WritableSpan[i] = window.ReturnValue(input[i], i >= length ? input[i - length] : 0).Publish();
+            MovingAverage(data, maType, length, returns.Span, means.WritableSpan);
         }
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length, returns.Span, smoothed.WritableSpan);
-        var average = smoothed.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = stdDev[i] != 0 ? average[i] / stdDev[i] : 0;
-        }
-
-        return buffer;
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        return output;
     }
 
     /// <summary>
@@ -22408,42 +22385,20 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeInformationRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.05,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateInformationRatio measures the return over a whole length-bar window, not bar to bar, and
-        // subtracts the benchmark from the smoothed return rather than from each observation - so the tracking
-        // error in the denominator is the deviation of the raw windowed return. The routine this replaced did
-        // both differently and read the close instead of the chained series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        double barsPerYr = (double)(60 * 24 * 30 * 12) / (60 * 24);
-        var bench = MathHelper.Pow(1 + bmk, length / barsPerYr) - 1;
-
-        using var returns = context.Rent(count);
-        var ret = returns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length);
+        using var window = new ReturnScoreWindow(maType, length, bmk, true);
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(input.Count);
+        if (custom)
         {
-            var prevValue = i >= length ? input[i - length] : 0;
-            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
+            using var returns = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) returns.WritableSpan[i] = window.ReturnValue(input[i], i >= length ? input[i - length] : 0).Publish();
+            MovingAverage(data, maType, length, returns.Span, means.WritableSpan);
         }
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length, returns.Span, smoothed.WritableSpan);
-        var retMa = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = stdDev[i] != 0 ? (retMa[i] - bench) / stdDev[i] : 0;
-        }
-
-        return buffer;
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null);
+        return output;
     }
 
     /// <summary>

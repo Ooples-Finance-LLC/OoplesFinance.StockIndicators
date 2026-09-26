@@ -7868,5 +7868,96 @@
     "after": "",
     "filter": "FullyQualifiedName~TrendIntensityNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class TrendIntensityIndexState"
+  },
+  {
+    "id": "return-score-wrong-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "_prices[0] : 0",
+    "after": "_prices[_prices.Count - 1] : 0",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-wrong-benchmark-placement",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "if (!_information) difference.AddProduct",
+    "after": "if (_information) difference.AddProduct",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-zero-prior-return",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "if (previous == 0) return default;",
+    "after": "if (previous == 0) return new RocBankValue(1);",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-drops-upper-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "<< value.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-sample-variance",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "var variance = n * squares - sum * sum;",
+    "after": "var variance = (n - 1) * squares - sum * sum;",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-keeps-expired-returns",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "? _returns[0] : BigInteger.Zero",
+    "after": "? BigInteger.Zero : BigInteger.Zero",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "if (commit) { _prices.TryAdd",
+    "after": "if (_prices.Capacity > 0) { _prices.TryAdd",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark"
+  },
+  {
+    "id": "return-score-skips-customer-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ReturnScoreWindow.cs",
+    "before": "customerMean.HasValue ? new RocBankValue(customerMean.Value)",
+    "after": "customerMean.HasValue ? new RocBankValue(0)",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.CustomerMeanControlsNumerator"
+  },
+  {
+    "id": "return-score-raw-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.ExactMomentsNormalizeWideReturnsAndKeepLagAndBenchmark",
+    "scope": "internal static ComputeBuffer ComputeInformationRatioFast("
+  },
+  {
+    "id": "return-score-sharpe-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class SharpeRatioState"
+  },
+  {
+    "id": "return-score-information-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ReturnScoreNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class InformationRatioState"
   }
 ]
