@@ -331,61 +331,19 @@ public sealed class PriceVolumeRankState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pvt")]
 public sealed class PriceVolumeTrendState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevPvt;
-    private bool _hasPrev;
-
+    private readonly PriceVolumeTrendWindow _window;
     public PriceVolumeTrendState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        => _window = new PriceVolumeTrendWindow(maType, length, false);
     public IndicatorName Name => IndicatorName.PriceVolumeTrend;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _prevPvt = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevPvt = _hasPrev ? _prevPvt : 0;
-        var diff = _hasPrev ? value - prevValue : 0;
-        var pvt = prevValue != 0 ? prevPvt + (bar.Volume * (diff / prevValue)) : prevPvt;
-        var signal = _signalSmoother.Next(pvt, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevPvt = pvt;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pvt", pvt },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pvt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Pvt", value.Line }, { "Signal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pzo")]
