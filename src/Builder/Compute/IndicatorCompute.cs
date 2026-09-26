@@ -18226,35 +18226,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast(StockData data, ComputeContext context, int length = 20)
     {
-        // The batch correlates price against a descending ramp (y = -j). The core this arm used ran the
-        // ramp ascending, which flips the sign of every published value.
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var x = (i >= j ? input[i - j] : 0) - input[i];
-                double y = -j;
-
-                sx += x;
-                sy += y;
-                sxx += MathHelper.Pow(x, 2);
-                sxy += x * y;
-                syy += MathHelper.Pow(y, 2);
-            }
-
-            var varianceX = (length * sxx) - (sx * sx);
-            var varianceY = (length * syy) - (sy * sy);
-            output[i] = varianceX > 0 && varianceY > 0 ? ((length * sxy) - (sx * sy)) / MathHelper.Sqrt(varianceX * varianceY) : 0;
-        }
-
+        var buffer = context.Rent(data.Count);
+        OscillatorCore.EhlersCorrelationTrendIndicator(SpanCompat.AsReadOnlySpan(inputList), buffer.WritableSpan, length);
         return buffer;
     }
 

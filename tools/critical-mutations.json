@@ -6756,5 +6756,86 @@
     "after": "_c = new ResidualAverageWindow(MovingAvgType.ExponentialMovingAverage, length2,",
     "filter": "FullyQualifiedName~ResidualPressureNumericalTests.AllOutputsKeepWideResidualsExactPressureAndDistinctPeriods",
     "scope": "public sealed class EmaWaveIndicatorState"
+  },
+  {
+    "id": "ehlers-correlation-loses-covariance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "cross.Sign * ExactPopulationDeviation.RootRatio",
+    "after": "ExactPopulationDeviation.RootRatio",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-drops-centering",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "_values.Capacity * squares - sum * sum",
+    "after": "_values.Capacity * squares",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-fills-padding-with-current",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "_values[_values.Count - j] : 0",
+    "after": "_values[_values.Count - j] : value",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "if (commit) _values.TryAdd",
+    "after": "if (_values.Capacity > 0) _values.TryAdd",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-retains-history-on-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "internal void Reset() => _values.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-reverses-imaginary-axis",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "? 0 : -Math.Sin(phase)",
+    "after": "? 0 : Math.Sin(phase)",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-uses-ascending-trend",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationWindow.cs",
+    "before": "trend ? -(double)j",
+    "after": "trend ? (double)j",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-raw-loses-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "buffer.WritableSpan, length);",
+    "after": "buffer.WritableSpan, 20);",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState",
+    "scope": "internal static ComputeBuffer ComputeEhlersCorrelationTrendIndicatorFast("
+  },
+  {
+    "id": "ehlers-correlation-angle-loses-hold",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationPhase.cs",
+    "before": "Math.Atan2(-imaginary, real)",
+    "after": "Math.Atan2(imaginary, real)",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
+  },
+  {
+    "id": "ehlers-correlation-market-state-wrong-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersCorrelationPhase.cs",
+    "before": "< 9 - 1e-10",
+    "after": "< 90 - 1e-10",
+    "filter": "FullyQualifiedName~EhlersCorrelationNumericalTests.ExactMomentsRetainScalePaddingOrientationAndState"
   }
 ]
