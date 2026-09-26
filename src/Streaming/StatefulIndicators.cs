@@ -8106,71 +8106,21 @@ public sealed class RateOfChangeState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Ui")]
 public sealed class UlcerIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowSum _drawdownSum;
+    private readonly DrawdownWindow _window;
     private readonly StreamingInputResolver _input;
-
-    public UlcerIndexState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _maxWindow = new RollingWindowMax(_length);
-        _drawdownSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public UlcerIndexState(int length = 14) { _window = new(length); _input = new(InputName.Close, null); }
     internal UlcerIndexState(int length, Func<OhlcvBar, double> selector)
-    {
-        if (selector == null)
-        {
-            throw new ArgumentNullException(nameof(selector));
-        }
-
-        _length = Math.Max(1, length);
-        _maxWindow = new RollingWindowMax(_length);
-        _drawdownSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, selector);
-    }
-
+    { if (selector is null) throw new ArgumentNullException(nameof(selector)); _window = new(length); _input = new(InputName.Close, selector); }
     public IndicatorName Name => IndicatorName.UlcerIndex;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _drawdownSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var maxValue = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
-
-        var pctDrawdownSquared = maxValue != 0 ? MathHelper.Pow((value - maxValue) / maxValue * 100, 2) : 0;
-
-        int sumCount;
-        var sum = isFinal ? _drawdownSum.Add(pctDrawdownSquared, out sumCount)
-            : _drawdownSum.Preview(pctDrawdownSquared, out sumCount);
-        var denom = Math.Min(sumCount, _length);
-        var average = denom > 0 ? sum / denom : 0;
-        var ulcer = MathHelper.Sqrt(average);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ui", ulcer }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ulcer, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Ui", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _drawdownSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("ViPlus")]

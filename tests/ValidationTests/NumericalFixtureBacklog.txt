@@ -1932,11 +1932,6 @@ OoplesFinance.StockIndicators.Indicators.MarketMeannessIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.MarketMeannessIndex/minimum-periods
 OoplesFinance.StockIndicators.Indicators.MarketMeannessIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.MarketMeannessIndex/weighted-average
-OoplesFinance.StockIndicators.Indicators.MartinRatio/default
-OoplesFinance.StockIndicators.Indicators.MartinRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.MartinRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.MartinRatio/shorter-periods
-OoplesFinance.StockIndicators.Indicators.MartinRatio/weighted-average
 OoplesFinance.StockIndicators.Indicators.MassIndex/default
 OoplesFinance.StockIndicators.Indicators.MassIndex/longer-emaLength
 OoplesFinance.StockIndicators.Indicators.MassIndex/longer-periods
@@ -3019,10 +3014,6 @@ OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/default
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.UlcerIndex/default
-OoplesFinance.StockIndicators.Indicators.UlcerIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.UlcerIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.UlcerIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UltimateMomentumIndicator/default
 OoplesFinance.StockIndicators.Indicators.UltimateMomentumIndicator/longer-length1
 OoplesFinance.StockIndicators.Indicators.UltimateMomentumIndicator/longer-length2

@@ -1895,7 +1895,7 @@ public sealed class FormulaContractCoverageTests
     public async Task RiskRatiosUseTargetDownsideAndPriceDrawdowns()
     {
         var bars = new[] { 100d, 100, 80, 80 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
-        Check(new MartinRatio(2, 0), new[] { 0d, 0, -1 / Math.Sqrt(2), -Math.Sqrt(2) });
+        Check(new MartinRatio(2, 0), new[] { 0d, 0, -Math.Sqrt(.5), -Math.Sqrt(2) });
         Check(new SortinoRatio(2, 0), new[] { 0d, 0, -1 / Math.Sqrt(2), -1 });
         Check(new SharpeRatio(2, 0), new[] { 0d, 0, -1, 0 });
         Check(new InformationRatio(2, 0), new[] { 0d, 0, -1, 0 });
@@ -2830,8 +2830,8 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { 1d, 2, 4, 2 }.Select((v, i) => new Bar(new DateTime(2021, 1, 4).AddDays(i), v, v, v, v, 1)).ToArray();
         Check(new StandardError(3), new[] { 0d, 0, Math.Sqrt(1d / 18), Math.Sqrt(8d / 9) });
-        Check(new ZScore(3), new[] { 0d, 0, 5 / Math.Sqrt(14), -1 / Math.Sqrt(2) });
-        Check(new UlcerIndex(3), new[] { 0d, 0, 0, 50 / Math.Sqrt(3) });
+        Check(new ZScore(3), new[] { 0d, 0, 5 / Math.Sqrt(14), -Math.Sqrt(.5) });
+        Check(new UlcerIndex(3), new[] { 0d, 0, 0, Math.Sqrt(2500d / 3) });
         Check(new AroonUp(2), new[] { 0d, 0, 100, 50 });
         Check(new AroonDown(2), new[] { 0d, 0, 0, 100 });
 
