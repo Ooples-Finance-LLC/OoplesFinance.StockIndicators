@@ -627,77 +627,17 @@ public sealed class VariableMovingAverageBandsState : IStreamingIndicatorState, 
 [PrimaryOutput("Vhma")]
 public sealed class VerticalHorizontalMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _changeSum;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevVhma;
-    private bool _hasPrev;
-
-    public VerticalHorizontalMovingAverageState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _changeSum = new RollingWindowSum(_length);
-        _maxWindow = new RollingWindowMax(_length);
-        _minWindow = new RollingWindowMin(_length);
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VerticalHorizontalAverageWindow _window;
+    public VerticalHorizontalMovingAverageState(int length = 50) => _window = new(length);
     public IndicatorName Name => IndicatorName.VerticalHorizontalMovingAverage;
-
-    public void Reset()
-    {
-        _changeSum.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _values.Clear();
-        _prevVhma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length);
-        var priceChange = Math.Abs(value - priorValue);
-        var changeSum = isFinal ? _changeSum.Add(priceChange, out _) : _changeSum.Preview(priceChange, out _);
-        var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
-        var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
-        var vhf = changeSum != 0 ? (highest - lowest) / changeSum : 0;
-        // Seeded at the first price, as the batch is: vhf is legitimately zero when the window has neither
-        // range nor travel, and a tracking rate of zero never leaves the seed.
-        var prevVhma = _hasPrev ? _prevVhma : value;
-        var vhma = prevVhma + (MathHelper.Pow(vhf, 2) * (value - prevVhma));
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevVhma = vhma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vhma", vhma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vhma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Vhma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _changeSum.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vhaco")]

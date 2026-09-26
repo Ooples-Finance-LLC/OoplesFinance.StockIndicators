@@ -1056,46 +1056,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVerticalHorizontalMovingAverage(this StockData stockData, int length = 50)
     {
-        List<double> changeList = new(stockData.Count);
-        List<double> vhmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum changeSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VerticalHorizontalAverageWindow(length, Math.Max(1, input.Count));
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var priorValue = i >= length ? inputList[i - length] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-
-            var priceChange = Math.Abs(currentValue - priorValue);
-            changeList.Add(priceChange);
-            changeSumWindow.Add(priceChange);
-
-            var numerator = highest - lowest;
-            var denominator = changeSumWindow.Sum(length);
-            var vhf = denominator != 0 ? numerator / denominator : 0;
-
-            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
-            // range nor travel, and a tracking rate of zero never leaves the seed.
-            var prevVhma = i >= 1 ? vhmaList[i - 1] : currentValue;
-            var vhma = prevVhma + (Pow(vhf, 2) * (currentValue - prevVhma));
-            vhmaList.Add(vhma);
-
-            var signal = GetCompareSignal(currentValue - vhma, prevValue - prevVhma);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? input[i] : line[i - 1]; var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, (i == 0 ? 0 : input[i - 1]) - previous));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Vhma", vhmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(vhmaList);
-        stockData.IndicatorName = IndicatorName.VerticalHorizontalMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Vhma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.VerticalHorizontalMovingAverage;
         return stockData;
     }
 

@@ -3196,37 +3196,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void VerticalHorizontalMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevVhma = i >= 1 ? output[i - 1] : currentValue;
-
-            var n = Math.Min(i + 1, length);
-
-            // Calculate VHF (Vertical Horizontal Filter)
-            double highest = double.MinValue, lowest = double.MaxValue;
-            double changeSum = 0;
-            for (var j = 0; j < n; j++)
-            {
-                var val = input[i - j];
-                if (val > highest) highest = val;
-                if (val < lowest) lowest = val;
-                if (j > 0)
-                {
-                    changeSum += Math.Abs(input[i - j] - input[i - j + 1]);
-                }
-            }
-
-            var range = highest - lowest;
-            var vhf = changeSum > 0 && n > 1 ? range / changeSum : 0;
-
-            // Adaptive EMA based on VHF
-            var alpha = Math.Min(Math.Max(vhf, 0.01), 0.99);
-            output[i] = prevVhma + (alpha * (currentValue - prevVhma));
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new VerticalHorizontalAverageWindow(length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
