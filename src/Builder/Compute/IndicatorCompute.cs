@@ -764,9 +764,7 @@ internal static partial class IndicatorCompute
             BilateralStochasticOscillatorSpecOptions bso => ComputeBilateralStochasticOscillatorFast(data, context, bso.Length,
                 bso.MaType, spec.OutputKey),
             FisherTransformStochasticOscillatorSpecOptions ftso => ComputeFisherTransformStochasticOscillatorFast(data, context, ftso.Length),
-            StochasticCustomOscillatorSpecOptions sco => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeStochasticCustomOscillatorFast(data, context, sco.Length, maType: sco.MaType), 12, sco.MaType)
-                : ComputeStochasticCustomOscillatorFast(data, context, sco.Length, maType: sco.MaType),
+            StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length, maType: sco.MaType, outputKey: spec.OutputKey),
             FastSlowStochasticOscillatorSpecOptions => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeFastSlowStochasticOscillatorFast(data, context),
                     9, MovingAvgType.WeightedMovingAverage)
@@ -10999,47 +10997,35 @@ internal static partial class IndicatorCompute
     /// Computes Stochastic Custom Oscillator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeStochasticCustomOscillatorFast(StockData data, ComputeContext context, int length1 = 7,
-        int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int length2 = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length3 = 12, string? outputKey = null)
     {
-        // CalculateStochasticCustomOscillator smooths the numerator and the denominator of the raw stochastic
-        // separately before dividing, which is not the same as smoothing the ratio. Its Sco key is that
-        // reading; the further average over length3 is the Signal series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-
-        using var numerator = context.Rent(count);
-        using var denominator = context.Rent(count);
-        var num = numerator.WritableSpan;
-        var denom = denominator.WritableSpan;
-
-        var highWindow = new RollingMinMax(length1);
-        var lowWindow = new RollingMinMax(length1);
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count);
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
         {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-            num[i] = input[i] - lowWindow.Min;
-            denom[i] = highWindow.Max - lowWindow.Min;
+            using var window = new StochasticCustomWindow(maType, length1, length2, length3);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true);
+                output.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line;
+            }
+            return output;
         }
-
-        using var numeratorAverage = context.Rent(count);
-        using var denominatorAverage = context.Rent(count);
-        MovingAverage(data, maType, length2, numerator.Span, numeratorAverage.WritableSpan);
-        MovingAverage(data, maType, length2, denominator.Span, denominatorAverage.WritableSpan);
-        var numSma = numeratorAverage.Span;
-        var denomSma = denominatorAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        using var distance = context.Rent(input.Count); using var range = context.Rent(input.Count);
+        using var high = new RollingWindowMax(Math.Max(1, length1)); using var low = new RollingWindowMin(Math.Max(1, length1));
+        for (var i = 0; i < input.Count; i++)
         {
-            output[i] = denomSma[i] != 0 ? MathHelper.MinOrMax(numSma[i] / denomSma[i] * 100, 100, 0) : 0;
+            var value = StochasticCustomWindow.Components(input[i], high.Add(data.HighPrices[i], out _), low.Add(data.LowPrices[i], out _));
+            distance.WritableSpan[i] = value.Distance.Publish(); range.WritableSpan[i] = value.Range.Publish();
         }
-
-        return buffer;
+        using var firstDistance = context.Rent(input.Count); using var firstRange = context.Rent(input.Count);
+        MovingAverage(data, maType, length2, distance.Span, firstDistance.WritableSpan);
+        MovingAverage(data, maType, length2, range.Span, firstRange.WritableSpan);
+        using var line = context.Rent(input.Count); using var signal = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = StochasticCustomWindow.Ratio(new(firstDistance.Span[i]), new(firstRange.Span[i]));
+        MovingAverage(data, maType, length3, line.Span, signal.WritableSpan);
+        (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(output.WritableSpan);
+        return output;
     }
 
     /// <summary>

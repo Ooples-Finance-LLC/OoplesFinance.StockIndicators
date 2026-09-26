@@ -269,57 +269,35 @@ public static partial class Calculations
     public static StockData CalculateStochasticCustomOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7,
         int length2 = 3, int length3 = 12)
     {
-        List<double> numList = new(stockData.Count);
-        List<double> denomList = new(stockData.Count);
-        List<double> sckList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count), signal = new(stockData.Count);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-
-            var num = currentValue - lowestLow;
-            numList.Add(num);
-
-            var denom = highestHigh - lowestLow;
-            denomList.Add(denom);
+            using var window = new StochasticCustomWindow(maType, length1, length2, length3);
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = window.Next(input[i], stockData.HighPrices[i], stockData.LowPrices[i], true);
+                line.Add(value.Line); signal.Add(value.Signal);
+            }
         }
-
-        var numSmaList = GetMovingAverageList(stockData, maType, length2, numList);
-        var denomSmaList = GetMovingAverageList(stockData, maType, length2, denomList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var numSma = numSmaList[i];
-            var denomSma = denomSmaList[i];
-
-            var sck = denomSma != 0 ? MinOrMax(numSma / denomSma * 100, 100, 0) : 0;
-            sckList.Add(sck);
+            List<double> distance = new(stockData.Count), range = new(stockData.Count);
+            using var high = new Streaming.RollingWindowMax(Math.Max(1, length1)); using var low = new Streaming.RollingWindowMin(Math.Max(1, length1));
+            for (var i = 0; i < input.Count; i++)
+            {
+                var value = StochasticCustomWindow.Components(input[i], high.Add(stockData.HighPrices[i], out _), low.Add(stockData.LowPrices[i], out _));
+                distance.Add(value.Distance.Publish()); range.Add(value.Range.Publish());
+            }
+            var firstDistance = GetMovingAverageList(stockData, maType, length2, distance);
+            var firstRange = GetMovingAverageList(stockData, maType, length2, range);
+            for (var i = 0; i < input.Count; i++) line.Add(StochasticCustomWindow.Ratio(new(firstDistance[i]), new(firstRange[i])));
+            signal = GetMovingAverageList(stockData, maType, length3, line);
         }
-
-        var scdList = GetMovingAverageList(stockData, maType, length3, sckList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sck = sckList[i];
-            var scd = scdList[i];
-            var prevSck = i >= 1 ? sckList[i - 1] : 0;
-            var prevScd = i >= 1 ? scdList[i - 1] : 0;
-
-            var signal = GetRsiSignal(sck - scd, prevSck - prevScd, sck, prevSck, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sco", sckList },
-            { "Signal", scdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sckList);
-        stockData.IndicatorName = IndicatorName.StochasticCustomOscillator;
-
+        List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetRsiSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1], line[i], i == 0 ? 0 : line[i - 1], 70, 30));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sco", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.StochasticCustomOscillator;
         return stockData;
     }
 

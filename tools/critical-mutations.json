@@ -9211,5 +9211,87 @@
     "after": "",
     "filter": "FullyQualifiedName~StochasticMomentumNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class StochasticMomentumIndexState"
+  },
+  {
+    "id": "stochastic-custom-wrong-low-sign",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "distance.Add(low, -1)",
+    "after": "distance.Add(low, 1)",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "distance.Add(price); distance.Add(low, -1);",
+    "after": "distance.Add(price - low);",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-premature-range-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "range.Add(high); range.Add(low, -1);",
+    "after": "range.Add(high - low);",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-wrong-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "distance.AddTo(ref numerator, 100)",
+    "after": "distance.AddTo(ref numerator, 10)",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-discarded-numerator-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "firstLength, firstLength, signalLength",
+    "after": "1, firstLength, signalLength",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "firstLength, firstLength, signalLength",
+    "after": "firstLength, firstLength, 1",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-commits-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "_high.Preview(high, out _)",
+    "after": "_high.Add(high, out _)",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-stale-high-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCustomWindow.cs",
+    "before": "_high.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.RatioOfSmoothedDifferencesPreservesSelectedCandles"
+  },
+  {
+    "id": "stochastic-custom-skips-third-customer-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, length3, line.Span, signal.WritableSpan);",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.CustomerComponentsConsumeAllThreeStagesInOrder",
+    "scope": "internal static ComputeBuffer ComputeStochasticCustomOscillatorFast("
+  },
+  {
+    "id": "stochastic-custom-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticCustomNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class StochasticCustomOscillatorState"
   }
 ]
