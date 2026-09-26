@@ -658,6 +658,8 @@ internal static partial class StatefulIndicatorFactory
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
+            EhlersIirFilterSpecOptions iir => new EhlersInfiniteImpulseResponseFilterState(iir.Length),
+            EhlersInfiniteImpulseResponseFilterSpecOptions iirFull => new EhlersInfiniteImpulseResponseFilterState(iirFull.Length),
             EhlersFirFilterSpecOptions or EhlersFiniteImpulseResponseFilterSpecOptions => new EhlersFiniteImpulseResponseFilterState(),
             Spencer15PointMovingAverageSpecOptions => new Spencer15PointMovingAverageState(),
             Spencer21PointMovingAverageSpecOptions => new Spencer21PointMovingAverageState(),

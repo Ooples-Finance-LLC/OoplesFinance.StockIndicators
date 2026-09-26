@@ -946,62 +946,17 @@ public sealed class EhlersImpulseReactionState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Eiirf")]
 public sealed class EhlersInfiniteImpulseResponseFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly int _lag;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevFilter;
-    private int _index;
-
-    public EhlersInfiniteImpulseResponseFilterState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = 2.0 / (resolved + 1);
-        _lag = MathHelper.MinOrMax((int)Math.Ceiling((1 / _alpha) - 1));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_lag);
-    }
-
+    private readonly EhlersIirWindow _window;
+    public EhlersInfiniteImpulseResponseFilterState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersInfiniteImpulseResponseFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevFilter = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _lag);
-        var diff = _index >= _lag ? value - prevValue : 0;
-        var prevFilter = _index >= 1 ? _prevFilter : 0;
-        var filter = (_alpha * (value + diff)) + ((1 - _alpha) * prevFilter);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevFilter = filter;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eiirf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eiirf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eipi")]

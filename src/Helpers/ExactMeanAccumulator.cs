@@ -14,6 +14,11 @@ internal struct ExactMeanAccumulator
     internal bool IsExactlyZero => IsZero;
     internal int Sign => _wide ? _large.Sign : Math.Sign(_small);
 
+    internal void ScaleByPowerOfTwo(int exponent)
+    {
+        if (!IsZero) _scale = checked(_scale + exponent);
+    }
+
     internal static bool SevereCancellation(double left, double right, double result) =>
         left != 0 && right != 0 && Math.Abs(result) <= 1e-4 * Math.Max(Math.Abs(left), Math.Abs(right));
 

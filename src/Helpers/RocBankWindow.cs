@@ -17,6 +17,12 @@ internal readonly struct RocBankValue
         else sum.Add(Mantissa, new BigInteger(weight) << UpperShift);
     }
     internal double Publish() { var sum = new ExactMeanAccumulator(); AddTo(ref sum); return sum.Mean(1); }
+    internal RocBankValue Multiply(double factor)
+    {
+        var product = new ExactMeanAccumulator(); product.AddProduct(Mantissa, factor);
+        product.ScaleByPowerOfTwo(UpperShift);
+        return Round(product);
+    }
     internal static RocBankValue Round(ExactMeanAccumulator sum, double unit = 1, long count = 1)
     {
         if (sum.IsExactlyZero) return default;

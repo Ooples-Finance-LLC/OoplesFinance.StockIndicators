@@ -10170,5 +10170,111 @@
     "after": "",
     "filter": "FullyQualifiedName~EhlersFirNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EhlersFiniteImpulseResponseFilterState"
+  },
+  {
+    "id": "ehlers-iir-wrong-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 2d",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-minimum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "Math.Max(2,",
+    "after": "Math.Max(1,",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-maximum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "_prices.Count == _prices.Capacity",
+    "after": "_prices.Count > 0",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-lag-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "_prices[0]",
+    "after": "_prices[_prices.Count - 1]",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-momentum-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "change.Add(_prices[0], -1);",
+    "after": "change.Add(_prices[0]);",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-drops-momentum",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "momentum.AddTo(ref lead);",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-wrong-retained-weight",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "_previous.Multiply(1 - _alpha)",
+    "after": "_previous.Multiply(_alpha)",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-stale-history-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-stale-value-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersIirWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.RoundedLaggedMomentumFilterPreservesStartupAndRecovery"
+  },
+  {
+    "id": "ehlers-iir-drops-product-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/RocBankWindow.cs",
+    "before": "product.ScaleByPowerOfTwo(UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.ExtendedProductsScaleBeforeRoundingAndRetainSubnormalContributions",
+    "scope": "internal RocBankValue Multiply("
+  },
+  {
+    "id": "ehlers-iir-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersIirNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class EhlersInfiniteImpulseResponseFilterState"
   }
 ]

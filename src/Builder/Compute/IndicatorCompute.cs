@@ -17598,26 +17598,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersInfiniteImpulseResponseFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var alpha = 2d / (length + 1);
-        var lag = MathHelper.MinOrMax((int)Math.Ceiling((1 / alpha) - 1));
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= lag ? input[i - lag] : 0;
-            var previousFilter = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (alpha * (input[i] + CalculationsHelper.MinPastValues(i, lag, input[i] - previousValue))) +
-                ((1 - alpha) * previousFilter);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.EhlersInfiniteImpulseResponseFilter(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
