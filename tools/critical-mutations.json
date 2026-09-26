@@ -15204,5 +15204,104 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~PolynomialCellNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-wrong-radius",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "* 100 / pctWidth",
+    "after": "* 10 / pctWidth",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-wrong-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "(1 - square) * Math.Exp",
+    "after": "(1 + square) * Math.Exp",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-wrong-gaussian",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "Math.Exp(-square / 2)",
+    "after": "Math.Exp(-square)",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-drops-negative-tail",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "radius > 37",
+    "after": "radius > 40",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-overflows-product",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "sum.AddProduct(lag == 0 ? price : _prices[_prices.Count - lag], _weights[lag]);",
+    "after": "sum.Add((lag == 0 ? price : _prices[_prices.Count - lag]) * _weights[lag]);",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-drops-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "sum.Ratio(_mass)",
+    "after": "sum.Mean(1)",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-wrong-history",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "_prices[_prices.Count - lag]",
+    "after": "_prices[_prices.Count - 1]",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RickerWindow.cs",
+    "before": "_prices.Clear()",
+    "after": "_prices.Count.ToString()",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class RightSidedRickerMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRightSidedRickerMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "ricker-ignores-width",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void RightSidedRickerMovingAverage(",
+    "before": "new RickerWindow(length, pctWidth)",
+    "after": "new RickerWindow(length, 60)",
+    "filter": "FullyQualifiedName~RickerNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
   }
 ]

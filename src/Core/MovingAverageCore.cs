@@ -2727,27 +2727,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RightSidedRickerMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 50, double pctWidth = 60)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var width = pctWidth / 100 * length;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            double w = 0, vw = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? input[i - j] : 0;
-                var jOverWidth = j / width;
-                var jSquared = (double)j * j;
-                var widthSquared = width * width;
-                var weight = (1 - jOverWidth * jOverWidth) * Math.Exp(-(jSquared / (2 * widthSquared)));
-                w += weight;
-                vw += prevV * weight;
-            }
-
-            output[i] = w != 0 ? vw / w : input[i];
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RickerWindow(length, pctWidth);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

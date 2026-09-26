@@ -1060,44 +1060,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRightSidedRickerMovingAverage(this StockData stockData, int length = 50, double pctWidth = 60)
     {
-        List<double> rrmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var width = pctWidth / 100 * length;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new RickerWindow(length, pctWidth); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double w = 0, vw = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevV = i >= j ? inputList[i - j] : 0;
-                // Each bar is weighted by its own Ricker weight, not by the running total of every weight up
-                // to it. Against the running total the divisor no longer matches the numerator, and the
-                // filter read 2656.39 on a series held at 50.
-                var weight = (1 - Pow(j / width, 2)) * Exp(-(Pow(j, 2) / (2 * Pow(width, 2))));
-                w += weight;
-                vw += prevV * weight;
-            }
-
-            var prevRrma = GetLastOrDefault(rrmaList);
-            var rrma = w != 0 ? vw / w : currentValue;
-            rrmaList.Add(rrma);
-
-            var signal = GetCompareSignal(currentValue - rrma, prevValue - prevRrma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rsrma", rrmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rrmaList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsrma", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.RightSidedRickerMovingAverage;
-
         return stockData;
     }
 

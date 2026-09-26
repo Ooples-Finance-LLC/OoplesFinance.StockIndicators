@@ -2460,9 +2460,14 @@ public sealed class FormulaContractCoverageTests
         Check(new PriceMomentum(1), prices, new[] { 0d, 1, 2 });
         Check(new QuickMovingAverage(3), prices, new[] { .25, 1, 2.25 });
         Check(new QuickMovingAverage(1), prices, new[] { 1d / 3, 4d / 3, 8d / 3 });
-        var rickerLagWeight = 11d / 36 * Math.Exp(-25d / 72);
+        var rickerLagWeight = ReferenceFraction.FromDouble(11d / 36 * Math.Exp(-25d / 72));
+        // The signed weighted quotient rounds once; rounding 1+w before dividing
+        // introduces a one-ULP error in the first hand-calculated output.
+        var rickerMass = new ReferenceFraction(1) + rickerLagWeight;
         Check(new RightSidedRickerMovingAverage(2), prices,
-            new[] { 1 / (1 + rickerLagWeight), (2 + rickerLagWeight) / (1 + rickerLagWeight), (4 + 2 * rickerLagWeight) / (1 + rickerLagWeight) });
+            new[] { (new ReferenceFraction(1) / rickerMass).ToDouble(),
+                ((new ReferenceFraction(2) + rickerLagWeight) / rickerMass).ToDouble(),
+                ((new ReferenceFraction(4) + new ReferenceFraction(2) * rickerLagWeight) / rickerMass).ToDouble() });
         var impulse = new[] { 1d, 0, 0, 0, 0, 0, 0 }
             .Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new EhlersFiniteImpulseResponseFilter(7), impulse, new[] { 2d, 7, 9, 6, 1, -1, -3 }.Select(v => v / 21).ToArray());
