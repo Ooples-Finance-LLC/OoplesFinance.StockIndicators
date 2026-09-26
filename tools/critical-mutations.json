@@ -16637,5 +16637,119 @@
     "before": "ComponentAverage.Take(raw.Span, signalLength)",
     "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), signalLength)",
     "filter": "FullyQualifiedName~VerticalHorizontalNumericalTests&FullyQualifiedName!~AllRoutes&FullyQualifiedName!~SelectedSource&FullyQualifiedName!~EveryPublished&FullyQualifiedName!~PublicConfigurations"
+  },
+  {
+    "id": "vhma-wrong-lookback",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "_prices[0]",
+    "after": "_prices[_prices.Count - 1]",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-drops-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "var change = BigInteger.Abs(units - prior);",
+    "after": "var change = _count == 0 ? BigInteger.Zero : BigInteger.Abs(units - prior);",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-signed-change",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "BigInteger.Abs(units - prior)",
+    "after": "units - prior",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-drops-change-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "sum -= _changes[0];",
+    "after": "sum -= 0;",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-wrong-range",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "after": "ExactVarianceWindow.Units(high)",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-drops-gain-square",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "RocBankValue.RoundUnits(ratio * ratio, BigInteger.One << 1074)",
+    "after": "ratio",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-clamps-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "var previous = _count == 0 ? units : _previous;",
+    "after": "gain = BigInteger.Min(gain, BigInteger.One << 1074); var previous = _count == 0 ? units : _previous;",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-zero-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "_count == 0 ? units : _previous",
+    "after": "_count == 0 ? BigInteger.Zero : _previous",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-premature-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "_previous = result;",
+    "after": "_previous = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(result, BigInteger.One));",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-stale-count-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-stale-changes-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VerticalHorizontalAverageWindow.cs",
+    "before": "_changes.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VerticalHorizontalMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "vhma-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVerticalHorizontalMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
   }
 ]

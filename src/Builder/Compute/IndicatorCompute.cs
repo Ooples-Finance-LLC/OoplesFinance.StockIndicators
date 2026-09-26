@@ -15917,36 +15917,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeVerticalHorizontalMovingAverageFast(StockData data, ComputeContext context, int length = 50)
     {
-        // CalculateVerticalHorizontalMovingAverage tracks the chained series at a rate set by the vertical
-        // horizontal filter squared - the window's range divided by the total distance travelled inside it -
-        // so it moves quickly in a trend and barely at all in a range. It is seeded at zero, not at the value.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(length);
-        var changeSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorValue = i >= length ? input[i - length] : 0;
-            window.Add(currentValue);
-
-            changeSum.Add(Math.Abs(currentValue - priorValue));
-
-            var denominator = changeSum.Sum(length);
-            var vhf = denominator != 0 ? (window.Max - window.Min) / denominator : 0;
-
-            // Seeded at the first price, not at zero: vhf is legitimately zero when the window has neither
-            // range nor travel, and a tracking rate of zero never leaves the seed.
-            var prevVhma = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = prevVhma + (MathHelper.Pow(vhf, 2) * (currentValue - prevVhma));
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.VerticalHorizontalMovingAverage(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 
