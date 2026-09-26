@@ -164,55 +164,16 @@ public sealed class MovingAverageConvergenceDivergenceLeaderState : IStreamingIn
 [PrimaryOutput("Mav3")]
 public sealed class MovingAverageV3State : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ma1;
-    private readonly IMovingAverageSmoother _ma2;
-    private readonly StreamingInputResolver _input;
-    private readonly double _alpha;
-
-    public MovingAverageV3State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14,
-        int length2 = 3)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _ma1 = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _ma2 = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        var lamdaRatio = (double)resolved1 / resolved2;
-        _alpha = resolved1 - lamdaRatio != 0 ? lamdaRatio * (resolved1 - 1) / (resolved1 - lamdaRatio) : 0;
-    }
-
+    private readonly MovingAverageV3Window _window;
+    public MovingAverageV3State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14, int length2 = 3) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.MovingAverageV3;
-
-    public void Reset()
-    {
-        _ma1.Reset();
-        _ma2.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ma1 = _ma1.Next(value, isFinal);
-        var ma2 = _ma2.Next(value, isFinal);
-        var nma = ((1 + _alpha) * ma1) - (_alpha * ma2);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mav3", nma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(nma, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Mav3", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ma1.Dispose();
-        _ma2.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Md2Pole")]

@@ -14777,31 +14777,21 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeMovingAverageV3Fast(StockData data, ComputeContext context, int length1 = 14, int length2 = 3,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateMovingAverageV3 extrapolates between the averages over its two windows by a lambda ratio
-        // built from both lengths. The core routine knew only one window, so neither the second length nor
-        // the spec's MaType reached the calculation.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-
-        var lamdaRatio = (double)length1 / length2;
-        var alpha = length1 - lamdaRatio != 0 ? lamdaRatio * (length1 - 1) / (length1 - lamdaRatio) : 0;
-
-        using var second = context.Rent(count);
-        MovingAverage(data, maType, length2, input, second.WritableSpan);
-        var ma2 = second.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length1, input, output);
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            output[i] = ((1 + alpha) * output[i]) - (alpha * ma2[i]);
+            using var second = context.Rent(input.Count);
+            MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+            MovingAverage(data, maType, length2, SpanCompat.AsReadOnlySpan(input), second.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = MovingAverageV3Window.Combine(result.Span[i], second.Span[i], length1, length2);
         }
-
-        return buffer;
+        else
+        {
+            using var window = new MovingAverageV3Window(maType, length1, length2);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        }
+        return result;
     }
 
     /// <summary>

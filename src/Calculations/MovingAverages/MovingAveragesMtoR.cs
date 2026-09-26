@@ -1422,38 +1422,21 @@ public static partial class Calculations
     public static StockData CalculateMovingAverageV3(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 14, int length2 = 3)
     {
-        List<double> nmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var lamdaRatio = (double)length1 / length2;
-        var alpha = length1 - lamdaRatio != 0 ? lamdaRatio * (length1 - 1) / (length1 - lamdaRatio) : 0;
-
-        var ma1List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var ma2List = GetMovingAverageList(stockData, maType, length2, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var ma1 = ma1List[i];
-            var ma2 = ma2List[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevNma = GetLastOrDefault(nmaList);
-            var nma = ((1 + alpha) * ma1) - (alpha * ma2);
-            nmaList.Add(nma);
-
-            var signal = GetCompareSignal(currentValue - nma, prevValue - prevNma);
-            signalsList?.Add(signal);
+            var first = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
+            var second = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, input);
+            for (var i = 0; i < input.Count; i++) line.Add(MovingAverageV3Window.Combine(first[i], second[i], length1, length2));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mav3", nmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nmaList);
-        stockData.IndicatorName = IndicatorName.MovingAverageV3;
-
+        else
+        {
+            using var window = new MovingAverageV3Window(maType, length1, length2);
+            foreach (var price in input) line.Add(window.Next(price, true));
+        }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Mav3", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.MovingAverageV3;
         return stockData;
     }
 
