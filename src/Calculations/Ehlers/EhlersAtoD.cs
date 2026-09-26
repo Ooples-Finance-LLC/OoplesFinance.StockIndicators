@@ -107,26 +107,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        using var correlation = new EhlersCorrelationWindow(length, true);
         for (var i = 0; i < stockData.Count; i++)
         {
             var prevCorr1 = i >= 1 ? corrList[i - 1] : 0;
             var prevCorr2 = i >= 2 ? corrList[i - 2] : 0;
 
-            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var x = (i >= j ? inputList[i - j] : 0) - inputList[i];
-                double y = -j;
-
-                sx += x;
-                sy += y;
-                sxx += Pow(x, 2);
-                sxy += x * y;
-                syy += Pow(y, 2);
-            }
-
-            var corr = (length * sxx) - (sx * sx) > 0 && (length * syy) - (sy * sy) > 0 ? ((length * sxy) - (sx * sy)) /
-                Sqrt(((length * sxx) - (sx * sx)) * ((length * syy) - (sy * sy))) : 0;
+            var corr = correlation.Next(inputList[i], true).Real;
             corrList.Add(corr);
 
             var signal = GetRsiSignal(corr - prevCorr1, prevCorr1 - prevCorr2, corr, prevCorr1, 0.5, -0.5);
@@ -481,34 +468,13 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        using var correlation = new EhlersCorrelationWindow(length, false);
         for (var i = 0; i < stockData.Count; i++)
         {
-            double sx = 0, sy = 0, nsy = 0, sxx = 0, syy = 0, nsyy = 0, sxy = 0, nsxy = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var x = (i >= j - 1 ? inputList[i - (j - 1)] : 0) - inputList[i];
-                var v = 2 * Math.PI * ((double)(j - 1) / length);
-                var y = Math.Cos(v);
-                var ny = length <= 2 ? 0 : -Math.Sin(v);
-                sx += x;
-                sy += y;
-                nsy += ny;
-                sxx += Pow(x, 2);
-                syy += Pow(y, 2);
-                nsyy += ny * ny;
-                sxy += x * y;
-                nsxy += x * ny;
-            }
-
+            var (real, imag) = correlation.Next(inputList[i], true);
             var prevReal = GetLastOrDefault(realList);
-            var real = (length * sxx) - (sx * sx) > 0 && (length * syy) - (sy * sy) > 0 ? ((length * sxy) - (sx * sy)) /
-                   Sqrt(((length * sxx) - (sx * sx)) * ((length * syy) - (sy * sy))) : 0;
-            realList.Add(real);
-
             var prevImag = GetLastOrDefault(imagList);
-            var imag = (length * sxx) - (sx * sx) > 0 && (length * nsyy) - (nsy * nsy) > 0 ? ((length * nsxy) - (sx * nsy)) /
-                   Sqrt(((length * sxx) - (sx * sx)) * ((length * nsyy) - (nsy * nsy))) : 0;
-            imagList.Add(imag);
+            realList.Add(real); imagList.Add(imag);
 
             var signal = GetCompareSignal(real - imag, prevReal - prevImag);
             signalsList?.Add(signal);

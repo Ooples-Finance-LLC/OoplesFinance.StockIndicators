@@ -1211,9 +1211,13 @@ public sealed class FormulaContractCoverageTests
         Check(new EhlersCorrelationAngleIndicator(4), [0, 90, 180, -90, 0]);
         void Check(IIndicator indicator, params double[][] expected)
         {
-            var rules = BuiltInFormulaReferences.For(indicator).ToArray();
-            Assert.Equal(expected.Length, rules.Length);
-            foreach (var rule in rules) rule.Check(new IndicatorValidationContext("correlation-quarter-cycle", bars, expected, 0));
+            // Hand values use ideal Fourier axes. Binary64 sin/cos samples can
+            // retain a tiny correlation on those axes; the formula contract is exact
+            // for those samples, so compare the hand calculation separately.
+            var reference = BuiltInFormulaReferences.EhlersCorrelationOutputs(bars, (IBuiltInIndicator)indicator).Values.ToArray();
+            Assert.Equal(expected.Length, reference.Length);
+            for (var slot = 0; slot < expected.Length; slot++)
+                for (var i = 0; i < bars.Length; i++) Assert.Equal(expected[slot][i], reference[slot][i], 12);
         }
     }
 

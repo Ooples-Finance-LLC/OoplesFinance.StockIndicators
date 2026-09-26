@@ -5,6 +5,9 @@ namespace OoplesFinance.StockIndicators.Validation;
 
 internal static partial class BuiltInFormulaReferences
 {
+    internal static IReadOnlyDictionary<string, double[]> EhlersCorrelationOutputs(IReadOnlyList<Bar> bars, IBuiltInIndicator indicator)
+        => EhlersCorrelations(indicator)!.Compute(bars);
+
     private static FormulaDefinition? EhlersCorrelations(IBuiltInIndicator indicator)
     {
         var name = indicator.BatchName;
@@ -19,15 +22,21 @@ internal static partial class BuiltInFormulaReferences
         {
             double Correlation(double[] x, double[] y)
             {
-                var mx = x.Average();
-                var my = y.Average();
-                var dx = x.Select(v => v - mx).ToArray();
-                var dy = y.Select(v => v - my).ToArray();
-                var norm = Math.Sqrt(dx.Sum(v => v * v)) * Math.Sqrt(dy.Sum(v => v * v));
-                return norm == 0 ? 0 : dx.Zip(dy, (a, b) => a * b).Sum() / norm;
+                var count = new ReferenceFraction(x.Length);
+                var xx = x.Select(ReferenceFraction.FromDouble).ToArray();
+                var yy = y.Select(ReferenceFraction.FromDouble).ToArray();
+                var mx = xx.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / count;
+                var my = yy.Aggregate(new ReferenceFraction(0), (a, b) => a + b) / count;
+                var covariance = new ReferenceFraction(0); var vx = new ReferenceFraction(0); var vy = new ReferenceFraction(0);
+                for (var j = 0; j < x.Length; j++)
+                {
+                    var dx = xx[j] - mx; var dy = yy[j] - my;
+                    covariance += dx * dy; vx += dx * dx; vy += dy * dy;
+                }
+                return vx.Sign == 0 || vy.Sign == 0 ? 0 : covariance.Sign * (covariance * covariance / (vx * vy)).SqrtToDouble();
             }
-            var cosine = Enumerable.Range(0, length).Select(j => Math.Cos(2 * Math.PI * j / length)).ToArray();
-            var sine = Enumerable.Range(0, length).Select(j => length <= 2 ? 0 : -Math.Sin(2 * Math.PI * j / length)).ToArray();
+            var cosine = Enumerable.Range(0, length).Select(j => Math.Cos(2 * Math.PI * ((double)j / length))).ToArray();
+            var sine = Enumerable.Range(0, length).Select(j => length <= 2 ? 0 : -Math.Sin(2 * Math.PI * ((double)j / length))).ToArray();
             var ramp = Enumerable.Range(0, length).Select(j => -(double)j).ToArray();
             var real = new double[bars.Count];
             var imaginary = new double[bars.Count];

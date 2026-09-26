@@ -8290,27 +8290,12 @@ internal static class OscillatorCore
     internal static void EhlersCorrelationTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
         if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
+            throw new ArgumentException("Output spans must be at least input length.");
+        using var correlation = new EhlersCorrelationWindow(length, true);
         for (var i = 0; i < close.Length; i++)
         {
-            double sx = 0, sy = 0, sxx = 0, sxy = 0, syy = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = (i >= j ? close[i - j] : 0) - close[i];
-                sx -= j;
-                sy += prevValue;
-                sxx += j * j;
-                sxy -= j * prevValue;
-                syy += prevValue * prevValue;
-            }
-
-            var denom = Math.Sqrt((length * sxx - sx * sx) * (length * syy - sy * sy));
-            output[i] = denom != 0 ? (length * sxy - sx * sy) / denom : 0;
+            var value = correlation.Next(close[i], true);
+            output[i] = value.Real;
         }
     }
 
@@ -9186,43 +9171,12 @@ internal static class OscillatorCore
     internal static void EhlersCorrelationCycleIndicator(ReadOnlySpan<double> close, Span<double> realOutput, Span<double> imagOutput, int length = 20)
     {
         if (realOutput.Length < close.Length || imagOutput.Length < close.Length)
-        {
             throw new ArgumentException("Output spans must be at least input length.");
-        }
-
-        length = Math.Max(1, length);
-
+        using var correlation = new EhlersCorrelationWindow(length, false);
         for (var i = 0; i < close.Length; i++)
         {
-            double sx = 0, sy = 0, nsy = 0, sxx = 0, syy = 0, nsyy = 0, sxy = 0, nsxy = 0;
-
-            for (var j = 1; j <= length; j++)
-            {
-                var idx = i - (j - 1);
-                var x = (idx >= 0 ? close[idx] : 0) - close[i];
-                var v = 2 * Math.PI * ((double)(j - 1) / length);
-                var y = Math.Cos(v);
-                var ny = length <= 2 ? 0 : -Math.Sin(v);
-                sx += x;
-                sy += y;
-                nsy += ny;
-                sxx += x * x;
-                syy += y * y;
-                nsyy += ny * ny;
-                sxy += x * y;
-                nsxy += x * ny;
-            }
-
-            var realDenom1 = (length * sxx) - (sx * sx);
-            var realDenom2 = (length * syy) - (sy * sy);
-            realOutput[i] = realDenom1 > 0 && realDenom2 > 0
-                ? ((length * sxy) - (sx * sy)) / Math.Sqrt(realDenom1 * realDenom2)
-                : 0;
-
-            var imagDenom2 = (length * nsyy) - (nsy * nsy);
-            imagOutput[i] = realDenom1 > 0 && imagDenom2 > 0
-                ? ((length * nsxy) - (sx * nsy)) / Math.Sqrt(realDenom1 * imagDenom2)
-                : 0;
+            var value = correlation.Next(close[i], true);
+            realOutput[i] = value.Real; imagOutput[i] = value.Imag;
         }
     }
 

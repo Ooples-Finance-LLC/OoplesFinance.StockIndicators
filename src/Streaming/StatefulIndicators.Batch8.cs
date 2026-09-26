@@ -8,82 +8,21 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Ecti")]
 public sealed class EhlersCorrelationTrendIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sy;
-    private readonly double _syy;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersCorrelationTrendIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        (_sy, _syy) = BuildYAxisSums(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersCorrelationWindow _correlation;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersCorrelationTrendIndicatorState(int length = 20) => _correlation = new EhlersCorrelationWindow(length, true);
     public IndicatorName Name => IndicatorName.EhlersCorrelationTrendIndicator;
 
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() { _correlation.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sx = 0;
-        double sxx = 0;
-        double sxy = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j) - value;
-            var y = -j;
-            sx += x;
-            sxx += x * x;
-            sxy += x * y;
-        }
+        StreamingInputValidation.Validate(bar);
+        var (real, imag) = _correlation.Next(_input.GetValue(bar), isFinal);
 
-        var denom = ((_length * sxx) - (sx * sx)) * ((_length * _syy) - (_sy * _sy));
-        var corr = denom > 0
-            ? ((_length * sxy) - (sx * _sy)) / MathHelper.Sqrt(denom)
-            : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ecti", corr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(corr, outputs);
+        return new StreamingIndicatorStateResult(real, includeOutputs
+            ? new Dictionary<string, double> { { "Ecti", real } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static (double sy, double syy) BuildYAxisSums(int length)
-    {
-        double sy = 0;
-        double syy = 0;
-        for (var j = 0; j <= length - 1; j++)
-        {
-            var y = -j;
-            sy += y;
-            syy += y * y;
-        }
-
-        return (sy, syy);
-    }
+    public void Dispose() => _correlation.Dispose();
 }
 
 [PrimaryOutput("Ecog")]
@@ -311,110 +250,21 @@ public sealed class EhlersDecyclerState : IStreamingIndicatorState
 [PrimaryOutput("Real")]
 public sealed class EhlersCorrelationCycleIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _sy;
-    private readonly double _syy;
-    private readonly double _nsy;
-    private readonly double _nsyy;
-    private readonly double[] _cosValues;
-    private readonly double[] _negSinValues;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersCorrelationCycleIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _cosValues = new double[_length];
-        _negSinValues = new double[_length];
-        (_sy, _syy, _nsy, _nsyy) = BuildTrigonometricSums(_length, _cosValues, _negSinValues);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly EhlersCorrelationWindow _correlation;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersCorrelationCycleIndicatorState(int length = 20) => _correlation = new EhlersCorrelationWindow(length, false);
     public IndicatorName Name => IndicatorName.EhlersCorrelationCycleIndicator;
-
     internal double LastImag { get; private set; }
-
-    public void Reset()
-    {
-        _values.Clear();
-        LastImag = 0;
-    }
-
+    public void Reset() { _correlation.Reset(); LastImag = 0; }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sx = 0;
-        double sxx = 0;
-        double sxy = 0;
-        double nsxy = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var x = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1) - value;
-            var y = _cosValues[j - 1];
-            var ny = _negSinValues[j - 1];
-            sx += x;
-            sxx += x * x;
-            sxy += x * y;
-            nsxy += x * ny;
-        }
-
-        var realDenom = ((_length * sxx) - (sx * sx)) * ((_length * _syy) - (_sy * _sy));
-        var real = realDenom > 0
-            ? ((_length * sxy) - (sx * _sy)) / MathHelper.Sqrt(realDenom)
-            : 0;
-
-        var imagDenom = ((_length * sxx) - (sx * sx)) * ((_length * _nsyy) - (_nsy * _nsy));
-        var imag = imagDenom > 0
-            ? ((_length * nsxy) - (sx * _nsy)) / MathHelper.Sqrt(imagDenom)
-            : 0;
+        StreamingInputValidation.Validate(bar);
+        var (real, imag) = _correlation.Next(_input.GetValue(bar), isFinal);
         LastImag = imag;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Real", real },
-                { "Imag", imag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(real, outputs);
+        return new StreamingIndicatorStateResult(real, includeOutputs
+            ? new Dictionary<string, double> { { "Real", real }, { "Imag", imag } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
-
-    private static (double sy, double syy, double nsy, double nsyy) BuildTrigonometricSums(
-        int length, double[] cosValues, double[] negSinValues)
-    {
-        double sy = 0;
-        double syy = 0;
-        double nsy = 0;
-        double nsyy = 0;
-        for (var j = 1; j <= length; j++)
-        {
-            var v = 2 * Math.PI * ((double)(j - 1) / length);
-            var cos = Math.Cos(v);
-            var negSin = length <= 2 ? 0 : -Math.Sin(v);
-            cosValues[j - 1] = cos;
-            negSinValues[j - 1] = negSin;
-            sy += cos;
-            syy += cos * cos;
-            nsy += negSin;
-            nsyy += negSin * negSin;
-        }
-
-        return (sy, syy, nsy, nsyy);
-    }
+    public void Dispose() => _correlation.Dispose();
 }
 
 [PrimaryOutput("Cai")]

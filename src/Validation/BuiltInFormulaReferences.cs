@@ -17,6 +17,19 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersCorrelationTrendIndicator or IndicatorName.EhlersCorrelationCycleIndicator
+            or IndicatorName.EhlersCorrelationAngleIndicator or IndicatorName.EhlersMarketStateIndicator)
+        {
+            var definition = EhlersCorrelations(builtIn)!;
+            var cache = new System.Runtime.CompilerServices.ConditionalWeakTable<IReadOnlyList<Bar>, IReadOnlyDictionary<string, double[]>>();
+            for (var slot = 0; slot < definition.Keys.Length; slot++)
+            {
+                var key = definition.Keys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => cache.GetValue(bars, b => definition.Compute(b))[key],
+                    builtIn.BatchName == IndicatorName.EhlersCorrelationAngleIndicator ? new IndicatorErrorBudget(1e-12, 1e-14) : IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EmaWaveIndicator ||
             (builtIn.BatchName is IndicatorName.ErgodicMeanDeviationIndicator or IndicatorName.TraderPressureIndex
             && AverageKind(builtIn.CreateOptions(), builtIn.BatchName == IndicatorName.TraderPressureIndex ? 2 : 3) is 1 or 2 or 3 or 6))
