@@ -1100,47 +1100,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDynamicallyAdjustableMovingAverage(this StockData stockData, int fastLength = 6, int slowLength = 200)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> amaList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double tempSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var shortStdDevList = GetStandardDeviationList(inputList, fastLength);
-        var longStdDevList = GetStandardDeviationList(inputList, slowLength);
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new DynamicAverageWindow(fastLength, slowLength);
+        List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var a = shortStdDevList[i];
-            var b = longStdDevList[i];
-            var v = a != 0 ? (b / a) + fastLength : fastLength;
-
-            var prevValue = GetLastOrDefault(tempList);
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSum += currentValue;
-
-            var p = (int)Math.Round(MinOrMax(v, slowLength, fastLength));       
-            var prevK = i >= p ? kList[i - p] : 0;
-            var k = tempSum;
-            kList.Add(k);
-
-            var prevAma = GetLastOrDefault(amaList);
-            var ama = p != 0 ? (k - prevK) / p : 0;
-            amaList.Add(ama);
-
-            var signal = GetCompareSignal(currentValue - ama, prevValue - prevAma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dama", amaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(amaList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dama", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.DynamicallyAdjustableMovingAverage;
-
         return stockData;
     }
 

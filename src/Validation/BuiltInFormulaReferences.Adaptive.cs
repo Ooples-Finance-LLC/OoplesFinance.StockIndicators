@@ -175,24 +175,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Des", line));
                 });
             case IndicatorName.DynamicallyAdjustableMovingAverage:
-                return new("Dama", new[] { "Dama" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var fast = Integer(options, "FastLength", 6);
-                    var slow = Integer(options, "SlowLength", 200);
-                    var fastVariance = PopulationVariance(prices, fast);
-                    var slowVariance = PopulationVariance(prices, slow);
-                    var line = prices.Select((_, i) =>
-                    {
-                        var ratio = fastVariance[i] == 0 ? 0 : Math.Sqrt(slowVariance[i] / fastVariance[i]);
-                        // The final slow-period cap also governs accepted reversed periods.
-                        // When slow < fast this is the slow-period mean, matching the public formula.
-                        var period = (int)Math.Round(Math.Min(slow, Math.Max(fast, fast + ratio)));
-                        // Direct window mean, with missing startup observations contributing zero.
-                        return Window(prices, i, period).Sum() / period;
-                    }).ToArray();
-                    return Outputs(("Dama", line));
-                });
+                return new("Dama", new[] { "Dama" }, bars => DynamicAverageOutputs(bars, indicator));
             case IndicatorName.DynamicallyAdjustableFilter:
                 return new("Daf", new[] { "Daf" }, bars =>
                 {

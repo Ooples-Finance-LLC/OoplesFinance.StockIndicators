@@ -339,6 +339,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersKaufmanAdaptiveMovingAverageSpecOptions ekama => new EhlersKaufmanAdaptiveMovingAverageState(ekama.Length),
             VolumeAdjustedMovingAverageSpecOptions volumeAdjusted => new VolumeAdjustedMovingAverageState(volumeAdjusted.MaType, volumeAdjusted.Length, volumeAdjusted.Factor),
             VolumeAdjustedMaSpecOptions volumeAdjustedAlias => new VolumeAdjustedMovingAverageState(length: volumeAdjustedAlias.Length),
+            DynamicallyAdjustableMovingAverageSpecOptions dynamicAverage => new DynamicallyAdjustableMovingAverageState(dynamicAverage.FastLength, dynamicAverage.SlowLength),
             VolumeWeightedMovingAverageSpecOptions volumeWeighted => new VolumeWeightedMovingAverageState(volumeWeighted.MaType, volumeWeighted.Length),
             WellRoundedMovingAverageSpecOptions wellRounded => new WellRoundedMovingAverageState(wellRounded.Length),
             EhlersBetterExponentialMovingAverageSpecOptions better => new EhlersBetterExponentialMovingAverageState(better.Length),
