@@ -130,9 +130,9 @@
   {
     "id": "reversed-signal",
     "module": "force",
-    "file": "src/Streaming/TrendForceKernel.cs",
-    "before": "Math.Sign(change) * Math.Exp(logForce - maximum)",
-    "after": "-Math.Sign(change) * Math.Exp(logForce - maximum)",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "ExactMeanAccumulator.UnitRatio(force << 1074, maximum)",
+    "after": "-ExactMeanAccumulator.UnitRatio(force << 1074, maximum)",
     "filter": "FullyQualifiedName~ForceIndexDoesNotNormalizeAnExactZeroGapIntoAMaximumSignal"
   },
   {
@@ -7266,5 +7266,71 @@
     "after": "",
     "filter": "FullyQualifiedName~ReversalPointsNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ReversalPointsState"
+  },
+  {
+    "id": "trend-direction-force-squares-change",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "* change * change * change;",
+    "after": "* change * change;",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-ignores-gap",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "BigInteger.Abs(f - s) * change",
+    "after": "BigInteger.One * change",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-stale-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "oldest.Value.Index <= _count - _lookback",
+    "after": "oldest.Value.Index < _count - _lookback",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "if (commit)\n        {",
+    "after": "if (_lookback > 0)\n        {",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-drops-wide-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "* (value.Doubled ? 2 : 1)",
+    "after": "* 1",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-skips-second-average",
+    "module": "numerical",
+    "file": "src/Helpers/ExactTrendForceWindow.cs",
+    "before": "var second = _second.Next(first, commit);",
+    "after": "var second = first;",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima"
+  },
+  {
+    "id": "trend-direction-force-ignores-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.FourthDegreeForceKeepsTinyAndExtremeSignalsAndEvictsMaxima",
+    "scope": "internal static ComputeBuffer ComputeTrendDirectionForceIndexFast("
+  },
+  {
+    "id": "trend-direction-force-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~TrendDirectionForceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class TrendDirectionForceIndexState"
   }
 ]

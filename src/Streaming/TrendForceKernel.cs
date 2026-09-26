@@ -5,6 +5,7 @@ namespace OoplesFinance.StockIndicators.Streaming;
 internal sealed class TrendForceKernel : IDisposable
 {
     private readonly SpreadAverage _first, _second;
+    private readonly ExactTrendForceWindow? _exact;
     private readonly RollingWindowMax _logMaximum;
     private readonly bool _center;
     private bool _hasAnchor;
@@ -15,9 +16,11 @@ internal sealed class TrendForceKernel : IDisposable
         _first = new(kind, period); _second = new(kind, period);
         _logMaximum = new(Math.Max(1, lookback));
         _center = kind == MovingAvgType.ExponentialMovingAverage;
+        if (StrengthWindow.Supports(kind)) _exact = new ExactTrendForceWindow(kind, length, lookback);
     }
     internal double Next(double value, bool final)
     {
+        if (_exact is not null) return _exact.Next(value, final);
         var anchor = _hasAnchor ? _anchor : value;
         var source = _center ? value - anchor : value * 1000;
         var first = _first.Next(new SpreadNumber(source), final);
@@ -35,8 +38,9 @@ internal sealed class TrendForceKernel : IDisposable
     }
     internal void Reset()
     {
+        _exact?.Reset();
         _first.Reset(); _second.Reset(); _logMaximum.Reset();
         _hasAnchor = false; _anchor = _previousFirst = _previousSecond = 0;
     }
-    public void Dispose() { _first.Dispose(); _second.Dispose(); _logMaximum.Dispose(); }
+    public void Dispose() { _exact?.Dispose(); _first.Dispose(); _second.Dispose(); _logMaximum.Dispose(); }
 }
