@@ -934,49 +934,15 @@ public sealed class DoubleExponentialMovingAverageState : IStreamingIndicatorSta
 [PrimaryOutput("Des")]
 public sealed class DoubleExponentialSmoothingState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _gamma;
-    private readonly StreamingInputResolver _input;
-    private double _prevS;
-    private double _prevS2;
-
-    public DoubleExponentialSmoothingState(double alpha = 0.01, double gamma = 0.9)
-    {
-        _alpha = alpha;
-        _gamma = gamma;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DoubleSmoothingWindow _window;
+    public DoubleExponentialSmoothingState(double alpha = .01, double gamma = .9) => _window = new(alpha, gamma);
     public IndicatorName Name => IndicatorName.DoubleExponentialSmoothing;
-
-    public void Reset()
-    {
-        _prevS = 0;
-        _prevS2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sChg = _prevS - _prevS2;
-        var s = (_alpha * value) + ((1 - _alpha) * (_prevS + (_gamma * (sChg + ((1 - _gamma) * sChg)))));
-
-        if (isFinal)
-        {
-            _prevS2 = _prevS;
-            _prevS = s;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Des", s }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(s, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Des", value } } : null);
     }
 }
 

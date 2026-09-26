@@ -10726,5 +10726,94 @@
     "after": "",
     "filter": "FullyQualifiedName~McNichollNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class McNichollMovingAverageState"
+  },
+  {
+    "id": "double-smoothing-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "private RocBankValue _previous, _prior;",
+    "after": "private RocBankValue _previous = new(1), _prior;",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "double-smoothing-wrong-level-factor",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "Multiply(1 - _alpha)",
+    "after": "Multiply(_alpha)",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-wrong-trend-factor",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "Multiply(1 - _gamma)",
+    "after": "Multiply(_gamma)",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-wrong-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "Add(_previous, _prior, -1)",
+    "after": "Add(_previous, _prior, 1)",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-premature-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-stale-prior-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "_prior = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.CoefficientsPreserveThePublishedRecurrenceAndOverflowRecovery"
+  },
+  {
+    "id": "double-smoothing-accepts-invalid-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "if (double.IsNaN(alpha) || double.IsInfinity(alpha)) throw new ArgumentOutOfRangeException(nameof(alpha));",
+    "after": "",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.InvalidCoefficientsRejectBeforeCalculation"
+  },
+  {
+    "id": "double-smoothing-accepts-invalid-gamma",
+    "module": "numerical",
+    "file": "src/Helpers/DoubleSmoothingWindow.cs",
+    "before": "if (double.IsNaN(gamma) || double.IsInfinity(gamma)) throw new ArgumentOutOfRangeException(nameof(gamma));",
+    "after": "",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.InvalidCoefficientsRejectBeforeCalculation"
+  },
+  {
+    "id": "double-smoothing-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class DoubleExponentialSmoothingState"
   }
 ]
