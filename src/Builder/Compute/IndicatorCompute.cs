@@ -22267,72 +22267,26 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSortinoRatioFast(StockData data, ComputeContext context, int length = 30, double bmk = 0.02,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateSortinoRatio takes the return across the window in excess of the benchmark compounded over
-        // that fraction of a year, and divides the moving average of that return by the downside deviation:
-        // the root of the mean of the squared negative part. Under a simple moving average that mean is an
-        // exact window average, because a running sum of zeroes leaves a residue the root turns into nonsense.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        const double barsPerYear = 60d * 24 * 30 * 12 / (60 * 24);
-        var bench = MathHelper.Pow(1 + bmk, length / barsPerYear) - 1;
-
-        using var returns = context.Rent(count);
-        var ret = returns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        length = Math.Max(1, length);
+        using var window = new SortinoWindow(maType, length, bmk);
+        var custom = ComponentAverage.HasOverrides;
+        using var means = context.Rent(input.Count);
+        using var downsideMeans = context.Rent(input.Count);
+        if (custom)
         {
-            var prevValue = i >= length ? input[i - length] : 0;
-            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 - bench : 0;
-        }
-
-        using var smoothedReturns = context.Rent(count);
-        MovingAverage(data, maType, length, returns.Span, smoothedReturns.WritableSpan);
-        var retSma = smoothedReturns.Span;
-
-        using var downside = context.Rent(count);
-        var deviationSquared = downside.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            deviationSquared[i] = MathHelper.Pow(Math.Min(ret[i], 0), 2);
-        }
-
-        using var meanSquared = context.Rent(count);
-        var mean = meanSquared.WritableSpan;
-        if (maType == MovingAvgType.SimpleMovingAverage)
-        {
-            var windowLength = Math.Max(1, length);
-            for (var i = 0; i < count; i++)
+            using var returns = context.Rent(input.Count); using var squares = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++)
             {
-                if (i < windowLength - 1)
-                {
-                    mean[i] = 0;
-                    continue;
-                }
-
-                double sum = 0;
-                for (var j = i - windowLength + 1; j <= i; j++)
-                {
-                    sum += deviationSquared[j];
-                }
-
-                mean[i] = sum / windowLength;
+                var value = window.ReturnValue(input[i], i >= length ? input[i - length] : 0);
+                returns.WritableSpan[i] = value.Publish(); squares.WritableSpan[i] = SortinoWindow.PublishSquare(SortinoWindow.DownsideSquare(value));
             }
+            MovingAverage(data, maType, length, returns.Span, means.WritableSpan);
+            MovingAverage(data, maType, length, squares.Span, downsideMeans.WritableSpan);
         }
-        else
-        {
-            MovingAverage(data, maType, length, downside.Span, mean);
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var stdDeviation = MathHelper.Sqrt(mean[i]);
-            output[i] = stdDeviation != 0 ? retSma[i] / stdDeviation : 0;
-        }
-
-        return buffer;
+        var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, custom ? means.Span[i] : null, custom ? downsideMeans.Span[i] : null);
+        return output;
     }
 
     /// <summary>

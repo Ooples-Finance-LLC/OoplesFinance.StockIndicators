@@ -235,111 +235,19 @@ public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIn
 [PrimaryOutput("Sr")]
 public sealed class SortinoRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _bench;
-    private readonly IMovingAverageSmoother _retSmoother;
-    private readonly IMovingAverageSmoother _devSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _devWindow;
-    private readonly bool _exactWindow;
-    private readonly StreamingInputResolver _input;
-
-    public SortinoRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = 0.02)
-    {
-        _length = Math.Max(1, length);
-        var barMin = 60d * 24;
-        var minPerYr = 60d * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        _bench = MathHelper.Pow(1 + bmk, _length / barsPerYr) - 1;
-        _retSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _devSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _devWindow = new PooledRingBuffer<double>(_length);
-        _exactWindow = maType == MovingAvgType.SimpleMovingAverage;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SortinoWindow _window;
+    public SortinoRatioState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, double bmk = .02)
+        => _window = new SortinoWindow(maType, length, bmk);
     public IndicatorName Name => IndicatorName.SortinoRatio;
-
-    private double ExactWindowAverage(double value, bool isFinal)
-    {
-        if (isFinal)
-        {
-            _devWindow.TryAdd(value, out _);
-            if (_devWindow.Count < _length)
-            {
-                return 0;
-            }
-
-            double total = 0;
-            for (var i = 0; i < _devWindow.Count; i++)
-            {
-                total += _devWindow[i];
-            }
-
-            return total / _length;
-        }
-
-        var kept = Math.Min(_devWindow.Count, _length - 1);
-        if (kept + 1 < _length)
-        {
-            return 0;
-        }
-
-        double sum = 0;
-        for (var i = _devWindow.Count - kept; i < _devWindow.Count; i++)
-        {
-            sum += _devWindow[i];
-        }
-
-        return (sum + value) / _length;
-    }
-
-    public void Reset()
-    {
-        _retSmoother.Reset();
-        _devSmoother.Reset();
-        _values.Clear();
-        _devWindow.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, _length);
-        var ret = prevValue != 0 ? (value / prevValue) - 1 - _bench : 0;
-        var retSma = _retSmoother.Next(ret, isFinal);
-        var deviation = Math.Min(ret, 0);
-        var deviationSquared = deviation * deviation;
-        // Summed afresh over the window, as the batch does, so a window with no downside is exactly 0.
-        var divisionOfSum = _exactWindow ? ExactWindowAverage(deviationSquared, isFinal) : _devSmoother.Next(deviationSquared, isFinal);
-        var stdDeviation = MathHelper.Sqrt(divisionOfSum);
-        var sortino = stdDeviation != 0 ? retSma / stdDeviation : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sr", sortino }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sortino, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Sr", value } } : null;
+        return new StreamingIndicatorStateResult(value, outputs);
     }
-
-    public void Dispose()
-    {
-        _retSmoother.Dispose();
-        _devSmoother.Dispose();
-        _devWindow.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Si")]

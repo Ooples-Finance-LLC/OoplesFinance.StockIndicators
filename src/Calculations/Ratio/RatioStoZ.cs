@@ -123,61 +123,19 @@ public static partial class Calculations
     public static StockData CalculateSortinoRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 30, 
         double bmk = 0.02)
     {
-        List<double> sortinoList = new(stockData.Count);
-        List<double> retList = new(stockData.Count);
-        List<double> deviationSquaredList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double minPerYr = 60 * 24 * 30 * 12, barMin = 60 * 24, barsPerYr = minPerYr / barMin;
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new SortinoWindow(maType, length, bmk);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var bench = Pow(1 + bmk, length / barsPerYr) - 1;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 - bench : 0;
-            retList.Add(ret);
+            var value = window.Next(input[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            output.Add(value); signals?.Add(GetCompareSignal(value - 2, previous - 2));
         }
-
-        var retSmaList = GetMovingAverageList(stockData, maType, length, retList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ret = retList[i];
-            var retSma = retSmaList[i];
-            var currentDeviation = Math.Min(ret, 0);
-
-            var deviationSquared = Pow(currentDeviation, 2);
-            deviationSquaredList.Add(deviationSquared);
-        }
-
-        // The downside deviation is exactly 0 when no return in the window falls below the target. A running
-        // SMA left a residue near 1e-19 there, and the ratio divided by its root came out near 1e7.
-        var divisionOfSumList = maType == MovingAvgType.SimpleMovingAverage
-            ? GetExactWindowAverageList(deviationSquaredList, length)
-            : GetMovingAverageList(stockData, maType, length, deviationSquaredList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var divisionOfSum = divisionOfSumList[i];
-            var stdDeviation = Sqrt(divisionOfSum);
-            var retSma = retSmaList[i];
-
-            var prevSortino = GetLastOrDefault(sortinoList);
-            var sortino = stdDeviation != 0 ? retSma / stdDeviation : 0;
-            sortinoList.Add(sortino);
-
-            var signal = GetCompareSignal(sortino - 2, prevSortino - 2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sr", sortinoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sortinoList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sr", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.SortinoRatio;
-
         return stockData;
     }
 
