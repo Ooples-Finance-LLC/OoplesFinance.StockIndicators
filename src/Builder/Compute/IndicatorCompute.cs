@@ -12585,30 +12585,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersBetterExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 20)
     {
-        // CalculateEhlersBetterExponentialMovingAverage smooths the two-bar midpoint but recurses on a plain
-        // exponential average of the series, so the two run side by side and only the first is published.
-        // The core routine ran one recursion on the close, which is neither of them.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
-        var alpha = val != 0 ? MathHelper.MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double ema = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var prevEma = ema;
-
-            ema = (alpha * currentValue) + ((1 - alpha) * prevEma);
-            output[i] = (alpha * ((currentValue + previousValue) / 2)) + ((1 - alpha) * prevEma);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); var window = new BetterEmaWindow(length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

@@ -1428,54 +1428,14 @@ public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
 [PrimaryOutput("Ebema")]
 public sealed class EhlersBetterExponentialMovingAverageState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevEma;
-    private int _index;
-
-    public EhlersBetterExponentialMovingAverageState(int length = 20)
-    {
-        var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
-        _alpha = val != 0 ? MathHelper.MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BetterEmaWindow _window;
+    public EhlersBetterExponentialMovingAverageState(int length = 20) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersBetterExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevEma = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevEma = _index >= 1 ? _prevEma : 0;
-
-        var ema = (_alpha * value) + ((1 - _alpha) * prevEma);
-        var bEma = (_alpha * ((value + prevValue) / 2)) + ((1 - _alpha) * prevEma);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevEma = ema;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ebema", bEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bEma, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ebema", value } } : null);
     }
 }
 

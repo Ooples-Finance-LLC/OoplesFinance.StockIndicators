@@ -1252,37 +1252,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersBetterExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var alpha = 2.0 / (length + 1);
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(input.Length);
-        var errArray = pool.Rent(input.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, input.Length);
-            var err = errArray.AsSpan(0, input.Length);
-
-            ema[0] = input[0];
-            err[0] = 0;
-            output[0] = input[0];
-
-            for (var i = 1; i < input.Length; i++)
-            {
-                ema[i] = alpha * input[i] + (1 - alpha) * ema[i - 1];
-                err[i] = input[i] - ema[i];
-                output[i] = ema[i] + (1 - alpha) * err[i];
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(errArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new BetterEmaWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

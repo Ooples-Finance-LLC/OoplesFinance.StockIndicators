@@ -1703,38 +1703,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersBetterExponentialMovingAverage(this StockData stockData, int length = 20)
     {
-        List<double> emaList = new(stockData.Count);
-        List<double> bEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var val = length != 0 ? Math.Cos(2 * Math.PI / length) + Math.Sin(2 * Math.PI / length) : 0;
-        var alpha = val != 0 ? MinOrMax((val - 1) / val, 0.99, 0.01) : 0.01;
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new BetterEmaWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevEma1 = i >= 1 ? emaList[i - 1] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var ema = (alpha * currentValue) + ((1 - alpha) * prevEma1);
-            emaList.Add(ema);
-
-            var prevBEma = GetLastOrDefault(bEmaList);
-            var bEma = (alpha * ((currentValue + prevValue) / 2)) + ((1 - alpha) * prevEma1);
-            bEmaList.Add(bEma);
-
-            var signal = GetCompareSignal(currentValue - bEma, prevValue - prevBEma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ebema", bEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bEmaList);
-        stockData.IndicatorName = IndicatorName.EhlersBetterExponentialMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ebema", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersBetterExponentialMovingAverage;
         return stockData;
     }
 
