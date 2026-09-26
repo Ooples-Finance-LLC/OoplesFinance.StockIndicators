@@ -13,36 +13,25 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChandeQuickStick(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> openCloseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var opens = stockData.OpenPrices;
+        var lag = 0; var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? customer = null;
+        if (custom)
         {
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-
-            var openClose = currentClose - currentOpen;
-            openCloseList.Add(openClose);
+            var changes = input.Select((price, i) => OpenCloseAverageWindow.Difference(i >= lag ? opens[i - lag] : 0, price).Publish()).ToList();
+            customer = GetMovingAverageList(stockData, maType, length, changes);
         }
-
-        var smaList = GetMovingAverageList(stockData, maType, length, openCloseList);
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count), signal = new(stockData.Count), histogram = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new OpenCloseAverageWindow(maType, length, lag);
+        for (var i = 0; i < input.Count; i++)
         {
-            var sma = smaList[i];
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(sma, prevSma);
-            signalsList?.Add(signal);
+            var value = window.Next(opens[i], input[i], true, customer?[i]);
+            line.Add(value.Line); signal.Add(value.Signal); histogram.Add(value.Histogram);
+            signals?.Add(GetCompareSignal(value.Signal, i == 0 ? 0 : signal[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cqs", smaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(smaList);
-        stockData.IndicatorName = IndicatorName.ChandeQuickStick;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cqs", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(signal); stockData.IndicatorName = IndicatorName.ChandeQuickStick;
         return stockData;
     }
 

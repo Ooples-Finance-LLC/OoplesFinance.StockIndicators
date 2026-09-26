@@ -9631,5 +9631,111 @@
     "after": "",
     "filter": "FullyQualifiedName~WilderSummationNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class WellesWilderSummationState"
+  },
+  {
+    "id": "open-close-average-wrong-body-sign",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "difference.Add(open, -1);",
+    "after": "difference.Add(open);",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-wrong-lag-startup",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_opens[0] : 0",
+    "after": "_opens[0] : open",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-wrong-lag-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_opens[0]",
+    "after": "_opens[_opens.Count - 1]",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-premature-body-publication",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_average.Next(line, commit)",
+    "after": "_average.Next(new RocBankValue(line.Publish()), commit)",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-adds-histogram-signal",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "signal.AddTo(ref histogram, -1);",
+    "after": "signal.AddTo(ref histogram);",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-commits-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_average.Next(line, commit)",
+    "after": "_average.Next(line, true)",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-commits-open-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "if (commit) _opens?.TryAdd",
+    "after": "if (true) _opens?.TryAdd",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-stale-open-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_opens?.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-stale-average-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseAverageWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-ignores-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.OpenCloseAverage.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.RoundedBodyAveragesRecoverAcrossExtremesAndPreserveOriginalOpens"
+  },
+  {
+    "id": "open-close-average-skips-customer-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.OpenCloseAverage.cs",
+    "before": "ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.CustomerAverageConsumesDifferencesAndControlsSignal"
+  },
+  {
+    "id": "open-close-average-accepts-invalid-deltamovingaverage",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class DeltaMovingAverageState"
+  },
+  {
+    "id": "open-close-average-accepts-invalid-chandequickstick",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ChandeQuickStickState"
   }
 ]
