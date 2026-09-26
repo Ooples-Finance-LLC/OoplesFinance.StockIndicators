@@ -1698,32 +1698,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ElderForceIndex(ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 13)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        var pool = ArrayPool<double>.Shared;
-        var forceArray = pool.Rent(close.Length);
-
-        try
-        {
-            var force = forceArray.AsSpan(0, close.Length);
-
-            force[0] = 0;
-            for (var i = 1; i < close.Length; i++)
-            {
-                force[i] = (close[i] - close[i - 1]) * volume[i];
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(force, output, length);
-        }
-        finally
-        {
-            pool.Return(forceArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ForceWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true);
     }
 
     /// <summary>

@@ -536,6 +536,7 @@ internal static partial class StatefulIndicatorFactory
             OnBalanceVolumeSpecOptions obvExpanded => new OnBalanceVolumeState(obvExpanded.Length, obvExpanded.MaType),
             AdlSpecOptions _ => new AccumulationDistributionLineState(),
             CmfSpecOptions cmf => new ChaikinMoneyFlowState(length: cmf.Length),
+            ElderForceIndexSpecOptions elderForce => new ForceIndexState(length: elderForce.Length),
             ForceIndexSpecOptions fi => new ForceIndexState(maType: fi.MaType, length: fi.Length),
             MfiSpecOptions mfi => new MoneyFlowIndexState(length: mfi.Length),
             MfiCoreSpecOptions mfiCore => new MoneyFlowIndexState(length: mfiCore.Length),

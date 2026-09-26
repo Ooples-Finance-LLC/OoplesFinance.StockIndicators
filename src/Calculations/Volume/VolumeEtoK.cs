@@ -13,38 +13,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateForceIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> rawForceList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> output = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ForceWindow(maType, length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentVolume = volumeList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var rawForce = MinPastValues(i, 1, currentValue - prevValue) * currentVolume;
-            rawForceList.Add(rawForce);
+            var value = window.Next(input[i], stockData.Volumes[i], true);
+            var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetCompareSignal(value - previous, previous - (i < 2 ? 0 : output[i - 2]))); output.Add(value);
         }
-
-        var forceList = GetMovingAverageList(stockData, maType, length, rawForceList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var force = forceList[i];
-            var prevForce1 = i >= 1 ? forceList[i - 1] : 0;
-            var prevForce2 = i >= 2 ? forceList[i - 2] : 0;
-
-            var signal = GetCompareSignal(force - prevForce1, prevForce1 - prevForce2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fi", forceList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(forceList);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fi", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.ForceIndex;
-
         return stockData;
     }
 

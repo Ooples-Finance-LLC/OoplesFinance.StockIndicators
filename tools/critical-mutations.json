@@ -8523,5 +8523,80 @@
     "after": "",
     "filter": "FullyQualifiedName~VortexNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class VortexIndicatorState"
+  },
+  {
+    "id": "price-force-wrong-previous-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "value.AddProduct(previous, volume, -1)",
+    "after": "value.AddProduct(previous, volume, 1)",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-nonzero-first-force",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "_hasPrevious ? RawForce",
+    "after": "(_hasPrevious || price != 0) ? RawForce",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-premature-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "value.AddProduct(price, volume); value.AddProduct(previous, volume, -1);",
+    "after": "value.AddProduct(price - previous, volume);",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-wrong-smoothing-period",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "new RocBankAverage(kind, length, int.MaxValue)",
+    "after": "new RocBankAverage(kind, 1, int.MaxValue)",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "if (commit) { _previous",
+    "after": "if (volume != 0) { _previous",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-stale-mean-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ForceWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages"
+  },
+  {
+    "id": "price-force-customer-wrong-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "force.Span, means.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(input), means.WritableSpan",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.CustomerAverageReceivesRoundedForceProducts",
+    "scope": "internal static ComputeBuffer ComputeForceIndexFast("
+  },
+  {
+    "id": "price-force-elder-discards-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComputeForceIndexFast(data, context, length, MovingAvgType.ExponentialMovingAverage)",
+    "after": "ComputeForceIndexFast(data, context, 13, MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.FusedForceProductsKeepSelectedPricesAndRecoverThroughAverages",
+    "scope": "internal static ComputeBuffer ComputeElderForceIndexFast("
+  },
+  {
+    "id": "price-force-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceForceNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ForceIndexState"
   }
 ]
