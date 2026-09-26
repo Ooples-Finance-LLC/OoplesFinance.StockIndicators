@@ -11973,5 +11973,102 @@
     "after": "",
     "filter": "FullyQualifiedName~SelfWeightedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class SelfWeightedMovingAverageState"
+  },
+  {
+    "id": "optimal-weighted-wrong-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "Previous: _previous",
+    "after": "Previous: price",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-drops-correlation-centering",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "count * xy - sx * sy",
+    "after": "count * xy",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-erases-negative-correlation",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "cross.Sign * ExactPopulationDeviation",
+    "after": "Math.Abs(cross.Sign) * ExactPopulationDeviation",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-uses-fixed-weights",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "Math.Pow(_pairs.Capacity - j, correlation)",
+    "after": "Math.Pow(_pairs.Capacity - j, 1)",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-reverses-weights",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "Math.Pow(_pairs.Capacity - j, correlation)",
+    "after": "Math.Pow(j + 1, correlation)",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-drops-zero-padding",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "j < _pairs.Capacity; j++",
+    "after": "j < count; j++",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-rounds-weighted-product",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "top.AddProduct(j == 0 ? price : _pairs[_pairs.Count - j].Price, weight)",
+    "after": "top.Add((j == 0 ? price : _pairs[_pairs.Count - j].Price) * weight)",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-uses-count-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "top.Ratio(bottom)",
+    "after": "top.Mean(count)",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-stale-feedback-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "_previous = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-stale-pairs-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OptimalWeightedWindow.cs",
+    "before": "_pairs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "optimal-weighted-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class OptimalWeightedMovingAverageState"
   }
 ]

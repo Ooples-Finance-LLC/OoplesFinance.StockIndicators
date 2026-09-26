@@ -5034,67 +5034,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void OptimalWeightedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        // Rolling correlation state
-        double sumX = 0, sumY = 0, sumXY = 0, sumX2 = 0, sumY2 = 0;
-        var corrWindow = new double[length * 2]; // Store x,y pairs
-        var corrIndex = 0;
-        var corrCount = 0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevOwma = i >= 1 ? output[i - 1] : 0;
-
-            // Update rolling correlation (input vs prevOwma)
-            var oldIdx = corrIndex;
-            if (corrCount >= length)
-            {
-                // Remove oldest values
-                var oldX = corrWindow[oldIdx * 2];
-                var oldY = corrWindow[oldIdx * 2 + 1];
-                sumX -= oldX;
-                sumY -= oldY;
-                sumXY -= oldX * oldY;
-                sumX2 -= oldX * oldX;
-                sumY2 -= oldY * oldY;
-            }
-
-            // Add new values
-            corrWindow[corrIndex * 2] = currentValue;
-            corrWindow[corrIndex * 2 + 1] = prevOwma;
-            sumX += currentValue;
-            sumY += prevOwma;
-            sumXY += currentValue * prevOwma;
-            sumX2 += currentValue * currentValue;
-            sumY2 += prevOwma * prevOwma;
-
-            corrIndex = (corrIndex + 1) % length;
-            if (corrCount < length) corrCount++;
-
-            // Calculate correlation
-            var n = corrCount;
-            var numerator = (n * sumXY) - (sumX * sumY);
-            var denomX = (n * sumX2) - (sumX * sumX);
-            var denomY = (n * sumY2) - (sumY * sumY);
-            var denominator = Math.Sqrt(denomX * denomY);
-            var corr = denominator != 0 ? numerator / denominator : 0;
-            if (double.IsNaN(corr) || double.IsInfinity(corr)) corr = 0;
-
-            // Calculate weighted sum
-            double sum = 0, weightedSum = 0;
-            for (var j = 0; j <= length - 1 && i >= j; j++)
-            {
-                var weight = Math.Pow(length - j, corr);
-                var prevValue = input[i - j];
-                sum += prevValue * weight;
-                weightedSum += weight;
-            }
-
-            output[i] = weightedSum != 0 ? sum / weightedSum : 0;
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new OptimalWeightedWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
