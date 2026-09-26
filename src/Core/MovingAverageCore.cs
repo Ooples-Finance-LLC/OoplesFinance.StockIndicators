@@ -2583,19 +2583,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AhrensMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 9)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevAhma = i >= 1 ? output[i - 1] : 0;
-            var priorAhma = i >= length ? output[i - length] : currentValue;
-
-            output[i] = prevAhma + ((currentValue - ((prevAhma + priorAhma) / 2)) / length);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AhrensWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

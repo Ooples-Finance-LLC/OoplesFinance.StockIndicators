@@ -72,10 +72,6 @@ OoplesFinance.StockIndicators.Indicators.Adx/longer-periods
 OoplesFinance.StockIndicators.Indicators.Adx/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Adx/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Adx/weighted-average
-OoplesFinance.StockIndicators.Indicators.AhrensMovingAverage/default
-OoplesFinance.StockIndicators.Indicators.AhrensMovingAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.AhrensMovingAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AhrensMovingAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AlligatorJaw/default
 OoplesFinance.StockIndicators.Indicators.AlligatorJaw/longer-periods
 OoplesFinance.StockIndicators.Indicators.AlligatorJaw/minimum-periods

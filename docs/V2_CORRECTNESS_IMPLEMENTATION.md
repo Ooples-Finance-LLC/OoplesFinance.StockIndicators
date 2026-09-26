@@ -1099,3 +1099,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Five configurations retain separately rounded open and close averages before subtraction. Independent references cover extreme equality/cancellation, customer component order, selected closes with original opens, direct raw, native/live preview/reset and invalid fields.
 - **46/46** checks passed (`open-close-histogram.trx`); campaign289 passed its baseline and caught **8/8** injected faults. All 12 staged files match its archive. **1,152** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `29713f13385bc72788a57476b5ddbd52dae2507177c0a93f219c2e9cc0f698d0` / `6c14160a0218e2f5f2735cd5893ea64d53c7ad41fd41fece893dd9d3effda590`.
 - Inventory: **3,968/7,131**, **3,163** omissions across **557** types; no construction failures. DLL SHA256 `A7C2C97834F1F46FDEE80BF977E09814BA3DFAB40BF2E7BA039ECBD0FAC5AE18`. Sixty-nine grouped batches cover **1,138 configurations / 188 types**. Full library coverage remains incomplete.
+
+
+### Ahrens Moving Average numerical contracts
+
+- Four configurations preserve the rounded lagged recurrence across batch, both direct cores, raw, native and live routes. The trend core now uses the public formula and accepts empty input. Independent references verify startup, lag, preview/reset and invalid fields; genuine overshoot may overflow at MaxValue, then recover without poisoned state.
+- **37/37** checks passed (`ahrens-final.trx`); campaign290 passed its baseline and caught **10/10** injected faults. All 14 staged files match its archive. **1,162** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `322fc8eebeafe41765af7049a5a1fd2609fe88701971b2ed67bc6abd141c99c8` / `28b5de2314d47d0b47d6b29936728b855c590a17f3b0af3aa077f5bc7dea90c8`.
+- Inventory: **3,972/7,131**, **3,159** omissions across **556** types; no construction failures. DLL SHA256 `D0779D1BFAB6E3EA400B856466F51E62115F7280374DEA3444F21C3D432FB37C`. Seventy grouped batches cover **1,142 configurations / 189 types**. Full library coverage remains incomplete.
