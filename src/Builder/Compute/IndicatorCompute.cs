@@ -3283,29 +3283,23 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTrixFast(StockData data, ComputeContext context, int length = 15,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateTrix publishes the percentage change of the triple moving average of the chained series,
-        // and the percentage change is taken against the absolute previous value, so the first bar is zero
-        // rather than a change from nothing. The signal line is a separate series and is not this one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var first = context.Rent(count);
-        using var second = context.Rent(count);
-        using var third = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), first.WritableSpan);
-        MovingAverage(data, maType, length, first.Span, second.WritableSpan);
-        MovingAverage(data, maType, length, second.Span, third.WritableSpan);
-        var ema3 = third.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count); using var third = context.Rent(input.Count);
+        if (custom)
         {
-            output[i] = CalculationsHelper.CalculatePercentChange(ema3[i], i >= 1 ? ema3[i - 1] : 0);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, maType, length, first.Span, second.WritableSpan);
+            MovingAverage(data, maType, length, second.Span, third.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(input.Count); using var window = new TrixWindow(maType, length);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null, custom ? third.Span[i] : null).Publish();
+        if (ComponentAverage.HasOverrides)
+        {
+            using var signal = context.Rent(input.Count);
+            MovingAverage(data, maType, 9, result.Span, signal.WritableSpan);
+        }
+        return result;
     }
 
     /// <summary>
