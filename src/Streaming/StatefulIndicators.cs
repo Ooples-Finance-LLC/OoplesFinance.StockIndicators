@@ -9280,75 +9280,14 @@ public sealed class BollingerBandsAverageTrueRangeState : IStreamingIndicatorSta
 [PrimaryOutput("MiddleBand")]
 public sealed class BollingerBandsFibonacciRatiosState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _fibRatio3;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly IMovingAverageSmoother _atr;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
+    private readonly StollerAverageRangeChannelsState _channel;
     public BollingerBandsFibonacciRatiosState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20,
-        double fibRatio1 = MathHelper.Phi, double fibRatio2 = MathHelper.Phi + 1,
-        double fibRatio3 = (2 * MathHelper.Phi) + 1)
-    {
-        _ = fibRatio1;
-        _ = fibRatio2;
-        _fibRatio3 = fibRatio3;
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atr = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+        double fibRatio1 = MathHelper.Phi, double fibRatio2 = MathHelper.Phi + 1, double fibRatio3 = (2 * MathHelper.Phi) + 1)
+    { _channel = new(maType, length, fibRatio3); }
     public IndicatorName Name => IndicatorName.BollingerBandsFibonacciRatios;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _atr.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atr.Next(tr, isFinal);
-        var r3 = atr * _fibRatio3;
-        var upper = sma + r3;
-        var lower = sma - r3;
-        var middle = sma;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
-    }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _atr.Dispose();
-    }
+    public void Reset() => _channel.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs) => _channel.Update(bar, isFinal, includeOutputs);
+    public void Dispose() => _channel.Dispose();
 }
 
 [PrimaryOutput("PctB")]

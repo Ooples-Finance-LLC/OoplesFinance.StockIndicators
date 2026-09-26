@@ -19243,5 +19243,86 @@
     "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, atrLength))",
     "filter": "FullyQualifiedName~BollingerAtrNumericalTests.DeviationWidthPreservesSmallSpreadsAndExtendedRangeRatios|FullyQualifiedName~BollingerAtrNumericalTests.SelectedClosesAndCustomerAtrRetainTheirStages|FullyQualifiedName~BollingerAtrNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~BollingerAtrNumericalTests.LegacyBatchOnlyAtrAveragesRemainAvailable",
     "scope": "internal static ComputeBuffer ComputeBollingerBandsAvgTrueRangeFast("
+  },
+  {
+    "id": "fibonacci-band-batch-ratio",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart1.cs",
+    "scope": "public static StockData CalculateBollingerBandsFibonacciRatios(",
+    "before": "CalculateStollerAverageRangeChannels(maType, length, fibRatio3)",
+    "after": "CalculateStollerAverageRangeChannels(maType, length, fibRatio1)",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-raw-ratio",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBollingerBandsFibonacciRatiosFast(",
+    "before": "context, length, fibRatio3, maType, band",
+    "after": "context, length, fibRatio2, maType, band",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "new(maType, length, fibRatio3)",
+    "after": "new(maType, length + 1, fibRatio3)",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-native-kind",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "new(maType, length, fibRatio3)",
+    "after": "new(MovingAvgType.ExponentialMovingAverage, length, fibRatio3)",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-preview-commit",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "_channel.Update(bar, isFinal, includeOutputs)",
+    "after": "_channel.Update(bar, true, includeOutputs)",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-stale-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "public void Reset() => _channel.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-missing-outputs",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "_channel.Update(bar, isFinal, includeOutputs)",
+    "after": "_channel.Update(bar, isFinal, false)",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-wrong-identity",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsFibonacciRatiosState :",
+    "before": "public IndicatorName Name => IndicatorName.BollingerBandsFibonacciRatios;",
+    "after": "public IndicatorName Name => IndicatorName.StollerAverageRangeChannels;",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
+  },
+  {
+    "id": "fibonacci-band-hidden-output-metadata",
+    "module": "numerical",
+    "file": "src/Calculations/BollingerBands/BollingerBandsPart1.cs",
+    "scope": "public static StockData CalculateBollingerBandsFibonacciRatios(",
+    "before": "stockData.SetOutputValues(() => new Dictionary<string, List<double>> {\n            { \"UpperBand\", bands[\"UpperBand\"] }, { \"MiddleBand\", bands[\"MiddleBand\"] }, { \"LowerBand\", bands[\"LowerBand\"] }\n        });",
+    "after": "stockData.SetOutputValues(() => bands.ToDictionary(pair => pair.Key, pair => pair.Value));",
+    "filter": "FullyQualifiedName~FibonacciBandNumericalTests"
   }
 ]

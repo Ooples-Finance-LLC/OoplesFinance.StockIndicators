@@ -37,7 +37,7 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BollingerAtrOutputs(bars, builtIn)["AtrDev"], IndicatorErrorBudget.Exact);
             yield break;
         }
-        if (builtIn.BatchName is IndicatorName.AverageTrueRangeChannel or IndicatorName.StollerAverageRangeChannels)
+        if (builtIn.BatchName is IndicatorName.AverageTrueRangeChannel or IndicatorName.StollerAverageRangeChannels or IndicatorName.BollingerBandsFibonacciRatios)
         {
             var channelKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < channelKeys.Length; slot++) { var key = channelKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RangeChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }

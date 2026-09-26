@@ -5,7 +5,7 @@ internal static partial class BuiltInFormulaReferences
     internal static IReadOnlyDictionary<string, double[]> RangeChannelOutputs(IReadOnlyList<Bar> bars, IBuiltInIndicator indicator)
     {
         var options = indicator.CreateOptions(); var rounded = indicator.BatchName == IndicatorName.AverageTrueRangeChannel;
-        return RangeChannelOutputs(bars, Math.Max(1, Integer(options, "Length", 14)), AverageKind(options, 1), Number(options, 2, rounded ? "Multiplier" : "AtrMult"), rounded);
+        return RangeChannelOutputs(bars, Math.Max(1, Integer(options, "Length", 14)), AverageKind(options, 1), Number(options, 2, rounded ? "Multiplier" : "AtrMult", "FibRatio3"), rounded);
     }
     internal static IReadOnlyDictionary<string, double[]> RangeChannelOutputs(IReadOnlyList<Bar> bars, int length, int kind, double multiplier, bool rounded)
     {

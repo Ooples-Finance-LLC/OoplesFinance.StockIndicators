@@ -21431,15 +21431,7 @@ internal static partial class IndicatorCompute
         int length = 20, double fibRatio1 = 1.618, double fibRatio2 = 2.618, double fibRatio3 = 4.236,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(input.Count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan);
-        if (band == ChannelBand.Middle) return buffer;
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        var multiplier = band == ChannelBand.Upper ? fibRatio3 : -fibRatio3;
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < output.Length; i++) output[i] += multiplier * atr.Span[i];
-        return buffer;
+        return ComputeStollerAverageRangeChannelsFast(data, context, length, fibRatio3, maType, band);
     }
 
     /// <summary>

@@ -116,7 +116,7 @@ public sealed class RangeChannelNumericalTests
         }
     }
     public static IEnumerable<object[]> Cases => IndicatorValidationDiscovery.Discover(new[] { typeof(IIndicator).Assembly })
-        .Where(c => c.IndicatorType == typeof(AverageTrueRangeChannel) || c.IndicatorType == typeof(StollerAverageRangeChannels)).Select(c => new object[] { c });
+        .Where(c => c.IndicatorType == typeof(BollingerBandsFibonacciRatios) || c.IndicatorType == typeof(AverageTrueRangeChannel) || c.IndicatorType == typeof(StollerAverageRangeChannels)).Select(c => new object[] { c });
     public static IEnumerable<object[]> Routes => Cases.SelectMany(c => new[] { "batch", "fast", "arm", "native", "streaming" }.Select(route => new object[] { c[0], route }));
     [Theory, MemberData(nameof(Routes))]
     public void AllRoutesMatchIndependentFormulasIncludingPreviewAndReset(IndicatorValidationCase testCase, string route) =>

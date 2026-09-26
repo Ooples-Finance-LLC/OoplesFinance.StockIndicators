@@ -192,52 +192,15 @@ public static partial class Calculations
     public static StockData CalculateBollingerBandsFibonacciRatios(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, double fibRatio1 = MathHelper.Phi, double fibRatio2 = MathHelper.Phi + 1, double fibRatio3 = (2 * MathHelper.Phi) + 1)
     {
-        List<double> fibTop3List = new(stockData.Count);
-        List<double> fibBottom3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var atr = atrList[i];
-            var sma = smaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var r1 = atr * fibRatio1;
-            var r2 = atr * fibRatio2;
-            var r3 = atr * fibRatio3;
-
-            var prevFibTop3 = GetLastOrDefault(fibTop3List);
-            var fibTop3 = sma + r3;
-            fibTop3List.Add(fibTop3);
-
-            var fibTop2 = sma + r2;
-            var fibTop1 = sma + r1;
-            var fibBottom1 = sma - r1;
-            var fibBottom2 = sma - r2;
-
-            var prevFibBottom3 = GetLastOrDefault(fibBottom3List);
-            var fibBottom3 = sma - r3;
-            fibBottom3List.Add(fibBottom3);
-
-            var signal = GetBollingerBandsSignal(currentValue - sma, prevValue - prevSma, currentValue, prevValue, fibTop3, prevFibTop3, 
-                fibBottom3, prevFibBottom3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", fibTop3List },
-            { "MiddleBand", smaList },
-            { "LowerBand", fibBottom3List }
+        // Only the third pair of bands is published. Keep the legacy inner-ratio
+        // parameters inert while sharing the verified ATR-band contract.
+        stockData.CalculateStollerAverageRangeChannels(maType, length, fibRatio3);
+        // Keep publication explicit: generated output metadata reads these keys.
+        var bands = stockData.ChainedOutputs;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "UpperBand", bands["UpperBand"] }, { "MiddleBand", bands["MiddleBand"] }, { "LowerBand", bands["LowerBand"] }
         });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.BollingerBandsFibonacciRatios;
-
         return stockData;
     }
 
