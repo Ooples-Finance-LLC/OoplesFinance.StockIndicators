@@ -13246,10 +13246,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV1Fast(StockData data, ComputeContext context, int length = 10)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers3PoleButterworthFilterV1(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers3PoleButterworthFilterV1(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -13257,10 +13257,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers3PoleButterworthFilterV2Fast(StockData data, ComputeContext context, int length = 15)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers3PoleButterworthFilterV2(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers3PoleButterworthFilterV2(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>
@@ -13290,10 +13290,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlers3PoleSuperSmootherFilterFast(StockData data, ComputeContext context, int length = 20)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.Ehlers3PoleSuperSmootherFilter(close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var result = context.Rent(input.Count);
+        MovingAverageCore.Ehlers3PoleSuperSmootherFilter(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        return result;
     }
 
     /// <summary>

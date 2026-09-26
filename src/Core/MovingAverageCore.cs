@@ -1849,29 +1849,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleButterworthFilterV1(ReadOnlySpan<double> input, Span<double> output, int length = 10)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var a = Math.Exp(-Math.PI / length);
-        var b = 2 * a * Math.Cos(1.738 * Math.PI / length);
-        var c = a * a;
-        var d2 = b + c;
-        var d3 = -(c + (b * c));
-        var d4 = c * c;
-        var d1 = 1 - d2 - d3 - d4;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-            var prevFilter3 = i >= 3 ? output[i - 3] : 0;
-
-            output[i] = (d1 * currentValue) + (d2 * prevFilter1) + (d3 * prevFilter2) + (d4 * prevFilter3);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 0);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1879,10 +1859,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleButterworthFilterV2(ReadOnlySpan<double> input, Span<double> output, int length = 15)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        var kernel = new Streaming.ButterworthThreePoleKernel(length);
-        for (var i = 0; i < input.Length; i++) output[i] = kernel.Next(input[i], true);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 1);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
@@ -1910,14 +1889,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void Ehlers3PoleSuperSmootherFilter(ReadOnlySpan<double> input, Span<double> output, int length = 20)
     {
-        length = Math.Max(2, length);
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var kernel = new Streaming.ButterworthThreePoleKernel(length, smoothInput: false);
-        for (var i = 0; i < input.Length; i++) output[i] = kernel.Next(input[i], true);
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new ThreePoleWindow(length, 2);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>
