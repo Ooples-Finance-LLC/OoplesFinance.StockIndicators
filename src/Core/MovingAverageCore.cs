@@ -3066,43 +3066,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void QuadraticRegression(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var n = Math.Min(i + 1, length);
-
-            // Compute sums for quadratic regression
-            double sumX = 0, sumX2 = 0, sumX3 = 0, sumX4 = 0;
-            double sumY = 0, sumXY = 0, sumX2Y = 0;
-
-            for (var j = 0; j < n; j++)
-            {
-                var x = (double)j;
-                var y = input[i - j];
-
-                sumX += x;
-                sumX2 += x * x;
-                sumX3 += x * x * x;
-                sumX4 += x * x * x * x;
-                sumY += y;
-                sumXY += x * y;
-                sumX2Y += x * x * y;
-            }
-
-            // Simplified quadratic regression using normal equations
-            // For simplicity, fall back to linear regression approach
-            var avgX = sumX / n;
-            var avgY = sumY / n;
-            var avgXY = sumXY / n;
-            var avgX2 = sumX2 / n;
-
-            var slope = avgX2 != avgX * avgX ? (avgXY - avgX * avgY) / (avgX2 - avgX * avgX) : 0;
-            var intercept = avgY - slope * avgX;
-
-            output[i] = intercept; // Value at x=0 (current)
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new QuadraticProjectionWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -949,41 +949,22 @@ public sealed class QuadraticMovingAverageState : IStreamingIndicatorState, IDis
 [PrimaryOutput("QuadReg")]
 public sealed class QuadraticRegressionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly QuadraticRegressionEngine _engine;
-
+    private readonly QuadraticProjectionWindow? _window;
+    private readonly QuadraticRegressionEngine? _fallback;
     public QuadraticRegressionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500)
     {
-        _engine = new QuadraticRegressionEngine(maType, length, InputName.Close);
+        if (StrengthWindow.Supports(maType)) _window = new(maType, length);
+        else _fallback = new(maType, length, InputName.Close);
     }
-
     public IndicatorName Name => IndicatorName.QuadraticRegression;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() { _window?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var quadReg = _engine.Next(bar, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "QuadReg", quadReg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(quadReg, outputs);
+        var value = _window?.Next(bar.Close, isFinal) ?? _fallback!.Next(bar, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "QuadReg", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() { _window?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Qema")]

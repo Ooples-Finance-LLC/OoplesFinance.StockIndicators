@@ -8,6 +8,7 @@ internal readonly struct ReferenceFraction : IComparable<ReferenceFraction>
 {
     private readonly BigInteger _numerator, _denominator;
     internal ReferenceFraction(long value) : this(new BigInteger(value), BigInteger.One) { }
+    internal ReferenceFraction(BigInteger value) : this(value, BigInteger.One) { }
     private ReferenceFraction(BigInteger numerator, BigInteger denominator)
     {
         if (denominator.IsZero) throw new DivideByZeroException();
