@@ -9737,5 +9737,70 @@
     "after": "",
     "filter": "FullyQualifiedName~OpenCloseAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class ChandeQuickStickState"
+  },
+  {
+    "id": "open-close-histogram-wrong-subtraction",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "first.AddTo(ref difference, -1);",
+    "after": "first.AddTo(ref difference);",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-smooths-wrong-open",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "_open.Next(new RocBankValue(open), commit)",
+    "after": "_open.Next(new RocBankValue(close), commit)",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-commits-open-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "_open.Next(new RocBankValue(open), commit)",
+    "after": "_open.Next(new RocBankValue(open), true)",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-commits-close-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "_close.Next(new RocBankValue(close), commit)",
+    "after": "_close.Next(new RocBankValue(close), true)",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-stale-open-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "_open?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-stale-close-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "_close?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.SeparateAveragesPreserveRoundingAndExtremeCancellation"
+  },
+  {
+    "id": "open-close-histogram-reuses-customer-open",
+    "module": "numerical",
+    "file": "src/Helpers/OpenCloseHistogramWindow.cs",
+    "before": "new RocBankValue(customerClose.Value)",
+    "after": "new RocBankValue(customerOpen!.Value)",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.CustomerOpenAndCloseAveragesAreIndependentAndOrdered"
+  },
+  {
+    "id": "open-close-histogram-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~OpenCloseHistogramNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class OCHistogramState"
   }
 ]
