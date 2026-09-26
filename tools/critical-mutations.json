@@ -10276,5 +10276,111 @@
     "after": "",
     "filter": "FullyQualifiedName~EhlersIirNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class EhlersInfiniteImpulseResponseFilterState"
+  },
+  {
+    "id": "generalized-double-drops-unit-gain",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "first.AddTo(ref result);",
+    "after": "",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-wrong-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_second.Next(first, commit)",
+    "after": "_second.Next(new RocBankValue(price), commit)",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-ignores-factor",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_factor = factor;",
+    "after": "_factor = .7;",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-premature-product-publication",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "result.AddProduct(first.Publish(), _factor);",
+    "after": "result.Add(first.Publish() * _factor);",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-adds-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "result.AddProduct(second.Publish(), _factor, -1);",
+    "after": "result.AddProduct(second.Publish(), _factor);",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-commits-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_first.Next(new RocBankValue(price), commit)",
+    "after": "_first.Next(new RocBankValue(price), true)",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-commits-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_second.Next(first, commit)",
+    "after": "_second.Next(first, true)",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-stale-first-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-stale-second-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "_second?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation"
+  },
+  {
+    "id": "generalized-double-reuses-first-customer",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "new RocBankValue(customerSecond.Value)",
+    "after": "new RocBankValue(customerFirst!.Value)",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.CustomerStagesRemainSequentialAndPreserveTheFactor"
+  },
+  {
+    "id": "generalized-double-accepts-invalid-factor",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralizedDoubleWindow.cs",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor)) throw new ArgumentOutOfRangeException(nameof(factor));",
+    "after": "",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.InvalidFactorsRejectBeforeStateAllocation"
+  },
+  {
+    "id": "generalized-double-wrong-registry-default",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "double volumeFactor = 0.7",
+    "after": "double volumeFactor = 1.0",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.ExactAffineCombinationRetainsUnitGainAndExtremeCancellation",
+    "scope": "internal static void GeneralizedDoubleExponentialMovingAverage("
+  },
+  {
+    "id": "generalized-double-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~GeneralizedDoubleNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class GeneralizedDoubleExponentialMovingAverageState"
   }
 ]

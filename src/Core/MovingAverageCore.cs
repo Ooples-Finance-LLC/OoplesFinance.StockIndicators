@@ -2091,35 +2091,11 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Generalized Double Exponential Moving Average (GDEMA).
     /// </summary>
-    internal static void GeneralizedDoubleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double volumeFactor = 1.0)
+    internal static void GeneralizedDoubleExponentialMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14, double volumeFactor = 0.7)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var ema1Array = pool.Rent(input.Length);
-        var ema2Array = pool.Rent(input.Length);
-
-        try
-        {
-            var ema1 = ema1Array.AsSpan(0, input.Length);
-            var ema2 = ema2Array.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, ema1, length);
-            ExponentialMovingAverage(ema1, ema2, length);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = ((1 + volumeFactor) * ema1[i]) - (volumeFactor * ema2[i]);
-            }
-        }
-        finally
-        {
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new GeneralizedDoubleWindow(MovingAvgType.ExponentialMovingAverage, length, volumeFactor);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

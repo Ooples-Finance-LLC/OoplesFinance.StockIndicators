@@ -13294,27 +13294,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeGeneralizedDoubleEmaFast(StockData data, ComputeContext context, int length = 5,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, double factor = 0.7)
     {
-        // CalculateGeneralizedDoubleExponentialMovingAverage leans the singly smoothed chained series against
-        // the doubly smoothed one by the given factor. The core routine this replaced read the close and
-        // exposed neither the factor nor the moving average type.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-
-        using var firstPass = context.Rent(count);
-        using var secondPass = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), firstPass.WritableSpan);
-        MovingAverage(data, maType, length, firstPass.Span, secondPass.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var ema1 = firstPass.Span;
-        var ema2 = secondPass.Span;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new GeneralizedDoubleWindow(maType, length, factor);
+        using var first = context.Rent(input.Count); using var second = context.Rent(input.Count);
+        if (custom)
         {
-            output[i] = (ema1[i] * (1 + factor)) - (ema2[i] * factor);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), first.WritableSpan);
+            MovingAverage(data, maType, length, first.Span, second.WritableSpan);
         }
-
-        return buffer;
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, custom ? first.Span[i] : null, custom ? second.Span[i] : null);
+        return result;
     }
 
     /// <summary>
@@ -17573,11 +17564,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeGeneralizedDoubleExponentialMovingAverageFast(StockData data, ComputeContext context, int length = 14, double volumeFactor = 1.0)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.GeneralizedDoubleExponentialMovingAverage(inputSpan, buffer.WritableSpan, length, volumeFactor);
-        return buffer;
+        return ComputeGeneralizedDoubleEmaFast(data, context, length, MovingAvgType.ExponentialMovingAverage, volumeFactor);
     }
 
     /// <summary>
