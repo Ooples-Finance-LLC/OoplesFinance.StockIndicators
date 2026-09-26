@@ -343,83 +343,18 @@ public sealed class KaufmanStressIndicatorState : IMultiSeriesIndicatorState, ID
 [PrimaryOutput("Krcc")]
 public sealed class KendallRankCorrelationCoefficientState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly LinearRegressionState _linReg;
-    private readonly RollingWindowCorrelation _correlation;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _linRegValues;
-    private readonly StreamingInputResolver _input;
-
-    public KendallRankCorrelationCoefficientState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _linReg = new LinearRegressionState(_length);
-        _correlation = new RollingWindowCorrelation(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _linRegValues = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KendallCorrelationWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public KendallRankCorrelationCoefficientState(int length = 20) => _window = new KendallCorrelationWindow(length);
     public IndicatorName Name => IndicatorName.KendallRankCorrelationCoefficient;
-
-    public void Reset()
-    {
-        _linReg.Reset();
-        _correlation.Reset();
-        _values.Clear();
-        _linRegValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-        var corr = isFinal
-            ? _correlation.Add(linReg, value, out _)
-            : _correlation.Preview(linReg, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-        var totalPairs = _length * (_length - 1) / 2d;
-        double numerator = 0;
-        for (var j = 0; j <= _length - 1; j++)
-        {
-            var valueJ = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var linRegJ = EhlersStreamingWindow.GetOffsetValue(_linRegValues, linReg, j);
-            for (var k = 0; k <= j; k++)
-            {
-                var valueK = EhlersStreamingWindow.GetOffsetValue(_values, value, k);
-                var linRegK = EhlersStreamingWindow.GetOffsetValue(_linRegValues, linReg, k);
-                numerator += Math.Sign(linRegJ - linRegK) * Math.Sign(valueJ - valueK);
-            }
-        }
-
-        var kendall = totalPairs != 0 ? numerator / totalPairs : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _linRegValues.TryAdd(linReg, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Krcc", kendall }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(kendall, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Krcc", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _linReg.Dispose();
-        _correlation.Dispose();
-        _values.Dispose();
-        _linRegValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
@@ -1537,59 +1472,18 @@ public sealed class LiquidRelativeStrengthIndexState : IStreamingIndicatorState
 [PrimaryOutput("LogCorr")]
 public sealed class LogisticCorrelationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _k;
-    private readonly RollingWindowCorrelation _correlation;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public LogisticCorrelationState(int length = 100, double k = 10)
-    {
-        _length = Math.Max(1, length);
-        _k = k;
-        _correlation = new RollingWindowCorrelation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LogisticCorrelationWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public LogisticCorrelationState(int length = 100, double k = 10) => _window = new LogisticCorrelationWindow(length, k);
     public IndicatorName Name => IndicatorName.LogisticCorrelation;
-
-    public void Reset()
-    {
-        _correlation.Reset();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var x = (double)_index;
-        var corr = isFinal
-            ? _correlation.Add(x, value, out _)
-            : _correlation.Preview(x, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-        var log = 1 / (1 + MathHelper.Exp(_k * -corr));
-
-        if (isFinal)
-        {
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "LogCorr", log }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(log, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "LogCorr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _correlation.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Macz")]

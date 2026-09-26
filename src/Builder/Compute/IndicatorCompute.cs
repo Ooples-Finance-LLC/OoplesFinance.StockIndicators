@@ -683,6 +683,7 @@ internal static partial class IndicatorCompute
             BollingerBandsAtrSpecOptions bbatr => ComputeBollingerBandsAtrFast(data, context, bbatr.Length, bbatr.Multiplier),
 
             // Batch 5 - Ratio/Performance
+            KendallRankCorrelationCoefficientSpecOptions kendall => ComputeKendallCorrelation(data, context, kendall.Length),
             LogisticCorrelationSpecOptions lc => ComputeLogisticCorrelation(data, context, lc.Length, lc.K),
             EfficientPriceSpecOptions ep => ComputeEfficientPrice(data, context, ep.Length),
             EfficientAutoLineSpecOptions eal => ComputeEfficientAutoLine(data, context, eal.Length, eal.FastAlpha, eal.SlowAlpha),

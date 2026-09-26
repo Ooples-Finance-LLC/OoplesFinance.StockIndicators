@@ -50,6 +50,20 @@ internal sealed class ExactLinearFitWindow : IDisposable
         internal int Count => (int)_n;
         internal double Slope => _n.IsOne ? 0 : ExactMeanAccumulator.UnitRatio(6 * _covariance, _n * _spread);
         internal double Last => At(_n - 1);
+        // The endpoint's coefficient absolute sum is below two. Round with one
+        // extra exponent bit only when publication as a double would overflow.
+        internal BigInteger RoundedLastUnits
+        {
+            get
+            {
+                var denominator = _n.IsOne ? BigInteger.One : _n * _spread;
+                var numerator = _n.IsOne ? _sum : _sum * _spread + 3 * _covariance * (_n - 1);
+                var value = ExactMeanAccumulator.UnitRatio(numerator, denominator);
+                return double.IsInfinity(value)
+                    ? 2 * ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(numerator, 2 * denominator))
+                    : ExactVarianceWindow.Units(value);
+            }
+        }
         internal double Next => At(_n + 1);
         internal double GlobalIntercept => At(_n - 1 - 2 * _index);
         // Normalize the exact residual before rounding, even when the hidden endpoint overflows.

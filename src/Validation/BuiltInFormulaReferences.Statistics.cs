@@ -38,45 +38,6 @@ internal static partial class BuiltInFormulaReferences
                     var filter = first.Select((_, i) => -2 * Window(first, i, smoothLength).Average()).ToArray();
                     return Outputs(("Lco", line), ("Filter", filter));
                 });
-            case IndicatorName.KendallRankCorrelationCoefficient:
-                return new("Krcc", new[] { "Krcc" }, bars =>
-                {
-                    var fitted = RegressionEndpoints(Closes(bars), length);
-                    var line = bars.Select((_, i) =>
-                    {
-                        if (length == 1) return 0d;
-                        // Sort pairs by price; count ordering agreements in fitted values, ignoring price ties.
-                        var pairs = Enumerable.Range(i - length + 1, length)
-                            .Select(j => (Price: j < 0 ? 0 : bars[j].Close, Fit: j < 0 ? 0 : fitted[j]))
-                            .OrderBy(pair => pair.Price).ToArray();
-                        double score = 0;
-                        for (var j = 0; j < pairs.Length; j++)
-                            score += pairs.Skip(j + 1).Where(p => p.Price != pairs[j].Price) // NOSONAR: S1244 - Kendall tie exclusion requires equal observations.
-                                .Sum(p => Math.Sign(p.Fit - pairs[j].Fit));
-                        return 2 * score / (length * (length - 1d));
-                    }).ToArray();
-                    return Outputs(("Krcc", line));
-                });
-            case IndicatorName.LogisticCorrelation:
-                return new("LogCorr", new[] { "LogCorr" }, bars =>
-                {
-                    var gain = Number(options, 10, "K");
-                    var line = bars.Select((_, i) =>
-                    {
-                        var window = Window(Closes(bars), i, length).ToArray();
-                        var n = window.Length;
-                        // Centered least-squares slope divided by the price standard deviation.
-                        var mean = window.Average();
-                        var center = (n - 1d) / 2;
-                        var covariance = window.Select((v, j) => (j - center) * (v - mean)).Sum();
-                        var spread = window.Sum(v => (v - mean) * (v - mean));
-                        var timeSpread = n * (n * (double)n - 1) / 12;
-                        var r = spread == 0 || timeSpread == 0 ? 0 : covariance / Math.Sqrt(timeSpread * spread);
-                        var exponent = Math.Min(100, -gain * r);
-                        return (1 - Math.Tanh(exponent / 2)) / 2;
-                    }).ToArray();
-                    return Outputs(("LogCorr", line));
-                });
             case IndicatorName.JrcFractalDimension:
                 if (kind == 0) return null;
                 return new("Jrcfd", new[] { "Jrcfd", "Signal" }, bars =>
