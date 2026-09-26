@@ -1085,3 +1085,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Campaign285 source/archive SHA256: `b2e2d0cbefa2df5afead3a0b1b70db25d4242cffe6938e234890689064bb767c` / `7493464abd0a297a6e0f2f86dc5d93969b7be3f51f187a19a41f26cbfda44829`.
 - Campaign286 source/archive SHA256: `587c687549c82e245136b6d2788143c25bac36d553d5b91608f93ec6330c8b81` / `80bb36131bfed44be6de24bc43b476b4a004efeb28cfd4e3e7ca2367b11beeda`.
 - Campaign287 source/archive SHA256: `dbf8a84bf0828a4c418ab261a0c394f60354b8153d5bced1c2a5a4263b95ab25` / `5ead6e749eba951d6734511a1a3eae5f155e22e0a109f23914503fd76fd9dd3f`.
+
+
+### Open/close body-average numerical contracts
+
+- Eighteen configurations across Qstick, Chande Quick Stick and Delta Moving Average preserve original opens independently of selected closes. Rounded body differences retain extended range through smoothing and Delta histogram subtraction. Independent references cover SMA/weighted startup, lagged opens, customer smoothing, direct core/raw, native/live preview/reset and invalid fields.
+- **151/151** checks passed (`open-close-average-final2.trx`); campaign288 passed its baseline and caught **13/13** injected faults. All 15 staged files match its archive. **1,144** mutation sites; selectedComplete=true, full complete=false. Source/archive SHA256: `9c477ff3cef02326a802929e68d51cc9fa26420f5a6433a1d6145e15852a0bd3` / `bd26e8f352fc1779882aa0d854cc01873e70860b2432f3d097f0144cee25e2bf`.
+- Inventory: **3,963/7,131**, **3,168** omissions across **558** types; no construction failures. DLL SHA256 `0DDF1E271337BC348FC4CE8FD94CE79C0FB294B7AAF85C30DB5240BDE0390B85`. Sixty-eight grouped batches cover **1,133 configurations / 187 types**. Full library coverage remains incomplete.

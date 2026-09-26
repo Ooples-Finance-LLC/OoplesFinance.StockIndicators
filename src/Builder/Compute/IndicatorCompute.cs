@@ -1676,13 +1676,12 @@ internal static partial class IndicatorCompute
 
             // Batch 6 - Additional Oscillators with Core methods
             ChandeQuickStickSpecOptions cqs => ComputeChandeQuickStickFast(data, context, cqs.Length, cqs.MaType),
-            // Length1 and MaType only smooth the Signal and Histogram lines CalculateDeltaMovingAverage
-            // publishes beside the delta, and this spec is bound to the delta itself.
+            // Keep all three outputs on the same unpublished difference/smoothing stages.
             DeltaMovingAverageSpecOptions dma => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeDeltaMovingAverageFast(data, context, dma.Length2), dma.Length1, dma.MaType),
-                "Histogram" => DifferenceFromSmoothing(data, context, ComputeDeltaMovingAverageFast(data, context, dma.Length2), dma.Length1, dma.MaType),
-                _ => ComputeDeltaMovingAverageFast(data, context, dma.Length2)
+                "Signal" => ComputeOpenCloseAverageFast(data, context, dma.Length1, dma.MaType, dma.Length2, "Signal"),
+                "Histogram" => ComputeOpenCloseAverageFast(data, context, dma.Length1, dma.MaType, dma.Length2, "Histogram"),
+                _ => ComputeOpenCloseAverageFast(data, context, dma.Length1, dma.MaType, dma.Length2, "Delta")
             },
             FoldedRelativeStrengthIndexSpecOptions frsi => spec.OutputKey == "Signal"
                 ? SmoothStrength(data, context, ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType), frsi.Length, frsi.MaType)
@@ -5048,11 +5047,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeQstickFast(StockData data, ComputeContext context, int length = 14)
     {
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.Qstick(open, close, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeChandeQuickStickFast(data, context, length);
     }
 
     /// <summary>
@@ -20605,23 +20600,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChandeQuickStickFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateChandeQuickStick averages how far each bar closed from where it opened, and that average
-        // takes whichever type it was given. The high and low never enter it.
-        var (inputList, _, _, openList, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        using var openCloseBuffer = context.Rent(count);
-        var openClose = openCloseBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            openClose[i] = inputList[i] - openList[i];
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, openClose, buffer.WritableSpan);
-
-        return buffer;
+        return ComputeOpenCloseAverageFast(data, context, length, maType, 0, "Cqs");
     }
 
     /// <summary>
@@ -20630,22 +20609,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDeltaMovingAverageFast(StockData data, ComputeContext context,
         int length2 = 5)
     {
-        // CalculateDeltaMovingAverage measures how far the close has travelled since the open length2 bars
-        // back. The average it also takes smooths that into its signal and histogram, other series.
-        var (inputList, _, _, openList, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            // Bars before the start of the series count as zero, which is what the batch does.
-            var previousOpen = i >= length2 ? openList[i - length2] : 0;
-            output[i] = inputList[i] - previousOpen;
-        }
-
-        return buffer;
+        return ComputeOpenCloseAverageFast(data, context, 10, MovingAvgType.SimpleMovingAverage, Math.Max(1, length2), "Delta");
     }
 
     /// <summary>

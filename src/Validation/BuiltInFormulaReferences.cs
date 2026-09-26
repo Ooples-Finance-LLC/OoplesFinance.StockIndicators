@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.ChandeQuickStick or IndicatorName.DeltaMovingAverage && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var openCloseKeys = builtIn.BatchName == IndicatorName.ChandeQuickStick ? new[] { "Cqs" } : new[] { "Delta", "Signal", "Histogram" };
+            for (var slot = 0; slot < openCloseKeys.Length; slot++)
+            {
+                var key = openCloseKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => OpenCloseAverageOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.WellesWilderSummation)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WilderSummationOutputs(bars, builtIn)["Wws"], IndicatorErrorBudget.Exact);

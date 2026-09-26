@@ -7230,59 +7230,17 @@ public sealed class CommoditySelectionIndexState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Delta")]
 public sealed class DeltaMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _openWindow;
-    private readonly StreamingInputResolver _input;
-
-    public DeltaMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 10, int length2 = 5)
-    {
-        _length2 = Math.Max(1, length2);
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _openWindow = new PooledRingBuffer<double>(_length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OpenCloseAverageWindow _window;
+    public DeltaMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 10, int length2 = 5) => _window = new(maType, length1, Math.Max(1, length2));
     public IndicatorName Name => IndicatorName.DeltaMovingAverage;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _openWindow.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var currentClose = _input.GetValue(bar);
-        var prevOpen = _openWindow.Count >= _length2 ? _openWindow[0] : 0;
-        var delta = currentClose - prevOpen;
-        var deltaSma = _smoother.Next(delta, isFinal);
-        var histogram = delta - deltaSma;
-
-        if (isFinal)
-        {
-            _openWindow.TryAdd(bar.Open, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Delta", delta },
-                { "Signal", deltaSma },
-                { "Histogram", histogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(delta, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Open, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Delta", value.Line }, { "Signal", value.Signal }, { "Histogram", value.Histogram } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _openWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dsp")]
@@ -11856,42 +11814,17 @@ public sealed class ChandeMomentumOscillatorFilterState : IStreamingIndicatorSta
 [PrimaryOutput("Cqs")]
 public sealed class ChandeQuickStickState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smoother;
-
-    public ChandeQuickStickState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-    }
-
+    private readonly OpenCloseAverageWindow _window;
+    public ChandeQuickStickState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) => _window = new(maType, length, 0);
     public IndicatorName Name => IndicatorName.ChandeQuickStick;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var openClose = bar.Close - bar.Open;
-        var cqs = _smoother.Next(openClose, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cqs", cqs }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cqs, outputs);
+        var value = _window.Next(bar.Open, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value.Signal, includeOutputs ? new Dictionary<string, double> { { "Cqs", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Cts")]

@@ -1458,43 +1458,25 @@ public static partial class Calculations
     public static StockData CalculateDeltaMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 10, int length2 = 5)
     {
-        List<double> deltaList = new(stockData.Count);
-        List<double> deltaHistogramList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var opens = stockData.OpenPrices;
+        var lag = Math.Max(1, length2); var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? customer = null;
+        if (custom)
         {
-            var currentClose = inputList[i];
-            var prevOpen = i >= length2 ? openList[i - length2] : 0;
-
-            var delta = currentClose - prevOpen;
-            deltaList.Add(delta);
+            var changes = input.Select((price, i) => OpenCloseAverageWindow.Difference(i >= lag ? opens[i - lag] : 0, price).Publish()).ToList();
+            customer = GetMovingAverageList(stockData, maType, length1, changes);
         }
-
-        var deltaSmaList = GetMovingAverageList(stockData, maType, length1, deltaList);
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> line = new(stockData.Count), signal = new(stockData.Count), histogram = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new OpenCloseAverageWindow(maType, length1, lag);
+        for (var i = 0; i < input.Count; i++)
         {
-            var delta = deltaList[i];
-            var deltaSma = deltaSmaList[i];
-
-            var prevDeltaHistogram = GetLastOrDefault(deltaHistogramList);
-            var deltaHistogram = delta - deltaSma;
-            deltaHistogramList.Add(deltaHistogram);
-
-            var signal = GetCompareSignal(deltaHistogram, prevDeltaHistogram);
-            signalsList?.Add(signal);
+            var value = window.Next(opens[i], input[i], true, customer?[i]);
+            line.Add(value.Line); signal.Add(value.Signal); histogram.Add(value.Histogram);
+            signals?.Add(GetCompareSignal(value.Histogram, i == 0 ? 0 : histogram[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Delta", deltaList },
-            { "Signal", deltaSmaList },
-            { "Histogram", deltaHistogramList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(deltaList);
-        stockData.IndicatorName = IndicatorName.DeltaMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Delta", line }, { "Signal", signal }, { "Histogram", histogram } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DeltaMovingAverage;
         return stockData;
     }
 

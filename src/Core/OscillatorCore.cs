@@ -1747,29 +1747,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Qstick(ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var diffArray = pool.Rent(close.Length);
-
-        try
-        {
-            var diff = diffArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                diff[i] = close[i] - open[i];
-            }
-
-            MovingAverageCore.SimpleMovingAverage(diff, output, length);
-        }
-        finally
-        {
-            pool.Return(diffArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new OpenCloseAverageWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], close[i], true).Signal;
     }
 
     /// <summary>
