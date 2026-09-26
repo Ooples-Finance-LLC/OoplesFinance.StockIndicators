@@ -1058,51 +1058,22 @@ public sealed class MovingAverageBandsState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("MiddleBand")]
 public sealed class MovingAverageSupportResistanceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _supportLevel;
-
-    public MovingAverageSupportResistanceState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10,
-        double factor = 2)
+    private readonly SupportResistanceWindow _window;
+    private readonly double _factor;
+    public MovingAverageSupportResistanceState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10, double factor = 2)
     {
-        var resolved = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _supportLevel = 1 + (factor / 100);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        HighLowBandsWindow.ValidateShift(factor); _factor = factor; _window = new(maType, length);
     }
-
     public IndicatorName Name => IndicatorName.MovingAverageSupportResistance;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _smoother.Next(value, isFinal);
-        var upper = middle * _supportLevel;
-        var lower = _supportLevel != 0 ? middle / _supportLevel : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar);
+        var middle = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(middle, includeOutputs ? new Dictionary<string, double> {
+            { "UpperBand", HighLowBandsWindow.Shift(middle, _factor) }, { "MiddleBand", middle }, { "LowerBand", SupportResistanceWindow.Lower(middle, _factor) } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

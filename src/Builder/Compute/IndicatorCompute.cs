@@ -21886,14 +21886,21 @@ internal static partial class IndicatorCompute
     /// Returns the MA of close.
     /// </summary>
     internal static ComputeBuffer ComputeMovingAverageSupportResistanceFast(StockData data, ComputeContext context,
-        int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
+        int length = 10, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle, double factor = 2)
     {
+        HighLowBandsWindow.ValidateShift(factor);
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var buffer = context.Rent(input.Count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan);
+        else
+        {
+            using var window = new SupportResistanceWindow(maType, length);
+            for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        }
         var output = buffer.WritableSpan;
-        for (var i = 0; i < output.Length; i++)
-            output[i] *= band == ChannelBand.Upper ? 1.02 : band == ChannelBand.Lower ? 1 / 1.02 : 1;
+        for (var i = 0; i < output.Length; i++) output[i] = band == ChannelBand.Upper ? HighLowBandsWindow.Shift(output[i], factor)
+            : band == ChannelBand.Lower ? SupportResistanceWindow.Lower(output[i], factor) : output[i];
         return buffer;
     }
 

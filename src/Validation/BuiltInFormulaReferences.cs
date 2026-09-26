@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.MovingAverageSupportResistance && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var supportKeys = builtIn.BatchOutputKey is { } supportKey ? new[] { supportKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < supportKeys.Length; slot++)
+            {
+                var key = supportKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SupportResistanceOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.MovingAverageV3 && AverageKind(builtIn.CreateOptions(), 3) is 1 or 2 or 3 or 6)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovingAverageV3Outputs(bars, builtIn)["Mav3"], IndicatorErrorBudget.Exact);
