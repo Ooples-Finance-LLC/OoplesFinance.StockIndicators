@@ -590,56 +590,19 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateVortexIndicator(this StockData stockData, int length = 14)
     {
-        List<double> viPlus14List = new(stockData.Count);
-        List<double> viMinus14List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var vmPlusSumWindow = new RollingSum();
-        var vmMinusSumWindow = new RollingSum();
-        var trueRangeSumWindow = new RollingSum();
-
+        List<double> plus = new(stockData.Count), minus = new(stockData.Count);
+        List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new VortexWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevClose = i >= 1 ? inputList[i - 1] : inputList[i];
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-
-            var vmPlus = i == 0 ? 0 : Math.Abs(currentHigh - prevLow);
-            vmPlusSumWindow.Add(vmPlus);
-
-            var vmMinus = i == 0 ? 0 : Math.Abs(currentLow - prevHigh);
-            vmMinusSumWindow.Add(vmMinus);
-
-            var trueRange = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevClose);
-            trueRangeSumWindow.Add(trueRange);
-
-            var vmPlus14 = vmPlusSumWindow.Sum(length);
-            var vmMinus14 = vmMinusSumWindow.Sum(length);
-            var trueRange14 = trueRangeSumWindow.Sum(length);
-
-            var prevViPlus14 = GetLastOrDefault(viPlus14List);
-            var viPlus14 = trueRange14 != 0 ? vmPlus14 / trueRange14 : 0;
-            viPlus14List.Add(viPlus14);
-
-            var prevViMinus14 = GetLastOrDefault(viMinus14List);
-            var viMinus14 = trueRange14 != 0 ? vmMinus14 / trueRange14 : 0;
-            viMinus14List.Add(viMinus14);
-
-            var signal = GetCompareSignal(viPlus14 - viMinus14, prevViPlus14 - prevViMinus14);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            signals?.Add(GetCompareSignal(value.Plus - value.Minus, i == 0 ? 0 : plus[i - 1] - minus[i - 1]));
+            plus.Add(value.Plus); minus.Add(value.Minus);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "ViPlus", viPlus14List },
-            { "ViMinus", viMinus14List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "ViPlus", plus }, { "ViMinus", minus } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>());
         stockData.IndicatorName = IndicatorName.VortexIndicator;
-
         return stockData;
     }
 

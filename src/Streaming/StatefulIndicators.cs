@@ -8041,82 +8041,18 @@ public sealed class UlcerIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("ViPlus")]
 public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _vmPlusSum;
-    private readonly RollingWindowSum _vmMinusSum;
-    private readonly RollingWindowSum _trSum;
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public VortexIndicatorState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _vmPlusSum = new RollingWindowSum(resolved);
-        _vmMinusSum = new RollingWindowSum(resolved);
-        _trSum = new RollingWindowSum(resolved);
-    }
-
+    private readonly VortexWindow _window;
+    public VortexIndicatorState(int length = 14) => _window = new VortexWindow(length);
     public IndicatorName Name => IndicatorName.VortexIndicator;
-
-    public void Reset()
-    {
-        _vmPlusSum.Reset();
-        _vmMinusSum.Reset();
-        _trSum.Reset();
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        // For TrueRange on first bar, use current close
-        var prevCloseForTr = _hasPrev ? _prevClose : bar.Close;
-
-        var vmPlus = _hasPrev ? Math.Abs(bar.High - prevLow) : 0;
-        var vmMinus = _hasPrev ? Math.Abs(bar.Low - prevHigh) : 0;
-        var trueRange = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevCloseForTr);
-
-        int _;
-        var vmPlusTotal = isFinal ? _vmPlusSum.Add(vmPlus, out _) : _vmPlusSum.Preview(vmPlus, out _);
-        var vmMinusTotal = isFinal ? _vmMinusSum.Add(vmMinus, out _) : _vmMinusSum.Preview(vmMinus, out _);
-        var trueRangeTotal = isFinal ? _trSum.Add(trueRange, out _) : _trSum.Preview(trueRange, out _);
-
-        var viPlus = trueRangeTotal != 0 ? vmPlusTotal / trueRangeTotal : 0;
-        var viMinus = trueRangeTotal != 0 ? vmMinusTotal / trueRangeTotal : 0;
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "ViPlus", viPlus },
-                { "ViMinus", viMinus }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(viPlus, outputs);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "ViPlus", value.Plus }, { "ViMinus", value.Minus } } : null;
+        return new StreamingIndicatorStateResult(value.Plus, outputs);
     }
-
-    public void Dispose()
-    {
-        _vmPlusSum.Dispose();
-        _vmMinusSum.Dispose();
-        _trSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ao")]
