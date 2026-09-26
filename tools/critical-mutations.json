@@ -16751,5 +16751,130 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~VerticalHorizontalAverageNumericalTests.LookbackChangesAndExtendedFeedbackMatchAllRoutes|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.UnitGainRecoversAfterAnUnpublishedPredictionOverflow|FullyQualifiedName~VerticalHorizontalAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-half-change",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "200 * (current - prior)",
+    "after": "100 * (current - prior)",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-reversed-change",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "current - prior",
+    "after": "prior - current",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-wrong-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "var denominator = current + prior;",
+    "after": "var denominator = current - prior;",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-loses-denominator-sign",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "* denominator.Sign",
+    "after": "* 1",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-wrong-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "if (!started || denominator.IsZero) return 0;",
+    "after": "if (denominator.IsZero) return 0;",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-wrong-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "Math.Max(1, signalLength)",
+    "after": "Math.Max(1, length)",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-raw-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "Average(average, 1, commit)",
+    "after": "Average(new RocBankValue(change), 1, commit)",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "var change = Change(price, _price, _started);",
+    "after": "commit = true; var change = Change(price, _price, _started);",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-stale-start-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "_price = 0; _started = false;",
+    "after": "_price = 0;",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-stale-smoothers-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GainLossAverageWindow.cs",
+    "before": "foreach (var average in _averages) average.Reset();",
+    "after": "foreach (var average in _averages) { }",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState"
+  },
+  {
+    "id": "glma-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class GainLossMovingAverageState :"
+  },
+  {
+    "id": "glma-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeGainLossMovingAverageFast("
+  },
+  {
+    "id": "glma-signal-publishes-primary",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "signal ? value.Signal : value.Value",
+    "after": "value.Value",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeGainLossMovingAverageFast("
+  },
+  {
+    "id": "glma-customer-fast-signal-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "signalLength, first.Span, result.WritableSpan",
+    "after": "signalLength, changes, result.WritableSpan",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "internal static ComputeBuffer ComputeGainLossMovingAverageFast("
+  },
+  {
+    "id": "glma-customer-batch-signal-input",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "SpanCompat.AsReadOnlySpan(line), signalLength",
+    "after": "SpanCompat.AsReadOnlySpan(changes), signalLength",
+    "filter": "FullyQualifiedName~GainLossAverageNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~GainLossAverageNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~GainLossAverageNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public static StockData CalculateGainLossMovingAverage("
   }
 ]

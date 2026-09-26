@@ -138,6 +138,7 @@ internal static partial class StatefulIndicatorFactory
             ClosedFormDistanceVolatilitySpecOptions distance => new ClosedFormDistanceVolatilityState(distance.MaType, distance.Length),
             MotionSmoothnessIndexSpecOptions motion => new MotionSmoothnessIndexState(motion.Length),
             NaturalMarketSlopeSpecOptions natural => new NaturalMarketSlopeState(natural.Length),
+            GainLossMovingAverageSpecOptions gainLoss => new GainLossMovingAverageState(gainLoss.MaType, gainLoss.Length, gainLoss.SignalLength),
             VerticalHorizontalMovingAverageSpecOptions verticalAverage => new VerticalHorizontalMovingAverageState(verticalAverage.Length),
             VerticalHorizontalFilterSpecOptions vertical => new VerticalHorizontalFilterState(vertical.MaType, vertical.Length),
             OvershootReductionMovingAverageSpecOptions overshoot => new OvershootReductionMovingAverageState(overshoot.MaType, overshoot.Length),
