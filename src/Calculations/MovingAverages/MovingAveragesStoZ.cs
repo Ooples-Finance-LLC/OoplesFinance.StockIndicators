@@ -1498,39 +1498,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSelfWeightedMovingAverage(this StockData stockData, int length = 14)
     {
-        List<double> wmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        using var window = new SelfWeightedWindow(length);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double sum = 0, weightSum = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var pValue = i >= j ? inputList[i - j] : 0;
-                var weight = i >= length + j ? inputList[i - (length + j)] : 0;
-                weightSum += weight;
-                sum += weight * pValue;
-            }
-
-            var prevWma = GetLastOrDefault(wmaList);
-            var wma = weightSum != 0 ? sum / weightSum : 0;
-            wmaList.Add(wma);
-
-            var signal = GetCompareSignal(currentValue - wma, prevValue - prevWma);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); line.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Swma", wmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(wmaList);
-        stockData.IndicatorName = IndicatorName.SelfWeightedMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Swma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.SelfWeightedMovingAverage;
         return stockData;
     }
 
