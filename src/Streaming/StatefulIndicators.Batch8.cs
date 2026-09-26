@@ -156,52 +156,15 @@ public sealed class EhlersDecyclerOscillatorV2State : IStreamingIndicatorState, 
 [PrimaryOutput("Ed")]
 public sealed class EhlersDecyclerState : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevDec;
-    private int _index;
-
-    public EhlersDecyclerState(int length = 60)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha1 = EhlersFirstOrderCoefficient.Alpha(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DecyclerWindow _window;
+    public EhlersDecyclerState(int length = 60) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersDecycler;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevDec = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue : 0;
-        var prevDec = _prevDec;
-        var dec = (_alpha1 / 2 * (value + prevValue1)) + ((1 - _alpha1) * prevDec);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevDec = dec;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ed", dec }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dec, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ed", value } } : null);
     }
 }
 

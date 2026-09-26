@@ -1899,22 +1899,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void EhlersDecycler(ReadOnlySpan<double> input, Span<double> output, int length = 60)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(length, 1);
-        var alpha1 = EhlersFirstOrderCoefficient.Alpha(length);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevDec = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = (alpha1 / 2 * (currentValue + prevValue1)) + ((1 - alpha1) * prevDec);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new DecyclerWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     #endregion

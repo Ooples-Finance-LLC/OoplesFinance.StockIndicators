@@ -13276,9 +13276,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersDecyclerFast(StockData data, ComputeContext context, int length = 60)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.EhlersDecycler(close, buffer.WritableSpan, length);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count);
+        MovingAverageCore.EhlersDecycler(SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan, length);
         return buffer;
     }
 
