@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.LightLeastSquaresMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LightLeastSquaresOutputs(bars, builtIn)["Llsma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersLeadingIndicator)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => LeadingOutputs(bars, builtIn)["Eli"], IndicatorErrorBudget.Exact);

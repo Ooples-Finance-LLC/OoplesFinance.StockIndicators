@@ -4381,85 +4381,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void LightLeastSquaresMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 250)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var length1 = Math.Max(1, (int)Math.Ceiling((double)length / 2));
-
-        var pool = ArrayPool<double>.Shared;
-        var sma1Array = pool.Rent(input.Length);
-        var sma2Array = pool.Rent(input.Length);
-        var indexArray = pool.Rent(input.Length);
-        var indexSmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var sma1 = sma1Array.AsSpan(0, input.Length);
-            var sma2 = sma2Array.AsSpan(0, input.Length);
-            var indexSpan = indexArray.AsSpan(0, input.Length);
-            var indexSma = indexSmaArray.AsSpan(0, input.Length);
-
-            // Create index array
-            for (var i = 0; i < input.Length; i++)
-                indexSpan[i] = i;
-
-            // Calculate SMAs
-            SimpleMovingAverage(input, sma1, length);
-            SimpleMovingAverage(input, sma2, length1);
-            SimpleMovingAverage(indexSpan, indexSma, length);
-
-            // Calculate standard deviations manually for each point
-            for (var i = 0; i < input.Length; i++)
-            {
-                // CalculateLightLeastSquaresMovingAverage draws its spread from GetStandardDeviationList,
-                // which is zero until its window fills, so the correction and the base average are both zero
-                // through the run-in. The shorter of the two averages fills first, and measuring it against
-                // a partial spread here published a value from the halfway bar that the indicator never has.
-                if (i < length - 1)
-                {
-                    output[i] = 0;
-                    continue;
-                }
-
-                var n = Math.Min(i + 1, length);
-
-                // StdDev of input
-                double inputSum = 0, inputSum2 = 0;
-                for (var j = 0; j < n; j++)
-                {
-                    var val = input[i - j];
-                    inputSum += val;
-                    inputSum2 += val * val;
-                }
-                var inputMean = inputSum / n;
-                var inputVariance = (inputSum2 / n) - (inputMean * inputMean);
-                var stdDev = inputVariance > 0 ? Math.Sqrt(inputVariance) : 0;
-
-                // StdDev of index
-                double indexSum = 0, indexSum2 = 0;
-                for (var j = 0; j < n; j++)
-                {
-                    var val = (double)(i - j);
-                    indexSum += val;
-                    indexSum2 += val * val;
-                }
-                var indexMean = indexSum / n;
-                var indexVariance = (indexSum2 / n) - (indexMean * indexMean);
-                var indexStdDev = indexVariance > 0 ? Math.Sqrt(indexVariance) : 0;
-
-                var c = stdDev != 0 ? (sma2[i] - sma1[i]) / stdDev : 0;
-                var z = indexStdDev != 0 && c != 0 ? (i - indexSma[i]) / indexStdDev * c : 0;
-
-                output[i] = sma1[i] + (z * stdDev);
-            }
-        }
-        finally
-        {
-            pool.Return(sma1Array);
-            pool.Return(sma2Array);
-            pool.Return(indexArray);
-            pool.Return(indexSmaArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new LightLeastSquaresWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, input.Length));
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

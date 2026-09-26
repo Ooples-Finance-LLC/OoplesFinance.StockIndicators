@@ -530,52 +530,23 @@ public static partial class Calculations
     public static StockData CalculateLightLeastSquaresMovingAverage(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 250)
     {
-        List<double> yList = new(stockData.Count);
-        List<double> indexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var length1 = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new LightLeastSquaresWindow(maType, length, Math.Max(1, input.Count), initializeFallback: false);
+        List<double> line = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            double index = i;
-            indexList.Add(index);
+            var first = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+            var half = Math.Max(2, Math.Min(530, (int)((length + 1L) / 2)));
+            var second = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), half)?.ToList() ?? GetMovingAverageList(stockData, maType, half, input);
+            var indices = Enumerable.Range(0, input.Count).Select(i => (double)i).ToList();
+            var indexMean = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(indices), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, indices);
+            for (var i = 0; i < input.Count; i++) line.Add(window.NextWithAverages(input[i], first[i], second[i], indexMean[i], true));
         }
-
-        var sma1List = GetMovingAverageList(stockData, maType, length, inputList);
-        var sma2List = GetMovingAverageList(stockData, maType, length1, inputList);
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        stockData.SetCustomValues(indexList);
-        var indexStdDevList = GetStandardDeviationList(indexList, length);
-        var indexSmaList = GetMovingAverageList(stockData, maType, length, indexList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sma1 = sma1List[i];
-            var sma2 = sma2List[i];
-            var stdDev = stdDevList[i];
-            var indexStdDev = indexStdDevList[i];
-            var indexSma = indexSmaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var c = stdDev != 0 ? (sma2 - sma1) / stdDev : 0;
-            var z = indexStdDev != 0 && c != 0 ? (i - indexSma) / indexStdDev * c : 0;
-
-            var prevY = GetLastOrDefault(yList);
-            var y = sma1 + (z * stdDev);
-            yList.Add(y);
-
-            var signal = GetCompareSignal(currentValue - y, prevValue - prevY);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Llsma", yList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(yList);
-        stockData.IndicatorName = IndicatorName.LightLeastSquaresMovingAverage;
-
+        else foreach (var price in input) line.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - line[i], i == 0 ? 0 : input[i - 1] - line[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Llsma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.LightLeastSquaresMovingAverage;
         return stockData;
     }
 

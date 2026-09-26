@@ -138,6 +138,7 @@ internal static partial class StatefulIndicatorFactory
             ClosedFormDistanceVolatilitySpecOptions distance => new ClosedFormDistanceVolatilityState(distance.MaType, distance.Length),
             MotionSmoothnessIndexSpecOptions motion => new MotionSmoothnessIndexState(motion.Length),
             NaturalMarketSlopeSpecOptions natural => new NaturalMarketSlopeState(natural.Length),
+            LightLeastSquaresMovingAverageSpecOptions light => new LightLeastSquaresMovingAverageState(length: light.Length),
             EhlersLeadingIndicatorSpecOptions => new EhlersLeadingIndicatorState(),
             EhlersDecyclerSpecOptions basicDecycler => new EhlersDecyclerState(basicDecycler.Length),
             EhlersDecyclerOscillatorV1SpecOptions decycler => EhlersDecyclerOscillatorV1State.ForPeriod(decycler.Length),

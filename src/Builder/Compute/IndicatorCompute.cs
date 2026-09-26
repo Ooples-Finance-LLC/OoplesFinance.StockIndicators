@@ -14567,10 +14567,20 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeLightLeastSquaresMovingAverageFast(StockData data, ComputeContext context, int length = 250)
     {
+        length = Math.Max(1, length);
         var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        MovingAverageCore.LightLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
+        var inputSpan = SpanCompat.AsReadOnlySpan(inputList); var buffer = context.Rent(inputList.Count);
+        if (ComponentAverage.HasOverrides)
+        {
+            using var first = context.Rent(inputList.Count); using var second = context.Rent(inputList.Count); using var indexMean = context.Rent(inputList.Count);
+            var indices = Enumerable.Range(0, inputList.Count).Select(i => (double)i).ToArray();
+            MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, inputSpan, first.WritableSpan);
+            MovingAverage(data, MovingAvgType.SimpleMovingAverage, Math.Max(2, Math.Min(530, (int)((length + 1L) / 2))), inputSpan, second.WritableSpan);
+            MovingAverage(data, MovingAvgType.SimpleMovingAverage, length, indices, indexMean.WritableSpan);
+            using var window = new LightLeastSquaresWindow(MovingAvgType.SimpleMovingAverage, length, Math.Max(1, inputList.Count));
+            for (var i = 0; i < inputList.Count; i++) buffer.WritableSpan[i] = window.NextWithAverages(inputList[i], first.Span[i], second.Span[i], indexMean.Span[i], true);
+        }
+        else MovingAverageCore.LightLeastSquaresMovingAverage(inputSpan, buffer.WritableSpan, length);
         return buffer;
     }
 
