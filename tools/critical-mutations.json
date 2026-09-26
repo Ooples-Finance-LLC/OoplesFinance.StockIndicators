@@ -18817,5 +18817,140 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~AtrDerivedNumericalTests.ExtendedRangesScaleAndNormalizeBeforePublishing|FullyQualifiedName~AtrDerivedNumericalTests.SelectedClosesControlBothGapsAndNormalization|FullyQualifiedName~AtrDerivedNumericalTests.InvalidFieldsNeverAdvanceState",
     "scope": "public sealed class AtrChannelWidthState :"
+  },
+  {
+    "id": "atr-numerical-batch-period",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "scope": "public static StockData CalculateAverageTrueRange(",
+    "before": "new KeltnerWindow(maType, length, length, maType,",
+    "after": "new KeltnerWindow(maType, length, length + 1, maType,",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-batch-kind",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "scope": "public static StockData CalculateAverageTrueRange(",
+    "before": "new KeltnerWindow(maType, length, length, maType,",
+    "after": "new KeltnerWindow(maType, length, length, MovingAvgType.ExponentialMovingAverage,",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-batch-stage",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "scope": "public static StockData CalculateAverageTrueRange(",
+    "before": "var atr = point.Atr.Publish()",
+    "after": "var atr = point.Middle.Publish()",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "scope": "public static StockData CalculateAverageTrueRange(",
+    "before": "SpanCompat.AsReadOnlySpan(trList), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(trList), Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-customer-bypass",
+    "module": "numerical",
+    "file": "src/Calculations/Wilder/WilderAtoD.cs",
+    "scope": "public static StockData CalculateAverageTrueRange(",
+    "before": "atrList = supplied.ToList();",
+    "after": "atrList = new List<double>(trList);",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-raw-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAtrFast(",
+    "before": "new KeltnerWindow(maType, 1, length, maType,",
+    "after": "new KeltnerWindow(maType, 1, length + 1, maType,",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-raw-kind",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAtrFast(",
+    "before": "new KeltnerWindow(maType, 1, length, maType,",
+    "after": "new KeltnerWindow(maType, 1, length, MovingAvgType.ExponentialMovingAverage,",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAtrFast(",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeState :",
+    "before": "_exact = new(maType, 1, length, maType)",
+    "after": "_exact = new(maType, 1, length + 1, maType)",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-native-kind",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeState :",
+    "before": "_exact = new(maType, 1, length, maType)",
+    "after": "_exact = new(maType, 1, length, MovingAvgType.ExponentialMovingAverage)",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeState :",
+    "before": "_exact.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_exact.Next(bar.High, bar.Low, bar.Close, true)",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeState :",
+    "before": "_exact?.Reset();",
+    "after": "/* retain exact state */",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-core-period",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void AverageTrueRange(",
+    "before": "ExponentialMovingAverage, 1, length, capacityHint",
+    "after": "ExponentialMovingAverage, 1, length + 1, capacityHint",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "atr-numerical-core-startup",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void AverageTrueRange(",
+    "before": "output[i] = window.Next(high[i], low[i], close[i], true).Atr.Publish();",
+    "after": "output[i] = i == 0 ? 0 : window.Next(high[i], low[i], close[i], true).Atr.Publish();",
+    "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
   }
 ]

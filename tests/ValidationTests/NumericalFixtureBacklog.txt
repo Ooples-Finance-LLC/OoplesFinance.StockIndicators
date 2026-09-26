@@ -21,11 +21,6 @@ OoplesFinance.StockIndicators.Indicators.AnchoredMomentum/longer-periods
 OoplesFinance.StockIndicators.Indicators.AnchoredMomentum/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AnchoredMomentum/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AnchoredMomentum/weighted-average
-OoplesFinance.StockIndicators.Indicators.Atr/default
-OoplesFinance.StockIndicators.Indicators.Atr/longer-periods
-OoplesFinance.StockIndicators.Indicators.Atr/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Atr/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Atr/weighted-average
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/default
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/longer-periods
 OoplesFinance.StockIndicators.Indicators.AtrFilteredEma/minimum-periods
@@ -82,11 +77,6 @@ OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/longer-perio
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AverageMoneyFlowOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.AverageTrueRange/default
-OoplesFinance.StockIndicators.Indicators.AverageTrueRange/longer-periods
-OoplesFinance.StockIndicators.Indicators.AverageTrueRange/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AverageTrueRange/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AverageTrueRange/weighted-average
 OoplesFinance.StockIndicators.Indicators.AverageTrueRangeChannel/default
 OoplesFinance.StockIndicators.Indicators.AverageTrueRangeChannel/longer-periods
 OoplesFinance.StockIndicators.Indicators.AverageTrueRangeChannel/minimum-periods

@@ -52,53 +52,9 @@ internal static class VolatilityCore
     /// <param name="length">ATR period (default 14).</param>
     internal static void AverageTrueRange(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        var k = 1.0 / length;
-        double prevAtr = 0;
-        double trSum = 0;
-
-        // First bar: TR = High - Low
-        var tr0 = high[0] - low[0];
-        trSum = tr0;
-        output[0] = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var prevClose = close[i - 1];
-            var highLow = high[i] - low[i];
-            var highClose = Math.Abs(high[i] - prevClose);
-            var lowClose = Math.Abs(low[i] - prevClose);
-            var tr = Math.Max(highLow, Math.Max(highClose, lowClose));
-
-            if (i < length)
-            {
-                // Build up initial sum
-                trSum += tr;
-                output[i] = 0;
-            }
-            else if (i == length)
-            {
-                // First ATR value is simple average
-                trSum += tr;
-                prevAtr = trSum / (length + 1);
-                output[i] = prevAtr;
-            }
-            else
-            {
-                // Wilder's smoothing
-                prevAtr = (tr * k) + (prevAtr * (1 - k));
-                output[i] = prevAtr;
-            }
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new KeltnerWindow(MovingAvgType.ExponentialMovingAverage, 1, length, capacityHint: Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Atr.Publish();
     }
 
     /// <summary>

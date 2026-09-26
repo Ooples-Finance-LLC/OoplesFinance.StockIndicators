@@ -4753,6 +4753,7 @@ public sealed class ChandeMomentumOscillatorState : IStreamingIndicatorState, ID
 [PrimaryOutput("Atr")]
 public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposable
 {
+    private readonly KeltnerWindow? _exact;
     private readonly IMovingAverageSmoother _atr;
     private double _prevClose;
     private bool _hasPrev;
@@ -4761,6 +4762,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
     // who asks the batch method for another average gets it here too.
     public AverageTrueRangeState(int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
+        if (StrengthWindow.Supports(maType)) _exact = new(maType, 1, length, maType);
         _atr = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
 
@@ -4768,6 +4770,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
 
     public void Reset()
     {
+        _exact?.Reset();
         _atr.Reset();
         _prevClose = 0;
         _hasPrev = false;
@@ -4776,6 +4779,11 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        if (_exact is not null)
+        {
+            var value = _exact.Next(bar.High, bar.Low, bar.Close, isFinal).Atr.Publish();
+            return new(value, includeOutputs ? new Dictionary<string, double> { { "Atr", value } } : null);
+        }
         // For first bar, use current close (TR = High - Low)
         var prevClose = _hasPrev ? _prevClose : bar.Close;
         var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
@@ -4801,6 +4809,7 @@ public sealed class AverageTrueRangeState : IStreamingIndicatorState, IDisposabl
 
     public void Dispose()
     {
+        _exact?.Dispose();
         _atr.Dispose();
     }
 }

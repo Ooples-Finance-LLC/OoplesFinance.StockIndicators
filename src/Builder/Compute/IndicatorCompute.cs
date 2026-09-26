@@ -3620,10 +3620,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAtrFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // CalculateAverageTrueRange smooths the true range with whichever average it was given, over the whole
-        // series and from the first bar. The core here builds its first reading from a simple mean of the
-        // opening window and blanks everything before it, which is a different average under the same name and
-        // published nothing at all until the lookback had arrived.
+        // Keep extended true ranges through the selected smoothing stage. Customer
+        // and legacy batch-only averages still receive the original range series.
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+            using var window = new KeltnerWindow(maType, 1, length, maType, Math.Max(1, input.Count));
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true).Atr.Publish();
+            return result;
+        }
         var trueRange = CalculationsHelper.GetTrueRangeList(data);
         var buffer = context.Rent(trueRange.Count);
         MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(trueRange), buffer.WritableSpan);

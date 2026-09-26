@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AverageTrueRange)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrOutputs(bars, builtIn)["Atr"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.NormalizedAverageTrueRange or IndicatorName.AtrChannelWidth)
         {
             var key = builtIn.BatchName == IndicatorName.AtrChannelWidth ? "Acw" : "Natr";

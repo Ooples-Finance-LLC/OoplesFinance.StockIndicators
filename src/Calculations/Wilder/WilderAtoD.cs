@@ -16,6 +16,21 @@ public static partial class Calculations
     public static StockData CalculateAverageTrueRange(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int length = 14)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (input, high, low, _, _) = GetInputValuesList(stockData);
+            using var window = new KeltnerWindow(maType, length, length, maType, Math.Max(1, input.Count));
+            using var signalAverage = new RocBankAverage(maType, length, Math.Max(1, input.Count));
+            List<double> values = new(input.Count); var signals = CreateSignalsList(stockData); double previousMiddle = 0;
+            for (var i = 0; i < input.Count; i++)
+            {
+                var point = window.Next(high[i], low[i], input[i], true); var atr = point.Atr.Publish(); var middle = point.Middle.Publish();
+                var signal = signalAverage.Next(point.Atr, true).Publish();
+                signals?.Add(GetVolatilitySignal(input[i] - middle, (i > 0 ? input[i - 1] : 0) - previousMiddle, atr, signal));
+                values.Add(atr); previousMiddle = middle;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Atr", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AverageTrueRange; return stockData;
+        }
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         var count = inputList.Count;
         List<double> maList;
@@ -47,6 +62,11 @@ public static partial class Calculations
             atrMaList = GetMovingAverageList(stockData, maType, length, atrList);
         }
 
+        if (Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(trList), Math.Max(1, length)) is { } supplied)
+        {
+            atrList = supplied.ToList();
+            atrMaList = GetMovingAverageList(stockData, maType, length, atrList);
+        }
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
         for (var i = 0; i < count; i++)
         {
