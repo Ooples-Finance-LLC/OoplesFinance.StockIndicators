@@ -511,40 +511,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateZeroLowLagMovingAverage(this StockData stockData, int length = 50, double lag = 1.4)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var lbLength = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)length / 2)));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ZeroLowLagWindow(length, lag);
+        List<double> line = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorB = i >= lbLength ? bList[i - lbLength] : currentValue;
-            var priorA = i >= length ? aList[i - length] : 0;
-
-            var prevA = GetLastOrDefault(aList);
-            var a = (lag * currentValue) + ((1 - lag) * priorB) + prevA;
-            aList.Add(a);
-
-            var aDiff = a - priorA;
-            var prevB = GetLastOrDefault(bList);
-            var b = aDiff / length;
-            bList.Add(b);
-
-            var signal = GetCompareSignal(currentValue - b, prevValue - prevB);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - line[i - 1])); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Zllma", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.ZeroLowLagMovingAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Zllma", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ZeroLowLagMovingAverage;
         return stockData;
     }
 

@@ -1602,67 +1602,15 @@ public sealed class ZeroLagTripleExponentialMovingAverageState : IStreamingIndic
 [PrimaryOutput("Zllma")]
 public sealed class ZeroLowLagMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _lbLength;
-    private readonly double _lag;
-    private readonly PooledRingBuffer<double> _aValues;
-    private readonly PooledRingBuffer<double> _bValues;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-    private double _prevA;
-
-    public ZeroLowLagMovingAverageState(int length = 50, double lag = 1.4)
-    {
-        _length = Math.Max(1, length);
-        _lbLength = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)_length / 2)));
-        _lag = lag;
-        _aValues = new PooledRingBuffer<double>(_length + 1);
-        _bValues = new PooledRingBuffer<double>(_lbLength + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ZeroLowLagWindow _window;
+    public ZeroLowLagMovingAverageState(int length = 50, double lag = 1.4) => _window = new(length, lag);
     public IndicatorName Name => IndicatorName.ZeroLowLagMovingAverage;
-
-    public void Reset()
-    {
-        _aValues.Clear();
-        _bValues.Clear();
-        _index = 0;
-        _prevA = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorB = _index >= _lbLength ? EhlersStreamingWindow.GetOffsetValue(_bValues, 0, _lbLength) : value;
-        var priorA = _index >= _length ? EhlersStreamingWindow.GetOffsetValue(_aValues, 0, _length) : 0;
-        var prevA = _index >= 1 ? _prevA : 0;
-        var a = (_lag * value) + ((1 - _lag) * priorB) + prevA;
-        var b = _length != 0 ? (a - priorA) / _length : 0;
-
-        if (isFinal)
-        {
-            _aValues.TryAdd(a, out _);
-            _bValues.TryAdd(b, out _);
-            _prevA = a;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Zllma", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Zllma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _aValues.Dispose();
-        _bValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }

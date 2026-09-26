@@ -2782,24 +2782,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void ZeroLowLagMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 32)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // Lag-compensated input
-        var lag = (length - 1) / 2;
-        var alpha = 2.0 / (length + 1);
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var currentValue = input[i];
-            var lagValue = i >= lag ? input[i - lag] : input[0];
-            var compensatedInput = (2 * currentValue) - lagValue;
-
-            var prevOut = i >= 1 ? output[i - 1] : compensatedInput;
-            output[i] = (alpha * compensatedInput) + ((1 - alpha) * prevOut);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new ZeroLowLagWindow(length, 1.4);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

@@ -13031,6 +13031,15 @@ internal sealed class TripleExponentialMovingAverageSmoother : IMovingAverageSmo
     }
 }
 
+internal sealed class ZeroLowLagMovingAverageSmoother : IMovingAverageSmoother
+{
+    private readonly ZeroLowLagWindow _window;
+    public ZeroLowLagMovingAverageSmoother(int length) => _window = new(length, 1.4);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
+}
+
 internal sealed class ZeroLagTripleExponentialMovingAverageSmoother : IMovingAverageSmoother
 {
     private readonly ZeroLagTripleWindow _window;
@@ -13218,6 +13227,7 @@ internal static class MovingAverageSmootherFactory
             MovingAvgType.ZeroLagExponentialMovingAverage => new ZeroLagExponentialMovingAverageSmoother(length),
             MovingAvgType.TripleExponentialMovingAverage => new TripleExponentialMovingAverageSmoother(length),
             MovingAvgType.ZeroLagTripleExponentialMovingAverage => new ZeroLagTripleExponentialMovingAverageSmoother(length),
+            MovingAvgType.ZeroLowLagMovingAverage => new ZeroLowLagMovingAverageSmoother(length),
             MovingAvgType.McNichollMovingAverage => new McNichollMovingAverageSmoother(length),
             MovingAvgType.WeightedMovingAverage => new WeightedMovingAverageSmoother(length),
             MovingAvgType.WildersSmoothingMethod => new WilderMovingAverageSmoother(length),

@@ -10815,5 +10815,95 @@
     "after": "",
     "filter": "FullyQualifiedName~DoubleSmoothingNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class DoubleExponentialSmoothingState"
+  },
+  {
+    "id": "zero-low-wrong-lookback-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.LaggedWindowsClampLookbackAndPreserveOverflowingHistory"
+  },
+  {
+    "id": "zero-low-wrong-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "count: _length",
+    "after": "count: _length + 1L",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-wrong-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "priorOutput.Multiply(1 - _lag)",
+    "after": "priorOutput.Multiply(_lag)",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.LaggedWindowsClampLookbackAndPreserveOverflowingHistory"
+  },
+  {
+    "id": "zero-low-premature-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "_previous = accumulator;",
+    "after": "_previous = new RocBankValue(accumulator.Publish());",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-stale-previous-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-stale-accumulators-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "_accumulators.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-stale-outputs-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "_outputs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset"
+  },
+  {
+    "id": "zero-low-wrong-registry-lag",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "new(length, 1.4)",
+    "after": "new(length, 1)",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.CascadesPreserveStagesCancellationPreviewAndReset",
+    "scope": "internal sealed class ZeroLowLagMovingAverageSmoother"
+  },
+  {
+    "id": "zero-low-accepts-invalid-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLowLagWindow.cs",
+    "before": "if (double.IsNaN(lag) || double.IsInfinity(lag)) throw new ArgumentOutOfRangeException(nameof(lag));",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.InvalidLagRejectsBeforeCalculation"
+  },
+  {
+    "id": "zero-low-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ZeroLowLagNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ZeroLowLagMovingAverageState"
   }
 ]

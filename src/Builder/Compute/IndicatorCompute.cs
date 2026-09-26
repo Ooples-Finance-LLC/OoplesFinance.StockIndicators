@@ -15129,33 +15129,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeZeroLowLagMovingAverageFast(StockData data, ComputeContext context, int length = 50,
         double lag = 1.4)
     {
-        // CalculateZeroLowLagMovingAverage runs a lagged accumulator and publishes the windowed difference of
-        // that accumulator, not the accumulator itself. The core routine returned the wrong one of the two
-        // series and had no lag parameter.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var lbLength = Math.Max(1, Math.Min(530, (int)Math.Ceiling((double)length / 2)));
-
-        using var accumulator = context.Rent(count);
-        var a = accumulator.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorB = i >= lbLength ? output[i - lbLength] : currentValue;
-            var priorA = i >= length ? a[i - length] : 0;
-
-            var prevA = i >= 1 ? a[i - 1] : 0;
-            a[i] = (lag * currentValue) + ((1 - lag) * priorB) + prevA;
-
-            output[i] = (a[i] - priorA) / length;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new ZeroLowLagWindow(length, lag);
+        var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 
