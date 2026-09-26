@@ -3002,10 +3002,6 @@ OoplesFinance.StockIndicators.Indicators.Trender/longer-periods
 OoplesFinance.StockIndicators.Indicators.Trender/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Trender/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Trender/weighted-average
-OoplesFinance.StockIndicators.Indicators.TreynorRatio/default
-OoplesFinance.StockIndicators.Indicators.TreynorRatio/longer-periods
-OoplesFinance.StockIndicators.Indicators.TreynorRatio/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TreynorRatio/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/default
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.TrigonometricOscillator/minimum-periods

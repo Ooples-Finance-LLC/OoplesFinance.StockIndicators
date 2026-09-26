@@ -2424,6 +2424,7 @@ internal static partial class IndicatorCompute
                 : ComputePhaseChangeIndexFast(data, context, pci.Length),
             PseudoPolynomialChannelSpecOptions ppc => ComputePseudoPolynomialChannelFast(data, context, ppc.Length, ppc.Morph, ppc.MaType, spec.OutputKey),
             RecursiveDifferenciatorSpecOptions rd => ComputeRecursiveDifferenciatorFast(data, context, rd.Length, rd.Alpha, rd.MaType),
+            TreynorRatioSpecOptions treynor => ComputeTargetReturnFast(data, context, treynor.Length, treynor.Bmk, false, treynor.Beta),
             OmegaRatioSpecOptions omega => ComputeTargetReturnFast(data, context, omega.Length, omega.Bmk, false),
             UpsidePotentialRatioSpecOptions potential => ComputeTargetReturnFast(data, context, potential.Length, potential.Bmk, true),
             ReversalPointsSpecOptions rp => ComputeReversalPointsFast(data, context, rp.Length, rp.MaType),
@@ -28743,11 +28744,11 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeTargetReturnFast(StockData data, ComputeContext context, int length, double benchmark, bool potential)
+    internal static ComputeBuffer ComputeTargetReturnFast(StockData data, ComputeContext context, int length, double benchmark, bool potential, double? beta = null)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
         var output = context.Rent(input.Count);
-        using var window = new TargetReturnWindow(length, benchmark, potential);
+        using var window = new TargetReturnWindow(length, benchmark, potential, beta);
         for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
         return output;
     }

@@ -15,12 +15,18 @@ internal static partial class BuiltInFormulaReferences
         var output = returns.Select((_, i) =>
         {
             var window = Window(returns, i, length).ToArray();
+            if (indicator.BatchName == IndicatorName.TreynorRatio)
+            {
+                var beta = ReferenceFraction.FromDouble(Number(options, 1, "Beta"));
+                var mean = window.Aggregate(zero, (a, b) => a + b) / new ReferenceFraction(window.Length);
+                return beta.Sign == 0 ? 0 : ((mean - target) / beta).ToDouble();
+            }
             var differences = Enumerable.Repeat(zero, length - window.Length).Concat(window).Select(v => v - target).ToArray();
             var up = differences.Where(v => v.Sign > 0).Aggregate(zero, (a, b) => a + b);
             var down = differences.Where(v => v.Sign < 0).Aggregate(zero, (a, b) => a + (potential ? b * b : zero - b));
             if (down.Sign == 0) return 0;
             return potential ? (up * up / (new ReferenceFraction(length) * down)).SqrtToDouble() : (up / down).ToDouble();
         }).ToArray();
-        return Outputs((potential ? "Upr" : "Or", output));
+        return Outputs((indicator.BatchName == IndicatorName.TreynorRatio ? "Tr" : potential ? "Upr" : "Or", output));
     }
 }
