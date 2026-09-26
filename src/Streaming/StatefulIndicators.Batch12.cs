@@ -66,56 +66,17 @@ public sealed class ElasticVolumeWeightedMovingAverageV1State : IStreamingIndica
 [PrimaryOutput("Evwma")]
 public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _volumeSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevEvwma;
-    private bool _hasPrev;
-
-    public ElasticVolumeWeightedMovingAverageV2State(int length = 14)
-    {
-        _volumeSum = new RollingWindowSum(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ElasticVolumeWindow _window;
+    public ElasticVolumeWeightedMovingAverageV2State(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.ElasticVolumeWeightedMovingAverageV2;
-
-    public void Reset()
-    {
-        _volumeSum.Reset();
-        _prevEvwma = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var volumeSum = isFinal ? _volumeSum.Add(volume, out _) : _volumeSum.Preview(volume, out _);
-        var prevEvwma = _hasPrev ? _prevEvwma : value;
-        var evwma = volumeSum > 0 ? prevEvwma + volume / volumeSum * (value - prevEvwma) : prevEvwma;
-
-        if (isFinal)
-        {
-            _prevEvwma = evwma;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Evwma", evwma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(evwma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Evwma", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Emt")]

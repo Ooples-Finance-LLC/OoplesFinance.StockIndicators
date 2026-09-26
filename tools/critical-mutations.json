@@ -12070,5 +12070,102 @@
     "after": "",
     "filter": "FullyQualifiedName~OptimalWeightedNumericalTests.InvalidFieldsNeverAdvanceAnyState",
     "scope": "public sealed class OptimalWeightedMovingAverageState"
+  },
+  {
+    "id": "elastic-volume-wrong-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_started ? _previous : new RocBankValue(price)",
+    "after": "_started ? _previous : default",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-forgets-expired-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_sum + current - expired",
+    "after": "_sum + current",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-wrong-current-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "top.Add(price, current)",
+    "after": "top.Add(price, sum)",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-wrong-previous-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "(sum - current) << previous.UpperShift",
+    "after": "sum << previous.UpperShift",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-rounds-overflowing-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "bottom.Add(1, sum << shift)",
+    "after": "bottom.Add((double)sum, BigInteger.One << shift)",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-updates-on-negative-total",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "sum.Sign > 0",
+    "after": "sum.Sign != 0",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-forgets-volume-sum",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_sum = sum;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-stale-volume-sum-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_sum = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-stale-startup-after-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_started = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-premature-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ElasticVolumeWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = new RocBankValue(value.Publish());",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.VolumeExtremesZeroAndSignedCancellationPreserveTheRecurrence"
+  },
+  {
+    "id": "elastic-volume-accepts-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ElasticVolumeNumericalTests.InvalidFieldsNeverAdvanceAnyState",
+    "scope": "public sealed class ElasticVolumeWeightedMovingAverageV2State"
   }
 ]
