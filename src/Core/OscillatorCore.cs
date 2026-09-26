@@ -1283,39 +1283,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void SwingIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, double limitMove = 0)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = 0;
-
-        for (var i = 1; i < close.Length; i++)
-        {
-            var cy = close[i - 1];
-            var oy = open[i - 1];
-            var c = close[i];
-            var o = open[i];
-            var h = high[i];
-            var l = low[i];
-
-            var k = Math.Max(h - cy, l - cy);
-            var tr = Math.Max(Math.Max(h - l, Math.Abs(h - cy)), Math.Abs(l - cy));
-
-            var sh = Math.Abs(cy - oy);
-            var r = tr - 0.5 * Math.Abs(c - o) + 0.25 * sh;
-
-            if (r != 0 && tr != 0)
-            {
-                var limit = limitMove > 0 ? limitMove : tr;
-                var si = 50 * ((c - cy) + 0.5 * (c - o) + 0.25 * (cy - oy)) / r * k / limit;
-                output[i] = si;
-            }
-            else
-            {
-                output[i] = 0;
-            }
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) output[i] = i == 0 ? 0 : WilderSwingIndex.Compute(open[i], high[i], low[i], close[i], open[i - 1], close[i - 1], limitMove);
     }
 
     /// <summary>
@@ -1323,30 +1292,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AccumulativeSwingIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, double limitMove = 0)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var siArray = pool.Rent(close.Length);
-
-        try
-        {
-            var si = siArray.AsSpan(0, close.Length);
-            SwingIndex(open, high, low, close, si, limitMove);
-
-            double asi = 0;
-            for (var i = 0; i < close.Length; i++)
-            {
-                asi += si[i];
-                output[i] = asi;
-            }
-        }
-        finally
-        {
-            pool.Return(siArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AccumulatedSwingWindow(MovingAvgType.SimpleMovingAverage, 1, limitMove, Math.Max(1, close.Length));
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], high[i], low[i], close[i], true).Value;
     }
 
     /// <summary>

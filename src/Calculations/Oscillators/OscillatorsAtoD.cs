@@ -149,41 +149,19 @@ public static partial class Calculations
     public static StockData CalculateAccumulativeSwingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
         double limitMove = 0)
     {
-        List<double> accumulativeSwingIndexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length);
+        var (input, high, low, open, _) = GetInputValuesList(stockData);
+        using var window = new AccumulatedSwingWindow(maType, length, limitMove, Math.Max(1, input.Count));
+        List<double> line = new(input.Count), signal = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            // Wilder's swing index needs yesterday's bar; the first bar has none. The numerator ran backwards (the
-            // previous close less today's) and K and R took signed moves where Wilder takes their sizes.
-            var swingIndex = i >= 1
-                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1], inputList[i - 1], limitMove)
-                : 0;
-
-            var prevSwingIndex = GetLastOrDefault(accumulativeSwingIndexList);
-            var accumulativeSwingIndex = prevSwingIndex + swingIndex;
-            accumulativeSwingIndexList.Add(accumulativeSwingIndex);
+            var value = window.Next(open[i], high[i], low[i], input[i], true); line.Add(value.Value); signal.Add(value.Signal);
+            signals?.Add(GetCompareSignal(value.Value, i > 0 ? line[i - 1] : 0));
         }
-
-        var asiOscillatorList = GetMovingAverageList(stockData, maType, length, accumulativeSwingIndexList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var asi = accumulativeSwingIndexList[i];
-            var prevAsi = i >= 1 ? accumulativeSwingIndexList[i - 1] : 0;
-
-            var signal = GetCompareSignal(asi, prevAsi);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Asi", accumulativeSwingIndexList },
-            { "Signal", asiOscillatorList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(accumulativeSwingIndexList);
-        stockData.IndicatorName = IndicatorName.AccumulativeSwingIndex;
-
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, line);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Asi", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.AccumulativeSwingIndex;
         return stockData;
     }
 

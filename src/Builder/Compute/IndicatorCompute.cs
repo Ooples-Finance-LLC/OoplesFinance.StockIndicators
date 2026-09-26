@@ -547,7 +547,7 @@ internal static partial class IndicatorCompute
             PriceChannelMiddleSpecOptions pcm => ComputePriceChannelMiddleFast(data, context, pcm.Length),
             SwingIndexSpecOptions swi => ComputeSwingIndexFast(data, context, swi.LimitMove),
             AccumulativeSwingIndexSpecOptions asi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeAccumulativeSwingIndexFast(data, context, asi.LimitMove), asi.Length, asi.MaType)
+                ? ComputeAccumulativeSwingIndexFast(data, context, asi.LimitMove, asi.Length, asi.MaType, true)
                 : ComputeAccumulativeSwingIndexFast(data, context, asi.LimitMove),
             ZigZagSpecOptions zigzag => ComputeZigZagFast(data, context, zigzag.Deviation),
             PivotPointSpecOptions _ => spec.OutputKey switch
@@ -4726,29 +4726,22 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Accumulative Swing Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAccumulativeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0)
+    internal static ComputeBuffer ComputeAccumulativeSwingIndexFast(StockData data, ComputeContext context, double limitMove = 0, int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signal = false)
     {
-        // CalculateAccumulativeSwingIndex accumulates Wilder's swing index, whose numerator runs from the
-        // previous close to today's and whose K and R take the sizes of the moves rather than their signs.
-        // The core still carried the older reading, so the two parted company from the second bar on.
-        var (inputList, highList, lowList, openList, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var accumulated = 0d;
-
-        for (var i = 0; i < count; i++)
+        var (input, high, low, open, _) = CalculationsHelper.GetInputValuesList(data);
+        using var window = new AccumulatedSwingWindow(maType, length, limitMove, Math.Max(1, input.Count));
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
         {
-            // The first bar has no previous bar to swing from, so it contributes nothing.
-            accumulated += i >= 1
-                ? WilderSwingIndex.Compute(openList[i], highList[i], lowList[i], inputList[i], openList[i - 1],
-                    inputList[i - 1], limitMove)
-                : 0;
-            output[i] = accumulated;
+            var value = window.Next(open[i], high[i], low[i], input[i], true);
+            result.WritableSpan[i] = signal ? value.Signal : value.Value;
         }
-
-        return buffer;
+        if (signal && (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)))
+        {
+            using var values = ComputeAccumulativeSwingIndexFast(data, context, limitMove, length, maType);
+            MovingAverage(data, maType, length, values.Span, result.WritableSpan);
+        }
+        return result;
     }
 
     /// <summary>

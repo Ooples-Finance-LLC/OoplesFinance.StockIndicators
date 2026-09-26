@@ -252,6 +252,7 @@ public sealed class SwingIndexState : IStreamingIndicatorState
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _input.GetValue(bar);
         var swingIndex = _hasPrev
             ? WilderSwingIndex.Compute(bar.Open, bar.High, bar.Low, value, _prevOpen, _prevClose, _limitMove)

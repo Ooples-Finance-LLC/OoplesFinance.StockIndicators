@@ -5688,66 +5688,17 @@ public sealed class AbsoluteStrengthIndexState : IStreamingIndicatorState
 [PrimaryOutput("Asi")]
 public sealed class AccumulativeSwingIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signal;
-    private readonly double _limitMove;
-    private double _asi;
-    private double _prevClose;
-    private double _prevOpen;
-    private bool _hasPrev;
-
-    public AccumulativeSwingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double limitMove = 0)
-    {
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _limitMove = limitMove;
-    }
-
+    private readonly AccumulatedSwingWindow _window;
+    public AccumulativeSwingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double limitMove = 0) => _window = new(maType, length, limitMove);
     public IndicatorName Name => IndicatorName.AccumulativeSwingIndex;
-
-    public void Reset()
-    {
-        _signal.Reset();
-        _asi = 0;
-        _prevClose = 0;
-        _prevOpen = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        // Wilder's swing index needs yesterday's bar; the first bar has none.
-        var swingIndex = _hasPrev
-            ? WilderSwingIndex.Compute(bar.Open, bar.High, bar.Low, bar.Close, _prevOpen, _prevClose, _limitMove)
-            : 0;
-        var asi = _asi + swingIndex;
-        var signal = _signal.Next(asi, isFinal);
-
-        if (isFinal)
-        {
-            _asi = asi;
-            _prevClose = bar.Close;
-            _prevOpen = bar.Open;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Asi", asi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(asi, outputs);
+        var value = _window.Next(bar.Open, bar.High, bar.Low, bar.Close, isFinal);
+        return new(value.Value, includeOutputs ? new Dictionary<string, double> { { "Asi", value.Value }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Bop")]

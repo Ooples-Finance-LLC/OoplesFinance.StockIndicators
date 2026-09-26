@@ -1,10 +1,5 @@
 # Existing numerical-fixture enrollment debt for issue #244; not passing execution evidence.
 # Remove entries as their contracts are completed. New indicators/configurations must be enrolled.
-OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/default
-OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.AccumulativeSwingIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.AdaptiveAutonomousRecursiveMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.AdaptiveAutonomousRecursiveMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.AdaptiveAutonomousRecursiveMovingAverage/minimum-periods
@@ -2322,7 +2317,6 @@ OoplesFinance.StockIndicators.Indicators.SwamiStochastics/minimum-fastLength
 OoplesFinance.StockIndicators.Indicators.SwamiStochastics/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SwamiStochastics/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.SwamiStochastics/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SwingIndex/default
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.TStepLeastSquaresMovingAverage/minimum-periods

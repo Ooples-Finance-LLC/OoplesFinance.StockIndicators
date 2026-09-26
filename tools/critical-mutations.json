@@ -17313,5 +17313,137 @@
     "after": "bears = Average(bulls, smoothLength);",
     "filter": "FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SymmetricChangeAndBothSmoothersPreserveAllFiniteScales|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.SelectedInputAndCustomerStagesReceiveTheDerivedSeries|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~AbsoluteStrengthMtfNumericalTests.OverflowingDifferenceCanProduceFiniteSmoothedStrength",
     "scope": "public static StockData CalculateAbsoluteStrengthMTFIndicator("
+  },
+  {
+    "id": "swing-signed-high-move",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "System.Numerics.BigInteger.Abs(h - pc)",
+    "after": "h - pc",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-low-branch",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "4 * lowMove - 2 * highMove + body",
+    "after": "4 * lowMove + 2 * highMove + body",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-range-branch",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "4 * range + body",
+    "after": "4 * range - body",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "4 * (c - pc)",
+    "after": "4 * (pc - c)",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-body-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "2 * (c - o)",
+    "after": "4 * (c - o)",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-limit",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "limitMove > 0 ? ExactVarianceWindow.Units(limitMove) : range",
+    "after": "range",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-k",
+    "module": "numerical",
+    "file": "src/Helpers/WilderSwingIndex.cs",
+    "before": "System.Numerics.BigInteger.Max(highMove, lowMove)",
+    "after": "System.Numerics.BigInteger.Min(highMove, lowMove)",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-drops-cumulative-history",
+    "module": "numerical",
+    "file": "src/Helpers/AccumulatedSwingWindow.cs",
+    "before": "_previous.AddTo(ref sum);",
+    "after": "// Deliberately discard cumulative history.\n        ",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-premature-swing-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AccumulatedSwingWindow.cs",
+    "before": "swing.AddTo(ref sum);",
+    "after": "sum.Add(swing.Publish());",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-wrong-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/AccumulatedSwingWindow.cs",
+    "before": "_signal.Next(accumulated, commit)",
+    "after": "_signal.Next(swing, commit)",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-commits-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AccumulatedSwingWindow.cs",
+    "before": "var swing = _started ?",
+    "after": "commit = true; var swing = _started ?",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AccumulatedSwingWindow.cs",
+    "before": "_previous = default; _open = _close = 0; _started = false;",
+    "after": "_open = _close = 0; _started = false;",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs"
+  },
+  {
+    "id": "swing-invalid-single-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "before": "StreamingInputValidation.Validate(bar);\n        var value = _input.GetValue(bar);",
+    "after": "var value = bar.Volume < 0 && bar.Volume > 0 ? _input.GetValue(bar) : bar.Close;",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs",
+    "scope": "public sealed class SwingIndexState :"
+  },
+  {
+    "id": "swing-invalid-cumulative-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// Deliberately omit validation.",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs",
+    "scope": "public sealed class AccumulativeSwingIndexState :"
+  },
+  {
+    "id": "swing-wrong-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "signal ? value.Signal : value.Value",
+    "after": "value.Value",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs",
+    "scope": "internal static ComputeBuffer ComputeAccumulativeSwingIndexFast("
+  },
+  {
+    "id": "swing-customer-signal-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(line), length",
+    "after": "SpanCompat.AsReadOnlySpan(line), length + 1",
+    "filter": "FullyQualifiedName~SwingNumericalTests.WilderBranchesAndCumulativeSignalPreserveAllScales|FullyQualifiedName~SwingNumericalTests.CustomerSignalReceivesTheCumulativeSeries|FullyQualifiedName~SwingNumericalTests.InvalidFieldsNeverAdvanceAnyState|FullyQualifiedName~SwingNumericalTests.EmptyCoreAndBatchInputsReturnEmptyOutputs",
+    "scope": "public static StockData CalculateAccumulativeSwingIndex("
   }
 ]
