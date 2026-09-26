@@ -7900,30 +7900,23 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAverageTrueRangeChannelFast(StockData data, ComputeContext context, int length = 14,
         double mult = 2.5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? key = null)
     {
-        // The upper band this arm is bound to is the input a multiple of the average true range above
-        // itself, rounded to whole units as CalculateAverageTrueRangeChannel rounds it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        if (key == "Sma")
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var center = context.Rent(count); using var atr = context.Rent(count);
+        if (external)
         {
-            var average = context.Rent(count);
-            MovingAverage(data, maType, length, input, average.WritableSpan);
-            return average;
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
         }
-        using var atr = ComputeAtrFast(data, context, length, maType);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
+        var result = context.Rent(count); using var window = external ? null : new KeltnerWindow(maType, length, length, maType, Math.Max(1, count));
         for (var i = 0; i < count; i++)
         {
-            var upper = Math.Round(input[i] + atr.Span[i] * mult);
-            var lower = Math.Round(input[i] - atr.Span[i] * mult);
-            output[i] = key == "LowerBand" ? lower : key == "MiddleBand" ? (upper + lower) / 2 : upper;
+            var stages = external ? (new RocBankValue(center.Span[i]), new RocBankValue(atr.Span[i])) : window!.Next(high[i], low[i], input[i], true);
+            var point = RangeChannelWindow.Output(input[i], stages.Item1, stages.Item2, mult, true);
+            result.WritableSpan[i] = key == "Sma" ? point.Average : key == "MiddleBand" ? point.Middle : key == "LowerBand" ? point.Lower : point.Upper;
         }
-
-        return buffer;
+        return result;
     }
 
     internal static ComputeBuffer ComputeVolatilityRatioFast(StockData data, ComputeContext context, int length = 14)
@@ -21575,15 +21568,23 @@ internal static partial class IndicatorCompute
         int length = 14, double atrMult = 2, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         ChannelBand band = ChannelBand.Middle)
     {
-        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(input.Count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), buffer.WritableSpan);
-        if (band == ChannelBand.Middle) return buffer;
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        var multiplier = band == ChannelBand.Upper ? atrMult : -atrMult;
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < output.Length; i++) output[i] += multiplier * atr.Span[i];
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var count = input.Count;
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var center = context.Rent(count); using var atr = context.Rent(count);
+        if (external)
+        {
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
+        }
+        var result = context.Rent(count); using var window = external ? null : new KeltnerWindow(maType, length, length, maType, Math.Max(1, count));
+        for (var i = 0; i < count; i++)
+        {
+            var stages = external ? (new RocBankValue(center.Span[i]), new RocBankValue(atr.Span[i])) : window!.Next(high[i], low[i], input[i], true);
+            var point = RangeChannelWindow.Output(input[i], stages.Item1, stages.Item2, atrMult, false);
+            result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
+        }
+        return result;
     }
 
     /// <summary>

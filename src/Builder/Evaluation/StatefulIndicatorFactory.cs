@@ -584,6 +584,8 @@ internal static partial class StatefulIndicatorFactory
             BollingerBandsWidthSpecOptions bbWidth => new BollingerBandsWidthState(length: bbWidth.Length),
 
             // Volatility - using named parameters where MovingAvgType is first
+            AverageTrueRangeChannelSpecOptions channel => new AverageTrueRangeChannelState(channel.MaType, channel.Length, channel.Multiplier),
+            StollerAverageRangeChannelsSpecOptions starc => new StollerAverageRangeChannelsState(starc.MaType, starc.Length, starc.AtrMult),
             AverageTrueRangeSpecOptions range => new AverageTrueRangeState(length: range.Length, maType: range.MaType),
             AtrSpecOptions atr => new AverageTrueRangeState(length: atr.Length, maType: atr.MaType),
             AdaptiveErgodicCandlestickOscillatorSpecOptions candle => new AdaptiveErgodicCandlestickOscillatorState(candle.MaType, candle.SmoothLength, candle.StochLength, candle.SignalLength),

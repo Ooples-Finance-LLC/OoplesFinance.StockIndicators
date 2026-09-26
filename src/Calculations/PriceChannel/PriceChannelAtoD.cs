@@ -63,55 +63,26 @@ public static partial class Calculations
     public static StockData CalculateAverageTrueRangeChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14, double mult = 2.5)
     {
-        List<double> innerTopAtrChannelList = new(stockData.Count);
-        List<double> innerBottomAtrChannelList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? center = null, atr = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var atr = atrList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma = smaList[i];
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var prevTopInner = GetLastOrDefault(innerTopAtrChannelList);
-            var topInner = Math.Round(currentValue + (atr * mult));
-            innerTopAtrChannelList.Add(topInner);
-
-            var prevBottomInner = GetLastOrDefault(innerBottomAtrChannelList);
-            var bottomInner = Math.Round(currentValue - (atr * mult));
-            innerBottomAtrChannelList.Add(bottomInner);
-
-            // The centre of the two bands actually published. Both are drawn around the current value,
-            // so their mean is that value carried through the same rounding, and it lies between them by
-            // construction.
-            middleBandList.Add((topInner + bottomInner) / 2);
-
-            var signal = GetBollingerBandsSignal(currentValue - sma, prevValue - prevSma, currentValue, prevValue, topInner,
-                prevTopInner, bottomInner, prevBottomInner);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, ranges);
+            center = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The bands are the current value plus and minus a multiple of the average true range. The
-            // moving average was published between them, and it is a different quantity with no reason
-            // to sit there: it was above the upper band on 9 bars and below the lower on 19.
-            { "UpperBand", innerTopAtrChannelList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", innerBottomAtrChannelList },
-            { "Sma", smaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.AverageTrueRangeChannel;
-
-        return stockData;
+        using var window = external ? null : new KeltnerWindow(maType, length, length, maType, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), average = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var stages = external ? (new RocBankValue(center![i]), new RocBankValue(atr![i])) : window!.Next(high[i], low[i], input[i], true);
+            var point = RangeChannelWindow.Output(input[i], stages.Item1, stages.Item2, mult, true);
+            signals?.Add(GetBollingerBandsSignal(input[i] - point.Average, (i > 0 ? input[i - 1] : 0) - (i > 0 ? average[i - 1] : 0), input[i], i > 0 ? input[i - 1] : 0, point.Upper, i > 0 ? upper[i - 1] : 0, point.Lower, i > 0 ? lower[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); average.Add(point.Average);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } , { "Sma", average } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.AverageTrueRangeChannel; return stockData;
     }
 
 

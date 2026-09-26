@@ -515,72 +515,19 @@ public sealed class MidpriceState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Sma")]
 public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _mult;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public AverageTrueRangeChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double mult = 2.5)
-    {
-        var resolved = Math.Max(1, length);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _mult = mult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KeltnerWindow _window;
+    private readonly double _multiplier;
+    public AverageTrueRangeChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double mult = 2.5)
+    { _window = new(maType, length, length, maType); _multiplier = mult; }
     public IndicatorName Name => IndicatorName.AverageTrueRangeChannel;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _middleSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var middle = _middleSmoother.Next(value, isFinal);
-        var upper = Math.Round(value + (atr * _mult));
-        var lower = Math.Round(value - (atr * _mult));
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // The moving average is not the centre of these bands; see the batch calculation.
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", (upper + lower) / 2 },
-                { "LowerBand", lower },
-                { "Sma", middle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var stages = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        var point = RangeChannelWindow.Output(bar.Close, stages.Middle, stages.Atr, _multiplier, true);
+        return new(point.Average, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } , { "Sma", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _middleSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
@@ -1624,70 +1571,19 @@ public sealed class ExtendedRecursiveBandsState : IStreamingIndicatorState
 [PrimaryOutput("MiddleBand")]
 public sealed class StollerAverageRangeChannelsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _middleSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _atrMult;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public StollerAverageRangeChannelsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double atrMult = 2)
-    {
-        var resolved = Math.Max(1, length);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _middleSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atrMult = atrMult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KeltnerWindow _window;
+    private readonly double _multiplier;
+    public StollerAverageRangeChannelsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double atrMult = 2)
+    { _window = new(maType, length, length, maType); _multiplier = atrMult; }
     public IndicatorName Name => IndicatorName.StollerAverageRangeChannels;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _middleSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var middle = _middleSmoother.Next(value, isFinal);
-        var upper = middle + (atr * _atrMult);
-        var lower = middle - (atr * _atrMult);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var stages = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        var point = RangeChannelWindow.Output(bar.Close, stages.Middle, stages.Atr, _multiplier, false);
+        return new(point.Average, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower }  } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-        _middleSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dema1")]

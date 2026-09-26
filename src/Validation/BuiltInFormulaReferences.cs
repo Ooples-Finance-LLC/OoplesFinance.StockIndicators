@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.AverageTrueRangeChannel or IndicatorName.StollerAverageRangeChannels)
+        {
+            var channelKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < channelKeys.Length; slot++) { var key = channelKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RangeChannelOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AverageTrueRange)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrOutputs(bars, builtIn)["Atr"], IndicatorErrorBudget.Exact);

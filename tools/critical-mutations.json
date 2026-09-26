@@ -18952,5 +18952,161 @@
     "before": "output[i] = window.Next(high[i], low[i], close[i], true).Atr.Publish();",
     "after": "output[i] = i == 0 ? 0 : window.Next(high[i], low[i], close[i], true).Atr.Publish();",
     "filter": "FullyQualifiedName~AtrNumericalTests.TrueRangeStartupAveragesAndOverflowRecoveryMatchFractions|FullyQualifiedName~AtrNumericalTests.SelectedClosesAndCustomerAverageReceiveActualTrueRanges|FullyQualifiedName~AtrNumericalTests.InvalidFieldsNeverAdvanceState"
+  },
+  {
+    "id": "range-channel-skip-round",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "Math.Round(value.Mantissa)",
+    "after": "value.Mantissa",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-round-ties-away",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "Math.Round(value.Mantissa)",
+    "after": "Math.Round(value.Mantissa, MidpointRounding.AwayFromZero)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-lost-extended-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "value.UpperShift == 0 ? new RocBankValue(Math.Round(value.Mantissa)) : value",
+    "after": "new RocBankValue(Math.Round(value.Mantissa))",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "RoundedBoundary(price, atr, multiplier, -1)",
+    "after": "RoundedBoundary(price, atr, multiplier, 1)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-middle-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "sum.Mean(1)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-wrong-channel-center",
+    "module": "numerical",
+    "file": "src/Helpers/RangeChannelWindow.cs",
+    "before": "RoundedBoundary(price, atr, multiplier, 1)",
+    "after": "RoundedBoundary(average.Publish(), atr, multiplier, 1)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable"
+  },
+  {
+    "id": "range-channel-atr-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window!.Next(high[i], low[i], input[i], true)",
+    "after": "window!.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeAverageTrueRangeChannelFast("
+  },
+  {
+    "id": "range-channel-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public static StockData CalculateAverageTrueRangeChannel("
+  },
+  {
+    "id": "range-channel-atr-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class AverageTrueRangeChannelState :"
+  },
+  {
+    "id": "range-channel-atr-preview-commit",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.Close, true)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class AverageTrueRangeChannelState :"
+  },
+  {
+    "id": "range-channel-atr-wrong-kind",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "new(maType, length, length, maType)",
+    "after": "new(maType, length, length, MovingAvgType.WildersSmoothingMethod)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class AverageTrueRangeChannelState :"
+  },
+  {
+    "id": "range-channel-starc-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window!.Next(high[i], low[i], input[i], true)",
+    "after": "window!.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeStollerAverageRangeChannelsFast("
+  },
+  {
+    "id": "range-channel-starc-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "before": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))",
+    "after": "SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public static StockData CalculateStollerAverageRangeChannels("
+  },
+  {
+    "id": "range-channel-starc-invalid-bar",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class StollerAverageRangeChannelsState :"
+  },
+  {
+    "id": "range-channel-starc-preview-commit",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.Close, true)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class StollerAverageRangeChannelsState :"
+  },
+  {
+    "id": "range-channel-starc-wrong-kind",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "new(maType, length, length, maType)",
+    "after": "new(maType, length, length, MovingAvgType.WildersSmoothingMethod)",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public sealed class StollerAverageRangeChannelsState :"
+  },
+  {
+    "id": "range-channel-batch-legacy-average",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "public static StockData CalculateAverageTrueRangeChannel("
+  },
+  {
+    "id": "range-channel-raw-legacy-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": " || !StrengthWindow.Supports(maType)",
+    "after": "",
+    "filter": "FullyQualifiedName~RangeChannelNumericalTests.RoundedPriceChannelsAndSmoothCenterChannelsKeepDistinctContracts|FullyQualifiedName~RangeChannelNumericalTests.CustomerStagesAndSelectedPricesRetainTheirOrder|FullyQualifiedName~RangeChannelNumericalTests.InvalidFieldsNeverAdvanceState|FullyQualifiedName~RangeChannelNumericalTests.LegacyBatchOnlyAveragesRemainAvailable",
+    "scope": "internal static ComputeBuffer ComputeStollerAverageRangeChannelsFast("
   }
 ]
