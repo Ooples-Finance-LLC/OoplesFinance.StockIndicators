@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.HighLowBands && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var bandKeys = builtIn.BatchOutputKey is { } bandKey ? new[] { bandKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };
+            for (var slot = 0; slot < bandKeys.Length; slot++)
+            {
+                var key = bandKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HighLowBandsOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.HighLowMovingAverage && AverageKind(builtIn.CreateOptions(), 2) is 1 or 2 or 3 or 6)
         {
             var highLowKeys = builtIn.BatchOutputKey is { } outputKey ? new[] { outputKey } : new[] { "UpperBand", "MiddleBand", "LowerBand" };

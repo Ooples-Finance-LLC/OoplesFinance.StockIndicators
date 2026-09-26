@@ -3357,56 +3357,22 @@ public sealed class HighLowMovingAverageState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("MiddleBand")]
 public sealed class HighLowBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _firstSmoother;
-    private readonly IMovingAverageSmoother _secondSmoother;
-    private readonly StreamingInputResolver _input;
+    private readonly HighLowBandsWindow _window;
     private readonly double _pctShift;
-
-    public HighLowBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double pctShift = 1)
+    public HighLowBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double pctShift = 1)
     {
-        var resolved = Math.Max(1, length);
-        _firstSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _secondSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _pctShift = pctShift;
-        _input = new StreamingInputResolver(InputName.Close, null);
+        HighLowBandsWindow.ValidateShift(pctShift); _pctShift = pctShift; _window = new(maType, length);
     }
-
     public IndicatorName Name => IndicatorName.HighLowBands;
-
-    public void Reset()
-    {
-        _firstSmoother.Reset();
-        _secondSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var tma1 = _firstSmoother.Next(value, isFinal);
-        var tma = _secondSmoother.Next(tma1, isFinal);
-        var upper = tma + (tma * _pctShift / 100);
-        var lower = tma - (tma * _pctShift / 100);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", tma },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tma, outputs);
+        StreamingInputValidation.Validate(bar);
+        var middle = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(middle, includeOutputs ? new Dictionary<string, double> {
+            { "UpperBand", HighLowBandsWindow.Shift(middle, _pctShift) }, { "MiddleBand", middle }, { "LowerBand", HighLowBandsWindow.Shift(middle, -_pctShift) } } : null);
     }
-
-    public void Dispose()
-    {
-        _firstSmoother.Dispose();
-        _secondSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

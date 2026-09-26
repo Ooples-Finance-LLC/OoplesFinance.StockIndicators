@@ -225,13 +225,23 @@ public static partial class Calculations
     public static StockData CalculateHighLowBands(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
         double pctShift = 1)
     {
+        HighLowBandsWindow.ValidateShift(pctShift);
         List<double> highBandList = new(stockData.Count);
         List<double> lowBandList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var tmaList1 = GetMovingAverageList(stockData, maType, length, inputList);
-        var tmaList2 = GetMovingAverageList(stockData, maType, length, tmaList1);
+        List<double> tmaList2;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        {
+            var tmaList1 = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(inputList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            tmaList2 = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(tmaList1), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, tmaList1);
+        }
+        else
+        {
+            tmaList2 = new(stockData.Count); using var window = new HighLowBandsWindow(maType, length);
+            foreach (var price in inputList) tmaList2.Add(window.Next(price, true));
+        }
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -241,11 +251,11 @@ public static partial class Calculations
             var prevTma = i >= 1 ? tmaList2[i - 1] : 0;
 
             var prevHighBand = GetLastOrDefault(highBandList);
-            var highBand = tma + (tma * pctShift / 100);
+            var highBand = HighLowBandsWindow.Shift(tma, pctShift);
             highBandList.Add(highBand);
 
             var prevLowBand = GetLastOrDefault(lowBandList);
-            var lowBand = tma - (tma * pctShift / 100);
+            var lowBand = HighLowBandsWindow.Shift(tma, -pctShift);
             lowBandList.Add(lowBand);
 
             var signal = GetBollingerBandsSignal(currentValue - tma, prevValue - prevTma, currentValue, prevValue, highBand, prevHighBand,
