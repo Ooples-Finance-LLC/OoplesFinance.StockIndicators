@@ -22,6 +22,11 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ParametricCorrectiveOutputs(bars, builtIn)["Pclma"], IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PolynomialLeastSquaresMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => PolynomialCellOutputs(bars, builtIn)["Plsma"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DynamicallyAdjustableMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DynamicAverageOutputs(bars, builtIn)["Dama"], IndicatorErrorBudget.Exact);

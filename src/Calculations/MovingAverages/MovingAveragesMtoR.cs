@@ -626,65 +626,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePolynomialLeastSquaresMovingAverage(this StockData stockData, int length = 100)
     {
-        List<double> sumPow3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new PolynomialCellWindow(length); List<double> output = new(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevSumPow3 = GetLastOrDefault(sumPow3List);
-            double x1Pow1Sum, x2Pow1Sum, x1Pow2Sum, x2Pow2Sum, x1Pow3Sum, x2Pow3Sum, wPow1, wPow2, wPow3, sumPow1 = 0, sumPow2 = 0, sumPow3 = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevValue = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                var x1 = (double)j / length;
-                var x2 = (double)(j - 1) / length;
-                var ax1 = x1 * x1;
-                var ax2 = x2 * x2;
-
-                double b1Pow1Sum = 0, b2Pow1Sum = 0, b1Pow2Sum = 0, b2Pow2Sum = 0, b1Pow3Sum = 0, b2Pow3Sum = 0;
-                for (var k = 1; k <= 3; k++)
-                {
-                    var b1 = (double)1 / k * Math.Sin(x1 * k * Math.PI);
-                    var b2 = (double)1 / k * Math.Sin(x2 * k * Math.PI);
-
-                    b1Pow1Sum += k == 1 ? b1 : 0;
-                    b2Pow1Sum += k == 1 ? b2 : 0;
-                    b1Pow2Sum += k <= 2 ? b1 : 0;
-                    b2Pow2Sum += k <= 2 ? b2 : 0;
-                    b1Pow3Sum += k <= 3 ? b1 : 0; //-V3022
-                    b2Pow3Sum += k <= 3 ? b2 : 0; //-V3022
-                }
-
-                x1Pow1Sum = ax1 + b1Pow1Sum;
-                x2Pow1Sum = ax2 + b2Pow1Sum;
-                wPow1 = x1Pow1Sum - x2Pow1Sum;
-                sumPow1 += prevValue * wPow1;
-                x1Pow2Sum = ax1 + b1Pow2Sum;
-                x2Pow2Sum = ax2 + b2Pow2Sum;
-                wPow2 = x1Pow2Sum - x2Pow2Sum;
-                sumPow2 += prevValue * wPow2;
-                x1Pow3Sum = ax1 + b1Pow3Sum;
-                x2Pow3Sum = ax2 + b2Pow3Sum;
-                wPow3 = x1Pow3Sum - x2Pow3Sum;
-                sumPow3 += prevValue * wPow3;
-            }
-            sumPow3List.Add(sumPow3);
-
-            var signal = GetCompareSignal(currentValue - sumPow3, prevVal - prevSumPow3);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); output.Add(value);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Plsma", sumPow3List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sumPow3List);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Plsma", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output);
         stockData.IndicatorName = IndicatorName.PolynomialLeastSquaresMovingAverage;
-
         return stockData;
     }
 
