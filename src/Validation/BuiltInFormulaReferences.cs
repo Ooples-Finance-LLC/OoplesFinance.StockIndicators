@@ -107,6 +107,11 @@ internal static partial class BuiltInFormulaReferences
             var demarkKeys=new[]{"Pivot","S1","R1"};
             for(var slot=0;slot<demarkKeys.Length;slot++){var key=demarkKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DemarkPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PivotPointAverage && AverageKind(builtIn.CreateOptions(),1) is 1 or 2 or 3 or 6)
+        {
+            var pivotAverageKeys=new[]{"Pivot1","Signal1","Pivot2","Signal2","Pivot3","Signal3"};
+            for(var slot=0;slot<pivotAverageKeys.Length;slot++){var key=pivotAverageKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>PivotAverageOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.FloorPivotPoints)
         {
             var floorKeys=builtIn.BatchOutputKey is { } selected?new[]{selected}:new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"};

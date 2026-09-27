@@ -1027,9 +1027,9 @@ public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposab
     {
         _inputLength = inputLength;
         var resolved = Math.Max(1, length);
-        _pp1Smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _pp2Smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _pp3Smoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        _pp1Smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _pp2Smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
+        _pp3Smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);
     }
 
     public IndicatorName Name => IndicatorName.PivotPointAverage;
@@ -1054,9 +1054,7 @@ public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposab
         var values = _current;
         if (newPeriod)
         {
-            var pp1 = (_prevHigh + _prevLow + _prevClose) / 3;
-            var pp2 = (_prevHigh + _prevLow + _prevClose + bar.Open) / 4;
-            var pp3 = (_prevHigh + _prevLow + bar.Open) / 3;
+            var (pp1,pp2,pp3)=PivotAverageMath.Values(_prevHigh,_prevLow,_prevClose,bar.Open);
             values = new[] { pp1, _pp1Smoother.Next(pp1, isFinal), pp2,
                 _pp2Smoother.Next(pp2, isFinal), pp3, _pp3Smoother.Next(pp3, isFinal) };
         }

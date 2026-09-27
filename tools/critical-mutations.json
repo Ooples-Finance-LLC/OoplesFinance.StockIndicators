@@ -29245,8 +29245,132 @@
     "id": "pivot-alias-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is PivotPointSpecOptions or FloorPivotPointSpecOptions",
-    "after": "spec.Options is FloorPivotPointSpecOptions",
+    "before": "spec.Options is PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
+    "after": "spec.Options is PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
+  },
+  {
+    "id": "pivot-average-early-sum",
+    "module": "numerical",
+    "file": "src/Helpers/PivotAverageMath.cs",
+    "before": "extrema.Add(high);extrema.Add(low);",
+    "after": "extrema.Add(high+low);",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-divisor-1",
+    "module": "numerical",
+    "file": "src/Helpers/PivotAverageMath.cs",
+    "before": "completed.Mean(3)",
+    "after": "completed.Mean(4)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-divisor-2",
+    "module": "numerical",
+    "file": "src/Helpers/PivotAverageMath.cs",
+    "before": "combined.Mean(4)",
+    "after": "combined.Mean(3)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-divisor-3",
+    "module": "numerical",
+    "file": "src/Helpers/PivotAverageMath.cs",
+    "before": "opening.Mean(3)",
+    "after": "opening.Mean(4)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-current-open",
+    "module": "numerical",
+    "file": "src/Helpers/PivotAverageMath.cs",
+    "before": "combined.Add(open);",
+    "after": "combined.Add(close);",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-batch-fields",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointLtoR.cs",
+    "before": "PivotPeriodInputs.Read(stockData, inputLength)",
+    "after": "GetInputValuesList(stockData, inputLength)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-batch-mean",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointLtoR.cs",
+    "before": "BollingerArithmetic.Mean(pp1List, Math.Max(1, length))",
+    "after": "GetMovingAverageList(stockData, maType, length, pp1List)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-batch-components",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointLtoR.cs",
+    "before": "Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(pp1List), Math.Max(1, length))?.ToList()",
+    "after": "(List<double>?)null",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-raw-mean",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "BollingerArithmetic.Mean(pivots1.Span, averages1.WritableSpan, length);",
+    "after": "MovingAverage(data, maType, length, pivots1.Span, averages1.WritableSpan);",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests",
+    "scope": "internal static ComputeBuffer ComputePivotPointAverageFast("
+  },
+  {
+    "id": "pivot-average-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "PivotPointAverageSeries.Average3 => averages3.Span",
+    "after": "PivotPointAverageSeries.Average3 => averages2.Span",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-native-mean",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "_pp1Smoother = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(resolved) : MovingAverageSmootherFactory.Create(maType, resolved);",
+    "after": "_pp1Smoother = MovingAverageSmootherFactory.Create(maType, resolved);",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "pivot-average-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests",
+    "scope": "public sealed class PivotPointAverageState"
+  },
+  {
+    "id": "pivot-average-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "_period = null;",
+    "after": "// omit period reset",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests",
+    "scope": "public sealed class PivotPointAverageState"
+  },
+  {
+    "id": "pivot-average-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omit invalid-input guard",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests",
+    "scope": "public sealed class PivotPointAverageState"
+  },
+  {
+    "id": "pivot-average-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "spec.Options is PivotPointAverageSpecOptions or PivotPointSpecOptions",
+    "after": "spec.Options is PivotPointSpecOptions",
+    "filter": "FullyQualifiedName~PivotAverageNumericalTests"
   }
 ]

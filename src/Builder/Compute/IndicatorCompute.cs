@@ -23057,7 +23057,7 @@ internal static partial class IndicatorCompute
         // The period aggregation and the bar map come from the same helpers the batch uses. They are keyed by
         // date and cannot be pooled - a period is a dictionary lookup, not a window - but every calculation
         // downstream of them runs in rented buffers.
-        var (periodClose, periodHigh, periodLow, periodOpen, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
+        var (periodClose, periodHigh, periodLow, periodOpen, _) = PivotPeriodInputs.Read(data, inputLength);
         var periodCount = periodClose.Count;
         var count = data.Count;
         length = Math.Max(length, 1);
@@ -23071,17 +23071,24 @@ internal static partial class IndicatorCompute
             var prevHigh = i >= 1 ? periodHigh[i - 1] : 0;
             var prevLow = i >= 1 ? periodLow[i - 1] : 0;
             var prevClose = i >= 1 ? periodClose[i - 1] : 0;
-            pivots1.WritableSpan[i] = (prevHigh + prevLow + prevClose) / 3;
-            pivots2.WritableSpan[i] = (prevHigh + prevLow + prevClose + currentOpen) / 4;
-            pivots3.WritableSpan[i] = (prevHigh + prevLow + currentOpen) / 3;
+            var (pp1,pp2,pp3)=PivotAverageMath.Values(prevHigh,prevLow,prevClose,currentOpen);
+            pivots1.WritableSpan[i] = pp1;
+            pivots2.WritableSpan[i] = pp2;
+            pivots3.WritableSpan[i] = pp3;
         }
         using var averages1 = context.Rent(periodCount);
         using var averages2 = context.Rent(periodCount);
         using var averages3 = context.Rent(periodCount);
         // Consume the configured stages in batch order, regardless of the requested output.
-        MovingAverage(data, maType, length, pivots1.Span, averages1.WritableSpan);
-        MovingAverage(data, maType, length, pivots2.Span, averages2.WritableSpan);
-        MovingAverage(data, maType, length, pivots3.Span, averages3.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
+            BollingerArithmetic.Mean(pivots1.Span, averages1.WritableSpan, length);
+        else MovingAverage(data, maType, length, pivots1.Span, averages1.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
+            BollingerArithmetic.Mean(pivots2.Span, averages2.WritableSpan, length);
+        else MovingAverage(data, maType, length, pivots2.Span, averages2.WritableSpan);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides)
+            BollingerArithmetic.Mean(pivots3.Span, averages3.WritableSpan, length);
+        else MovingAverage(data, maType, length, pivots3.Span, averages3.WritableSpan);
         var periodValues = series switch
         {
             PivotPointAverageSeries.Pivot2 => pivots2.Span,
