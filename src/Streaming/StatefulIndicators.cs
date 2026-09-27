@@ -1697,213 +1697,31 @@ public sealed class PeriodicChannelState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class PriceLineChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevA1;
-    private double _prevA2;
-    private double _prevB1;
-    private double _prevB2;
-    private double _prevSizeA;
-    private double _prevSizeB;
-    private double _prevSizeC;
-    private double _prevValue;
-    private int _count;
-    private bool _hasPrev;
-
-    public PriceLineChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PriceDriftWindow _window;
+    public PriceLineChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 100) { _window = new(maType, length, false); }
     public IndicatorName Name => IndicatorName.PriceLineChannel;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _prevA1 = 0;
-        _prevA2 = 0;
-        _prevB1 = 0;
-        _prevB2 = 0;
-        _prevSizeA = 0;
-        _prevSizeB = 0;
-        _prevSizeC = 0;
-        _prevValue = 0;
-        _count = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        var prevA1 = _count >= 1 ? _prevA1 : value;
-        var prevB1 = _count >= 1 ? _prevB1 : value;
-        var prevA2 = _count >= 2 ? _prevA2 : 0;
-        var prevB2 = _count >= 2 ? _prevB2 : 0;
-        var prevSizeA = _count >= 1 ? _prevSizeA : atr / _length;
-        var prevSizeB = _count >= 1 ? _prevSizeB : atr / _length;
-        var prevSizeC = _count >= 1 ? _prevSizeC : atr / _length;
-
-        var sizeA = prevA1 - prevA2 > 0 ? atr : prevSizeA;
-        var sizeB = prevB1 - prevB2 < 0 ? atr : prevSizeB;
-        var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
-        // Each band is an envelope of price, so its drift stops at price; see the batch calculation.
-        var a = Math.Max(Math.Max(value, prevA1) - (sizeA / _length), value);
-        var b = Math.Min(Math.Min(value, prevB1) + (sizeB / _length), value);
-        var middle = (a + b) / 2;
-
-        if (isFinal)
-        {
-            _prevA2 = _count >= 1 ? _prevA1 : 0;
-            _prevB2 = _count >= 1 ? _prevB1 : 0;
-            _prevA1 = a;
-            _prevB1 = b;
-            _prevSizeA = sizeA;
-            _prevSizeB = sizeB;
-            _prevSizeC = sizeC;
-            _prevValue = value;
-            _count++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", middle },
-                { "LowerBand", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
 public sealed class PriceCurveChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevA1;
-    private double _prevA2;
-    private double _prevB1;
-    private double _prevB2;
-    private double _prevSize;
-    private double _prevValue;
-    private int _count;
-    private int _lastAChangeIndex;
-    private int _lastBChangeIndex;
-    private bool _hasPrev;
-
-    public PriceCurveChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _lastAChangeIndex = -1;
-        _lastBChangeIndex = -1;
-    }
-
+    private readonly PriceDriftWindow _window;
+    public PriceCurveChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 100) { _window = new(maType, length, true); }
     public IndicatorName Name => IndicatorName.PriceCurveChannel;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _prevA1 = 0;
-        _prevA2 = 0;
-        _prevB1 = 0;
-        _prevB2 = 0;
-        _prevSize = 0;
-        _prevValue = 0;
-        _count = 0;
-        _lastAChangeIndex = -1;
-        _lastBChangeIndex = -1;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        var prevA1 = _count >= 1 ? _prevA1 : value;
-        var prevB1 = _count >= 1 ? _prevB1 : value;
-        var prevA2 = _count >= 2 ? _prevA2 : 0;
-        var prevB2 = _count >= 2 ? _prevB2 : 0;
-        var prevSize = _count >= 1 ? _prevSize : atr / _length;
-
-        var size = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSize;
-        var aChg = prevA1 > prevA2 ? 1 : 0;
-        var bChg = prevB1 < prevB2 ? 1 : 0;
-        var lastAIndex = aChg == 1 ? _count : _lastAChangeIndex;
-        var lastBIndex = bChg == 1 ? _count : _lastBChangeIndex;
-        var barsSinceA = _count - lastAIndex;
-        var barsSinceB = _count - lastBIndex;
-        var lengthSquared = (double)_length * _length;
-        var factor = lengthSquared != 0 ? size / lengthSquared : 0;
-        // Each band is an envelope of price, so its drift stops at price; see the batch calculation.
-        var a = Math.Max(Math.Max(value, prevA1) - (factor * (barsSinceA + 1)), value);
-        var b = Math.Min(Math.Min(value, prevB1) + (factor * (barsSinceB + 1)), value);
-        var middle = (a + b) / 2;
-
-        if (isFinal)
-        {
-            _prevA2 = _count >= 1 ? _prevA1 : 0;
-            _prevB2 = _count >= 1 ? _prevB1 : 0;
-            _prevA1 = a;
-            _prevB1 = b;
-            _prevSize = size;
-            _prevValue = value;
-            if (aChg == 1)
-            {
-                _lastAChangeIndex = _count;
-            }
-
-            if (bChg == 1)
-            {
-                _lastBChangeIndex = _count;
-            }
-
-            _count++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", middle },
-                { "LowerBand", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

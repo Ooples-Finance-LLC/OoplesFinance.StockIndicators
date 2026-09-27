@@ -21863,65 +21863,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePriceCurveChannelFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculatePriceCurveChannel walks two envelopes of the chained series. Each steps towards price by a
-        // fraction of the average true range that grows with the bars since that band last turned, and neither
-        // is allowed past price itself. The middle band is their average; a moving average of the close, which
-        // is what this computed, is none of the three.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        using var upperBand = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        var a = upperBand.WritableSpan;
-        var b = lowerBand.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var lastRise = -1;
-        var lastFall = -1;
-        double previousSize = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousA1 = i >= 1 ? a[i - 1] : currentValue;
-            var previousB1 = i >= 1 ? b[i - 1] : currentValue;
-            var previousA2 = i >= 2 ? a[i - 2] : 0;
-            var previousB2 = i >= 2 ? b[i - 2] : 0;
-
-            var fallbackSize = i >= 1 ? previousSize : atr[i] / length;
-            var size = previousA1 - previousA2 > 0 || previousB1 - previousB2 < 0 ? atr[i] : fallbackSize;
-            previousSize = size;
-
-            if (previousA1 > previousA2)
-            {
-                lastRise = i;
-            }
-
-            if (previousB1 < previousB2)
-            {
-                lastFall = i;
-            }
-
-            // The bars since the band last turned, counted the way the batch counts them: a band that has
-            // never turned has been still for the whole series so far.
-            var drift = size / MathHelper.Pow(length, 2);
-            a[i] = Math.Max(Math.Max(currentValue, previousA1) - (drift * (i - lastRise + 1)), currentValue);
-            b[i] = Math.Min(Math.Min(currentValue, previousB1) + (drift * (i - lastFall + 1)), currentValue);
-            output[i] = band switch
-            {
-                ChannelBand.Upper => a[i],
-                ChannelBand.Lower => b[i],
-                _ => (a[i] + b[i]) / 2
-            };
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
+        using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, true, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
     }
 
     /// <summary>
@@ -21957,53 +21903,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePriceLineChannelFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculatePriceLineChannel is the curve channel's straight-line sibling: each envelope steps towards
-        // price by the same fraction of the average true range every bar, and each keeps its own size, taken
-        // when that band last turned. The third size the batch keeps reaches no band and is not kept here.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        using var upperBand = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        var a = upperBand.WritableSpan;
-        var b = lowerBand.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousSizeA = 0;
-        double previousSizeB = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousA1 = i >= 1 ? a[i - 1] : currentValue;
-            var previousB1 = i >= 1 ? b[i - 1] : currentValue;
-            var previousA2 = i >= 2 ? a[i - 2] : 0;
-            var previousB2 = i >= 2 ? b[i - 2] : 0;
-
-            var fallbackSizeA = i >= 1 ? previousSizeA : atr[i] / length;
-            var fallbackSizeB = i >= 1 ? previousSizeB : atr[i] / length;
-            var sizeA = previousA1 - previousA2 > 0 ? atr[i] : fallbackSizeA;
-            var sizeB = previousB1 - previousB2 < 0 ? atr[i] : fallbackSizeB;
-            previousSizeA = sizeA;
-            previousSizeB = sizeB;
-
-            a[i] = Math.Max(Math.Max(currentValue, previousA1) - (sizeA / length), currentValue);
-            b[i] = Math.Min(Math.Min(currentValue, previousB1) + (sizeB / length), currentValue);
-            output[i] = band switch
-            {
-                ChannelBand.Upper => a[i],
-                ChannelBand.Lower => b[i],
-                _ => (a[i] + b[i]) / 2
-            };
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
+        using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
     }
 
     /// <summary>Computes a motion-to-attraction channel output or trailing stop.</summary>

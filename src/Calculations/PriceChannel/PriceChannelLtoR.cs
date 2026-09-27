@@ -618,69 +618,17 @@ public static partial class Calculations
     public static StockData CalculatePriceLineChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 100)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> sizeAList = new(stockData.Count);
-        List<double> sizeBList = new(stockData.Count);
-        List<double> sizeCList = new(stockData.Count);
-        List<double> midList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var atr = external ? CalculateAverageTrueRange(stockData, maType, Math.Max(1, length)).ChainedValues : null;
+        using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var atr = atrList[i];
-            var prevA1 = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
-            var prevA2 = i >= 2 ? aList[i - 2] : 0;
-            var prevB2 = i >= 2 ? bList[i - 2] : 0;
-            var prevSizeA = i >= 1 ? sizeAList[i - 1] : atr / length;
-            var prevSizeB = i >= 1 ? sizeBList[i - 1] : atr / length;
-            var prevSizeC = i >= 1 ? sizeCList[i - 1] : atr / length;
-
-            var sizeA = prevA1 - prevA2 > 0 ? atr : prevSizeA;
-            sizeAList.Add(sizeA);
-
-            var sizeB = prevB1 - prevB2 < 0 ? atr : prevSizeB;
-            sizeBList.Add(sizeB);
-
-            var sizeC = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSizeC;
-            sizeCList.Add(sizeC);
-
-            // Each band is an envelope of price, so its drift stops at price: the upper cannot decay down
-            // through price, nor the lower rise up through it. Both seed at the first close, and at bar 0
-            // prevA2 and prevB2 are still zero, so prevA1 - prevA2 is the whole price and positive - which
-            // sets sizeA to the full average true range while failing the lower band's < 0 test. The two
-            // then step away from the same seed in opposite directions and the upper band ends the bar
-            // below the lower one, before the channel has any width at all.
-            var a = Math.Max(Math.Max(currentValue, prevA1) - (sizeA / length), currentValue);
-            aList.Add(a);
-
-            var b = Math.Min(Math.Min(currentValue, prevB1) + (sizeB / length), currentValue);
-            bList.Add(b);
-
-            var prevMid = GetLastOrDefault(midList);
-            var mid = (a + b) / 2;
-            midList.Add(mid);
-
-            var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
-            signalsList?.Add(signal);
+            var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr[i]));
+            signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0)); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aList },
-            { "MiddleBand", midList },
-            { "LowerBand", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.PriceLineChannel;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.PriceLineChannel; return stockData;
     }
 
 
@@ -695,68 +643,17 @@ public static partial class Calculations
     public static StockData CalculatePriceCurveChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 100)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> sizeList = new(stockData.Count);
-        List<double> aChgList = new(stockData.Count);
-        List<double> bChgList = new(stockData.Count);
-        List<double> midList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var atr = external ? CalculateAverageTrueRange(stockData, maType, Math.Max(1, length)).ChainedValues : null;
+        using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, true, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var atr = atrList[i];
-            var prevA1 = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
-            var prevA2 = i >= 2 ? aList[i - 2] : 0;
-            var prevB2 = i >= 2 ? bList[i - 2] : 0;
-            var prevSize = i >= 1 ? sizeList[i - 1] : atr / length;
-
-            var size = prevA1 - prevA2 > 0 || prevB1 - prevB2 < 0 ? atr : prevSize;
-            sizeList.Add(size);
-
-            double aChg = prevA1 > prevA2 ? 1 : 0;
-            aChgList.Add(aChg);
-
-            double bChg = prevB1 < prevB2 ? 1 : 0;
-            bChgList.Add(bChg);
-
-            var maxIndexA = aChgList.LastIndexOf(1);
-            var maxIndexB = bChgList.LastIndexOf(1);
-            var barsSinceA = aChgList.Count - 1 - maxIndexA;
-            var barsSinceB = bChgList.Count - 1 - maxIndexB;
-
-            // Each band is an envelope of price and its drift stops there; see CalculatePriceLineChannel,
-            // which inverts at bar 0 for the same reason and takes the same clamp.
-            var a = Math.Max(Math.Max(currentValue, prevA1) - (size / Pow(length, 2) * (barsSinceA + 1)), currentValue);
-            aList.Add(a);
-
-            var b = Math.Min(Math.Min(currentValue, prevB1) + (size / Pow(length, 2) * (barsSinceB + 1)), currentValue);
-            bList.Add(b);
-
-            var prevMid = GetLastOrDefault(midList);
-            var mid = (a + b) / 2;
-            midList.Add(mid);
-
-            var signal = GetCompareSignal(currentValue - mid, prevValue - prevMid);
-            signalsList?.Add(signal);
+            var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr[i]));
+            signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0)); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aList },
-            { "MiddleBand", midList },
-            { "LowerBand", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.PriceCurveChannel;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.PriceCurveChannel; return stockData;
     }
 
 

@@ -20826,5 +20826,169 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
     "scope": "public sealed class MotionToAttractionTrailingStopState :"
+  },
+  {
+    "id": "price-drift-period",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(1, length + 1)",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-seed",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_count > 0 ? _upper : close",
+    "after": "_count > 0 ? _upper : 0",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-startup-history",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_count >= 2 ? _olderUpper : 0",
+    "after": "_count >= 2 ? _olderUpper : previousUpper",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-upper-event",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "previousUpper > olderUpper",
+    "after": "previousUpper < olderUpper",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-lower-event",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "previousLower < olderLower",
+    "after": "previousLower > olderLower",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-shared-curve-size",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "rise || (_curve && fall)",
+    "after": "rise || (_curve && false && fall)",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-shared-lower-size",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "fall || (_curve && rise)",
+    "after": "fall || (_curve && false && rise)",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-curve-period-square",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "(long)_length * _length",
+    "after": "(long)_length",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-upper-age",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_count - lastRise + 1",
+    "after": "_count - lastRise + 2",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-lower-age",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_count - lastFall + 1",
+    "after": "_count - lastFall + 2",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-never-event-age",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_lastRise = -1, _lastFall = -1",
+    "after": "_lastRise = 0, _lastFall = 0",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-initial-size",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "RocBankValue.Round(sum, count: _length)",
+    "after": "RocBankValue.Round(sum, count: 1)",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-early-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "var atr = externalAtr ?? _atr.Next(high, low, close, commit).Atr;",
+    "after": "var atr = externalAtr ?? new RocBankValue(_atr.Next(high, low, close, commit).Atr.Publish());",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-early-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "midpoint.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "if (commit) { _olderUpper",
+    "after": "{ _olderUpper",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PriceDriftWindow.cs",
+    "before": "_lastRise = _lastFall = -1;",
+    "after": "_lastRise = _lastFall = 0;",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "price-drift-line-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "public sealed class PriceLineChannelState :"
+  },
+  {
+    "id": "price-drift-line-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "input[i], true, atr is null",
+    "after": "data.ClosePrices[i], true, atr is null",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "internal static ComputeBuffer ComputePriceLineChannelFast("
+  },
+  {
+    "id": "price-drift-curve-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "public sealed class PriceCurveChannelState :"
+  },
+  {
+    "id": "price-drift-curve-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "input[i], true, atr is null",
+    "after": "data.ClosePrices[i], true, atr is null",
+    "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "internal static ComputeBuffer ComputePriceCurveChannelFast("
   }
 ]
