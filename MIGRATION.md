@@ -573,7 +573,9 @@ var snapshot = new IndicatorSnapshot(series, keys, h => Lookup(h) is { } found ?
 `ReadOnlyMemory<double>` converts from `double[]` implicitly, so a resolver that already returns an array
 needs no change beyond its declared return type. Going the other way, `TryGetSeries` hands back
 `ReadOnlyMemory<double>`; call `.Span` to read it without copying, or `.ToArray()` if you need an array you
-own. A snapshot keeps its own copy of what it publishes, so it stays valid after the runtime is disposed.
+own. Runtime-produced batch snapshots copy their published series and can resolve deferred series after
+the runtime is disposed. The public `IndicatorSnapshot` constructor stores caller-supplied memory
+directly; it does not copy that storage, so later changes to its backing arrays remain visible.
 
 ## StockData and TickerData are no longer [Serializable]
 

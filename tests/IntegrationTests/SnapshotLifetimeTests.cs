@@ -25,10 +25,11 @@ public sealed class SnapshotLifetimeTests : GlobalTestData
         SeriesHandle handle = default;
         builder.ConfigureIndicators(catalog => handle = catalog.Sma(20));
 
+        var pool = new ReusingPool();
         double[] expected;
         IndicatorSnapshot snapshot;
 
-        using (var runtime = builder.Build())
+        using (var runtime = builder.Build(pool))
         {
             runtime.Start();
             runtime.Subscribe(handle);
@@ -39,26 +40,51 @@ public sealed class SnapshotLifetimeTests : GlobalTestData
 
         // The runtime is gone and its buffers are back in the pool. Take them and write over them, which is
         // exactly what the next caller of ArrayPool does.
-        var stolen = new List<double[]>();
-        for (var i = 0; i < 8; i++)
-        {
-            var array = ArrayPool<double>.Shared.Rent(SampleSize);
-            array.AsSpan().Fill(double.NaN);
-            stolen.Add(array);
-        }
+        var reused = pool.Rent(SampleSize);
+        pool.Returned.Should().Contain(array => ReferenceEquals(array, reused));
+        reused.AsSpan().Fill(double.NaN);
+        snapshot.TryGetSeries(handle, out var afterwards).Should().BeTrue();
+        afterwards.ToArray().Should().Equal(expected,
+            "a snapshot must not observe the reused runtime buffer");
+        pool.Return(reused);
+    }
 
-        try
+    [Fact]
+    public void DeferredSeriesCanFirstBeReadAfterRuntimeDisposal()
+    {
+        var builder = new StockIndicatorBuilder(
+            IndicatorDataSource.FromBatch(new StockData(StockTestData.Take(SampleSize))));
+        SeriesHandle active = default, deferred = default;
+        builder.ConfigureIndicators(catalog => { active = catalog.Sma(20); deferred = catalog.Ema(15); });
+        builder.ConfigureSignals(signals => signals.When(active).CrossesAbove(0).Emit("active"));
+        double[] expected;
+        using (var control = builder.Build())
         {
-            snapshot.TryGetSeries(handle, out var afterwards).Should().BeTrue();
-            afterwards.ToArray().Should().Equal(expected,
-                "a snapshot reports what it computed, not what later rented its memory");
+            control.Subscribe(deferred);
+            control.Start();
+            expected = control.Latest!.GetSeries(deferred).ToArray();
         }
-        finally
+        IndicatorSnapshot snapshot;
+        using (var runtime = builder.Build())
         {
-            foreach (var array in stolen)
-            {
-                ArrayPool<double>.Shared.Return(array);
-            }
+            runtime.Start();
+            snapshot = runtime.Latest!;
+        }
+        snapshot.TryGetSeries(deferred, out var actual).Should().BeTrue();
+        actual.ToArray().Should().Equal(expected);
+        snapshot.GetSeries(deferred).ToArray().Should().Equal(expected);
+    }
+
+    private sealed class ReusingPool : ArrayPool<double>
+    {
+        private readonly Stack<double[]> _available = new();
+        internal List<double[]> Returned { get; } = new();
+        public override double[] Rent(int minimumLength)
+            => _available.Count > 0 ? _available.Pop() : new double[minimumLength];
+        public override void Return(double[] array, bool clearArray = false)
+        {
+            Returned.Add(array);
+            _available.Push(array);
         }
     }
 }

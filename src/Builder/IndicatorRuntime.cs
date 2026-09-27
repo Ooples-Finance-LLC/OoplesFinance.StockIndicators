@@ -74,7 +74,8 @@ public sealed class IndicatorRuntime : IDisposable
         StreamingOptions? streamingOptions,
         SignalOptions? signalOptions,
         BacktestOptions? backtestOptions,
-        BenchmarkOptions? benchmarkOptions)
+        BenchmarkOptions? benchmarkOptions,
+        ArrayPool<double>? computePool = null)
     {
         _source = source;
         _nodes = nodes;
@@ -102,7 +103,7 @@ public sealed class IndicatorRuntime : IDisposable
         }
 
         // Initialize compute context for pooled fast-path computations
-        _computeContext = new ComputeContext();
+        _computeContext = new ComputeContext(computePool ?? ArrayPool<double>.Shared);
     }
 
     /// <summary>
@@ -345,18 +346,20 @@ public sealed class IndicatorRuntime : IDisposable
             series[handle] = series[handle].ToArray();
         }
 
-        Publish(new IndicatorSnapshot(series, _keys, handle =>
-        {
-            if (series.TryGetValue(handle, out var existing))
-            {
-                return existing;
-            }
+        Publish(CreateBatchSnapshot(data, _nodes, _keys, series));
+    }
 
-            var computed = evaluator.Evaluate(handle).ToArray();
-            series[handle] = computed;
-            ActivateSeries(handle);
-            return computed;
-        }));
+    private static IndicatorSnapshot CreateBatchSnapshot(StockData data,
+        Dictionary<SeriesHandle, SeriesNode> nodes, Dictionary<IndicatorKey, SeriesHandle> keys,
+        Dictionary<SeriesHandle, ReadOnlyMemory<double>> series)
+    {
+        return new IndicatorSnapshot(series, keys, handle =>
+        {
+            if (!nodes.ContainsKey(handle)) return null;
+            // A deferred lookup owns its temporary buffers; it never calls back into the runtime.
+            using var context = new ComputeContext();
+            return new SeriesEvaluator(data, nodes, context).Evaluate(handle).ToArray();
+        });
     }
 
     private void StartStreaming()
