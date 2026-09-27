@@ -7889,63 +7889,17 @@ public sealed class BryantAdaptiveMovingAverageState : IStreamingIndicatorState,
 [PrimaryOutput("FastBuff")]
 public sealed class BuffAverageState : IStreamingIndicatorState, IDisposable    
 {
-    private readonly RollingWindowSum _fastPriceSum;
-    private readonly RollingWindowSum _fastVolumeSum;
-    private readonly RollingWindowSum _slowPriceSum;
-    private readonly RollingWindowSum _slowVolumeSum;
-    private readonly StreamingInputResolver _input;
-
-    public BuffAverageState(int fastLength = 5, int slowLength = 20)
-    {
-        _fastPriceSum = new RollingWindowSum(Math.Max(1, fastLength));
-        _fastVolumeSum = new RollingWindowSum(Math.Max(1, fastLength));
-        _slowPriceSum = new RollingWindowSum(Math.Max(1, slowLength));
-        _slowVolumeSum = new RollingWindowSum(Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BuffWindow _fast, _slow;
+    public BuffAverageState(int fastLength = 5, int slowLength = 20) { _fast = new(fastLength); _slow = new(slowLength); }
     public IndicatorName Name => IndicatorName.BuffAverage;
-
-    public void Reset()
-    {
-        _fastPriceSum.Reset();
-        _fastVolumeSum.Reset();
-        _slowPriceSum.Reset();
-        _slowVolumeSum.Reset();
-    }
-
+    public void Reset() { _fast.Reset(); _slow.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var priceVol = value * volume;
-        var fastPriceSum = isFinal ? _fastPriceSum.Add(priceVol, out _) : _fastPriceSum.Preview(priceVol, out _);
-        var fastVolumeSum = isFinal ? _fastVolumeSum.Add(volume, out _) : _fastVolumeSum.Preview(volume, out _);
-        var slowPriceSum = isFinal ? _slowPriceSum.Add(priceVol, out _) : _slowPriceSum.Preview(priceVol, out _);
-        var slowVolumeSum = isFinal ? _slowVolumeSum.Add(volume, out _) : _slowVolumeSum.Preview(volume, out _);
-        var fastBuff = fastVolumeSum != 0 ? fastPriceSum / fastVolumeSum : 0;
-        var slowBuff = slowVolumeSum != 0 ? slowPriceSum / slowVolumeSum : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "FastBuff", fastBuff },
-                { "SlowBuff", slowBuff }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fastBuff, outputs);
+        StreamingInputValidation.Validate(bar);
+        var fast = _fast.Next(bar.Close, bar.Volume, isFinal); var slow = _slow.Next(bar.Close, bar.Volume, isFinal);
+        return new(fast, includeOutputs ? new Dictionary<string, double> { { "FastBuff", fast }, { "SlowBuff", slow } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastPriceSum.Dispose();
-        _fastVolumeSum.Dispose();
-        _slowPriceSum.Dispose();
-        _slowVolumeSum.Dispose();
-    }
+    public void Dispose() => Reset();
 }
 
 [PrimaryOutput("Cr")]

@@ -72,10 +72,6 @@ OoplesFinance.StockIndicators.Indicators.BryantAdaptiveMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.BryantAdaptiveMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.BryantAdaptiveMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.BryantAdaptiveMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.BuffAverage/default
-OoplesFinance.StockIndicators.Indicators.BuffAverage/longer-periods
-OoplesFinance.StockIndicators.Indicators.BuffAverage/minimum-periods
-OoplesFinance.StockIndicators.Indicators.BuffAverage/shorter-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/default
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/longer-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/minimum-periods

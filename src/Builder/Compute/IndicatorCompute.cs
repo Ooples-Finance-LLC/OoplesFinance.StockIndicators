@@ -7000,30 +7000,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeBuffAverageFast(StockData data, ComputeContext context, int fastLength = 5)
     {
-        // CalculateBuffAverage is a volume weighted average of the chained series over its window - the sum of
-        // price times volume divided by the sum of volume. The spec addresses the fast arm of the pair, so the
-        // slow window never reaches this series. TrendCore.BuffAverage read the close and ignored volume.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var priceVolumeSum = new RollingSum();
-        var volumeSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentVolume = volumes[i];
-            volumeSum.Add(currentVolume);
-            priceVolumeSum.Add(input[i] * currentVolume);
-
-            var denominator = volumeSum.Sum(fastLength);
-            output[i] = denominator != 0 ? priceVolumeSum.Sum(fastLength) / denominator : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(input.Count); var window = new BuffWindow(fastLength);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], data.Volumes[i], true);
+        return output;
     }
 
     /// <summary>

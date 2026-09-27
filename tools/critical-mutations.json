@@ -30051,5 +30051,104 @@
     "before": "1d/(2L*length)",
     "after": "1d/(3L*length)",
     "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "buff-product-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "weighted.AddProduct(price, volume);",
+    "after": "weighted.Add(price * volume);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-price-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "weighted.AddProduct(old.Price, old.Volume, -1);",
+    "after": "weighted.AddProduct(old.Price, old.Volume, 1);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-volume-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "mass.Add(old.Volume, -1);",
+    "after": "mass.Add(old.Volume, 1);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-full-window-startup",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "var result = weighted.Ratio(mass);",
+    "after": "var result = _terms.Count < _length - 1 ? 0 : weighted.Ratio(mass);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BuffWindow.cs",
+    "before": "_terms.Clear();",
+    "after": "// retain history\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "buff-slow-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_slow = new(slowLength);",
+    "after": "_slow = new(fastLength);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow",
+    "scope": "public sealed class BuffAverageState"
+  },
+  {
+    "id": "buff-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow",
+    "scope": "internal static ComputeBuffer ComputeBuffAverageFast("
+  },
+  {
+    "id": "buff-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow",
+    "scope": "public sealed class BuffAverageState"
+  },
+  {
+    "id": "buff-native-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "            BuffAverageSpecOptions buff => new BuffAverageState(buff.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.EveryRouteMatchesExactPartialWindowWeights"
+  },
+  {
+    "id": "buff-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " BuffAverageSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.EveryRouteMatchesExactPartialWindowWeights"
+  },
+  {
+    "id": "buff-reference-volume",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Buff.cs",
+    "before": "numerator += ReferenceFraction.FromDouble(bars[j].Close) * volume;",
+    "after": "numerator += ReferenceFraction.FromDouble(bars[j].Close);",
+    "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
   }
 ]

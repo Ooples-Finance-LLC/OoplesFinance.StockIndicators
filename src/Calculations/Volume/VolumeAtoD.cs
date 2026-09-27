@@ -451,53 +451,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBuffAverage(this StockData stockData, int fastLength = 5, int slowLength = 20)
     {
-        List<double> priceVolList = new(stockData.Count);
-        List<double> fastBuffList = new(stockData.Count);
-        List<double> slowBuffList = new(stockData.Count);
-        List<double> tempVolumeList = new(stockData.Count);
-        var priceVolSumWindow = new RollingSum();
-        var volumeSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
+        List<double> fastValues = new(stockData.Count), slowValues = new(stockData.Count);
+        var signals = CreateSignalsList(stockData);
+        var (input, _, _, _, volumes) = GetInputValuesList(stockData);
+        var fast = new BuffWindow(fastLength); var slow = new BuffWindow(slowLength);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-
-            var currentVolume = volumeList[i];
-            tempVolumeList.Add(currentVolume);
-            volumeSumWindow.Add(currentVolume);
-
-            var priceVol = currentValue * currentVolume;
-            priceVolList.Add(priceVol);
-            priceVolSumWindow.Add(priceVol);
-
-            var fastBuffNum = priceVolSumWindow.Sum(fastLength);
-            var fastBuffDenom = volumeSumWindow.Sum(fastLength);
-
-            var prevFastBuff = i >= 1 ? fastBuffList[i - 1] : 0;
-            var fastBuff = fastBuffDenom != 0 ? fastBuffNum / fastBuffDenom : 0;
-            fastBuffList.Add(fastBuff);
-
-            var slowBuffNum = priceVolSumWindow.Sum(slowLength);
-            var slowBuffDenom = volumeSumWindow.Sum(slowLength);
-
-            var prevSlowBuff = i >= 1 ? slowBuffList[i - 1] : 0;
-            var slowBuff = slowBuffDenom != 0 ? slowBuffNum / slowBuffDenom : 0;
-            slowBuffList.Add(slowBuff);
-
-            var signal = GetCompareSignal(fastBuff - slowBuff, prevFastBuff - prevSlowBuff);
-            signalsList?.Add(signal);
+            var a = fast.Next(input[i], volumes[i], true); var b = slow.Next(input[i], volumes[i], true);
+            var previous = i == 0 ? 0 : fastValues[i - 1] - slowValues[i - 1];
+            signals?.Add(GetCompareSignal(a - b, previous)); fastValues.Add(a); slowValues.Add(b);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "FastBuff", fastBuffList },
-            { "SlowBuff", slowBuffList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.BuffAverage;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "FastBuff", fastValues }, { "SlowBuff", slowValues } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.BuffAverage;
         return stockData;
     }
 
