@@ -1297,39 +1297,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateNthOrderDifferencingOscillator(this StockData stockData, int length = 14, int lbLength = 2)
     {
-        List<double> nodoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-
-            double sum = 0, w = 1;
-            for (var j = 0; j <= lbLength; j++)
-            {
-                var prevValue = i >= length * (j + 1) ? inputList[i - (length * (j + 1))] : 0;
-                double x = Math.Sign(((j + 1) % 2) - 0.5);
-                w *= (lbLength - j) / (double)(j + 1);
-                sum += prevValue * w * x;
-            }
-
-            var prevNodo = GetLastOrDefault(nodoList);
-            var nodo = currentValue - sum;
-            nodoList.Add(nodo);
-
-            var signal = GetCompareSignal(nodo, prevNodo);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Nodo", nodoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(nodoList);
-        stockData.IndicatorName = IndicatorName.NthOrderDifferencingOscillator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new NthDifferenceWindow(length, lbLength, input.Count); List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var value = window.Next(price, true); var previous = values.Count > 0 ? values[values.Count - 1] : 0; values.Add(value); signals?.Add(GetCompareSignal(value, previous)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Nodo", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.NthOrderDifferencingOscillator; return stockData;
     }
 
 

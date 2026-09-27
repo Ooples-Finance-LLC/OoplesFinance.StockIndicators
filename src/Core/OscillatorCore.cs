@@ -5409,31 +5409,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void NthOrderDifferencingOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14, int order = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateNthOrderDifferencingOscillator subtracts one binomially weighted sum of earlier bars
-        // from the arriving value, reading a bar that has not arrived as zero rather than blanking the
-        // result. Differencing the series in place instead, and blanking each pass, agreed only once
-        // both lookbacks had filled: before that the earlier passes had been zeroed, not merely zero.
-        for (var i = 0; i < close.Length; i++)
-        {
-            double sum = 0;
-            double weight = 1;
-
-            for (var j = 0; j <= order; j++)
-            {
-                var lookback = length * (j + 1);
-                var prevValue = i >= lookback ? close[i - lookback] : 0;
-                double sign = Math.Sign(((j + 1) % 2) - 0.5);
-                weight *= (order - j) / (double)(j + 1);
-                sum += prevValue * weight * sign;
-            }
-
-            output[i] = close[i] - sum;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new NthDifferenceWindow(length, order, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

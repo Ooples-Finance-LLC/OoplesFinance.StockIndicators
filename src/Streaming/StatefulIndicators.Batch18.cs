@@ -1253,62 +1253,16 @@ public sealed class NormalizedRelativeVigorIndexState : IStreamingIndicatorState
 [PrimaryOutput("Nodo")]
 public sealed class NthOrderDifferencingOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _lbLength;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public NthOrderDifferencingOscillatorState(int length = 14, int lbLength = 2)
-    {
-        _length = Math.Max(1, length);
-        _lbLength = Math.Max(0, lbLength);
-        _values = new PooledRingBuffer<double>((_length * (_lbLength + 1)) + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly NthDifferenceWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public NthOrderDifferencingOscillatorState(int length = 14, int lbLength = 2) { _window = new(length, lbLength); }
     public IndicatorName Name => IndicatorName.NthOrderDifferencingOscillator;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        double sum = 0;
-        double w = 1;
-        for (var j = 0; j <= _lbLength; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length * (j + 1));
-            var x = Math.Sign(((j + 1) % 2) - 0.5);
-            w *= (_lbLength - j) / (double)(j + 1);
-            sum += prevValue * w * x;
-        }
-
-        var nodo = value - sum;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Nodo", nodo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(nodo, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(_input.GetValue(bar), isFinal); return new(value, includeOutputs ? new Dictionary<string, double> { { "Nodo", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Oi")]

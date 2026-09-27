@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.NthOrderDifferencingOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => NthDifferenceOutputs(bars, builtIn)["Nodo"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RelativeVigorIndex)
         {
             var vigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

@@ -1987,3 +1987,12 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Campaign418a/418b caught twelve faults and left nine inconclusive (exit code 1073807364). Same-source retry418c caught all nine; **21/21 distinct retained faults** are proven, with **2,935** manifest sites. Inconclusive attempts receive no kill credit. All fourteen staged source/test/catalog files match the retry snapshot exactly.
 - Original source/archive SHA256: `0b771736e0490462307c5691496bd2a62c64e254482dd0e135a60e5c91a7bff4` / `392543ddf0e9c232df8d7b5bac0e4453ae855ebb3e005b350f5af4a7dca50e00`. Retry source/archive: `0b771736e0490462307c5691496bd2a62c64e254482dd0e135a60e5c91a7bff4` / `6afd6b058e0234fd70f3c890bdad45dd6057a4f704dda345ef72d572a1062529`.
 - Inventory: **4,782/7,131**, **2,349** omissions across **389** types; no construction failures. 188 grouped batches cover **1,956 configurations / 356 types**. DLL SHA256 `49DD483B963C8017E1E6A2DC53A1A287FDA8897572BAD3B791644A0D9DFF02E8`. Full library and release gates remain incomplete.
+
+
+### Nth Difference numerical contracts
+
+- Four configurations use exact binomial coefficients with zero prehistory and a single final rounding. An independent oracle applies successive lagged differences. Native/core/raw/batch routes now share the corrected arithmetic and preserve selected prices.
+- **74/74** family/shared checks passed (`nth-difference.trx`); the recovered combined regression passed **259/259** checks. Tests cover orders 0 through 64, fourth-difference annihilation of cubics, extreme/subnormal cancellation, previews/reset and rejected inputs.
+- All thirteen attempts in419a/419b were inconclusive (exit code 1073807364); same-source retry419c caught **13/13** faults. All thirteen staged files match its archive. **2,948** retained manifest sites. No inconclusive attempt earns credit.
+- Original source/archive SHA256: `e020bacd416ec80f97cfb5cff984284ddc002aa25e2df0805038a3840ad99a18` / `c1848521ffbab17c978d8bb41be650d3b4947ea282214b9f8c464454e683316b`. Retry source/archive: `e020bacd416ec80f97cfb5cff984284ddc002aa25e2df0805038a3840ad99a18` / `8ba5657dfb2809e7bc1bca1f6b395bbc0546428886bc58d1aed0dc3e84446615`.
+- Inventory: **4,786/7,131**, **2,345** omissions across **388** types; no construction failures. 189 grouped batches cover **1,960 configurations / 357 types**. DLL SHA256 `9E5122F4D3E83B4F5ED1C4C705F9D9BA20D26F57D4D242FE12707996AFBEFA4B`. Full coverage remains incomplete.

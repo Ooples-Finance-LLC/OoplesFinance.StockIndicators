@@ -24520,5 +24520,111 @@
     "before": "var d = Units(denominator); var value = d.IsZero ? default : Value(RocBankValue.RoundUnits((Units(numerator) * d.Sign) << 1074, BigInteger.Abs(d)));",
     "after": "var d = Units(denominator); var value = d.IsZero ? default : new RocBankValue(numerator.Publish() / denominator.Publish());",
     "filter": "FullyQualifiedName~RelativeVigorNumericalTests.ExtendedCustomerRatiosCancelBeforeSignalPublication"
+  },
+  {
+    "id": "nth-difference-lag",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "_lag = Math.Max(1, lag)",
+    "after": "_lag = Math.Max(2, lag)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-order-zero",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "_order = Math.Max(0, order)",
+    "after": "_order = Math.Max(1, order)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-history-capacity",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "(long)_lag * _order",
+    "after": "(long)_lag * Math.Max(0, _order - 1)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-current-sign",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "sum.Add(value);",
+    "after": "sum.Add(value, -1);",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "(_order - j + 1L)",
+    "after": "(_order - j + 2L)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-coefficient-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "coefficient * (_order - j + 1L) / j",
+    "after": "coefficient * (_order - j + 1L) / (j + 1)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-alternation",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "j % 2 == 0 ? coefficient : -coefficient",
+    "after": "j % 2 == 0 ? -coefficient : coefficient",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-lag-offset",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "_values.Count - _lag * j",
+    "after": "_values.Count - 1",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-coefficient-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "j % 2 == 0 ? coefficient : -coefficient",
+    "after": "new BigInteger((double)(j % 2 == 0 ? coefficient : -coefficient))",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "if (commit) _values.TryAdd(value, out _)",
+    "after": "if (true) _values.TryAdd(value, out _)",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-reset",
+    "module": "numerical",
+    "file": "src/Helpers/NthDifferenceWindow.cs",
+    "before": "internal void Reset() => _values.Clear();",
+    "after": "internal void Reset() { if (_values.Count == 0) _values.Clear(); }",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory"
+  },
+  {
+    "id": "nth-difference-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory",
+    "scope": "internal static ComputeBuffer ComputeNthOrderDifferencingOscillatorFast("
+  },
+  {
+    "id": "nth-difference-nan-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory",
+    "scope": "public sealed class NthOrderDifferencingOscillatorState :"
   }
 ]
