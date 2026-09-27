@@ -36,13 +36,13 @@ internal sealed class TargetReturnWindow : IDisposable
     internal TargetReturnWindow(int length, double benchmark, bool potential, double? beta = null)
     {
         length = Math.Max(1, length);
-        if (!double.IsFinite(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
+        if (MathHelper.IsValueNullOrInfinity(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
         var target = Math.Pow(1 + benchmark, length / 360d) - 1;
-        if (!double.IsFinite(target)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
+        if (MathHelper.IsValueNullOrInfinity(target)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
         _benchmark = new Fraction(ExactVarianceWindow.Units(target), BigInteger.One << 1074);
         if (beta.HasValue)
         {
-            if (!double.IsFinite(beta.Value)) throw new ArgumentOutOfRangeException(nameof(beta));
+            if (MathHelper.IsValueNullOrInfinity(beta.Value)) throw new ArgumentOutOfRangeException(nameof(beta));
             _beta = new Fraction(ExactVarianceWindow.Units(beta.Value), BigInteger.One << 1074);
         }
         _potential = potential; _prices = new(length); _returns = new(length);

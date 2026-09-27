@@ -8,7 +8,9 @@ internal static class RoundedNearUnityLog
 {
     internal static double Of(double current, double previous)
     {
+#pragma warning disable S1244 // Exact equality identifies zero change or identical rounded interval endpoints.
         if (current == previous) return 0;
+#pragma warning restore S1244
         var denominator = ExactVarianceWindow.Units(previous);
         var numerator = ExactVarianceWindow.Units(current) - denominator;
         var gcd = BigInteger.GreatestCommonDivisor(BigInteger.Abs(numerator), denominator);
@@ -37,7 +39,9 @@ internal static class RoundedNearUnityLog
             var radius = tailNumerator * sumDenominator;
             var lower = ExactMeanAccumulator.UnitRatio((center - radius) << 1074, common);
             var upper = ExactMeanAccumulator.UnitRatio((center + radius) << 1074, common);
+#pragma warning disable S1244 // Exact equality identifies zero change or identical rounded interval endpoints.
             if (lower == upper) return lower;
+#pragma warning restore S1244
         }
     }
 }

@@ -39,9 +39,9 @@ internal sealed class MartinWindow : IDisposable
     internal MartinWindow(MovingAvgType kind, int length, double benchmark)
     {
         length = Math.Max(1, length);
-        if (!double.IsFinite(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
+        if (MathHelper.IsValueNullOrInfinity(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
         _benchmark = Math.Pow(1 + benchmark, length / 360d) - 1;
-        if (!double.IsFinite(_benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
+        if (MathHelper.IsValueNullOrInfinity(_benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
         _prices = new(length); _drawdown = new(length);
         if (StrengthWindow.Supports(kind)) _mean = new RocBankAverage(kind, length, int.MaxValue);
         else _fallback = MovingAverageSmootherFactory.Create(kind, length);

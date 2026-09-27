@@ -20,7 +20,9 @@ internal static partial class BuiltInFormulaReferences
             var travel = zero;
             if (i >= length) for (var j = i - length + 1; j <= i; j++) travel += Abs(prices[j] - prices[j - 1]);
             var efficiency = travel.Sign == 0 ? zero : Round(Abs(prices[i] - prices[i - length]) / travel);
+#pragma warning disable S1244 // Exact integer exponents select the specified staged rounding formula.
             var gain = factor == 2 ? Round(efficiency * efficiency) : factor == 3 ? Round(Round(efficiency * efficiency) * efficiency) : ReferenceFraction.FromDouble(Math.Pow(efficiency.ToDouble(), factor));
+#pragma warning restore S1244
             if (i == 0) average = a = b = prices[i];
             average = Round((one - gain) * average + gain * prices[i]);
             var previousA = a; var previousB = b;

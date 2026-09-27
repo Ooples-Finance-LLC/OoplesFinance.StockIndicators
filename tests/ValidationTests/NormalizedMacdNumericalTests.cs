@@ -11,6 +11,12 @@ namespace OoplesFinance.StockIndicators.Tests.Unit.ValidationTests;
 public sealed class NormalizedMacdNumericalTests
 {
     [Fact]
+    public void EmptyReferenceReturnsNoValues()
+    {
+        Assert.Empty(BuiltInFormulaReferences.RoundedNormalizedMacd(Array.Empty<Bar>(), new NormalizedMacdSpecOptions(1, 5)));
+    }
+
+    [Fact]
     public void ExtremeRatioAndFirstBarSeedHaveIndependentExpectedValues()
     {
         var prices = new[] { -double.MaxValue, double.MaxValue, 3, 3 };

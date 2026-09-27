@@ -7,7 +7,9 @@ internal static partial class BuiltInFormulaReferences
     internal static IReadOnlyDictionary<string,double[]> InternalBarStrengthOutputs(IReadOnlyList<Bar> bars,int length,int smooth=3)
     {
         length=Math.Max(1,length);smooth=Math.Max(1,smooth);
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
         var positions=bars.Select(b=>b.High==b.Low?new ReferenceFraction(0):RoundRocBankStage(new ReferenceFraction(100)*(ReferenceFraction.FromDouble(b.Close)-ReferenceFraction.FromDouble(b.Low))/(ReferenceFraction.FromDouble(b.High)-ReferenceFraction.FromDouble(b.Low)))).ToArray();
+#pragma warning restore S1244
         var line=new double[bars.Count];var signal=new double[bars.Count];var prior=new ReferenceFraction(0);
         for(var i=0;i<bars.Count;i++)
         {

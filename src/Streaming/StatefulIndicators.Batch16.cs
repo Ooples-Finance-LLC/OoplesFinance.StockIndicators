@@ -482,7 +482,9 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
         int rocLength4 = 30, int signalLength = 9, double weight1 = 1, double weight2 = 2, double weight3 = 3,
         double weight4 = 4)
     {
+#pragma warning disable S1244 // The specialized formula requires these exact integer coefficients.
         if (StrengthWindow.Supports(maType) && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4) _wide = new RocBankWindow(maType, new[] { rocLength1, rocLength2, rocLength3, rocLength4 }, new[] { length1, length2, length3, length4 }, new[] { 1, 2, 3, 4 }, signalLength);
+#pragma warning restore S1244
         _weight1 = weight1;
         _weight2 = weight2;
         _weight3 = weight3;

@@ -814,13 +814,6 @@ public sealed class QuadraticLeastSquaresMovingAverageState : IStreamingIndicato
         var qlsma = (a * n2) + (b * n) + c;
         var forecast = (a * MathHelper.Pow(n + _forecastLength, 2)) + (b * (n + _forecastLength)) + c;
 
-        if (_stableFit is not null)
-        {
-            var stable = _stableFit.Next(value, _forecastLength, isFinal);
-            qlsma = stable.Value;
-            forecast = stable.Forecast;
-        }
-
         if (isFinal)
         {
             _index++;

@@ -2400,7 +2400,9 @@ public static partial class Calculations
 
         List<double> kstSignalList;
         if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides
+#pragma warning disable S1244 // The specialized formula requires these exact integer coefficients.
             && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4)
+#pragma warning restore S1244
         {
             var (prices, _, _, _, _) = GetInputValuesList(stockData);
             kstSignalList = new(stockData.Count);

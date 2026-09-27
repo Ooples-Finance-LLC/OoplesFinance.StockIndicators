@@ -213,7 +213,7 @@ internal static partial class BuiltInFormulaReferences
         double[] Strength(double[] values, int period)
         {
             if (kind is 1 or 2 or 3 or 6)
-                return RoundedPriceRsi(values.Select(v => new Bar(DateTime.UnixEpoch, v, v, v, v, 1)).ToArray(), period, kind);
+                return RoundedPriceRsi(values.Select(v => new Bar(new DateTime(1970, 1, 1, 0, 0, 0, DateTimeKind.Utc), v, v, v, v, 1)).ToArray(), period, kind);
             var differences = values.Select((value, i) => i == 0 ? 0 : value - values[i - 1]).ToArray();
             var up = Average(differences.Select(value => Math.Max(0, value)).ToArray(), period, kind);
             var down = Average(differences.Select(value => Math.Max(0, -value)).ToArray(), period, kind);

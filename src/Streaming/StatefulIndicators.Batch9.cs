@@ -1640,7 +1640,9 @@ internal sealed class EhlersSpectrumDerivedFilterBankEngine : IDisposable
 
         if (isFinal)
         {
+#pragma warning disable S1244 // Exactly one is the identity rescaling factor.
             if (rescale != 1)
+#pragma warning restore S1244
             {
                 RescaleHistory(_hpValues, rescale);
                 RescaleHistory(_smoothHpValues, rescale);

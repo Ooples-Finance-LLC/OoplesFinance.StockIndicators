@@ -18,7 +18,7 @@ internal static partial class BuiltInFormulaReferences
         }
         var d = SmoothRocBankStage(distance, firstLength, kind);
         var r = SmoothRocBankStage(range, firstLength, kind);
-        var line = d.Select((v, i) => r[i].Sign == 0 ? 0 : Math.Clamp((new ReferenceFraction(100) * v / r[i]).ToDouble(), 0, 100)).ToArray();
+        var line = d.Select((v, i) => r[i].Sign == 0 ? 0 : Clamp((new ReferenceFraction(100) * v / r[i]).ToDouble(), 0, 100)).ToArray();
         var signal = SmoothRocBankStage(line.Select(ReferenceFraction.FromDouble).ToArray(), signalLength, kind).Select(v => v.ToDouble()).ToArray();
         return Outputs(("Sco", line), ("Signal", signal));
     }

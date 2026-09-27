@@ -12,7 +12,9 @@ internal static partial class BuiltInFormulaReferences
         {
             var high = ReferenceFraction.FromDouble(bar.High); var low = ReferenceFraction.FromDouble(bar.Low);
             var price = ReferenceFraction.FromDouble(bar.Close); var volume = ReferenceFraction.FromDouble(bar.Volume);
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
             if (bar.High != bar.Low) total += RoundRocBankStage((new ReferenceFraction(2) * price - high - low) * volume / (high - low));
+#pragma warning restore S1244
             return RoundRocBankStage(total);
         }).ToArray();
         var options = indicator.CreateOptions(); var oscillator = indicator.BatchName == IndicatorName.ChaikinOscillator;

@@ -9,7 +9,9 @@ internal static partial class BuiltInFormulaReferences
         var total = new ReferenceFraction(0);
         var cumulative = bars.Select((bar, i) =>
         {
+#pragma warning disable S1244 // Equal consecutive prices contribute zero; every representable change contributes.
             if (i > 0 && bar.Close != bars[i - 1].Close)
+#pragma warning restore S1244
             {
                 var reference = bar.Close > bars[i - 1].Close ? Math.Min(bar.Low, bars[i - 1].Close) : Math.Max(bar.High, bars[i - 1].Close);
                 total += ReferenceFraction.FromDouble(bar.Close) - ReferenceFraction.FromDouble(reference);

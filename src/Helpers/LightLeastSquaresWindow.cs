@@ -37,7 +37,9 @@ internal sealed class LightLeastSquaresWindow : IDisposable
     private double Finish(double price, RocBankValue first, RocBankValue second, RocBankValue indexMean, bool commit)
     {
         if (double.IsNaN(price) || double.IsInfinity(price)) throw new ArgumentOutOfRangeException(nameof(price));
+#pragma warning disable S1244 // Only an exactly constant price window has the constant-series result.
         var run = _constantRun > 0 && price == _lastPrice ? (int)Math.Min(_length, _constantRun + 1L) : 1;
+#pragma warning restore S1244
         var result = first.Publish();
         // Population deviations use full windows. Cancel the nonzero price
         // deviation algebraically, avoiding its overflow and subnormal underflow.

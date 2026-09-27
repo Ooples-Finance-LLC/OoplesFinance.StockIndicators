@@ -10,7 +10,7 @@ internal static partial class BuiltInFormulaReferences
         var price = customerPrices ?? SmoothRocBankStage(bars.Select(b => ReferenceFraction.FromDouble(b.Close)).ToArray(), length, kind).Select(v => v.ToDouble()).ToArray();
         var signed = bars.Select((b, i) => ReferenceFraction.FromDouble(i == 0 ? 0 : (b.Close > bars[i - 1].Close ? 1 : b.Close < bars[i - 1].Close ? -1 : 0) * b.Close)).ToArray();
         var directional = customerDirections ?? SmoothRocBankStage(signed, length, kind).Select(v => v.ToDouble()).ToArray();
-        var result = price.Select((v, i) => v == 0 ? 0 : Math.Clamp((new ReferenceFraction(100) * ReferenceFraction.FromDouble(directional[i]) / ReferenceFraction.FromDouble(v)).ToDouble(), -100, 100)).ToArray();
+        var result = price.Select((v, i) => v == 0 ? 0 : Clamp((new ReferenceFraction(100) * ReferenceFraction.FromDouble(directional[i]) / ReferenceFraction.FromDouble(v)).ToDouble(), -100, 100)).ToArray();
         return Outputs(("Pzo", result));
     }
 }

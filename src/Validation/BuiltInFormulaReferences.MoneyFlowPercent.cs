@@ -15,7 +15,9 @@ internal static partial class BuiltInFormulaReferences
             var previous = i == 0 ? 0 : bars[i - 1].Close;
             var h = twiggs ? Math.Max(bar.High, previous) : bar.High; var l = twiggs ? Math.Min(bar.Low, previous) : bar.Low;
             var high = ReferenceFraction.FromDouble(h); var low = ReferenceFraction.FromDouble(l);
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
             return h == l ? zero : RoundRocBankStage((new ReferenceFraction(2) * ReferenceFraction.FromDouble(bar.Close) - high - low) * ReferenceFraction.FromDouble(bar.Volume) / (high - low));
+#pragma warning restore S1244
         }).ToArray();
         var volumes = bars.Select(b => ReferenceFraction.FromDouble(b.Volume)).ToArray();
         if (twiggs)

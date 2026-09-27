@@ -4,7 +4,9 @@ internal static class RoundedMidpointOscillator
 {
     internal static double Of(double value, double high, double low)
     {
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
         if (high == low) return 0;
+#pragma warning restore S1244
         var numerator = new ExactMeanAccumulator();
         numerator.Add(value, 200); numerator.Add(high, -100); numerator.Add(low, -100);
         var denominator = new ExactMeanAccumulator();

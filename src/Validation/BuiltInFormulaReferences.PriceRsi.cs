@@ -12,7 +12,9 @@ internal static partial class BuiltInFormulaReferences
         var down = SmoothStrengthStage(changes.Select(v => v.Sign < 0 ? zero - v : zero).ToArray(), length, kind);
         var result = new double[bars.Count];
         for (var i = 0; i < result.Length; i++)
+#pragma warning disable S1244 // The flat-price carry rule applies only to exactly unchanged prices.
             result[i] = i > 0 && length > 1 && kind is 3 or 6 && bars[i].Close == bars[i - 1].Close ? result[i - 1]
+#pragma warning restore S1244
                 : (up[i] + down[i]).Sign == 0 ? 100 : (new ReferenceFraction(100) * up[i] / (up[i] + down[i])).ToDouble();
         return result;
     }

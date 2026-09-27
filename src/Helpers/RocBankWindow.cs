@@ -34,7 +34,9 @@ internal readonly struct RocBankValue
     internal static RocBankValue Round(ExactMeanAccumulator sum, double unit = 1, long count = 1)
     {
         if (sum.IsExactlyZero) return default;
+#pragma warning disable S1244 // The integer mean path applies only to an exact unit multiplier.
         var integerMean = unit == 1 && count > 0;
+#pragma warning restore S1244
         if (integerMean)
         {
             var mean = sum.Mean(count);

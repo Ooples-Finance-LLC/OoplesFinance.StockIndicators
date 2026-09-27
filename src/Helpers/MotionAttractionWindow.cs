@@ -16,7 +16,9 @@ internal sealed class MotionAttractionWindow
         var previousA = _hasPrevious ? _a : close; var previousB = _hasPrevious ? _b : close;
         var previousUpper = _hasPrevious ? _upper : close; var previousLower = _hasPrevious ? _lower : close;
         var a = close > previousUpper ? close : previousA; var b = close < previousLower ? close : previousB;
+#pragma warning disable S1244 // Movement is defined by a change in the stored value, including one ULP.
         var aChanged = a != previousA; var bChanged = b != previousB;
+#pragma warning restore S1244
         // Count exact 1/length steps so attraction saturates on the length-th change.
         var upperSteps = bChanged ? _upperSteps < _length ? _upperSteps + 1 : _length : aChanged ? 0 : _upperSteps;
         var lowerSteps = aChanged ? _lowerSteps < _length ? _lowerSteps + 1 : _length : bChanged ? 0 : _lowerSteps;

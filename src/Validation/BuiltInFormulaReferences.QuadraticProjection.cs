@@ -27,7 +27,7 @@ internal static partial class BuiltInFormulaReferences
         for (var i = 0; i < bars.Count; i++)
         {
             if (i < length) { var x = new BigInteger(i); sx += x; sq += x * x; sc += x * x * x; sf += x * x * x * x; }
-            result[i] = yMean[i].ToDouble(); if (length < 3 || i < 2) continue;
+            if (length < 3 || i < 2) { result[i] = yMean[i].ToDouble(); continue; }
             var start = Math.Max(0, i - length + 1); var origin = new ReferenceFraction(start);
             var sy = prefix0[i + 1] - prefix0[start];
             var xy = prefix1[i + 1] - prefix1[start] - origin * sy;

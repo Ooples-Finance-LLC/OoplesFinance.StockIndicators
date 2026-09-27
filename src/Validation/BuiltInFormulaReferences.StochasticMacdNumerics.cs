@@ -14,7 +14,9 @@ internal static partial class BuiltInFormulaReferences
             var window = Window(bars, i, length).ToArray();
             var high = window.Max(b => b.High);
             var low = window.Min(b => b.Low);
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
             return high == low ? 0 : (new ReferenceFraction(10) *
+#pragma warning restore S1244
                 (ReferenceFraction.FromDouble(fast[i]) - ReferenceFraction.FromDouble(slow[i])) /
                 (ReferenceFraction.FromDouble(high) - ReferenceFraction.FromDouble(low))).ToDouble();
         }).ToArray();

@@ -34,7 +34,9 @@ internal sealed class AdaptiveRangeMeanWindow : IDisposable
         var highest = Extreme(_highs, high, true);
         var lowest = Extreme(_lows, low, false);
         var multiplier = 0d;
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
         if (highest != lowest)
+#pragma warning restore S1244
         {
             var numerator = new ExactMeanAccumulator();
             numerator.Add(price, 2); numerator.Add(lowest, -1); numerator.Add(highest, -1);

@@ -16,8 +16,12 @@ internal sealed class FlaggingBandWindow : IDisposable
         var previousUpper = _history > 0 ? _upper : close; var previousLower = _history > 0 ? _lower : close;
         var olderUpper = _history >= 2 ? _olderUpper : close; var olderLower = _history >= 2 ? _olderLower : close;
         // Equality means that the retained boundary did not move on the preceding bar.
+#pragma warning disable S1244 // Decay starts only when consecutive stored band values are exactly unchanged.
         var upper = close > previousUpper ? close : previousUpper == olderUpper ? Math.Max(close, Decay(previousUpper, deviation, -1)) : previousUpper;
+#pragma warning restore S1244
+#pragma warning disable S1244 // Decay starts only when consecutive stored band values are exactly unchanged.
         var lower = close < previousLower ? close : previousLower == olderLower ? Math.Min(close, Decay(previousLower, deviation, 1)) : previousLower;
+#pragma warning restore S1244
         var isLong = close > olderUpper ? true : close < olderLower ? false : _long;
         var middle = Midpoint(isLong ? upper : lower, Midpoint(upper, lower));
         if (commit) { _olderUpper = previousUpper; _olderLower = previousLower; _upper = upper; _lower = lower; _long = isLong; _history = Math.Min(2, _history + 1); }

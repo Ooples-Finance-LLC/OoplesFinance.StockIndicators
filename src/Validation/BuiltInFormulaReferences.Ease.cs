@@ -9,7 +9,9 @@ internal static partial class BuiltInFormulaReferences
         var divisor = ReferenceFraction.FromDouble(Number(indicator.CreateOptions(), 1000000, "Divisor"));
         var output = bars.Select((b, i) =>
         {
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
             if (i == 0 || b.High == b.Low || b.Volume == 0) return 0d;
+#pragma warning restore S1244
             var high = ReferenceFraction.FromDouble(b.High); var low = ReferenceFraction.FromDouble(b.Low);
             var movement = (high + low - ReferenceFraction.FromDouble(bars[i - 1].High) - ReferenceFraction.FromDouble(bars[i - 1].Low)) / new ReferenceFraction(2);
             return (divisor * movement * (high - low) / ReferenceFraction.FromDouble(b.Volume)).ToDouble();

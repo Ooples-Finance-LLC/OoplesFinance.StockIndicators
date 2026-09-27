@@ -18600,7 +18600,9 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
 
         if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides
+#pragma warning disable S1244 // The specialized formula requires these exact integer coefficients.
             && weight1 == 1 && weight2 == 2 && weight3 == 3 && weight4 == 4)
+#pragma warning restore S1244
         {
             var stable = context.Rent(count);
             using var bank = new RocBankWindow(maType, new[] { rocLength1, rocLength2, rocLength3, rocLength4 },
@@ -19636,8 +19638,7 @@ internal static partial class IndicatorCompute
         int length, int signalLength, MovingAvgType kind, bool cci, double constant)
     {
         if (!cci) return ComputeEhlersInverseFisherTransformFast(data, context, length, signalLength, kind);
-        var source = cci ? ComputeCciFast(data, context, length, kind, constant)
-            : ComputeRsiFast(data, context, length, kind);
+        var source = ComputeCciFast(data, context, length, kind, constant);
         for (var i = 0; i < data.Count; i++) source.WritableSpan[i] = .1 * (source.Span[i] - 50);
         var result = SmoothStrength(data, context, source, signalLength, kind);
         for (var i = 0; i < data.Count; i++) result.WritableSpan[i] = Math.Tanh(result.Span[i]);

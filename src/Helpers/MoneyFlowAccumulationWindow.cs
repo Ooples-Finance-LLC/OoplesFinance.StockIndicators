@@ -16,7 +16,9 @@ internal sealed class MoneyFlowAccumulationWindow
     internal static RocBankValue Flow(double high, double low, double close, double volume)
     {
         RocBankValue flow = default;
+#pragma warning disable S1244 // Only an exactly zero range uses the degenerate result; nonzero subnormal ranges remain meaningful.
         if (high != low)
+#pragma warning restore S1244
         {
             var numerator = new ExactMeanAccumulator();
             numerator.AddProduct(close, volume, 2); numerator.AddProduct(high, volume, -1); numerator.AddProduct(low, volume, -1);

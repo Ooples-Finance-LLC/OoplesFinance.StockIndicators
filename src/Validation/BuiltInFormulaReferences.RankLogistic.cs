@@ -39,7 +39,9 @@ internal static partial class BuiltInFormulaReferences
                 long score = 0;
                 for (var j = 0; j < pairs.Length; j++)
                     foreach (var other in pairs.Skip(j + 1))
+#pragma warning disable S1244 // Only exactly tied observed prices are excluded from the rank comparison.
                         if (other.Price != pairs[j].Price) score += other.Fit.CompareTo(pairs[j].Fit);
+#pragma warning restore S1244
                 result[i] = period == 1 ? 0 : (new ReferenceFraction(2 * score) / (new ReferenceFraction(period) * new ReferenceFraction(period - 1))).ToDouble();
             }
         }

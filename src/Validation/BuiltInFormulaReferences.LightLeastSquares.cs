@@ -17,7 +17,9 @@ internal static partial class BuiltInFormulaReferences
             if (i + 1 >= length && length > 1)
             {
                 var start = i - length + 1;
+#pragma warning disable S1244 // Only an exactly constant price window has the constant-series result.
                 if (Enumerable.Range(start, length).Any(j => bars[j].Close != bars[i].Close))
+#pragma warning restore S1244
                 {
                     var mean = new ReferenceFraction(start + (long)i) / new ReferenceFraction(2);
                     var squared = new ReferenceFraction(0);

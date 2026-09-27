@@ -17,9 +17,9 @@ internal sealed class ReturnScoreWindow : IDisposable
     internal ReturnScoreWindow(MovingAvgType kind, int length, double benchmark, bool information)
     {
         length = Math.Max(1, length);
-        if (!double.IsFinite(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
+        if (MathHelper.IsValueNullOrInfinity(benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark));
         _benchmark = Math.Pow(1 + benchmark, length / 360d) - 1;
-        if (!double.IsFinite(_benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
+        if (MathHelper.IsValueNullOrInfinity(_benchmark)) throw new ArgumentOutOfRangeException(nameof(benchmark), "The period benchmark must be finite and real.");
         _information = information; _simple = kind == MovingAvgType.SimpleMovingAverage;
         _prices = new(length); _returns = new(length);
         if (StrengthWindow.Supports(kind)) _mean = new RocBankAverage(kind, length, int.MaxValue);

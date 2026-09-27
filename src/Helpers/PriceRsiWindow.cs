@@ -18,7 +18,9 @@ internal sealed class PriceRsiWindow : IDisposable
         var loss = _losses.Next(change.Mantissa < 0 ? change.Absolute : default, final);
         var numerator = new ExactMeanAccumulator(); gain.AddTo(ref numerator, 100);
         var total = new ExactMeanAccumulator(); gain.AddTo(ref total); loss.AddTo(ref total);
+#pragma warning disable S1244 // The flat-price carry rule applies only to exactly unchanged prices.
         var value = _preserveFlat && _hasPrevious && price == _previous ? _line : GainLossShare.Of(numerator, total, 100);
+#pragma warning restore S1244
         if (final) { _previous = price; _line = value; _hasPrevious = true; }
         return value;
     }

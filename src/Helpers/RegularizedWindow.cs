@@ -6,7 +6,9 @@ internal sealed class RegularizedWindow
     private RocBankValue _previous, _prior;
     internal RegularizedWindow(int length, double lambda)
     {
+#pragma warning disable S1244 // Exactly -1 makes the regularization denominator zero; neighboring values remain valid.
         if (double.IsNaN(lambda) || double.IsInfinity(lambda) || lambda == -1) throw new ArgumentOutOfRangeException(nameof(lambda));
+#pragma warning restore S1244
         _alpha = 2d / (Math.Max(1, length) + 1d); _lambda = lambda;
     }
     private static RocBankValue Add(RocBankValue first, RocBankValue second, int sign = 1)
