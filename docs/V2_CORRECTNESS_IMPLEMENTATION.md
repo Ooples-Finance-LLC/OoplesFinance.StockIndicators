@@ -2107,3 +2107,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **114/114** family/enrollment/foundation checks passed (`pretty-good.trx`). Four basic average types, all public routes, direct core, selected prices outside the candle, both customer averages, normal/subnormal/extreme values, preview/reset and invalid fields are covered. Campaign432a caught **21/21** faults; **3,208** retained sites.
 - Source/archive SHA256: `38429de91937f2568833b0b20a6c794f4c6aa00035a553117d38b8ff80525ffe` / `8e21ed32e2624fd82e3763ac735d3743c7c600ad04fef423d4883714b45cb013`.
 - Inventory: **4,871/7,131**, **2,260** omissions across **372** types; no construction failures. 202 grouped batches cover **2,045 configurations / 373 types**. DLL SHA256 `D89A74B29DC53969A7433EBDAEB72B9638A166193E49EDFC3FC307C3519CB124`. Full coverage and release gates remain incomplete.
+
+
+### Price Cycle Oscillator numerical contract
+
+- Five configurations preserve extended price-to-low distances and ATR through the final percentage. Raw and legacy customer stages now both run ATR first, then the distance average. Selected prices retain original candle fields. The core has an OHLC overload matching the public formula; its retained price-only overload explicitly represents flat candles.
+- **157/157** combined Price Cycle/Pretty Good/enrollment/foundation checks passed (`price-cycle-pretty-good.trx`). Four basic average types, all public routes, both core forms, selected prices, ordered customer stages, normal/subnormal/extreme values, preview/reset and invalid fields are covered. A supplied epsilon distance over an ATR of 100 retains epsilon after percentage scaling. Campaign433a caught **22/22** faults; **3,230** retained sites.
+- Source/archive SHA256: `2f9dd900c6e4ad60a0de0eda155161f8ef012309c6e49079c1c3550b13814a33` / `851d2caea42015f4cfbc3afb84c49d01ca233f851be6b887126a84e4cdff7267`.
+- Inventory: **4,876/7,131**, **2,255** omissions across **371** types; no construction failures. 203 grouped batches cover **2,050 configurations / 374 types**. DLL SHA256 `695636FE6B33F8EEDD758EC47B1DDBA6EBD537EC1838C99AB603ABA503573592`. Full coverage and release gates remain incomplete.

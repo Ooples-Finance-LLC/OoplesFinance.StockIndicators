@@ -9463,35 +9463,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePriceCycleOscillatorFast(StockData data, ComputeContext context, int length = 22,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculatePriceCycleOscillator measures the average distance from the low up to the chained series as
-        // a percentage of the average true range, both taken over the same length and with the same type.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        using var range = context.Rent(count);
-        var diff = range.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length=Math.Max(1,length);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new PriceCycleWindow(maType,length,input.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            diff[i] = input[i] - lows[i];
+            using var atr=context.Rent(input.Count);using var distance=context.Rent(input.Count);
+            var ranges=PrettyGoodWindow.TrueRanges(data.HighPrices,data.LowPrices,input);MovingAverage(data,maType,length,ranges,atr.WritableSpan);
+            using var difference=context.Rent(input.Count);for(var i=0;i<input.Count;i++)difference.WritableSpan[i]=PriceCycleWindow.Distance(input[i],data.LowPrices[i]).Publish();
+            MovingAverage(data,maType,length,difference.Span,distance.WritableSpan);
+            for(var i=0;i<input.Count;i++)output.WritableSpan[i]=PriceCycleWindow.Finish(new RocBankValue(distance.Span[i]),new RocBankValue(atr.Span[i]));
         }
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length, range.Span, smoothed.WritableSpan);
-        var diffSma = smoothed.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = atr[i] != 0 ? diffSma[i] / atr[i] * 100 : 0;
-        }
-
-        return buffer;
+        else for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(data.HighPrices[i],data.LowPrices[i],input[i],true);
+        return output;
     }
 
     /// <summary>

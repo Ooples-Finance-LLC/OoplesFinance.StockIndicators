@@ -26768,5 +26768,189 @@
     "before": "new PrettyGoodWindow(MovingAvgType.SimpleMovingAverage,length,close.Length)",
     "after": "new PrettyGoodWindow(MovingAvgType.WildersSmoothingMethod,length,close.Length)",
     "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "price-cycle-distance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "sum.Add(low, -1)",
+    "after": "sum.Add(low)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-early-distance",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "return RocBankValue.Round(sum)",
+    "after": "return new RocBankValue(sum.Mean(1))",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-zero-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "if (atr.Mantissa == 0) return 0",
+    "after": "if (atr.Mantissa == 0) return 1",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-percentage-scale",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "distance.AddTo(ref numerator, 100)",
+    "after": "distance.AddTo(ref numerator)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-early-average",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "distance.AddTo(ref numerator, 100)",
+    "after": "numerator.Add(distance.Publish(), 100)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-early-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "atr.AddTo(ref denominator)",
+    "after": "denominator.Add(atr.Publish())",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "atr.AddTo(ref denominator)",
+    "after": "distance.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_range = new(kind, 1, length, kind, capacityHint)",
+    "after": "_range = new(kind, 1, length+1, kind, capacityHint)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-distance-period",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_distance = new(kind, length, capacityHint)",
+    "after": "_distance = new(kind, length+1, capacityHint)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-atr-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_range.Next(high, low, price, commit)",
+    "after": "_range.Next(high, low, price, true)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-distance-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_distance.Next(difference, commit)",
+    "after": "_distance.Next(difference, true)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-reset-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_range.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-reset-distance",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "_distance?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-early-percentage-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/PriceCycleWindow.cs",
+    "before": "var numerator = new ExactMeanAccumulator(); distance.AddTo(ref numerator, 100);\n        var denominator = new ExactMeanAccumulator(); atr.AddTo(ref denominator);\n        return numerator.Ratio(denominator);",
+    "after": "var numerator = new ExactMeanAccumulator(); distance.AddTo(ref numerator);\n        var denominator = new ExactMeanAccumulator(); atr.AddTo(ref denominator);\n        return numerator.Ratio(denominator)*100;",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-raw-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceCycleOscillatorFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePriceCycleOscillator(",
+    "before": "stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-raw-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceCycleOscillatorFast(",
+    "before": "MovingAverage(data,maType,length,ranges,atr.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,ranges,atr.WritableSpan)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-raw-distance-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePriceCycleOscillatorFast(",
+    "before": "MovingAverage(data,maType,length,difference.Span,distance.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,difference.Span,distance.WritableSpan)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-batch-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePriceCycleOscillator(",
+    "before": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length)",
+    "after": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length+1)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-batch-distance-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePriceCycleOscillator(",
+    "before": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(difference),length)",
+    "after": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(difference),length+1)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PriceCycleOscillatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "price-cycle-core-kind",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PriceCycleOscillator(ReadOnlySpan<double> high",
+    "before": "new PriceCycleWindow(MovingAvgType.SimpleMovingAverage,length,close.Length)",
+    "after": "new PriceCycleWindow(MovingAvgType.WildersSmoothingMethod,length,close.Length)",
+    "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
   }
 ]

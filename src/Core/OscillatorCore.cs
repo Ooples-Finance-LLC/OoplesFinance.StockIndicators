@@ -4438,31 +4438,15 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PriceCycleOscillator(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
+        // A price-only input represents flat candles; callers with OHLC use the overload below.
+        PriceCycleOscillator(input,input,input,output,length);
+    }
 
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, input.Length);
-
-            // Calculate SMA
-            MovingAverageCore.SimpleMovingAverage(input, sma, length);
-
-            // Calculate oscillator as percentage deviation from SMA
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = sma[i] != 0 ? ((input[i] - sma[i]) / sma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-        }
+    internal static void PriceCycleOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 22)
+    {
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new PriceCycleWindow(MovingAvgType.SimpleMovingAverage,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>

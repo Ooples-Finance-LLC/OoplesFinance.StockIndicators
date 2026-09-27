@@ -79,51 +79,17 @@ public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Pco")]
 public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _diffSma;
-    private readonly AverageTrueRangeSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public PriceCycleOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 22)
+    private readonly PriceCycleWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public PriceCycleOscillatorState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int length=22)=>_window=new(maType,length);
+    public IndicatorName Name=>IndicatorName.PriceCycleOscillator;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _diffSma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atrSmoother = new AverageTrueRangeSmoother(maType, resolved, InputName.Close);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.High,bar.Low,_input.GetValue(bar),isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Pco",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.PriceCycleOscillator;
-
-    public void Reset()
-    {
-        _diffSma.Reset();
-        _atrSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var diff = value - bar.Low;
-        var diffSma = _diffSma.Next(diff, isFinal);
-        var atr = _atrSmoother.Next(bar, isFinal);
-        var pco = atr != 0 ? diffSma / atr * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Pco", pco }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pco, outputs);
-    }
-
-    public void Dispose()
-    {
-        _diffSma.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Pmo")]

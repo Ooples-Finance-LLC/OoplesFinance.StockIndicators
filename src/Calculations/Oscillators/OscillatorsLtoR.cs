@@ -1754,45 +1754,18 @@ public static partial class Calculations
     public static StockData CalculatePriceCycleOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 22)
     {
-        List<double> pcoList = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, lowList, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        length=Math.Max(1,length);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;using var window=new PriceCycleWindow(maType,length,input.Count);
+        var external=Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);List<double>? atr=null,distance=null;
+        if(external)
         {
-            var currentClose = inputList[i];
-            var currentLow = lowList[i];
-            
-            var diff = currentClose - currentLow;
-            diffList.Add(diff);
+            var ranges=PrettyGoodWindow.TrueRanges(stockData.HighPrices,stockData.LowPrices,input).ToList();
+            atr=Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,ranges);
+            var difference=input.Select((v,i)=>PriceCycleWindow.Distance(v,stockData.LowPrices[i]).Publish()).ToList();
+            distance=Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(difference),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,difference);
         }
-
-        var diffSmaList = GetMovingAverageList(stockData, maType, length, diffList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentAtr = atrList[i];
-            var prevPco1 = i >= 1 ? pcoList[i - 1] : 0;
-            var prevPco2 = i >= 2 ? pcoList[i - 2] : 0;
-            var diffSma = diffSmaList[i];
-
-            var pco = currentAtr != 0 ? diffSma / currentAtr * 100 : 0;
-            pcoList.Add(pco);
-
-            var signal = GetCompareSignal(pco - prevPco1, prevPco1 - prevPco2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pco", pcoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pcoList);
-        stockData.IndicatorName = IndicatorName.PriceCycleOscillator;
-
-        return stockData;
+        List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<input.Count;i++){var value=external?PriceCycleWindow.Finish(new RocBankValue(distance![i]),new RocBankValue(atr![i])):window.Next(stockData.HighPrices[i],stockData.LowPrices[i],input[i],true);var previous=i>0?values[i-1]:0;var older=i>1?values[i-2]:0;signals?.Add(GetCompareSignal(value-previous,previous-older));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Pco",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.PriceCycleOscillator;return stockData;
     }
 
 
