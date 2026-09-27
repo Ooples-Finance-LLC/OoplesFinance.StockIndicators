@@ -2004,3 +2004,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - The combined recovery regression passed **259/259** checks; the final strengthened Rex family passed **44/44** (`rex-final.trx`). A hand fixture proves that opposite overflowing primary values yield a finite zero signal. All five routes, customer-stage order, preview/reset and invalid-input state integrity are covered.
 - Campaign420a caught **18/18** faults; **2,966** retained sites. All thirteen staged implementation/test/catalog files match its archive. Source/archive SHA256: `67eb51322762db89ae5519a07c54d7edd19bdb5dc31b3c763734a9ef22318bb7` / `9739c7cb93733cc5feb4e26d03b91367be5dbf4a1294aadbc7612f34654443d7`.
 - Inventory: **4,791/7,131**, **2,340** omissions across **387** types; no construction failures. 190 grouped batches cover **1,965 configurations / 358 types**. DLL SHA256 `847A2F840AABCAD9C786224A8C295997A6162126264C5109880D81B4C96C23F8`. Full library/release gates remain incomplete.
+
+
+### Ehlers Relative Vigor numerical contracts
+
+- Nine configurations independently check each candle body/range ratio, its selected average and separately configured signal average. Exact differences preserve extreme candles; extended ratios remain available to recover finite averages before publication. Zero ranges retain zero output, and selected closes retain the original open/high/low.
+- **115/115** family/enrollment/composition checks passed (`ehlers-vigor.trx`). Hand fixtures, subnormal/extreme ranges, unequal periods, core raw ratios, both ordered customer averages, all five routes, preview/reset and invalid-input state integrity are covered.
+- Campaign421a caught **18/18** faults; **2,984** retained sites. All thirteen staged implementation/test/catalog files match its archive. Source/archive SHA256: `1bca05985c82f22bb36349567bdda341798532b429fa0951a679d2493b5d7e23` / `0d16d92586d0ceb9726adb5c182fd321f0c5d1678ee0d50bd84bb3b3b2b91a49`.
+- Inventory: **4,800/7,131**, **2,331** omissions across **386** types; no construction failures. 191 grouped batches cover **1,974 configurations / 359 types**. DLL SHA256 `96DFC4B91BD796800FD3D029DDBE766E0728486588A1B74F11BB7AF7B76BF4CA`. Full library/release gates remain incomplete.

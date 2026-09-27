@@ -9667,23 +9667,8 @@ internal static class OscillatorCore
     internal static void EhlersRelativeVigorIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high,
         ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentClose = close[i];
-            var currentOpen = open[i];
-            var currentHigh = high[i];
-            var currentLow = low[i];
-
-            var range = currentHigh - currentLow;
-            output[i] = range != 0 ? (currentClose - currentOpen) / range : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        for (var i = 0; i < close.Length; i++) output[i] = EhlersVigorWindow.TrueValue(close[i], open[i], high[i], low[i]).Publish();
     }
 
     /// <summary>

@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersRelativeVigorIndex)
+        {
+            var ehlersVigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < ehlersVigorKeys.Length; slot++) { var key = ehlersVigorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersVigorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RexOscillator)
         {
             var rexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

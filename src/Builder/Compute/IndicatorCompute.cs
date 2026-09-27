@@ -20210,28 +20210,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int signalLength = 4, string? outputKey = null)
     {
-        // CalculateEhlersRelativeVigorIndex measures where the bar closed relative to where it opened as a
-        // fraction of that bar's range, then averages that fraction over the length. Its signalLength smooths
-        // the result again into the published Signal.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        using var vigor = context.Rent(count);
-        var rvi = vigor.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); signalLength = Math.Max(1, signalLength); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var output = context.Rent(input.Count); var signal = outputKey == "Signal";
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var range = highs[i] - lows[i];
-            rvi[i] = range != 0 ? (input[i] - opens[i]) / range : 0;
+            using var ratios = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) ratios.WritableSpan[i] = EhlersVigorWindow.TrueValue(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i]).Publish();
+            if (signal) { using var first = context.Rent(input.Count); MovingAverage(data, maType, length, ratios.Span, first.WritableSpan); MovingAverage(data, maType, signalLength, first.Span, output.WritableSpan); } else MovingAverage(data, maType, length, ratios.Span, output.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, vigor.Span, buffer.WritableSpan);
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, signalLength, maType) : buffer;
+        else { using var window = new EhlersVigorWindow(maType, length, signalLength, input.Count); for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true); output.WritableSpan[i] = signal ? r.Signal : r.Value; } }
+        return output;
     }
 
     /// <summary>

@@ -161,54 +161,16 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
 [PrimaryOutput("Ervi")]
 public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _rviSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public EhlersRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10,
-        int signalLength = 4)
-    {
-        _rviSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EhlersVigorWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10, int signalLength = 4) { _window = new(maType, length, signalLength); }
     public IndicatorName Name => IndicatorName.EhlersRelativeVigorIndex;
-
-    public void Reset()
-    {
-        _rviSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var open = bar.Open;
-        var high = bar.High;
-        var low = bar.Low;
-        var rvi = high - low != 0 ? (close - open) / (high - low) : 0;
-        var rviMa = _rviSmoother.Next(rvi, isFinal);
-        var signal = _signalSmoother.Next(rviMa, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ervi", rviMa },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rviMa, outputs);
+        StreamingInputValidation.Validate(bar); var r = _window.Next(_input.GetValue(bar), bar.Open, bar.High, bar.Low, isFinal); return new(r.Value, includeOutputs ? new Dictionary<string, double> { { "Ervi", r.Value }, { "Signal", r.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _rviSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rpi")]

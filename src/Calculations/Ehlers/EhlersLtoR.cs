@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -200,45 +201,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersRelativeVigorIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10,
         int signalLength = 4)
     {
-        length = Math.Max(length, 1);
-        signalLength = Math.Max(signalLength, 1);
-        List<double> rviList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); signalLength = Math.Max(1, signalLength); var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues; List<double> values = new(input.Count), signal = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-
-            var rvi = currentHigh - currentLow != 0 ? (currentClose - currentOpen) / (currentHigh - currentLow) : 0;
-            rviList.Add(rvi);
+            var ratios = input.Select((v,i) => EhlersVigorWindow.TrueValue(v, stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i]).Publish()).ToList();
+            values = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(ratios), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ratios);
+            signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(values), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, values);
         }
-
-        var rviSmaList = GetMovingAverageList(stockData, maType, length, rviList);
-        var rviSignalList = GetMovingAverageList(stockData, maType, signalLength, rviSmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rviSma = rviSmaList[i];
-            var prevRviSma = i >= 1 ? rviSmaList[i - 1] : 0;
-            var rviSignal = rviSignalList[i];
-            var prevRviSignal = i >= 1 ? rviSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(rviSma - rviSignal, prevRviSma - prevRviSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ervi", rviSmaList },
-            { "Signal", rviSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rviSmaList);
-        stockData.IndicatorName = IndicatorName.EhlersRelativeVigorIndex;
-
-        return stockData;
+        else { using var window = new EhlersVigorWindow(maType, length, signalLength, input.Count); for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], true); values.Add(r.Value); signal.Add(r.Signal); } }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - signal[i], i > 0 ? values[i - 1] - signal[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ervi", values }, { "Signal", signal } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersRelativeVigorIndex; return stockData;
     }
 
 

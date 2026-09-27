@@ -803,6 +803,7 @@ internal static partial class StatefulIndicatorFactory
             StochRsiSpecOptions srsi => new StochasticRelativeStrengthIndexState(maType: srsi.MaType, length: srsi.RsiLength, stochLength: srsi.StochLength),
             PvoSpecOptions pvo => new PercentageVolumeOscillatorState(maType: pvo.MaType, fastLength: pvo.Length,
                 signalLength: pvo.SignalLength),
+            EhlersRelativeVigorIndexSpecOptions ev => new EhlersRelativeVigorIndexState(ev.MaType, ev.Length, ev.SignalLength),
             RexOscillatorSpecOptions rex => new RexOscillatorState(rex.MaType, rex.Length),
             NthOrderDifferencingOscillatorSpecOptions difference => new NthOrderDifferencingOscillatorState(difference.Length),
             RelativeVigorIndexSpecOptions vigor => new RelativeVigorIndexState(vigor.MaType, vigor.Length),

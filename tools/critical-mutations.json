@@ -24774,5 +24774,153 @@
     "after": "new RexWindow(MovingAvgType.SimpleMovingAverage, length, close.Length)",
     "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
     "scope": "internal static void RexOscillator("
+  },
+  {
+    "id": "ehlers-vigor-body-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open)",
+    "after": "ExactVarianceWindow.Units(open) - ExactVarianceWindow.Units(close)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "after": "ExactVarianceWindow.Units(low) - ExactVarianceWindow.Units(high)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "if (denominator.IsZero) return default;",
+    "after": "if (denominator.IsZero) return new RocBankValue(1);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-early-body-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "var numerator = ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open);",
+    "after": "var numerator = ExactVarianceWindow.Units(close - open);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-early-range-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "var denominator = ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low);",
+    "after": "var denominator = ExactVarianceWindow.Units(high - low);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-first-kind",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_first = new(kind, length, capacityHint);",
+    "after": "_first = new(MovingAvgType.SimpleMovingAverage, length, capacityHint);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-signal-kind",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal = new(kind, signalLength, capacityHint);",
+    "after": "_signal = new(MovingAvgType.SimpleMovingAverage, signalLength, capacityHint);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal = new(kind, signalLength, capacityHint);",
+    "after": "_signal = new(kind, length, capacityHint);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(input, commit)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-early-first-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(new RocBankValue(first.Publish()), commit)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-preview-first",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_first.Next(input, commit)",
+    "after": "_first.Next(input, true)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-preview-signal",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(first, true)",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-reset-first",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersVigorWindow.cs",
+    "before": "_signal?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "ehlers-vigor-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast("
+  },
+  {
+    "id": "ehlers-vigor-customer-second-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, signalLength, first.Span, output.WritableSpan);",
+    "after": "MovingAverage(data, maType, length, first.Span, output.WritableSpan);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeEhlersRelativeVigorIndexFast("
+  },
+  {
+    "id": "ehlers-vigor-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "public sealed class EhlersRelativeVigorIndexState :"
+  },
+  {
+    "id": "ehlers-vigor-core-output",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "EhlersVigorWindow.TrueValue(close[i], open[i], high[i], low[i]).Publish()",
+    "after": "EhlersVigorWindow.TrueValue(close[i], open[i], high[i], low[i]).Publish() * 100",
+    "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static void EhlersRelativeVigorIndex("
   }
 ]
