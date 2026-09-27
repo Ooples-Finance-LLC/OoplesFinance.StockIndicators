@@ -29245,8 +29245,8 @@
     "id": "pivot-alias-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
-    "after": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
+    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
+    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
   },
   {
@@ -29369,8 +29369,8 @@
     "id": "pivot-average-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
-    "after": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
+    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
+    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotAverageNumericalTests"
   },
   {
@@ -29448,16 +29448,16 @@
     "id": "earning-levels-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
-    "after": "spec.Options is DMIStochasticSpecOptions or PivotPointAverageSpecOptions",
+    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
+    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or PivotPointAverageSpecOptions",
     "filter": "FullyQualifiedName~EarningLevelsNumericalTests"
   },
   {
     "id": "dmi-numerical-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions",
-    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions",
+    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions",
+    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or EarningSupportResistanceLevelsSpecOptions",
     "filter": "FullyQualifiedName~DmiStochasticNumericalTests"
   },
   {
@@ -29485,5 +29485,111 @@
     "before": "Window(spread, i, 10)",
     "after": "Window(spread, i, 9)",
     "filter": "FullyQualifiedName~DmiStochasticNumericalTests"
+  },
+  {
+    "id": "demark-range-early-difference",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "sum.Add(a);sum.Add(b,-1);",
+    "after": "sum.Add(a-b);",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-low-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "Difference(low,At(_low,2))",
+    "after": "Difference(At(_low,2),low)",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-first-gate",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "var signed=overlap||previousOverlap?default:change;",
+    "after": "var signed=previousOverlap?default:change;",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-second-gate",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "var signed=overlap||previousOverlap?default:change;",
+    "after": "var signed=overlap?default:change;",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-close-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "At(_high,2)>=At(_close,8)",
+    "after": "At(_high,2)>=At(_close,7)",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-absolute-window",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "Math.Abs(change.Mantissa)",
+    "after": "change.Mantissa",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "old.Signed.AddTo(ref numerator,-100);",
+    "after": "old.Signed.AddTo(ref numerator,0);",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkRangeWindow.cs",
+    "before": "_window.Clear();_head=_count=0;",
+    "after": "_window.Clear();_head=0;",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues)",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices)",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeDemarkRangeExpansionIndexFast("
+  },
+  {
+    "id": "demark-range-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omit validation\n        ",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests",
+    "scope": "public sealed class DemarkRangeExpansionIndexState"
+  },
+  {
+    "id": "demark-range-reference-scale",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DemarkRange.cs",
+    "before": "numerator*new ReferenceFraction(100)",
+    "after": "numerator*new ReferenceFraction(50)",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "demark-range-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions",
+    "after": "spec.Options is DMIStochasticSpecOptions",
+    "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
   }
 ]

@@ -242,87 +242,16 @@ public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Drei")]
 public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _s1Sum;
-    private readonly RollingWindowSum _s2Sum;
-    private readonly PooledRingBuffer<double> _highs;
-    private readonly PooledRingBuffer<double> _lows;
-    private readonly PooledRingBuffer<double> _closes;
-
-    public DemarkRangeExpansionIndexState(int length = 5)
+    private readonly DemarkRangeWindow _window;
+    public DemarkRangeExpansionIndexState(int length=5)=>_window=new DemarkRangeWindow(length);
+    public IndicatorName Name=>IndicatorName.DemarkRangeExpansionIndex;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _s1Sum = new RollingWindowSum(resolved);
-        _s2Sum = new RollingWindowSum(resolved);
-        _highs = new PooledRingBuffer<double>(9);
-        _lows = new PooledRingBuffer<double>(9);
-        _closes = new PooledRingBuffer<double>(9);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.High,bar.Low,bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Drei",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.DemarkRangeExpansionIndex;
-
-    public void Reset()
-    {
-        _s1Sum.Reset();
-        _s2Sum.Reset();
-        _highs.Clear();
-        _lows.Clear();
-        _closes.Clear();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = bar.Close;
-
-        var prevHigh2 = StreamingWindowHelper.GetRecentValue(_highs, 2, high);
-        var prevHigh5 = StreamingWindowHelper.GetRecentValue(_highs, 5, high);
-        var prevHigh6 = StreamingWindowHelper.GetRecentValue(_highs, 6, high);
-        var prevLow2 = StreamingWindowHelper.GetRecentValue(_lows, 2, low);
-        var prevLow5 = StreamingWindowHelper.GetRecentValue(_lows, 5, low);
-        var prevLow6 = StreamingWindowHelper.GetRecentValue(_lows, 6, low);
-        var prevClose7 = StreamingWindowHelper.GetRecentValue(_closes, 7, close);
-        var prevClose8 = StreamingWindowHelper.GetRecentValue(_closes, 8, close);
-
-        double n = (high >= prevLow5 || high >= prevLow6) && (low <= prevHigh5 || low <= prevHigh6) ? 0 : 1;
-        double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
-        var s = high - prevHigh2 + (low - prevLow2);
-
-        var s1 = n * m * s;
-        var s2 = Math.Abs(s);
-
-        var s1Sum = isFinal ? _s1Sum.Add(s1, out _) : _s1Sum.Preview(s1, out _);
-        var s2Sum = isFinal ? _s2Sum.Add(s2, out _) : _s2Sum.Preview(s2, out _);
-        var rei = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
-
-        if (isFinal)
-        {
-            _highs.TryAdd(high, out _);
-            _lows.TryAdd(low, out _);
-            _closes.TryAdd(close, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Drei", rei }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rei, outputs);
-    }
-
-    public void Dispose()
-    {
-        _s1Sum.Dispose();
-        _s2Sum.Dispose();
-        _highs.Dispose();
-        _lows.Dispose();
-        _closes.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 [PrimaryOutput("Drp")]

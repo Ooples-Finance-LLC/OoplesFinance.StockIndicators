@@ -6745,61 +6745,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemarkRangeExpansionIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 5)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var s1Array = pool.Rent(close.Length);
-        var s2Array = pool.Rent(close.Length);
-
-        try
-        {
-            var s1 = s1Array.AsSpan(0, close.Length);
-            var s2 = s2Array.AsSpan(0, close.Length);
-
-            // Calculate s1 and s2 values
-            for (var i = 0; i < close.Length; i++)
-            {
-                var prevHigh2 = i >= 2 ? high[i - 2] : 0;
-                var prevHigh5 = i >= 5 ? high[i - 5] : 0;
-                var prevHigh6 = i >= 6 ? high[i - 6] : 0;
-                var prevLow2 = i >= 2 ? low[i - 2] : 0;
-                var prevLow5 = i >= 5 ? low[i - 5] : 0;
-                var prevLow6 = i >= 6 ? low[i - 6] : 0;
-                var prevClose7 = i >= 7 ? close[i - 7] : 0;
-                var prevClose8 = i >= 8 ? close[i - 8] : 0;
-
-                double n = (high[i] >= prevLow5 || high[i] >= prevLow6) && (low[i] <= prevHigh5 || low[i] <= prevHigh6) ? 0 : 1;
-                double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
-                var sVal = high[i] - prevHigh2 + (low[i] - prevLow2);
-
-                s1[i] = n * m * sVal;
-                s2[i] = Math.Abs(sVal);
-            }
-
-            // Calculate rolling sums and REI
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double s1Sum = 0, s2Sum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    s1Sum += s1[j];
-                    s2Sum += s2[j];
-                }
-
-                output[i] = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(s1Array);
-            pool.Return(s2Array);
-        }
+        if(high.Length!=close.Length||low.Length!=close.Length||output.Length<close.Length)throw new ArgumentException("Aligned inputs and a sufficient output span are required.");
+        var window=new DemarkRangeWindow(length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>

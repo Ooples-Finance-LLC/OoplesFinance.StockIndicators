@@ -12,58 +12,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDemarkRangeExpansionIndex(this StockData stockData, int length = 5)
     {
-        List<double> s2List = new(stockData.Count);
-        List<double> s1List = new(stockData.Count);
-        List<double> reiList = new(stockData.Count);
-        var s1SumWindow = new RollingSum();
-        var s2SumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);
+        var (input,_,_,_,_)=GetInputValuesList(stockData);var window=new DemarkRangeWindow(length);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var high = highList[i];
-            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            var prevHigh5 = i >= 5 ? highList[i - 5] : 0;
-            var prevHigh6 = i >= 6 ? highList[i - 6] : 0;
-            var low = lowList[i];
-            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-            var prevLow5 = i >= 5 ? lowList[i - 5] : 0;
-            var prevLow6 = i >= 6 ? lowList[i - 6] : 0;
-            var prevClose7 = i >= 7 ? inputList[i - 7] : 0;
-            var prevClose8 = i >= 8 ? inputList[i - 8] : 0;
-            var prevRei1 = i >= 1 ? reiList[i - 1] : 0;
-            var prevRei2 = i >= 2 ? reiList[i - 2] : 0;
-            double n = (high >= prevLow5 || high >= prevLow6) && (low <= prevHigh5 || low <= prevHigh6) ? 0 : 1;
-            double m = prevHigh2 >= prevClose8 && (prevLow2 <= prevClose7 || prevLow2 <= prevClose8) ? 0 : 1;
-            var s = high - prevHigh2 + (low - prevLow2);
-
-            var s1 = n * m * s;
-            s1List.Add(s1);
-            s1SumWindow.Add(s1);
-
-            var s2 = Math.Abs(s);
-            s2List.Add(s2);
-            s2SumWindow.Add(s2);
-
-            var s1Sum = s1SumWindow.Sum(length);
-            var s2Sum = s2SumWindow.Sum(length);
-
-            var rei = s2Sum != 0 ? s1Sum / s2Sum * 100 : 0;
-            reiList.Add(rei);
-
-            var signal = GetRsiSignal(rei - prevRei1, prevRei1 - prevRei2, rei, prevRei1, 100, -100);
-            signalsList?.Add(signal);
+            var value=window.Next(stockData.HighPrices[i],stockData.LowPrices[i],input[i],true);
+            var previous=i>0?values[i-1]:0;var before=i>1?values[i-2]:0;
+            signals?.Add(GetRsiSignal(value-previous,previous-before,value,previous,100,-100));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Drei", reiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(reiList);
-        stockData.IndicatorName = IndicatorName.DemarkRangeExpansionIndex;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Drei",values}});
+        stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.DemarkRangeExpansionIndex;return stockData;
     }
 
 

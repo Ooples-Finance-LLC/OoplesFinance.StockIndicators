@@ -13239,7 +13239,7 @@ internal static partial class IndicatorCompute
     {
         var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         OscillatorCore.DemarkRangeExpansionIndex(high, low, close, buffer.WritableSpan, length);
         return buffer;

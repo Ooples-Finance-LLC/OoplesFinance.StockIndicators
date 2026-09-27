@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.DemarkRangeExpansionIndex)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => DemarkRangeOutputs(bars,Integer(builtIn.CreateOptions(),"Length",5))["Drei"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EarningSupportResistanceLevels)
         {
             yield return IndicatorValidationRule.Reference(0, bars => EarningLevelsOutputs(bars)["Esr"], IndicatorErrorBudget.Exact);
