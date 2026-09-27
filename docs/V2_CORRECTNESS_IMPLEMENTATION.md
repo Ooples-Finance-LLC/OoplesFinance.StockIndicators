@@ -2115,3 +2115,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **157/157** combined Price Cycle/Pretty Good/enrollment/foundation checks passed (`price-cycle-pretty-good.trx`). Four basic average types, all public routes, both core forms, selected prices, ordered customer stages, normal/subnormal/extreme values, preview/reset and invalid fields are covered. A supplied epsilon distance over an ATR of 100 retains epsilon after percentage scaling. Campaign433a caught **22/22** faults; **3,230** retained sites.
 - Source/archive SHA256: `2f9dd900c6e4ad60a0de0eda155161f8ef012309c6e49079c1c3550b13814a33` / `851d2caea42015f4cfbc3afb84c49d01ca233f851be6b887126a84e4cdff7267`.
 - Inventory: **4,876/7,131**, **2,255** omissions across **371** types; no construction failures. 203 grouped batches cover **2,050 configurations / 374 types**. DLL SHA256 `695636FE6B33F8EEDD758EC47B1DDBA6EBD537EC1838C99AB603ABA503573592`. Full coverage and release gates remain incomplete.
+
+
+### PPO Moving Average numerical contract
+
+- Eight PpoMa configurations use the shared exact average-gap kernel with fixed exponential averages. Independent fast/slow periods, selected prices, and preview/reset agree across all routes. Extended arithmetic preserves finite percentage gaps after otherwise overflowing subtraction; fixed EMA does not consume customer-average overrides.
+- **106/106** family/enrollment/foundation checks passed (`ppo-ma.trx`). Minimum, equal, reversed and maximum integer periods, normal/subnormal/extreme prices, direct core, all typed routes and invalid fields are covered. Campaign434a caught **16/16** route-specific faults; **3,246** retained sites. Previously verified shared-kernel arithmetic faults are not duplicated.
+- Source/archive SHA256: `ed5bd396ec86c5fac9123b88d7a48e33fe6db21798afd6317a3976bce7638347` / `52db1a48b13c64ac434c1b6d9993141bb6f2e29157bb941a8062e3c29566b0d6`.
+- Inventory: **4,884/7,131**, **2,247** omissions across **370** types; no construction failures. 204 grouped batches cover **2,058 configurations / 375 types**. DLL SHA256 `70A63770E0C50C9FA2FA64C5CC9391B270657403A977B43DB457F9B543ACC2E1`. Full coverage and release gates remain incomplete.

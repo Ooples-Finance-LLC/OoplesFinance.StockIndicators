@@ -79,6 +79,10 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PriceCycleOutputs(bars,builtIn)["Pco"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.PpoMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PpoMaOutputs(bars,builtIn)["PpoMa"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
         {
             var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

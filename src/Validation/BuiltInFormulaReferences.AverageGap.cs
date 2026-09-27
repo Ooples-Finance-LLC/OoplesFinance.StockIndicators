@@ -2,6 +2,8 @@ using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
 {
+    internal static IReadOnlyDictionary<string,double[]> PpoMaOutputs(IReadOnlyList<Bar> bars,IBuiltInIndicator indicator)
+    {var o=indicator.CreateOptions();return AverageGapOutputs(bars,Integer(o,"FastLength",12),Integer(o,"SlowLength",26),3,"PpoMa");}
     internal static IReadOnlyDictionary<string,double[]> AverageGapOutputs(IReadOnlyList<Bar> bars,IBuiltInIndicator indicator)
     {var o=indicator.CreateOptions();var ehlers=indicator.BatchName==IndicatorName.EhlersMovingAverageDifferenceIndicator;return AverageGapOutputs(bars,Integer(o,"FastLength",ehlers?8:7),Integer(o,"SlowLength",ehlers?23:65),AverageKind(o,ehlers?2:1),ehlers?"Emad":"Ravi");}
     internal static IReadOnlyDictionary<string,double[]> AverageGapOutputs(IReadOnlyList<Bar> bars,int fast,int slow,int kind,string key,double[][]? external=null)

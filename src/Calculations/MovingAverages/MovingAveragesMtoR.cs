@@ -21,39 +21,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePpoMovingAverage(this StockData stockData, int fastLength = 12, int slowLength = 26)
     {
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> ppoMaList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var fastBuffer = SpanCompat.CreateOutputBuffer(count);
-        var slowBuffer = SpanCompat.CreateOutputBuffer(count);
-        MovingAverageCore.ExponentialMovingAverage(inputSpan, fastBuffer.Span, fastLength);
-        MovingAverageCore.ExponentialMovingAverage(inputSpan, slowBuffer.Span, slowLength);
-
-        for (var i = 0; i < count; i++)
-        {
-            var slowEma = slowBuffer.Span[i];
-            var ppoMa = slowEma != 0 ? (fastBuffer.Span[i] - slowEma) / slowEma * 100 : 0;
-            ppoMaList.Add(ppoMa);
-
-            var prevPpoMa1 = i >= 1 ? ppoMaList[i - 1] : 0;
-            var prevPpoMa2 = i >= 2 ? ppoMaList[i - 2] : 0;
-            var signal = GetCompareSignal(ppoMa - prevPpoMa1, prevPpoMa1 - prevPpoMa2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "PpoMa", ppoMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ppoMaList);
-        stockData.IndicatorName = IndicatorName.PpoMovingAverage;
-
-        return stockData;
+        var (input,_,_,_,_)=GetInputValuesList(stockData);using var window=new AverageGapWindow(MovingAvgType.ExponentialMovingAverage,fastLength,slowLength,input.Count);
+        List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        foreach(var price in input){var value=window.Next(price,true);var previous=values.Count>0?values[values.Count-1]:0;var older=values.Count>1?values[values.Count-2]:0;signals?.Add(GetCompareSignal(value-previous,previous-older));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"PpoMa",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.PpoMovingAverage;return stockData;
     }
 
     /// <summary>

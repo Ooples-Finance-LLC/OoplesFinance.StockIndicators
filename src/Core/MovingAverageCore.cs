@@ -854,33 +854,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void PpoMa(ReadOnlySpan<double> input, Span<double> output, int fastLength = 12, int slowLength = 26)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var fastEmaArray = pool.Rent(input.Length);
-        var slowEmaArray = pool.Rent(input.Length);
-
-        try
-        {
-            var fastEma = fastEmaArray.AsSpan(0, input.Length);
-            var slowEma = slowEmaArray.AsSpan(0, input.Length);
-
-            ExponentialMovingAverage(input, fastEma, fastLength);
-            ExponentialMovingAverage(input, slowEma, slowLength);
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                output[i] = slowEma[i] != 0 ? ((fastEma[i] - slowEma[i]) / slowEma[i]) * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastEmaArray);
-            pool.Return(slowEmaArray);
-        }
+        if(output.Length<input.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new AverageGapWindow(MovingAvgType.ExponentialMovingAverage,fastLength,slowLength,input.Length);
+        for(var i=0;i<input.Length;i++)output[i]=window.Next(input[i],true);
     }
 
     /// <summary>

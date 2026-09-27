@@ -26952,5 +26952,149 @@
     "before": "new PriceCycleWindow(MovingAvgType.SimpleMovingAverage,length,close.Length)",
     "after": "new PriceCycleWindow(MovingAvgType.WildersSmoothingMethod,length,close.Length)",
     "filter": "FullyQualifiedName~PriceCycleNumericalTests.ExtendedAverageDistanceAndAtrMatchIndependentFractions|FullyQualifiedName~PriceCycleNumericalTests.SelectedPricesKeepOriginalCandlesAndAtrComesBeforeDistance|FullyQualifiedName~PriceCycleNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "ppo-ma-core-kind",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void PpoMa(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.WildersSmoothingMethod,fastLength,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-core-fast-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void PpoMa(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,1,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-core-slow-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void PpoMa(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,fastLength,1",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-batch-kind",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculatePpoMovingAverage(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.WildersSmoothingMethod,fastLength,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-batch-fast-period",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculatePpoMovingAverage(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,1,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-batch-slow-period",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculatePpoMovingAverage(",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,fastLength,1",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-native-kind",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.WildersSmoothingMethod,fastLength,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-native-fast-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,1,slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-native-slow-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "MovingAvgType.ExponentialMovingAverage,fastLength,slowLength",
+    "after": "MovingAvgType.ExponentialMovingAverage,fastLength,1",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "_window.Next(_input.GetValue(bar),isFinal)",
+    "after": "_window.Next(_input.GetValue(bar),true)",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "public void Reset()=>_window.Reset();",
+    "after": "public void Reset(){}",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch37.cs",
+    "scope": "public sealed class PpoMovingAverageState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-raw-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePpoMaFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-raw-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePpoMaFast(",
+    "before": "buffer.WritableSpan, fastLength, slowLength",
+    "after": "buffer.WritableSpan, 1, slowLength",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-raw-slow-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePpoMaFast(",
+    "before": "buffer.WritableSpan, fastLength, slowLength",
+    "after": "buffer.WritableSpan, fastLength, 1",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "ppo-ma-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "scope": "public static StockData CalculatePpoMovingAverage(",
+    "before": "foreach(var price in input)",
+    "after": "foreach(var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
   }
 ]

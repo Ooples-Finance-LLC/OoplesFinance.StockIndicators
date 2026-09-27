@@ -144,42 +144,19 @@ public sealed class HarmonicMeanMovingAverageState : IStreamingIndicatorState, I
 /// <c>EmaState</c> the batch path's exponential average is built on, seeding and all.
 /// </remarks>
 [PrimaryOutput("PpoMa")]
-public sealed class PpoMovingAverageState : IStreamingIndicatorState
+public sealed class PpoMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EmaState _fast;
-    private readonly EmaState _slow;
-    private readonly StreamingInputResolver _input;
-
-    public PpoMovingAverageState(int fastLength = 12, int slowLength = 26)
+    private readonly AverageGapWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public PpoMovingAverageState(int fastLength=12,int slowLength=26)=>_window=new(MovingAvgType.ExponentialMovingAverage,fastLength,slowLength);
+    public IndicatorName Name=>IndicatorName.PpoMovingAverage;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _fast = new EmaState(Math.Max(1, fastLength));
-        _slow = new EmaState(Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(_input.GetValue(bar),isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"PpoMa",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.PpoMovingAverage;
-
-    public void Reset()
-    {
-        _fast.Reset();
-        _slow.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var fastEma = _fast.GetNext(value, isFinal);
-        var slowEma = _slow.GetNext(value, isFinal);
-        var ppoMa = slowEma != 0 ? (fastEma - slowEma) / slowEma * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "PpoMa", ppoMa } };
-        }
-
-        return new StreamingIndicatorStateResult(ppoMa, outputs);
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 /// <summary>

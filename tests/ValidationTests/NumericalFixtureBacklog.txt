@@ -1533,14 +1533,6 @@ OoplesFinance.StockIndicators.Indicators.PolarizedFractalEfficiency/minimum-peri
 OoplesFinance.StockIndicators.Indicators.PolarizedFractalEfficiency/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.PolarizedFractalEfficiency/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PolarizedFractalEfficiency/weighted-average
-OoplesFinance.StockIndicators.Indicators.PpoMa/default
-OoplesFinance.StockIndicators.Indicators.PpoMa/longer-fastLength
-OoplesFinance.StockIndicators.Indicators.PpoMa/longer-periods
-OoplesFinance.StockIndicators.Indicators.PpoMa/longer-slowLength
-OoplesFinance.StockIndicators.Indicators.PpoMa/minimum-fastLength
-OoplesFinance.StockIndicators.Indicators.PpoMa/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PpoMa/minimum-slowLength
-OoplesFinance.StockIndicators.Indicators.PpoMa/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PremierStochastic/default
 OoplesFinance.StockIndicators.Indicators.PremierStochastic/longer-periods
 OoplesFinance.StockIndicators.Indicators.PremierStochastic/minimum-periods
