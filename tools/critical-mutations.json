@@ -28796,5 +28796,185 @@
     "after": "(high[i-1]+low[i-1]+close[i-1])/3",
     "filter": "FullyQualifiedName~CamarillaPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~CamarillaPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~CamarillaPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~CamarillaPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~CamarillaPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~CamarillaPivotNumericalTests.FifthLevelsPreserveExtendedRatiosAndTheZeroLowConvention",
     "scope": "internal static void CamarillaPivotPoint("
+  },
+  {
+    "id": "projected-levels-period",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "_length=Math.Max(1,length)",
+    "after": "_length=1",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "first.Value.Index<=_index-_length",
+    "after": "first.Value.Index<_index-_length",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-stored-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "queue.AddLast((_index,current))",
+    "after": "queue.AddLast((_index,0))",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Math.Max(current,first.Value.Value)",
+    "after": "Math.Min(current,first.Value.Value)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Math.Min(current,first.Value.Value)",
+    "after": "Math.Max(current,first.Value.Value)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-commit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "if(commit)\n        {",
+    "after": "if(true)\n        {",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "_highs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-reset-low",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "_lows.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Combine(new(h),new(l),-1)",
+    "after": "Combine(new(h),new(l))",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-quarter-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "divisor:4",
+    "after": "divisor:3",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-half-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "divisor:2",
+    "after": "divisor:3",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-middle-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Round(total,count:4)",
+    "after": "Round(total,count:3)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-first-support",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Combine(new(l),quarter,-1)",
+    "after": "Combine(new(l),quarter)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-second-support",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "Combine(new(l),half,-1)",
+    "after": "Combine(new(l),half)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-first-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "r1=Combine(new(h),quarter)",
+    "after": "r1=Combine(new(h),quarter,-1)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-second-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "r2=Combine(new(h),half)",
+    "after": "r2=Combine(new(h),half,-1)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-early-middle",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "s1.AddTo(ref total);s2.AddTo(ref total);r1.AddTo(ref total);r2.AddTo(ref total);",
+    "after": "total.Add(s1.Publish()+s2.Publish()+r1.Publish()+r2.Publish());",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-early-range",
+    "module": "numerical",
+    "file": "src/Helpers/ProjectedLevelsWindow.cs",
+    "before": "a.AddTo(ref sum);b.AddTo(ref sum,weight);",
+    "after": "sum.Add(a.Publish()+b.Publish()*weight);",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "projected-levels-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "before": "window.Next(stockData.HighPrices[i],stockData.LowPrices[i],true)",
+    "after": "window.Next(Math.Max(stockData.HighPrices[i],currentValue),stockData.LowPrices[i],true)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "public static StockData CalculateProjectedSupportAndResistance("
+  },
+  {
+    "id": "projected-levels-raw-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(data.HighPrices[i],data.LowPrices[i],true)",
+    "after": "window.Next(data.ChainedValues.Count>0?data.ChainedValues[i]:data.HighPrices[i],data.LowPrices[i],true)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "private static ComputeBuffer ComputeProjectedLevelsFast("
+  },
+  {
+    "id": "projected-levels-raw-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "new ProjectedLevelsWindow(length)",
+    "after": "new ProjectedLevelsWindow(1)",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "private static ComputeBuffer ComputeProjectedLevelsFast("
+  },
+  {
+    "id": "projected-levels-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "public sealed class ProjectedSupportAndResistanceState :"
   }
 ]

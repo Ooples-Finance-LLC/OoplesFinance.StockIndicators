@@ -584,59 +584,18 @@ public sealed class PseudoPolynomialChannelState : IStreamingIndicatorState, IDi
 [PrimaryOutput("MiddleBand")]
 public sealed class ProjectedSupportAndResistanceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
-    public ProjectedSupportAndResistanceState(int length = 25)
+    private readonly ProjectedLevelsWindow _window;
+    public ProjectedSupportAndResistanceState(int length=25)=>_window=new(length);
+    public IndicatorName Name=>IndicatorName.ProjectedSupportAndResistance;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var values=_window.Next(bar.High,bar.Low,isFinal);
+        IReadOnlyDictionary<string,double>? outputs=null;
+        if(includeOutputs){var result=new Dictionary<string,double>(5);for(var i=0;i<values.Length;i++)result[ProjectedLevelsWindow.Keys[i]]=values[i];outputs=result;}
+        return new(values[4],outputs);
     }
-
-    public IndicatorName Name => IndicatorName.ProjectedSupportAndResistance;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        _ = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var support1 = lowest - (0.25 * range);
-        var support2 = lowest - (0.5 * range);
-        var resistance1 = highest + (0.25 * range);
-        var resistance2 = highest + (0.5 * range);
-        var middle = (support1 + support2 + resistance1 + resistance2) / 4;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(5)
-            {
-                { "Support1", support1 },
-                { "Support2", support2 },
-                { "Resistance1", resistance1 },
-                { "Resistance2", resistance2 },
-                { "MiddleBand", middle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

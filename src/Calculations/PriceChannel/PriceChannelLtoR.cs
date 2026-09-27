@@ -301,31 +301,29 @@ public static partial class Calculations
         List<double> resistance2List = new(stockData.Count);
         List<double> middleList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
+        var inputList=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;
+        using var window=new ProjectedLevelsWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var range = highestHigh - lowestLow;
+            var levels=window.Next(stockData.HighPrices[i],stockData.LowPrices[i],true);
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
 
-            var support1 = lowestLow - (0.25 * range);
+            var support1 = levels[0];
             support1List.Add(support1);
 
-            var support2 = lowestLow - (0.5 * range);
+            var support2 = levels[1];
             support2List.Add(support2);
 
-            var resistance1 = highestHigh + (0.25 * range);
+            var resistance1 = levels[2];
             resistance1List.Add(resistance1);
 
-            var resistance2 = highestHigh + (0.5 * range);
+            var resistance2 = levels[3];
             resistance2List.Add(resistance2);
 
             var prevMiddle = GetLastOrDefault(middleList);
-            var middle = (support1 + support2 + resistance1 + resistance2) / 4;
+            var middle = levels[4];
             middleList.Add(middle);
 
             var signal = GetCompareSignal(currentValue - middle, prevValue - prevMiddle);
