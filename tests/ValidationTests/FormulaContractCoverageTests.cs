@@ -2938,8 +2938,21 @@ public sealed class FormulaContractCoverageTests
     public void RelativeVigorUsesTheWholeRangeAtEveryLag()
     {
         var bars = Enumerable.Range(0, 8).Select(i => new Bar(new DateTime(2021, 1, 4).AddDays(i), 10, 14, 8, 12, 1)).ToArray();
-        var expected = bars.Select((_, i) => i == 0 ? 0 : 1d / 3).ToArray();
-        var signal = new[] { 0d, 1d / 18, 1d / 6, 5d / 18, 1d / 3, 1d / 3, 1d / 3, 1d / 3 };
+        // The constant body's four-tap startup is 1/3, 1, 5/3, 2. Each average and ratio rounds separately.
+        var numerator = new[] { 1d / 3, 1, 5d / 3, 2, 2, 2, 2, 2 };
+        var denominator = new[] { 1d, 3, 5, 6, 6, 6, 6, 6 };
+        ReferenceFraction Fraction(double value) => ReferenceFraction.FromDouble(value);
+        var expected = new double[bars.Length]; var signal = new double[bars.Length];
+        for (var i = 1; i < expected.Length; i++)
+        {
+            var n = ((Fraction(numerator[i - 1]) + Fraction(numerator[i])) / new ReferenceFraction(2)).ToDouble();
+            var d = ((Fraction(denominator[i - 1]) + Fraction(denominator[i])) / new ReferenceFraction(2)).ToDouble();
+            expected[i] = (Fraction(n) / Fraction(d)).ToDouble();
+        }
+        for (var i = 0; i < signal.Length; i++)
+            signal[i] = ((Fraction(expected[i]) + (i > 0 ? new ReferenceFraction(2) * Fraction(expected[i - 1]) : Fraction(0)) +
+                (i > 1 ? new ReferenceFraction(2) * Fraction(expected[i - 2]) : Fraction(0)) +
+                (i > 2 ? Fraction(expected[i - 3]) : Fraction(0))) / new ReferenceFraction(6)).ToDouble();
         foreach (var rule in BuiltInFormulaReferences.For(new Rvi(2)))
             rule.Check(new IndicatorValidationContext("constant-body-and-range", bars, new[] { expected, signal }, 0));
         var core = new double[bars.Length];
@@ -2952,9 +2965,9 @@ public sealed class FormulaContractCoverageTests
             var preview = streaming.Update(bar, false, true);
             var actual = streaming.Update(bar, true, true);
             Assert.Equal(preview.Value, actual.Value);
-            Assert.InRange(Math.Abs(actual.Value - expected[i]), 0, 1e-12);
-            Assert.InRange(Math.Abs(core[i] - expected[i]), 0, 1e-12);
-            Assert.InRange(Math.Abs(actual.Outputs!["Signal"] - signal[i]), 0, 1e-12);
+            Assert.Equal(expected[i], actual.Value);
+            Assert.Equal(expected[i], core[i]);
+            Assert.Equal(signal[i], actual.Outputs!["Signal"]);
         }
         streaming.Reset();
         var first = new OhlcvBar("TEST", BarTimeframe.Tick, bars[0].Time, bars[0].Time, 10, 14, 8, 12, 1, true);

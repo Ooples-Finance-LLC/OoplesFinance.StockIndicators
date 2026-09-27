@@ -24350,5 +24350,175 @@
     "before": "stockData.LowPrices",
     "after": "GetInputValuesList(stockData).lowList",
     "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference"
+  },
+  {
+    "id": "relative-vigor-period",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "length = Math.Max(1, length)",
+    "after": "length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-numerator-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_numerator = new(kind, length, capacityHint)",
+    "after": "_numerator = new(MovingAvgType.SimpleMovingAverage, length, capacityHint)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-denominator-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_denominator = new(kind, length, capacityHint)",
+    "after": "_denominator = new(MovingAvgType.SimpleMovingAverage, length, capacityHint)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-weights",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "(lag == 3 ? 1 : 2)",
+    "after": "(lag == 3 ? 2 : 1)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "RocBankValue.RoundUnits(total, 6)",
+    "after": "RocBankValue.RoundUnits(total, 5)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-lag",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "history[history.Count - lag]",
+    "after": "history[history.Count - 1]",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-body-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open)",
+    "after": "ExactVarianceWindow.Units(close) + ExactVarianceWindow.Units(open)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "after": "ExactVarianceWindow.Units(high) + ExactVarianceWindow.Units(low)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "Filter(_ranges, ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low), commit)",
+    "after": "Filter(_ranges, ExactVarianceWindow.Units(high - low), commit)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "(Units(numerator) * d.Sign) << 1074",
+    "after": "(Units(numerator) * d.Sign) << 1073",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "d.IsZero ? default : Value",
+    "after": "d.IsZero ? new RocBankValue(1) : Value",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "if (commit) history.TryAdd(current, out _)",
+    "after": "if (true) history.TryAdd(current, out _)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-preview-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_numerator.Next(legs.Numerator, commit)",
+    "after": "_numerator.Next(legs.Numerator, true)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-preview-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_denominator.Next(legs.Denominator, commit)",
+    "after": "_denominator.Next(legs.Denominator, true)",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-reset-body",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_bodies.Clear();",
+    "after": "if (_ranges.Count == 0) _bodies.Clear();",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_indices.Clear();",
+    "after": "if (_indices.Count == 0) _indices.Clear();",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-reset-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_numerator?.Reset();",
+    "after": "if (_indices.Count != 0) _numerator?.Reset();",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-reset-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "_denominator?.Reset();",
+    "after": "if (_indices.Count != 0) _denominator?.Reset();",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory"
+  },
+  {
+    "id": "relative-vigor-nan-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory",
+    "scope": "public sealed class RelativeVigorIndexState :"
+  },
+  {
+    "id": "relative-vigor-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.FourTapCandleLegsRatioAndSignalKeepTheirRoundedStages|FullyQualifiedName~RelativeVigorNumericalTests.SelectedCloseAndCustomerAveragesPreserveCandleLegsAndFixedSignal|FullyQualifiedName~RelativeVigorNumericalTests.InvalidFieldsCannotAdvanceLegAveragesOrSignalHistory",
+    "scope": "private static ComputeBuffer ComputeRelativeVigorOutput("
+  },
+  {
+    "id": "relative-vigor-published-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVigorWindow.cs",
+    "before": "var d = Units(denominator); var value = d.IsZero ? default : Value(RocBankValue.RoundUnits((Units(numerator) * d.Sign) << 1074, BigInteger.Abs(d)));",
+    "after": "var d = Units(denominator); var value = d.IsZero ? default : new RocBankValue(numerator.Publish() / denominator.Publish());",
+    "filter": "FullyQualifiedName~RelativeVigorNumericalTests.ExtendedCustomerRatiosCancelBeforeSignalPublication"
   }
 ]

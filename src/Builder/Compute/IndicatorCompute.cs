@@ -4238,51 +4238,21 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRelativeVigorIndexFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRelativeVigorIndex measures how far each bar closed above its open against how far it
-        // ranged, weighting the current bar and the three before it 1-2-2-1, then divides the smoothed
-        // numerator by the smoothed denominator. OscillatorCore.RelativeVigorIndex read the raw ticker rows
-        // instead of the chained series and took no average type at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var close = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
+        return ComputeRelativeVigorOutput(data, context, length, maType, false);
+    }
 
-        using var numerators = context.Rent(count);
-        using var denominators = context.Rent(count);
-        var numerator = numerators.WritableSpan;
-        var denominator = denominators.WritableSpan;
-        for (var i = 0; i < count; i++)
+    private static ComputeBuffer ComputeRelativeVigorOutput(StockData data, ComputeContext context, int length, MovingAvgType kind, bool signal)
+    {
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind); using var window = new RelativeVigorWindow(kind, length, external, input.Count); var output = context.Rent(input.Count);
+        if (external)
         {
-            // Bars before the fourth have no history to weight, so those terms read as zero.
-            var a = close[i] - opens[i];
-            var b = i >= 1 ? close[i - 1] - opens[i - 1] : 0;
-            var c = i >= 2 ? close[i - 2] - opens[i - 2] : 0;
-            var d = i >= 3 ? close[i - 3] - opens[i - 3] : 0;
-            var e = highs[i] - lows[i];
-            var f = i >= 1 ? highs[i - 1] - lows[i - 1] : 0;
-            var g = i >= 2 ? highs[i - 2] - lows[i - 2] : 0;
-            var h = i >= 3 ? highs[i - 3] - lows[i - 3] : 0;
-
-            numerator[i] = (a + (2 * b) + (2 * c) + d) / 6;
-            denominator[i] = (e + (2 * f) + (2 * g) + h) / 6;
+            using var numerator = context.Rent(input.Count); using var denominator = context.Rent(input.Count); using var n = context.Rent(input.Count); using var d = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) { var legs = window.Generate(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true); numerator.WritableSpan[i] = legs.Numerator.Publish(); denominator.WritableSpan[i] = legs.Denominator.Publish(); }
+            MovingAverage(data, kind, length, numerator.Span, n.WritableSpan); MovingAverage(data, kind, length, denominator.Span, d.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var r = window.Finish(new RocBankValue(n.Span[i]), new RocBankValue(d.Span[i]), true); output.WritableSpan[i] = signal ? r.Signal : r.Value; }
         }
-
-        using var numeratorAverage = context.Rent(count);
-        using var denominatorAverage = context.Rent(count);
-        MovingAverage(data, maType, length, numerators.Span, numeratorAverage.WritableSpan);
-        MovingAverage(data, maType, length, denominators.Span, denominatorAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var smoothedDenominator = denominatorAverage.Span[i];
-            output[i] = smoothedDenominator != 0 ? numeratorAverage.Span[i] / smoothedDenominator : 0;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true); output.WritableSpan[i] = signal ? r.Signal : r.Value; }
+        return output;
     }
 
     /// <summary>
@@ -7648,26 +7618,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRelativeVigorIndexSignalFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // The signal line CalculateRelativeVigorIndex publishes is the same 1-2-2-1 weighting applied to the
-        // index itself, not a second moving average, so the spec's signal length has nothing to set - which is
-        // why it carries [Obsolete] - and the arm no longer takes one.
-        var count = data.Count;
-
-        using var index = ComputeRelativeVigorIndexFast(data, context, length, maType);
-        var rvi = index.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var k = i >= 1 ? rvi[i - 1] : 0;
-            var l = i >= 2 ? rvi[i - 2] : 0;
-            var m = i >= 3 ? rvi[i - 3] : 0;
-
-            output[i] = (rvi[i] + (2 * k) + (2 * l) + m) / 6;
-        }
-
-        return buffer;
+        return ComputeRelativeVigorOutput(data, context, length, maType, true);
     }
 
     internal static ComputeBuffer ComputeVolumeMomentumOscillatorFast(StockData data, ComputeContext context, int shortLength = 5, int longLength = 20)

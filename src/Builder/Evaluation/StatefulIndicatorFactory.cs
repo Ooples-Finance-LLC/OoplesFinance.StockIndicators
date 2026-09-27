@@ -803,6 +803,8 @@ internal static partial class StatefulIndicatorFactory
             StochRsiSpecOptions srsi => new StochasticRelativeStrengthIndexState(maType: srsi.MaType, length: srsi.RsiLength, stochLength: srsi.StochLength),
             PvoSpecOptions pvo => new PercentageVolumeOscillatorState(maType: pvo.MaType, fastLength: pvo.Length,
                 signalLength: pvo.SignalLength),
+            RelativeVigorIndexSpecOptions vigor => new RelativeVigorIndexState(vigor.MaType, vigor.Length),
+            RelativeVigorIndexSignalSpecOptions vigor => new RelativeVigorIndexState(length: vigor.Length),
             RviSpecOptions rvi => new RelativeVigorIndexState(length: rvi.Length),
 
             // Additional MAs - using named parameters to skip MovingAvgType defaults

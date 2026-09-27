@@ -599,41 +599,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RelativeVigorIndex(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Numerator: (Close-Open) + 2*(Close[1]-Open[1]) + 2*(Close[2]-Open[2]) + (Close[3]-Open[3])
-            double numSum = 0;
-            double denomSum = 0;
-
-            for (var j = 0; j < length; j++)
-            {
-                var idx = i - j;
-                var co0 = close[idx] - open[idx];
-                var co1 = idx >= 1 ? close[idx - 1] - open[idx - 1] : 0;
-                var co2 = idx >= 2 ? close[idx - 2] - open[idx - 2] : 0;
-                var co3 = idx >= 3 ? close[idx - 3] - open[idx - 3] : 0;
-                numSum += (co0 + (2 * co1) + (2 * co2) + co3) / 6;
-
-                var hl0 = high[idx] - low[idx];
-                var hl1 = idx >= 1 ? high[idx - 1] - low[idx - 1] : 0;
-                var hl2 = idx >= 2 ? high[idx - 2] - low[idx - 2] : 0;
-                var hl3 = idx >= 3 ? high[idx - 3] - low[idx - 3] : 0;
-                denomSum += (hl0 + (2 * hl1) + (2 * hl2) + hl3) / 6;
-            }
-
-            output[i] = denomSum != 0 ? numSum / denomSum : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RelativeVigorWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], high[i], low[i], true).Value;
     }
 
     /// <summary>

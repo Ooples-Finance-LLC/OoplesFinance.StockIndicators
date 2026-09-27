@@ -2654,77 +2654,16 @@ public static partial class Calculations
     public static StockData CalculateRelativeVigorIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
-        List<double> rviList = new(stockData.Count);
-        List<double> numeratorList = new(stockData.Count);
-        List<double> denominatorList = new(stockData.Count);
-        List<double> signalLineList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues; var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new RelativeVigorWindow(maType, length, external, input.Count); List<double> values = new(input.Count), signal = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevOpen1 = i >= 1 ? openList[i - 1] : 0;
-            var prevClose1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
-            var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
-            var prevOpen2 = i >= 2 ? openList[i - 2] : 0;
-            var prevClose2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-            var prevOpen3 = i >= 3 ? openList[i - 3] : 0;
-            var prevClose3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevHigh3 = i >= 3 ? highList[i - 3] : 0;
-            var prevLow3 = i >= 3 ? lowList[i - 3] : 0;
-            var a = currentClose - currentOpen;
-            var b = prevClose1 - prevOpen1;
-            var c = prevClose2 - prevOpen2;
-            var d = prevClose3 - prevOpen3;
-            var e = currentHigh - currentLow;
-            var f = prevHigh1 - prevLow1;
-            var g = prevHigh2 - prevLow2;
-            var h = prevHigh3 - prevLow3;
-
-            var numerator = (a + (2 * b) + (2 * c) + d) / 6;
-            numeratorList.Add(numerator);
-
-            var denominator = (e + (2 * f) + (2 * g) + h) / 6;
-            denominatorList.Add(denominator);
+            List<double> numerator = new(input.Count), denominator = new(input.Count); for (var i = 0; i < input.Count; i++) { var legs = window.Generate(input[i], stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], true); numerator.Add(legs.Numerator.Publish()); denominator.Add(legs.Denominator.Publish()); }
+            var n = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(numerator), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, numerator); var d = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(denominator), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, denominator);
+            for (var i = 0; i < input.Count; i++) { var r = window.Finish(new RocBankValue(n[i]), new RocBankValue(d[i]), true); values.Add(r.Value); signal.Add(r.Signal); }
         }
-
-        var numeratorAvgList = GetMovingAverageList(stockData, maType, length, numeratorList);
-        var denominatorAvgList = GetMovingAverageList(stockData, maType, length, denominatorList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var numeratorAvg = numeratorAvgList[i];
-            var denominatorAvg = denominatorAvgList[i];
-            var k = i >= 1 ? rviList[i - 1] : 0;
-            var l = i >= 2 ? rviList[i - 2] : 0;
-            var m = i >= 3 ? rviList[i - 3] : 0;
-
-            var rvi = denominatorAvg != 0 ? numeratorAvg / denominatorAvg : 0;
-            rviList.Add(rvi);
-
-            var prevSignalLine = GetLastOrDefault(signalLineList);
-            var signalLine = (rvi + (2 * k) + (2 * l) + m) / 6;
-            signalLineList.Add(signalLine);
-
-            var signal = GetCompareSignal(rvi - signalLine, k - prevSignalLine);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rvi", rviList },
-            { "Signal", signalLineList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rviList);
-        stockData.IndicatorName = IndicatorName.RelativeVigorIndex;
-
-        return stockData;
+        else for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], true); values.Add(r.Value); signal.Add(r.Signal); }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - signal[i], i > 0 ? values[i - 1] - signal[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rvi", values }, { "Signal", signal } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.RelativeVigorIndex; return stockData;
     }
 
 

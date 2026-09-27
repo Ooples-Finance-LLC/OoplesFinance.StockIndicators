@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RelativeVigorIndex)
+        {
+            var vigorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < vigorKeys.Length; slot++) { var key = vigorKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RelativeVigorOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.RelativeVolatilityIndexHigh or IndicatorName.RelativeVolatilityIndexLow)
         {
             var key = builtIn.BatchName == IndicatorName.RelativeVolatilityIndexHigh ? "RviHigh" : "RviLow";

@@ -945,104 +945,16 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
 [PrimaryOutput("Rvi")]
 public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _numeratorMa;
-    private readonly IMovingAverageSmoother _denominatorMa;
-    private readonly PooledRingBuffer<double> _openValues;
-    private readonly PooledRingBuffer<double> _closeValues;
-    private readonly PooledRingBuffer<double> _rangeValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevRvi1;
-    private double _prevRvi2;
-    private double _prevRvi3;
-
-    public RelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _numeratorMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _denominatorMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _openValues = new PooledRingBuffer<double>(3);
-        _closeValues = new PooledRingBuffer<double>(3);
-        _rangeValues = new PooledRingBuffer<double>(3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RelativeVigorWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public RelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.RelativeVigorIndex;
-
-    public void Reset()
-    {
-        _numeratorMa.Reset();
-        _denominatorMa.Reset();
-        _openValues.Clear();
-        _closeValues.Clear();
-        _rangeValues.Clear();
-        _prevRvi1 = 0;
-        _prevRvi2 = 0;
-        _prevRvi3 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var open = bar.Open;
-        var high = bar.High;
-        var low = bar.Low;
-        var prevOpen1 = _openValues.Count >= 1 ? _openValues[_openValues.Count - 1] : 0;
-        var prevOpen2 = _openValues.Count >= 2 ? _openValues[_openValues.Count - 2] : 0;
-        var prevOpen3 = _openValues.Count >= 3 ? _openValues[_openValues.Count - 3] : 0;
-        var prevClose1 = _closeValues.Count >= 1 ? _closeValues[_closeValues.Count - 1] : 0;
-        var prevClose2 = _closeValues.Count >= 2 ? _closeValues[_closeValues.Count - 2] : 0;
-        var prevClose3 = _closeValues.Count >= 3 ? _closeValues[_closeValues.Count - 3] : 0;
-        var prevRange1 = _rangeValues.Count >= 1 ? _rangeValues[_rangeValues.Count - 1] : 0;
-        var prevRange2 = _rangeValues.Count >= 2 ? _rangeValues[_rangeValues.Count - 2] : 0;
-        var prevRange3 = _rangeValues.Count >= 3 ? _rangeValues[_rangeValues.Count - 3] : 0;
-
-        var a = close - open;
-        var b = prevClose1 - prevOpen1;
-        var c = prevClose2 - prevOpen2;
-        var d = prevClose3 - prevOpen3;
-        var e = high - low;
-        var f = prevRange1;
-        var g = prevRange2;
-        var h = prevRange3;
-
-        var numerator = (a + (2 * b) + (2 * c) + d) / 6;
-        var denominator = (e + (2 * f) + (2 * g) + h) / 6;
-        var numeratorAvg = _numeratorMa.Next(numerator, isFinal);
-        var denominatorAvg = _denominatorMa.Next(denominator, isFinal);
-        var rvi = denominatorAvg != 0 ? numeratorAvg / denominatorAvg : 0;
-        var signal = (rvi + (2 * _prevRvi1) + (2 * _prevRvi2) + _prevRvi3) / 6;
-
-        if (isFinal)
-        {
-            _openValues.TryAdd(open, out _);
-            _closeValues.TryAdd(close, out _);
-            _rangeValues.TryAdd(high - low, out _);
-            _prevRvi3 = _prevRvi2;
-            _prevRvi2 = _prevRvi1;
-            _prevRvi1 = rvi;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Rvi", rvi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rvi, outputs);
+        StreamingInputValidation.Validate(bar); var r = _window.Next(_input.GetValue(bar), bar.Open, bar.High, bar.Low, isFinal); return new(r.Value, includeOutputs ? new Dictionary<string, double> { { "Rvi", r.Value }, { "Signal", r.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _numeratorMa.Dispose();
-        _denominatorMa.Dispose();
-        _openValues.Dispose();
-        _closeValues.Dispose();
-        _rangeValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rvi")]
