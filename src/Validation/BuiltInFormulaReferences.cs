@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.AutoLineWithDrift)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutoDriftOutputs(bars,Integer(builtIn.CreateOptions(),"Length",500))["Alwd"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AutoLine)
         {
             yield return IndicatorValidationRule.Reference(0, bars => AutoLineOutputs(bars,Integer(builtIn.CreateOptions(),"Length",500))["Al"], IndicatorErrorBudget.Exact);

@@ -29937,5 +29937,119 @@
     "after": "output[i] = currentValue;",
     "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests",
     "scope": "internal static ComputeBuffer ComputeAutoLineFast("
+  },
+  {
+    "id": "auto-drift-period-product",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_gain=1d/(2L*_length)",
+    "after": "_gain=1d/(2*_length)",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-history-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_lines.Count>_length?_lines.Peek():seed",
+    "after": "_lines.Count>=_length?_lines.Peek():seed",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-deviation-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "(BigInteger)_length*_length",
+    "after": "(BigInteger)_length",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_prices.Count<_length-1?0:",
+    "after": "_prices.Count<0?0:",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_previous=line;",
+    "after": "_previous=new RocBankValue(line.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-history-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_lines.Enqueue(line);",
+    "after": "_lines.Enqueue(new RocBankValue(line.Publish()));",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-drift-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "Combine(previous,drift);",
+    "after": "Combine(previous,drift,-1);",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDriftWindow.cs",
+    "before": "_lines.Clear();",
+    "after": "// retain line history\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
+  },
+  {
+    "id": "auto-drift-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory",
+    "scope": "internal static ComputeBuffer ComputeAutoLineWithDriftFast("
+  },
+  {
+    "id": "auto-drift-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory",
+    "scope": "public sealed class AutoLineWithDriftState"
+  },
+  {
+    "id": "auto-drift-native-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "            AutoLineWithDriftSpecOptions autoDrift => new AutoLineWithDriftState(autoDrift.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.AllRoutesMatchIndependentPopulationBandsAndDrift"
+  },
+  {
+    "id": "auto-drift-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " AutoLineWithDriftSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.AllRoutesMatchIndependentPopulationBandsAndDrift"
+  },
+  {
+    "id": "auto-drift-reference-gain",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.AutoDrift.cs",
+    "before": "1d/(2L*length)",
+    "after": "1d/(3L*length)",
+    "filter": "FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.HandDriftUsesTheLineFromLengthPlusOneBarsEarlier|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.MaximumPeriodUsesPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.UnrepresentablePublishedDriftDoesNotPoisonLaterValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.SelectedRawClosesDefineBandsAndHeldValues|FullyQualifiedName~ValidationTests.AutoDriftNumericalTests.InvalidFieldsDoNotAdvanceHistory"
   }
 ]

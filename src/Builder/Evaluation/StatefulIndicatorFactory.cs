@@ -410,6 +410,7 @@ internal static partial class StatefulIndicatorFactory
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
             TurboTriggerSpecOptions turbo => new TurboTriggerState(turbo.MaType, turbo.Length),
             TradingMadeMoreSimplerOscillatorSpecOptions trading => new TradingMadeMoreSimplerOscillatorState(length1: trading.Length),
+            AutoLineWithDriftSpecOptions autoDrift => new AutoLineWithDriftState(autoDrift.Length),
             AutoLineSpecOptions autoLine => new AutoLineState(autoLine.Length),
             AverageAbsoluteErrorNormalizationSpecOptions absoluteError => new AverageAbsoluteErrorNormalizationState(absoluteError.Length),
             RetrospectiveCandlestickChartSpecOptions retrospective => new RetrospectiveCandlestickChartState(retrospective.Length),

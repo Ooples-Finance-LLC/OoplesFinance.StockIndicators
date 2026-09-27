@@ -528,41 +528,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAutoLineWithDrift(this StockData stockData, int length = 500)
     {
-        List<double> aList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, as in the automatic line above: the band the line
-        // holds within is one deviation either side of it, and sigma in a band is the windowed deviation. The
-        // quantity this replaces is about 55% wider, so the band was too wide and the line drifted where it
-        // should have jumped. See #190.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);var (input,_,_,_,_)=GetInputValuesList(stockData);var window=new AutoDriftWindow(length);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var currentValue = inputList[i];
-            var dev = stdDevList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var r = Math.Round(currentValue);
-
-            var prevA = i >= 1 ? aList[i - 1] : r;
-            var priorA = i >= length + 1 ? aList[i - (length + 1)] : r;
-            var a = currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue :
-                prevA + ((double)1 / (length * 2) * (prevA - priorA));
-            aList.Add(a);
-
-            var signal = GetCompareSignal(currentValue - a, prevValue - prevA);
-            signalsList?.Add(signal);
+            var value=window.Next(input[i],true);var previous=i>0?values[i-1]:Math.Round(input[i]);var previousPrice=i>0?input[i-1]:0;
+            signals?.Add(GetCompareSignal(input[i]-value,previousPrice-previous));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Alwd", aList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName.AutoLineWithDrift;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Alwd",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.AutoLineWithDrift;return stockData;
     }
 
 

@@ -6928,34 +6928,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeAutoLineWithDriftFast(StockData data, ComputeContext context, int length = 500)
     {
-        // CalculateAutoLineWithDrift holds a line inside a band of one windowed standard deviation either
-        // side of itself, jumping to the value when the value leaves the band and otherwise drifting by a
-        // fraction of how far the line has moved over the window. TrendCore.AutoLineWithDrift took the close
-        // and implemented something else.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var dev = stdDev[i];
-            var r = Math.Round(currentValue);
-
-            var prevA = i >= 1 ? output[i - 1] : r;
-            var priorA = i >= length + 1 ? output[i - (length + 1)] : r;
-            output[i] = currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue :
-                prevA + ((double)1 / (length * 2) * (prevA - priorA));
-        }
-
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);var window=new AutoDriftWindow(length);
+        for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);
+        return output;
     }
 
     /// <summary>

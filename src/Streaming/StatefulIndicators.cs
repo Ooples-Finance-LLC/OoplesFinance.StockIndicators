@@ -7163,80 +7163,16 @@ public sealed class AutoLineState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Alwd")]
 public sealed class AutoLineWithDriftState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private int _index;
-    private bool _hasPrev;
-
-    public AutoLineWithDriftState(int length = 500)
+    private readonly AutoDriftWindow _window;
+    public AutoLineWithDriftState(int length=500)=>_window=new AutoDriftWindow(length);
+    public IndicatorName Name=>IndicatorName.AutoLineWithDrift;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-
-        // No moving-average type: a windowed deviation is taken about the window's own mean.
-        _stdDev = new RollingStandardDeviation(_length);
-        _values = new PooledRingBuffer<double>(_length + 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Alwd",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.AutoLineWithDrift;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _values.Clear();
-        _prevA = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-
-        // Fed the resolved input rather than the bar, matching the batch calculation.
-        var dev = _stdDev.Next(value, isFinal);
-        var r = Math.Round(value);
-        var prevA = _hasPrev ? _prevA : r;
-        var priorA = r;
-        if (_index >= _length + 1 && _values.Count >= _length + 1)
-        {
-            var priorIndex = _values.Count - (_length + 1);
-            priorA = priorIndex >= 0 ? _values[priorIndex] : r;
-        }
-
-        var drift = (double)1 / (_length * 2) * (prevA - priorA);
-        var a = value > prevA + dev ? value : value < prevA - dev ? value : prevA + drift;
-
-        if (isFinal)
-        {
-            _values.TryAdd(a, out _);
-            _prevA = a;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Alwd", a }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
-    }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 [PrimaryOutput("Arma")]
