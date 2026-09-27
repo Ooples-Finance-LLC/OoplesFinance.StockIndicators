@@ -659,39 +659,38 @@ public static partial class Calculations
         List<double> rhList = new(stockData.Count);
         List<double> rlList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
+        var inputList=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;
+        using var window=new TironeWindow(length);
 
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hh = highestList[i];
-            var ll = lowestList[i];
+            var levels=window.Next(stockData.HighPrices[i],stockData.LowPrices[i],currentValue,true);
 
-            var tlh = hh - ((hh - ll) / 3);
+            var tlh = levels[0];
             tlhList.Add(tlh);
 
-            var clh = ll + ((hh - ll) / 2);
+            var clh = levels[1];
             clhList.Add(clh);
 
-            var blh = ll + ((hh - ll) / 3);
+            var blh = levels[2];
             blhList.Add(blh);
 
             var prevAm = GetLastOrDefault(amList);
-            var am = (hh + ll + currentValue) / 3;
+            var am = levels[3];
             amList.Add(am);
 
-            var eh = am + (hh - ll);
+            var eh = levels[4];
             ehList.Add(eh);
 
-            var el = am - (hh - ll);
+            var el = levels[5];
             elList.Add(el);
 
-            var rh = (2 * am) - ll;
+            var rh = levels[6];
             rhList.Add(rh);
 
-            var rl = (2 * am) - hh;
+            var rl = levels[7];
             rlList.Add(rl);
 
             var signal = GetCompareSignal(currentValue - am, prevValue - prevAm);

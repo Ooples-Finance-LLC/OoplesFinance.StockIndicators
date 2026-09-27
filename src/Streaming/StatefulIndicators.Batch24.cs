@@ -1301,67 +1301,20 @@ public sealed class TimePriceIndicatorState : IStreamingIndicatorState, IDisposa
 }
 
 [PrimaryOutput("Am")]
-public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable   
+public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
-    public TironeLevelsState(int length = 20)
+    private readonly TironeWindow _window;
+    public TironeLevelsState(int length=20)=>_window=new(length);
+    public IndicatorName Name=>IndicatorName.TironeLevels;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var values=_window.Next(bar.High,bar.Low,bar.Close,isFinal);
+        IReadOnlyDictionary<string,double>? outputs=null;
+        if(includeOutputs){var result=new Dictionary<string,double>(8);for(var i=0;i<values.Length;i++)result[TironeWindow.Keys[i]]=values[i];outputs=result;}
+        return new(values[3],outputs);
     }
-
-    public IndicatorName Name => IndicatorName.TironeLevels;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-
-        var tlh = highest - ((highest - lowest) / 3);
-        var clh = lowest + ((highest - lowest) / 2);
-        var blh = lowest + ((highest - lowest) / 3);
-        var am = (highest + lowest + value) / 3;
-        var eh = am + (highest - lowest);
-        var el = am - (highest - lowest);
-        var rh = (2 * am) - lowest;
-        var rl = (2 * am) - highest;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(8)
-            {
-                { "Tlh", tlh },
-                { "Clh", clh },
-                { "Blh", blh },
-                { "Am", am },
-                { "Eh", eh },
-                { "El", el },
-                { "Rh", rh },
-                { "Rl", rl }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(am, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Tai")]

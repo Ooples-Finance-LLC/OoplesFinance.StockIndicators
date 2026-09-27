@@ -2248,6 +2248,7 @@ internal static partial class IndicatorCompute
             EhlersUniversalTradingFilterSpecOptions eutf => ComputeEhlersUniversalTradingFilterFast(data, context, eutf.Length1, eutf.Length2, eutf.Mult, eutf.MaType, spec.OutputKey),
             EhlersAdaptiveCommodityChannelIndexV2SpecOptions eacciv2 => ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(data, context, eacciv2.Length1, eacciv2.Length2, eacciv2.Length3, eacciv2.MaType, spec.OutputKey),
             EhlersAdaptiveRelativeStrengthIndexV2SpecOptions earsiv2 => ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(data, context, earsiv2.Length1, earsiv2.Length2, earsiv2.Length3, earsiv2.MaType, spec.OutputKey),
+            TironeLevelsSpecOptions tirone => ComputeTironeFast(data, context, tirone.Length, spec.OutputKey),
             StandardPivotPointsSpecOptions => ComputeDailyPivotFast(data, context, true, spec.OutputKey),
             DynamicPivotPointsSpecOptions => ComputeDailyPivotFast(data, context, false, spec.OutputKey),
             EhlersAdaptiveStochasticInverseFisherTransformSpecOptions inverse => ComputeAdaptiveStochasticInverseFisherFast(data, context, inverse, spec.OutputKey),
@@ -24280,6 +24281,16 @@ internal static partial class IndicatorCompute
         }
 
         return outputKey == "Signal" ? SmoothPublished(data, context, buffer, length2, maType) : buffer;
+    }
+
+    private static ComputeBuffer ComputeTironeFast(StockData data,ComputeContext context,int length,string? outputKey)
+    {
+        var slot=outputKey is null?3:Array.IndexOf(TironeWindow.Keys,outputKey);
+        if(slot<0)throw new ArgumentOutOfRangeException(nameof(outputKey));
+        var close=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;
+        using var window=new TironeWindow(length);var buffer=context.Rent(data.Count);
+        for(var i=0;i<data.Count;i++)buffer.WritableSpan[i]=window.Next(data.HighPrices[i],data.LowPrices[i],close[i],true)[slot];
+        return buffer;
     }
 
     private static ComputeBuffer ComputeDailyPivotFast(StockData data, ComputeContext context, bool standard, string? outputKey)

@@ -28009,5 +28009,193 @@
     "after": "public void Reset() { }",
     "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
     "scope": "public sealed class WoodiePivotPointsState :"
+  },
+  {
+    "id": "tirone-period",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "_length=Math.Max(1,length)",
+    "after": "_length=1",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "first.Value.Index<=_index-_length",
+    "after": "first.Value.Index<_index-_length",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-stored-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "queue.AddLast((_index,current))",
+    "after": "queue.AddLast((_index,0))",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Math.Max(current,first.Value.Value)",
+    "after": "Math.Min(current,first.Value.Value)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Math.Min(current,first.Value.Value)",
+    "after": "Math.Max(current,first.Value.Value)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-commit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "if(commit)\n        {",
+    "after": "if(true)\n        {",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "_highs.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-reset-low",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "_lows.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Combine(new(h),new(l),-1)",
+    "after": "Combine(new(h),new(l))",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-third-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "divisor:3",
+    "after": "divisor:2",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-half-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "divisor:2",
+    "after": "divisor:3",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Round(total,count:3)",
+    "after": "Round(total,count:2)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-early-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "total.Add(h);total.Add(l);total.Add(close);",
+    "after": "total.Add(h+l+close);",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-top-third",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Combine(new(h),third,-1)",
+    "after": "Combine(new(h),third)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-upper-extension",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Combine(mean,range).Publish()",
+    "after": "Combine(mean,range,-1).Publish()",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-lower-extension",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "Combine(mean,range,-1).Publish()",
+    "after": "Combine(mean,range).Publish()",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-reflection-low",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "upper.Add(l,-1)",
+    "after": "upper.Add(l)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-reflection-high",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "lower.Add(h,-1)",
+    "after": "lower.Add(h)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-early-range",
+    "module": "numerical",
+    "file": "src/Helpers/TironeWindow.cs",
+    "before": "a.AddTo(ref sum);b.AddTo(ref sum,weight);",
+    "after": "sum.Add(a.Publish()+b.Publish()*weight);",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "before": "window.Next(stockData.HighPrices[i],stockData.LowPrices[i],currentValue,true)",
+    "after": "window.Next(Math.Max(stockData.HighPrices[i],currentValue),stockData.LowPrices[i],currentValue,true)",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "public static StockData CalculateTironeLevels("
+  },
+  {
+    "id": "tirone-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema",
+    "scope": "public sealed class TironeLevelsState :"
+  },
+  {
+    "id": "tirone-raw-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "scope": "private static ComputeBuffer ComputeTironeFast(",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "tirone-raw-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "new TironeWindow(length)",
+    "after": "new TironeWindow(1)",
+    "scope": "private static ComputeBuffer ComputeTironeFast(",
+    "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
   }
 ]

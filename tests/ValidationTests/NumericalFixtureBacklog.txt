@@ -1870,10 +1870,6 @@ OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/minimum-length2
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TimeAndMoneyChannel/weighted-average
-OoplesFinance.StockIndicators.Indicators.TironeLevels/default
-OoplesFinance.StockIndicators.Indicators.TironeLevels/longer-periods
-OoplesFinance.StockIndicators.Indicators.TironeLevels/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TironeLevels/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TopsAndBottomsFinder/default
 OoplesFinance.StockIndicators.Indicators.TopsAndBottomsFinder/longer-periods
 OoplesFinance.StockIndicators.Indicators.TopsAndBottomsFinder/minimum-periods

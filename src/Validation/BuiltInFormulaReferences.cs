@@ -87,6 +87,11 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>RatioOchlOutputs(bars)["Rochla"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TironeLevels)
+        {
+            var tironeKeys=new[]{"Tlh","Clh","Blh","Am","Eh","El","Rh","Rl"};var tironeLength=Integer(builtIn.CreateOptions(),"Length",20);
+            for(var slot=0;slot<tironeKeys.Length;slot++){var key=tironeKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>TironeOutputs(bars,tironeLength)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.WoodiePivotPoints)
         {
             var woodieKeys=new[]{"Pivot","S1","S2","S3","S4","R1","R2","R3","R4","M1","M2","M3","M4"};
