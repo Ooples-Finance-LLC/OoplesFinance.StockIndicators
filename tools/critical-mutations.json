@@ -30150,5 +30150,138 @@
     "before": "numerator += ReferenceFraction.FromDouble(bars[j].Close) * volume;",
     "after": "numerator += ReferenceFraction.FromDouble(bars[j].Close);",
     "filter": "FullyQualifiedName~ValidationTests.BuffNumericalTests.HandWeightsUsePartialWindowsAndDistinctPeriods|FullyQualifiedName~ValidationTests.BuffNumericalTests.ProductsAndTotalsRemainExactAcrossExtremePricesAndVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.SelectedRawPricesKeepOriginalVolumes|FullyQualifiedName~ValidationTests.BuffNumericalTests.InvalidFieldsDoNotAdvanceEitherWindow"
+  },
+  {
+    "id": "trading-agreement-range1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "ClampedRangePosition.Percent(value, stoch1Low, stoch1High)",
+    "after": "stoch1High == stoch1Low ? 0 : MathHelper.MinOrMax((value - stoch1Low) / (stoch1High - stoch1Low) * 100, 100, 0)",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-sma1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_stoch1Smoother = maType == MovingAvgType.SimpleMovingAverage\n            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))\n            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));",
+    "after": "_stoch1Smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-range2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "ClampedRangePosition.Percent(value, stoch2Low, stoch2High)",
+    "after": "stoch2High == stoch2Low ? 0 : MathHelper.MinOrMax((value - stoch2Low) / (stoch2High - stoch2Low) * 100, 100, 0)",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-sma2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_stoch2Smoother = maType == MovingAvgType.SimpleMovingAverage\n            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))\n            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));",
+    "after": "_stoch2Smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-agreement",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "bufRsi > _limit && bufStoch1 > _limit && bufStoch2 > _limit",
+    "after": "bufRsi > _limit || bufStoch1 > _limit || bufStoch2 > _limit",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-bear-sign",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "var tmmso = bufHistUp - bufHistDn;",
+    "after": "var tmmso = bufHistUp + bufHistDn;",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_rsi.Next(value, isFinal)",
+    "after": "_rsi.Next(value, true)",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "_rsi.Reset();",
+    "after": "// retain RSI\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "double value; try { value = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { value = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent",
+    "scope": "public sealed class TradingMadeMoreSimplerOscillatorState"
+  },
+  {
+    "id": "trading-agreement-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.RawSelectedClosesKeepOriginalExtrema",
+    "scope": "internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast("
+  },
+  {
+    "id": "trading-agreement-batch-restoration",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "stockData.RestoreInputSeries(callerSeries);\n        var stochastic2List",
+    "after": "// omit restoring caller prices\n        var stochastic2List",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.RawSelectedClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds",
+    "scope": "public static StockData CalculateTradingMadeMoreSimplerOscillator("
+  },
+  {
+    "id": "trading-agreement-reference-period",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TradingAgreement.cs",
+    "before": "Math.Max(1, shortLength), Math.Max(1, smoothing)",
+    "after": "Math.Max(1, length), Math.Max(1, smoothing)",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.HandAgreementRequiresAllThreeComponentsAndStrictThresholds|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement|FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.InvalidFieldsDoNotAdvanceAnyComponent"
+  },
+  {
+    "id": "trading-agreement-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " TradingMadeMoreSimplerOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.EveryRouteMatchesIndependentStrengthAndStochasticAgreement"
+  },
+  {
+    "id": "trading-agreement-raw-sma-short",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(",
+    "before": "StochasticSmooth(data, maType, smoothLength, shortFastK.Span, shortFastD.WritableSpan);",
+    "after": "MovingAverage(data, maType, smoothLength, shortFastK.Span, shortFastD.WritableSpan);",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement"
+  },
+  {
+    "id": "trading-agreement-raw-sma-long",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTradingMadeMoreSimplerOscillatorFast(",
+    "before": "StochasticSmooth(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);",
+    "after": "MovingAverage(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);",
+    "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement"
   }
 ]

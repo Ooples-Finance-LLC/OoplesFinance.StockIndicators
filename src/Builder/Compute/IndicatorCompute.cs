@@ -10502,8 +10502,8 @@ internal static partial class IndicatorCompute
 
         using var shortFastD = context.Rent(count);
         using var longFastD = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, shortFastK.Span, shortFastD.WritableSpan);
-        MovingAverage(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);
+        StochasticSmooth(data, maType, smoothLength, shortFastK.Span, shortFastD.WritableSpan);
+        StochasticSmooth(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);
         var stoch1 = shortFastD.Span;
         var stoch2 = longFastD.Span;
 

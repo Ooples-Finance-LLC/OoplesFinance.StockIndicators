@@ -847,8 +847,12 @@ public sealed class TradingMadeMoreSimplerOscillatorState : IStreamingIndicatorS
         _stoch1Low = new RollingWindowMin(_length2);
         _stoch2High = new RollingWindowMax(_length1);
         _stoch2Low = new RollingWindowMin(_length1);
-        _stoch1Smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _stoch2Smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _stoch1Smoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
+        _stoch2Smoother = maType == MovingAvgType.SimpleMovingAverage
+            ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, smoothLength))
+            : MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -872,14 +876,12 @@ public sealed class TradingMadeMoreSimplerOscillatorState : IStreamingIndicatorS
 
         var stoch1High = isFinal ? _stoch1High.Add(bar.High, out _) : _stoch1High.Preview(bar.High, out _);
         var stoch1Low = isFinal ? _stoch1Low.Add(bar.Low, out _) : _stoch1Low.Preview(bar.Low, out _);
-        var stoch1Range = stoch1High - stoch1Low;
-        var stoch1 = stoch1Range != 0 ? MathHelper.MinOrMax((value - stoch1Low) / stoch1Range * 100, 100, 0) : 0;
+        var stoch1 = ClampedRangePosition.Percent(value, stoch1Low, stoch1High);
         var stoch1FastD = _stoch1Smoother.Next(stoch1, isFinal);
 
         var stoch2High = isFinal ? _stoch2High.Add(bar.High, out _) : _stoch2High.Preview(bar.High, out _);
         var stoch2Low = isFinal ? _stoch2Low.Add(bar.Low, out _) : _stoch2Low.Preview(bar.Low, out _);
-        var stoch2Range = stoch2High - stoch2Low;
-        var stoch2 = stoch2Range != 0 ? MathHelper.MinOrMax((value - stoch2Low) / stoch2Range * 100, 100, 0) : 0;
+        var stoch2 = ClampedRangePosition.Percent(value, stoch2Low, stoch2High);
         var stoch2FastD = _stoch2Smoother.Next(stoch2, isFinal);
 
         var bufRsi = rsi - _threshold;
