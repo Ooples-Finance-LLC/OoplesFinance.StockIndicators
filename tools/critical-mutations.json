@@ -29232,5 +29232,21 @@
     "after": "var buffer=context.Rent(data.Count);TrendCore.FloorPivotPointR1(data.HighPrices.ToArray(),data.LowPrices.ToArray(),data.ClosePrices.ToArray(),buffer.WritableSpan);return buffer;",
     "filter": "FullyQualifiedName~FloorPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FloorPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FloorPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FloorPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FloorPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~FloorPivotNumericalTests.HandLevelsCoreAndAliasesKeepTheirOwnPrimaryOutputs",
     "scope": "internal static ComputeBuffer ComputeFloorPivotPointR1Fast("
+  },
+  {
+    "id": "pivot-alias-native-formula",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "            PivotPointSpecOptions => new FloorPivotPointsState()",
+    "after": "            PivotPointSpecOptions => new StandardPivotPointsState()",
+    "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
+  },
+  {
+    "id": "pivot-alias-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "spec.Options is PivotPointSpecOptions or FloorPivotPointSpecOptions",
+    "after": "spec.Options is FloorPivotPointSpecOptions",
+    "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
   }
 ]

@@ -1491,10 +1491,6 @@ OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PivotDetectorOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.PivotPoint/default
-OoplesFinance.StockIndicators.Indicators.PivotPoint/longer-periods
-OoplesFinance.StockIndicators.Indicators.PivotPoint/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PivotPoint/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PivotPointAverage/default
 OoplesFinance.StockIndicators.Indicators.PivotPointAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.PivotPointAverage/minimum-periods
