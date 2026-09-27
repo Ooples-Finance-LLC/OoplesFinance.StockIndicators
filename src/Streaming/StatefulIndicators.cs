@@ -6591,71 +6591,18 @@ public sealed class _4PercentagePriceOscillatorState : IStreamingIndicatorState,
 [PrimaryOutput("Ama")]
 public sealed class AdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevAma;
-    private bool _hasPrev;
-
-    public AdaptiveMovingAverageState(int fastLength = 2, int slowLength = 14, int length = 14)
+    private readonly AdaptiveRangeMeanWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public AdaptiveMovingAverageState(int fastLength=2,int slowLength=14,int length=14)=>_window=new(fastLength,slowLength,length);
+    public IndicatorName Name=>IndicatorName.AdaptiveMovingAverage;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _fastAlpha = (double)2 / (Math.Max(1, fastLength) + 1);
-        _slowAlpha = (double)2 / (Math.Max(1, slowLength) + 1);
-        var windowLength = Math.Max(1, _length + 1);
-        _highWindow = new RollingWindowMax(windowLength);
-        _lowWindow = new RollingWindowMin(windowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);
+        var value=_window.Next(_input.GetValue(bar),bar.High,bar.Low,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Ama",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.AdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevAma = 0;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var mltp = highest - lowest != 0
-            ? MathHelper.MinOrMax(Math.Abs((2 * value) - lowest - highest) / (highest - lowest), 1, 0)
-            : 0;
-        var ssc = (mltp * (_fastAlpha - _slowAlpha)) + _slowAlpha;
-        var prevAma = _hasPrev ? _prevAma : 0;
-        var ama = prevAma + (MathHelper.Pow(ssc, 2) * (value - prevAma));
-
-        if (isFinal)
-        {
-            _prevAma = ama;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ama", ama }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ama, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Aema")]

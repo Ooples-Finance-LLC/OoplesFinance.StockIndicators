@@ -95,39 +95,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveMovingAverage(this StockData stockData, int fastLength = 2, int slowLength = 14, int length = 14)
     {
-        List<double> amaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length + 1);
-
-        var fastAlpha = (double)2 / (fastLength + 1);
-        var slowAlpha = (double)2 / (slowLength + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;var high=stockData.HighPrices;var low=stockData.LowPrices;using var window=new AdaptiveRangeMeanWindow(fastLength,slowLength,length);
+        List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<input.Count;i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var hh = highestList[i];
-            var ll = lowestList[i];
-            var mltp = hh - ll != 0 ? MinOrMax(Math.Abs((2 * currentValue) - ll - hh) / (hh - ll), 1, 0) : 0;
-            var ssc = (mltp * (fastAlpha - slowAlpha)) + slowAlpha;
-
-            var prevAma = GetLastOrDefault(amaList);
-            var ama = prevAma + (Pow(ssc, 2) * (currentValue - prevAma));
-            amaList.Add(ama);
-
-            var signal = GetCompareSignal(currentValue - ama, prevValue - prevAma);
-            signalsList?.Add(signal);
+            var value=window.Next(input[i],high[i],low[i],true);
+            signals?.Add(GetCompareSignal(input[i]-value,(i>0?input[i-1]:0)-(i>0?values[i-1]:0)));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ama", amaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(amaList);
-        stockData.IndicatorName = IndicatorName.AdaptiveMovingAverage;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Ama",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.AdaptiveMovingAverage;return stockData;
     }
 
 

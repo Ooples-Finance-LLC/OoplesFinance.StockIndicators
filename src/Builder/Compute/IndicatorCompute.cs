@@ -4948,40 +4948,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAmaFast(StockData data, ComputeContext context, int fastLength = 2, int slowLength = 14,
         int length = 14)
     {
-        // CalculateAdaptiveMovingAverage scales its smoothing by where the chained value sits inside the bar
-        // range of the last length + 1 bars, then squares that constant for the recursion, which is seeded at
-        // zero. MovingAverageCore.AdaptiveMovingAverage used Kaufman's efficiency ratio instead.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        var fastAlpha = (double)2 / (Math.Max(fastLength, 1) + 1);
-        var slowAlpha = (double)2 / (Math.Max(slowLength, 1) + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(Math.Max(length, 1) + 1);
-        var lowWindow = new RollingMinMax(Math.Max(length, 1) + 1);
-        double previous = 0;
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var currentValue = input[i];
-            var hh = highWindow.Max;
-            var ll = lowWindow.Min;
-            var mltp = hh - ll != 0 ? MathHelper.MinOrMax(Math.Abs((2 * currentValue) - ll - hh) / (hh - ll), 1, 0) : 0;
-            var ssc = (mltp * (fastAlpha - slowAlpha)) + slowAlpha;
-
-            previous += MathHelper.Pow(ssc, 2) * (currentValue - previous);
-            output[i] = previous;
-        }
-
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;
+        var output=context.Rent(input.Count);using var window=new AdaptiveRangeMeanWindow(fastLength,slowLength,length);
+        for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],data.HighPrices[i],data.LowPrices[i],true);
+        return output;
     }
 
     /// <summary>

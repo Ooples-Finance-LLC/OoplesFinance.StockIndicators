@@ -25908,6 +25908,160 @@
     "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
   },
   {
+    "id": "adaptive-range-mean-extra-bar",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "_period = Math.Max(1, length) + 1L",
+    "after": "_period = Math.Max(1, length)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "_period = Math.Max(1, length) + 1L",
+    "after": "_period = Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-fast-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "2d / (Math.Max(1, fast) + 1L)",
+    "after": "2d / (Math.Max(1, fast) + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-slow-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "2d / (Math.Max(1, slow) + 1L)",
+    "after": "2d / (Math.Max(1, slow) + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "node.Value.Index <= _index - _period",
+    "after": "node.Value.Index < _index - _period",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-dominance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "maximum ? queue.Last.Value.Value <= current : queue.Last.Value.Value >= current",
+    "after": "maximum ? queue.Last.Value.Value >= current : queue.Last.Value.Value <= current",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-high-input",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "Extreme(_highs, high, true)",
+    "after": "Extreme(_highs, price, true)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-low-input",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "Extreme(_lows, low, false)",
+    "after": "Extreme(_lows, price, false)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-doubled-price",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "numerator.Add(price, 2)",
+    "after": "numerator.Add(price)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-absolute-distance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "if (numerator.Sign < 0)",
+    "after": "if (numerator.Sign > 0)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-clamped-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "Math.Max(0, Math.Min(1, numerator.Ratio(denominator)))",
+    "after": "numerator.Ratio(denominator)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-coefficient-order",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "multiplier * (_fastAlpha - _slowAlpha) + _slowAlpha",
+    "after": "multiplier * (_slowAlpha - _fastAlpha) + _fastAlpha",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-gain-square",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "var gain = coefficient * coefficient",
+    "after": "var gain = coefficient",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-recursive-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "VidyaBlend.Compute(_previous, price, gain)",
+    "after": "_previous + gain * (price - _previous)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "_highs.Clear(); _lows.Clear(); _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-reset-recursion",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeMeanWindow.cs",
+    "before": "_previous = 0; _index = 0;",
+    "after": "_index = 0;",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAmaFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "adaptive-range-mean-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AdaptiveMovingAverageState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
     "id": "chaikin-flow-batch-selected-range",
     "module": "numerical",
     "file": "src/Calculations/Volume/VolumeAtoD.cs",
@@ -25915,5 +26069,14 @@
     "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
     "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
     "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "adaptive-range-mean-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "scope": "public static StockData CalculateAdaptiveMovingAverage(",
+    "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
+    "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
+    "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
   }
 ]
