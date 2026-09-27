@@ -2907,11 +2907,26 @@ public static partial class Calculations
     public static StockData CalculateErgodicCandlestickOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 32, int length2 = 12)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (close, _, _, open, _) = GetInputValuesList(stockData); var high = stockData.HighPrices; var low = stockData.LowPrices;
+            using var window = new ErgodicCandleWindow(maType, length1, length2, close.Count);
+            var line = new List<double>(close.Count); var signal = new List<double>(close.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < close.Count; i++)
+            {
+                var value = window.Next(close[i], open[i], high[i], low[i], true);
+                signals?.Add(GetCompareSignal(value.Eco - value.Signal, i > 0 ? line[i - 1] - signal[i - 1] : 0));
+                line.Add(value.Eco); signal.Add(value.Signal);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eco", line }, { "Signal", signal } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ErgodicCandlestickOscillator; return stockData;
+        }
+
         List<double> xcoList = new(stockData.Count);
         List<double> xhlList = new(stockData.Count);
         List<double> ecoList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
+        var (inputList, _, _, openList, _) = GetInputValuesList(stockData); var highList = stockData.HighPrices; var lowList = stockData.LowPrices;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2927,10 +2942,10 @@ public static partial class Calculations
             xhlList.Add(xhl);
         }
 
-        var xcoEma1List = GetMovingAverageList(stockData, maType, length1, xcoList);
-        var xcoEma2List = GetMovingAverageList(stockData, maType, length2, xcoEma1List);
-        var xhlEma1List = GetMovingAverageList(stockData, maType, length1, xhlList);
-        var xhlEma2List = GetMovingAverageList(stockData, maType, length2, xhlEma1List);
+        var xcoEma1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(xcoList), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, xcoList);
+        var xcoEma2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(xcoEma1List), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, xcoEma1List);
+        var xhlEma1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(xhlList), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, xhlList);
+        var xhlEma2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(xhlEma1List), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, xhlEma1List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var xhlEma2 = xhlEma2List[i];
@@ -2940,7 +2955,7 @@ public static partial class Calculations
             ecoList.Add(eco);
         }
 
-        var ecoSignalList = GetMovingAverageList(stockData, maType, length2, ecoList);
+        var ecoSignalList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(ecoList), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, ecoList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var eco = ecoList[i];

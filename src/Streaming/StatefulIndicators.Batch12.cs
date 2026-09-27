@@ -452,68 +452,16 @@ public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Eco")]
 public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _xcoEma1;
-    private readonly IMovingAverageSmoother _xcoEma2;
-    private readonly IMovingAverageSmoother _xhlEma1;
-    private readonly IMovingAverageSmoother _xhlEma2;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public ErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 32, int length2 = 12)
-    {
-        _xcoEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _xcoEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _xhlEma1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _xhlEma2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ErgodicCandleWindow _window;
+    public ErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 12) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.ErgodicCandlestickOscillator;
-
-    public void Reset()
-    {
-        _xcoEma1.Reset();
-        _xcoEma2.Reset();
-        _xhlEma1.Reset();
-        _xhlEma2.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var xco = close - bar.Open;
-        var xhl = bar.High - bar.Low;
-        var xcoEma1 = _xcoEma1.Next(xco, isFinal);
-        var xcoEma2 = _xcoEma2.Next(xcoEma1, isFinal);
-        var xhlEma1 = _xhlEma1.Next(xhl, isFinal);
-        var xhlEma2 = _xhlEma2.Next(xhlEma1, isFinal);
-        var eco = xhlEma2 != 0 ? 100 * xcoEma2 / xhlEma2 : 0;
-        var signal = _signalSmoother.Next(eco, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eco", eco },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(eco, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new(value.Eco, includeOutputs ? new Dictionary<string, double> { { "Eco", value.Eco }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _xcoEma1.Dispose();
-        _xcoEma2.Dispose();
-        _xhlEma1.Dispose();
-        _xhlEma2.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ecsi")]

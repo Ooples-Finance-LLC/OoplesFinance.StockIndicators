@@ -608,10 +608,7 @@ internal static partial class IndicatorCompute
             ChandeMomentumOscillatorAbsoluteSpecOptions cmoa => ComputeChandeMomentumOscillatorAbsoluteFast(data, context, cmoa.Length),
 
             // Batch 5 - Oscillators
-            ErgodicCandlestickOscillatorSpecOptions eco => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeErgodicCandlestickOscillatorFast(data, context,
-                    length2: eco.Length, maType: eco.MaType), eco.Length, eco.MaType)
-                : ComputeErgodicCandlestickOscillatorFast(data, context, length2: eco.Length, maType: eco.MaType),
+            ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context, length2: eco.Length, maType: eco.MaType, key: spec.OutputKey),
             BayesianOscillatorSpecOptions bayes => ComputeBayesianOscillatorFast(data, context, bayes.Length, bayes.MaType, key: spec.OutputKey),
             AnchoredMomentumSpecOptions amom => ComputeAnchoredMomentumFast(data, context, amom.Length, amom.MaType, signal: spec.OutputKey == "Signal"),
             ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length,
@@ -5503,14 +5500,23 @@ internal static partial class IndicatorCompute
     /// Computes Ergodic Candlestick Oscillator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeErgodicCandlestickOscillatorFast(StockData data, ComputeContext context, int length1 = 32,
-        int length2 = 12, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 12, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? key = null)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var close = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+            using var window = new ErgodicCandleWindow(maType, length1, length2, close.Count); var result = context.Rent(close.Count);
+            for (var i = 0; i < close.Count; i++)
+            { var value = window.Next(close[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true); result.WritableSpan[i] = key == "Signal" ? value.Signal : value.Eco; }
+            return result;
+        }
+
         // CalculateErgodicCandlestickOscillator double-smooths the candle body and the candle range by
         // length1 then length2 and publishes the body as a percentage of the range. The arm this replaced
         // delegated to OscillatorCore.ErgodicCandlestickOscillator with a hard-wired first length of 5 and
         // no moving average type. The spec's only length binds to length2; length1 keeps its batch default.
         var count = data.Count;
-        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var closes = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
         var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
         var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
@@ -5544,7 +5550,7 @@ internal static partial class IndicatorCompute
             output[i] = xhlEma2[i] != 0 ? 100 * xcoEma2[i] / xhlEma2[i] : 0;
         }
 
-        return buffer;
+        return key == "Signal" ? SmoothPublished(data, context, buffer, length2, maType) : buffer;
     }
 
     /// <summary>
