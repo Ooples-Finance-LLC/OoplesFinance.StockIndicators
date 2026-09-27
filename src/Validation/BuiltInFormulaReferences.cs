@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.FractalChaosBands)
+        {
+            var fractalKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fractalKeys.Length; slot++) { var key = fractalKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FractalBandOutputs(bars)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.PriceLineChannel or IndicatorName.PriceCurveChannel)
         {
             var driftKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

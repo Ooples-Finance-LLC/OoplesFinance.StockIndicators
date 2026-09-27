@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            FractalChaosBandsSpecOptions => ComputeFractalChaosBandsFast(data, context, spec.OutputKey),
             MotionToAttractionChannelsSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, spec.OutputKey),
             MotionToAttractionTrailingStopSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, "Ts"),
             ExtendedRecursiveBandsSpecOptions recursive => ComputeExtendedRecursiveBandsFast(data, context, recursive.Length, spec.OutputKey),
@@ -21907,6 +21908,24 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes retained five-bar fractal boundaries and their exact midpoint.</summary>
+    internal static ComputeBuffer ComputeFractalChaosBandsFast(StockData data, ComputeContext context, string? outputKey = null)
+    {
+        var (_, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(high.Count); double upper = 0, lower = 0;
+        for (var i = 0; i < high.Count; i++)
+        {
+            if (i >= 4)
+            {
+                var h = high[i - 2]; var l = low[i - 2];
+                if (h > high[i - 4] && h > high[i - 3] && h > high[i - 1] && h > high[i]) upper = h;
+                if (l < low[i - 4] && l < low[i - 3] && l < low[i - 1] && l < low[i]) lower = l;
+            }
+            var midpoint = new ExactMeanAccumulator(); midpoint.Add(upper); midpoint.Add(lower);
+            result.WritableSpan[i] = outputKey == "UpperBand" ? upper : outputKey == "LowerBand" ? lower : midpoint.Mean(2);
+        }
         return result;
     }
 

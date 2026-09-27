@@ -20990,5 +20990,122 @@
     "after": "data.ClosePrices[i], true, atr is null",
     "filter": "FullyQualifiedName~PriceDriftNumericalTests.RetainedAtrAndEventAgesMatchIndependentRationalDrift|FullyQualifiedName~PriceDriftNumericalTests.SelectedCloseAndCustomerAtrDriveRetainedSizes|FullyQualifiedName~PriceDriftNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
     "scope": "internal static ComputeBuffer ComputePriceCurveChannelFast("
+  },
+  {
+    "id": "fractal-band-batch-midpoint",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "scope": "public static StockData CalculateFractalChaosBands(",
+    "before": "midpoint.Mean(2)",
+    "after": "(upperBand + lowerBand) / 2",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-raw-midpoint",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFractalChaosBandsFast(",
+    "before": "midpoint.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-native-midpoint",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FractalChaosBandsState :",
+    "before": "midpoint.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-batch-startup",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "scope": "public static StockData CalculateFractalChaosBands(",
+    "before": "var complete = i >= 4;",
+    "after": "var complete = i >= 2;",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-raw-startup",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFractalChaosBandsFast(",
+    "before": "if (i >= 4)",
+    "after": "if (i >= 5)",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-raw-left-tie",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFractalChaosBandsFast(",
+    "before": "h > high[i - 4]",
+    "after": "h >= high[i - 4]",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-raw-right-tie",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFractalChaosBandsFast(",
+    "before": "l < low[i]",
+    "after": "l <= low[i]",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-batch-left-tie",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "scope": "public static StockData CalculateFractalChaosBands(",
+    "before": "prevHigh4 < prevHigh2",
+    "after": "prevHigh4 <= prevHigh2",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-batch-right-tie",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelEtoK.cs",
+    "scope": "public static StockData CalculateFractalChaosBands(",
+    "before": "currentLow > prevLow2",
+    "after": "currentLow >= prevLow2",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FractalChaosBandsState :",
+    "before": "if (isFinal)",
+    "after": "if (isFinal || includeOutputs)",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FractalChaosBandsState :",
+    "before": "_highs.Clear();\n        _lows.Clear();",
+    "after": "if (_highs.Count < 0) { _highs.Clear(); _lows.Clear(); }",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FractalChaosBandsState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "fractal-band-raw-held-upper",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFractalChaosBandsFast(",
+    "before": "double upper = 0, lower = 0;",
+    "after": "double upper = 1, lower = 0;",
+    "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
   }
 ]

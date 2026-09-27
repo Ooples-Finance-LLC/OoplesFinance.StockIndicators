@@ -1301,7 +1301,7 @@ public sealed class FractalChaosBandsState : IStreamingIndicatorState, IDisposab
 
         var upper = upFractal ?? _prevUpper;
         var lower = downFractal ?? _prevLower;
-        var middle = (upper + lower) / 2;
+        var midpoint = new ExactMeanAccumulator(); midpoint.Add(upper); midpoint.Add(lower); var middle = midpoint.Mean(2);
 
         if (isFinal)
         {

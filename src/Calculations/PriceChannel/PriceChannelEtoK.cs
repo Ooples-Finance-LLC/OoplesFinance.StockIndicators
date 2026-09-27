@@ -55,7 +55,8 @@ public static partial class Calculations
             lowerBandList.Add(lowerBand);
 
             var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (upperBand + lowerBand) / 2;
+            var midpoint = new ExactMeanAccumulator(); midpoint.Add(upperBand); midpoint.Add(lowerBand);
+            var middleBand = midpoint.Mean(2);
             middleBandList.Add(middleBand);
 
             var signal = GetBollingerBandsSignal(currentClose - middleBand, prevClose - prevMiddleBand, currentClose, prevClose, upperBand, prevUpperBand, lowerBand, prevLowerBand);

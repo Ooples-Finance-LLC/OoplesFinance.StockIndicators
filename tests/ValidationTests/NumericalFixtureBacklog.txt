@@ -1177,7 +1177,6 @@ OoplesFinance.StockIndicators.Indicators.ForecastOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.ForecastOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ForecastOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ForecastOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.FractalChaosBands/default
 OoplesFinance.StockIndicators.Indicators.Frama/default
 OoplesFinance.StockIndicators.Indicators.Frama/longer-periods
 OoplesFinance.StockIndicators.Indicators.Frama/minimum-periods
