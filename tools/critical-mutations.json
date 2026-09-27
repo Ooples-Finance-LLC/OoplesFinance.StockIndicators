@@ -21754,5 +21754,143 @@
     "after": "&& (!ComponentAverage.HasOverrides || true)",
     "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
     "scope": "internal static ComputeBuffer ComputeUniChannelFast("
+  },
+  {
+    "id": "hurst-band-delay-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "(length + 1L) / 2 + 1",
+    "after": "length / 2L + 1",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-delay-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "Math.Max(2, (length + 1L) / 2 + 1)",
+    "after": "Math.Max(1, (length + 1L) / 2)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-delay-cap",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "Math.Min(530, Math.Max(2, (length + 1L) / 2 + 1))",
+    "after": "Math.Max(2, (length + 1L) / 2 + 1)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_mean = new(length)",
+    "after": "_mean = new(length + 1)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-history-seed",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "? _prices[0] : 0",
+    "after": "? _prices[0] : close",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-current-mean",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_mean.Next(delayed, commit)",
+    "after": "_mean.Next(close + delayed * 0, commit)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-outer-factor",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_outer = outer",
+    "after": "_outer = inner",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-extreme-factor",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_extreme = extreme",
+    "after": "_extreme = outer",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "Shift(middle, -_inner)",
+    "after": "Shift(middle, _inner)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-early-product",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "HighLowBandsWindow.Shift(middle, _inner)",
+    "after": "middle + middle * _inner / 100",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "if (commit) _prices.TryAdd(close, out _);",
+    "after": "_prices.TryAdd(close, out _);",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_mean.Next(delayed, commit)",
+    "after": "_mean.Next(delayed, true)",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "if (_prices.Count < 0) _prices.Clear();",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "_mean.Reset();",
+    "after": "if (_mean == null) _mean!.Reset();",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/HurstBandWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(extreme);",
+    "after": "if (extreme == 0) HighLowBandsWindow.ValidateShift(extreme);",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory",
+    "scope": "internal static ComputeBuffer ComputeHurstBandsFast("
+  },
+  {
+    "id": "hurst-band-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory",
+    "scope": "public sealed class HurstBandsState :"
   }
 ]

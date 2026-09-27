@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            HurstBandsSpecOptions hurst => ComputeHurstBandsFast(data, context, hurst.Length, hurst.InnerMult, hurst.OuterMult, hurst.ExtremeMult, spec.OutputKey),
             FlaggingBandsSpecOptions flagging => ComputeFlaggingBandsFast(data, context, flagging.Length, spec.OutputKey),
             FractalChaosBandsSpecOptions => ComputeFractalChaosBandsFast(data, context, spec.OutputKey),
             MotionToAttractionChannelsSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, spec.OutputKey),
@@ -21856,6 +21857,14 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes the displaced partial-window center and selected Hurst percentage envelope.</summary>
+    internal static ComputeBuffer ComputeHurstBandsFast(StockData data, ComputeContext context, int length = 10, double innerMult = 1.6, double outerMult = 2.6, double extremeMult = 4.2, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new HurstBandWindow(length, innerMult, outerMult, extremeMult); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey switch { "UpperInnerBand" => point.UpperInner, "LowerInnerBand" => point.LowerInner, "UpperOuterBand" => point.UpperOuter, "LowerOuterBand" => point.LowerOuter, "UpperExtremeBand" => point.UpperExtreme, "LowerExtremeBand" => point.LowerExtreme, _ => point.Middle }; }
         return result;
     }
 

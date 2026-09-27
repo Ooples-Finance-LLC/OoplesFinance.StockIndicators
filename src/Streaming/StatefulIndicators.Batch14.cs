@@ -1431,81 +1431,16 @@ public sealed class HullEstimateState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class HurstBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _displacement;
-    private readonly double _innerMult;
-    private readonly double _outerMult;
-    private readonly double _extremeMult;
-    private readonly RollingWindowSum _dPriceSum;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public HurstBandsState(int length = 10, double innerMult = 1.6, double outerMult = 2.6,
-        double extremeMult = 4.2)
-    {
-        _length = Math.Max(1, length);
-        _displacement = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2) + 1);
-        _innerMult = innerMult;
-        _outerMult = outerMult;
-        _extremeMult = extremeMult;
-        _dPriceSum = new RollingWindowSum(_length);
-        _values = new PooledRingBuffer<double>(_displacement);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HurstBandWindow _window;
+    public HurstBandsState(int length = 10, double innerMult = 1.6, double outerMult = 2.6, double extremeMult = 4.2) { _window = new(length, innerMult, outerMult, extremeMult); }
     public IndicatorName Name => IndicatorName.HurstBands;
-
-    public void Reset()
-    {
-        _dPriceSum.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var dPrice = EhlersStreamingWindow.GetOffsetValue(_values, value, _displacement);
-        var dPriceSum = isFinal ? _dPriceSum.Add(dPrice, out var count) : _dPriceSum.Preview(dPrice, out count);
-        var cma = count > 0 ? dPriceSum / count : 0;
-
-        var extremeBand = cma * _extremeMult / 100;
-        var outerBand = cma * _outerMult / 100;
-        var innerBand = cma * _innerMult / 100;
-        var upperExtremeBand = cma + extremeBand;
-        var lowerExtremeBand = cma - extremeBand;
-        var upperOuterBand = cma + outerBand;
-        var lowerOuterBand = cma - outerBand;
-        var upperInnerBand = cma + innerBand;
-        var lowerInnerBand = cma - innerBand;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(7)
-            {
-                { "UpperExtremeBand", upperExtremeBand },
-                { "UpperOuterBand", upperOuterBand },
-                { "UpperInnerBand", upperInnerBand },
-                { "MiddleBand", cma },
-                { "LowerExtremeBand", lowerExtremeBand },
-                { "LowerOuterBand", lowerOuterBand },
-                { "LowerInnerBand", lowerInnerBand }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cma, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperExtremeBand", point.UpperExtreme }, { "UpperOuterBand", point.UpperOuter }, { "UpperInnerBand", point.UpperInner }, { "MiddleBand", point.Middle }, { "LowerExtremeBand", point.LowerExtreme }, { "LowerOuterBand", point.LowerOuter }, { "LowerInnerBand", point.LowerInner } } : null);
     }
-
-    public void Dispose()
-    {
-        _dPriceSum.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("FastMiddleBand")]

@@ -1840,3 +1840,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Selected inputs, signed/zero/extreme factors, both offset modes, customer means, legacy Hull fallback, preview/reset and invalid-field/factor rejection are covered across all five routes.
 - **83/83** checks passed (`uni-channel.trx`). Campaign401a/401b caught **14/14** faults; **2,596** retained sites. The 12 staged files match the archived source except preservation of the separately verified Narrow Sideways delegated-validation change and its two replacement fault records. Source/archive SHA256: `609e1f4cfb590b76b3454267ca70b0a78e275596a4e91540d16868f07099bcad` / `e85b722519e0e5276cf3c7b2dcec5538519c8b265e4b4132265e7e3702187145`.
 - Inventory: **4,619/7,131**, **2,512** omissions across **418** types; no construction failures. 171 grouped batches cover **1,793 configurations / 327 types**. AA61403CB268FCB9D6512E5043742E392D785CE2EB4032DF2A4F641D1A19209C SHA256 `AA61403CB268FCB9D6512E5043742E392D785CE2EB4032DF2A4F641D1A19209C`. Full coverage remains incomplete.
+
+
+### Hurst Band numerical contracts
+
+- Four configurations now share the delayed-price partial-mean contract, zero startup history, ceiling-based half-period delay clamped to 2..530, and six exact percentage boundaries. Multipliers are validated before allocation; native inputs are validated before state changes.
+- Hand examples, odd/even and capped delays, extreme signed coefficients, selected inputs, alternate previews and reset replay cover batch, raw, armed, native and streaming routes.
+- **74/74** checks passed (`hurst-bands.trx`). Campaign402a/402b caught **17/17** injected faults; **2,613** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `d609e3cd13af3d8204ac1098756375b488f44e9aa5d0eaf1fde35df3f36f1b4f` / `1ef2cb4bae25bf7ed24d4353e88065f47c90e05079dbb49c24b7a8d651996338`.
+- Inventory: **4,623/7,131**, **2,508** omissions across **417** types; no construction failures. 172 grouped batches cover **1,797 configurations / 328 types**. F2ACBF2EA2605ABE3F6DD43AFB9FB2BEAE79481A7D8EE9662A10253FD7C29737 SHA256 `F2ACBF2EA2605ABE3F6DD43AFB9FB2BEAE79481A7D8EE9662A10253FD7C29737`. Full coverage remains incomplete.

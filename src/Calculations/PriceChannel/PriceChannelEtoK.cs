@@ -358,73 +358,14 @@ public static partial class Calculations
     public static StockData CalculateHurstBands(this StockData stockData, int length = 10, double innerMult = 1.6, double outerMult = 2.6,
         double extremeMult = 4.2)
     {
-        List<double> cmaList = new(stockData.Count);
-        List<double> upperExtremeBandList = new(stockData.Count);
-        List<double> lowerExtremeBandList = new(stockData.Count);
-        List<double> upperOuterBandList = new(stockData.Count);
-        List<double> lowerOuterBandList = new(stockData.Count);
-        List<double> upperInnerBandList = new(stockData.Count);
-        List<double> lowerInnerBandList = new(stockData.Count);
-        List<double> dPriceList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum dPriceSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var displacement = MinOrMax((int)Math.Ceiling((double)length / 2) + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new HurstBandWindow(length, innerMult, outerMult, extremeMult);
+        List<double> middle = new(input.Count), upperInner = new(input.Count), lowerInner = new(input.Count), upperOuter = new(input.Count), lowerOuter = new(input.Count), upperExtreme = new(input.Count), lowerExtreme = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevCma1 = i >= 1 ? cmaList[i - 1] : 0;
-
-            var dPrice = i >= displacement ? inputList[i - displacement] : 0;
-            dPriceList.Add(dPrice);
-            dPriceSum.Add(dPrice);
-
-            var cma = dPriceSum.Average(length);
-            cmaList.Add(cma);
-
-            var extremeBand = cma * extremeMult / 100;
-            var outerBand = cma * outerMult / 100;
-            var innerBand = cma * innerMult / 100;
-
-            var upperExtremeBand = cma + extremeBand;
-            upperExtremeBandList.Add(upperExtremeBand);
-
-            var lowerExtremeBand = cma - extremeBand;
-            lowerExtremeBandList.Add(lowerExtremeBand);
-
-            var upperInnerBand = cma + innerBand;
-            upperInnerBandList.Add(upperInnerBand);
-
-            var lowerInnerBand = cma - innerBand;
-            lowerInnerBandList.Add(lowerInnerBand);
-
-            var upperOuterBand = cma + outerBand;
-            upperOuterBandList.Add(upperOuterBand);
-
-            var lowerOuterBand = cma - outerBand;
-            lowerOuterBandList.Add(lowerOuterBand);
-
-            var signal = GetCompareSignal(currentValue - cma, prevValue - prevCma1);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            middle.Add(point.Middle); upperInner.Add(point.UpperInner); lowerInner.Add(point.LowerInner); upperOuter.Add(point.UpperOuter); lowerOuter.Add(point.LowerOuter); upperExtreme.Add(point.UpperExtreme); lowerExtreme.Add(point.LowerExtreme);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperExtremeBand", upperExtremeBandList },
-            { "UpperOuterBand", upperOuterBandList },
-            { "UpperInnerBand", upperInnerBandList },
-            { "MiddleBand", cmaList },
-            { "LowerExtremeBand", lowerExtremeBandList },
-            { "LowerOuterBand", lowerOuterBandList },
-            { "LowerInnerBand", lowerInnerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.HurstBands;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperExtremeBand", upperExtreme }, { "UpperOuterBand", upperOuter }, { "UpperInnerBand", upperInner }, { "MiddleBand", middle }, { "LowerExtremeBand", lowerExtreme }, { "LowerOuterBand", lowerOuter }, { "LowerInnerBand", lowerInner } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.HurstBands; return stockData;
     }
 
 
