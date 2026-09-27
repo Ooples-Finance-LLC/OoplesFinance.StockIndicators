@@ -384,8 +384,9 @@ public sealed class FormulaContractCoverageTests
     public void QuadraticRegressionFitsThreeHandCalculatedPoints()
     {
         var bars = new[] { 2d, 4, 2, 8 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
+        // The final projection is 22 - 3 * binary64(14/3), not the unrounded polynomial value 8.
         Assert.Single(BuiltInFormulaReferences.For(new QuadraticRegression(3))).Check(
-            new IndicatorValidationContext("quadratic-hand", bars, [[0, 0, 2, 8]], 0));
+            new IndicatorValidationContext("quadratic-hand", bars, [[0, 0, 2, 7.999999999999999]], 0));
         Assert.Single(BuiltInFormulaReferences.For(new LinearQuadraticConvergenceDivergenceOscillator(3))).Check(
             new IndicatorValidationContext("linear-quadratic-hand", bars, [[-2, -4, -2d / 3, 4d / 3]], 0));
     }
@@ -1929,7 +1930,8 @@ public sealed class FormulaContractCoverageTests
     public void AtrPercentageBandsMatchTheirSeededFractionalRange()
     {
         var bars = new[] { 1d, 2 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
-        var expected = new[] { new[] { 3d, 10d / 3 }, new[] { 1d, 2 }, new[] { -1d, 2d / 3 } };
+        // Round 2/3, then its percentage (66.66666666666666), before projecting 2 +/- 2 * percent / 100.
+        var expected = new[] { new[] { 3d, 3.333333333333333 }, new[] { 1d, 2 }, new[] { -1d, 0.6666666666666669 } };
         var rules = BuiltInFormulaReferences.For(new BollingerBandsWithAtrPct(1, 1, 1)).ToArray();
         Assert.Equal(3, rules.Length);
         foreach (var rule in rules)
