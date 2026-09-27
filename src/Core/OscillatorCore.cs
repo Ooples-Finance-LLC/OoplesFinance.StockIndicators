@@ -1812,48 +1812,7 @@ internal static class OscillatorCore
     /// </summary>
     internal static void Demarker(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deMaxArray = pool.Rent(high.Length);
-        var deMinArray = pool.Rent(high.Length);
-        var smaMaxArray = pool.Rent(high.Length);
-        var smaMinArray = pool.Rent(high.Length);
-
-        try
-        {
-            var deMax = deMaxArray.AsSpan(0, high.Length);
-            var deMin = deMinArray.AsSpan(0, high.Length);
-            var smaMax = smaMaxArray.AsSpan(0, high.Length);
-            var smaMin = smaMinArray.AsSpan(0, high.Length);
-
-            deMax[0] = 0;
-            deMin[0] = 0;
-            for (var i = 1; i < high.Length; i++)
-            {
-                deMax[i] = high[i] > high[i - 1] ? high[i] - high[i - 1] : 0;
-                deMin[i] = low[i] < low[i - 1] ? low[i - 1] - low[i] : 0;
-            }
-
-            MovingAverageCore.SimpleMovingAverage(deMax, smaMax, length);
-            MovingAverageCore.SimpleMovingAverage(deMin, smaMin, length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                var sum = smaMax[i] + smaMin[i];
-                output[i] = sum != 0 ? smaMax[i] / sum : 0.5;
-            }
-        }
-        finally
-        {
-            pool.Return(deMaxArray);
-            pool.Return(deMinArray);
-            pool.Return(smaMaxArray);
-            pool.Return(smaMinArray);
-        }
+        DeMarker(high, low, output, length);
     }
 
     /// <summary>
@@ -3586,58 +3545,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DeMarker(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 14)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var deMaxArray = pool.Rent(high.Length);
-        var deMinArray = pool.Rent(high.Length);
-
-        try
-        {
-            var deMax = deMaxArray.AsSpan(0, high.Length);
-            var deMin = deMinArray.AsSpan(0, high.Length);
-
-            // Calculate DeMax and DeMin
-            deMax[0] = 0;
-            deMin[0] = 0;
-
-            for (var i = 1; i < high.Length; i++)
-            {
-                var highDiff = high[i] - high[i - 1];
-                var lowDiff = low[i - 1] - low[i];
-
-                deMax[i] = highDiff > 0 ? highDiff : 0;
-                deMin[i] = lowDiff > 0 ? lowDiff : 0;
-            }
-
-            // Calculate DeMarker
-            for (var i = 0; i < high.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 0.5;
-                    continue;
-                }
-
-                double sumMax = 0, sumMin = 0;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    sumMax += deMax[j];
-                    sumMin += deMin[j];
-                }
-
-                var total = sumMax + sumMin;
-                output[i] = total != 0 ? sumMax / total : 0.5;
-            }
-        }
-        finally
-        {
-            pool.Return(deMaxArray);
-            pool.Return(deMinArray);
-        }
+        if (output.Length < high.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (low.Length < high.Length) throw new ArgumentException("Low span must be at least high length.", nameof(low));
+        using var window = new DemarkerWindow(MovingAvgType.SimpleMovingAverage, length, high.Length);
+        for (var i = 0; i < high.Length; i++) output[i] = window.Next(high[i], low[i], true);
     }
 
     /// <summary>

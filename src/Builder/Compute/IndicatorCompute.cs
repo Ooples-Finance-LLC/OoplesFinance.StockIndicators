@@ -5703,45 +5703,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDemarkerFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateDemarker asks what share of the recent movement was upwards: how far each bar reached
-        // above the last high against how far it also fell below the last low. Both are smoothed with
-        // whichever average it was given.
-        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = highList.Count;
-
-        using var upBuffer = context.Rent(count);
-        using var downBuffer = context.Rent(count);
-        var up = upBuffer.WritableSpan;
-        var down = downBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var (_, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(high.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : currentHigh;
-            var prevLow = i >= 1 ? lowList[i - 1] : currentLow;
-
-            up[i] = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
-            down[i] = currentLow < prevLow ? prevLow - currentLow : 0;
+            using var ups = context.Rent(high.Count); using var downs = context.Rent(high.Count); using var upMean = context.Rent(high.Count); using var downMean = context.Rent(high.Count);
+            for (var i = 0; i < high.Count; i++) { var up = DemarkerWindow.PositiveDifference(high[i], i > 0 ? high[i - 1] : high[i]); var down = DemarkerWindow.PositiveDifference(i > 0 ? low[i - 1] : low[i], low[i]); ups.WritableSpan[i] = up.Mantissa * (up.Doubled ? 2 : 1); downs.WritableSpan[i] = down.Mantissa * (down.Doubled ? 2 : 1); }
+            MovingAverage(data, maType, length, ups.Span, upMean.WritableSpan); MovingAverage(data, maType, length, downs.Span, downMean.WritableSpan);
+            for (var i = 0; i < high.Count; i++) result.WritableSpan[i] = DemarkerWindow.Ratio(new StrengthValue(upMean.Span[i]), new StrengthValue(downMean.Span[i]));
         }
-
-        using var averageUpBuffer = context.Rent(count);
-        using var averageDownBuffer = context.Rent(count);
-        var averageUp = averageUpBuffer.WritableSpan;
-        var averageDown = averageDownBuffer.WritableSpan;
-        MovingAverage(data, maType, length, up, averageUp);
-        MovingAverage(data, maType, length, down, averageDown);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var total = averageUp[i] + averageDown[i];
-            output[i] = total != 0 ? MathHelper.MinOrMax(averageUp[i] / total * 100, 100, 0) : 0;
-        }
-
-        return buffer;
+        else { using var window = new DemarkerWindow(maType, length, high.Count); for (var i = 0; i < high.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], true); }
+        return result;
     }
 
     #endregion
@@ -15865,42 +15836,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDeMarkerFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateDemarker averages the upward extension of the high and the downward extension of the low
-        // separately, then reports the upward share of the two as a percentage. OscillatorCore.DeMarker used a
-        // different smoothing and a different opening window, so it never agreed from the first bar.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        using var upMoves = context.Rent(count);
-        using var downMoves = context.Rent(count);
-        var dMax = upMoves.WritableSpan;
-        var dMin = downMoves.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevHigh = i >= 1 ? highs[i - 1] : highs[i];
-            var prevLow = i >= 1 ? lows[i - 1] : lows[i];
-            dMax[i] = highs[i] > prevHigh ? highs[i] - prevHigh : 0;
-            dMin[i] = lows[i] < prevLow ? prevLow - lows[i] : 0;
-        }
-
-        using var smoothedUp = context.Rent(count);
-        using var smoothedDown = context.Rent(count);
-        MovingAverage(data, maType, length, upMoves.Span, smoothedUp.WritableSpan);
-        MovingAverage(data, maType, length, downMoves.Span, smoothedDown.WritableSpan);
-        var maxMa = smoothedUp.Span;
-        var minMa = smoothedDown.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var total = maxMa[i] + minMa[i];
-            output[i] = total != 0 ? MathHelper.MinOrMax(maxMa[i] / total * 100, 100, 0) : 0;
-        }
-
-        return buffer;
+        return ComputeDemarkerFast(data, context, length, maType);
     }
 
     /// <summary>

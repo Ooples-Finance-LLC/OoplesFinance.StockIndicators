@@ -45,6 +45,8 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            DemarkerSpecOptions demarker => new DemarkerState(demarker.MaType, demarker.Length),
+            DeMarkerSpecOptions demarker => new DemarkerState(length: demarker.Length),
             BullPowerIndicatorSpecOptions power => new BullPowerIndicatorState(power.MaType, power.Length),
             BearPowerIndicatorSpecOptions power => new BearPowerIndicatorState(power.MaType, power.Length),
             EhlersCycleAmplitudeSpecOptions amplitude => new EhlersCycleAmplitudeState(amplitude.Length, amplitude.Delta),

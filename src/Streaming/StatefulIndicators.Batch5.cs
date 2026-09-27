@@ -171,69 +171,16 @@ public sealed class DecisionPointPriceMomentumOscillatorState : IStreamingIndica
 [PrimaryOutput("Dm")]
 public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _maxSmoother;
-    private readonly IMovingAverageSmoother _minSmoother;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-
-    public DemarkerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _maxSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _minSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-    }
-
+    private readonly DemarkerWindow _window;
+    public DemarkerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.Demarker;
-
-    public void Reset()
-    {
-        _maxSmoother.Reset();
-        _minSmoother.Reset();
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : bar.High;
-        var prevLow = _hasPrev ? _prevLow : bar.Low;
-
-        var dMax = bar.High > prevHigh ? bar.High - prevHigh : 0;
-        var dMin = bar.Low < prevLow ? prevLow - bar.Low : 0;
-
-        var maxMa = _maxSmoother.Next(dMax, isFinal);
-        var minMa = _minSmoother.Next(dMin, isFinal);
-        var demarker = maxMa + minMa != 0
-            ? MathHelper.MinOrMax((maxMa / (maxMa + minMa)) * 100, 100, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Dm", demarker }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(demarker, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Dm", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxSmoother.Dispose();
-        _minSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pivot")]

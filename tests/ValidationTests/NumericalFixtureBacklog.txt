@@ -226,10 +226,6 @@ OoplesFinance.StockIndicators.Indicators.DampingIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.DampingIndex/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DampingIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DampingIndex/weighted-average
-OoplesFinance.StockIndicators.Indicators.DeMarker/default
-OoplesFinance.StockIndicators.Indicators.DeMarker/longer-periods
-OoplesFinance.StockIndicators.Indicators.DeMarker/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DeMarker/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DemandIndex/default
 OoplesFinance.StockIndicators.Indicators.DemandIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.DemandIndex/minimum-periods
@@ -244,11 +240,6 @@ OoplesFinance.StockIndicators.Indicators.DemarkRangeExpansionIndex/default
 OoplesFinance.StockIndicators.Indicators.DemarkRangeExpansionIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.DemarkRangeExpansionIndex/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DemarkRangeExpansionIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Demarker/default
-OoplesFinance.StockIndicators.Indicators.Demarker/longer-periods
-OoplesFinance.StockIndicators.Indicators.Demarker/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Demarker/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Demarker/weighted-average
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/default
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.DerivativeOscillator/minimum-periods

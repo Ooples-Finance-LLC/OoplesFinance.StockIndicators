@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.Demarker)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DemarkerOutputs(bars, builtIn)["Dm"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.BullPowerIndicator or IndicatorName.BearPowerIndicator)
         {
             var powerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
