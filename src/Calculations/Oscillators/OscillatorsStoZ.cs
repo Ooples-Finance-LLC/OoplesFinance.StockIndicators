@@ -1695,6 +1695,22 @@ public static partial class Calculations
     public static StockData CalculateTurboTrigger(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100,
         int smoothLength = 2)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, stableHigh, stableLow, stableOpen, _) = GetInputValuesList(stockData);
+            using var stableWindow = new TurboTriggerWindow(maType, length, smoothLength);
+            List<double> stableBull = new(stockData.Count), stableTrigger = new(stockData.Count); var stableSignals = CreateSignalsList(stockData);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var value = stableWindow.Next(stableInput[i], stableOpen[i], stableHigh[i], stableLow[i], true);
+                var previous = i == 0 ? 0 : stableTrigger[i - 1] - stableBull[i - 1];
+                stableSignals?.Add(GetCompareSignal(value.Trigger - value.Bull, previous)); stableBull.Add(value.Bull); stableTrigger.Add(value.Trigger);
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "BullLine", stableBull }, { "Trigger", stableTrigger } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.TurboTrigger;
+            return stockData;
+        }
+
         List<double> avgList = new(stockData.Count);
         List<double> hyList = new(stockData.Count);
         List<double> ylList = new(stockData.Count);
@@ -1702,10 +1718,10 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
 
-        var cList = GetMovingAverageList(stockData, maType, smoothLength, inputList);
-        var oList = GetMovingAverageList(stockData, maType, smoothLength, openList);
-        var hList = GetMovingAverageList(stockData, maType, smoothLength, highList);
-        var lList = GetMovingAverageList(stockData, maType, smoothLength, lowList);
+        var cList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(inputList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, inputList);
+        var oList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(openList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, openList);
+        var hList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(highList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, highList);
+        var lList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(lowList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, lowList);
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -1716,7 +1732,7 @@ public static partial class Calculations
             avgList.Add(avg);
         }
 
-        var yList = GetMovingAverageList(stockData, maType, length, avgList);
+        var yList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(avgList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, avgList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var y = yList[i];
@@ -1730,8 +1746,8 @@ public static partial class Calculations
             ylList.Add(yl);
         }
 
-        var aList = GetMovingAverageList(stockData, maType, length, hyList);
-        var bList = GetMovingAverageList(stockData, maType, length, ylList);
+        var aList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(hyList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, hyList);
+        var bList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(ylList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, ylList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var a = aList[i];
@@ -1741,7 +1757,7 @@ public static partial class Calculations
             abList.Add(ab);
         }
 
-        var oscList = GetMovingAverageList(stockData, maType, length, abList);
+        var oscList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(abList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, abList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var osc = oscList[i];

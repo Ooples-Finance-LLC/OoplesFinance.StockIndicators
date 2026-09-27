@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TurboTrigger)
+        {
+            var turboOptions = builtIn.CreateOptions(); var turboKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < turboKeys.Length; slot++)
+            {
+                var key = turboKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TurboTriggerOutputs(bars, Integer(turboOptions, "Length", 100), kind: AverageKind(turboOptions, 1))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TheRangeIndicator)
         {
             var rangeOptions = builtIn.CreateOptions();

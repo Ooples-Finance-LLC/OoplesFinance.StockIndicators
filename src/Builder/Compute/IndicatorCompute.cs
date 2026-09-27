@@ -16829,6 +16829,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTurboTriggerFast(StockData data, ComputeContext context, int length = 100, int smoothLength = 2,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var stableInput = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+            using var stableWindow = new TurboTriggerWindow(maType, length, smoothLength); var stableOutput = context.Rent(stableInput.Count);
+            for (var i = 0; i < stableInput.Count; i++)
+            {
+                var value = stableWindow.Next(stableInput[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true);
+                stableOutput.WritableSpan[i] = outputKey == "Trigger" ? value.Trigger : value.Bull;
+            }
+            return stableOutput;
+        }
+
         // CalculateTurboTrigger smooths the open, high and close, centres a long average on the midpoint of
         // the smoothed open and close, and publishes the long average of how far the smoothed high sits above
         // that centre as its "BullLine". The smoothed low only reaches the trigger line, which is a different

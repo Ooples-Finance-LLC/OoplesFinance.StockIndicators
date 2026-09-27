@@ -30399,5 +30399,121 @@
     "before": "tr / RoundRocBankStage(close - previous)",
     "after": "tr * RoundRocBankStage(close - previous)",
     "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "turbo-trigger-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "Combine(c, o, 1, 2)",
+    "after": "new RocBankValue((c.Publish() + o.Publish()) / 2)",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-high-difference",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "Combine(h, center, -1)",
+    "after": "new RocBankValue(h.Publish() - center.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-low-difference",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "Combine(center, l, -1)",
+    "after": "new RocBankValue(center.Publish() - l.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~RangeAndSmoothingCompositesHaveHandCalculatedValues|FullyQualifiedName~ComponentAverageParityTests.Turbo"
+  },
+  {
+    "id": "turbo-trigger-trigger-difference",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "Combine(bull, bear, -1)",
+    "after": "new RocBankValue(bull.Publish() - bear.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-trigger-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "Combine(bull, bear, -1)",
+    "after": "Combine(bull, bear, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "smoothing, smoothing, smoothing, smoothing, length",
+    "after": "length, smoothing, smoothing, smoothing, length",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "_averages[slot].Next(value, commit)",
+    "after": "_averages[slot].Next(value, true)",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TurboTriggerWindow.cs",
+    "before": "foreach (var v in _averages) v.Reset();",
+    "after": "foreach (var v in _averages.Skip(1)) v.Reset();",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "turbo-trigger-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields",
+    "scope": "public sealed class TurboTriggerState"
+  },
+  {
+    "id": "turbo-trigger-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var stableInput = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var stableInput = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields",
+    "scope": "internal static ComputeBuffer ComputeTurboTriggerFast("
+  },
+  {
+    "id": "turbo-trigger-raw-trigger-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Trigger\" ? value.Trigger : value.Bull",
+    "after": "value.Bull",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields",
+    "scope": "internal static ComputeBuffer ComputeTurboTriggerFast("
+  },
+  {
+    "id": "turbo-trigger-batch-callback",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(inputList), smoothLength)?.ToList() ?? ",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields",
+    "scope": "public static StockData CalculateTurboTrigger("
+  },
+  {
+    "id": "turbo-trigger-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " TurboTriggerSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.EveryRouteMatchesIndependentEightStageFormula"
+  },
+  {
+    "id": "turbo-trigger-reference-trigger",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TurboTrigger.cs",
+    "before": "RoundRocBankStage(v - bear[i])",
+    "after": "RoundRocBankStage(v + bear[i])",
+    "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
   }
 ]

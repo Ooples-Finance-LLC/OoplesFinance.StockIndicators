@@ -1888,11 +1888,6 @@ OoplesFinance.StockIndicators.Indicators.TurboStochasticsSlow/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TurboStochasticsSlow/minimum-turboLength
 OoplesFinance.StockIndicators.Indicators.TurboStochasticsSlow/shorter-periods
 OoplesFinance.StockIndicators.Indicators.TurboStochasticsSlow/weighted-average
-OoplesFinance.StockIndicators.Indicators.TurboTrigger/default
-OoplesFinance.StockIndicators.Indicators.TurboTrigger/longer-periods
-OoplesFinance.StockIndicators.Indicators.TurboTrigger/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TurboTrigger/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TurboTrigger/weighted-average
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/default
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.UberTrendIndicator/minimum-periods

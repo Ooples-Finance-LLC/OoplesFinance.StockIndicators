@@ -964,85 +964,16 @@ public sealed class TurboStochasticsSlowState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("BullLine")]
 public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _closeSmoother;
-    private readonly IMovingAverageSmoother _openSmoother;
-    private readonly IMovingAverageSmoother _highSmoother;
-    private readonly IMovingAverageSmoother _lowSmoother;
-    private readonly IMovingAverageSmoother _avgSmoother;
-    private readonly IMovingAverageSmoother _hySmoother;
-    private readonly IMovingAverageSmoother _ylSmoother;
-    private readonly IMovingAverageSmoother _oscSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public TurboTriggerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100,
-        int smoothLength = 2)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _closeSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _openSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _avgSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _hySmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _ylSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _oscSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TurboTriggerWindow _window;
+    public TurboTriggerState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100, int smoothLength = 2) => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.TurboTrigger;
-
-    public void Reset()
-    {
-        _closeSmoother.Reset();
-        _openSmoother.Reset();
-        _highSmoother.Reset();
-        _lowSmoother.Reset();
-        _avgSmoother.Reset();
-        _hySmoother.Reset();
-        _ylSmoother.Reset();
-        _oscSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var close = _closeSmoother.Next(_input.GetValue(bar), isFinal);
-        var open = _openSmoother.Next(bar.Open, isFinal);
-        var high = _highSmoother.Next(bar.High, isFinal);
-        var low = _lowSmoother.Next(bar.Low, isFinal);
-        var avg = (close + open) / 2;
-        var y = _avgSmoother.Next(avg, isFinal);
-        var hy = high - y;
-        var yl = y - low;
-        var a = _hySmoother.Next(hy, isFinal);
-        var b = _ylSmoother.Next(yl, isFinal);
-        var osc = _oscSmoother.Next(a - b, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "BullLine", a },
-                { "Trigger", osc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new(value.Bull, includeOutputs ? new Dictionary<string, double> { { "BullLine", value.Bull }, { "Trigger", value.Trigger } } : null);
     }
-
-    public void Dispose()
-    {
-        _closeSmoother.Dispose();
-        _openSmoother.Dispose();
-        _highSmoother.Dispose();
-        _lowSmoother.Dispose();
-        _avgSmoother.Dispose();
-        _hySmoother.Dispose();
-        _ylSmoother.Dispose();
-        _oscSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tmf")]
