@@ -215,22 +215,16 @@ public static partial class Calculations
     public static StockData CalculateNarrowSidewaysChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, double stdDevMult = 3)
     {
-        var narrowChannelList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBandList = narrowChannelList.ChainedOutputs["UpperBand"];
-        var middleBandList = narrowChannelList.ChainedOutputs["MiddleBand"];
-        var lowerBandList = narrowChannelList.ChainedOutputs["LowerBand"];
-        var signalsList = narrowChannelList.SignalsList;
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.NarrowSidewaysChannel;
-
-        return stockData;
+        HighLowBandsWindow.ValidateShift(stdDevMult); length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var middle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList()
+            ?? (maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(input, length) : GetMovingAverageList(stockData, maType, length, input));
+        using var deviation = new ExactPopulationWindow(length); List<double> upper = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var width = deviation.Next(input[i], true); upper.Add(BollingerArithmetic.Band(middle[i], width, stdDevMult)); lower.Add(BollingerArithmetic.Band(middle[i], width, -stdDevMult));
+            signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.NarrowSidewaysChannel; return stockData;
     }
 
 

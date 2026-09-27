@@ -2342,57 +2342,14 @@ public sealed class LinearChannelsState : IStreamingIndicatorState
 [PrimaryOutput("MiddleBand")]
 public sealed class NarrowSidewaysChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly StreamingInputResolver _input;
-    private readonly double _stdDevMult;
-
-    public NarrowSidewaysChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double stdDevMult = 3)
-    {
-        var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
-        _stdDevMult = stdDevMult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BollingerBandsState _bands;
+    public NarrowSidewaysChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double stdDevMult = 3)
+    { HighLowBandsWindow.ValidateShift(stdDevMult); _bands = new(length, stdDevMult, maType); }
     public IndicatorName Name => IndicatorName.NarrowSidewaysChannel;
-
-    public void Reset()
-    {
-        _meanSmoother.Reset();
-        _stdDev.Reset();
-    }
-
+    public void Reset() => _bands.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var middle = _meanSmoother.Next(value, isFinal);
-        // Bollinger Bands, as the batch defines it: the population standard deviation of the prices.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var upper = middle + (stdDev * _stdDevMult);
-        var lower = middle - (stdDev * _stdDevMult);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
-    }
-
-    public void Dispose()
-    {
-        _meanSmoother.Dispose();
-        _stdDev.Dispose();
-    }
+    { return _bands.Update(bar, isFinal, includeOutputs); }
+    public void Dispose() => _bands.Dispose();
 }
 
 [PrimaryOutput("Roc")]

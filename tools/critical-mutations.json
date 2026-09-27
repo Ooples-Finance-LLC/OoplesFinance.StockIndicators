@@ -21506,5 +21506,131 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState",
     "scope": "public sealed class TrendTraderBandsState :"
+  },
+  {
+    "id": "narrow-channel-batch-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "scope": "public static StockData CalculateNarrowSidewaysChannel(",
+    "before": "length = Math.Max(1, length)",
+    "after": "length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-batch-deviation-source",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "scope": "public static StockData CalculateNarrowSidewaysChannel(",
+    "before": "deviation.Next(input[i], true)",
+    "after": "deviation.Next(middle[i], true)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-batch-selected-source",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelLtoR.cs",
+    "scope": "public static StockData CalculateNarrowSidewaysChannel(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-raw-multiplier",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(",
+    "before": "band == ChannelBand.Upper ? 3 : -3",
+    "after": "band == ChannelBand.Upper ? 2 : -2",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-raw-deviation-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(",
+    "before": "deviation.Next(input[i], true)",
+    "after": "deviation.Next(result.Span[i], true)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-raw-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-raw-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(",
+    "before": "&& !ComponentAverage.HasOverrides",
+    "after": "&& (!ComponentAverage.HasOverrides || true)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class NarrowSidewaysChannelState :",
+    "before": "new(length, stdDevMult, maType)",
+    "after": "new(length + 1, stdDevMult, maType)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-native-multiplier",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class NarrowSidewaysChannelState :",
+    "before": "new(length, stdDevMult, maType)",
+    "after": "new(length, 2, maType)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class NarrowSidewaysChannelState :",
+    "before": "_bands.Update(bar, isFinal, includeOutputs)",
+    "after": "_bands.Update(bar, true, includeOutputs)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class NarrowSidewaysChannelState :",
+    "before": "public void Reset() => _bands.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BollingerBandsState :",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "var value = bar.Close; if (bar.Volume < 0 && bar.Volume > 0) value = _input.GetValue(bar);",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests.InvalidFieldsAndMultipliersAreRejectedBeforeStateChanges"
+  },
+  {
+    "id": "narrow-channel-native-coefficient",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class NarrowSidewaysChannelState :",
+    "before": "HighLowBandsWindow.ValidateShift(stdDevMult);",
+    "after": "if (stdDevMult == 0) HighLowBandsWindow.ValidateShift(stdDevMult);",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests"
+  },
+  {
+    "id": "narrow-channel-obsolete-pct",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": "private static IStreamingIndicatorState? TryCreateFromTypedOptions(",
+    "before": "new NarrowSidewaysChannelState(narrow.MaType, narrow.Length)",
+    "after": "new NarrowSidewaysChannelState(narrow.MaType, narrow.Length, (double)narrow.GetType().GetProperty(\"Pct\")!.GetValue(narrow)!)",
+    "filter": "FullyQualifiedName~NarrowChannelNumericalTests.ObsoletePercentageDoesNotReplaceTheThreeDeviationContract"
   }
 ]

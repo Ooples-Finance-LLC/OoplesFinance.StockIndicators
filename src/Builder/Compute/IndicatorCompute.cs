@@ -21293,20 +21293,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeNarrowSidewaysChannelFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateNarrowSidewaysChannel republishes Bollinger Bands at three standard deviations and nothing
-        // else, so the arm is that band rather than a moving average of the close. The channel has no
-        // percentage of its own, which is why the spec's Pct is marked as having no effect.
-        const double stdDevMult = 3;
-
-        if (band == ChannelBand.Middle)
+        // Pct is an obsolete no-op; the typed channel uses three population deviations.
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; length = Math.Max(1, length); var result = context.Rent(input.Count);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides) BollingerArithmetic.Mean(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        else MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+        if (band != ChannelBand.Middle)
         {
-            var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-            var middle = context.Rent(inputList.Count);
-            MovingAverage(data, maType, Math.Max(length, 1), SpanCompat.AsReadOnlySpan(inputList), middle.WritableSpan);
-            return middle;
+            using var deviation = new ExactPopulationWindow(length); var multiplier = band == ChannelBand.Upper ? 3 : -3;
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = BollingerArithmetic.Band(result.Span[i], deviation.Next(input[i], true), multiplier);
         }
-
-        return BollingerBand(data, context, length, band == ChannelBand.Upper ? stdDevMult : -stdDevMult, maType);
+        return result;
     }
 
     /// <summary>
