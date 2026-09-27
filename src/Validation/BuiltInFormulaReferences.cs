@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RexOscillator)
+        {
+            var rexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < rexKeys.Length; slot++) { var key = rexKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.NthOrderDifferencingOscillator)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => NthDifferenceOutputs(bars, builtIn)["Nodo"], IndicatorErrorBudget.Exact);

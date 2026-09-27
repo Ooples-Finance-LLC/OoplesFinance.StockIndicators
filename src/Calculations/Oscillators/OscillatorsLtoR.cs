@@ -2775,43 +2775,14 @@ public static partial class Calculations
     public static StockData CalculateRexOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14)
     {
-        List<double> tvbList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues; List<double> values = new(input.Count), signal = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var close = inputList[i];
-            var open = openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            var tvb = (3 * close) - (low + open + high);
-            tvbList.Add(tvb);
+            var tvb = input.Select((v,i) => RexWindow.TrueValue(v, stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i]).Publish()).ToList(); values = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(tvb), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, tvb); signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(values), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, values);
         }
-
-        var roList = GetMovingAverageList(stockData, maType, length, tvbList);
-        var roEmaList = GetMovingAverageList(stockData, maType, length, roList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ro = roList[i];
-            var roEma = roEmaList[i];
-            var prevRo = i >= 1 ? roList[i - 1] : 0;
-            var prevRoEma = i >= 1 ? roEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(ro - roEma, prevRo - prevRoEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ro", roList },
-            { "Signal", roEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(roList);
-        stockData.IndicatorName = IndicatorName.RexOscillator;
-
-        return stockData;
+        else { using var window = new RexWindow(maType, length, input.Count); for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], true); values.Add(r.Value); signal.Add(r.Signal); } }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - signal[i], i > 0 ? values[i - 1] - signal[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ro", values }, { "Signal", signal } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.RexOscillator; return stockData;
     }
 
 

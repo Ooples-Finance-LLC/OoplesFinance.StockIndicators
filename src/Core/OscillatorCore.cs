@@ -4630,40 +4630,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RexOscillator(ReadOnlySpan<double> open, ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var tvbArray = pool.Rent(close.Length);
-        var emaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var tvb = tvbArray.AsSpan(0, close.Length);
-            var ema = emaArray.AsSpan(0, close.Length);
-
-            // Calculate True Value Bar (TVB)
-            for (var i = 0; i < close.Length; i++)
-            {
-                tvb[i] = (3 * close[i]) - (high[i] + low[i] + open[i]);
-            }
-
-            // Apply EMA
-            MovingAverageCore.ExponentialMovingAverage(tvb, ema, length);
-
-            // Output is the TVB EMA
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = ema[i];
-            }
-        }
-        finally
-        {
-            pool.Return(tvbArray);
-            pool.Return(emaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new RexWindow(MovingAvgType.ExponentialMovingAverage, length, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], open[i], high[i], low[i], true).Value;
     }
 
     /// <summary>

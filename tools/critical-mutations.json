@@ -24626,5 +24626,153 @@
     "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~NthDifferenceNumericalTests.ExactBinomialFormMatchesSuccessiveDifferencesAndAnnihilatesPolynomials|FullyQualifiedName~NthDifferenceNumericalTests.RawAndBatchUseTheSelectedSeries|FullyQualifiedName~NthDifferenceNumericalTests.InvalidFieldsCannotAdvanceLagHistory",
     "scope": "public sealed class NthOrderDifferencingOscillatorState :"
+  },
+  {
+    "id": "rex-close-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "sum.Add(close, 3);",
+    "after": "sum.Add(close, 2);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-open-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "sum.Add(open, -1);",
+    "after": "sum.Add(open, 1);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-high-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "sum.Add(high, -1);",
+    "after": "sum.Add(high, 1);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-low-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "sum.Add(low, -1);",
+    "after": "sum.Add(low, 1);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-premature-candle-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(3 * close - open - high - low);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-first-average-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_first = new(kind, length, capacityHint);",
+    "after": "_first = new(MovingAvgType.SimpleMovingAverage, length, capacityHint);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-signal-average-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal = new(kind, length, capacityHint);",
+    "after": "_signal = new(MovingAvgType.SimpleMovingAverage, length, capacityHint);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal = new(kind, length, capacityHint);",
+    "after": "_signal = new(kind, length + 1, capacityHint);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(input, commit)",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-early-first-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(new RocBankValue(first.Publish()), commit)",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-preview-first",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_first.Next(input, commit)",
+    "after": "_first.Next(input, true)",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-preview-signal",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal.Next(first, commit)",
+    "after": "_signal.Next(first, true)",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-reset-first",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_first?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/RexWindow.cs",
+    "before": "_signal?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage"
+  },
+  {
+    "id": "rex-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeRexOscillatorFast("
+  },
+  {
+    "id": "rex-customer-second-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, length, first.Span, output.WritableSpan);",
+    "after": "MovingAverage(data, maType, length, tvb.Span, output.WritableSpan);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeRexOscillatorFast("
+  },
+  {
+    "id": "rex-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "public sealed class RexOscillatorState :"
+  },
+  {
+    "id": "rex-core-average",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new RexWindow(MovingAvgType.ExponentialMovingAverage, length, close.Length)",
+    "after": "new RexWindow(MovingAvgType.SimpleMovingAverage, length, close.Length)",
+    "filter": "FullyQualifiedName~RexNumericalTests.WeightedCandleAndBothAveragesMatchIndependentRoundedStages|FullyQualifiedName~RexNumericalTests.ExtendedCandleValuesRecoverBeforeEitherAverageIsPublished|FullyQualifiedName~RexNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~RexNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
+    "scope": "internal static void RexOscillator("
   }
 ]

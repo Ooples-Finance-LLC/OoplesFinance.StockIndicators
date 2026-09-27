@@ -908,7 +908,7 @@ internal static partial class IndicatorCompute
             RainbowOscillatorSpecOptions rbo => ComputeRainbowOscillatorFast(data, context, rbo.Length, maType: rbo.MaType, outputKey: spec.OutputKey),
             RegressionOscillatorSpecOptions regro => ComputeRegressionOscillatorFast(data, context, regro.Length),
             RexOscillatorSpecOptions rexo => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeRexOscillatorFast(data, context, rexo.Length, rexo.MaType), rexo.Length, rexo.MaType)
+                ? ComputeRexOscillatorFast(data, context, rexo.Length, rexo.MaType, true)
                 : ComputeRexOscillatorFast(data, context, rexo.Length, rexo.MaType),
 
             // Batch 6 - Sentiment/Zone oscillators
@@ -9755,29 +9755,16 @@ internal static partial class IndicatorCompute
     /// Computes Rex Oscillator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeRexOscillatorFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // CalculateRexOscillator smooths the true value of the bar - three times the close less the sum of the
-        // low, the open and the high, which is how far the close finished above the rest of the bar. The second
-        // smoothing is the separate signal series, so the published one is smoothed just once.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var trueValue = context.Rent(count);
-        var tvb = trueValue.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var output = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            tvb[i] = (3 * input[i]) - (lows[i] + opens[i] + highs[i]);
+            using var tvb = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) tvb.WritableSpan[i] = RexWindow.TrueValue(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i]).Publish();
+            if (signal) { using var first = context.Rent(input.Count); MovingAverage(data, maType, length, tvb.Span, first.WritableSpan); MovingAverage(data, maType, length, first.Span, output.WritableSpan); } else MovingAverage(data, maType, length, tvb.Span, output.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, trueValue.Span, buffer.WritableSpan);
-        return buffer;
+        else { using var window = new RexWindow(maType, length, input.Count); for (var i = 0; i < input.Count; i++) { var r = window.Next(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true); output.WritableSpan[i] = signal ? r.Signal : r.Value; } }
+        return output;
     }
 
     /// <summary>

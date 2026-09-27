@@ -1996,3 +1996,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - All thirteen attempts in419a/419b were inconclusive (exit code 1073807364); same-source retry419c caught **13/13** faults. All thirteen staged files match its archive. **2,948** retained manifest sites. No inconclusive attempt earns credit.
 - Original source/archive SHA256: `e020bacd416ec80f97cfb5cff984284ddc002aa25e2df0805038a3840ad99a18` / `c1848521ffbab17c978d8bb41be650d3b4947ea282214b9f8c464454e683316b`. Retry source/archive: `e020bacd416ec80f97cfb5cff984284ddc002aa25e2df0805038a3840ad99a18` / `8ba5657dfb2809e7bc1bca1f6b395bbc0546428886bc58d1aed0dc3e84446615`.
 - Inventory: **4,786/7,131**, **2,345** omissions across **388** types; no construction failures. 189 grouped batches cover **1,960 configurations / 357 types**. DLL SHA256 `9E5122F4D3E83B4F5ED1C4C705F9D9BA20D26F57D4D242FE12707996AFBEFA4B`. Full coverage remains incomplete.
+
+
+### Rex Oscillator numerical contracts
+
+- Five configurations check the weighted candle value `3*close-open-high-low`, its selected average and second signal average against independent rational stages. Extended candle and first-average values remain available until the final outputs are published. Native/core/raw/batch routes preserve the same formula and selected inputs.
+- The combined recovery regression passed **259/259** checks; the final strengthened Rex family passed **44/44** (`rex-final.trx`). A hand fixture proves that opposite overflowing primary values yield a finite zero signal. All five routes, customer-stage order, preview/reset and invalid-input state integrity are covered.
+- Campaign420a caught **18/18** faults; **2,966** retained sites. All thirteen staged implementation/test/catalog files match its archive. Source/archive SHA256: `67eb51322762db89ae5519a07c54d7edd19bdb5dc31b3c763734a9ef22318bb7` / `9739c7cb93733cc5feb4e26d03b91367be5dbf4a1294aadbc7612f34654443d7`.
+- Inventory: **4,791/7,131**, **2,340** omissions across **387** types; no construction failures. 190 grouped batches cover **1,965 configurations / 358 types**. DLL SHA256 `847A2F840AABCAD9C786224A8C295997A6162126264C5109880D81B4C96C23F8`. Full library/release gates remain incomplete.

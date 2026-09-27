@@ -8,51 +8,16 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Ro")]
 public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _roSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public RexOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _roSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RexWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public RexOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.RexOscillator;
-
-    public void Reset()
-    {
-        _roSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var tvb = (3 * close) - (bar.Low + bar.Open + bar.High);
-        var ro = _roSmoother.Next(tvb, isFinal);
-        var signal = _signalSmoother.Next(ro, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ro", ro },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ro, outputs);
+        StreamingInputValidation.Validate(bar); var r = _window.Next(_input.GetValue(bar), bar.Open, bar.High, bar.Low, isFinal); return new(r.Value, includeOutputs ? new Dictionary<string, double> { { "Ro", r.Value }, { "Signal", r.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _roSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rsrma")]
