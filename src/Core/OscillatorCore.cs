@@ -7300,35 +7300,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageAbsoluteErrorNormalization(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var eAbsSum = new RollingSum();
-        var eSum = new RollingSum();
-        double prevY = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                prevY = close[i];
-            }
-
-            var e = close[i] - prevY;
-            eSum.Add(e);
-            eAbsSum.Add(Math.Abs(e));
-
-            var eAbsSma = eAbsSum.Average(length);
-            var eSma = eSum.Average(length);
-
-            var a = eAbsSma != 0 ? Math.Min(Math.Max(eSma / eAbsSma, -1), 1) : 0;
-            output[i] = a;
-
-            prevY = close[i] + (a * eAbsSma);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.");
+        var window=new AbsoluteErrorWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>

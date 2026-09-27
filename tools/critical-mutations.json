@@ -29690,5 +29690,111 @@
     "before": " RetrospectiveCandlestickChartSpecOptions or ",
     "after": " ",
     "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "absolute-error-early-prediction",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "previous.AddTo(ref delta,-1);",
+    "after": "delta.Add(previous.Publish(),-1);",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-early-means",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "var ratio=travel.IsExactlyZero?0:net.Ratio(travel);",
+    "after": "var roundedNet=net.Mean(Math.Min(_length,_errors.Count+1));var roundedTravel=travel.Mean(Math.Min(_length,_errors.Count+1));var ratio=roundedTravel==0?0:roundedNet/roundedTravel;",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-partial-window",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "var count=_errors.Count<_length?_errors.Count+1:_length;",
+    "after": "var count=_length;",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-absolute-errors",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "Math.Abs(value.Mantissa)",
+    "after": "value.Mantissa",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-feedback-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "mean.Multiply(ratio)",
+    "after": "mean.Multiply(-ratio)",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-feedback-history",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "_prediction=prediction;",
+    "after": "_prediction=new RocBankValue(price);",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "old.AddTo(ref net,-1);",
+    "after": "old.AddTo(ref net,0);",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AbsoluteErrorWindow.cs",
+    "before": "_started=false;",
+    "after": "// retain started state\n        ",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeAverageAbsoluteErrorNormalizationFast("
+  },
+  {
+    "id": "absolute-error-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests",
+    "scope": "public sealed class AverageAbsoluteErrorNormalizationState"
+  },
+  {
+    "id": "absolute-error-native-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "            AverageAbsoluteErrorNormalizationSpecOptions absoluteError => new AverageAbsoluteErrorNormalizationState(absoluteError.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "absolute-error-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " AverageAbsoluteErrorNormalizationSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
   }
 ]

@@ -167,51 +167,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAverageAbsoluteErrorNormalization(this StockData stockData, int length = 14)
     {
-        List<double> yList = new(stockData.Count);
-        List<double> eList = new(stockData.Count);
-        List<double> eAbsList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum eAbsSum = new();
-        RollingSum eSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);var (input,_,_,_,_)=GetInputValuesList(stockData);var window=new AbsoluteErrorWindow(length);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var currentValue = inputList[i];
-            var prevY = i >= 1 ? yList[i - 1] : currentValue;
-            var prevA1 = i >= 1 ? aList[i - 1] : 0;
-            var prevA2 = i >= 2 ? aList[i - 2] : 0;
-
-            var e = currentValue - prevY;
-            eList.Add(e);
-            eSum.Add(e);
-
-            var eAbs = Math.Abs(e);
-            eAbsList.Add(eAbs);
-            eAbsSum.Add(eAbs);
-
-            var eAbsSma = eAbsSum.Average(length);
-            var eSma = eSum.Average(length);
-
-            var a = eAbsSma != 0 ? MinOrMax(eSma / eAbsSma, 1, -1) : 0;
-            aList.Add(a);
-
-            var y = currentValue + (a * eAbsSma);
-            yList.Add(y);
-
-            var signal = GetRsiSignal(a - prevA1, prevA1 - prevA2, a, prevA1, 0.8, -0.8);
-            signalsList?.Add(signal);
+            var value=window.Next(input[i],true);var previous=i>0?values[i-1]:0;var before=i>1?values[i-2]:0;
+            signals?.Add(GetRsiSignal(value-previous,previous-before,value,previous,0.8,-0.8));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Aaen", aList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(aList);
-        stockData.IndicatorName = IndicatorName.AverageAbsoluteErrorNormalization;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Aaen",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.AverageAbsoluteErrorNormalization;return stockData;
     }
 
 

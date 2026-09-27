@@ -7326,68 +7326,16 @@ public sealed class AutonomousRecursiveMovingAverageState : IStreamingIndicatorS
 [PrimaryOutput("Aaen")]
 public sealed class AverageAbsoluteErrorNormalizationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _eSum;
-    private readonly RollingWindowSum _eAbsSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevY;
-    private bool _hasPrev;
-
-    public AverageAbsoluteErrorNormalizationState(int length = 14)
+    private readonly AbsoluteErrorWindow _window;
+    public AverageAbsoluteErrorNormalizationState(int length=14)=>_window=new AbsoluteErrorWindow(length);
+    public IndicatorName Name=>IndicatorName.AverageAbsoluteErrorNormalization;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _eSum = new RollingWindowSum(resolved);
-        _eAbsSum = new RollingWindowSum(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Aaen",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.AverageAbsoluteErrorNormalization;
-
-    public void Reset()
-    {
-        _eSum.Reset();
-        _eAbsSum.Reset();
-        _prevY = 0;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var prevY = _hasPrev ? _prevY : value;
-        var e = value - prevY;
-        int eCount;
-        var eSum = isFinal ? _eSum.Add(e, out eCount) : _eSum.Preview(e, out eCount);
-        var eAbs = Math.Abs(e);
-        int eAbsCount;
-        var eAbsSum = isFinal ? _eAbsSum.Add(eAbs, out eAbsCount) : _eAbsSum.Preview(eAbs, out eAbsCount);
-        var eAbsSma = eAbsCount > 0 ? eAbsSum / eAbsCount : 0;
-        var eSma = eCount > 0 ? eSum / eCount : 0;
-        var a = eAbsSma != 0 ? MathHelper.MinOrMax(eSma / eAbsSma, 1, -1) : 0;
-        var y = value + (a * eAbsSma);
-
-        if (isFinal)
-        {
-            _prevY = y;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Aaen", a }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
-    }
-
-    public void Dispose()
-    {
-        _eSum.Dispose();
-        _eAbsSum.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 [PrimaryOutput("Amfo")]

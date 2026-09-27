@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.AverageAbsoluteErrorNormalization)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => AbsoluteErrorOutputs(bars,Integer(builtIn.CreateOptions(),"Length",14))["Aaen"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RetrospectiveCandlestickChart)
         {
             yield return IndicatorValidationRule.Reference(0, bars => RetrospectiveCandleOutputs(bars,Integer(builtIn.CreateOptions(),"Length",100))["Rcc"], IndicatorErrorBudget.Exact);
