@@ -2093,3 +2093,9 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **74/74** family/enrollment/foundation checks passed (`center-linearity.trx`), including all public routes, direct core, selected inputs, minimum/maximum periods, subnormal/extreme values, finite recovery after overflow, preview/reset and invalid fields. Campaign431a caught **21/21** faults; **3,187** retained sites.
 - Source/archive SHA256: `31a999136e018216ed8cab1a2eb7125e8a4b1c431f387fe6649a233326a85fac` / `ff9a7004a1e66ad9c00bae9ddb95334136cc0fa876f0574ccb34785834264cc2`.
 - Inventory: **4,862/7,131**, **2,269** omissions across **374** types; no construction failures. 201 grouped batches cover **2,036 configurations / 371 types**. DLL SHA256 `42EF5B92D230035C16851C674EF130DC59A949CBC8677E79F80BFCEFE27B3C4E`. Full coverage and release gates remain incomplete.
+
+
+### Shared pooled-buffer constructor-failure cleanup
+
+- Explicit disposal and finalization skip returning an array when construction failed before ArrayPool.Rent assigned the buffer. Ordinary rented-buffer disposal remains idempotent.
+- The focused regression models the uninitialized object and invokes its finalizer with automatic finalization suppressed, avoiding forced memory exhaustion or a test-host crash. Both cleanup paths and normal eviction/disposal passed (3 tests), alongside the Internal Bar Strength/enrollment/foundation run: **77/77** (`internal-bar-strength-buffer.trx`).
