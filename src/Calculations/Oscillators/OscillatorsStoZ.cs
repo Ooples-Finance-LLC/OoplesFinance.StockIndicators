@@ -20,53 +20,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimplePriceZone(this StockData stockData, int length = 14)
     {
-        length = Math.Max(length, 1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> zoneList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        double sumUp = 0;
-        double sumDown = 0;
-        for (var i = 0; i < count; i++)
+        List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);var (input,_,_,_,_)=GetInputValuesList(stockData);var window=new SimplePriceZoneWindow(length);
+        for(var i=0;i<stockData.Count;i++)
         {
-            double zone = 0;
-            if (i >= 1)
-            {
-                var change = inputList[i] - inputList[i - 1];
-                sumUp += change > 0 ? change : 0;
-                sumDown += change < 0 ? -change : 0;
-
-                // A change enters the sums only from the second bar, so the one leaving is
-                // change[i - length], which exists only once i - length >= 1. Removing it at
-                // i == length subtracted a raw price that was never added.
-                if (i >= length + 1)
-                {
-                    var prevChange = inputList[i - length] - inputList[i - length - 1];
-                    sumUp -= prevChange > 0 ? prevChange : 0;
-                    sumDown -= prevChange < 0 ? -prevChange : 0;
-                }
-
-                var total = sumUp + sumDown;
-                zone = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
-            }
-
-            zoneList.Add(zone);
-
-            var prevZone1 = i >= 1 ? zoneList[i - 1] : 0;
-            var prevZone2 = i >= 2 ? zoneList[i - 2] : 0;
-            var signal = GetCompareSignal(zone - prevZone1, prevZone1 - prevZone2);
-            signalsList?.Add(signal);
+            var value=window.Next(input[i],true);var previous=i>0?values[i-1]:0;var before=i>1?values[i-2]:0;
+            signals?.Add(GetCompareSignal(value-previous,previous-before));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Spz", zoneList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zoneList);
-        stockData.IndicatorName = IndicatorName.SimplePriceZone;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Spz",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.SimplePriceZone;return stockData;
     }
 
     /// <summary>

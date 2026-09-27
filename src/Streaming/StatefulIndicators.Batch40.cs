@@ -146,77 +146,16 @@ public sealed class ElderImpulseSystemState : IStreamingIndicatorState
 [PrimaryOutput("Spz")]
 public sealed class SimplePriceZoneState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly PooledRingBuffer<double> _window;
-    private readonly StreamingInputResolver _input;
-    private double _sumUp;
-    private double _sumDown;
-    private int _barIndex;
-
-    public SimplePriceZoneState(int length = 14)
+    private readonly SimplePriceZoneWindow _window;
+    public SimplePriceZoneState(int length=14)=>_window=new SimplePriceZoneWindow(length);
+    public IndicatorName Name=>IndicatorName.SimplePriceZone;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _window = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Spz",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.SimplePriceZone;
-
-    public void Reset()
-    {
-        _window.Clear();
-        _sumUp = 0;
-        _sumDown = 0;
-        _barIndex = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-
-        double zone = 0;
-        var sumUp = _sumUp;
-        var sumDown = _sumDown;
-        if (_barIndex >= 1)
-        {
-            var change = value - _window[_window.Count - 1];
-            sumUp += change > 0 ? change : 0;
-            sumDown += change < 0 ? -change : 0;
-
-            // A change enters the sums only from the second bar, so the one leaving is the change into
-            // the bar _length back, which exists only once the window holds the bar before it too.
-            if (_barIndex >= _length + 1)
-            {
-                var prevChange = _window[1] - _window[0];
-                sumUp -= prevChange > 0 ? prevChange : 0;
-                sumDown -= prevChange < 0 ? -prevChange : 0;
-            }
-
-            var total = sumUp + sumDown;
-            zone = total != 0 ? 100 * (sumUp - sumDown) / total : 0;
-        }
-
-        if (isFinal)
-        {
-            _sumUp = sumUp;
-            _sumDown = sumDown;
-            _window.TryAdd(value, out _);
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Spz", zone } };
-        }
-
-        return new StreamingIndicatorStateResult(zone, outputs);
-    }
-
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 /// <summary>

@@ -170,6 +170,7 @@ internal static partial class IndicatorCompute
             // Multi-output indicators, dispatched on the key the caller named. A spec that names none wants the
             // indicator's own series, which is the first key each of these publishes.
             RetrospectiveCandlestickChartSpecOptions retrospective => ComputeRetrospectiveCandleFast(data, context, retrospective.Length),
+            SimplePriceZoneSpecOptions simpleZone => ComputeSimplePriceZoneFast(data, context, simpleZone.Length),
             EarningSupportResistanceLevelsSpecOptions => ComputeEarningLevelsFast(data, context),
             MacdSpecOptions macd => spec.OutputKey switch
             {
@@ -13234,7 +13235,7 @@ internal static partial class IndicatorCompute
     #region Batch 24 - Demark Indicators
 
     /// <summary>
-    /// Computes Demark Range Expansion Index using zero-allocation fast path.
+    /// Computes Demark Range Expansion Index using a pooled output buffer.
     /// </summary>
     internal static ComputeBuffer ComputeDemarkRangeExpansionIndexFast(StockData data, ComputeContext context, int length = 5)
     {
@@ -16054,11 +16055,11 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Simple Price Zone using zero-allocation fast path.
+    /// Computes Simple Price Zone using a pooled output buffer.
     /// </summary>
     internal static ComputeBuffer ComputeSimplePriceZoneFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
         OscillatorCore.SimplePriceZone(close, buffer.WritableSpan, length);
         return buffer;
@@ -16719,7 +16720,7 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Average Absolute Error Normalization using zero-allocation fast path.
+    /// Computes Average Absolute Error Normalization using a pooled output buffer.
     /// </summary>
     internal static ComputeBuffer ComputeAverageAbsoluteErrorNormalizationFast(StockData data, ComputeContext context, int length = 14)
     {
@@ -17961,13 +17962,13 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Floor Pivot Point Support Level 1 using zero-allocation fast path.
+    /// Computes Floor Pivot Point Support Level 1 using a pooled output buffer.
     /// </summary>
     internal static ComputeBuffer ComputeFloorPivotPointS1Fast(StockData data, ComputeContext context)
     { return ComputeFloorPivotPointFast(data,context,series:PivotSeries.Support1); }
 
     /// <summary>
-    /// Computes Floor Pivot Point Resistance Level 1 using zero-allocation fast path.
+    /// Computes Floor Pivot Point Resistance Level 1 using a pooled output buffer.
     /// </summary>
     internal static ComputeBuffer ComputeFloorPivotPointR1Fast(StockData data, ComputeContext context)
     { return ComputeFloorPivotPointFast(data,context,series:PivotSeries.Resistance1); }

@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SimplePriceZone)
+        {
+            yield return IndicatorValidationRule.Reference(0, bars => SimplePriceZoneOutputs(bars,Integer(builtIn.CreateOptions(),"Length",14))["Spz"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AverageAbsoluteErrorNormalization)
         {
             yield return IndicatorValidationRule.Reference(0, bars => AbsoluteErrorOutputs(bars,Integer(builtIn.CreateOptions(),"Length",14))["Aaen"], IndicatorErrorBudget.Exact);

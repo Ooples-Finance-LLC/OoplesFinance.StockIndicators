@@ -6676,44 +6676,8 @@ internal static class OscillatorCore
     /// <param name="length">Period length.</param>
     internal static void SimplePriceZone(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double sumUp = 0;
-        double sumDn = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var change = close[i] - close[i - 1];
-            var up = change > 0 ? change : 0;
-            var dn = change < 0 ? -change : 0;
-
-            sumUp += up;
-            sumDn += dn;
-
-            // A change enters the sums only from the second bar, so the one leaving is
-            // change[i - length], which exists only once i - length >= 1. Removing it at
-            // i == length subtracted a raw price that was never added.
-            if (i >= length + 1)
-            {
-                var prevChange = close[i - length] - close[i - length - 1];
-                var prevUp = prevChange > 0 ? prevChange : 0;
-                var prevDn = prevChange < 0 ? -prevChange : 0;
-                sumUp -= prevUp;
-                sumDn -= prevDn;
-            }
-
-            var total = sumUp + sumDn;
-            output[i] = total != 0 ? 100 * (sumUp - sumDn) / total : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.");
+        var window=new SimplePriceZoneWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>

@@ -29796,5 +29796,95 @@
     "before": " AverageAbsoluteErrorNormalizationSpecOptions or ",
     "after": " ",
     "filter": "FullyQualifiedName~AbsoluteErrorNumericalTests"
+  },
+  {
+    "id": "simple-zone-early-change",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "delta.Add(price);delta.Add(_previous,-1);",
+    "after": "delta.Add(price-_previous);",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-startup",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "if(_started)",
+    "after": "if(_started || _changes.Count==0)",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-scale",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "change.AddTo(ref net,100);",
+    "after": "change.AddTo(ref net,99);",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-absolute-changes",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "Math.Abs(value.Mantissa)",
+    "after": "value.Mantissa",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "old.AddTo(ref net,-100);",
+    "after": "old.AddTo(ref net,0);",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SimplePriceZoneWindow.cs",
+    "before": "_started=false;",
+    "after": "// retain started state\n        ",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeSimplePriceZoneFast("
+  },
+  {
+    "id": "simple-zone-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests",
+    "scope": "public sealed class SimplePriceZoneState"
+  },
+  {
+    "id": "simple-zone-arm-registration",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "            SimplePriceZoneSpecOptions simpleZone => ComputeSimplePriceZoneFast(data, context, simpleZone.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "simple-zone-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SimplePriceZoneSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
   }
 ]
