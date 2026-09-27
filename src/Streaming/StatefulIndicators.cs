@@ -1809,60 +1809,16 @@ public sealed class StandardDeviationChannelState : IStreamingIndicatorState, ID
 [PrimaryOutput("MiddleBand")]
 public sealed class TimeSeriesForecastState : IStreamingIndicatorState, IDisposable
 {
-    private readonly LinearRegressionState _regressionState;
-    private readonly StreamingInputResolver _input;
-    private double _absDiffSum;
-    private int _index;
-
-    public TimeSeriesForecastState(int length = 500)
-    {
-        _regressionState = new LinearRegressionState(length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TimeSeriesForecastWindow _window;
+    public TimeSeriesForecastState(int length = 500) { _window = new(length); }
     public IndicatorName Name => IndicatorName.TimeSeriesForecast;
-
-    public void Reset()
-    {
-        _regressionState.Reset();
-        _absDiffSum = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _regressionState.Update(bar, isFinal, includeOutputs: false).Value;
-        var absDiff = Math.Abs(value - middle);
-        var absDiffSum = _absDiffSum + absDiff;
-        var e = absDiffSum / (_index + 1);
-        var upper = middle + e;
-        var lower = middle - e;
-
-        if (isFinal)
-        {
-            _absDiffSum = absDiffSum;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", p.Upper }, { "MiddleBand", p.Middle }, { "LowerBand", p.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _regressionState.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

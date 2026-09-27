@@ -1900,6 +1900,7 @@ internal static partial class IndicatorCompute
             BollingerBandsFibonacciRatiosSpecOptions bbfr => ComputeBollingerBandsFibonacciRatiosFast(data, context, bbfr.Length, bbfr.FibRatio1, bbfr.FibRatio2, bbfr.FibRatio3, bbfr.MaType,
                 spec.OutputKey == "UpperBand" ? ChannelBand.Upper : spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Middle),
             BollingerBandsWithAtrPctSpecOptions bbatrp => ComputeBollingerBandsWithAtrPctFast(data, context, bbatrp.Length, bbatrp.BbLength, bbatrp.StdDevMult, bbatrp.MaType, spec.OutputKey == "UpperBand" ? ChannelBand.Upper : spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Middle),
+            TimeSeriesForecastSpecOptions forecast => ComputeTimeSeriesForecastFast(data, context, forecast.Length, spec.OutputKey),
             KirshenbaumBandsSpecOptions kb => ComputeKirshenbaumBandsFast(data, context, kb.Length1, kb.Length2, kb.StdDevFactor, kb.MaType,
                 spec.OutputKey == "UpperBand" ? ChannelBand.Upper : spec.OutputKey == "LowerBand" ? ChannelBand.Lower : ChannelBand.Middle),
             SmoothedVolatilityBandsSpecOptions svb => ComputeSmoothedVolatilityBandsFast(data, context, svb.Length1, svb.Length2, svb.Deviation, svb.BandAdjust, svb.MaType,
@@ -21238,6 +21239,12 @@ internal static partial class IndicatorCompute
     /// Computes Kirshenbaum Bands using zero-allocation fast path.
     /// Returns the middle band (EMA).
     /// </summary>
+    internal static ComputeBuffer ComputeTimeSeriesForecastFast(StockData data, ComputeContext context, int length = 500, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new TimeSeriesForecastWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? p.Upper : outputKey == "LowerBand" ? p.Lower : p.Middle; } return result;
+    }
+
     internal static ComputeBuffer ComputeKirshenbaumBandsFast(StockData data, ComputeContext context,
         int length1 = 30, int length2 = 20, double stdDevFactor = 1,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)

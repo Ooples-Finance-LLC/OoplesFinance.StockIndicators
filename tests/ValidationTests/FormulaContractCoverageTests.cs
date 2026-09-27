@@ -1601,13 +1601,19 @@ public sealed class FormulaContractCoverageTests
         foreach (var indicator in new IIndicator[] { new EhlersCyberCycle(3), new EhlersSimpleCycleIndicator(.5) })
             Assert.Single(BuiltInFormulaReferences.For(indicator)).Check(new IndicatorValidationContext("delayed-impulse", impulse, new[] { expected }, 0));
         var bars = new[] { 1d, 2, 4, 8 }.Select(v => new Bar(date, v, v, v, v, 100)).ToArray();
-        var decay = Math.Cos(.01) / (1 + Math.Sin(.01));
-        var gain = (1 - decay) / 2;
-        var coefficient = Math.Cos(.99) * (1 + decay);
+        // V2 and Cycle retain their distinct binary64 coefficient expressions.
+        // The recurrence is then rounded once per stage, not once per product.
+        ReferenceFraction Fraction(double value) => ReferenceFraction.FromDouble(value);
+        var cosine = Math.Cos(.01); var gamma = 1 / cosine;
+        var v2Alpha = Fraction(gamma - Math.Sqrt(1 / (cosine * cosine) - 1));
+        var cycleAlpha = Fraction(gamma - Math.Sqrt(gamma * gamma - 1));
+        var one = new ReferenceFraction(1); var three = new ReferenceFraction(3);
+        var cycleFirst = (three * (one - cycleAlpha) / new ReferenceFraction(2)).ToDouble();
+        var cycleNext = (three * (one - cycleAlpha) + Fraction(Math.Cos(.99)) * (one + cycleAlpha) * Fraction(cycleFirst)).ToDouble();
         Assert.Single(BuiltInFormulaReferences.For(new EhlersBandPassFilterV2(4, 0))).Check(
-            new IndicatorValidationContext("three-bar-startup", bars, new[] { new[] { 0d, 0, 0, 6 * gain } }, 0));
+            new IndicatorValidationContext("three-bar-startup", bars, new[] { new[] { 0d, 0, 0, (three * (one - v2Alpha)).ToDouble() } }, 0));
         Assert.Single(BuiltInFormulaReferences.For(new EhlersCycleBandPassFilter(4, 0))).Check(
-            new IndicatorValidationContext("two-bar-startup", bars, new[] { new[] { 0d, 0, 3 * gain, 6 * gain + coefficient * 3 * gain } }, 0));
+            new IndicatorValidationContext("two-bar-startup", bars, new[] { new[] { 0d, 0, cycleFirst, cycleNext } }, 0));
     }
 
     [Fact]
@@ -1675,7 +1681,9 @@ public sealed class FormulaContractCoverageTests
         var rms = Math.Sqrt(.625);
         Check(new RootMovingAverageSquaredErrorBands(2), new[] { 0d, 1.5 + rms, 3 + rms }, new[] { 0d, 1.5, 3 }, new[] { 0d, 1.5 - rms, 3 - rms });
         Check(new InterquartileRangeBands(3, 1), new[] { 1d, 3, 7 }, new[] { 1d, 1.5, 2.5 }, new[] { 1d, 0, -2 });
-        Check(new TimeSeriesForecast(3), new[] { 1d, 2, 35d / 9 }, new[] { 1d, 2, 23d / 6 }, new[] { 1d, 2, 34d / 9 });
+        // Endpoint and cumulative mean error round before the two affine bands.
+        var forecastCenter = 23d / 6; var forecastWidth = (4 - forecastCenter) / 3;
+        Check(new TimeSeriesForecast(3), new[] { 1d, 2, forecastCenter + forecastWidth }, new[] { 1d, 2, forecastCenter }, new[] { 1d, 2, forecastCenter - forecastWidth });
         foreach (var factory in new Func<IIndicator>[] { () => new MeanAbsoluteDeviationBands(1), () => new MeanAbsoluteErrorBands(1),
             () => new RootMovingAverageSquaredErrorBands(1), () => new InterquartileRangeBands(1), () => new TimeSeriesForecast(1) })
             await IndicatorValidation.ValidateAndThrowAsync(new IndicatorValidationCase(factory().GetType(),
@@ -2316,8 +2324,13 @@ public sealed class FormulaContractCoverageTests
         Check(new AsymmetricalRelativeStrengthIndex(3), reversal, new[] { 100d, 100, 100d / 3 });
         Check(new AsymmetricalRsi(3), reversal, new[] { 100d, 100, 100d / 3 });
         Check(new AdaptiveTrailingStop(2, 3), prices, new[] { 0d, 2, 2 });
-        Check(new AutoDispersionBands(2, 1), prices, new[] { 2d / 3, 5d / 3, 10d / 3 + Math.Sqrt(2) },
-            new[] { 2d / 3, 4d / 3, 19d / 6 }, new[] { 2d / 3, 1, 3 - Math.Sqrt(2) });
+        // RMS and envelopes round before the weighted means and final midpoint.
+        var dispersionRoot = Math.Sqrt(4.5);
+        var dispersionUpper = ((new ReferenceFraction(2) + new ReferenceFraction(2) * ReferenceFraction.FromDouble(4 + dispersionRoot)) / new ReferenceFraction(3)).ToDouble();
+        var dispersionLower = ((new ReferenceFraction(1) + new ReferenceFraction(2) * ReferenceFraction.FromDouble(4 - dispersionRoot)) / new ReferenceFraction(3)).ToDouble();
+        var dispersionMiddle = ((ReferenceFraction.FromDouble(dispersionUpper) + ReferenceFraction.FromDouble(dispersionLower)) / new ReferenceFraction(2)).ToDouble();
+        Check(new AutoDispersionBands(2, 1), prices, new[] { 2d / 3, 5d / 3, dispersionUpper },
+            new[] { 2d / 3, ((ReferenceFraction.FromDouble(5d / 3) + new ReferenceFraction(1)) / new ReferenceFraction(2)).ToDouble(), dispersionMiddle }, new[] { 2d / 3, 1, dispersionLower });
         var holdPrices = new[] { 1d, 2, 4, 3.4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new AverageAbsoluteErrorNormalization(2), reversal, new[] { 0d, 1, -.2 });
         Check(new AtrTrailingStops(2, .5), reversal, new[] { 1d, 1.75, 17d / 12 });

@@ -725,49 +725,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTimeSeriesForecast(this StockData stockData, int length = 500)
     {
-        List<double> absDiffList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double absDiffSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var tsList = CalculateLinearRegression(stockData, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new TimeSeriesForecastWindow(length); List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var ts = tsList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevTs = i >= 1 ? tsList[i - 1] : 0;
-
-            var absDiff = Math.Abs(currentValue - ts);
-            absDiffList.Add(absDiff);
-
-            absDiffSum += absDiff;
-            var e = absDiffSum / (i + 1);
-            var prevA = GetLastOrDefault(aList);
-            var a = ts + e;
-            aList.Add(a);
-
-            var prevB = GetLastOrDefault(bList);
-            var b = ts - e;
-            bList.Add(b);
-
-            var signal = GetBollingerBandsSignal(currentValue - ts, prevValue - prevTs, currentValue, prevValue, a, prevA, b, prevB);
-            signalsList?.Add(signal);
+            var p = window.Next(input[i], true); var previous = i > 0 ? input[i - 1] : 0;
+            signals?.Add(GetBollingerBandsSignal(input[i] - p.Middle, previous - (i > 0 ? middle[i - 1] : 0), input[i], previous, p.Upper, i > 0 ? upper[i - 1] : 0, p.Lower, i > 0 ? lower[i - 1] : 0)); upper.Add(p.Upper); middle.Add(p.Middle); lower.Add(p.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aList },
-            { "MiddleBand", tsList },
-            { "LowerBand", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsList);
-        stockData.IndicatorName = IndicatorName.TimeSeriesForecast;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(middle); stockData.IndicatorName = IndicatorName.TimeSeriesForecast; return stockData;
     }
 
 

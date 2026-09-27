@@ -23753,5 +23753,127 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~DemarkerNumericalTests.SeparateMovementsAndAveragesPreserveBoundedExtremeRatios|FullyQualifiedName~DemarkerNumericalTests.OriginalHighLowAndOrderedCustomerAveragesDetermineRatio|FullyQualifiedName~DemarkerNumericalTests.InvalidFieldsAndShortCoreSpansNeverAdvanceState",
     "scope": "public sealed class DemarkerState :"
+  },
+  {
+    "id": "timeseries-forecast-period",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "new(Math.Max(1, length))",
+    "after": "new(Math.Max(1, length + 1))",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-future-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_fit.Next(close, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_fit.Next(close, commit).Next)",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-early-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_fit.Next(close, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_fit.Next(close, commit).Last)",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-absolute-error",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "BigInteger.Abs(ExactVarianceWindow.Units(close) - center)",
+    "after": "ExactVarianceWindow.Units(close) - center",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-cumulative",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "var sum = _errorSum + error",
+    "after": "var sum = error",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_count + 1",
+    "after": "_count + 2",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-width-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "UnitRatio(center - width, BigInteger.One)",
+    "after": "UnitRatio(center + width, BigInteger.One)",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-middle",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "UnitRatio(center, BigInteger.One)",
+    "after": "UnitRatio(center + width, BigInteger.One)",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-preview-fit",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_fit.Next(close, commit)",
+    "after": "_fit.Next(close, true)",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-preview-error",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-reset-fit",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_fit.Reset();",
+    "after": "if (_count.Sign < 0) _fit.Reset();",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-reset-error",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_errorSum = _count = default;",
+    "after": "_count = default;",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/TimeSeriesForecastWindow.cs",
+    "before": "_errorSum = _count = default;",
+    "after": "_errorSum = default;",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError"
+  },
+  {
+    "id": "timeseries-forecast-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError",
+    "scope": "internal static ComputeBuffer ComputeTimeSeriesForecastFast("
+  },
+  {
+    "id": "timeseries-forecast-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError",
+    "scope": "public sealed class TimeSeriesForecastState :"
   }
 ]
