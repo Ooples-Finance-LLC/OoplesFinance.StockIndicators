@@ -1379,50 +1379,14 @@ public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicator
 [PrimaryOutput("Emad")]
 public sealed class EhlersMovingAverageDifferenceIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _shortSmoother;
-    private readonly IMovingAverageSmoother _longSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public EhlersMovingAverageDifferenceIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int fastLength = 8, int slowLength = 23)
-    {
-        _shortSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _longSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-    public IndicatorName Name => IndicatorName.EhlersMovingAverageDifferenceIndicator;
-
-    public void Reset()
-    {
-        _shortSmoother.Reset();
-        _longSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var shortMa = _shortSmoother.Next(value, isFinal);
-        var longMa = _longSmoother.Next(value, isFinal);
-        var mad = longMa != 0 ? 100 * (shortMa - longMa) / longMa : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Emad", mad }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mad, outputs);
-    }
-
-    public void Dispose()
-    {
-        _shortSmoother.Dispose();
-        _longSmoother.Dispose();
-    }
+    private readonly AverageGapWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public EhlersMovingAverageDifferenceIndicatorState(MovingAvgType maType=MovingAvgType.WeightedMovingAverage,int fastLength=8,int slowLength=23){_window=new(maType,fastLength,slowLength);}
+    public IndicatorName Name=>IndicatorName.EhlersMovingAverageDifferenceIndicator;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
+    {StreamingInputValidation.Validate(bar);var value=_window.Next(_input.GetValue(bar),isFinal);return new(value,includeOutputs?new Dictionary<string,double>{{"Emad",value}}:null);}
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Enet")]

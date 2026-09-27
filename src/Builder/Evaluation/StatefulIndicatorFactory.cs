@@ -804,6 +804,8 @@ internal static partial class StatefulIndicatorFactory
             PvoSpecOptions pvo => new PercentageVolumeOscillatorState(maType: pvo.MaType, fastLength: pvo.Length,
                 signalLength: pvo.SignalLength),
             EhlersRelativeVigorIndexSpecOptions ev => new EhlersRelativeVigorIndexState(ev.MaType, ev.Length, ev.SignalLength),
+            RangeActionVerificationIndexSpecOptions ravi => new RangeActionVerificationIndexState(ravi.MaType,ravi.FastLength,ravi.SlowLength),
+            EhlersMovingAverageDifferenceIndicatorSpecOptions emad => new EhlersMovingAverageDifferenceIndicatorState(emad.MaType,emad.FastLength,emad.SlowLength),
             RexOscillatorSpecOptions rex => new RexOscillatorState(rex.MaType, rex.Length),
             NthOrderDifferencingOscillatorSpecOptions difference => new NthOrderDifferencingOscillatorState(difference.Length),
             RelativeVigorIndexSpecOptions vigor => new RelativeVigorIndexState(vigor.MaType, vigor.Length),

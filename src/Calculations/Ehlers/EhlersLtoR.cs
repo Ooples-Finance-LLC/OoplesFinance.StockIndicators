@@ -1022,37 +1022,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersMovingAverageDifferenceIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int fastLength = 8, int slowLength = 23)
     {
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-        List<double> madList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var shortMaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var longMaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        fastLength=Math.Max(1,fastLength);slowLength=Math.Max(1,slowLength);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        if(Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var shortMa = shortMaList[i];
-            var longMa = longMaList[i];
-            var prevMad1 = i >= 1 ? madList[i - 1] : 0;
-            var prevMad2 = i >= 2 ? madList[i - 2] : 0;
-
-            var mad = longMa != 0 ? 100 * (shortMa - longMa) / longMa : 0;
-            madList.Add(mad);
-
-            var signal = GetCompareSignal(mad - prevMad1, prevMad1 - prevMad2);
-            signalsList?.Add(signal);
+            var fast=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),fastLength)?.ToList()??GetMovingAverageList(stockData,maType,fastLength,input);
+            var slow=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),slowLength)?.ToList()??GetMovingAverageList(stockData,maType,slowLength,input);
+            for(var i=0;i<input.Count;i++)values.Add(AverageGapWindow.Gap(fast[i],slow[i]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Emad", madList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(madList);
-        stockData.IndicatorName = IndicatorName.EhlersMovingAverageDifferenceIndicator;
-
-        return stockData;
+        else {using var window=new AverageGapWindow(maType,fastLength,slowLength,input.Count);foreach(var value in input)values.Add(window.Next(value,true));}
+        for(var i=0;i<input.Count;i++)signals?.Add(GetCompareSignal(values[i]-(i>0?values[i-1]:0),(i>0?values[i-1]:0)-(i>1?values[i-2]:0)));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Emad",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.EhlersMovingAverageDifferenceIndicator;return stockData;
     }
 
 

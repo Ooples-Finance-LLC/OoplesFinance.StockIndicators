@@ -1561,50 +1561,14 @@ public sealed class RandomWalkIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Ravi")]
 public sealed class RangeActionVerificationIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public RangeActionVerificationIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 7,
-        int slowLength = 65)
-    {
-        _fastSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-    public IndicatorName Name => IndicatorName.RangeActionVerificationIndex;
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var fast = _fastSmoother.Next(value, isFinal);
-        var slow = _slowSmoother.Next(value, isFinal);
-        var ravi = slow != 0 ? (fast - slow) / slow * 100 : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ravi", ravi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ravi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-    }
+    private readonly AverageGapWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public RangeActionVerificationIndexState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int fastLength=7,int slowLength=65){_window=new(maType,fastLength,slowLength);}
+    public IndicatorName Name=>IndicatorName.RangeActionVerificationIndex;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
+    {StreamingInputValidation.Validate(bar);var value=_window.Next(_input.GetValue(bar),isFinal);return new(value,includeOutputs?new Dictionary<string,double>{{"Ravi",value}}:null);}
+    public void Dispose()=>_window.Dispose();
 }
 
 internal sealed class AverageTrueRangeSmoother : IDisposable

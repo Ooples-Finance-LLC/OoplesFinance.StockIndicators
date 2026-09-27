@@ -2214,35 +2214,16 @@ public static partial class Calculations
     public static StockData CalculateRangeActionVerificationIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 7, int slowLength = 65)
     {
-        List<double> raviList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        fastLength=Math.Max(1,fastLength);slowLength=Math.Max(1,slowLength);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        if(Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var fastMA = smaFastList[i];
-            var slowMA = smaSlowList[i];
-            var prevRavi1 = i >= 1 ? raviList[i - 1] : 0;
-            var prevRavi2 = i >= 2 ? raviList[i - 2] : 0;
-
-            var ravi = slowMA != 0 ? (fastMA - slowMA) / slowMA * 100 : 0;
-            raviList.Add(ravi);
-
-            var signal = GetCompareSignal(ravi - prevRavi1, prevRavi1 - prevRavi2);
-            signalsList?.Add(signal);
+            var fast=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),fastLength)?.ToList()??GetMovingAverageList(stockData,maType,fastLength,input);
+            var slow=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),slowLength)?.ToList()??GetMovingAverageList(stockData,maType,slowLength,input);
+            for(var i=0;i<input.Count;i++)values.Add(AverageGapWindow.Gap(fast[i],slow[i]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ravi", raviList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(raviList);
-        stockData.IndicatorName = IndicatorName.RangeActionVerificationIndex;
-
-        return stockData;
+        else {using var window=new AverageGapWindow(maType,fastLength,slowLength,input.Count);foreach(var value in input)values.Add(window.Next(value,true));}
+        for(var i=0;i<input.Count;i++)signals?.Add(GetCompareSignal(values[i]-(i>0?values[i-1]:0),(i>0?values[i-1]:0)-(i>1?values[i-2]:0)));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Ravi",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.RangeActionVerificationIndex;return stockData;
     }
 
 

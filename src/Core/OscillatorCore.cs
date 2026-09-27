@@ -7656,36 +7656,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RangeActionVerificationIndex(ReadOnlySpan<double> close, Span<double> output, int fastLength = 7, int slowLength = 65)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        fastLength = Math.Max(1, fastLength);
-        slowLength = Math.Max(1, slowLength);
-
-        var pool = ArrayPool<double>.Shared;
-        var fastSmaArray = pool.Rent(close.Length);
-        var slowSmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var fastSma = fastSmaArray.AsSpan(0, close.Length);
-            var slowSma = slowSmaArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, fastSma, fastLength);
-            MovingAverageCore.SimpleMovingAverage(close, slowSma, slowLength);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = slowSma[i] != 0 ? (fastSma[i] - slowSma[i]) / slowSma[i] * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(fastSmaArray);
-            pool.Return(slowSmaArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new AverageGapWindow(MovingAvgType.SimpleMovingAverage,fastLength,slowLength,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>

@@ -25109,5 +25109,156 @@
     "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage",
     "scope": "public sealed class NormalizedRelativeVigorIndexState :"
+  },
+  {
+    "id": "average-gap-reversed-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "RocBankValue.Return(fast,slow).Publish()",
+    "after": "RocBankValue.Return(slow,fast).Publish()",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-early-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "RocBankValue.Return(fast,slow).Publish()",
+    "after": "slow == 0 ? 0 : (fast - slow) / slow * 100",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-missing-percent",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "RocBankValue.Return(fast,slow).Publish()",
+    "after": "RocBankValue.Return(fast,slow).Publish() / 100",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "RocBankValue.Return(fast,slow).Publish()",
+    "after": "slow == 0 ? 1 : RocBankValue.Return(fast,slow).Publish()",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-fast-kind",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_fast=new(kind,fast,capacityHint);",
+    "after": "_fast=new(MovingAvgType.SimpleMovingAverage,fast,capacityHint);",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-slow-kind",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_slow=new(kind,slow,capacityHint);",
+    "after": "_slow=new(MovingAvgType.SimpleMovingAverage,slow,capacityHint);",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_slow=new(kind,slow,capacityHint);",
+    "after": "_slow=new(kind,fast,capacityHint);",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-preview-fast",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_fast.Next(new RocBankValue(price),commit)",
+    "after": "_fast.Next(new RocBankValue(price),true)",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-preview-slow",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_slow.Next(new RocBankValue(price),commit)",
+    "after": "_slow.Next(new RocBankValue(price),true)",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_fast?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-reset-slow",
+    "module": "numerical",
+    "file": "src/Helpers/AverageGapWindow.cs",
+    "before": "_slow?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "average-gap-ravi-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "internal static ComputeBuffer ComputeRangeActionVerificationIndexFast("
+  },
+  {
+    "id": "average-gap-ravi-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data,maType,slowLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan)",
+    "after": "MovingAverage(data,maType,fastLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan)",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "internal static ComputeBuffer ComputeRangeActionVerificationIndexFast("
+  },
+  {
+    "id": "average-gap-ehlers-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "internal static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast("
+  },
+  {
+    "id": "average-gap-ehlers-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data,maType,slowLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan)",
+    "after": "MovingAverage(data,maType,fastLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan)",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "internal static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast("
+  },
+  {
+    "id": "average-gap-ravi-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "public sealed class RangeActionVerificationIndexState :"
+  },
+  {
+    "id": "average-gap-ehlers-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "public sealed class EhlersMovingAverageDifferenceIndicatorState :"
+  },
+  {
+    "id": "average-gap-core-kind",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new AverageGapWindow(MovingAvgType.SimpleMovingAverage,fastLength,slowLength,close.Length)",
+    "after": "new AverageGapWindow(MovingAvgType.WeightedMovingAverage,fastLength,slowLength,close.Length)",
+    "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
+    "scope": "internal static void RangeActionVerificationIndex("
   }
 ]

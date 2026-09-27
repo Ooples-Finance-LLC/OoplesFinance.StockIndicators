@@ -2020,3 +2020,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **83/83** family/enrollment/composition checks passed (`normalized-vigor.trx`). Even/odd periods, basic and symmetric averages, extreme/subnormal candles, selected closes, three ordered customer stages, all five routes, previews/reset and invalid inputs are covered.
 - Campaign422a caught **23/23** faults; **3,007** retained sites. All eleven staged implementation/test/catalog files match its archive. Source/archive SHA256: `697d4b307f0cbe503cb7c7404527db82238433b7ad0c8510a3e4b08c2ff249a1` / `67fe59f6959499aec84c44a9e083071430749a0df5238498d795c9c77893c5d0`.
 - Inventory: **4,805/7,131**, **2,326** omissions across **385** types; no construction failures. 192 grouped batches cover **1,979 configurations / 360 types**. DLL SHA256 `445BA05C47ACAFCBC21DCA341E35176D8BA9E915C467C3FB3BA0588D07095C4E`. Full library/release gates remain incomplete.
+
+
+### Average-gap oscillator numerical contracts
+
+- Eighteen configurations across RangeActionVerificationIndex and EhlersMovingAverageDifferenceIndicator now independently check their two selected averages and exact signed percentage gap. Their separate defaults and output names are retained. Convex basic averages use exact rolling arithmetic; selected series and ordered customer averages feed the same ratio calculation.
+- **186/186** family/enrollment/composition checks passed (`average-gap.trx`). A hand fixture proves the finite -200% result when the raw difference would overflow. Basic average types, equal/unequal/minimum periods, signed/subnormal/extreme prices, both raw/core/native paths, five public routes, preview/reset and invalid inputs are covered.
+- Campaign423a caught **18/18** faults; **3,025** retained sites. All fifteen staged implementation/test/catalog files match its archive. Source/archive SHA256: `ee8352f47768e99fa3792ef5a9cce9901f91a31f0118ff1d82db4d24529c7519` / `8a5391a029c140ccbd63547debd6e1e26c76e86467af2351c7c84150597fe702`.
+- Inventory: **4,823/7,131**, **2,308** omissions across **383** types; no construction failures. 193 grouped batches cover **1,997 configurations / 362 types**. DLL SHA256 `45468EB2FADAC9D8D1F953FE1D159029F3F2E40BD8F6CB446E726B357D0F7060`. Full library/release gates remain incomplete.

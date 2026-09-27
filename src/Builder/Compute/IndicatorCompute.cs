@@ -17028,29 +17028,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRangeActionVerificationIndexFast(StockData data, ComputeContext context, int fastLength = 7,
         int slowLength = 65, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRangeActionVerificationIndex is the gap between two averages of the CHAINED series as a
-        // percentage of the slower one, taken with whichever average it was given.
-        // OscillatorCore.RangeActionVerificationIndex has no average to give it - the arm took no maType at
-        // all - and it read the close rather than the chained series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var fast = context.Rent(count);
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var fastSpan = fast.Span;
-        var slowSpan = slow.Span;
-        for (var i = 0; i < count; i++)
+        fastLength=Math.Max(1,fastLength);slowLength=Math.Max(1,slowLength);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            output[i] = slowSpan[i] != 0 ? (fastSpan[i] - slowSpan[i]) / slowSpan[i] * 100 : 0;
+            using var fast=context.Rent(input.Count);using var slow=context.Rent(input.Count);
+            MovingAverage(data,maType,fastLength,SpanCompat.AsReadOnlySpan(input),fast.WritableSpan);MovingAverage(data,maType,slowLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan);
+            for(var i=0;i<input.Count;i++)output.WritableSpan[i]=AverageGapWindow.Gap(fast.Span[i],slow.Span[i]);
         }
-
-        return buffer;
+        else{using var window=new AverageGapWindow(maType,fastLength,slowLength,input.Count);for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);}
+        return output;
     }
 
     /// <summary>
@@ -20242,36 +20228,15 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersMovingAverageDifferenceFast(StockData data, ComputeContext context, int fastLength = 8, int slowLength = 23, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        var count = data.Count;
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-
-        var pool = ArrayPool<double>.Shared;
-        var fastMaArray = pool.Rent(count);
-        var slowMaArray = pool.Rent(count);
-        try
+        fastLength=Math.Max(1,fastLength);slowLength=Math.Max(1,slowLength);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var fastMaSpan = fastMaArray.AsSpan(0, count);
-            var slowMaSpan = slowMaArray.AsSpan(0, count);
-
-            // Compute fast and slow MAs
-            MovingAverage(data, maType, fastLength, inputSpan, fastMaSpan);
-            MovingAverage(data, maType, slowLength, inputSpan, slowMaSpan);
-
-            ReadOnlySpan<double> fastMaReadOnly = fastMaSpan;
-            ReadOnlySpan<double> slowMaReadOnly = slowMaSpan;
-            var buffer = context.Rent(count);
-
-            // Compute MAD = 100 * (fastMA - slowMA) / slowMA
-            OscillatorCore.MovingAverageDifference(fastMaReadOnly, slowMaReadOnly, buffer.WritableSpan);
-
-            return buffer;
+            using var fast=context.Rent(input.Count);using var slow=context.Rent(input.Count);
+            MovingAverage(data,maType,fastLength,SpanCompat.AsReadOnlySpan(input),fast.WritableSpan);MovingAverage(data,maType,slowLength,SpanCompat.AsReadOnlySpan(input),slow.WritableSpan);
+            for(var i=0;i<input.Count;i++)output.WritableSpan[i]=AverageGapWindow.Gap(fast.Span[i],slow.Span[i]);
         }
-        finally
-        {
-            pool.Return(fastMaArray);
-            pool.Return(slowMaArray);
-        }
+        else{using var window=new AverageGapWindow(maType,fastLength,slowLength,input.Count);for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);}
+        return output;
     }
 
     /// <summary>
