@@ -27096,5 +27096,170 @@
     "before": "foreach(var price in input)",
     "after": "foreach(var price in stockData.ClosePrices)",
     "filter": "FullyQualifiedName~PpoMaNumericalTests.FixedExponentialAveragesMatchIndependentArithmetic|FullyQualifiedName~PpoMaNumericalTests.SelectedPricesUseFixedEmaWithoutConsumingCustomerCallbacks|FullyQualifiedName~PpoMaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "internal-bar-length",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "_smooth = Math.Max(1, smooth)",
+    "after": "_smooth = 1",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-position-scale",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "numerator.Add(close, 100); numerator.Add(low, -100);",
+    "after": "numerator.Add(close); numerator.Add(low, -1);",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-position-sign",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "numerator.Add(low, -100)",
+    "after": "numerator.Add(low, 100)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "denominator.Add(low, -1)",
+    "after": "denominator.Add(low)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "if (denominator.IsExactlyZero) return default;",
+    "after": "if (denominator.IsExactlyZero) return new(1);",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-early-range",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "var scaled = denominator; scaled.ScaleByPowerOfTwo(shift);",
+    "after": "var scaled = new ExactMeanAccumulator(); scaled.Add(high-low); scaled.ScaleByPowerOfTwo(shift);",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-early-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "return new(value, shift)",
+    "after": "return new(value)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "if (_values.Count == _length) _values.Peek().AddTo(ref sum, -1);",
+    "after": "if (_values.Count == _length) _values.Peek().AddTo(ref sum, 1);",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-startup-count",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "Math.Min((long)_values.Count + 1, _length)",
+    "after": "_length",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-signal-weight",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "value.AddTo(ref blend, 2)",
+    "after": "value.AddTo(ref blend, 1)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-signal-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "count: _smooth + 1L",
+    "after": "count: _smooth",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-commit",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "_sum = default; _signal = default;",
+    "after": "_signal = default;",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/InternalBarStrengthWindow.cs",
+    "before": "_sum = default; _signal = default;",
+    "after": "_sum = default;",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr"
+  },
+  {
+    "id": "internal-bar-raw-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
+    "scope": "internal static ComputeBuffer ComputeInternalBarStrengthIndicatorFast("
+  },
+  {
+    "id": "internal-bar-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
+    "scope": "public static StockData CalculateInternalBarStrengthIndicator("
+  },
+  {
+    "id": "internal-bar-raw-signal-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey==\"Signal\"?result.Signal:result.Value",
+    "after": "result.Value",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
+    "scope": "internal static ComputeBuffer ComputeInternalBarStrengthIndicatorFast("
+  },
+  {
+    "id": "internal-bar-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
+    "scope": "public sealed class InternalBarStrengthIndicatorState :"
+  },
+  {
+    "id": "internal-bar-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new InternalBarStrengthWindow(length)",
+    "after": "new InternalBarStrengthWindow(1)",
+    "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
+    "scope": "internal static void InternalBarStrength("
   }
 ]

@@ -6573,34 +6573,9 @@ internal static class OscillatorCore
     /// <param name="length">Averaging period length.</param>
     internal static void InternalBarStrength(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        Span<double> ibs = stackalloc double[close.Length > 1024 ? 0 : close.Length];
-        var ibsArray = close.Length > 1024 ? new double[close.Length] : null;
-        var ibsSpan = ibsArray is not null ? ibsArray.AsSpan() : ibs;
-
-        // Calculate raw IBS for each bar
-        for (var i = 0; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            ibsSpan[i] = range != 0 ? (close[i] - low[i]) / range * 100 : 0;
-        }
-
-        // Calculate rolling average of IBS
-        double sum = 0;
-        for (var i = 0; i < close.Length; i++)
-        {
-            sum += ibsSpan[i];
-            if (i >= length)
-            {
-                sum -= ibsSpan[i - length];
-            }
-            var count = Math.Min(i + 1, length);
-            output[i] = sum / count;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new InternalBarStrengthWindow(length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true).Value;
     }
 
     /// <summary>

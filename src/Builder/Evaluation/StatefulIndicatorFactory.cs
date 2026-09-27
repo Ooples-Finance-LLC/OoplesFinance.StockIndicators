@@ -685,6 +685,7 @@ internal static partial class StatefulIndicatorFactory
             GeoMaSpecOptions gma => new GeometricMovingAverageState(length: gma.Length),
             GeometricMeanMovingAverageSpecOptions gmma => new GeometricMeanMovingAverageState(length: gmma.Length),
             HarmonicMeanMovingAverageSpecOptions hmma => new HarmonicMeanMovingAverageState(length: hmma.Length),
+            InternalBarStrengthIndicatorSpecOptions ibs => new InternalBarStrengthIndicatorState(ibs.Length),
             PpoMaSpecOptions ppoma => new PpoMovingAverageState(fastLength: ppoma.FastLength, slowLength: ppoma.SlowLength),
             PriceMomentumSpecOptions pm => new PriceMomentumState(length: pm.Length),
             StandardErrorSpecOptions se => new StandardErrorState(length: se.Length),

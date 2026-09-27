@@ -2123,3 +2123,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **106/106** family/enrollment/foundation checks passed (`ppo-ma.trx`). Minimum, equal, reversed and maximum integer periods, normal/subnormal/extreme prices, direct core, all typed routes and invalid fields are covered. Campaign434a caught **16/16** route-specific faults; **3,246** retained sites. Previously verified shared-kernel arithmetic faults are not duplicated.
 - Source/archive SHA256: `ed5bd396ec86c5fac9123b88d7a48e33fe6db21798afd6317a3976bce7638347` / `52db1a48b13c64ac434c1b6d9993141bb6f2e29157bb941a8062e3c29566b0d6`.
 - Inventory: **4,884/7,131**, **2,247** omissions across **370** types; no construction failures. 204 grouped batches cover **2,058 configurations / 375 types**. DLL SHA256 `70A63770E0C50C9FA2FA64C5CC9391B270657403A977B43DB457F9B543ACC2E1`. Full coverage and release gates remain incomplete.
+
+
+### Internal Bar Strength numerical contract
+
+- Four configurations compute exact candle-position percentages, an available-history rolling mean and a zero-seeded EMA signal. Extended unpublished positions preserve later finite cancellation; growing history avoids maximum-period eager allocation. Raw and legacy routes retain original candle bounds when using selected prices.
+- The first build found a local-name collision in the new reference registration; after correction, **77/77** Internal Bar Strength/buffer/enrollment/foundation checks passed (`internal-bar-strength-buffer.trx`). Both outputs, all public routes, direct core, independent smoothing periods, maximum periods, normal/subnormal/extreme values, selected prices and invalid fields are covered. Campaign435a caught **20/20** faults; **3,266** retained sites.
+- Source/archive SHA256: `84735e12a2a5c58acba6d902d3775ca78788dc9953fc567b1ead2c1a2bdf58ef` / `4ccef3eb549984ed43c439c8f23a9a4e021c7b0659ff8d0700bc8fe261f2028e`.
+- Inventory: **4,888/7,131**, **2,243** omissions across **369** types; no construction failures. 205 grouped batches cover **2,062 configurations / 376 types**. DLL SHA256 `30F1668AC9A20656EF1C54B199CCE4EEEC3313964B0E71D8EB93A8363ED6F41B`. Full coverage and release gates remain incomplete.

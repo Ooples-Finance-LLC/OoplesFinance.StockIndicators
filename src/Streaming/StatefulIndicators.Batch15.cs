@@ -326,60 +326,17 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
 [PrimaryOutput("Ibs")]
 public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _smoothLength;
-    private readonly RollingWindowSum _ibsSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevIbsiEma;
-
-    public InternalBarStrengthIndicatorState(int length = 14, int smoothLength = 3)
+    private readonly InternalBarStrengthWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public InternalBarStrengthIndicatorState(int length=14,int smoothLength=3)=>_window=new(length,smoothLength);
+    public IndicatorName Name=>IndicatorName.InternalBarStrengthIndicator;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _smoothLength = Math.Max(1, smoothLength);
-        _ibsSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var result=_window.Next(bar.High,bar.Low,_input.GetValue(bar),isFinal);
+        return new(result.Value,includeOutputs?new Dictionary<string,double>{{"Ibs",result.Value},{"Signal",result.Signal}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.InternalBarStrengthIndicator;
-
-    public void Reset()
-    {
-        _ibsSum.Reset();
-        _prevIbsiEma = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var close = _input.GetValue(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var ibs = high - low != 0 ? (close - low) / (high - low) * 100 : 0;
-        var ibsSum = isFinal ? _ibsSum.Add(ibs, out var count) : _ibsSum.Preview(ibs, out count);
-        var ibsi = count > 0 ? ibsSum / count : 0;
-        var ibsiEma = CalculationsHelper.CalculateEMA(ibsi, _prevIbsiEma, _smoothLength);
-
-        if (isFinal)
-        {
-            _prevIbsiEma = ibsiEma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ibs", ibsi },
-                { "Signal", ibsiEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ibsi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ibsSum.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

@@ -346,42 +346,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateInternalBarStrengthIndicator(this StockData stockData, int length = 14, int smoothLength = 3)
     {
-        List<double> ibsiList = new(stockData.Count);
-        List<double> ibsEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var ibsSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
+        var close=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;
+        using var window=new InternalBarStrengthWindow(length,smoothLength);List<double> values=new(stockData.Count),signalValues=new(stockData.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var close = inputList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            var ibs = high - low != 0 ? (close - low) / (high - low) * 100 : 0;
-            ibsSumWindow.Add(ibs);
-
-            var prevIbsi = GetLastOrDefault(ibsiList);
-            var ibsi = ibsSumWindow.Average(length);
-            ibsiList.Add(ibsi);
-
-            var prevIbsiEma = GetLastOrDefault(ibsEmaList);
-            var ibsiEma = CalculateEMA(ibsi, prevIbsiEma, smoothLength);
-            ibsEmaList.Add(ibsiEma);
-
-            var signal = GetRsiSignal(ibsi - ibsiEma, prevIbsi - prevIbsiEma, ibsi, prevIbsi, 70, 30);
-            signalsList?.Add(signal);
+            var result=window.Next(stockData.HighPrices[i],stockData.LowPrices[i],close[i],true);var previous=i>0?values[i-1]:0;var previousSignal=i>0?signalValues[i-1]:0;
+            signals?.Add(GetRsiSignal(result.Value-result.Signal,previous-previousSignal,result.Value,previous,70,30));values.Add(result.Value);signalValues.Add(result.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ibs", ibsiList },
-            { "Signal", ibsEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ibsiList);
-        stockData.IndicatorName = IndicatorName.InternalBarStrengthIndicator;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Ibs",values},{"Signal",signalValues}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.InternalBarStrengthIndicator;return stockData;
     }
 
 

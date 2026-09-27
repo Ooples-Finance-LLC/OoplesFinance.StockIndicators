@@ -13155,20 +13155,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeInternalBarStrengthIndicatorFast(StockData data, ComputeContext context, int length = 14, string? outputKey = null)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.InternalBarStrength(high, low, close, buffer.WritableSpan, length);
-        if (outputKey == "Signal")
-        {
-            double previous = 0;
-            for (var i = 0; i < data.Count; i++)
-            {
-                previous += .5 * (buffer.WritableSpan[i] - previous);
-                buffer.WritableSpan[i] = previous;
-            }
-        }
+        var close=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;
+        var buffer=context.Rent(data.Count);using var window=new InternalBarStrengthWindow(length);
+        for(var i=0;i<data.Count;i++){var result=window.Next(data.HighPrices[i],data.LowPrices[i],close[i],true);buffer.WritableSpan[i]=outputKey=="Signal"?result.Signal:result.Value;}
         return buffer;
     }
 
