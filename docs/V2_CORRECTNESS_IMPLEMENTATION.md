@@ -2085,3 +2085,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **82/82** family/enrollment/foundation checks passed (`chaikin-volatility.trx`). Four basic average types, normal/subnormal/extreme values, maximum lag, long EMA startup, selected prices, customer stages, preview/reset and invalid fields are covered. Campaign430a caught **20/20** faults; **3,166** retained sites.
 - Source/archive SHA256: `aea854b41b1b8e29cba49ae5c5326186c1c15b5d6a170415974596534971eef6` / `eaaeb599edaafd632dbd4ae1b58856a4ac5d0d3cff3c0708fd148d4e7a06fb8a`.
 - Inventory: **4,858/7,131**, **2,273** omissions across **375** types; no construction failures. 200 grouped batches cover **2,032 configurations / 370 types**. DLL SHA256 `21F83B6C1B0BF252CABE117B2D69D4F55DDD3A5C2021B7B931752AD552FC7D1D`. Full coverage and release gates remain incomplete.
+
+
+### Center of Linearity numerical contract
+
+- Four configurations use differences weighted by the global bar index, then sum their rounded terms over the rolling window. Extended terms allow later finite cancellation; growing queues support maximum periods without eager allocation. The core now computes the public bar-index formula instead of a different center-of-mass oscillator.
+- **74/74** family/enrollment/foundation checks passed (`center-linearity.trx`), including all public routes, direct core, selected inputs, minimum/maximum periods, subnormal/extreme values, finite recovery after overflow, preview/reset and invalid fields. Campaign431a caught **21/21** faults; **3,187** retained sites.
+- Source/archive SHA256: `31a999136e018216ed8cab1a2eb7125e8a4b1c431f387fe6649a233326a85fac` / `ff9a7004a1e66ad9c00bae9ddb95334136cc0fa876f0574ccb34785834264cc2`.
+- Inventory: **4,862/7,131**, **2,269** omissions across **374** types; no construction failures. 201 grouped batches cover **2,036 configurations / 371 types**. DLL SHA256 `42EF5B92D230035C16851C674EF130DC59A949CBC8677E79F80BFCEFE27B3C4E`. Full coverage and release gates remain incomplete.

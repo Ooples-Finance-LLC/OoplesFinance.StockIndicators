@@ -6715,29 +6715,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeCenterOfLinearityFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateCenterOfLinearity weights the distance between the bar a whole length ago and the bar just
-        // gone by the bar number itself, and sums that over the window - a running total whose weights grow
-        // with the series rather than resetting inside the window. OscillatorCore.CenterOfLinearity read the
-        // close and weighted by position within the window instead.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var col = buffer.WritableSpan;
-
-        var weightedSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-
-            weightedSum.Add((i + 1) * (priorValue - previousValue));
-            col[i] = weightedSum.Sum(length);
-        }
-
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new CenterLinearityWindow(length);
+        for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);return output;
     }
 
     /// <summary>

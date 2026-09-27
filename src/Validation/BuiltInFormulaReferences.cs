@@ -67,6 +67,10 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>ChaikinVolatilityOutputs(bars,builtIn)["Cv"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.CenterOfLinearity)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>CenterLinearityOutputs(bars,builtIn)["Col"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
         {
             var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

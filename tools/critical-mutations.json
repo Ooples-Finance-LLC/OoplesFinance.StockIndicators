@@ -26419,5 +26419,176 @@
     "before": "var result = 0d;",
     "after": "var result = 1d;",
     "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "center-linearity-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "var prior = _prices.Count == _length ?",
+    "after": "var prior = _prices.Count >= 1 ?",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-prior-price",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_prices.Peek() : 0",
+    "after": "price : 0",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "difference.Add(_previous, -1)",
+    "after": "difference.Add(_previous)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-index-weight",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "roundedDifference.AddTo(ref product, _index + 1)",
+    "after": "roundedDifference.AddTo(ref product, _index)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-difference-publication",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "RocBankValue.Round(difference)",
+    "after": "new RocBankValue(difference.Mean(1))",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-term-publication",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "RocBankValue.Round(product)",
+    "after": "new RocBankValue(product.Mean(1))",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-term-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "if (_terms.Count == _length) _terms.Peek().AddTo(ref total, -1);",
+    "after": "",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-term-sign",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "term.AddTo(ref total);",
+    "after": "term.AddTo(ref total, -1);",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-total-commit",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_total = total;",
+    "after": "",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-index-advance",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_index++;",
+    "after": "",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-stored-price",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_prices.Enqueue(price)",
+    "after": "_prices.Enqueue(0)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_prices.Clear(); _terms.Clear(); _total = default;",
+    "after": "_terms.Clear(); _total = default;",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-reset-terms",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_prices.Clear(); _terms.Clear(); _total = default;",
+    "after": "_prices.Clear(); _total = default;",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-reset-total",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_total = default; _previous = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-reset-previous",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_previous = 0; _index = 0;",
+    "after": "_index = 0;",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-reset-index",
+    "module": "numerical",
+    "file": "src/Helpers/CenterLinearityWindow.cs",
+    "before": "_previous = 0; _index = 0;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCenterOfLinearityFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CenterOfLinearityState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "center-linearity-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void CenterOfLinearity(",
+    "before": "new CenterLinearityWindow(length)",
+    "after": "new CenterLinearityWindow(1)",
+    "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
   }
 ]

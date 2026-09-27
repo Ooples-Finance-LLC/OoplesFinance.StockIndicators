@@ -5079,67 +5079,17 @@ public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICust
 [PrimaryOutput("Col")]
 public sealed class CenterOfLinearityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _sumWindow;
-    private readonly PooledRingBuffer<double> _window;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-    private int _index;
-
-    public CenterOfLinearityState(int length = 14)
+    private readonly CenterLinearityWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public CenterOfLinearityState(int length=14)=>_window=new(length);
+    public IndicatorName Name=>IndicatorName.CenterOfLinearity;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _sumWindow = new RollingWindowSum(_length);
-        _window = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(_input.GetValue(bar),isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Col",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.CenterOfLinearity;
-
-    public void Reset()
-    {
-        _sumWindow.Reset();
-        _window.Clear();
-        _prevValue = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priorValue = _window.Count >= _length ? _window[0] : 0;
-        var a = (_index + 1) * (priorValue - prevValue);
-        var sum = isFinal ? _sumWindow.Add(a, out _) : _sumWindow.Preview(a, out _);
-        var col = sum;
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-            _prevValue = value;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Col", col }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(col, outputs);
-    }
-
-    public void Dispose()
-    {
-        _sumWindow.Dispose();
-        _window.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Cv")]

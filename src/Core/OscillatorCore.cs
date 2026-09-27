@@ -2305,35 +2305,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void CenterOfLinearity(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            // Calculate center of mass of price action
-            double sumProduct = 0;
-            double sumPrices = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var price = close[i - length + 1 + j];
-                sumProduct += (j + 1) * price;
-                sumPrices += price;
-            }
-
-            var centerOfMass = sumPrices > 0 ? sumProduct / sumPrices : length / 2.0;
-            var expectedCenter = (length + 1) / 2.0;
-
-            // Normalize to -100 to +100 range
-            output[i] = 100 * (centerOfMass - expectedCenter) / expectedCenter;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterLinearityWindow(length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>

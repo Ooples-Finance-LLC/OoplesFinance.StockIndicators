@@ -695,35 +695,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateCenterOfLinearity(this StockData stockData, int length = 14)
     {
-        List<double> colList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var aSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorValue = i >= length ? inputList[i - length] : 0;
-
-            var a = (i + 1) * (priorValue - prevValue);
-            aSumWindow.Add(a);
-
-            var prevCol = GetLastOrDefault(colList);
-            var col = aSumWindow.Sum(length);
-            colList.Add(col);
-
-            var signal = GetCompareSignal(col, prevCol);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Col", colList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(colList);
-        stockData.IndicatorName = IndicatorName.CenterOfLinearity;
-
-        return stockData;
+        var (input,_,_,_,_)=GetInputValuesList(stockData);using var window=new CenterLinearityWindow(length);List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        foreach(var price in input){var value=window.Next(price,true);signals?.Add(GetCompareSignal(value,values.Count>0?values[values.Count-1]:0));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Col",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.CenterOfLinearity;return stockData;
     }
 
 
