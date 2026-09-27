@@ -1032,48 +1032,23 @@ public static partial class Calculations
     public static StockData CalculateScalpersChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 15, 
         int length2 = 20)
     {
-        List<double> scalperList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        var smaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length2).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? average = null, atr = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentSma = smaList[i];
-            var currentAtr = atrList[i];
-
-            var prevScalper = GetLastOrDefault(scalperList);
-            var scalper = Math.PI * currentAtr > 0 ? currentSma - Math.Log(Math.PI * currentAtr) : currentSma;
-            scalperList.Add(scalper);
-
-            // The centre of the two bands published: a rolling high and a rolling low over the same
-            // window, so their midpoint lies between them on every bar by construction.
-            middleBandList.Add((highestList[i] + lowestList[i]) / 2);
-
-            var signal = GetCompareSignal(currentValue - scalper, prevValue - prevScalper);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), input);
+            atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), ranges);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            // The bands are a rolling high and a rolling low; the scalper line is sma - log(pi * atr),
-            // a third quantity with no reason to lie between them, and it sat below the rolling low on
-            // 19 bars. It keeps its own name and the midpoint of the two bands becomes the centre.
-            { "UpperBand", highestList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowestList },
-            { "Scalper", scalperList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ScalpersChannel;
-
-        return stockData;
+        using var window = new ScalperChannelWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length1, length2, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), scalper = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, average is null ? null : new RocBankValue(average[i]), atr is null ? null : new RocBankValue(atr[i]));
+            signals?.Add(GetCompareSignal(input[i] - point.Scalper, i > 0 ? input[i - 1] - scalper[i - 1] : 0)); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); scalper.Add(point.Scalper);
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower }, { "Scalper", scalper } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.ScalpersChannel; return stockData;
     }
 
 

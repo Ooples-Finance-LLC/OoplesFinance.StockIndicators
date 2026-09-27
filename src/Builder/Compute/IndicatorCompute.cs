@@ -21729,36 +21729,26 @@ internal static partial class IndicatorCompute
     {
         if (outputKey is "UpperBand" or "MiddleBand" or "LowerBand")
         {
-            var (close, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
-            var result = context.Rent(data.Count);
-            var highs = new RollingMinMax(Math.Max(1, rangeLength));
-            var lows = new RollingMinMax(Math.Max(1, rangeLength));
-            for (var i = 0; i < data.Count; i++)
-            {
-                highs.Add(high[i]); lows.Add(low[i]);
-                result.WritableSpan[i] = outputKey == "UpperBand" ? highs.Max : outputKey == "LowerBand" ? lows.Min : (highs.Max + lows.Min) / 2;
-            }
-            return result;
+            var (_, highValues, lowValues, _, _) = CalculationsHelper.GetInputValuesList(data); var bands = context.Rent(highValues.Count);
+            var highs = new RollingMinMax(Math.Max(1, rangeLength)); var lows = new RollingMinMax(Math.Max(1, rangeLength));
+            for (var i = 0; i < highValues.Count; i++) { highs.Add(highValues[i]); lows.Add(lowValues[i]); var midpoint = new ExactMeanAccumulator(); midpoint.Add(highs.Max); midpoint.Add(lows.Min); bands.WritableSpan[i] = outputKey == "UpperBand" ? highs.Max : outputKey == "LowerBand" ? lows.Min : midpoint.Mean(2); }
+            return bands;
         }
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), smoothed.WritableSpan);
-        var sma = smoothed.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var average = context.Rent(external ? input.Count : 0); using var atr = context.Rent(external ? input.Count : 0);
+        if (external)
         {
-            var scaled = Math.PI * atr[i];
-            output[i] = scaled > 0 ? sma[i] - Math.Log(scaled) : sma[i];
+            var ranges = CalculationsHelper.GetTrueRangeList(data);
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan);
         }
-
-        return buffer;
+        using var window = new ScalperChannelWindow(external ? MovingAvgType.SimpleMovingAverage : maType, rangeLength, length, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(average.Span[i]) : null, external ? new RocBankValue(atr.Span[i]) : null);
+            result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : outputKey == "MiddleBand" ? point.Middle : point.Scalper;
+        }
+        return result;
     }
 
     /// <summary>

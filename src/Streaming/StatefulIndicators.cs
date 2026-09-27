@@ -2191,80 +2191,16 @@ public sealed class StationaryExtrapolatedLevelsState : IStreamingIndicatorState
 [PrimaryOutput("Scalper")]
 public sealed class ScalpersChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public ScalpersChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 15,
-        int length2 = 20)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _highWindow = new RollingWindowMax(resolved1);
-        _lowWindow = new RollingWindowMin(resolved1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ScalperChannelWindow _window;
+    public ScalpersChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 15, int length2 = 20) { _window = new(maType, length1, length2); }
     public IndicatorName Name => IndicatorName.ScalpersChannel;
-
-    public void Reset()
-    {
-        _smaSmoother.Reset();
-        _atrSmoother.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _smaSmoother.Next(value, isFinal);
-        // The true range of the bars, against the previous close (the bar's own on the first bar, as
-        // AverageTrueRange does) - not against the previous SMA, which only the batch's leaked average read.
-        var prevClose = _hasPrev ? _prevClose : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var scalper = Math.PI * atr > 0 ? sma - Math.Log(Math.PI * atr) : sma;
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            // The scalper line is a third quantity, not the centre; see the batch calculation.
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", highest },
-                { "MiddleBand", (highest + lowest) / 2 },
-                { "LowerBand", lowest },
-                { "Scalper", scalper }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(scalper, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Scalper, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower }, { "Scalper", point.Scalper } } : null);
     }
-
-    public void Dispose()
-    {
-        _smaSmoother.Dispose();
-        _atrSmoother.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

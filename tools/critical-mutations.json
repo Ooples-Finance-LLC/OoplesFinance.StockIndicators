@@ -21245,5 +21245,136 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class FlaggingBandsState :"
+  },
+  {
+    "id": "scalper-channel-high-period",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "_high = new(Math.Max(1, rangeLength))",
+    "after": "_high = new(Math.Max(1, averageLength))",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-low-period",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "_low = new(Math.Max(1, rangeLength))",
+    "after": "_low = new(Math.Max(1, averageLength))",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "new(kind, averageLength, averageLength, kind, capacityHint)",
+    "after": "new(kind, averageLength, rangeLength, kind, capacityHint)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-basis-period",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "new(kind, averageLength, averageLength, kind, capacityHint)",
+    "after": "new(kind, rangeLength, averageLength, kind, capacityHint)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-pi-factor",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "atr.Multiply(Math.PI)",
+    "after": "atr.Multiply(1)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-early-product",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "Math.Log(scaled.Mantissa) + scaled.UpperShift * Math.Log(2)",
+    "after": "Math.Log(scaled.Publish())",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-log-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "scaled.UpperShift * Math.Log(2)",
+    "after": "scaled.UpperShift * 0",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-scalper-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "result.Add(logarithm, -1)",
+    "after": "result.Add(logarithm, 1)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "midpoint.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-preview-high",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "commit ? _high.Add(high, out _) : _high.Preview(high, out _)",
+    "after": "_high.Add(high, out _)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-preview-average",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "_average.Next(high, low, close, commit)",
+    "after": "_average.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "_high.Reset();",
+    "after": "if (_high == null) _high!.Reset();",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/ScalperChannelWindow.cs",
+    "before": "_average.Reset();",
+    "after": "if (_average == null) _average!.Reset();",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "scalper-channel-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "input[i], true, external",
+    "after": "data.ClosePrices[i], true, external",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeScalpersChannelFast("
+  },
+  {
+    "id": "scalper-channel-raw-midpoint",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "midpoint.Mean(2)",
+    "after": "(highs.Max + lows.Min) / 2",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeScalpersChannelFast("
+  },
+  {
+    "id": "scalper-channel-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class ScalpersChannelState :"
   }
 ]

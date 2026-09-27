@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ScalpersChannel)
+        {
+            var scalperKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < scalperKeys.Length; slot++) { var key = scalperKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ScalperChannelOutputs(bars, builtIn)[key], key == "Scalper" ? ScalperBudget : IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.FlaggingBands)
         {
             var flaggingKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
