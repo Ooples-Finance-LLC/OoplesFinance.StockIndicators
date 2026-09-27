@@ -89,65 +89,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSmoothedWilliamsR(this StockData stockData, int length = 14, int smoothLength = 3)
     {
-        length = Math.Max(length, 1);
-        smoothLength = Math.Max(smoothLength, 1);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var count = inputList.Count;
-        List<double> smoothedList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        var k = 2.0 / (smoothLength + 1);
-        double prevSmoothed = 0;
-
-        for (var i = 0; i < count; i++)
+        var (input, highs, lows, _, _) = GetInputValuesList(stockData); var window = new SmoothedWilliamsWindow(length, smoothLength);
+        List<double> values = new(input.Count); var signals = CreateSignalsList(stockData, input.Count);
+        for (var i = 0; i < input.Count; i++)
         {
-            double rawWilliamsR;
-            if (i < length - 1)
-            {
-                rawWilliamsR = -50;
-            }
-            else
-            {
-                var highestHigh = double.MinValue;
-                var lowestLow = double.MaxValue;
-                for (var j = i - length + 1; j <= i; j++)
-                {
-                    if (highList[j] > highestHigh)
-                    {
-                        highestHigh = highList[j];
-                    }
-
-                    if (lowList[j] < lowestLow)
-                    {
-                        lowestLow = lowList[j];
-                    }
-                }
-
-                // Greater than, not unequal to: the window's highest high is never below its lowest low, so
-                // the two agree on every real window, and the comparison stays exact rather than approximate.
-                // It also keeps a window of nothing but NaN on the midpoint instead of dividing by -infinity.
-                rawWilliamsR = highestHigh > lowestLow
-                    ? (highestHigh - inputList[i]) / (highestHigh - lowestLow) * -100
-                    : -50;
-            }
-
-            var smoothed = i == 0 ? rawWilliamsR : (rawWilliamsR * k) + (prevSmoothed * (1 - k));
-            prevSmoothed = smoothed;
-            smoothedList.Add(smoothed);
-
-            var prevSmoothed1 = i >= 1 ? smoothedList[i - 1] : 0;
-            var prevSmoothed2 = i >= 2 ? smoothedList[i - 2] : 0;
-            var signal = GetCompareSignal(smoothed - prevSmoothed1, prevSmoothed1 - prevSmoothed2);
-            signalsList?.Add(signal);
+            var value = window.Next(highs[i], lows[i], input[i], true); var previous = i > 0 ? values[i - 1] : 0; var prior = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetCompareSignal(value - previous, previous - prior)); values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Swr", smoothedList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(smoothedList);
-        stockData.IndicatorName = IndicatorName.SmoothedWilliamsR;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Swr", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.SmoothedWilliamsR;
         return stockData;
     }
 

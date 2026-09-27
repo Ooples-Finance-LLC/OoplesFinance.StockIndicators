@@ -187,101 +187,16 @@ public sealed class IchimokuChikouSpanState : IStreamingIndicatorState
 [PrimaryOutput("Swr")]
 public sealed class SmoothedWilliamsRState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _k;
-    private readonly PooledRingBuffer<double> _highs;
-    private readonly PooledRingBuffer<double> _lows;
-    private readonly StreamingInputResolver _input;
-    private double _prevSmoothed;
-    private int _barIndex;
-
-    public SmoothedWilliamsRState(int length = 14, int smoothLength = 3)
-    {
-        _length = Math.Max(1, length);
-        _k = 2.0 / (Math.Max(1, smoothLength) + 1);
-        _highs = new PooledRingBuffer<double>(_length);
-        _lows = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SmoothedWilliamsWindow _window;
+    public SmoothedWilliamsRState(int length = 14, int smoothLength = 3) => _window = new(length, smoothLength);
     public IndicatorName Name => IndicatorName.SmoothedWilliamsR;
-
-    public void Reset()
-    {
-        _highs.Clear();
-        _lows.Clear();
-        _prevSmoothed = 0;
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double rawWilliamsR;
-        if (_highs.Count + 1 < _length)
-        {
-            rawWilliamsR = -50;
-        }
-        else
-        {
-            var start = _highs.Count - (_length - 1);
-            var highestHigh = double.MinValue;
-            var lowestLow = double.MaxValue;
-            for (var i = start; i < _highs.Count; i++)
-            {
-                if (_highs[i] > highestHigh)
-                {
-                    highestHigh = _highs[i];
-                }
-
-                if (_lows[i] < lowestLow)
-                {
-                    lowestLow = _lows[i];
-                }
-            }
-
-            if (bar.High > highestHigh)
-            {
-                highestHigh = bar.High;
-            }
-
-            if (bar.Low < lowestLow)
-            {
-                lowestLow = bar.Low;
-            }
-
-            // Greater than, not unequal to, for the reason the batch gives: the highest high is never below
-            // the lowest low, so this is the same test made exact, and an all-NaN window keeps the midpoint.
-            rawWilliamsR = highestHigh > lowestLow
-                ? (highestHigh - value) / (highestHigh - lowestLow) * -100
-                : -50;
-        }
-
-        var smoothed = _barIndex == 0 ? rawWilliamsR : (rawWilliamsR * _k) + (_prevSmoothed * (1 - _k));
-
-        if (isFinal)
-        {
-            _highs.TryAdd(bar.High, out _);
-            _lows.TryAdd(bar.Low, out _);
-            _prevSmoothed = smoothed;
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Swr", smoothed } };
-        }
-
-        return new StreamingIndicatorStateResult(smoothed, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Swr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highs.Dispose();
-        _lows.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 /// <summary>

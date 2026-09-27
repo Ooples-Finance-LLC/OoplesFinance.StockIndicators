@@ -7407,12 +7407,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeSmoothedWilliamsRFast(StockData data, ComputeContext context, int length = 14, int smoothLength = 3)
     {
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.SmoothedWilliamsR(high, low, close, buffer.WritableSpan, length, smoothLength);
-        return buffer;
+        var close = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var output = context.Rent(close.Count);
+        OscillatorCore.SmoothedWilliamsR(SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), SpanCompat.AsReadOnlySpan(close), output.WritableSpan, length, smoothLength);
+        return output;
     }
 
     internal static ComputeBuffer ComputePriceOscillatorPercentFast(StockData data, ComputeContext context, int fastLength = 12,

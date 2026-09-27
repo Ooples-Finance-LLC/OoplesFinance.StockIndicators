@@ -30515,5 +30515,120 @@
     "before": "RoundRocBankStage(v - bear[i])",
     "after": "RoundRocBankStage(v + bear[i])",
     "filter": "FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.HandStagesKeepMidpointBullAndTriggerDistinct|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.ExtendedDifferencesRecoverAcrossFourSmootherKinds|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.CustomerStagesReceiveEightInputsInFormulaOrder|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.InvalidFieldsDoNotAdvanceAnySmoothingStage|FullyQualifiedName~ValidationTests.TurboTriggerNumericalTests.RawSelectedClosesKeepOtherCandleFields"
+  },
+  {
+    "id": "smoothed-williams-period-increment",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "Math.Max(1, smoothing) + 1L",
+    "after": "Math.Max(1, smoothing) + 1",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "_count + 1 >= _length",
+    "after": "_count + 1 > _length",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "new RocBankValue(-50)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-percent-scale",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "100 * (c - h)",
+    "after": "1 * (c - h)",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-feedback-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "_previous = result;",
+    "after": "_previous = new RocBankValue(result.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-recursion-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "raw.Multiply(_gain).AddTo(ref sum);",
+    "after": "raw.Multiply(1 - _gain).AddTo(ref sum);",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "_high.Clear();",
+    "after": "// retain highs\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "smoothed-williams-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedWilliamsWindow.cs",
+    "before": "return result.Publish();",
+    "after": "return Math.Max(-100, Math.Min(0, result.Publish()));",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smoothed-williams-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing",
+    "scope": "internal static ComputeBuffer ComputeSmoothedWilliamsRFast("
+  },
+  {
+    "id": "smoothed-williams-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new SmoothedWilliamsWindow(length, smoothLength)",
+    "after": "new SmoothedWilliamsWindow(smoothLength, length)",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing",
+    "scope": "internal static void SmoothedWilliamsR("
+  },
+  {
+    "id": "smoothed-williams-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing",
+    "scope": "public sealed class SmoothedWilliamsRState"
+  },
+  {
+    "id": "smoothed-williams-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SmoothedWilliamsRSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.EveryRouteMatchesIndependentWilliamsRecurrence"
+  },
+  {
+    "id": "smoothed-williams-reference-gain",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SmoothedWilliams.cs",
+    "before": "2d / (Math.Max(1, smoothing) + 1L)",
+    "after": "1d / (Math.Max(1, smoothing) + 1L)",
+    "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
   }
 ]
