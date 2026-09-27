@@ -50,6 +50,11 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>AverageGapOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
+        {
+            var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<anchorKeys.Length;slot++){var key=anchorKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>AnchoredMomentumOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RexOscillator)
         {
             var rexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

@@ -7046,63 +7046,14 @@ public sealed class AlligatorIndexState : IStreamingIndicatorState, IDisposable,
 [PrimaryOutput("Amom")]
 public sealed class AnchoredMomentumState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _signalLength;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly RollingWindowSum _priceSum;
-    private readonly RollingWindowSum _signalSum;
-    private readonly StreamingInputResolver _input;
-
-    public AnchoredMomentumState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 7,
-        int signalLength = 8, int momentumLength = 10)
-    {
-        _signalLength = Math.Max(1, signalLength);
-        var p = MathHelper.MinOrMax((2 * momentumLength) + 1);
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _priceSum = new RollingWindowSum(p);
-        _signalSum = new RollingWindowSum(_signalLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-    public IndicatorName Name => IndicatorName.AnchoredMomentum;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _priceSum.Reset();
-        _signalSum.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var ema = _ema.Next(value, isFinal);
-        int priceCount;
-        var priceSum = isFinal ? _priceSum.Add(value, out priceCount) : _priceSum.Preview(value, out priceCount);
-        var sma = priceCount > 0 ? priceSum / priceCount : 0;
-        var amom = sma != 0 ? 100 * ((ema / sma) - 1) : 0;
-        int signalCount;
-        var signalSum = isFinal ? _signalSum.Add(amom, out signalCount) : _signalSum.Preview(amom, out signalCount);
-        var signal = signalCount > 0 ? signalSum / signalCount : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Amom", amom },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(amom, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _priceSum.Dispose();
-        _signalSum.Dispose();
-    }
+    private readonly AnchoredMomentumWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public AnchoredMomentumState(MovingAvgType maType=MovingAvgType.ExponentialMovingAverage,int smoothLength=7,int signalLength=8,int momentumLength=10){_window=new(maType,smoothLength,signalLength,momentumLength);}
+    public IndicatorName Name=>IndicatorName.AnchoredMomentum;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
+    {StreamingInputValidation.Validate(bar);var r=_window.Next(_input.GetValue(bar),isFinal);return new(r.Value,includeOutputs?new Dictionary<string,double>{{"Amom",r.Value},{"Signal",r.Signal}}:null);}
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Asrsi")]

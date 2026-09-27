@@ -25260,5 +25260,169 @@
     "after": "new AverageGapWindow(MovingAvgType.WeightedMovingAverage,fastLength,slowLength,close.Length)",
     "filter": "FullyQualifiedName~AverageGapNumericalTests.TwoRoundedAveragesAndExactPercentGapMatchIndependentArithmetic|FullyQualifiedName~AverageGapNumericalTests.SelectedPricesAndTwoCustomerStagesPreserveFiniteExtremeGaps|FullyQualifiedName~AverageGapNumericalTests.InvalidFieldsCannotAdvanceEitherAverage",
     "scope": "internal static void RangeActionVerificationIndex("
+  },
+  {
+    "id": "anchored-momentum-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "2L*momentum+1",
+    "after": "2*momentum+1",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "Math.Max(2,Math.Min",
+    "after": "Math.Max(1,Math.Min",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-period-cap",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-smooth-kind",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_smooth=new(kind,smooth,capacityHint)",
+    "after": "_smooth=new(MovingAvgType.SimpleMovingAverage,smooth,capacityHint)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_smooth=new(kind,smooth,capacityHint)",
+    "after": "_smooth=new(kind,signal,capacityHint)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-ratio-reversed",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "RocBankValue.Return(smooth,anchor)",
+    "after": "RocBankValue.Return(anchor,smooth)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-early-ratio-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "var value=RocBankValue.Return(smooth,anchor);",
+    "after": "var value=new RocBankValue(RocBankValue.Return(smooth,anchor).Publish());",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-signal-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_signals[0].AddTo(ref sum,-1)",
+    "after": "_signals[0].AddTo(ref sum,1)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-signal-startup-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "count:Math.Min(_signals.Count+1,_signals.Capacity)",
+    "after": "count:_signals.Capacity",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-anchor-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_anchor.Next(price,commit)",
+    "after": "_anchor.Next(price,true)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-smooth-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_smooth.Next(new RocBankValue(price),commit)",
+    "after": "_smooth.Next(new RocBankValue(price),true)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "if(commit){_sum=sum;",
+    "after": "if(true){_sum=sum;",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-reset-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_smooth?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-reset-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_anchor.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_signals.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/AnchoredMomentumWindow.cs",
+    "before": "_sum=default;",
+    "after": "",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor"
+  },
+  {
+    "id": "anchored-momentum-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor",
+    "scope": "internal static ComputeBuffer ComputeAnchoredMomentumFast("
+  },
+  {
+    "id": "anchored-momentum-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data,maType,smoothLength,SpanCompat.AsReadOnlySpan(input),smooth.WritableSpan)",
+    "after": "MovingAverage(data,maType,signalLength,SpanCompat.AsReadOnlySpan(input),smooth.WritableSpan)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor",
+    "scope": "internal static ComputeBuffer ComputeAnchoredMomentumFast("
+  },
+  {
+    "id": "anchored-momentum-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor",
+    "scope": "public sealed class AnchoredMomentumState :"
+  },
+  {
+    "id": "anchored-momentum-core-smoothing",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new AnchoredMomentumWindow(MovingAvgType.ExponentialMovingAverage,7,8,length,close.Length)",
+    "after": "new AnchoredMomentumWindow(MovingAvgType.ExponentialMovingAverage,1,8,length,close.Length)",
+    "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor",
+    "scope": "internal static void AnchoredMomentum("
   }
 ]

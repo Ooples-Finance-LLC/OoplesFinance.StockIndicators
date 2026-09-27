@@ -6725,34 +6725,14 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAnchoredMomentumFast(StockData data, ComputeContext context,
         int momentumLength = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 7, bool signal = false, int signalLength = 8)
     {
-        // CalculateAnchoredMomentum measures a short average of the price against a simple average anchored
-        // over (2 * momentumLength) + 1 bars, and the short average takes whichever type it was given.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var anchorLength = MathHelper.MinOrMax((2 * momentumLength) + 1);
-
-        using var smoothBuffer = context.Rent(count);
-        var smoothed = smoothBuffer.WritableSpan;
-        MovingAverage(data, maType, smoothLength, input, smoothed);
-
-        var anchorWindow = new RollingSum();
-        var signalWindow = signal ? new RollingSum() : null;
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        smoothLength=Math.Max(1,smoothLength);signalLength=Math.Max(1,signalLength);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new AnchoredMomentumWindow(maType,smoothLength,signalLength,momentumLength,input.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            anchorWindow.Add(input[i]);
-
-            // An anchor window that has not filled averages what it holds rather than nothing.
-            var anchor = anchorWindow.Average(anchorLength);
-            var momentum = anchor != 0 ? 100 * ((smoothed[i] / anchor) - 1) : 0;
-            signalWindow?.Add(momentum);
-            output[i] = signalWindow is null ? momentum : signalWindow.Average(signalLength);
+            using var smooth=context.Rent(input.Count);MovingAverage(data,maType,smoothLength,SpanCompat.AsReadOnlySpan(input),smooth.WritableSpan);
+            for(var i=0;i<input.Count;i++){var r=window.Finish(input[i],smooth.Span[i],true);output.WritableSpan[i]=signal?r.Signal:r.Value;}
         }
-
-        return buffer;
+        else for(var i=0;i<input.Count;i++){var r=window.Next(input[i],true);output.WritableSpan[i]=signal?r.Signal:r.Value;}
+        return output;
     }
 
     /// <summary>

@@ -11,6 +11,21 @@ spec.loader.exec_module(mutations)
 
 
 class MutationEvidenceTests(unittest.TestCase):
+    def test_selected_build_targets_the_runtime_whose_results_are_checked(self):
+        with tempfile.TemporaryDirectory() as directory:
+            path = Path(directory)
+            (path / "results.trx").write_text(self.trx("Passed"), encoding="utf-8")
+            process = Mock()
+            process.wait.return_value = 0
+            with patch.object(mutations.subprocess, "Popen", return_value=process) as start:
+                result = mutations.run_tests(path, path, "Example", 1)
+            command = start.call_args.args[0]
+            self.assertEqual("net10.0", command[command.index("-f") + 1])
+            self.assertIn("-p:TargetFrameworks=net10.0", command)
+            self.assertIn("--no-restore", command)
+            self.assertNotIn("--no-build", command)
+            self.assertEqual("passed", result["outcome"])
+
     def test_timeout_stops_children_and_never_credits_partial_failed_tests(self):
         with tempfile.TemporaryDirectory() as directory:
             path = Path(directory)

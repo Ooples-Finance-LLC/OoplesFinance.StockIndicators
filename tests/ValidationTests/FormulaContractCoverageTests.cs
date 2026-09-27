@@ -2281,7 +2281,11 @@ public sealed class FormulaContractCoverageTests
         Check(new PolynomialLeastSquaresMovingAverage(2), prices, new[] { 11d / 12, 23d / 12, 23d / 6 });
         Check(new LightLeastSquaresMovingAverage(3), prices, new[] { 0d, 0, 7d / 3 + Math.Sqrt(2d / 3) });
         var anchoredPrices = new[] { 1d, 2, 4, 8 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
-        Check(new AnchoredMomentum(1), anchoredPrices, new[] { 0d, 0, 0, -275d / 14 }, new[] { 0d, 0, 0, -275d / 56 });
+        // The available three-bar anchor rounds to binary64 before the percentage and signal stages.
+        var roundedAnchor = ReferenceFraction.FromDouble(14d / 3);
+        var anchoredFourth = (new ReferenceFraction(100) * (ReferenceFraction.FromDouble(15d / 4) - roundedAnchor) / roundedAnchor).ToDouble();
+        var anchoredSignalFourth = (ReferenceFraction.FromDouble(anchoredFourth) / new ReferenceFraction(4)).ToDouble();
+        Check(new AnchoredMomentum(1), anchoredPrices, new[] { 0d, 0, 0, anchoredFourth }, new[] { 0d, 0, 0, anchoredSignalFourth });
         Check(new TrueRangeAdjustedExponentialMovingAverage(2, 1), prices, new[] { 1d, 7d / 3, 103d / 27 });
         Check(new StatisticalVolatility(2, 2), prices, new[] { 0d, .6 * Math.Log(2), .6 * Math.Log(2) },
             new[] { 0d, .3 * Math.Log(2), .5 * Math.Log(2) });

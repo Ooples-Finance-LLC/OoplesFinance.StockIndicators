@@ -2028,3 +2028,12 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **186/186** family/enrollment/composition checks passed (`average-gap.trx`). A hand fixture proves the finite -200% result when the raw difference would overflow. Basic average types, equal/unequal/minimum periods, signed/subnormal/extreme prices, both raw/core/native paths, five public routes, preview/reset and invalid inputs are covered.
 - Campaign423a caught **18/18** faults; **3,025** retained sites. All fifteen staged implementation/test/catalog files match its archive. Source/archive SHA256: `ee8352f47768e99fa3792ef5a9cce9901f91a31f0118ff1d82db4d24529c7519` / `8a5391a029c140ccbd63547debd6e1e26c76e86467af2351c7c84150597fe702`.
 - Inventory: **4,823/7,131**, **2,308** omissions across **383** types; no construction failures. 193 grouped batches cover **1,997 configurations / 362 types**. DLL SHA256 `45468EB2FADAC9D8D1F953FE1D159029F3F2E40BD8F6CB446E726B357D0F7060`. Full library/release gates remain incomplete.
+
+
+### Anchored Momentum numerical contract
+
+- Five configurations now share the selected price average versus the available-history anchor mean, with overflow-safe derived periods clamped to 2..530 and a fixed partial-window arithmetic signal. Extended unpublished momentum preserves finite signal cancellation; the core now uses the public EMA7/Signal8 defaults.
+- Initial verification passed 82/83; its hand expectation omitted intermediate rounding. After correcting that expectation, **44/44** final family/foundation checks passed (`anchored-momentum-final.trx`). Period boundaries, all routes, selected inputs, customer smoothing, preview/reset and invalid fields are covered.
+- Campaign424a caught **20/20** distinct faults with a passing baseline; **3,045** retained sites. Source/archive SHA256: `40c9981bab0fcf9ad5ed88f4d316b1f63b610eb296499e5fd887778bcbb14462` / `e89d670cfede94995b412726f0215014f2d11c236ff1ffcbb1bb893893523c72`.
+- Selected mutation builds now target only their tested net10.0 framework while continuing to rebuild changed production code. **30/30** tooling tests passed; separate cross-framework release gates remain required.
+- Inventory: **4,828/7,131**, **2,303** omissions across **382** types; no construction failures. 194 grouped batches cover **2,002 configurations / 363 types**. DLL SHA256 `E379DE88F05950C21AE8DECF1A97EF9D3346A26D8CBF2034F781885C3DC7C193`.

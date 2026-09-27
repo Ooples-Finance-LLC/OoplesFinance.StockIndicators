@@ -2261,26 +2261,13 @@ internal static class OscillatorCore
 
     /// <summary>
     /// Computes Anchored Momentum.
-    /// Measures momentum relative to a specific bar.
+    /// Compares the default seven-bar EMA with the available history in the derived anchor window.
     /// </summary>
     internal static void AnchoredMomentum(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 0;
-                continue;
-            }
-
-            var anchor = close[i - length];
-            output[i] = anchor > 0 ? 100 * (close[i] - anchor) / anchor : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new AnchoredMomentumWindow(MovingAvgType.ExponentialMovingAverage,7,8,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true).Value;
     }
 
     /// <summary>

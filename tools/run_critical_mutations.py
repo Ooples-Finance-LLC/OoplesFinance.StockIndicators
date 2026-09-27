@@ -64,7 +64,7 @@ def stop_process_tree(process, log):
 def run_tests(worktree, directory, test_filter, timeout):
     directory.mkdir(parents=True, exist_ok=True)
     args = ["dotnet", "test", "tests/OoplesFinance.StockIndicators.Tests.Unit.csproj", "-c", "Release",
-            "-f", "net10.0", "-p:GeneratePackageOnBuild=false", "--no-restore", "--disable-build-servers", "--filter", test_filter,
+            "-f", "net10.0", "-p:TargetFrameworks=net10.0", "-p:GeneratePackageOnBuild=false", "--no-restore", "--disable-build-servers", "--filter", test_filter,
             "--logger", "trx;LogFileName=results.trx", "--results-directory", str(directory), "--verbosity", "quiet"]
     env = dict(os.environ, MSBUILDDISABLENODEREUSE="1", DOTNET_CLI_USE_MSBUILD_SERVER="0")
     started = time.monotonic()

@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -71,49 +72,15 @@ public static partial class Calculations
     public static StockData CalculateAnchoredMomentum(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 7,
         int signalLength = 8, int momentumLength = 10)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> amomList = new(stockData.Count);
-        List<double> amomsList = new(stockData.Count);
-        var tempSumWindow = new RollingSum();
-        var amomSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var p = MinOrMax((2 * momentumLength) + 1);
-
-        var emaList = GetMovingAverageList(stockData, maType, smoothLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        smoothLength=Math.Max(1,smoothLength);signalLength=Math.Max(1,signalLength);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;List<double> values=new(input.Count),signal=new(input.Count);var signals=CreateSignalsList(stockData);using var window=new AnchoredMomentumWindow(maType,smoothLength,signalLength,momentumLength,input.Count);
+        if(Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentEma = emaList[i];
-
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempSumWindow.Add(currentValue);
-
-            var sma = tempSumWindow.Average(p);
-            var prevAmom = GetLastOrDefault(amomList);
-            var amom = sma != 0 ? 100 * ((currentEma / sma) - 1) : 0;
-            amomList.Add(amom);
-            amomSumWindow.Add(amom);
-
-            var prevAmoms = GetLastOrDefault(amomsList);
-            var amoms = amomSumWindow.Average(signalLength);
-            amomsList.Add(amoms);
-
-            var signal = GetCompareSignal(amom - amoms, prevAmom - prevAmoms);
-            signalsList?.Add(signal);
+            var smooth=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input),smoothLength)?.ToList()??GetMovingAverageList(stockData,maType,smoothLength,input);
+            for(var i=0;i<input.Count;i++){var r=window.Finish(input[i],smooth[i],true);values.Add(r.Value);signal.Add(r.Signal);}
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Amom", amomList },
-            { "Signal", amomsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(amomList);
-        stockData.IndicatorName = IndicatorName.AnchoredMomentum;
-
-        return stockData;
+        else foreach(var price in input){var r=window.Next(price,true);values.Add(r.Value);signal.Add(r.Signal);}
+        for(var i=0;i<input.Count;i++)signals?.Add(GetCompareSignal(values[i]-signal[i],i>0?values[i-1]-signal[i-1]:0));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Amom",values},{"Signal",signal}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.AnchoredMomentum;return stockData;
     }
 
 
