@@ -9,20 +9,22 @@ internal sealed class DailyPivotLevels
     private readonly bool _fibonacci;
     private readonly bool _demark;
     private readonly bool _camarilla;
+    private readonly bool _floor;
     private DateTime? _day;
     private double _open, _high, _low, _close;
     private double[] _levels;
     internal static readonly string[] StandardKeys = { "Pivot", "S1", "S2", "S3", "R1", "R2", "R3", "M1", "M2", "M3", "M4", "M5", "M6" };
     internal static readonly string[] DynamicKeys = { "Pivot", "S1", "R1" };
-    internal string[] Keys => _camarilla ? CamarillaPivotMath.Keys : _woodie ? WoodiePivotMath.Keys : (_standard || _fibonacci) ? StandardKeys : DynamicKeys;
+    internal string[] Keys => _camarilla ? CamarillaPivotMath.Keys : _woodie ? WoodiePivotMath.Keys : (_standard || _fibonacci || _floor) ? StandardKeys : DynamicKeys;
 
-    internal DailyPivotLevels(bool standard, bool woodie = false, bool fibonacci = false, bool demark = false, bool camarilla = false)
+    internal DailyPivotLevels(bool standard, bool woodie = false, bool fibonacci = false, bool demark = false, bool camarilla = false, bool floor = false)
     {
         _standard = standard;
         _woodie = woodie;
         _fibonacci = fibonacci;
         _demark = demark;
         _camarilla = camarilla;
+        _floor = floor;
         _levels = new double[Keys.Length];
     }
 
@@ -43,6 +45,7 @@ internal sealed class DailyPivotLevels
 
     private double[] Calculate()
     {
+        if (_floor) return FloorPivotMath.Levels(_high, _low, _close);
         if (_camarilla) return CamarillaPivotMath.Levels(_high, _low, _close);
         if (_demark) return DemarkPivotMath.Levels(_open, _high, _low, _close);
         if (_fibonacci) return FibonacciPivotMath.Levels(_high, _low, _close);

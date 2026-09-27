@@ -17950,65 +17950,25 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFloorPivotPointFast(StockData data, ComputeContext context,
         InputLength inputLength = InputLength.Day, PivotSeries series = PivotSeries.Pivot)
     {
-        return PivotLevels(data, context, inputLength, (i, inputList, highList, lowList) =>
-        {
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var range = prevHigh - prevLow;
-
-            var pivot = (prevHigh + prevLow + prevClose) / 3;
-            var support1 = (pivot * 2) - prevHigh;
-            var resistance1 = (pivot * 2) - prevLow;
-            var support2 = pivot - range;
-            var resistance2 = pivot + range;
-            var support3 = support1 - range;
-            var resistance3 = resistance1 + range;
-
-            return series switch
-            {
-                PivotSeries.Support1 => support1,
-                PivotSeries.Support2 => support2,
-                PivotSeries.Support3 => support3,
-                PivotSeries.Resistance1 => resistance1,
-                PivotSeries.Resistance2 => resistance2,
-                PivotSeries.Resistance3 => resistance3,
-                PivotSeries.Mid1 => (support3 + support2) / 2,
-                PivotSeries.Mid2 => (support2 + support1) / 2,
-                PivotSeries.Mid3 => (support1 + pivot) / 2,
-                PivotSeries.Mid4 => (resistance1 + pivot) / 2,
-                PivotSeries.Mid5 => (resistance2 + resistance1) / 2,
-                PivotSeries.Mid6 => (resistance3 + resistance2) / 2,
-                _ => pivot
-            };
-        });
+        var (close,high,low,_,_)=PivotPeriodInputs.Read(data,inputLength);var groups=CalculationsHelper.GetInputLengthGroupIndexes(data,inputLength);
+        var slot=series switch { PivotSeries.Support1=>1,PivotSeries.Support2=>2,PivotSeries.Support3=>3,
+            PivotSeries.Resistance1=>4,PivotSeries.Resistance2=>5,PivotSeries.Resistance3=>6,
+            PivotSeries.Mid1=>7,PivotSeries.Mid2=>8,PivotSeries.Mid3=>9,PivotSeries.Mid4=>10,PivotSeries.Mid5=>11,PivotSeries.Mid6=>12,_=>0 };
+        var levels=new double[close.Count];for(var i=1;i<levels.Length;i++)levels[i]=FloorPivotMath.Levels(high[i-1],low[i-1],close[i-1])[slot];
+        var buffer=context.Rent(data.Count);for(var i=0;i<data.Count;i++)buffer.WritableSpan[i]=levels[groups[i]];return buffer;
     }
 
     /// <summary>
     /// Computes Floor Pivot Point Support Level 1 using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeFloorPivotPointS1Fast(StockData data, ComputeContext context)
-    {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.FloorPivotPointS1(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
-        return buffer;
-    }
+    { return ComputeFloorPivotPointFast(data,context,series:PivotSeries.Support1); }
 
     /// <summary>
     /// Computes Floor Pivot Point Resistance Level 1 using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeFloorPivotPointR1Fast(StockData data, ComputeContext context)
-    {
-        var highSpan = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lowSpan = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closeSpan = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        TrendCore.FloorPivotPointR1(highSpan, lowSpan, closeSpan, buffer.WritableSpan);
-        return buffer;
-    }
+    { return ComputeFloorPivotPointFast(data,context,series:PivotSeries.Resistance1); }
 
     /// <summary>
     /// Computes Camarilla Pivot Point using zero-allocation fast path.

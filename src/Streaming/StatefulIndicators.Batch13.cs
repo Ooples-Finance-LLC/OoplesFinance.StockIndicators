@@ -846,75 +846,24 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pivot")]
 public sealed class FloorPivotPointsState : IStreamingIndicatorState
 {
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevClose;
-    private bool _hasPrev;
-
+    private readonly DailyPivotLevels _daily = new(false, floor: true);
+    private readonly int _primarySlot;
+    public FloorPivotPointsState() : this(0) { }
+    internal FloorPivotPointsState(int primarySlot) => _primarySlot = primarySlot;
     public IndicatorName Name => IndicatorName.FloorPivotPoints;
-
-    public void Reset()
-    {
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _daily.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        // The preceding bar, as every other pivot point state here does. Reading the arriving bar's own
-        // high, low and close made a bar's levels depend on how that bar turned out.
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevClose = _hasPrev ? _prevClose : 0;
-
-        var range = prevHigh - prevLow;
-        var pivot = (prevHigh + prevLow + prevClose) / 3;
-        var support1 = (pivot * 2) - prevHigh;
-        var resistance1 = (pivot * 2) - prevLow;
-        var support2 = pivot - range;
-        var resistance2 = pivot + range;
-        var support3 = support1 - range;
-        var resistance3 = resistance1 + range;
-        var midpoint1 = (support3 + support2) / 2;
-        var midpoint2 = (support2 + support1) / 2;
-        var midpoint3 = (support1 + pivot) / 2;
-        var midpoint4 = (resistance1 + pivot) / 2;
-        var midpoint5 = (resistance2 + resistance1) / 2;
-        var midpoint6 = (resistance3 + resistance2) / 2;
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
+        var levels = _daily.Next(bar.StartTime, bar.Open, bar.High, bar.Low, bar.Close, isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(13)
-            {
-                { "Pivot", pivot },
-                { "S1", support1 },
-                { "S2", support2 },
-                { "S3", support3 },
-                { "R1", resistance1 },
-                { "R2", resistance2 },
-                { "R3", resistance3 },
-                { "M1", midpoint1 },
-                { "M2", midpoint2 },
-                { "M3", midpoint3 },
-                { "M4", midpoint4 },
-                { "M5", midpoint5 },
-                { "M6", midpoint6 }
-            };
+            var values = new Dictionary<string, double>(levels.Length);
+            for (var i = 0; i < levels.Length; i++) values[_daily.Keys[i]] = levels[i];
+            outputs = values;
         }
-
-        return new StreamingIndicatorStateResult(pivot, outputs);
+        return new StreamingIndicatorStateResult(levels[_primarySlot], outputs);
     }
 }
 
