@@ -1660,7 +1660,7 @@ internal static class TrendCore
             var prevLow = i >= 1 ? low[i - 1] : 0;
             var prevClose = i >= 1 ? close[i - 1] : 0;
 
-            output[i] = (prevHigh + prevLow + (prevClose * 2)) / 4;
+            output[i] = WoodiePivotMath.Levels(prevHigh,prevLow,prevClose)[0];
         }
     }
 
@@ -1683,7 +1683,7 @@ internal static class TrendCore
             var prevLow = i >= 1 ? low[i - 1] : 0;
             var prevClose = i >= 1 ? close[i - 1] : 0;
 
-            output[i] = (prevHigh + prevLow + prevClose) / 3;
+            output[i] = FibonacciPivotMath.Levels(prevHigh,prevLow,prevClose)[0];
         }
     }
 

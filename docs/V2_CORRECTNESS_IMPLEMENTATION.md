@@ -2187,3 +2187,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **101/101** Demark/all previously covered daily pivots/reference/golden/enrollment/foundation checks passed (`demark-daily-pivots.trx`). All three close/open branches have independent hand vectors; normal/subnormal/extreme values, all routes, direct core, six legacy calendar periods, selected prices, preview/reset and invalid fields are covered. Campaigns442a/442b caught **17/17** faults from identical snapshots; **3,417** retained sites.
 - Source/archive SHA256: `ac2715d73bcc8c5fe4c0a78cdce9bd0670244c7c7acfac051996fc48407d2875` / `a57967e4751b26d545574c8f700c952854bd7b3c5f515ed47dc87c262ce2ac20`. Additional source/archive: `ac2715d73bcc8c5fe4c0a78cdce9bd0670244c7c7acfac051996fc48407d2875` / `a57967e4751b26d545574c8f700c952854bd7b3c5f515ed47dc87c262ce2ac20`.
 - Inventory: **4,911/7,131**, **2,220** omissions across **360** types; no construction failures. 212 grouped batches cover **2,085 configurations / 385 types**. DLL SHA256 `1751077BF34B412DFB915C8C543DE004794EA4D927BE0ED0A1FEABF7594F97C0`. Full coverage and release gates remain incomplete.
+
+
+### Woodie and Fibonacci internal pivot core follow-up
+
+- The unused internal TrendCore Woodie/Fibonacci helpers still formed overflowing direct sums after the public routes had been repaired. Their primary outputs now use the verified pivot mathematics while retaining prior-period span alignment. This follow-up adds no numerical enrollments or grouped-family credit.
+- **2/2** direct-core regressions passed (`pivot-core-followup.trx`), covering empty inputs, first-period zero, normal/subnormal/opposite-maximum prices and constant maximum-price finite means. Campaign443a caught **6/6** faults, including restoration of both original overflowing expressions, wrong-period highs and incorrect first-close seeds; **3,423** retained sites.
+- Source/archive SHA256: `1dacdcb5209cf0e048eebdb32f1815d6be5ae4abb0b77a706d04dc852c4a6222` / `1f47db5bd9bcc2494793e6314283611ad71d36db8eb0c9d93257bb19271a9833`.
+- Inventory: **4,911/7,131**, **2,220** omissions across **360** types; no construction failures. 212 grouped batches cover **2,085 configurations / 385 types**. DLL SHA256 `E984AEB8AC854CDC8ACFE97F88316827A72F8EEE5B2441929654AAFD9A570A43`. Full coverage and release gates remain incomplete.

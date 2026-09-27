@@ -28516,5 +28516,59 @@
     "after": "open[i],high[i],low[i],close[i]",
     "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
     "scope": "internal static void DemarkPivotPoint("
+  },
+  {
+    "id": "pivot-core-woodie-early-overflow",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "WoodiePivotMath.Levels(prevHigh,prevLow,prevClose)[0]",
+    "after": "(prevHigh + prevLow + (prevClose * 2)) / 4",
+    "scope": "internal static void WoodiePivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
+  },
+  {
+    "id": "pivot-core-woodie-current-high",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "var prevHigh = i >= 1 ? high[i - 1] : 0;",
+    "after": "var prevHigh = high[i];",
+    "scope": "internal static void WoodiePivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
+  },
+  {
+    "id": "pivot-core-woodie-first-close-seed",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "var prevClose = i >= 1 ? close[i - 1] : 0;",
+    "after": "var prevClose = i >= 1 ? close[i - 1] : close[i];",
+    "scope": "internal static void WoodiePivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
+  },
+  {
+    "id": "pivot-core-fibonacci-early-overflow",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "FibonacciPivotMath.Levels(prevHigh,prevLow,prevClose)[0]",
+    "after": "(prevHigh + prevLow + prevClose) / 3",
+    "scope": "internal static void FibonacciPivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
+  },
+  {
+    "id": "pivot-core-fibonacci-current-high",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "var prevHigh = i >= 1 ? high[i - 1] : 0;",
+    "after": "var prevHigh = high[i];",
+    "scope": "internal static void FibonacciPivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
+  },
+  {
+    "id": "pivot-core-fibonacci-first-close-seed",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "var prevClose = i >= 1 ? close[i - 1] : 0;",
+    "after": "var prevClose = i >= 1 ? close[i - 1] : close[i];",
+    "scope": "internal static void FibonacciPivotPoint(",
+    "filter": "FullyQualifiedName~PivotCoreNumericalTests"
   }
 ]
