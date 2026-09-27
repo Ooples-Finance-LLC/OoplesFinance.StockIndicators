@@ -83,6 +83,10 @@ internal static partial class BuiltInFormulaReferences
         {
             var ibsKeys=new[]{"Ibs","Signal"};for(var slot=0;slot<ibsKeys.Length;slot++){var key=ibsKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>InternalBarStrengthOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RatioOCHLAverager)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>RatioOchlOutputs(bars)["Rochla"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PpoMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PpoMaOutputs(bars,builtIn)["PpoMa"],IndicatorErrorBudget.Exact);yield break;

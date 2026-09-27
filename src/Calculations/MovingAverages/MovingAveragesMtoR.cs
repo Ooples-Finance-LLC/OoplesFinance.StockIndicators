@@ -810,36 +810,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRatioOCHLAverager(this StockData stockData)
     {
-        List<double> dList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var close=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;var window=new RatioOchlWindow();List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var b = currentHigh - currentLow != 0 ? Math.Abs(currentValue - currentOpen) / (currentHigh - currentLow) : 0;
-            var c = b > 1 ? 1 : b;
-
-            var prevD = i >= 1 ? dList[i - 1] : currentValue;
-            var d = (c * currentValue) + ((1 - c) * prevD);
-            dList.Add(d);
-
-            var signal = GetCompareSignal(currentValue - d, prevValue - prevD);
-            signalsList?.Add(signal);
+            var value=window.Next(stockData.OpenPrices[i],stockData.HighPrices[i],stockData.LowPrices[i],close[i],true);var previous=i>0?values[i-1]:close[i];var previousPrice=i>0?close[i-1]:0;
+            signals?.Add(GetCompareSignal(close[i]-value,previousPrice-previous));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rochla", dList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dList);
-        stockData.IndicatorName = IndicatorName.RatioOCHLAverager;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Rochla",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.RatioOCHLAverager;return stockData;
     }
 
 

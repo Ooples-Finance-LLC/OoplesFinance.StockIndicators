@@ -1601,7 +1601,6 @@ OoplesFinance.StockIndicators.Indicators.RandomWalkIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.RandomWalkIndex/minimum-periods
 OoplesFinance.StockIndicators.Indicators.RandomWalkIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RandomWalkIndex/weighted-average
-OoplesFinance.StockIndicators.Indicators.RatioOchlAverager/default
 OoplesFinance.StockIndicators.Indicators.ReallySimpleIndicator/default
 OoplesFinance.StockIndicators.Indicators.ReallySimpleIndicator/longer-length
 OoplesFinance.StockIndicators.Indicators.ReallySimpleIndicator/longer-periods

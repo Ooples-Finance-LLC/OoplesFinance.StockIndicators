@@ -31,48 +31,14 @@ public sealed class RapidRelativeStrengthIndexState : IStreamingIndicatorState, 
 [PrimaryOutput("Rochla")]
 public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevD;
-    private bool _hasPrev;
-
-    public RatioOCHLAveragerState()
+    private readonly RatioOchlWindow _window=new();
+    public RatioOCHLAveragerState(){}
+    public IndicatorName Name=>IndicatorName.RatioOCHLAverager;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
-    public IndicatorName Name => IndicatorName.RatioOCHLAverager;
-
-    public void Reset()
-    {
-        _prevD = 0;
-        _hasPrev = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var range = bar.High - bar.Low;
-        var b = range != 0 ? Math.Abs(value - bar.Open) / range : 0;
-        var c = b > 1 ? 1 : b;
-        var prevD = _hasPrev ? _prevD : value;
-        var d = (c * value) + ((1 - c) * prevD);
-
-        if (isFinal)
-        {
-            _prevD = d;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rochla", d }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(d, outputs);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Open,bar.High,bar.Low,bar.Close,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Rochla",value}}:null);
     }
 }
 

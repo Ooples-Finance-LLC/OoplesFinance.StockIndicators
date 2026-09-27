@@ -27261,5 +27261,147 @@
     "after": "new InternalBarStrengthWindow(1)",
     "filter": "FullyQualifiedName~InternalBarStrengthNumericalTests.CandlePercentagesRollingMeanAndZeroSeedSignalMatchIndependentFractions|FullyQualifiedName~InternalBarStrengthNumericalTests.SelectedPricesRetainOriginalCandleRange|FullyQualifiedName~InternalBarStrengthNumericalTests.InvalidFieldsCannotAdvanceDistanceOrAtr",
     "scope": "internal static void InternalBarStrength("
+  },
+  {
+    "id": "ratio-ochl-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "if (numerator.Sign < 0)",
+    "after": "if (numerator.Sign > 0)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-open-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "numerator.Add(open, -1)",
+    "after": "numerator.Add(open)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "denominator.Add(low, -1)",
+    "after": "denominator.Add(low)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "denominator.IsExactlyZero ? 0",
+    "after": "denominator.IsExactlyZero ? 1",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-gain-cap",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "Math.Min(1, numerator.Ratio(denominator))",
+    "after": "numerator.Ratio(denominator)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-early-distance",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "numerator.Add(close); numerator.Add(open, -1);",
+    "after": "numerator.Add(close-open);",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-early-range",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "denominator.Add(high); denominator.Add(low, -1);",
+    "after": "denominator.Add(high-low);",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-seed",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "_hasPrevious ? _previous : close",
+    "after": "_hasPrevious ? _previous : 0",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "_previous = 0; _hasPrevious = false;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-blend-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RatioOchlWindow.cs",
+    "before": "close, gain)",
+    "after": "close, gain*0.5)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend"
+  },
+  {
+    "id": "ratio-ochl-raw-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "internal static ComputeBuffer ComputeRatioOchlAveragerFast("
+  },
+  {
+    "id": "ratio-ochl-raw-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.OpenPrices[i]",
+    "after": "data.ClosePrices[i]",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "internal static ComputeBuffer ComputeRatioOchlAveragerFast("
+  },
+  {
+    "id": "ratio-ochl-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "before": "stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "public static StockData CalculateRatioOCHLAverager("
+  },
+  {
+    "id": "ratio-ochl-batch-open",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesMtoR.cs",
+    "before": "stockData.OpenPrices[i]",
+    "after": "stockData.ClosePrices[i]",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "public static StockData CalculateRatioOCHLAverager("
+  },
+  {
+    "id": "ratio-ochl-core-open",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "before": "window.Next(open[i],high[i],low[i],close[i],true)",
+    "after": "window.Next(close[i],high[i],low[i],close[i],true)",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "internal static void RatioOchlAverager("
+  },
+  {
+    "id": "ratio-ochl-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
+    "scope": "public sealed class RatioOCHLAveragerState :"
   }
 ]

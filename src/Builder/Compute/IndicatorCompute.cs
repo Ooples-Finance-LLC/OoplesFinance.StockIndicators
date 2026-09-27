@@ -16237,34 +16237,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeRatioOchlAveragerFast(StockData data, ComputeContext context)
     {
-        // CalculateRatioOCHLAverager weights each bar by how much of its range the move from the open covers,
-        // and smooths the chained series by that weight, seeded at the first value. The core routine this
-        // replaced never saw the chained series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-
-        using var highRange = context.Rent(count);
-        using var lowRange = context.Rent(count);
-        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
-        var highs = highRange.Span;
-        var lows = lowRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var range = highs[i] - lows[i];
-            var open = i < opens.Length ? opens[i] : currentValue;
-            var share = range != 0 ? Math.Abs(currentValue - open) / range : 0;
-            var weight = share > 1 ? 1 : share;
-
-            var previousValue = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = (weight * currentValue) + ((1 - weight) * previousValue);
-        }
-
+        var close=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var buffer=context.Rent(data.Count);var window=new RatioOchlWindow();
+        for(var i=0;i<data.Count;i++)buffer.WritableSpan[i]=window.Next(data.OpenPrices[i],data.HighPrices[i],data.LowPrices[i],close[i],true);
         return buffer;
     }
 

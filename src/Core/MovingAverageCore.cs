@@ -3907,24 +3907,8 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void RatioOchlAverager(ReadOnlySpan<double> open, ReadOnlySpan<double> close, ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output)
     {
-        if (output.Length < close.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var o = open[i];
-            var c = close[i];
-            var h = high[i];
-            var l = low[i];
-
-            var oc = Math.Abs(o - c);
-            var hl = h - l;
-
-            var ratio = hl != 0 ? oc / hl : 0;
-            var avg = (o + c + h + l) / 4;
-
-            output[i] = avg * (1 + ratio);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        var window=new RatioOchlWindow();for(var i=0;i<close.Length;i++)output[i]=window.Next(open[i],high[i],low[i],close[i],true);
     }
 
     /// <summary>

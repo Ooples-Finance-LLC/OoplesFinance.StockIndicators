@@ -2131,3 +2131,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - The first build found a local-name collision in the new reference registration; after correction, **77/77** Internal Bar Strength/buffer/enrollment/foundation checks passed (`internal-bar-strength-buffer.trx`). Both outputs, all public routes, direct core, independent smoothing periods, maximum periods, normal/subnormal/extreme values, selected prices and invalid fields are covered. Campaign435a caught **20/20** faults; **3,266** retained sites.
 - Source/archive SHA256: `84735e12a2a5c58acba6d902d3775ca78788dc9953fc567b1ead2c1a2bdf58ef` / `4ccef3eb549984ed43c439c8f23a9a4e021c7b0659ff8d0700bc8fe261f2028e`.
 - Inventory: **4,888/7,131**, **2,243** omissions across **369** types; no construction failures. 205 grouped batches cover **2,062 configurations / 376 types**. DLL SHA256 `30F1668AC9A20656EF1C54B199CCE4EEEC3313964B0E71D8EB93A8363ED6F41B`. Full coverage and release gates remain incomplete.
+
+
+### Ratio OCHL Averager numerical contract
+
+- The single RatioOchlAverager configuration now shares its public recursive, first-value-seeded formula across core, raw, batch and native routes. Exact candle-distance ratios and the existing exact convex blend preserve finite outputs at extreme prices. Selected prices retain original open/high/low fields and the gain is capped at one.
+- After correcting a missing reference import and duplicate native registration, **50/50** family/enrollment/foundation checks passed (`ratio-ochl.trx`). Normal/subnormal/extreme prices, first seed, zero range, gain capping, selected prices, all public routes, direct core, preview/reset and invalid fields are covered. Campaign436a caught **17/17** faults; **3,283** retained sites. Earlier compile failures earn no credit.
+- Source/archive SHA256: `40d221437cbbf92b87cbd1872132a0d77818000583f0c8d2caa23bdd7641e8e8` / `2ca2aa9658d731ee2d4a9b66e499e8188678b283c687f613274bf8ecfc07faa4`.
+- Inventory: **4,889/7,131**, **2,242** omissions across **368** types; no construction failures. 206 grouped batches cover **2,063 configurations / 377 types**. DLL SHA256 `A3120B72E4D307978BE528F817A3E044F71769A734286755539A78A357A7F9FB`. Full coverage and release gates remain incomplete.
