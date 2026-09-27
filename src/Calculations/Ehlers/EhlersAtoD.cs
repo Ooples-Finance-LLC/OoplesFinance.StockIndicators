@@ -1621,43 +1621,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersCycleAmplitude(this StockData stockData, int length = 20, double delta = 0.1)
     {
-        length = Math.Max(length, 1);
-        List<double> ptopList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var lbLength = (int)Math.Ceiling((double)length / 4);
-
-        var bpList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersCycleBandPassFilter(data, length, delta));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new CycleAmplitudeWindow(length, delta, input.Count); List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var prevPtop1 = i >= 1 ? ptopList[i - 1] : 0;
-            var prevPtop2 = i >= 2 ? ptopList[i - 2] : 0;
-
-            double power = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevBp1 = i >= j ? bpList[i - j] : 0;
-                var prevBp2 = i >= j + lbLength ? bpList[i - (j + lbLength)] : 0;
-                power += Pow(prevBp1, 2) + Pow(prevBp2, 2);
-            }
-
-            var ptop = 2 * 1.414 * Sqrt(power / length);
-            ptopList.Add(ptop);
-
-            var signal = GetCompareSignal(ptop - prevPtop1, prevPtop1 - prevPtop2);
-            signalsList?.Add(signal);
+            var value = window.Next(price, true); var previous = values.Count > 0 ? values[values.Count - 1] : 0; var older = values.Count > 1 ? values[values.Count - 2] : 0;
+            signals?.Add(GetCompareSignal(value - previous, previous - older)); values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eca", ptopList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ptopList);
-        stockData.IndicatorName = IndicatorName.EhlersCycleAmplitude;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eca", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersCycleAmplitude; return stockData;
     }
 
 

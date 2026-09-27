@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersCycleAmplitude)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CycleAmplitudeOutputs(bars, builtIn)["Eca"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersBandPassFilterV1 or IndicatorName.EhlersBandPassFilterV2 or IndicatorName.EhlersCycleBandPassFilter)
         {
             var bandPassKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

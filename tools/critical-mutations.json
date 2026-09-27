@@ -23300,5 +23300,143 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution",
     "scope": "public sealed class EhlersCycleBandPassFilterState :"
+  },
+  {
+    "id": "cycle-amplitude-delay",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "(_length + 3L) / 4",
+    "after": "(_length + 2L) / 4",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-filter-period",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "new(_length, delta, 2)",
+    "after": "new(_length + 1, delta, 2)",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-filter-variant",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "new(_length, delta, 2)",
+    "after": "new(_length, delta, 1)",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-squared-energy",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "var square = band * band",
+    "after": "var square = BigInteger.Abs(band)",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-early-square",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "var square = band * band",
+    "after": "var square = ExactVarianceWindow.Units(Math.Pow(ExactMeanAccumulator.UnitRatio(band, BigInteger.One), 2)) << 1074",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-delayed-energy",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "square + (_count >= _delay ? _lag[0] : BigInteger.Zero)",
+    "after": "square",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-latest-instead-of-lag",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_lag[0]",
+    "after": "_lag[_lag.Count - 1]",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_sum + pair -",
+    "after": "_sum + pair +",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-partial-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "new BigInteger(_length)",
+    "after": "new BigInteger(Math.Min(_count + 1, _length))",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-gain",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "2 * 1.414",
+    "after": "1.414",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-preview-filter",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_filter.Next(close, commit, out var band)",
+    "after": "_filter.Next(close, true, out var band)",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-preview-energy",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-reset-filter",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_filter.Reset();",
+    "after": "if (_count < 0) _filter.Reset();",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_sum = default;",
+    "after": "_sum += 0;",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/CycleAmplitudeWindow.cs",
+    "before": "_count = 0;",
+    "after": "_count += 0;",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "cycle-amplitude-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution",
+    "scope": "internal static ComputeBuffer ComputeEhlersCycleAmplitudeFast("
+  },
+  {
+    "id": "cycle-amplitude-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution",
+    "scope": "public sealed class EhlersCycleAmplitudeState :"
   }
 ]

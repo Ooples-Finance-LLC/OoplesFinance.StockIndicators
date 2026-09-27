@@ -8625,39 +8625,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCycleAmplitude(ReadOnlySpan<double> close, Span<double> output, int length = 20, double delta = 0.1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var lbLength = (int)Math.Ceiling((double)length / 4);
-
-        var pool = ArrayPool<double>.Shared;
-        var bpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var bp = bpArray.AsSpan(0, close.Length);
-            EhlersCycleBandPassFilter(close, bp, length, delta);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                double power = 0;
-                for (var j = 0; j < length; j++)
-                {
-                    var prevBp1 = i >= j ? bp[i - j] : 0;
-                    var prevBp2 = i >= j + lbLength ? bp[i - (j + lbLength)] : 0;
-                    power += (prevBp1 * prevBp1) + (prevBp2 * prevBp2);
-                }
-
-                output[i] = 2 * 1.414 * Math.Sqrt(power / length);
-            }
-        }
-        finally
-        {
-            pool.Return(bpArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new CycleAmplitudeWindow(length, delta, close.Length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

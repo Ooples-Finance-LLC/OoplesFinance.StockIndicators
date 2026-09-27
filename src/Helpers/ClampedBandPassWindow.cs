@@ -22,7 +22,8 @@ internal sealed class ClampedBandPassWindow
         }
     }
     private static BigInteger HighPass(BigInteger change, BigInteger previous, BigInteger alpha) => RocBankValue.RoundUnits((2 * Unit + alpha) * change + 2 * (Unit - alpha) * previous, 2 * Unit);
-    internal (double Value, double Signal) Next(double close, bool commit)
+    internal (double Value, double Signal) Next(double close, bool commit) => Next(close, commit, out _);
+    internal (double Value, double Signal) Next(double close, bool commit, out BigInteger bandUnits)
     {
         var price = ExactVarianceWindow.Units(close); var hp = _variant == 0 ? HighPass(_count == 0 ? BigInteger.Zero : price - _input1, _hp1, _hpAlpha) : price;
         var difference = _variant == 0 ? hp - _hp2 : price - _input2; var start = _variant == 2 ? 2 : 3;
@@ -31,6 +32,7 @@ internal sealed class ClampedBandPassWindow
         var signal = _variant == 0 ? peak.IsZero ? 0 : ExactMeanAccumulator.UnitRatio(band << 1074, peak) : ExactMeanAccumulator.UnitRatio(band, BigInteger.One);
         var signalUnits = _variant == 0 ? ExactVarianceWindow.Units(signal) : BigInteger.Zero; var trigger = _variant == 0 ? HighPass(signalUnits - _signal, _trigger, _triggerAlpha) : BigInteger.Zero;
         if (commit) { _input2 = _input1; _input1 = price; _hp2 = _hp1; _hp1 = hp; _band2 = _band1; _band1 = band; _peak = peak; _signal = signalUnits; _trigger = trigger; if (_count < 3) _count++; }
+        bandUnits = band;
         return (signal, ExactMeanAccumulator.UnitRatio(trigger, BigInteger.One));
     }
     internal void Reset() { _input1 = _input2 = _hp1 = _hp2 = _band1 = _band2 = _peak = _signal = _trigger = default; _count = 0; }
