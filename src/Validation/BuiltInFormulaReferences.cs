@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.MotionToAttractionChannels or IndicatorName.MotionToAttractionTrailingStop)
+        {
+            var motionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < motionKeys.Length; slot++) { var key = motionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MotionAttractionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ExtendedRecursiveBands)
         {
             var extendedKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

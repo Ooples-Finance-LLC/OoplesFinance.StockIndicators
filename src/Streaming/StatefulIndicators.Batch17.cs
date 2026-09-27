@@ -1268,61 +1268,14 @@ public sealed class MotionSmoothnessIndexState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Ts")]
 public sealed class MotionToAttractionTrailingStopState : IStreamingIndicatorState
 {
-    private readonly MotionToAttractionChannelsState _channels;
-    private readonly StreamingInputResolver _input;
-    private double _prevUpper;
-    private double _prevLower;
-    private double _prevOs;
-    private bool _hasPrev;
-
-    public MotionToAttractionTrailingStopState(int length = 14)
-    {
-        _channels = new MotionToAttractionChannelsState(length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MotionAttractionWindow _window;
+    public MotionToAttractionTrailingStopState(int length = 14) { _window = new(length); }
     public IndicatorName Name => IndicatorName.MotionToAttractionTrailingStop;
-
-    public void Reset()
-    {
-        _channels.Reset();
-        _prevUpper = 0;
-        _prevLower = 0;
-        _prevOs = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var channelResult = _channels.Update(bar, isFinal, includeOutputs: true);
-        var channelOutputs = channelResult.Outputs!;
-        var upper = channelOutputs["UpperBand"];
-        var lower = channelOutputs["LowerBand"];
-        var prevUpper = _hasPrev ? _prevUpper : value;
-        var prevLower = _hasPrev ? _prevLower : value;
-        var prevOs = _hasPrev ? _prevOs : 0;
-        var os = value > prevUpper ? 1 : value < prevLower ? 0 : prevOs;
-        var ts = (os * lower) + ((1 - os) * upper);
-
-        if (isFinal)
-        {
-            _prevUpper = upper;
-            _prevLower = lower;
-            _prevOs = os;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ts", ts }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ts, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Stop, includeOutputs ? new Dictionary<string, double> { { "Ts", point.Stop } } : null);
     }
 }
 

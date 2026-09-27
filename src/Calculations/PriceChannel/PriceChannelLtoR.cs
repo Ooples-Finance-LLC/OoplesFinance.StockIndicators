@@ -1096,66 +1096,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMotionToAttractionChannels(this StockData stockData, int length = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<double> dList = new(stockData.Count);
-        List<double> aMaList = new(stockData.Count);
-        List<double> bMaList = new(stockData.Count);
-        List<double> avgMaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)1 / length;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MotionAttractionWindow(length);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevAMa = i >= 1 ? aMaList[i - 1] : currentValue;
-            var prevBMa = i >= 1 ? bMaList[i - 1] : currentValue;
-
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var a = currentValue > prevAMa ? currentValue : prevA;
-            aList.Add(a);
-
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var b = currentValue < prevBMa ? currentValue : prevB;
-            bList.Add(b);
-
-            var prevC = GetLastOrDefault(cList);
-            var c = b - prevB != 0 ? Math.Min(1, prevC + alpha) : a - prevA != 0 ? 0 : prevC;
-            cList.Add(c);
-
-            var prevD = GetLastOrDefault(dList);
-            var d = a - prevA != 0 ? Math.Min(1, prevD + alpha) : b - prevB != 0 ? 0 : prevD;
-            dList.Add(d);
-
-            var avg = (a + b) / 2;
-            var aMa = (c * avg) + ((1 - c) * a);
-            aMaList.Add(aMa);
-
-            var bMa = (d * avg) + ((1 - d) * b);
-            bMaList.Add(bMa);
-
-            var prevAvgMa = GetLastOrDefault(avgMaList);
-            var avgMa = (aMa + bMa) / 2;
-            avgMaList.Add(avgMa);
-
-            var signal = GetCompareSignal(currentValue - avgMa, prevValue - prevAvgMa);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aMaList },
-            { "MiddleBand", avgMaList },
-            { "LowerBand", bMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.MotionToAttractionChannels;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.MotionToAttractionChannels; return stockData;
     }
 
 

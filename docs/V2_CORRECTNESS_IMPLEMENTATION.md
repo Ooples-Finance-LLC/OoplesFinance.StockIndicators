@@ -1777,3 +1777,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Four configurations now use exact normalized convex updates, avoiding overflow in range subtraction and length-plus-one coefficients. First-price seeding, minimum length three, same-sign extreme plateaus, opposite extreme prices, selected input and ordered preview/reset outputs are covered across all five routes.
 - **74/74** checks passed (`extended-band.trx`). Campaign393a/393b caught **12/12** faults; **2,467** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `bf4d84147f7ff1a14eab372a218c498a446adfc9cd185712aaf9bf37eba6be65` / `336c0f245c453536f761ba3dac8c97b7544984666e11dd2d35bd12d98fff31d1`.
 - Inventory: **4,572/7,131**, **2,559** omissions across **428** types; no construction failures. 163 grouped batches cover **1,746 configurations / 317 types**. 5D182ED0FE5C228F811885A818E6BA1C45BED77087B40BE5CA73E68C5CF95862 SHA256 `5D182ED0FE5C228F811885A818E6BA1C45BED77087B40BE5CA73E68C5CF95862`. Full coverage remains incomplete.
+
+
+### Motion to Attraction numerical contracts
+
+- Eight channel/trailing-stop configurations now use exact attraction steps, normalized convex boundary blends and safe midpoint arithmetic. First-price seeds, opposite-anchor feedback, saturation, strict previous-boundary stop ties, selected inputs and preview/reset behavior are covered across all five routes. Invalid candle fields are rejected before native state advances.
+- **106/106** checks passed (`motion-attraction.trx`). Campaign394a/394b caught **19/19** faults; **2,486** retained sites. All 13 staged files match the archived source. Source/archive SHA256: `96040ca95d9c74e9e3774e3726e4439ebe8f183d4760963a8d99a0c1ce8bb4b4` / `b2564dd51078897a527b87dae812e89bd6ea18242148890bf4f971e2668039f3`.
+- Inventory: **4,580/7,131**, **2,551** omissions across **426** types; no construction failures. 164 grouped batches cover **1,754 configurations / 319 types**. 87FCCD639910869BB962535A6DAFB6EC481FBF77CCA33B99BB0563F9134AB91B SHA256 `87FCCD639910869BB962535A6DAFB6EC481FBF77CCA33B99BB0563F9134AB91B`. Full coverage remains incomplete.

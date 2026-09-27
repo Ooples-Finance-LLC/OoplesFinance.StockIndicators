@@ -230,44 +230,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMotionToAttractionTrailingStop(this StockData stockData, int length = 14)
     {
-        List<double> osList = new(stockData.Count);
-        List<double> tsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var mtaList = CalculateMotionToAttractionChannels(stockData, length);
-        var aList = mtaList.ChainedOutputs["UpperBand"];
-        var bList = mtaList.ChainedOutputs["LowerBand"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var a = aList[i];
-            var b = bList[i];
-
-            var prevOs = GetLastOrDefault(osList);
-            var os = currentValue > prevA ? 1 : currentValue < prevB ? 0 : prevOs;
-            osList.Add(os);
-
-            var prevTs = GetLastOrDefault(tsList);
-            var ts = (os * b) + ((1 - os) * a);
-            tsList.Add(ts);
-
-            var signal = GetCompareSignal(currentValue - ts, prevValue - prevTs);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ts", tsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tsList);
-        stockData.IndicatorName = IndicatorName.MotionToAttractionTrailingStop;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MotionAttractionWindow(length); List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true).Stop; signals?.Add(GetCompareSignal(input[i] - value, i > 0 ? input[i - 1] - values[i - 1] : 0)); values.Add(value); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ts", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.MotionToAttractionTrailingStop; return stockData;
     }
 
 

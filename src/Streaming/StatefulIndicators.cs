@@ -978,79 +978,14 @@ public sealed class MovingAverageSupportResistanceState : IStreamingIndicatorSta
 [PrimaryOutput("MiddleBand")]
 public sealed class MotionToAttractionChannelsState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private double _prevB;
-    private double _prevC;
-    private double _prevD;
-    private double _prevAMa;
-    private double _prevBMa;
-    private int _count;
-
-    public MotionToAttractionChannelsState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = (double)1 / resolved;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MotionAttractionWindow _window;
+    public MotionToAttractionChannelsState(int length = 14) { _window = new(length); }
     public IndicatorName Name => IndicatorName.MotionToAttractionChannels;
-
-    public void Reset()
-    {
-        _prevA = 0;
-        _prevB = 0;
-        _prevC = 0;
-        _prevD = 0;
-        _prevAMa = 0;
-        _prevBMa = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevA = _count >= 1 ? _prevA : value;
-        var prevB = _count >= 1 ? _prevB : value;
-        var prevAMa = _count >= 1 ? _prevAMa : value;
-        var prevBMa = _count >= 1 ? _prevBMa : value;
-        var prevC = _prevC;
-        var prevD = _prevD;
-
-        var a = value > prevAMa ? value : prevA;
-        var b = value < prevBMa ? value : prevB;
-        var c = b - prevB != 0 ? Math.Min(1, prevC + _alpha) : a - prevA != 0 ? 0 : prevC;
-        var d = a - prevA != 0 ? Math.Min(1, prevD + _alpha) : b - prevB != 0 ? 0 : prevD;
-
-        var avg = (a + b) / 2;
-        var aMa = (c * avg) + ((1 - c) * a);
-        var bMa = (d * avg) + ((1 - d) * b);
-        var avgMa = (aMa + bMa) / 2;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _prevC = c;
-            _prevD = d;
-            _prevAMa = aMa;
-            _prevBMa = bMa;
-            _count++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", aMa },
-                { "MiddleBand", avgMa },
-                { "LowerBand", bMa }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(avgMa, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
 }
 

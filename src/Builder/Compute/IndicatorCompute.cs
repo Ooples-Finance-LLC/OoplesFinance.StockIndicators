@@ -1969,6 +1969,8 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            MotionToAttractionChannelsSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, spec.OutputKey),
+            MotionToAttractionTrailingStopSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, "Ts"),
             ExtendedRecursiveBandsSpecOptions recursive => ComputeExtendedRecursiveBandsFast(data, context, recursive.Length, spec.OutputKey),
             SmartEnvelopeSpecOptions smart => ComputeSmartEnvelopeFast(data, context, smart.Length, smart.Factor, spec.OutputKey),
             DEnvelopeSpecOptions envelope => ComputeDEnvelopeFast(data, context, envelope.Length, envelope.DevFactor, spec.OutputKey),
@@ -22002,6 +22004,14 @@ internal static partial class IndicatorCompute
         }
 
         return buffer;
+    }
+
+    /// <summary>Computes a motion-to-attraction channel output or trailing stop.</summary>
+    internal static ComputeBuffer ComputeMotionAttractionFast(StockData data, ComputeContext context, int length = 14, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); var window = new MotionAttractionWindow(length);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Ts" ? point.Stop : outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        return result;
     }
 
     /// <summary>Computes the selected extended recursive boundary or midpoint.</summary>

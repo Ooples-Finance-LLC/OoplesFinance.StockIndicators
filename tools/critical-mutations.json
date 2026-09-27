@@ -20671,5 +20671,160 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class ExtendedRecursiveBandsState :"
+  },
+  {
+    "id": "motion-attraction-period",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(1, length + 1)",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-anchor-seed",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "_hasPrevious ? _a : close",
+    "after": "_hasPrevious ? _a : 0",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-upper-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "var a = close > previousUpper ? close : previousA",
+    "after": "var a = close < previousUpper ? close : previousA",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-lower-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "var b = close < previousLower ? close : previousB",
+    "after": "var b = close > previousLower ? close : previousB",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-upper-step",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "_upperSteps + 1 : _length",
+    "after": "_upperSteps + 2 : _length",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-lower-step",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "_lowerSteps + 1 : _length",
+    "after": "_lowerSteps + 2 : _length",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-upper-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "aChanged ? 0 : _upperSteps",
+    "after": "aChanged ? _upperSteps : _upperSteps",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-lower-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "bChanged ? 0 : _lowerSteps",
+    "after": "bChanged ? _lowerSteps : _lowerSteps",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-blend-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "sum.Mean(_length)",
+    "after": "sum.Mean(_length + 1L)",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-early-midpoint-sum",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-stop-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "var isLong = close > previousUpper",
+    "after": "var isLong = close >= previousUpper",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-stop-lower-tie",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "close < previousLower ? false : _long",
+    "after": "close <= previousLower ? false : _long",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-stop-current-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "var isLong = close > previousUpper",
+    "after": "var isLong = close > upper",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-stop-side",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "isLong ? lower : upper",
+    "after": "isLong ? upper : lower",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "if (commit) { _a = a;",
+    "after": "{ _a = a;",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-stale-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MotionAttractionWindow.cs",
+    "before": "_hasPrevious = _long = false;",
+    "after": "_hasPrevious = true; _long = false;",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState"
+  },
+  {
+    "id": "motion-attraction-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "internal static ComputeBuffer ComputeMotionAttractionFast("
+  },
+  {
+    "id": "motion-attraction-channel-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "public sealed class MotionToAttractionChannelsState :"
+  },
+  {
+    "id": "motion-attraction-stop-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~MotionAttractionNumericalTests.ExactAttractionStepsSaturateAndStopsKeepStrictPreviousBoundaryTies|FullyQualifiedName~MotionAttractionNumericalTests.SelectedClosesDriveBothChannelsAndStopDirection|FullyQualifiedName~MotionAttractionNumericalTests.InvalidInputsNeverAdvanceEitherNativeState",
+    "scope": "public sealed class MotionToAttractionTrailingStopState :"
   }
 ]
