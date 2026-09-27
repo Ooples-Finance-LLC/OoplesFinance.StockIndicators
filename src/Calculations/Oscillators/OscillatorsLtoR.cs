@@ -2600,55 +2600,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRetrospectiveCandlestickChart(this StockData stockData, int length = 100)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        var absChgWindow = new RollingMinMax(length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        List<double> values=new(stockData.Count);var signals=CreateSignalsList(stockData);var (input,_,_,_,_)=GetInputValuesList(stockData);
+        var window=new RetrospectiveCandleWindow(length);
+        for(var i=0;i<stockData.Count;i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var currentOpen = openList[i];
-            var prevK1 = i >= 1 ? kList[i - 1] : 0;
-            var prevK2 = i >= 2 ? kList[i - 2] : 0;
-
-            var absChg = Math.Abs(currentClose - prevClose);
-            absChgWindow.Add(absChg);
-            var highest = absChgWindow.Max;
-            var lowest = absChgWindow.Min;
-            var s = highest - lowest != 0 ? (absChg - lowest) / (highest - lowest) * 100 : 0;
-            var weight = s / 100;
-
-            var prevC = i >= 1 ? cList[i - 1] : currentClose;
-            var c = (weight * currentClose) + ((1 - weight) * prevC);
-            cList.Add(c);
-
-            var prevH = i >= 1 ? prevC : currentHigh;
-            var h = (weight * currentHigh) + ((1 - weight) * prevH);
-            var prevL = i >= 1 ? prevC : currentLow;
-            var l = (weight * currentLow) + ((1 - weight) * prevL);
-            var prevO = i >= 1 ? prevC : currentOpen;
-            var o = (weight * currentOpen) + ((1 - weight) * prevO);
-
-            var k = (c + h + l + o) / 4;
-            kList.Add(k);
-
-            var signal = GetCompareSignal(k - prevK1, prevK1 - prevK2);
-            signalsList?.Add(signal);
+            var value=window.Next(stockData.OpenPrices[i],stockData.HighPrices[i],stockData.LowPrices[i],input[i],true);
+            var previous=i>0?values[i-1]:0;var before=i>1?values[i-2]:0;signals?.Add(GetCompareSignal(value-previous,previous-before));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rcc", kList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kList);
-        stockData.IndicatorName = IndicatorName.RetrospectiveCandlestickChart;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Rcc",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.RetrospectiveCandlestickChart;return stockData;
     }
 
 

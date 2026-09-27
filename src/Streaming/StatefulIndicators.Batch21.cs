@@ -1183,79 +1183,16 @@ public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState,
 [PrimaryOutput("Rcc")]
 public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _absMax;
-    private readonly RollingWindowMin _absMin;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevC;
-    private bool _hasPrev;
-    private bool _hasPrevC;
-
-    public RetrospectiveCandlestickChartState(int length = 100)
+    private readonly RetrospectiveCandleWindow _window;
+    public RetrospectiveCandlestickChartState(int length=100)=>_window=new RetrospectiveCandleWindow(length);
+    public IndicatorName Name=>IndicatorName.RetrospectiveCandlestickChart;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _absMax = new RollingWindowMax(resolved);
-        _absMin = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Open,bar.High,bar.Low,bar.Close,isFinal);
+        return new StreamingIndicatorStateResult(value,includeOutputs?new Dictionary<string,double>{{"Rcc",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.RetrospectiveCandlestickChart;
-
-    public void Reset()
-    {
-        _absMax.Reset();
-        _absMin.Reset();
-        _prevValue = 0;
-        _prevC = 0;
-        _hasPrev = false;
-        _hasPrevC = false;
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var close = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevValue : 0;
-        var absChg = Math.Abs(close - prevClose);
-        var highest = isFinal ? _absMax.Add(absChg, out _) : _absMax.Preview(absChg, out _);
-        var lowest = isFinal ? _absMin.Add(absChg, out _) : _absMin.Preview(absChg, out _);
-        var s = highest - lowest != 0 ? (absChg - lowest) / (highest - lowest) * 100 : 0;
-        var weight = s / 100;
-
-        var prevC = _hasPrevC ? _prevC : close;
-        var c = (weight * close) + ((1 - weight) * prevC);
-        var prevH = _hasPrevC ? prevC : bar.High;
-        var h = (weight * bar.High) + ((1 - weight) * prevH);
-        var prevL = _hasPrevC ? prevC : bar.Low;
-        var l = (weight * bar.Low) + ((1 - weight) * prevL);
-        var prevO = _hasPrevC ? prevC : bar.Open;
-        var o = (weight * bar.Open) + ((1 - weight) * prevO);
-        var k = (c + h + l + o) / 4;
-
-        if (isFinal)
-        {
-            _prevValue = close;
-            _prevC = c;
-            _hasPrev = true;
-            _hasPrevC = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rcc", k }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(k, outputs);
-    }
-
-    public void Dispose()
-    {
-        _absMax.Dispose();
-        _absMin.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
 
 [PrimaryOutput("Rp")]

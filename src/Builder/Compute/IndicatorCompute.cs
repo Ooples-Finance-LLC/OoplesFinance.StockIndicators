@@ -169,6 +169,7 @@ internal static partial class IndicatorCompute
         {
             // Multi-output indicators, dispatched on the key the caller named. A spec that names none wants the
             // indicator's own series, which is the first key each of these publishes.
+            RetrospectiveCandlestickChartSpecOptions retrospective => ComputeRetrospectiveCandleFast(data, context, retrospective.Length),
             EarningSupportResistanceLevelsSpecOptions => ComputeEarningLevelsFast(data, context),
             MacdSpecOptions macd => spec.OutputKey switch
             {
@@ -23044,6 +23045,13 @@ internal static partial class IndicatorCompute
         Average2,
         Pivot3,
         Average3
+    }
+
+    internal static ComputeBuffer ComputeRetrospectiveCandleFast(StockData data, ComputeContext context, int length=100)
+    {
+        var output=context.Rent(data.Count);var window=new RetrospectiveCandleWindow(length);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;
+        for(var i=0;i<data.Count;i++)output.WritableSpan[i]=window.Next(data.OpenPrices[i],data.HighPrices[i],data.LowPrices[i],input[i],true);
+        return output;
     }
 
     internal static ComputeBuffer ComputeEarningLevelsFast(StockData data, ComputeContext context)

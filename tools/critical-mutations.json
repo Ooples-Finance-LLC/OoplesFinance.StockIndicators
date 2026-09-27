@@ -29245,8 +29245,8 @@
     "id": "pivot-alias-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
-    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
+    "before": " PivotPointSpecOptions or ",
+    "after": " ",
     "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
   },
   {
@@ -29369,8 +29369,8 @@
     "id": "pivot-average-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
-    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
+    "before": " PivotPointAverageSpecOptions or ",
+    "after": " ",
     "filter": "FullyQualifiedName~PivotAverageNumericalTests"
   },
   {
@@ -29448,16 +29448,16 @@
     "id": "earning-levels-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
-    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or PivotPointAverageSpecOptions",
+    "before": " EarningSupportResistanceLevelsSpecOptions or ",
+    "after": " ",
     "filter": "FullyQualifiedName~EarningLevelsNumericalTests"
   },
   {
     "id": "dmi-numerical-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions",
-    "after": "spec.Options is DemarkRangeExpansionIndexSpecOptions or EarningSupportResistanceLevelsSpecOptions",
+    "before": " DMIStochasticSpecOptions or ",
+    "after": " ",
     "filter": "FullyQualifiedName~DmiStochasticNumericalTests"
   },
   {
@@ -29588,8 +29588,107 @@
     "id": "demark-range-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is DemarkRangeExpansionIndexSpecOptions or DMIStochasticSpecOptions",
-    "after": "spec.Options is DMIStochasticSpecOptions",
+    "before": " DemarkRangeExpansionIndexSpecOptions or ",
+    "after": " ",
     "filter": "FullyQualifiedName~DemarkRangeNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-early-change",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "RocBankValue.RoundUnits(ExactVarianceWindow.Units(close)-ExactVarianceWindow.Units(_previousPrice),BigInteger.One)",
+    "after": "ExactVarianceWindow.Units(close-_previousPrice)",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-blend-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "sum.AddProduct(previous,weight,-1);",
+    "after": "sum.AddProduct(previous,weight,0);",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "mean.Mean(4)",
+    "after": "mean.Mean(3)",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "_previousClose=c;",
+    "after": "_previousClose=result;",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-price-history",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "_previousPrice=close;",
+    "after": "_previousPrice=0;",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-flat-range",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "range.IsZero?0:",
+    "after": "range.IsZero?1:",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "maxNode.Value.Index<=_count-_length",
+    "after": "maxNode.Value.Index<_count-_length",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests",
+    "scope": "internal double Next("
+  },
+  {
+    "id": "retrospective-candle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RetrospectiveCandleWindow.cs",
+    "before": "_count=0;_previousPrice=_previousClose=0;",
+    "after": "_previousPrice=_previousClose=0;",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
+  },
+  {
+    "id": "retrospective-candle-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeRetrospectiveCandleFast("
+  },
+  {
+    "id": "retrospective-candle-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests",
+    "scope": "public sealed class RetrospectiveCandlestickChartState"
+  },
+  {
+    "id": "retrospective-candle-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " RetrospectiveCandlestickChartSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~RetrospectiveCandleNumericalTests"
   }
 ]
