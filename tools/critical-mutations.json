@@ -20573,5 +20573,103 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~SmartEnvelopeNumericalTests.CrossCoupledFeedbackAndFirstPriceSeedSurviveExtremeState|FullyQualifiedName~SmartEnvelopeNumericalTests.SelectedClosesDriveBothFeedbackBoundaries|FullyQualifiedName~SmartEnvelopeNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class SmartEnvelopeState :"
+  },
+  {
+    "id": "extended-band-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "Math.Max(3, length)",
+    "after": "Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-dominant-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "sum.Add(dominant, _length - 1)",
+    "after": "sum.Add(dominant, _length)",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-other-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "sum.Add(other, 2)",
+    "after": "sum.Add(other, 1)",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-early-difference",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "return sum.Mean(_length + 1L);",
+    "after": "return dominant - (2d / (_length + 1L)) * (dominant - other);",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-first-price-seed",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "_hasPrevious ? _upper : close",
+    "after": "_hasPrevious ? _upper : 0",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-upper-selection",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "Blend(Math.Max(close, previousUpper), Math.Min(close, previousUpper))",
+    "after": "Blend(Math.Min(close, previousUpper), Math.Max(close, previousUpper))",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-lower-selection",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "Blend(Math.Min(close, previousLower), Math.Max(close, previousLower))",
+    "after": "Blend(Math.Max(close, previousLower), Math.Min(close, previousLower))",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-early-midpoint-sum",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "middle.Mean(2)",
+    "after": "(upper + lower) / 2",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-preview-commit",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "if (commit) { _upper = upper;",
+    "after": "{ _upper = upper;",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/ExtendedBandWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "extended-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeExtendedRecursiveBandsFast("
+  },
+  {
+    "id": "extended-band-invalid-native",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ExtendedBandNumericalTests.ConvexRecurrencesKeepExtremeBandsFiniteAndOrdered|FullyQualifiedName~ExtendedBandNumericalTests.SelectedClosesDriveTheRecursiveBoundaries|FullyQualifiedName~ExtendedBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class ExtendedRecursiveBandsState :"
   }
 ]

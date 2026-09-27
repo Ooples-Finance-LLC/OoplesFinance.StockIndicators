@@ -1770,3 +1770,10 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Four configurations now preserve first-price seeding and the two cross-coupled strict feedback comparisons while keeping rounded boundary state extended. Exact normalized updates and midpoints avoid premature range/product overflow. Zero/negative/large factors, selected input, raw/native/streaming routes and invalid-input preview/reset are covered.
 - **74/74** checks passed (`smart-envelope.trx`). Campaign392a/392b caught **16/16** faults; **2,455** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `944903ef700ada53d3192510acc5211436eb5fdc885ce1c939c8d1ad5bca6909` / `3177de8793f00900f88db78a71c7c2551ac65ad96800176a7fa99007dcfe9466`.
 - Inventory: **4,568/7,131**, **2,563** omissions across **429** types; no construction failures. 162 grouped batches cover **1,742 configurations / 316 types**. CDCD0B81F4D72EE55B81AB7FD6DCC885BAC0D717D2F621F8E36B21E64623182C SHA256 `CDCD0B81F4D72EE55B81AB7FD6DCC885BAC0D717D2F621F8E36B21E64623182C`. Full coverage remains incomplete.
+
+
+### Extended recursive band numerical contracts
+
+- Four configurations now use exact normalized convex updates, avoiding overflow in range subtraction and length-plus-one coefficients. First-price seeding, minimum length three, same-sign extreme plateaus, opposite extreme prices, selected input and ordered preview/reset outputs are covered across all five routes.
+- **74/74** checks passed (`extended-band.trx`). Campaign393a/393b caught **12/12** faults; **2,467** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `bf4d84147f7ff1a14eab372a218c498a446adfc9cd185712aaf9bf37eba6be65` / `336c0f245c453536f761ba3dac8c97b7544984666e11dd2d35bd12d98fff31d1`.
+- Inventory: **4,572/7,131**, **2,559** omissions across **428** types; no construction failures. 163 grouped batches cover **1,746 configurations / 317 types**. 5D182ED0FE5C228F811885A818E6BA1C45BED77087B40BE5CA73E68C5CF95862 SHA256 `5D182ED0FE5C228F811885A818E6BA1C45BED77087B40BE5CA73E68C5CF95862`. Full coverage remains incomplete.

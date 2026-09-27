@@ -1466,57 +1466,14 @@ public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, I
 [PrimaryOutput("MiddleBand")]
 public sealed class ExtendedRecursiveBandsState : IStreamingIndicatorState
 {
-    private readonly double _sc;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private double _prevB;
-    private bool _hasPrev;
-
-    public ExtendedRecursiveBandsState(int length = 100)
-    {
-        var resolved = Math.Max(3, length);
-        _sc = (double)2 / (resolved + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ExtendedBandWindow _window;
+    public ExtendedRecursiveBandsState(int length = 100) { _window = new(length); }
     public IndicatorName Name => IndicatorName.ExtendedRecursiveBands;
-
-    public void Reset()
-    {
-        _prevA = 0;
-        _prevB = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevA = _hasPrev ? _prevA : value;
-        var prevB = _hasPrev ? _prevB : value;
-
-        var a = Math.Max(prevA, value) - (_sc * Math.Abs(value - prevA));
-        var b = Math.Min(prevB, value) + (_sc * Math.Abs(value - prevB));
-        var middle = (a + b) / 2;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _prevB = b;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", middle },
-                { "LowerBand", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
 }
 

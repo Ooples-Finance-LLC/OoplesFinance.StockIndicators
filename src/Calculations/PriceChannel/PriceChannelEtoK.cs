@@ -815,46 +815,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateExtendedRecursiveBands(this StockData stockData, int length = 100)
     {
-        length = Math.Max(3, length);
-        List<double> aClassicList = new(stockData.Count);
-        List<double> bClassicList = new(stockData.Count);
-        List<double> cClassicList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var sc = (double)2 / (length + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ExtendedBandWindow(length);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevAClassic = i >= 1 ? aClassicList[i - 1] : currentValue;
-            var prevBClassic = i >= 1 ? bClassicList[i - 1] : currentValue;
-
-            var aClassic = Math.Max(prevAClassic, currentValue) - (sc * Math.Abs(currentValue - prevAClassic));
-            aClassicList.Add(aClassic);
-
-            var bClassic = Math.Min(prevBClassic, currentValue) + (sc * Math.Abs(currentValue - prevBClassic));
-            bClassicList.Add(bClassic);
-
-            var prevCClassic = GetLastOrDefault(cClassicList);
-            var cClassic = (aClassic + bClassic) / 2;
-            cClassicList.Add(cClassic);
-
-            var signal = GetCompareSignal(currentValue - cClassic, prevValue - prevCClassic);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aClassicList },
-            { "MiddleBand", cClassicList },
-            { "LowerBand", bClassicList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ExtendedRecursiveBands;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.ExtendedRecursiveBands; return stockData;
     }
 
 
