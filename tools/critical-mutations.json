@@ -29245,8 +29245,8 @@
     "id": "pivot-alias-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
-    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
+    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
+    "after": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
   },
   {
@@ -29369,8 +29369,8 @@
     "id": "pivot-average-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
-    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
+    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
+    "after": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotAverageNumericalTests"
   },
   {
@@ -29448,8 +29448,42 @@
     "id": "earning-levels-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
-    "after": "spec.Options is PivotPointAverageSpecOptions",
+    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
+    "after": "spec.Options is DMIStochasticSpecOptions or PivotPointAverageSpecOptions",
     "filter": "FullyQualifiedName~EarningLevelsNumericalTests"
+  },
+  {
+    "id": "dmi-numerical-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "spec.Options is DMIStochasticSpecOptions or EarningSupportResistanceLevelsSpecOptions",
+    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions",
+    "filter": "FullyQualifiedName~DmiStochasticNumericalTests"
+  },
+  {
+    "id": "dmi-numerical-raw-orientation",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var oscillator = diMinus[i] - diPlus[i];",
+    "after": "var oscillator = diPlus[i] - diMinus[i];",
+    "filter": "FullyQualifiedName~DmiStochasticNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeDMIStochasticFast("
+  },
+  {
+    "id": "dmi-numerical-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "var dmiStoch = _dmiStoch.Next(slowK, isFinal);",
+    "after": "var dmiStoch = _dmiStoch.Next(fastK, isFinal);",
+    "filter": "FullyQualifiedName~DmiStochasticNumericalTests",
+    "scope": "public sealed class DMIStochasticState"
+  },
+  {
+    "id": "dmi-numerical-reference-window",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DmiStochastic.cs",
+    "before": "Window(spread, i, 10)",
+    "after": "Window(spread, i, 9)",
+    "filter": "FullyQualifiedName~DmiStochasticNumericalTests"
   }
 ]
