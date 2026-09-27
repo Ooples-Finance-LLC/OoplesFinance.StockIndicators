@@ -18151,51 +18151,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDemarkPivotPointFast(StockData data, ComputeContext context,
         InputLength inputLength = InputLength.Day, DemarkPivotSeries series = DemarkPivotSeries.Pivot)
     {
-        // A pivot level belongs to a PERIOD, not to a bar: CalculateDemarkPivotPoints aggregates the bars
-        // into periods, derives one level per period from the PRECEDING period's open, high, low and close,
-        // and only then projects that level back onto the bars of its own period. The routine this replaced
-        // passed the raw per-bar spans to TrendCore, so it produced a level that moved on every bar and
-        // matched the batch on none of them - the primary series included, which is why a defect here had
-        // never been caught by comparing named keys against it.
-        var (inputList, highList, lowList, openList, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
-
-        var periods = inputList.Count;
-        var levels = new List<double>(periods);
-        for (var i = 0; i < periods; i++)
-        {
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevOpen = i >= 1 ? openList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-
-            var x = prevClose < prevOpen
-                ? prevHigh + (2 * prevLow) + prevClose
-                : prevClose > prevOpen
-                    ? (2 * prevHigh) + prevLow + prevClose
-                    : prevHigh + prevLow + (2 * prevClose);
-
-            // Support and resistance are both half of x less one of the previous period's extremes, and the
-            // batch publishes all three: they were already available here and only the pivot was kept.
-            levels.Add(series switch
-            {
-                DemarkPivotSeries.Support1 => (x / 2) - prevHigh,
-                DemarkPivotSeries.Resistance1 => (x / 2) - prevLow,
-                _ => x / 4
-            });
-        }
-
-        var groupIndexes = CalculationsHelper.GetInputLengthGroupIndexes(data, inputLength);
-        var expanded = CalculationsHelper.ExpandPeriodValuesToBars(levels, groupIndexes);
-
-        var buffer = context.Rent(data.Count);
-        var output = buffer.WritableSpan;
-        output.Clear();
-        for (var i = 0; i < output.Length && i < expanded.Count; i++)
-        {
-            output[i] = expanded[i];
-        }
-
-        return buffer;
+        var (close,high,low,open,_)=PivotPeriodInputs.Read(data,inputLength);
+        var groups=CalculationsHelper.GetInputLengthGroupIndexes(data,inputLength);
+        var slot=series switch { DemarkPivotSeries.Support1=>1,DemarkPivotSeries.Resistance1=>2,_=>0 };
+        var levels=new double[close.Count];
+        for(var i=1;i<levels.Length;i++)levels[i]=DemarkPivotMath.Levels(open[i-1],high[i-1],low[i-1],close[i-1])[slot];
+        var buffer=context.Rent(data.Count);for(var i=0;i<data.Count;i++)buffer.WritableSpan[i]=levels[groups[i]];return buffer;
     }
 
     /// <summary>

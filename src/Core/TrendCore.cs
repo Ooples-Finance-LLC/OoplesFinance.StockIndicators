@@ -1692,37 +1692,9 @@ internal static class TrendCore
     /// </summary>
     internal static void DemarkPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> open, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
-            // the first bar rather than falling back to the arriving bar's own high, low and close, which
-            // would be this bar's pivot drawn from this bar.
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-            var prevOpen = i >= 1 ? open[i - 1] : 0;
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-
-            double x;
-            if (prevClose < prevOpen)
-            {
-                x = prevHigh + (2 * prevLow) + prevClose;
-            }
-            else if (prevClose > prevOpen)
-            {
-                x = (2 * prevHigh) + prevLow + prevClose;
-            }
-            else
-            {
-                x = prevHigh + prevLow + (2 * prevClose);
-            }
-
-            output[i] = x / 4;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        // Each span element represents a completed period; callers with intraday bars group them first.
+        for(var i=0;i<close.Length;i++)output[i]=i==0?0:DemarkPivotMath.Levels(open[i-1],high[i-1],low[i-1],close[i-1])[0];
     }
 
     /// <summary>

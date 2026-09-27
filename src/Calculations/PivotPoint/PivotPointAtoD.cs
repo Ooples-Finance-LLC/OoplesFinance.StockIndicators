@@ -174,7 +174,7 @@ public static partial class Calculations
         List<double> resistanceLevel1List = new(stockData.Count);
         List<double> supportLevel1List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData, inputLength);
+        var (inputList, highList, lowList, openList, _) = PivotPeriodInputs.Read(stockData, inputLength);
 
         for (var i = 0; i < inputList.Count; i++)
         {
@@ -183,18 +183,16 @@ public static partial class Calculations
             var prevOpen = i >= 1 ? openList[i - 1] : 0;
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var x = prevClose < prevOpen ? prevHigh + (2 * prevLow) + prevClose : prevClose > prevOpen ? (2 * prevHigh) + prevLow + prevClose :
-                prevClose == prevOpen ? prevHigh + prevLow + (2 * prevClose) : prevClose;
+            var levels=DemarkPivotMath.Levels(prevOpen,prevHigh,prevLow,prevClose);
 
             var prevPivot = GetLastOrDefault(pivotList);
-            var pivot = x / 4;
+            var pivot = levels[0];
             pivotList.Add(pivot);
 
-            var ratio = x / 2;
-            var supportLevel1 = ratio - prevHigh;
+            var supportLevel1 = levels[1];
             supportLevel1List.Add(supportLevel1);
 
-            var resistanceLevel1 = ratio - prevLow;
+            var resistanceLevel1 = levels[2];
             resistanceLevel1List.Add(resistanceLevel1);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);

@@ -186,62 +186,22 @@ public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pivot")]
 public sealed class DemarkPivotPointsState : IStreamingIndicatorState
 {
-    private double _prevClose;
-    private double _prevOpen;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-
+    private readonly DailyPivotLevels _daily = new(false, demark: true);
+    public DemarkPivotPointsState() { }
     public IndicatorName Name => IndicatorName.DemarkPivotPoints;
-
-    public void Reset()
-    {
-        _prevClose = 0;
-        _prevOpen = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _daily.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevOpen = _hasPrev ? _prevOpen : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var x = prevClose < prevOpen
-            ? prevHigh + (2 * prevLow) + prevClose
-            : prevClose > prevOpen
-                ? (2 * prevHigh) + prevLow + prevClose
-                : prevHigh + prevLow + (2 * prevClose);
-
-        var pivot = x / 4;
-        var ratio = x / 2;
-        var support = ratio - prevHigh;
-        var resistance = ratio - prevLow;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _prevOpen = bar.Open;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _hasPrev = true;
-        }
-
+        var levels = _daily.Next(bar.StartTime, bar.Open, bar.High, bar.Low, bar.Close, isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Pivot", pivot },
-                { "S1", support },
-                { "R1", resistance }
-            };
+            var values = new Dictionary<string, double>(levels.Length);
+            for (var i = 0; i < levels.Length; i++) values[_daily.Keys[i]] = levels[i];
+            outputs = values;
         }
-
-        return new StreamingIndicatorStateResult(pivot, outputs);
+        return new StreamingIndicatorStateResult(levels[0], outputs);
     }
 }
 

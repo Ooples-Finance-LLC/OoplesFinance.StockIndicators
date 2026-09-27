@@ -28372,5 +28372,149 @@
     "after": "public void Reset() { }",
     "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
     "scope": "public sealed class FibonacciPivotPointsState :"
+  },
+  {
+    "id": "demark-pivots-below-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "close<open?low",
+    "after": "close<open?high",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-above-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "close>open?high",
+    "after": "close>open?low",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-equal-weight",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "close>open?high:close",
+    "after": "close>open?high:low",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-pivot-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "Round(total,count:4)",
+    "after": "Round(total,count:3)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-half-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "Round(total,count:2)",
+    "after": "Round(total,count:4)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-early-total",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "total.Add(high);total.Add(low);total.Add(close);",
+    "after": "total.Add(high+low+close);",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-support-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "support.Add(high,-1)",
+    "after": "support.Add(high)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-resistance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "resistance.Add(low,-1)",
+    "after": "resistance.Add(low)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-early-half",
+    "module": "numerical",
+    "file": "src/Helpers/DemarkPivotMath.cs",
+    "before": "half.AddTo(ref support);",
+    "after": "support.Add(half.Publish());",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches"
+  },
+  {
+    "id": "demark-pivots-raw-current-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "open[i-1],high[i-1],low[i-1],close[i-1]",
+    "after": "open[i],high[i],low[i],close[i]",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "internal static ComputeBuffer ComputeDemarkPivotPointFast("
+  },
+  {
+    "id": "demark-pivots-raw-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "PivotPeriodInputs.Read(data,inputLength)",
+    "after": "CalculationsHelper.GetInputValuesList(data,inputLength)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "internal static ComputeBuffer ComputeDemarkPivotPointFast("
+  },
+  {
+    "id": "demark-pivots-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointAtoD.cs",
+    "before": "PivotPeriodInputs.Read(stockData, inputLength)",
+    "after": "GetInputValuesList(stockData, inputLength)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "public static StockData CalculateDemarkPivotPoints("
+  },
+  {
+    "id": "demark-pivots-native-formula",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "new(false, demark: true)",
+    "after": "new(false)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "public sealed class DemarkPivotPointsState :"
+  },
+  {
+    "id": "demark-pivots-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "bar.Close, isFinal)",
+    "after": "bar.Close, true)",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "public sealed class DemarkPivotPointsState :"
+  },
+  {
+    "id": "demark-pivots-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "public sealed class DemarkPivotPointsState :"
+  },
+  {
+    "id": "demark-pivots-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "before": "public void Reset() => _daily.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "public sealed class DemarkPivotPointsState :"
+  },
+  {
+    "id": "demark-pivots-core-current-period",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "before": "open[i-1],high[i-1],low[i-1],close[i-1]",
+    "after": "open[i],high[i],low[i],close[i]",
+    "filter": "FullyQualifiedName~DemarkPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DemarkPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DemarkPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DemarkPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DemarkPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate|FullyQualifiedName~DemarkPivotNumericalTests.CoreUsesPreviousCompletedPeriodsAndAllThreeCloseOpenBranches",
+    "scope": "internal static void DemarkPivotPoint("
   }
 ]
