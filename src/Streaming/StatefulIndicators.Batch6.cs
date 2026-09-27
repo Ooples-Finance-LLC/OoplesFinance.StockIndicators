@@ -930,13 +930,16 @@ public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorSta
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var currentValue = _input.GetValue(bar);
         var prevClose = _hasPrev ? _prevClose : 0;
         var prevLow = _lowValues.Count >= 2 ? _lowValues[_lowValues.Count - 2] : 0;
         var prevValue2 = _inputValues.Count >= 2 ? _inputValues[_inputValues.Count - 2] : 0;
 
-        var mode1 = (prevLow + bar.High) / 2;
-        var mode2 = (prevValue2 + currentValue + prevClose) / 3;
+        var level = new ExactMeanAccumulator(); level.Add(prevLow); level.Add(bar.High);
+        var mode1 = level.Mean(2);
+        var signalMean = new ExactMeanAccumulator(); signalMean.Add(prevValue2); signalMean.Add(currentValue); signalMean.Add(prevClose);
+        var mode2 = signalMean.Mean(3);
 
         if (isFinal)
         {

@@ -2745,7 +2745,9 @@ public static partial class Calculations
         List<double> mode1List = new(stockData.Count);
         List<double> mode2List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
+        var (inputList, _, _, _, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
+        var highList = stockData.HighPrices;
+        var lowList = stockData.LowPrices;
 
         for (var i = 0; i < stockData.Count; i++)
         {
@@ -2757,11 +2759,13 @@ public static partial class Calculations
             var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
 
             var prevMode1 = GetLastOrDefault(mode1List);
-            var mode1 = (prevLow + currentHigh) / 2;
+            var level = new ExactMeanAccumulator(); level.Add(prevLow); level.Add(currentHigh);
+            var mode1 = level.Mean(2);
             mode1List.Add(mode1);
 
             var prevMode2 = GetLastOrDefault(mode2List);
-            var mode2 = (prevValue2 + currentValue + prevClose) / 3;
+            var signalMean = new ExactMeanAccumulator(); signalMean.Add(prevValue2); signalMean.Add(currentValue); signalMean.Add(prevClose);
+            var mode2 = signalMean.Mean(3);
             mode2List.Add(mode2);
 
             var signal = GetBullishBearishSignal(currentValue - Math.Max(mode1, mode2), prevValue1 - Math.Max(prevMode1, prevMode2),

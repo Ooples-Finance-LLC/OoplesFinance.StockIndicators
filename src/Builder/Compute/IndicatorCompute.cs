@@ -169,6 +169,7 @@ internal static partial class IndicatorCompute
         {
             // Multi-output indicators, dispatched on the key the caller named. A spec that names none wants the
             // indicator's own series, which is the first key each of these publishes.
+            EarningSupportResistanceLevelsSpecOptions => ComputeEarningLevelsFast(data, context),
             MacdSpecOptions macd => spec.OutputKey switch
             {
                 null or "Macd" => ComputeMacdLineFast(data, context, macd.FastLength, macd.SlowLength),
@@ -23043,6 +23044,17 @@ internal static partial class IndicatorCompute
         Average2,
         Pivot3,
         Average3
+    }
+
+    internal static ComputeBuffer ComputeEarningLevelsFast(StockData data, ComputeContext context)
+    {
+        var output = context.Rent(data.Count);
+        for (var i = 0; i < data.Count; i++)
+        {
+            var mean = new ExactMeanAccumulator(); mean.Add(data.HighPrices[i]); mean.Add(i >= 2 ? data.LowPrices[i-2] : 0);
+            output.WritableSpan[i] = mean.Mean(2);
+        }
+        return output;
     }
 
     internal static ComputeBuffer ComputePivotPointAverageFast(StockData data, ComputeContext context, int length = 3,

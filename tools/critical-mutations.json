@@ -29245,8 +29245,8 @@
     "id": "pivot-alias-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
-    "after": "spec.Options is PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
+    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions or FloorPivotPointSpecOptions",
+    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or FloorPivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotPointAliasNumericalTests"
   },
   {
@@ -29369,8 +29369,87 @@
     "id": "pivot-average-live-registration",
     "module": "numerical",
     "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
-    "before": "spec.Options is PivotPointAverageSpecOptions or PivotPointSpecOptions",
-    "after": "spec.Options is PivotPointSpecOptions",
+    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions or PivotPointSpecOptions",
+    "after": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointSpecOptions",
     "filter": "FullyQualifiedName~PivotAverageNumericalTests"
+  },
+  {
+    "id": "earning-levels-batch-overflow",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "var mode1 = level.Mean(2);",
+    "after": "var mode1 = (prevLow + currentHigh) / 2;",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests"
+  },
+  {
+    "id": "earning-levels-batch-lag",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "i >= 2 ? lowList[i - 2] : 0",
+    "after": "i >= 1 ? lowList[i - 1] : 0",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public static StockData CalculateEarningSupportResistanceLevels("
+  },
+  {
+    "id": "earning-levels-batch-fields",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsEtoK.cs",
+    "before": "var highList = stockData.HighPrices;",
+    "after": "var highList = inputList;",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public static StockData CalculateEarningSupportResistanceLevels("
+  },
+  {
+    "id": "earning-levels-raw-mean",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output.WritableSpan[i] = mean.Mean(2);",
+    "after": "output.WritableSpan[i] = mean.Mean(3);",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeEarningLevelsFast("
+  },
+  {
+    "id": "earning-levels-native-overflow",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "var mode1 = level.Mean(2);",
+    "after": "var mode1 = (prevLow + bar.High) / 2;",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public sealed class EarningSupportResistanceLevelsState"
+  },
+  {
+    "id": "earning-levels-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public sealed class EarningSupportResistanceLevelsState"
+  },
+  {
+    "id": "earning-levels-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "_lowValues.Clear();",
+    "after": "// omit low history reset",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public sealed class EarningSupportResistanceLevelsState"
+  },
+  {
+    "id": "earning-levels-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "StreamingInputValidation.Validate(bar);\n        var currentValue = _input.GetValue(bar);",
+    "after": "double currentValue; try { currentValue = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { currentValue = bar.Close; }",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests",
+    "scope": "public sealed class EarningSupportResistanceLevelsState"
+  },
+  {
+    "id": "earning-levels-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": "spec.Options is EarningSupportResistanceLevelsSpecOptions or PivotPointAverageSpecOptions",
+    "after": "spec.Options is PivotPointAverageSpecOptions",
+    "filter": "FullyQualifiedName~EarningLevelsNumericalTests"
   }
 ]
