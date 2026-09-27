@@ -2077,3 +2077,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - The final combined Daily Delta/stochastic/enrollment/foundation run passed **117/117** (`daily-delta-stochastic-verified.trx`). Earlier compile failures earn no credit; the 115/117 intermediate run exposed a hand fixture that omitted full-window SMA startup and a missing legacy customer-average hook. Both were corrected. Campaign429a caught **21/21** faults; **3,146** retained sites. All public routes, four basic average types, subnormal/extreme bands, preview/reset and invalid fields are covered.
 - Source/archive SHA256: `bd198a025c51181b52454ece178e00b30aa20ce7ffc81faf38322ad518439650` / `e4a7f8aaa2b3bc41ab7cf08acf0d158217839ab6e4384ee12ab615a380851c30`.
 - Inventory: **4,853/7,131**, **2,278** omissions across **376** types; no construction failures. 199 grouped batches cover **2,027 configurations / 369 types**. DLL SHA256 `BE49F4B8A35BB142CCE8C0E354729382CD1D4DEB06960F51B366B2260DC728C4`. Full coverage and release gates remain incomplete.
+
+
+### Chaikin Volatility numerical contract
+
+- Five configurations retain extended high-low ranges through smoothing and lagged percentage returns. Independent smoothing/lag periods, zero previous averages and available-history startup are consistent across raw, core, batch and native routes. Selected closes preserve original candle ranges; customer averages receive the range series and smoothing period.
+- **82/82** family/enrollment/foundation checks passed (`chaikin-volatility.trx`). Four basic average types, normal/subnormal/extreme values, maximum lag, long EMA startup, selected prices, customer stages, preview/reset and invalid fields are covered. Campaign430a caught **20/20** faults; **3,166** retained sites.
+- Source/archive SHA256: `aea854b41b1b8e29cba49ae5c5326186c1c15b5d6a170415974596534971eef6` / `eaaeb599edaafd632dbd4ae1b58856a4ac5d0d3cff3c0708fd148d4e7a06fb8a`.
+- Inventory: **4,858/7,131**, **2,273** omissions across **375** types; no construction failures. 200 grouped batches cover **2,032 configurations / 370 types**. DLL SHA256 `21F83B6C1B0BF252CABE117B2D69D4F55DDD3A5C2021B7B931752AD552FC7D1D`. Full coverage and release gates remain incomplete.

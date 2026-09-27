@@ -225,48 +225,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void ChaikinVolatility(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 10, int rocLength = 10)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-        var emaRangeArray = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-            var emaRange = emaRangeArray.AsSpan(0, high.Length);
-
-            // Calculate high-low range
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            // EMA of range
-            MovingAverageCore.ExponentialMovingAverage(range, emaRange, length);
-
-            // Rate of change of EMA
-            for (var i = 0; i < high.Length; i++)
-            {
-                if (i < rocLength)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    var prevEma = emaRange[i - rocLength];
-                    output[i] = prevEma != 0 ? ((emaRange[i] - prevEma) / prevEma) * 100 : 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-            pool.Return(emaRangeArray);
-        }
+        if(output.Length<high.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new ChaikinVolatilityWindow(MovingAvgType.ExponentialMovingAverage,length,rocLength,high.Length);
+        for(var i=0;i<high.Length;i++)output[i]=window.Next(high[i],low[i],true);
     }
 
     /// <summary>

@@ -5145,55 +5145,16 @@ public sealed class CenterOfLinearityState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Cv")]
 public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly PooledRingBuffer<double> _window;
-
-    public ChaikinVolatilityState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 12)
+    private readonly ChaikinVolatilityWindow _window;
+    public ChaikinVolatilityState(MovingAvgType maType=MovingAvgType.ExponentialMovingAverage,int length1=10,int length2=12)=>_window=new(maType,length1,length2);
+    public IndicatorName Name=>IndicatorName.ChaikinVolatility;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length2 = Math.Max(1, length2);
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _window = new PooledRingBuffer<double>(_length2);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.High,bar.Low,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Cv",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.ChaikinVolatility;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _window.Clear();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var highLow = bar.High - bar.Low;
-        var highLowEma = _ema.Next(highLow, isFinal);
-        var prevHighLowEma = _window.Count >= _length2 ? _window[0] : 0;
-        var chaikinVolatility = prevHighLowEma != 0 ? (highLowEma - prevHighLowEma) / prevHighLowEma * 100 : 0;
-
-        if (isFinal)
-        {
-            _window.TryAdd(highLowEma, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cv", chaikinVolatility }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(chaikinVolatility, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _window.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Cc")]

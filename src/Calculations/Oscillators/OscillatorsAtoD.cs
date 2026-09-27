@@ -739,42 +739,17 @@ public static partial class Calculations
     public static StockData CalculateChaikinVolatility(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 10, int length2 = 12)
     {
-        List<double> chaikinVolatilityList = new(stockData.Count);
-        List<double> highLowList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length1=Math.Max(1,length1);var high=stockData.HighPrices;var low=stockData.LowPrices;using var window=new ChaikinVolatilityWindow(maType,length1,length2,high.Count);
+        var external=Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? averaged=null;
+        if(external)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-
-            var highLow = currentHigh - currentLow;
-            highLowList.Add(highLow);
+            var range=high.Select((v,i)=>ChaikinVolatilityWindow.Range(v,low[i]).Publish()).ToList();
+            averaged=Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(range),length1)?.ToList() ?? GetMovingAverageList(stockData,maType,length1,range);
         }
-
-        var highLowEmaList = GetMovingAverageList(stockData, maType, length1, highLowList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highLowEma = highLowEmaList[i];
-            var prevHighLowEma = i >= length2 ? highLowEmaList[i - length2] : 0;
-
-            var prevChaikinVolatility = GetLastOrDefault(chaikinVolatilityList);
-            var chaikinVolatility = prevHighLowEma != 0 ? (highLowEma - prevHighLowEma) / prevHighLowEma * 100 : 0;
-            chaikinVolatilityList.Add(chaikinVolatility);
-
-            var signal = GetCompareSignal(chaikinVolatility, prevChaikinVolatility, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cv", chaikinVolatilityList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(chaikinVolatilityList);
-        stockData.IndicatorName = IndicatorName.ChaikinVolatility;
-
-        return stockData;
+        List<double> values=new(high.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<high.Count;i++){var value=external?window.Finish(new RocBankValue(averaged![i]),true):window.Next(high[i],low[i],true);signals?.Add(GetCompareSignal(value,i>0?values[i-1]:0,true));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Cv",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.ChaikinVolatility;return stockData;
     }
 
 

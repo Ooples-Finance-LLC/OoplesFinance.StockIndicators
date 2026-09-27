@@ -26253,5 +26253,171 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "chaikin-volatility-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "range.Add(low, -1)",
+    "after": "range.Add(low)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-early-range-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "return RocBankValue.Round(range)",
+    "after": "return new RocBankValue(range.Mean(1))",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-early-average-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "return Finish(average, commit)",
+    "after": "return Finish(new RocBankValue(average.Publish()), commit)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-return-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "value.AddTo(ref numerator, 100)",
+    "after": "value.AddTo(ref numerator, 1)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-return-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "previous.AddTo(ref numerator, -100)",
+    "after": "previous.AddTo(ref numerator, 100)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-return-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "previous.AddTo(ref denominator)",
+    "after": "value.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "var previous = _history.Count == _lag ?",
+    "after": "var previous = _history.Count >= 1 ?",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-minimum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "_lag = Math.Max(1, lag)",
+    "after": "_lag = Math.Max(2, lag)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-stored-average",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "_history.Enqueue(value)",
+    "after": "_history.Enqueue(default)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-lag-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "if (commit) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-average-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "_average.Next(range, commit)",
+    "after": "_average.Next(range, true)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-reset-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "_fallback?.Reset(); _history.Clear();",
+    "after": "_fallback?.Reset();",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-raw-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChaikinVolatilityFast(",
+    "before": "var high=data.HighPrices;var low=data.LowPrices;",
+    "after": "var high=CalculationsHelper.GetInputValuesList(data).highList;var low=CalculationsHelper.GetInputValuesList(data).lowList;",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateChaikinVolatility(",
+    "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
+    "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-raw-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChaikinVolatilityFast(",
+    "before": "MovingAverage(data,maType,length1,range.Span,average.WritableSpan)",
+    "after": "MovingAverage(data,maType,length1+1,range.Span,average.WritableSpan)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-batch-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateChaikinVolatility(",
+    "before": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(range),length1)",
+    "after": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(range),length1+1)",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChaikinVolatilityState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-core-lag",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void ChaikinVolatility(",
+    "before": "MovingAvgType.ExponentialMovingAverage,length,rocLength,high.Length",
+    "after": "MovingAvgType.ExponentialMovingAverage,length,1,high.Length",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
+  },
+  {
+    "id": "chaikin-volatility-zero-previous",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinVolatilityWindow.cs",
+    "before": "var result = 0d;",
+    "after": "var result = 1d;",
+    "filter": "FullyQualifiedName~ChaikinVolatilityNumericalTests.ExtendedRangesAndLaggedAverageReturnsMatchIndependentFractions|FullyQualifiedName~ChaikinVolatilityNumericalTests.SelectedClosesPreserveRangesAndCustomerAverageReceivesItsPeriod|FullyQualifiedName~ChaikinVolatilityNumericalTests.InvalidFieldsCannotAdvanceAverageOrLag"
   }
 ]

@@ -63,6 +63,10 @@ internal static partial class BuiltInFormulaReferences
             var dailyDeltaKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for(var slot=0;slot<dailyDeltaKeys.Length;slot++){var key=dailyDeltaKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DailyDeltaOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ChaikinVolatility)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>ChaikinVolatilityOutputs(bars,builtIn)["Cv"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
         {
             var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

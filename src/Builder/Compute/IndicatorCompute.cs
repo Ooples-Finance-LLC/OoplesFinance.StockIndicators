@@ -3944,35 +3944,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChaikinVolatilityFast(StockData data, ComputeContext context, int length1 = 10,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 12)
     {
-        // CalculateChaikinVolatility averages the high-low range with whichever average it was given and then
-        // reads that average's rate of change over length2 bars, so the core's hardcoded average answered for
-        // one type only. It also copied the highs and lows into two fresh arrays on a path whose purpose is
-        // not to allocate.
-        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = highList.Count == lowList.Count ? highList.Count : 0;
-
-        using var rangeBuffer = context.Rent(count);
-        var highLow = rangeBuffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length1=Math.Max(1,length1);var high=data.HighPrices;var low=data.LowPrices;var output=context.Rent(high.Count);
+        using var window=new ChaikinVolatilityWindow(maType,length1,length2,high.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            highLow[i] = highList[i] - lowList[i];
+            using var range=context.Rent(high.Count);using var average=context.Rent(high.Count);
+            for(var i=0;i<high.Count;i++)range.WritableSpan[i]=ChaikinVolatilityWindow.Range(high[i],low[i]).Publish();
+            MovingAverage(data,maType,length1,range.Span,average.WritableSpan);
+            for(var i=0;i<high.Count;i++)output.WritableSpan[i]=window.Finish(new RocBankValue(average.Span[i]),true);
         }
-
-        using var averageBuffer = context.Rent(count);
-        var highLowAverage = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length1, highLow, highLowAverage);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            // Before length2 bars there is nothing to compare against, and the batch indicator reports no
-            // change rather than an unbounded one.
-            var previous = i >= length2 ? highLowAverage[i - length2] : 0;
-            output[i] = previous != 0 ? (highLowAverage[i] - previous) / previous * 100 : 0;
-        }
-
-        return buffer;
+        else for(var i=0;i<high.Count;i++)output.WritableSpan[i]=window.Next(high[i],low[i],true);
+        return output;
     }
 
     /// <summary>
