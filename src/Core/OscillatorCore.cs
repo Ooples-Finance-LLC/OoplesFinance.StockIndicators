@@ -5599,47 +5599,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersStochasticCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 8)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var cgArray = pool.Rent(close.Length);
-
-        try
-        {
-            var cg = cgArray.AsSpan(0, close.Length);
-
-            // Calculate Center of Gravity
-            EhlersCenterOfGravityOscillator(close, cg, length);
-
-            // Stochastic of CG
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length - 1)
-                {
-                    output[i] = 50;
-                }
-                else
-                {
-                    var highest = cg[i];
-                    var lowest = cg[i];
-                    for (var j = i - length + 1; j <= i; j++)
-                    {
-                        if (cg[j] > highest) highest = cg[j];
-                        if (cg[j] < lowest) lowest = cg[j];
-                    }
-
-                    var range = highest - lowest;
-                    output[i] = range != 0 ? (cg[i] - lowest) / range * 100 : 50;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(cgArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new StochasticGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>

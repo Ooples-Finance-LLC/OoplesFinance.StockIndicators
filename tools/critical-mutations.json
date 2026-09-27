@@ -25564,5 +25564,200 @@
     "after": "new CenterGravityWindow(Math.Max(2,length),close.Length)",
     "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement",
     "scope": "internal static void EhlersCenterOfGravityOscillator("
+  },
+  {
+    "id": "stochastic-gravity-minimum-extrema-period",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_length=Math.Max(2,length)",
+    "after": "_length=Math.Max(3,length)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-published-gravity",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_gravity.NextUnits(price,commit)",
+    "after": "ExactVarianceWindow.Units(_gravity.Next(price,commit))",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "node.Value.Index<=_index-_length",
+    "after": "node.Value.Index<_index-_length",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-queue-dominance",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "maximum?queue.Last.Value.Value<=current:queue.Last.Value.Value>=current",
+    "after": "maximum?queue.Last.Value.Value>=current:queue.Last.Value.Value<=current",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-queue-index",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "queue.AddLast((_index,current))",
+    "after": "queue.AddLast((_index+1,current))",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-minimum-direction",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "Extreme(_minimum,gravity,false)",
+    "after": "Extreme(_minimum,gravity,true)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-maximum-direction",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "Extreme(_maximum,gravity,true)",
+    "after": "Extreme(_maximum,gravity,false)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-flat-range",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "max==min?0:",
+    "after": "max==min?1:",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-current-weight",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "sum.Add(ratio,4)",
+    "after": "sum.Add(ratio,3)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-oldest-tap",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "lag<=3&&lag<=_ratios.Count",
+    "after": "lag<3&&lag<=_ratios.Count",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-filter-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "sum.Mean(10)",
+    "after": "sum.Mean(9)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-center-offset",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "2*(smoothed-.5)",
+    "after": "2*(smoothed-.25)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-trigger-delay",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": ".96*(_previous+.02)",
+    "after": ".96*(centered+.02)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-trigger-factor",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": ".96*(_previous+.02)",
+    "after": ".95*(_previous+.02)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-trigger-offset",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": ".96*(_previous+.02)",
+    "after": ".96*(_previous-.02)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "if(commit){Commit(_minimum",
+    "after": "if(true){Commit(_minimum",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-reset-gravity",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_gravity.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_gravity.Reset();_minimum.Clear();_maximum.Clear();",
+    "after": "_gravity.Reset();",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-reset-taps",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_ratios.Clear();_previous=0;",
+    "after": "_previous=0;",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-reset-trigger",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "_previous=0;_index=0;",
+    "after": "_index=0;",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
+    "id": "stochastic-gravity-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment",
+    "scope": "internal static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast("
+  },
+  {
+    "id": "stochastic-gravity-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment",
+    "scope": "public sealed class EhlersStochasticCenterOfGravityOscillatorState :"
+  },
+  {
+    "id": "stochastic-gravity-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new StochasticGravityWindow(length,close.Length)",
+    "after": "new StochasticGravityWindow(Math.Max(2,length),close.Length)",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment",
+    "scope": "internal static void EhlersStochasticCenterOfGravityOscillator("
+  },
+  {
+    "id": "stochastic-gravity-stored-extremum",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "queue.AddLast((_index,current))",
+    "after": "queue.AddLast((_index,BigInteger.Zero))",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
   }
 ]

@@ -10945,37 +10945,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersStochasticCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 8)
     {
-        // CalculateEhlersStochasticCenterOfGravityOscillator stochasticises the centre of gravity oscillator
-        // over its own window, smooths that with a four bar weighted average rescaled about zero, and
-        // publishes the trigger built from the PREVIOUS bar's smoothed value, not the current one.
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        using var centerOfGravity = ComputeEhlersCenterofGravityOscillatorFast(data, context, length);
-        var cg = centerOfGravity.Span;
-
-        using var stochastic = context.Rent(count);
-        var v1 = stochastic.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length, 2));
-        var prevV2 = 0d;
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(cg[i]);
-            var range = window.Max - window.Min;
-            v1[i] = range != 0 ? (cg[i] - window.Min) / range : 0;
-
-            output[i] = MathHelper.MinOrMax(0.96 * (prevV2 + 0.02), 1, 0);
-
-            var weighted = ((4 * v1[i]) + (3 * (i >= 1 ? v1[i - 1] : 0)) + (2 * (i >= 2 ? v1[i - 2] : 0)) +
-                (i >= 3 ? v1[i - 3] : 0)) / 10;
-            prevV2 = 2 * (weighted - 0.5);
-        }
-
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new StochasticGravityWindow(length,input.Count);for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);return output;
     }
 
     /// <summary>

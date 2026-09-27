@@ -107,50 +107,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersStochasticCenterOfGravityOscillator(this StockData stockData, int length = 8)
     {
-        length = Math.Max(length, 1);
-        List<double> v1List = new(stockData.Count);
-        List<double> v2List = new(stockData.Count);
-        List<double> tList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var ehlersCGOscillatorList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersCenterofGravityOscillator(data, length));
-        var (highestList, lowestList) = GetMaxAndMinValuesList(ehlersCGOscillatorList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var cg = ehlersCGOscillatorList[i];
-            var maxc = highestList[i];
-            var minc = lowestList[i];
-            var prevV1_1 = i >= 1 ? v1List[i - 1] : 0;
-            var prevV1_2 = i >= 2 ? v1List[i - 2] : 0;
-            var prevV1_3 = i >= 3 ? v1List[i - 3] : 0;
-            var prevV2_1 = i >= 1 ? v2List[i - 1] : 0;
-            var prevT1 = i >= 1 ? tList[i - 1] : 0;
-            var prevT2 = i >= 2 ? tList[i - 2] : 0;
-
-            var v1 = maxc - minc != 0 ? (cg - minc) / (maxc - minc) : 0;
-            v1List.Add(v1);
-
-            var v2_ = ((4 * v1) + (3 * prevV1_1) + (2 * prevV1_2) + prevV1_3) / 10;
-            var v2 = 2 * (v2_ - 0.5);
-            v2List.Add(v2);
-
-            var t = MinOrMax(0.96 * (prevV2_1 + 0.02), 1, 0);
-            tList.Add(t);
-
-            var signal = GetRsiSignal(t - prevT1, prevT1 - prevT2, t, prevT1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Escog", tList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tList);
-        stockData.IndicatorName = IndicatorName.EhlersStochasticCenterOfGravityOscillator;
-
-        return stockData;
+        var (input,_,_,_,_)=GetInputValuesList(stockData);using var window=new StochasticGravityWindow(length,input.Count);List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        foreach(var price in input){var value=window.Next(price,true);var previous=values.Count>0?values[values.Count-1]:0;var previous2=values.Count>1?values[values.Count-2]:0;signals?.Add(GetRsiSignal(value-previous,previous-previous2,value,previous,.8,.2));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Escog",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.EhlersStochasticCenterOfGravityOscillator;return stockData;
     }
 
 

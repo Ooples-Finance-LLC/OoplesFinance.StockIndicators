@@ -2618,90 +2618,14 @@ public sealed class EhlersSquelchIndicatorState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Escog")]
 public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _windowLength;
-    private readonly EhlersCenterofGravityOscillatorState _cogState;
-    private readonly PooledRingBuffer<double> _cgValues;
-    private readonly PooledRingBuffer<double> _v1Values;
-    private readonly PooledRingBuffer<double> _v2Values;
-
-    public EhlersStochasticCenterOfGravityOscillatorState(int length = 8)
-    {
-        _length = Math.Max(1, length);
-        _windowLength = Math.Max(_length, 2);
-        _cogState = new EhlersCenterofGravityOscillatorState(_length);
-        _cgValues = new PooledRingBuffer<double>(_windowLength);
-        _v1Values = new PooledRingBuffer<double>(3);
-        _v2Values = new PooledRingBuffer<double>(1);
-    }
-
-    public IndicatorName Name => IndicatorName.EhlersStochasticCenterOfGravityOscillator;
-
-    public void Reset()
-    {
-        _cogState.Reset();
-        _cgValues.Clear();
-        _v1Values.Clear();
-        _v2Values.Clear();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var cg = _cogState.Update(bar, isFinal, includeOutputs: false).Value;
-        var min = cg;
-        var max = cg;
-        // Skip oldest value when buffer is full to match batch's sliding window behavior
-        var start = _cgValues.Count == _windowLength ? 1 : 0;
-        for (var i = start; i < _cgValues.Count; i++)
-        {
-            var value = _cgValues[i];
-            if (value < min)
-            {
-                min = value;
-            }
-
-            if (value > max)
-            {
-                max = value;
-            }
-        }
-
-        var v1 = max - min != 0 ? (cg - min) / (max - min) : 0;
-        var prevV1_1 = EhlersStreamingWindow.GetOffsetValue(_v1Values, 1);
-        var prevV1_2 = EhlersStreamingWindow.GetOffsetValue(_v1Values, 2);
-        var prevV1_3 = EhlersStreamingWindow.GetOffsetValue(_v1Values, 3);
-        var v2_ = ((4 * v1) + (3 * prevV1_1) + (2 * prevV1_2) + prevV1_3) / 10;
-        var v2 = 2 * (v2_ - 0.5);
-        var prevV2 = EhlersStreamingWindow.GetOffsetValue(_v2Values, 1);
-        var t = MathHelper.MinOrMax(0.96 * (prevV2 + 0.02), 1, 0);
-
-        if (isFinal)
-        {
-            _cgValues.TryAdd(cg, out _);
-            _v1Values.TryAdd(v1, out _);
-            _v2Values.TryAdd(v2, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Escog", t }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(t, outputs);
-    }
-
-    public void Dispose()
-    {
-        _cogState.Dispose();
-        _cgValues.Dispose();
-        _v1Values.Dispose();
-        _v2Values.Dispose();
-    }
+    private readonly StochasticGravityWindow _window;
+    private readonly StreamingInputResolver _input=new(InputName.Close,null);
+    public EhlersStochasticCenterOfGravityOscillatorState(int length=8){_window=new(length);}
+    public IndicatorName Name=>IndicatorName.EhlersStochasticCenterOfGravityOscillator;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
+    {StreamingInputValidation.Validate(bar);var value=_window.Next(_input.GetValue(bar),isFinal);return new(value,includeOutputs?new Dictionary<string,double>{{"Escog",value}}:null);}
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Ezmrf")]

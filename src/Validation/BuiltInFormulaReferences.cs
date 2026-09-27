@@ -59,6 +59,10 @@ internal static partial class BuiltInFormulaReferences
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>CenterGravityOutputs(bars,builtIn)["Ecog"],IndicatorErrorBudget.Exact);yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersStochasticCenterOfGravityOscillator)
+        {
+            yield return IndicatorValidationRule.Reference(0,bars=>StochasticGravityOutputs(bars,builtIn)["Escog"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RexOscillator)
         {
             var rexKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
