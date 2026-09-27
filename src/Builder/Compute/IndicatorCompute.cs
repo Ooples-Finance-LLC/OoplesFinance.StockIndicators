@@ -24331,7 +24331,7 @@ internal static partial class IndicatorCompute
         var slot = outputKey is null ? 0 : Array.IndexOf(daily.Keys, outputKey);
         if (slot < 0) throw new ArgumentOutOfRangeException(nameof(outputKey));
         var buffer = context.Rent(data.Count);
-        var (close, high, low, open, _) = CalculationsHelper.GetInputValuesList(data);
+        var close=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var high=data.HighPrices;var low=data.LowPrices;var open=data.OpenPrices;
         for (var i = 0; i < data.Count; i++)
             buffer.WritableSpan[i] = daily.Next(data.Dates[i], open[i], high[i], low[i], close[i], true)[slot];
         return buffer;

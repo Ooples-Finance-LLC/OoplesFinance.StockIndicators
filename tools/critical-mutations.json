@@ -27403,5 +27403,193 @@
     "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~RatioOchlNumericalTests.CandleWeightAndSeededBlendMatchIndependentFractions|FullyQualifiedName~RatioOchlNumericalTests.SelectedPricesRetainOriginalOpenAndRangeAndClampTheGain|FullyQualifiedName~RatioOchlNumericalTests.InvalidFieldsCannotAdvanceTheRecursiveBlend",
     "scope": "public sealed class RatioOCHLAveragerState :"
+  },
+  {
+    "id": "daily-pivots-standard-open",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "if (standard) total.Add(open);",
+    "after": "if (standard) total.Add(close);",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "standard ? 4 : 3",
+    "after": "standard ? 3 : 4",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-support-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "left.Add(high, -1)",
+    "after": "left.Add(high)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-resistance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "right.Add(low, -1)",
+    "after": "right.Add(low)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "Combine(new(high), new(low), -1)",
+    "after": "Combine(new(high), new(low))",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-third-range",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "Combine(r1, s1, -1)",
+    "after": "Combine(r1, s1)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-midpoint-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "count: divisor",
+    "after": "count: 1",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-early-pivot",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "var total = new ExactMeanAccumulator(); total.Add(high); total.Add(low); total.Add(close); if (standard) total.Add(open);",
+    "after": "var total = new ExactMeanAccumulator(); total.Add(high+low+close+(standard?open:0));",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-early-double",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "var twice = new ExactMeanAccumulator(); pivot.AddTo(ref twice, 2);",
+    "after": "var twice = new ExactMeanAccumulator(); twice.Add(pivot.Publish()*2);",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-period-selection",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-period-high",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "Math.Max(high[g],data.HighPrices[i])",
+    "after": "Math.Min(high[g],data.HighPrices[i])",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-period-low",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "Math.Min(low[g],data.LowPrices[i])",
+    "after": "Math.Max(low[g],data.LowPrices[i])",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-period-open",
+    "module": "numerical",
+    "file": "src/Helpers/DailyPivotMath.cs",
+    "before": "open.Add(data.OpenPrices[i])",
+    "after": "open.Add(selected[i])",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-date-boundary",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "_day != time.Date",
+    "after": "_day != time",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-preview",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-session-high",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "Math.Max(_high, high)",
+    "after": "Math.Min(_high, high)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-session-low",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "Math.Min(_low, low)",
+    "after": "Math.Max(_low, low)",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-session-close",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "_close = close",
+    "after": "_close = open",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-reset-day",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "_day = null;",
+    "after": "",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "daily-pivots-reset-levels",
+    "module": "numerical",
+    "file": "src/Streaming/DailyPivotLevels.cs",
+    "before": "_levels = new double[Keys.Length];",
+    "after": "",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "internal void Reset()"
+  },
+  {
+    "id": "daily-pivots-raw-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "private static ComputeBuffer ComputeDailyPivotFast("
+  },
+  {
+    "id": "daily-pivots-standard-invalid-open",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class StandardPivotPointsState :"
+  },
+  {
+    "id": "daily-pivots-dynamic-invalid-open",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class DynamicPivotPointsState :"
   }
 ]

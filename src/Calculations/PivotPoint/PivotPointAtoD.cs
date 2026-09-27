@@ -247,7 +247,7 @@ public static partial class Calculations
         List<double> supportLevel1List = new(stockData.Count);
         List<double> pivotList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData, inputLength);
+        var (inputList, highList, lowList, _, _) = PivotPeriodInputs.Read(stockData, inputLength);
 
         for (var i = 0; i < inputList.Count; i++)
         {
@@ -256,15 +256,16 @@ public static partial class Calculations
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
-            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            var levels = DailyPivotMath.Levels(0,prevHigh,prevLow,prevClose,false);
+            var pivot = levels[0];
             pivotList.Add(pivot);
 
             var prevSupportLevel1 = GetLastOrDefault(supportLevel1List);
-            var supportLevel1 = pivot - (prevHigh - pivot);
+            var supportLevel1 = levels[1];
             supportLevel1List.Add(supportLevel1);
 
             var prevResistanceLevel1 = GetLastOrDefault(resistanceLevel1List);
-            var resistanceLevel1 = pivot + (pivot - prevLow);
+            var resistanceLevel1 = levels[2];
             resistanceLevel1List.Add(resistanceLevel1);
 
             var signal = GetBullishBearishSignal(currentClose - resistanceLevel1, prevClose - prevResistanceLevel1, 

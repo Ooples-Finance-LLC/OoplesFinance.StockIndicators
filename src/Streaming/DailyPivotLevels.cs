@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 /// <summary>Maintains completed daily OHLC without committing preview bars.</summary>
@@ -34,15 +35,7 @@ internal sealed class DailyPivotLevels
 
     private double[] Calculate()
     {
-        var pivot = _standard ? (_open + _high + _low + _close) / 4 : (_high + _low + _close) / 3;
-        var s1 = 2 * pivot - _high;
-        var r1 = 2 * pivot - _low;
-        if (!_standard) return new[] { pivot, s1, r1 };
-        var s2 = pivot - (_high - _low);
-        var r2 = pivot + (_high - _low);
-        // The library's Standard variant defines its third levels from R1-S1 (= high-low).
-        return new[] { pivot, s1, s2, s2, r1, r2, r2, s2, (s2 + s1) / 2,
-            (s1 + pivot) / 2, (r1 + pivot) / 2, (r2 + r1) / 2, r2 };
+        return DailyPivotMath.Levels(_open, _high, _low, _close, _standard);
     }
 
     internal void Reset()
