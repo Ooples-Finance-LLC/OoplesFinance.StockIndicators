@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.EhlersBandPassFilterV1 or IndicatorName.EhlersBandPassFilterV2 or IndicatorName.EhlersCycleBandPassFilter)
+        {
+            var bandPassKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < bandPassKeys.Length; slot++) { var key = bandPassKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ClampedBandPassOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KirshenbaumBands)
         {
             var kirshenbaumKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

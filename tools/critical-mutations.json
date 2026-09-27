@@ -23097,5 +23097,208 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
     "scope": "public sealed class KirshenbaumBandsState :"
+  },
+  {
+    "id": "clamped-bandpass-beta-angle",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "Clamp(2 * Math.PI / length)",
+    "after": "Clamp(Math.PI / length)",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "Math.Max(.01, Math.Min(.99, value))",
+    "after": "Math.Max(.02, Math.Min(.99, value))",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "Math.Max(.01, Math.Min(.99, value))",
+    "after": "Math.Max(.01, Math.Min(.98, value))",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-cycle-bandwidth",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "variant == 2 ? 4 : 2",
+    "after": "variant == 2 ? 2 : 2",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-v2-pole",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "1 / cosine - Math.Sqrt(1 / (cosine * cosine) - 1)",
+    "after": "1 / cosine + Math.Sqrt(1 / (cosine * cosine) - 1)",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-hp-angle",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": ".25 * bandwidth",
+    "after": ".5 * bandwidth",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-trigger-angle",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "1.5 * bandwidth",
+    "after": "1.25 * bandwidth",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-highpass-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "2 * Unit + alpha",
+    "after": "2 * Unit - alpha",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-initial-change",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "_count == 0 ? BigInteger.Zero : price - _input1",
+    "after": "price - _input1",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "hp - _hp2 : price - _input2",
+    "after": "hp - _hp1 : price - _input1",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "_variant == 2 ? 2 : 3",
+    "after": "_variant == 2 ? 3 : 2",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-band-input",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "(Unit - _alpha) * Unit * difference",
+    "after": "(Unit + _alpha) * Unit * difference",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-band-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "2 * _beta * (Unit + _alpha) * _band1",
+    "after": "2 * _beta * (Unit - _alpha) * _band1",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-band-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "- 2 * _alpha * Unit * _band2",
+    "after": "+ 2 * _alpha * Unit * _band2",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-peak-decay",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "ExactVarianceWindow.Units(.991)",
+    "after": "ExactVarianceWindow.Units(.9)",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-peak-selection",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "BigInteger.Max(",
+    "after": "BigInteger.Min(",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "UnitRatio(band << 1074, peak)",
+    "after": "UnitRatio(band << 1073, peak)",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-trigger-change",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "HighPass(signalUnits - _signal,",
+    "after": "HighPass(signalUnits,",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "_count = 0;",
+    "after": "_count = 3;",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-reset-peak",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "_input1 = _input2 = _hp1 = _hp2 = _band1 = _band2 = _peak = _signal = _trigger = default;",
+    "after": "_input1 = _input2 = _hp1 = _hp2 = _band1 = _band2 = _signal = _trigger = default;",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-nonfinite-width",
+    "module": "numerical",
+    "file": "src/Helpers/ClampedBandPassWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(bandwidth);",
+    "after": "if (!double.IsFinite(bandwidth)) bandwidth = 0;",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution"
+  },
+  {
+    "id": "clamped-bandpass-invalid-ehlersbandpassfilterv1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution",
+    "scope": "public sealed class EhlersBandPassFilterV1State :"
+  },
+  {
+    "id": "clamped-bandpass-invalid-ehlersbandpassfilterv2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution",
+    "scope": "public sealed class EhlersBandPassFilterV2State :"
+  },
+  {
+    "id": "clamped-bandpass-invalid-ehlerscyclebandpassfilter",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ClampedBandPassNumericalTests.DistinctStartupAndPeakNormalizationPreserveExtendedRecurrences|FullyQualifiedName~ClampedBandPassNumericalTests.SelectedPricesDriveBothFilterAndTrigger|FullyQualifiedName~ClampedBandPassNumericalTests.InvalidFieldsAndBandwidthNeverAdvanceStateOrEnterEmptyExecution",
+    "scope": "public sealed class EhlersCycleBandPassFilterState :"
   }
 ]

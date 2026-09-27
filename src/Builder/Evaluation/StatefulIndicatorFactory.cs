@@ -418,6 +418,8 @@ internal static partial class StatefulIndicatorFactory
             EhlersStochasticCenterOfGravityOscillatorSpecOptions centerStoch => new EhlersStochasticCenterOfGravityOscillatorState(centerStoch.Length),
             EhlersImpulseReactionSpecOptions reaction => new EhlersImpulseReactionState(reaction.Length1, reaction.Length2, reaction.Q),
             EhlersImpulseResponseSpecOptions response => new EhlersImpulseResponseState(response.MaType, response.Length, response.Bw),
+            EhlersBandPassFilterV2SpecOptions bandV2 => new EhlersBandPassFilterV2State(bandV2.Length, bandV2.Bw),
+            EhlersCycleBandPassFilterSpecOptions cycleBand => new EhlersCycleBandPassFilterState(cycleBand.Length, cycleBand.Delta),
             EhlersBandPassFilterV1SpecOptions bandV1 => new EhlersBandPassFilterV1State(bandV1.Length, bandV1.Bw),
             EhlersStochasticCyberCycleSpecOptions cyberStoch => new EhlersStochasticCyberCycleState(cyberStoch.Length, cyberStoch.Alpha),
             EhlersRoofingFilterIndicatorSpecOptions originalRoof => new EhlersRoofingFilterIndicatorState(originalRoof.Length1, originalRoof.Length2),

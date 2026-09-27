@@ -1561,63 +1561,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersBandPassFilterV1(this StockData stockData, int length = 20, double bw = 0.3)
     {
-        length = Math.Max(length, 1);
-        List<double> hpList = new(stockData.Count);
-        List<double> bpList = new(stockData.Count);
-        List<double> peakList = new(stockData.Count);
-        List<double> signalList = new(stockData.Count);
-        List<double> triggerList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var twoPiPrd1 = MinOrMax(0.25 * bw * 2 * Math.PI / length, 0.99, 0.01);
-        var twoPiPrd2 = MinOrMax(1.5 * bw * 2 * Math.PI / length, 0.99, 0.01);
-        var beta = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MinOrMax(2 * Math.PI * bw / length, 0.99, 0.01));
-        var alpha1 = gamma - Sqrt(Pow(gamma, 2) - 1);
-        var alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
-        var alpha3 = (Math.Cos(twoPiPrd2) + Math.Sin(twoPiPrd2) - 1) / Math.Cos(twoPiPrd2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ClampedBandPassWindow(length, bw, 0); List<double> values = new(input.Count), triggers = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevHp1 = i >= 1 ? hpList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var hp = ((1 + (alpha2 / 2)) * MinPastValues(i, 1, currentValue - prevValue)) + ((1 - alpha2) * prevHp1);
-            hpList.Add(hp);
-
-            var bp = i > 2 ? (0.5 * (1 - alpha1) * (hp - prevHp2)) + (beta * (1 + alpha1) * prevBp1) - (alpha1 * prevBp2) : 0;
-            bpList.Add(bp);
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Max(0.991 * prevPeak, Math.Abs(bp));
-            peakList.Add(peak);
-
-            var prevSig = GetLastOrDefault(signalList);
-            var sig = peak != 0 ? bp / peak : 0;
-            signalList.Add(sig);
-
-            var prevTrigger = GetLastOrDefault(triggerList);
-            var trigger = ((1 + (alpha3 / 2)) * (sig - prevSig)) + ((1 - alpha3) * prevTrigger);
-            triggerList.Add(trigger);
-
-            var signal = GetCompareSignal(sig - trigger, prevSig - prevTrigger);
-            signalsList?.Add(signal);
+            var p = window.Next(price, true); var previous = values.Count > 0 ? values[values.Count - 1] : 0; var older = values.Count > 1 ? values[values.Count - 2] : 0; var previousTrigger = triggers.Count > 0 ? triggers[triggers.Count - 1] : 0;
+            signals?.Add(GetCompareSignal(p.Value - p.Signal, previous - previousTrigger)); values.Add(p.Value); triggers.Add(p.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ebpf", signalList },
-            { "Signal", triggerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(signalList);
-        stockData.IndicatorName = IndicatorName.EhlersBandPassFilterV1;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ebpf", values }, { "Signal", triggers } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersBandPassFilterV1; return stockData;
     }
 
 
@@ -1631,37 +1581,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersBandPassFilterV2(this StockData stockData, int length = 20, double bw = 0.3)
     {
-        length = Math.Max(length, 1);
-        List<double> bpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var l1 = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var g1 = Math.Cos(MinOrMax(bw * 2 * Math.PI / length, 0.99, 0.01));
-        var s1 = (1 / g1) - Sqrt(1 / Pow(g1, 2) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ClampedBandPassWindow(length, bw, 1); List<double> values = new(input.Count), triggers = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.Add(bp);
-
-            var signal = GetCompareSignal(bp - prevBp1, prevBp1 - prevBp2);
-            signalsList?.Add(signal);
+            var p = window.Next(price, true); var previous = values.Count > 0 ? values[values.Count - 1] : 0; var older = values.Count > 1 ? values[values.Count - 2] : 0; var previousTrigger = triggers.Count > 0 ? triggers[triggers.Count - 1] : 0;
+            signals?.Add(GetCompareSignal(p.Value - previous, previous - older)); values.Add(p.Value); triggers.Add(p.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ebpf", bpList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bpList);
-        stockData.IndicatorName = IndicatorName.EhlersBandPassFilterV2;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ebpf", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersBandPassFilterV2; return stockData;
     }
 
 
@@ -1675,37 +1601,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersCycleBandPassFilter(this StockData stockData, int length = 20, double delta = 0.1)
     {
-        length = Math.Max(length, 1);
-        List<double> bpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var beta = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * delta / length, 0.99, 0.01));
-        var alpha = gamma - Sqrt(Pow(gamma, 2) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ClampedBandPassWindow(length, delta, 2); List<double> values = new(input.Count), triggers = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var bp = (0.5 * (1 - alpha) * MinPastValues(i, 2, currentValue - prevValue)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
-            bpList.Add(bp);
-
-            var signal = GetCompareSignal(bp - prevBp1, prevBp1 - prevBp2);
-            signalsList?.Add(signal);
+            var p = window.Next(price, true); var previous = values.Count > 0 ? values[values.Count - 1] : 0; var older = values.Count > 1 ? values[values.Count - 2] : 0; var previousTrigger = triggers.Count > 0 ? triggers[triggers.Count - 1] : 0;
+            signals?.Add(GetCompareSignal(p.Value - previous, previous - older)); values.Add(p.Value); triggers.Add(p.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ecbpf", bpList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bpList);
-        stockData.IndicatorName = IndicatorName.EhlersCycleBandPassFilter;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ecbpf", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersCycleBandPassFilter; return stockData;
     }
 
 

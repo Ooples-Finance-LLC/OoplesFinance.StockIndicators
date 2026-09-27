@@ -17772,53 +17772,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersBandPassFilterV1Fast(StockData data, ComputeContext context, int length = 20, double bw = 0.3, string? outputKey = null)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var twoPiPrd1 = MathHelper.MinOrMax(0.25 * bw * 2 * Math.PI / length, 0.99, 0.01);
-        var beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(2 * Math.PI * bw / length, 0.99, 0.01));
-        var alpha1 = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
-        var alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
-
-        using var highPass = context.Rent(count);
-        using var bandPass = context.Rent(count);
-        var hp = highPass.WritableSpan;
-        var bp = bandPass.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double peak = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var previousHp1 = i >= 1 ? hp[i - 1] : 0;
-            var previousHp2 = i >= 2 ? hp[i - 2] : 0;
-            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
-            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
-
-            hp[i] = ((1 + (alpha2 / 2)) * CalculationsHelper.MinPastValues(i, 1, input[i] - previousValue)) + ((1 - alpha2) * previousHp1);
-            bp[i] = i > 2 ? (0.5 * (1 - alpha1) * (hp[i] - previousHp2)) + (beta * (1 + alpha1) * previousBp1) - (alpha1 * previousBp2) : 0;
-
-            peak = Math.Max(0.991 * peak, Math.Abs(bp[i]));
-            output[i] = peak != 0 ? bp[i] / peak : 0;
-        }
-
-        if (outputKey == "Signal")
-        {
-            var angle = MathHelper.MinOrMax(1.5 * bw * 2 * Math.PI / length, .99, .01);
-            var alpha = (Math.Cos(angle) + Math.Sin(angle) - 1) / Math.Cos(angle);
-            double previous = 0, trigger = 0;
-            for (var i = 0; i < count; i++)
-            {
-                var current = output[i];
-                trigger = (1 + alpha / 2) * (current - previous) + (1 - alpha) * trigger;
-                output[i] = trigger; previous = current;
-            }
-        }
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new ClampedBandPassWindow(length, bw, 0); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? p.Signal : p.Value; }
+        return result;
     }
 
     /// <summary>

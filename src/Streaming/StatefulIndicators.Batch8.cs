@@ -510,221 +510,42 @@ public sealed class EhlersClassicHilbertTransformerState : IStreamingIndicatorSt
 [PrimaryOutput("Ebpf")]
 public sealed class EhlersBandPassFilterV1State : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly double _alpha2;
-    private readonly double _alpha3;
-    private readonly double _beta;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevHp1;
-    private double _prevHp2;
-    private double _prevBp1;
-    private double _prevBp2;
-    private double _prevPeak;
-    private double _prevSig;
-    private double _prevTrigger;
-    private int _index;
-
-    public EhlersBandPassFilterV1State(int length = 20, double bw = 0.3)
-    {
-        var resolved = Math.Max(1, length);
-        var twoPiPrd1 = MathHelper.MinOrMax(0.25 * bw * 2 * Math.PI / resolved, 0.99, 0.01);
-        var twoPiPrd2 = MathHelper.MinOrMax(1.5 * bw * 2 * Math.PI / resolved, 0.99, 0.01);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(2 * Math.PI * bw / resolved, 0.99, 0.01));
-        _alpha1 = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
-        _alpha2 = (Math.Cos(twoPiPrd1) + Math.Sin(twoPiPrd1) - 1) / Math.Cos(twoPiPrd1);
-        _alpha3 = (Math.Cos(twoPiPrd2) + Math.Sin(twoPiPrd2) - 1) / Math.Cos(twoPiPrd2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ClampedBandPassWindow _window;
+    public EhlersBandPassFilterV1State(int length = 20, double bw = .3) { _window = new(length, bw, 0); }
     public IndicatorName Name => IndicatorName.EhlersBandPassFilterV1;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _prevPeak = 0;
-        _prevSig = 0;
-        _prevTrigger = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevHp2 = _index >= 2 ? _prevHp2 : 0;
-        var prevBp1 = _index >= 1 ? _prevBp1 : 0;
-        var prevBp2 = _index >= 2 ? _prevBp2 : 0;
-        var prevSig = _prevSig;
-        var prevTrigger = _prevTrigger;
-        var diff = _index >= 1 ? value - prevValue : 0;
-
-        var hp = ((1 + (_alpha2 / 2)) * diff) + ((1 - _alpha2) * prevHp1);
-        var bp = _index > 2
-            ? (0.5 * (1 - _alpha1) * (hp - prevHp2)) + (_beta * (1 + _alpha1) * prevBp1) - (_alpha1 * prevBp2)
-            : 0;
-
-        var peak = Math.Max(0.991 * _prevPeak, Math.Abs(bp));
-        var sig = peak != 0 ? bp / peak : 0;
-        var trigger = ((1 + (_alpha3 / 2)) * (sig - prevSig)) + ((1 - _alpha3) * prevTrigger);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevHp2 = _prevHp1;
-            _prevHp1 = hp;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _prevPeak = peak;
-            _prevSig = sig;
-            _prevTrigger = trigger;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ebpf", sig },
-                { "Signal", trigger }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sig, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "Ebpf", p.Value }, { "Signal", p.Signal } } : null);
     }
 }
 
 [PrimaryOutput("Ebpf")]
 public sealed class EhlersBandPassFilterV2State : IStreamingIndicatorState
 {
-    private readonly double _l1;
-    private readonly double _s1;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevBp1;
-    private double _prevBp2;
-    private int _index;
-
-    public EhlersBandPassFilterV2State(int length = 20, double bw = 0.3)
-    {
-        var resolved = Math.Max(1, length);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / resolved, 0.99, 0.01));
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / MathHelper.Pow(g1, 2)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ClampedBandPassWindow _window;
+    public EhlersBandPassFilterV2State(int length = 20, double bw = .3) { _window = new(length, bw, 1); }
     public IndicatorName Name => IndicatorName.EhlersBandPassFilterV2;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevBp1 = _index >= 1 ? _prevBp1 : 0;
-        var prevBp2 = _index >= 2 ? _prevBp2 : 0;
-        var bp = _index < 3
-            ? 0
-            : (0.5 * (1 - _s1) * (value - prevValue2)) + (_l1 * (1 + _s1) * prevBp1) - (_s1 * prevBp2);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ebpf", bp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bp, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "Ebpf", p.Value } } : null);
     }
 }
 
 [PrimaryOutput("Ecbpf")]
 public sealed class EhlersCycleBandPassFilterState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _beta;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevBp1;
-    private double _prevBp2;
-    private int _index;
-
-    public EhlersCycleBandPassFilterState(int length = 20, double delta = 0.1)
-    {
-        var resolved = Math.Max(1, length);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolved, 0.99, 0.01));
-        _alpha = gamma - MathHelper.Sqrt(MathHelper.Pow(gamma, 2) - 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ClampedBandPassWindow _window;
+    public EhlersCycleBandPassFilterState(int length = 20, double delta = .1) { _window = new(length, delta, 2); }
     public IndicatorName Name => IndicatorName.EhlersCycleBandPassFilter;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevBp1 = _index >= 1 ? _prevBp1 : 0;
-        var prevBp2 = _index >= 2 ? _prevBp2 : 0;
-        var diff = _index >= 2 ? value - prevValue2 : 0;
-        var bp = (0.5 * (1 - _alpha) * diff) + (_beta * (1 + _alpha) * prevBp1) - (_alpha * prevBp2);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ecbpf", bp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bp, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "Ecbpf", p.Value } } : null);
     }
 }
 
