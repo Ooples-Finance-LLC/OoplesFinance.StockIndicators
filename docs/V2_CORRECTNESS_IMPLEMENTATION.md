@@ -2226,3 +2226,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 
 - Published the approved signed message-only history correction with an explicit force-with-lease against0ec63a9. All294 commit trees are unchanged; all294 corrected messages pass local commitlint. Original history remains in the recovery bundle and backup branch.
 - Corrected the quadratic and ATR-percentage hand vectors using independently calculated binary64 rounding stages. **2/2 focused tests passed** (`hand-rounding-corrections.trx`), reusing production build outputs. No numerical tolerance changed. The DMI Stochastic mismatch remains a separate active batch.
+
+
+### DMI Stochastic directional-stage consistency
+
+- A nearly flat directional spread amplified differences between the old DMI reference/native arithmetic and the independently verified ADX stages. DMI now uses those stages in the native path and its independent reference for simple, weighted, exponential and Wilder smoothing; other smoothing types retain their fallback.
+- **97/97 focused checks passed** (`dmi-directional-contracts.trx`), covering all discovered DMI configurations, rising/falling/flat/walk inputs, batch/fast/builder/native routes, preview/reset, three additional supported/fallback smoothing cases and shared directional-index contracts. An initial test interface-cast compilation error was corrected before this run and earns no verification credit.
+- Campaign446 caught **2/2 original-fault replays**, one restoring old native rounding and one restoring the old reference, from a passing baseline. Source/archive SHA256: `cc9ada47f489c0484cd5c29afb101f84678fffb13a47669f584cfc732ef35cfc` / `9493e880aab34070c9461d0160e2a21962fef0b1d3eee782c833019bfba5c95e`. **3,474 retained mutation sites**.
+- This focused consistency fix adds no numerical enrollment or grouped-family credit. Inventory remains **4,916/7,131**, with **2,215 omissions across358 types**. Full coverage and release/performance gates remain incomplete. Hosted commit-message lint and SonarCloud passed at943c51e after the approved CI/history corrections.

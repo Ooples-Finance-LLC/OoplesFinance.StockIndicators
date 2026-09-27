@@ -682,9 +682,10 @@ public sealed class DistanceWeightedMovingAverageState : IStreamingIndicatorStat
 [PrimaryOutput("DmiStochastic")]
 public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _dmPlus;
-    private readonly IMovingAverageSmoother _dmMinus;
-    private readonly IMovingAverageSmoother _tr;
+    private readonly DirectionalIndexWindow? _directional;
+    private readonly IMovingAverageSmoother? _dmPlus;
+    private readonly IMovingAverageSmoother? _dmMinus;
+    private readonly IMovingAverageSmoother? _tr;
     private readonly RollingWindowMax _maxWindow;
     private readonly RollingWindowMin _minWindow;
     private readonly IMovingAverageSmoother _slowK;
@@ -699,9 +700,13 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
-        _dmPlus = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _dmMinus = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _tr = MovingAverageSmootherFactory.Create(maType, resolved1);
+        if (StrengthWindow.Supports(maType)) _directional = new DirectionalIndexWindow(maType, resolved1);
+        else
+        {
+            _dmPlus = MovingAverageSmootherFactory.Create(maType, resolved1);
+            _dmMinus = MovingAverageSmootherFactory.Create(maType, resolved1);
+            _tr = MovingAverageSmootherFactory.Create(maType, resolved1);
+        }
         _maxWindow = new RollingWindowMax(resolved2);
         _minWindow = new RollingWindowMin(resolved2);
         _slowK = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
@@ -712,9 +717,10 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
 
     public void Reset()
     {
-        _dmPlus.Reset();
-        _dmMinus.Reset();
-        _tr.Reset();
+        _directional?.Reset();
+        _dmPlus?.Reset();
+        _dmMinus?.Reset();
+        _tr?.Reset();
         _maxWindow.Reset();
         _minWindow.Reset();
         _slowK.Reset();
@@ -728,23 +734,33 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : bar.High;
-        var prevLow = _hasPrev ? _prevLow : bar.Low;
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
+        double diPlus, diMinus;
+        if (_directional is not null)
+        {
+            var point = _directional.Next(bar.High, bar.Low, bar.Close, isFinal);
+            diPlus = point.Plus;
+            diMinus = point.Minus;
+        }
+        else
+        {
+            var prevHigh = _hasPrev ? _prevHigh : bar.High;
+            var prevLow = _hasPrev ? _prevLow : bar.Low;
+            // For TrueRange on first bar, use current close to avoid inflated TR
+            var prevClose = _hasPrev ? _prevClose : bar.Close;
 
-        var highDiff = bar.High - prevHigh;
-        var lowDiff = prevLow - bar.Low;
-        var dmPlus = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
-        var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
+            var highDiff = bar.High - prevHigh;
+            var lowDiff = prevLow - bar.Low;
+            var dmPlus = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
+            var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
+            var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
 
-        var dmPlus14 = _dmPlus.Next(dmPlus, isFinal);
-        var dmMinus14 = _dmMinus.Next(dmMinus, isFinal);
-        var tr14 = _tr.Next(tr, isFinal);
+            var dmPlus14 = _dmPlus!.Next(dmPlus, isFinal);
+            var dmMinus14 = _dmMinus!.Next(dmMinus, isFinal);
+            var tr14 = _tr!.Next(tr, isFinal);
 
-        var diPlus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmPlus14 / tr14, 100, 0) : 0;
-        var diMinus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmMinus14 / tr14, 100, 0) : 0;
+            diPlus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmPlus14 / tr14, 100, 0) : 0;
+            diMinus = tr14 != 0 ? MathHelper.MinOrMax(100 * dmMinus14 / tr14, 100, 0) : 0;
+        }
         var dmiOscillator = diMinus - diPlus;
 
         var highest = isFinal ? _maxWindow.Add(dmiOscillator, out _) : _maxWindow.Preview(dmiOscillator, out _);
@@ -779,9 +795,10 @@ public sealed class DMIStochasticState : IStreamingIndicatorState, IDisposable
 
     public void Dispose()
     {
-        _dmPlus.Dispose();
-        _dmMinus.Dispose();
-        _tr.Dispose();
+        _directional?.Dispose();
+        _dmPlus?.Dispose();
+        _dmMinus?.Dispose();
+        _tr?.Dispose();
         _maxWindow.Dispose();
         _minWindow.Dispose();
         _slowK.Dispose();

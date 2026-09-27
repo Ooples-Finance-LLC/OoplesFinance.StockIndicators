@@ -1079,6 +1079,8 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.CommoditySelectionIndex:
             case IndicatorName.ErgodicCommoditySelectionIndex:
             case IndicatorName.DMIStochastic:
+                if (name == IndicatorName.DMIStochastic && kind is 1 or 2 or 3 or 6)
+                    return new("DmiStochastic", new[] { "DmiStochastic" }, bars => DmiStochasticOutputs(bars, length, kind));
                 var ergodicCommodity = name == IndicatorName.ErgodicCommoditySelectionIndex;
                 var commodity = name != IndicatorName.DMIStochastic;
                 var commodityKey = ergodicCommodity ? "Ecsi" : "Csi";

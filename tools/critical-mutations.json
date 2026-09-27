@@ -28976,5 +28976,22 @@
     "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~ProjectedLevelsNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~ProjectedLevelsNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~ProjectedLevelsNumericalTests.InvalidFieldsDoNotCommitExtrema",
     "scope": "public sealed class ProjectedSupportAndResistanceState :"
+  },
+  {
+    "id": "dmi-directional-native-old-rounding",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class DMIStochasticState :",
+    "before": "if (StrengthWindow.Supports(maType)) _directional = new DirectionalIndexWindow(maType, resolved1);\n        else",
+    "after": "if (maType == (MovingAvgType)(-244)) _directional = new DirectionalIndexWindow(maType, resolved1);\n        else",
+    "filter": "FullyQualifiedName~DmiStochasticContractTests"
+  },
+  {
+    "id": "dmi-directional-reference-old-rounding",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.RelativeMotion.cs",
+    "before": "if (name == IndicatorName.DMIStochastic && kind is 1 or 2 or 3 or 6)\n                    return new(\"DmiStochastic\", new[] { \"DmiStochastic\" }, bars => DmiStochasticOutputs(bars, length, kind));",
+    "after": "",
+    "filter": "FullyQualifiedName~DmiStochasticContractTests"
   }
 ]
