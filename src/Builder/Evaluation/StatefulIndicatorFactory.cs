@@ -652,6 +652,7 @@ internal static partial class StatefulIndicatorFactory
             EaseOfMovementSpecOptions ease => new EaseOfMovementState(ease.Divisor),
             EmvSpecOptions _ => new EaseOfMovementState(),
             KvoSpecOptions kvo => new KlingerVolumeOscillatorState(fastLength: kvo.Length),
+            MassIndexCoreSpecOptions mic => new MassIndexState(length3: mic.Length),
             MassIndexSpecOptions mi => new MassIndexState(maType: mi.MaType, length1: mi.EmaLength, length2: mi.EmaLength, length3: mi.SumLength),
 
             // Price/Trend - using named parameters to skip MovingAvgType defaults

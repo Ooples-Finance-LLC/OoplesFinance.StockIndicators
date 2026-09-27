@@ -69,60 +69,17 @@ public sealed class MartinRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Mi")]
 public sealed class MassIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly RollingWindowSum _ratioSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-
-    public MassIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 21, int length2 = 21, int length3 = 25, int signalLength = 9)
+    private readonly MassIndexWindow _window;
+    public MassIndexState(MovingAvgType maType=MovingAvgType.ExponentialMovingAverage,int length1=21,int length2=21,int length3=25,int signalLength=9)
+        =>_window=new(maType,length1,length2,length3,signalLength);
+    public IndicatorName Name=>IndicatorName.MassIndex;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _ratioSum = new RollingWindowSum(Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.High,bar.Low,isFinal);
+        return new(value.Value,includeOutputs?new Dictionary<string,double>{{"Mi",value.Value},{"Signal",value.Signal}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.MassIndex;
-
-    public void Reset()
-    {
-        _ema1.Reset();
-        _ema2.Reset();
-        _ratioSum.Reset();
-        _signalSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var highLow = bar.High - bar.Low;
-        var ema1 = _ema1.Next(highLow, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var ratio = ema2 != 0 ? ema1 / ema2 : 0;
-        var massIndex = isFinal ? _ratioSum.Add(ratio, out _) : _ratioSum.Preview(ratio, out _);
-        var signal = _signalSmoother.Next(massIndex, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Mi", massIndex },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(massIndex, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _ratioSum.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Mti")]

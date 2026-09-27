@@ -629,54 +629,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void MassIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int emaLength = 9, int sumLength = 25)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-        var ema1Array = pool.Rent(high.Length);
-        var ema2Array = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-            var ema1 = ema1Array.AsSpan(0, high.Length);
-            var ema2 = ema2Array.AsSpan(0, high.Length);
-
-            // High-Low range
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            // Double EMA of range
-            MovingAverageCore.ExponentialMovingAverage(range, ema1, emaLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, emaLength);
-
-            // Sum of ratio
-            double sum = 0;
-            for (var i = 0; i < high.Length; i++)
-            {
-                var ratio = ema2[i] != 0 ? ema1[i] / ema2[i] : 0;
-                sum += ratio;
-
-                if (i >= sumLength)
-                {
-                    var oldRatio = ema2[i - sumLength] != 0 ? ema1[i - sumLength] / ema2[i - sumLength] : 0;
-                    sum -= oldRatio;
-                }
-
-                output[i] = i >= sumLength - 1 ? sum : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-        }
+        if(output.Length<high.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new MassIndexWindow(MovingAvgType.ExponentialMovingAverage,emaLength,emaLength,sumLength,9,high.Length);
+        for(var i=0;i<high.Length;i++)output[i]=window.Next(high[i],low[i],true).Value;
     }
 
     /// <summary>

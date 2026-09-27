@@ -376,57 +376,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void MassIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, Span<double> output, int length = 25, int emaLength = 9)
     {
-        if (output.Length < high.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var rangeArray = pool.Rent(high.Length);
-        var ema1Array = pool.Rent(high.Length);
-        var ema2Array = pool.Rent(high.Length);
-        var ratioArray = pool.Rent(high.Length);
-
-        try
-        {
-            var range = rangeArray.AsSpan(0, high.Length);
-            var ema1 = ema1Array.AsSpan(0, high.Length);
-            var ema2 = ema2Array.AsSpan(0, high.Length);
-            var ratio = ratioArray.AsSpan(0, high.Length);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                range[i] = high[i] - low[i];
-            }
-
-            MovingAverageCore.ExponentialMovingAverage(range, ema1, emaLength);
-            MovingAverageCore.ExponentialMovingAverage(ema1, ema2, emaLength);
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                ratio[i] = ema2[i] != 0 ? ema1[i] / ema2[i] : 1;
-            }
-
-            for (var i = 0; i < high.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double sum = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sum += ratio[j];
-                }
-                output[i] = sum;
-            }
-        }
-        finally
-        {
-            pool.Return(rangeArray);
-            pool.Return(ema1Array);
-            pool.Return(ema2Array);
-            pool.Return(ratioArray);
-        }
+        if(output.Length<high.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new MassIndexWindow(MovingAvgType.ExponentialMovingAverage,emaLength,emaLength,length,9,high.Length);
+        for(var i=0;i<high.Length;i++)output[i]=window.Next(high[i],low[i],true).Value;
     }
 
     /// <summary>

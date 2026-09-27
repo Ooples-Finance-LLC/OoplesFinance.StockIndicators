@@ -268,7 +268,7 @@ internal static partial class IndicatorCompute
             TrixSpecOptions trix => ComputeTrixFast(data, context, trix.Length, trix.MaType),
             MassIndexSpecOptions mi => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeMassIndexFast(data, context, mi.EmaLength, mi.EmaLength, mi.SumLength, mi.MaType), 9, mi.MaType),
+                "Signal" => ComputeMassIndexFast(data, context, mi.EmaLength, mi.EmaLength, mi.SumLength, mi.MaType, "Signal"),
                 _ => ComputeMassIndexFast(data, context, mi.EmaLength, mi.EmaLength, mi.SumLength, mi.MaType)
             },
             AtrSpecOptions atr => ComputeAtrFast(data, context, atr.Length, atr.MaType),
@@ -1141,7 +1141,7 @@ internal static partial class IndicatorCompute
             KeltnerChannelWidthSpecOptions kcw => ComputeKeltnerChannelWidthFast(data, context, kcw.Length),
             MassIndexCoreSpecOptions mic => spec.OutputKey switch
             {
-                "Signal" => SmoothPublished(data, context, ComputeMassIndexCoreFast(data, context, mic.Length), 9, MovingAvgType.ExponentialMovingAverage),
+                "Signal" => ComputeMassIndexFast(data, context, length3: mic.Length, outputKey: "Signal"),
                 _ => ComputeMassIndexCoreFast(data, context, mic.Length)
             },
             RahulMohindarOscillatorSpecOptions rmo => ComputeRahulMohindarOscillatorFast(data, context, rmo.Length,
@@ -3328,39 +3328,25 @@ internal static partial class IndicatorCompute
     /// Computes Mass Index using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeMassIndexFast(StockData data, ComputeContext context, int length1 = 21,
-        int length2 = 21, int length3 = 25, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 21, int length3 = 25, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null, int signalLength = 9)
     {
-        // CalculateMassIndex smooths the bar range twice - the second pass over the first, not over the range
-        // again - and sums the ratio of the two over its window, so a widening range drives it up whichever
-        // way the market is going. The core this replaced took a single smoothing.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-
-        using var range = context.Rent(count);
-        var highLow = range.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length1=Math.Max(1,length1);length2=Math.Max(1,length2);length3=Math.Max(1,length3);signalLength=Math.Max(1,signalLength);
+        var output=context.Rent(data.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            highLow[i] = highs[i] - lows[i];
+            using var ranges=context.Rent(data.Count);for(var i=0;i<data.Count;i++)ranges.WritableSpan[i]=MassIndexWindow.Range(data.HighPrices[i],data.LowPrices[i]).Publish();
+            using var first=context.Rent(data.Count);using var second=context.Rent(data.Count);using var line=context.Rent(data.Count);using var signal=context.Rent(data.Count);
+            MovingAverage(data,maType,length1,ranges.Span,first.WritableSpan);MovingAverage(data,maType,length2,first.Span,second.WritableSpan);
+            var sum=new MassIndexSum(length3);for(var i=0;i<data.Count;i++)line.WritableSpan[i]=sum.Next(new(first.Span[i]),new(second.Span[i]),true).Publish();
+            MovingAverage(data,maType,signalLength,line.Span,signal.WritableSpan);
+            (outputKey=="Signal"?signal.Span:line.Span).CopyTo(output.WritableSpan);
         }
-
-        using var firstSmoothing = context.Rent(count);
-        using var secondSmoothing = context.Rent(count);
-        MovingAverage(data, maType, length1, range.Span, firstSmoothing.WritableSpan);
-        MovingAverage(data, maType, length2, firstSmoothing.Span, secondSmoothing.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var ratioSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
+        else
         {
-            var secondEma = secondSmoothing.Span[i];
-            ratioSumWindow.Add(secondEma != 0 ? firstSmoothing.Span[i] / secondEma : 0);
-            output[i] = ratioSumWindow.Sum(length3);
+            using var window=new MassIndexWindow(maType,length1,length2,length3,signalLength,data.Count);
+            for(var i=0;i<data.Count;i++){var result=window.Next(data.HighPrices[i],data.LowPrices[i],true);output.WritableSpan[i]=outputKey=="Signal"?result.Signal:result.Value;}
         }
-
-        return buffer;
+        return output;
     }
 
     #endregion

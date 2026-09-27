@@ -27591,5 +27591,248 @@
     "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~DailyPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~DailyPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~DailyPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~DailyPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~DailyPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
     "scope": "public sealed class DynamicPivotPointsState :"
+  },
+  {
+    "id": "mass-index-sum-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "_length = Math.Max(1,length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-zero-second",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "if(second.Mantissa==0)return default;",
+    "after": "if(second.Mantissa==0)return new(1);",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "second.AddTo(ref denominator)",
+    "after": "first.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-extended-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "return new(value,shift)",
+    "after": "return new(value)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-expiry-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "_ratios.Peek().AddTo(ref sum,-1)",
+    "after": "_ratios.Peek().AddTo(ref sum,1)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-stored-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "_ratios.Enqueue(ratio)",
+    "after": "_ratios.Enqueue(default)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-sum-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "if(commit){_sum=sum;",
+    "after": "if(true){_sum=sum;",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-reset-sum",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "_ratios.Clear();_sum=default;",
+    "after": "_ratios.Clear();",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Math.Max(1,first),Math.Max(1,second)",
+    "after": "1,Math.Max(1,second)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Math.Max(1,second),Math.Max(1,signal)",
+    "after": "1,Math.Max(1,signal)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Math.Max(1,signal)}",
+    "after": "1}",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "range.Add(low,-1)",
+    "after": "range.Add(low)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-early-range",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "range.Add(high);range.Add(low,-1);",
+    "after": "range.Add(high-low);",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-second-input",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Average(1,first,commit)",
+    "after": "Average(1,Range(high,low),commit)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Average(2,value,commit)",
+    "after": "Average(2,first,commit)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Average(0,Range(high,low),commit)",
+    "after": "Average(0,Range(high,low),true)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Average(1,first,commit)",
+    "after": "Average(1,first,true)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MassIndexWindow.cs",
+    "before": "Average(2,value,commit)",
+    "after": "Average(2,value,true)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "mass-index-raw-first-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maType,length1,ranges.Span",
+    "after": "maType,1,ranges.Span",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeMassIndexFast("
+  },
+  {
+    "id": "mass-index-raw-second-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maType,length2,first.Span",
+    "after": "maType,1,first.Span",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeMassIndexFast("
+  },
+  {
+    "id": "mass-index-raw-signal-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "maType,signalLength,line.Span",
+    "after": "maType,1,line.Span",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeMassIndexFast("
+  },
+  {
+    "id": "mass-index-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey==\"Signal\"?result.Signal:result.Value",
+    "after": "result.Value",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static ComputeBuffer ComputeMassIndexFast("
+  },
+  {
+    "id": "mass-index-batch-first-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "Average(ranges,length1)",
+    "after": "Average(ranges,1)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "public static StockData CalculateMassIndex("
+  },
+  {
+    "id": "mass-index-batch-second-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "Average(first,length2)",
+    "after": "Average(first,1)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "public static StockData CalculateMassIndex("
+  },
+  {
+    "id": "mass-index-batch-signal-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "Average(values,signalLength)",
+    "after": "Average(values,1)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "public static StockData CalculateMassIndex("
+  },
+  {
+    "id": "mass-index-batch-original-range",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "window.Next(stockData.HighPrices[i],stockData.LowPrices[i],true)",
+    "after": "window.Next(stockData.ChainedValues.Count>0?stockData.ChainedValues[i]:stockData.HighPrices[i],stockData.LowPrices[i],true)",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "public static StockData CalculateMassIndex("
+  },
+  {
+    "id": "mass-index-oscillator-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "emaLength,emaLength,sumLength",
+    "after": "emaLength,emaLength,1",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static void MassIndex("
+  },
+  {
+    "id": "mass-index-volatility-core-period",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "before": "emaLength,emaLength,length",
+    "after": "emaLength,emaLength,1",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "internal static void MassIndex("
+  },
+  {
+    "id": "mass-index-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
+    "scope": "public sealed class MassIndexState :"
   }
 ]

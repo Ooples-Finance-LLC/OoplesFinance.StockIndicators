@@ -92,6 +92,10 @@ internal static partial class BuiltInFormulaReferences
             var dailyPivotKeys=builtIn.BatchName==IndicatorName.StandardPivotPoints?new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"}:new[]{"Pivot","S1","R1"};
             for(var slot=0;slot<dailyPivotKeys.Length;slot++){var key=dailyPivotKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>DailyPivotOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MassIndex)
+        {
+            var massKeys=new[]{"Mi","Signal"};for(var slot=0;slot<massKeys.Length;slot++){var key=massKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>MassIndexOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.PpoMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>PpoMaOutputs(bars,builtIn)["PpoMa"],IndicatorErrorBudget.Exact);yield break;

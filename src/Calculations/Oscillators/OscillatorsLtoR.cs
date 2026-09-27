@@ -2963,55 +2963,23 @@ public static partial class Calculations
     public static StockData CalculateMassIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 21, int length2 = 21, int length3 = 25, int signalLength = 9)
     {
-        List<double> highLowList = new(stockData.Count);
-        List<double> massIndexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var ratioSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
+        length1=Math.Max(1,length1);length2=Math.Max(1,length2);length3=Math.Max(1,length3);signalLength=Math.Max(1,signalLength);
+        List<double> values=new(stockData.Count),signalValues=new(stockData.Count);var signals=CreateSignalsList(stockData);
+        if(Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-
-            var highLow = currentHigh - currentLow;
-            highLowList.Add(highLow);
+            var ranges=Enumerable.Range(0,stockData.Count).Select(i=>MassIndexWindow.Range(stockData.HighPrices[i],stockData.LowPrices[i]).Publish()).ToList();
+            List<double> Average(List<double> input,int period)=>Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input),period)?.ToList()??GetMovingAverageList(stockData,maType,period,input);
+            var first=Average(ranges,length1);var second=Average(first,length2);var sum=new MassIndexSum(length3);
+            for(var i=0;i<stockData.Count;i++)values.Add(sum.Next(new(first[i]),new(second[i]),true).Publish());
+            signalValues=Average(values,signalLength);
         }
-
-        var firstEmaList = GetMovingAverageList(stockData, maType, length1, highLowList);
-        var secondEmaList = GetMovingAverageList(stockData, maType, length2, firstEmaList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var firstEma = firstEmaList[i];
-            var secondEma = secondEmaList[i];
-
-            var ratio = secondEma != 0 ? firstEma / secondEma : 0;
-            ratioSumWindow.Add(ratio);
-            var massIndex = ratioSumWindow.Sum(length3);
-            massIndexList.Add(massIndex);
+            using var window=new MassIndexWindow(maType,length1,length2,length3,signalLength,stockData.Count);
+            for(var i=0;i<stockData.Count;i++){var result=window.Next(stockData.HighPrices[i],stockData.LowPrices[i],true);values.Add(result.Value);signalValues.Add(result.Signal);}
         }
-
-        var massIndexSignalList = GetMovingAverageList(stockData, maType, signalLength, massIndexList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var massIndex = massIndexList[i];
-            var massIndexEma = massIndexSignalList[i];
-            var prevMassIndex = i >= 1 ? massIndexList[i - 1] : 0;
-            var prevMassIndexEma = i >= 1 ? massIndexSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(massIndex - massIndexEma, prevMassIndex - prevMassIndexEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Mi", massIndexList },
-            { "Signal", massIndexSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(massIndexList);
-        stockData.IndicatorName = IndicatorName.MassIndex;
-
-        return stockData;
+        for(var i=0;i<stockData.Count;i++)signals?.Add(GetCompareSignal(values[i]-signalValues[i],i>0?values[i-1]-signalValues[i-1]:0));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Mi",values},{"Signal",signalValues}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.MassIndex;return stockData;
     }
 
 
