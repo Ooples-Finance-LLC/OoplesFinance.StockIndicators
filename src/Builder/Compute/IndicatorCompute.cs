@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            RootMovingAverageSquaredErrorBandsSpecOptions rmse => ComputeRmseBandsFast(data, context, rmse.Length, rmse.StdDevFactor, rmse.MaType, spec.OutputKey),
             HurstBandsSpecOptions hurst => ComputeHurstBandsFast(data, context, hurst.Length, hurst.InnerMult, hurst.OuterMult, hurst.ExtremeMult, spec.OutputKey),
             FlaggingBandsSpecOptions flagging => ComputeFlaggingBandsFast(data, context, flagging.Length, spec.OutputKey),
             FractalChaosBandsSpecOptions => ComputeFractalChaosBandsFast(data, context, spec.OutputKey),
@@ -21857,6 +21858,21 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes an envelope around the root smoothed squared moving-average residual.</summary>
+    internal static ComputeBuffer ComputeRmseBandsFast(StockData data, ComputeContext context, int length = 14, double factor = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
+    {
+        HighLowBandsWindow.ValidateShift(factor); length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var mean = context.Rent(input.Count); using var squares = context.Rent(external ? input.Count : 0); if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), mean.WritableSpan);
+        using var window = new RmseBandWindow(maType, length, factor, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, external ? mean.Span[i] : null); mean.WritableSpan[i] = point.Middle; if (external) squares.WritableSpan[i] = point.RawSquare; result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        if (external)
+        {
+            using var variance = context.Rent(input.Count); MovingAverage(data, maType, length, squares.Span, variance.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var point = RmseBandWindow.Bands(mean.Span[i], RmseBandWindow.ScaledVariance(variance.Span[i]), factor); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        }
         return result;
     }
 

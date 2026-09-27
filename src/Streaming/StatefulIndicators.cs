@@ -852,58 +852,16 @@ public sealed class ProjectionBandwidthState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("MiddleBand")]
 public sealed class RootMovingAverageSquaredErrorBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly IMovingAverageSmoother _powSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _stdDevFactor;
-
-    public RootMovingAverageSquaredErrorBandsState(double stdDevFactor = 1,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _powSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDevFactor = stdDevFactor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RmseBandWindow _window;
+    public RootMovingAverageSquaredErrorBandsState(double stdDevFactor = 1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) { _window = new(maType, length, stdDevFactor); }
     public IndicatorName Name => IndicatorName.RootMovingAverageSquaredErrorBands;
-
-    public void Reset()
-    {
-        _meanSmoother.Reset();
-        _powSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _meanSmoother.Next(value, isFinal);
-        var pow = (value - middle) * (value - middle);
-        var powAvg = _powSmoother.Next(pow, isFinal);
-        var rmaseDev = MathHelper.Sqrt(powAvg);
-        var upper = middle + (rmaseDev * _stdDevFactor);
-        var lower = middle - (rmaseDev * _stdDevFactor);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _meanSmoother.Dispose();
-        _powSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("FastMa")]

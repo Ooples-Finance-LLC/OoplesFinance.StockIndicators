@@ -1848,3 +1848,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Hand examples, odd/even and capped delays, extreme signed coefficients, selected inputs, alternate previews and reset replay cover batch, raw, armed, native and streaming routes.
 - **74/74** checks passed (`hurst-bands.trx`). Campaign402a/402b caught **17/17** injected faults; **2,613** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `d609e3cd13af3d8204ac1098756375b488f44e9aa5d0eaf1fde35df3f36f1b4f` / `1ef2cb4bae25bf7ed24d4353e88065f47c90e05079dbb49c24b7a8d651996338`.
 - Inventory: **4,623/7,131**, **2,508** omissions across **417** types; no construction failures. 172 grouped batches cover **1,797 configurations / 328 types**. F2ACBF2EA2605ABE3F6DD43AFB9FB2BEAE79481A7D8EE9662A10253FD7C29737 SHA256 `F2ACBF2EA2605ABE3F6DD43AFB9FB2BEAE79481A7D8EE9662A10253FD7C29737`. Full coverage remains incomplete.
+
+
+### Root Moving Average Squared Error Band numerical contracts
+
+- Five configurations now share independently checked moving-average residual RMS, with separate mean and squared-residual smoothing. Exact residual squares are retained in epsilon-squared units to avoid underflow; extended roots survive until the final affine bands.
+- Hand cases verify subnormal nonzero widths and an unpublishable root that still yields finite final bands. Selected prices, ordered customer callbacks, negative custom variance, legacy Hull averages, previews/reset and invalid inputs/factors are covered across five routes.
+- **83/83** checks passed (`rmse-bands.trx`). Campaign403a/403b caught **16/16** injected faults; **2,629** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `05f6283364e9d1b4ec33619cd3f6c3a9f8ce1fb059cdabc6e42d34f572559497` / `7e33bafce7f9b2e7f7699a44bf5f9dbeeace5bb8d3ea4934af6a9e01d74bf070`.
+- Inventory: **4,628/7,131**, **2,503** omissions across **416** types; no construction failures. 173 grouped batches cover **1,802 configurations / 329 types**. 761EABCB3D0E676B21812D5E5BD031D4B640E3B0941FF0F9641236455D46566B SHA256 `761EABCB3D0E676B21812D5E5BD031D4B640E3B0941FF0F9641236455D46566B`. Full coverage remains incomplete.

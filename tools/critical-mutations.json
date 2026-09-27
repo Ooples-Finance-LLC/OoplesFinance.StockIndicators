@@ -21892,5 +21892,135 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~HurstBandNumericalTests.DelayedZerosAndPartialMeanPreserveAllSixPercentageEnvelopes|FullyQualifiedName~HurstBandNumericalTests.SelectedPricesFeedDelayedHistory|FullyQualifiedName~HurstBandNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory",
     "scope": "public sealed class HurstBandsState :"
+  },
+  {
+    "id": "rmse-band-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_mean = new(kind, length, capacityHint)",
+    "after": "_mean = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-square-period",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_squares = new(kind, length, capacityHint)",
+    "after": "_squares = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-mean-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_mean = new(kind, length, capacityHint)",
+    "after": "_mean = new(MovingAvgType.ExponentialMovingAverage, length, capacityHint)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-residual-cross-term",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "square.AddProduct(close, middle, -2)",
+    "after": "square.AddProduct(close, middle, -1)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-early-square",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "square.ScaleByPowerOfTwo(2148); var scaledSquare",
+    "after": "square = new ExactMeanAccumulator(); square.Add(rawSquare); square.ScaleByPowerOfTwo(2148); var scaledSquare",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-square-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "square.ScaleByPowerOfTwo(2148)",
+    "after": "square.ScaleByPowerOfTwo(2146)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-root-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "Root(variance), factor",
+    "after": "new RocBankValue(Root(variance).Publish()), factor",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-factor",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "Root(variance), factor",
+    "after": "Root(variance), 1",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-negative-variance",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "if (variance.Mantissa <= 0) return default;",
+    "after": "if (variance.Mantissa <= 0) return new RocBankValue(1);",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_mean.Next(new RocBankValue(close), commit)",
+    "after": "_mean.Next(new RocBankValue(close), true)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-preview-squares",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_squares.Next(scaledSquare, commit)",
+    "after": "_squares.Next(scaledSquare, true)",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_mean?.Reset();",
+    "after": "if (_factor < 0 && _factor > 0) _mean?.Reset();",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-reset-squares",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "_squares?.Reset();",
+    "after": "if (_factor < 0 && _factor > 0) _squares?.Reset();",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/RmseBandWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(factor);",
+    "after": "if (factor == 0) HighLowBandsWindow.ValidateShift(factor);",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "rmse-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeRmseBandsFast("
+  },
+  {
+    "id": "rmse-band-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class RootMovingAverageSquaredErrorBandsState :"
   }
 ]

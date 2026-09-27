@@ -859,56 +859,18 @@ public static partial class Calculations
     public static StockData CalculateRootMovingAverageSquaredErrorBands(this StockData stockData, double stdDevFactor = 1, 
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
     {
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<double> powList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(stdDevFactor); length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var average = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : null;
+        using var window = new RmseBandWindow(maType, length, stdDevFactor, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), squares = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, average?[i]); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); squares.Add(point.RawSquare); }
+        if (external)
         {
-            var sma = smaList[i];
-            var currentValue = inputList[i];
-
-            var pow = Pow(currentValue - sma, 2);
-            powList.Add(pow);
+            var variance = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(squares), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, squares);
+            for (var i = 0; i < input.Count; i++) { var point = RmseBandWindow.Bands(middle[i], RmseBandWindow.ScaledVariance(variance[i]), stdDevFactor); upper[i] = point.Upper; lower[i] = point.Lower; }
         }
-
-        var powSmaList = GetMovingAverageList(stockData, maType, length, powList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var middleBand = smaList[i];
-            var currentValue = inputList[i];
-            var powSma = powSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevMiddleBand = i >= 1 ? smaList[i - 1] : 0;
-            var rmaseDev = Sqrt(powSma);
-
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = middleBand + (rmaseDev * stdDevFactor);
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = middleBand - (rmaseDev * stdDevFactor);
-            lowerBandList.Add(lowerBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", smaList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.RootMovingAverageSquaredErrorBands;
-
-        return stockData;
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.RootMovingAverageSquaredErrorBands; return stockData;
     }
 
 
