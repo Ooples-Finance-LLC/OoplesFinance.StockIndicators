@@ -1532,47 +1532,21 @@ public static partial class Calculations
     public static StockData CalculateDampingIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5, 
         double threshold = 1.5)
     {
-        List<double> rangeList = new(stockData.Count);
-        List<double> diList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var smaList = custom ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : StrengthWindow.Smooth(input, maType, length);
+        List<double>? rangeSmaList = null;
+        if (custom)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            
-            var range = currentHigh - currentLow;
-            rangeList.Add(range);
+            var rangeList = stockData.HighPrices.Select((v, i) => v - stockData.LowPrices[i]).ToList();
+            rangeSmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rangeList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, rangeList);
         }
-
-        var rangeSmaList = GetMovingAverageList(stockData, maType, length, rangeList);
-        for (var i = 0; i < stockData.Count; i++)
+        using var window = new DampingWindow(maType, length, input.Count); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevSma1 = i >= 1 ? rangeSmaList[i - 1] : 0;
-            var prevSma6 = i >= 6 ? rangeSmaList[i - 6] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-            var currentSma = smaList[i];
-
-            var di = prevSma6 != 0 ? prevSma1 / prevSma6 : 0;
-            diList.Add(di);
-
-            var signal = GetVolatilitySignal(currentValue - currentSma, prevValue - prevSma, di, threshold);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], true, rangeSmaList?[i]);
+            signals?.Add(GetVolatilitySignal(input[i] - smaList[i], i > 0 ? input[i - 1] - smaList[i - 1] : 0, value, threshold)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Di", diList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(diList);
-        stockData.IndicatorName = IndicatorName.DampingIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Di", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DampingIndex; return stockData;
     }
 
 

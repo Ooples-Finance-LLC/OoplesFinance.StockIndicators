@@ -31296,5 +31296,120 @@
     "before": "ReferenceFraction.FromDouble(Math.Sqrt(length))",
     "after": "ReferenceFraction.FromDouble(length)",
     "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "var older = _history.Count == 6 ?",
+    "after": "var older = _history.Count == 5 ?",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-numerator-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "_previous.AddTo(ref numerator)",
+    "after": "average.AddTo(ref numerator)",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "if (older.Mantissa != 0)",
+    "after": "if (older.Mantissa == 0)",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-range-difference",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "difference.Add(low, -1)",
+    "after": "difference.Add(low, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-previous-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "_previous = average;",
+    "after": "_previous = new RocBankValue(average.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-history-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "_history.Enqueue(average)",
+    "after": "_history.Enqueue(new RocBankValue(average.Publish()))",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "_history.Clear();",
+    "after": "// retain history\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/DampingWindow.cs",
+    "before": "return result;",
+    "after": "return Math.Max(0, Math.Min(1, result));",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class DampingIndexState"
+  },
+  {
+    "id": "damping-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " DampingIndexSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "damping-raw-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(data.HighPrices[i], data.LowPrices[i], true",
+    "after": "window.Next(data.HighPrices[i], input[i], true",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeDampingIndexFast("
+  },
+  {
+    "id": "damping-callback-input",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rangeList), length)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateDampingIndex("
+  },
+  {
+    "id": "damping-reference-lag",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Damping.cs",
+    "before": "i < 6 || average[i - 6].Sign == 0 ? 0 : (average[i - 1] / average[i - 6]).ToDouble()",
+    "after": "i < 6 || average[i - 5].Sign == 0 ? 0 : (average[i - 1] / average[i - 5]).ToDouble()",
+    "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]

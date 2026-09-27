@@ -18140,36 +18140,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDampingIndexFast(StockData data, ComputeContext context, int length = 5,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateDampingIndex compares the average bar range one bar back with the average range six bars
-        // before that, so a market whose range has been shrinking reads below one. The average takes whichever
-        // type the indicator was given, and the price itself only reaches its signal.
-        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = highList.Count;
-
-        using var rangeBuffer = context.Rent(count);
-        var range = rangeBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var average = context.Rent(input.Count);
+        if (custom)
         {
-            range[i] = highList[i] - lowList[i];
+            using var price = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), price.WritableSpan);
+            using var ranges = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) ranges.WritableSpan[i] = data.HighPrices[i] - data.LowPrices[i];
+            MovingAverage(data, maType, length, ranges.Span, average.WritableSpan);
         }
-
-        using var averageRangeBuffer = context.Rent(count);
-        var averageRange = averageRangeBuffer.WritableSpan;
-        MovingAverage(data, maType, length, range, averageRange);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            // Both readings are taken from before this bar, as the batch does.
-            var previous = i >= 1 ? averageRange[i - 1] : 0;
-            var older = i >= 6 ? averageRange[i - 6] : 0;
-            output[i] = older != 0 ? previous / older : 0;
-        }
-
-        return buffer;
+        using var window = new DampingWindow(maType, length, input.Count); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], true, custom ? average.Span[i] : null);
+        return output;
     }
 
     /// <summary>

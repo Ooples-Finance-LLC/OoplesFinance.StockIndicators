@@ -5556,55 +5556,16 @@ public sealed class DisparityIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Di")]
 public sealed class DampingIndexState : IStreamingIndicatorState, IDisposable
 {
-    private const int RangeLookback = 6;
-    private readonly IMovingAverageSmoother _rangeSmoother;
-    private readonly PooledRingBuffer<double> _rangeWindow;
-
-    public DampingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5, double threshold = 1.5)
-    {
-        _rangeSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _rangeWindow = new PooledRingBuffer<double>(RangeLookback);
-    }
-
+    private readonly DampingWindow _window;
+    public DampingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5, double threshold = 1.5) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.DampingIndex;
-
-    public void Reset()
-    {
-        _rangeSmoother.Reset();
-        _rangeWindow.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var range = bar.High - bar.Low;
-        var rangeSma = _rangeSmoother.Next(range, isFinal);
-        var prevSma1 = _rangeWindow.Count >= 1 ? _rangeWindow[_rangeWindow.Count - 1] : 0;
-        var prevSma6 = _rangeWindow.Count >= RangeLookback ? _rangeWindow[_rangeWindow.Count - RangeLookback] : 0;
-        var di = prevSma6 != 0 ? prevSma1 / prevSma6 : 0;
-
-        if (isFinal)
-        {
-            _rangeWindow.TryAdd(rangeSma, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Di", di }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(di, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Di", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _rangeSmoother.Dispose();
-        _rangeWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dti")]

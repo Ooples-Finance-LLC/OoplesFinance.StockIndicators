@@ -408,6 +408,7 @@ internal static partial class StatefulIndicatorFactory
             AlligatorLipsSpecOptions lips => new AlligatorIndexState(lipsLength: lips.Length),
             TillsonIE2SpecOptions tillson => new TillsonIE2State(tillson.MaType, tillson.Length),
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
+            DampingIndexSpecOptions damping => new DampingIndexState(damping.MaType, damping.Length),
             ChartmillValueIndicatorSpecOptions chartmill => new ChartmillValueIndicatorState(chartmill.MaType, chartmill.Length),
             GatorOscillatorSpecOptions gator => new GatorOscillatorState(jawLength: gator.Length),
             DerivativeOscillatorSpecOptions derivative => new DerivativeOscillatorState(derivative.MaType, derivative.Length),

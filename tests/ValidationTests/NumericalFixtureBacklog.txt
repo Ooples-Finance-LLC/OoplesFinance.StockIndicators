@@ -167,11 +167,6 @@ OoplesFinance.StockIndicators.Indicators.DTOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.DTOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.DTOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DTOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.DampingIndex/default
-OoplesFinance.StockIndicators.Indicators.DampingIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.DampingIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DampingIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.DampingIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.DemandIndex/default
 OoplesFinance.StockIndicators.Indicators.DemandIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.DemandIndex/minimum-periods
