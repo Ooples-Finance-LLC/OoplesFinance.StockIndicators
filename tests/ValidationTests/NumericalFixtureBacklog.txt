@@ -163,10 +163,6 @@ OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/longer-per
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/weighted-average
-OoplesFinance.StockIndicators.Indicators.Cmf/default
-OoplesFinance.StockIndicators.Indicators.Cmf/longer-periods
-OoplesFinance.StockIndicators.Indicators.Cmf/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Cmf/shorter-periods
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/default
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/longer-periods
 OoplesFinance.StockIndicators.Indicators.CommoditySelectionIndex/minimum-periods

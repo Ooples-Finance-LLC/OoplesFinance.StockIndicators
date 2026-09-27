@@ -50,6 +50,10 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>AverageGapOutputs(bars,builtIn)[key],IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ChaikinMoneyFlow)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>ChaikinFlowOutputs(bars,builtIn)["Cmf"],IndicatorErrorBudget.Exact);yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AnchoredMomentum)
         {
             var anchorKeys=builtIn.BatchOutputKey is { } selected?new[] {selected}:GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

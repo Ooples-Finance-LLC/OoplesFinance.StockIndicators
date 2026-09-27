@@ -3478,22 +3478,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeCmfFast(StockData data, ComputeContext context, int length = 20)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        var volume = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-            volume[i] = (double)tickerList[i].Volume;
-        }
-        var buffer = context.Rent(count);
-        VolumeCore.ChaikinMoneyFlow(high, low, close, volume, buffer.WritableSpan, length);
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;
+        var output=context.Rent(input.Count);using var window=new ChaikinFlowWindow(length);
+        for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(data.HighPrices[i],data.LowPrices[i],input[i],data.Volumes[i],true);
+        return output;
     }
 
     /// <summary>

@@ -41,35 +41,9 @@ internal static class VolumeCore
     /// </summary>
     internal static void ChaikinMoneyFlow(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double mfvSum = 0;
-        double volSum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            var mfm = range != 0 ? ((close[i] - low[i]) - (high[i] - close[i])) / range : 0;
-            var mfv = mfm * volume[i];
-
-            mfvSum += mfv;
-            volSum += volume[i];
-
-            if (i >= length)
-            {
-                var oldRange = high[i - length] - low[i - length];
-                var oldMfm = oldRange != 0 ? ((close[i - length] - low[i - length]) - (high[i - length] - close[i - length])) / oldRange : 0;
-                mfvSum -= oldMfm * volume[i - length];
-                volSum -= volume[i - length];
-            }
-
-            // CalculateChaikinMoneyFlow divides one rolling sum by another over however many bars have
-            // arrived, so the flow has a reading from the first bar rather than none.
-            output[i] = volSum != 0 ? mfvSum / volSum : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new ChaikinFlowWindow(length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],volume[i],true);
     }
 
     /// <summary>

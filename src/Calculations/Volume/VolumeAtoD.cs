@@ -119,50 +119,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChaikinMoneyFlow(this StockData stockData, int length = 20)
     {
-        List<double> chaikinMoneyFlowList = new(stockData.Count);
-        List<double> tempVolumeList = new(stockData.Count);
-        List<double> moneyFlowVolumeList = new(stockData.Count);
-        var volumeSumWindow = new RollingSum();
-        var mfVolumeSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, volumeList) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;var high=stockData.HighPrices;var low=stockData.LowPrices;var volume=stockData.Volumes;using var window=new ChaikinFlowWindow(length);
+        List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<input.Count;i++)
         {
-            var currentLow = lowList[i];
-            var currentHigh = highList[i];
-            var currentClose = inputList[i];
-            var moneyFlowMultiplier = currentHigh - currentLow != 0 ?
-                (currentClose - currentLow - (currentHigh - currentClose)) / (currentHigh - currentLow) : 0;
-            var prevCmf1 = i >= 1 ? chaikinMoneyFlowList[i - 1] : 0;
-            var prevCmf2 = i >= 2 ? chaikinMoneyFlowList[i - 2] : 0;
-
-            var currentVolume = volumeList[i];
-            tempVolumeList.Add(currentVolume);
-            volumeSumWindow.Add(currentVolume);
-
-            var moneyFlowVolume = moneyFlowMultiplier * currentVolume;
-            moneyFlowVolumeList.Add(moneyFlowVolume);
-            mfVolumeSumWindow.Add(moneyFlowVolume);
-
-            var volumeSum = volumeSumWindow.Sum(length);
-            var mfVolumeSum = mfVolumeSumWindow.Sum(length);
-
-            var cmf = volumeSum != 0 ? mfVolumeSum / volumeSum : 0;
-            chaikinMoneyFlowList.Add(cmf);
-
-            var signal = GetCompareSignal(cmf - prevCmf1, prevCmf1 - prevCmf2);
-            signalsList?.Add(signal);
+            var value=window.Next(high[i],low[i],input[i],volume[i],true);
+            var previous=i>0?values[i-1]:0;var older=i>1?values[i-2]:0;
+            signals?.Add(GetCompareSignal(value-previous,previous-older));values.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cmf", chaikinMoneyFlowList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(chaikinMoneyFlowList);
-        stockData.IndicatorName = IndicatorName.ChaikinMoneyFlow;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Cmf",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.ChaikinMoneyFlow;return stockData;
     }
 
 

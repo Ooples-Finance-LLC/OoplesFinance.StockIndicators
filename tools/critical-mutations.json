@@ -25590,6 +25590,14 @@
     "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
   },
   {
+    "id": "stochastic-gravity-stored-extremum",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticGravityWindow.cs",
+    "before": "queue.AddLast((_index,current))",
+    "after": "queue.AddLast((_index,BigInteger.Zero))",
+    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+  },
+  {
     "id": "stochastic-gravity-queue-dominance",
     "module": "numerical",
     "file": "src/Helpers/StochasticGravityWindow.cs",
@@ -25753,11 +25761,159 @@
     "scope": "internal static void EhlersStochasticCenterOfGravityOscillator("
   },
   {
-    "id": "stochastic-gravity-stored-extremum",
+    "id": "chaikin-flow-flow-volume",
     "module": "numerical",
-    "file": "src/Helpers/StochasticGravityWindow.cs",
-    "before": "queue.AddLast((_index,current))",
-    "after": "queue.AddLast((_index,BigInteger.Zero))",
-    "filter": "FullyQualifiedName~StochasticGravityNumericalTests.ExtendedGravityExtremaAndDelayedTriggerMatchIndependentFractions|FullyQualifiedName~StochasticGravityNumericalTests.RawAndBatchUseSelectedPrices|FullyQualifiedName~StochasticGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment"
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "MoneyFlowAccumulationWindow.Flow(high,low,close,volume)",
+    "after": "MoneyFlowAccumulationWindow.Flow(high,low,close,1)",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-flow-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "MoneyFlowAccumulationWindow.Flow(high,low,close,volume)",
+    "after": "MoneyFlowAccumulationWindow.Flow(high,low,high,volume)",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-flow-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "old.Flow.AddTo(ref flowSum,-1);",
+    "after": "",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "volumeSum.Add(old.Volume,-1);",
+    "after": "",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-flow-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "current.AddTo(ref flowSum);",
+    "after": "current.AddTo(ref flowSum,-1);",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-volume-count",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "volumeSum.Add(volume);",
+    "after": "volumeSum.Add(1);",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-zero-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "volumeSum.IsExactlyZero?0:",
+    "after": "volumeSum.IsExactlyZero?1:",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-ratio-reversed",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "flowSum.Ratio(volumeSum)",
+    "after": "volumeSum.Ratio(flowSum)",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "current.AddTo(ref flowSum);",
+    "after": "flowSum.Add(current.Publish());",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "if(commit){_flow=flowSum;",
+    "after": "if(true){_flow=flowSum;",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "_history.Clear();_flow=_volume=default;",
+    "after": "_flow=_volume=default;",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-reset-flow",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "_flow=_volume=default;",
+    "after": "_volume=default;",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-reset-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "_flow=_volume=default;",
+    "after": "_flow=default;",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-stored-volume",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "_history.Enqueue((current,volume))",
+    "after": "_history.Enqueue((current,1))",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChaikinFlowWindow.cs",
+    "before": "_length=Math.Max(1,length)",
+    "after": "_length=Math.Max(2,length)",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-selected-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCmfFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChaikinMoneyFlowState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-core-period",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void ChaikinMoneyFlow(",
+    "before": "new ChaikinFlowWindow(length)",
+    "after": "new ChaikinFlowWindow(1)",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
+  },
+  {
+    "id": "chaikin-flow-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/Volume/VolumeAtoD.cs",
+    "scope": "public static StockData CalculateChaikinMoneyFlow(",
+    "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
+    "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
+    "filter": "FullyQualifiedName~ChaikinFlowNumericalTests.RollingFlowAndVolumeMatchIndependentFractions|FullyQualifiedName~ChaikinFlowNumericalTests.SelectedPricesKeepOriginalRangeAndVolume|FullyQualifiedName~ChaikinFlowNumericalTests.InvalidFieldsCannotAdvanceFlowOrVolume"
   }
 ]

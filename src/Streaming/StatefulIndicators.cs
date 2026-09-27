@@ -4256,57 +4256,17 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Cmf")]
 public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _volumeSum;
-    private readonly RollingWindowSum _mfVolumeSum;
-
-    public ChaikinMoneyFlowState(int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _volumeSum = new RollingWindowSum(resolved);
-        _mfVolumeSum = new RollingWindowSum(resolved);
-    }
-
-    public IndicatorName Name => IndicatorName.ChaikinMoneyFlow;
-
-    public void Reset()
-    {
-        _volumeSum.Reset();
-        _mfVolumeSum.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
+    private readonly ChaikinFlowWindow _window;
+    public ChaikinMoneyFlowState(int length=20)=>_window=new(length);
+    public IndicatorName Name=>IndicatorName.ChaikinMoneyFlow;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var close = bar.Close;
-        var volume = bar.Volume;
-        var multiplier = high - low != 0
-            ? (close - low - (high - close)) / (high - low)
-            : 0;
-        var mfVolume = multiplier * volume;
-
-        var volumeSum = isFinal ? _volumeSum.Add(volume, out _) : _volumeSum.Preview(volume, out _);
-        var mfVolumeSum = isFinal ? _mfVolumeSum.Add(mfVolume, out _) : _mfVolumeSum.Preview(mfVolume, out _);
-        var cmf = volumeSum != 0 ? mfVolumeSum / volumeSum : 0;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cmf", cmf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmf, outputs);
+        var value=_window.Next(bar.High,bar.Low,bar.Close,bar.Volume,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Cmf",value}}:null);
     }
-
-    public void Dispose()
-    {
-        _volumeSum.Dispose();
-        _mfVolumeSum.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 
 [PrimaryOutput("Mfi")]
