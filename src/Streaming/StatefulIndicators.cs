@@ -8186,84 +8186,22 @@ public sealed class CalmarRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pivot")]
 public sealed class CamarillaPivotPointsState : IStreamingIndicatorState
 {
-    private double _prevClose;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-
+    private readonly DailyPivotLevels _daily = new(false, camarilla: true);
+    public CamarillaPivotPointsState() { }
     public IndicatorName Name => IndicatorName.CamarillaPivotPoints;
-
-    public void Reset()
-    {
-        _prevClose = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _daily.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var currentClose = prevClose;
-        var currentHigh = prevHigh;
-        var currentLow = prevLow;
-        var range = currentHigh - currentLow;
-
-        var pivot = (prevHigh + prevLow + prevClose) / 3;
-        var support1 = currentClose - ((1.1 / 12) * range);
-        var support2 = currentClose - ((1.1 / 6) * range);
-        var support3 = currentClose - (0.275 * range);
-        var support4 = currentClose - (0.55 * range);
-        var resistance1 = currentClose + ((1.1 / 12) * range);
-        var resistance2 = currentClose + ((1.1 / 6) * range);
-        var resistance3 = currentClose + (0.275 * range);
-        var resistance4 = currentClose + (0.55 * range);
-        var resistance5 = currentLow != 0 ? currentHigh / currentLow * currentClose : 0;
-        var support5 = currentClose - (resistance5 - currentClose);
-        var midpoint1 = (support3 + support2) / 2;
-        var midpoint2 = (support2 + support1) / 2;
-        var midpoint3 = (resistance2 + resistance1) / 2;
-        var midpoint4 = (resistance3 + resistance2) / 2;
-        var midpoint5 = (resistance3 + resistance4) / 2;
-        var midpoint6 = (support4 + support3) / 2;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _hasPrev = true;
-        }
-
+        var levels = _daily.Next(bar.StartTime, bar.Open, bar.High, bar.Low, bar.Close, isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(17)
-            {
-                { "Pivot", pivot },
-                { "S1", support1 },
-                { "S2", support2 },
-                { "S3", support3 },
-                { "S4", support4 },
-                { "S5", support5 },
-                { "R1", resistance1 },
-                { "R2", resistance2 },
-                { "R3", resistance3 },
-                { "R4", resistance4 },
-                { "R5", resistance5 },
-                { "M1", midpoint1 },
-                { "M2", midpoint2 },
-                { "M3", midpoint3 },
-                { "M4", midpoint4 },
-                { "M5", midpoint5 },
-                { "M6", midpoint6 }
-            };
+            var values = new Dictionary<string, double>(levels.Length);
+            for (var i = 0; i < levels.Length; i++) values[_daily.Keys[i]] = levels[i];
+            outputs = values;
         }
-
-        return new StreamingIndicatorStateResult(pivot, outputs);
+        return new StreamingIndicatorStateResult(levels[0], outputs);
     }
 }
 

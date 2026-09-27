@@ -1622,22 +1622,9 @@ internal static class TrendCore
     /// </summary>
     internal static void CamarillaPivotPoint(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            // No preceding bar means no levels: CalculateFloorPivotPoints and its siblings report zero on
-            // the first bar rather than falling back to the arriving bar's own high, low and close, which
-            // would be this bar's pivot drawn from this bar.
-            var prevHigh = i >= 1 ? high[i - 1] : 0;
-            var prevLow = i >= 1 ? low[i - 1] : 0;
-            var prevClose = i >= 1 ? close[i - 1] : 0;
-
-            output[i] = (prevHigh + prevLow + prevClose) / 3;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        // Each span element represents a completed period.
+        for(var i=0;i<close.Length;i++)output[i]=i==0?0:CamarillaPivotMath.Levels(high[i-1],low[i-1],close[i-1])[0];
     }
 
     /// <summary>

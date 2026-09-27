@@ -30,69 +30,67 @@ public static partial class Calculations
         List<double> midpoint6List = new(stockData.Count);
         List<double> pivotList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData, inputLength);
+        var (inputList, highList, lowList, _, _) = PivotPeriodInputs.Read(stockData, inputLength);
 
         for (var i = 0; i < inputList.Count; i++)
         {
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
             var currentClose = prevClose;
             var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var currentHigh = prevHigh;
             var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var currentLow = prevLow;
-            var range = currentHigh - currentLow;
+            var levels=CamarillaPivotMath.Levels(prevHigh,prevLow,prevClose);
 
-            var pivot = (prevHigh + prevLow + prevClose) / 3;
+            var pivot = levels[0];
             pivotList.Add(pivot);
 
             var prevSupportLevel1 = GetLastOrDefault(supportLevel1List);
-            var supportLevel1 = currentClose - ((1.1 / 12) * range);
+            var supportLevel1 = levels[1];
             supportLevel1List.Add(supportLevel1);
 
-            var supportLevel2 = currentClose - ((1.1 / 6) * range);
+            var supportLevel2 = levels[2];
             supportLevel2List.Add(supportLevel2);
 
-            var supportLevel3 = currentClose - (0.275 * range);
+            var supportLevel3 = levels[3];
             supportLevel3List.Add(supportLevel3);
 
-            var supportLevel4 = currentClose - (0.55 * range);
+            var supportLevel4 = levels[4];
             supportLevel4List.Add(supportLevel4);
 
             var prevResistanceLevel1 = GetLastOrDefault(resistanceLevel1List);
-            var resistanceLevel1 = currentClose + ((1.1 / 12) * range);
+            var resistanceLevel1 = levels[6];
             resistanceLevel1List.Add(resistanceLevel1);
 
-            var resistanceLevel2 = currentClose + ((1.1 / 6) * range);
+            var resistanceLevel2 = levels[7];
             resistanceLevel2List.Add(resistanceLevel2);
 
-            var resistanceLevel3 = currentClose + (0.275 * range);
+            var resistanceLevel3 = levels[8];
             resistanceLevel3List.Add(resistanceLevel3);
 
-            var resistanceLevel4 = currentClose + (0.55 * range);
+            var resistanceLevel4 = levels[9];
             resistanceLevel4List.Add(resistanceLevel4);
 
-            var resistanceLevel5 = currentLow != 0 ? currentHigh / currentLow * currentClose : 0;
+            var resistanceLevel5 = levels[10];
             resistanceLevel5List.Add(resistanceLevel5);
 
-            var supportLevel5 = currentClose - (resistanceLevel5 - currentClose);
+            var supportLevel5 = levels[5];
             supportLevel5List.Add(supportLevel5);
 
-            var midpoint1 = (supportLevel3 + supportLevel2) / 2;
+            var midpoint1 = levels[11];
             midpoint1List.Add(midpoint1);
 
-            var midpoint2 = (supportLevel2 + supportLevel1) / 2;
+            var midpoint2 = levels[12];
             midpoint2List.Add(midpoint2);
 
-            var midpoint3 = (resistanceLevel2 + resistanceLevel1) / 2;
+            var midpoint3 = levels[13];
             midpoint3List.Add(midpoint3);
 
-            var midpoint4 = (resistanceLevel3 + resistanceLevel2) / 2;
+            var midpoint4 = levels[14];
             midpoint4List.Add(midpoint4);
 
-            var midpoint5 = (resistanceLevel3 + resistanceLevel4) / 2;
+            var midpoint5 = levels[15];
             midpoint5List.Add(midpoint5);
 
-            var midpoint6 = (supportLevel4 + supportLevel3) / 2;
+            var midpoint6 = levels[16];
             midpoint6List.Add(midpoint6);
 
             var signal = GetBullishBearishSignal(currentClose - resistanceLevel1, prevClose - prevResistanceLevel1, currentClose - supportLevel1, 

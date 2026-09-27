@@ -18033,69 +18033,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeCamarillaPivotPointFast(StockData data, ComputeContext context,
         InputLength inputLength = InputLength.Day, CamarillaPivotSeries series = CamarillaPivotSeries.Pivot)
     {
-        // Per PERIOD, like every pivot: see ComputeDemarkPivotPointFast for why the per-bar spans this used
-        // to pass to TrendCore cannot match the batch on any series, the primary included.
-        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data, inputLength);
-
-        var periods = inputList.Count;
-        var levels = new List<double>(periods);
-        for (var i = 0; i < periods; i++)
-        {
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-
-            // No completed session exists during the first period; publish zero levels then.
-            var close = prevClose;
-            var high = prevHigh;
-            var low = prevLow;
-            var range = high - low;
-
-            var support1 = close - ((1.1 / 12) * range);
-            var support2 = close - ((1.1 / 6) * range);
-            var support3 = close - (0.275 * range);
-            var support4 = close - (0.55 * range);
-            var resistance1 = close + ((1.1 / 12) * range);
-            var resistance2 = close + ((1.1 / 6) * range);
-            var resistance3 = close + (0.275 * range);
-            var resistance4 = close + (0.55 * range);
-            var resistance5 = low != 0 ? high / low * close : 0;
-            var support5 = close - (resistance5 - close);
-
-            levels.Add(series switch
-            {
-                CamarillaPivotSeries.Support1 => support1,
-                CamarillaPivotSeries.Support2 => support2,
-                CamarillaPivotSeries.Support3 => support3,
-                CamarillaPivotSeries.Support4 => support4,
-                CamarillaPivotSeries.Support5 => support5,
-                CamarillaPivotSeries.Resistance1 => resistance1,
-                CamarillaPivotSeries.Resistance2 => resistance2,
-                CamarillaPivotSeries.Resistance3 => resistance3,
-                CamarillaPivotSeries.Resistance4 => resistance4,
-                CamarillaPivotSeries.Resistance5 => resistance5,
-                CamarillaPivotSeries.Mid1 => (support3 + support2) / 2,
-                CamarillaPivotSeries.Mid2 => (support2 + support1) / 2,
-                CamarillaPivotSeries.Mid3 => (resistance2 + resistance1) / 2,
-                CamarillaPivotSeries.Mid4 => (resistance3 + resistance2) / 2,
-                CamarillaPivotSeries.Mid5 => (resistance3 + resistance4) / 2,
-                CamarillaPivotSeries.Mid6 => (support4 + support3) / 2,
-                _ => (prevHigh + prevLow + prevClose) / 3
-            });
-        }
-
-        var groupIndexes = CalculationsHelper.GetInputLengthGroupIndexes(data, inputLength);
-        var expanded = CalculationsHelper.ExpandPeriodValuesToBars(levels, groupIndexes);
-
-        var buffer = context.Rent(data.Count);
-        var output = buffer.WritableSpan;
-        output.Clear();
-        for (var i = 0; i < output.Length && i < expanded.Count; i++)
-        {
-            output[i] = expanded[i];
-        }
-
-        return buffer;
+        var (close,high,low,_,_)=PivotPeriodInputs.Read(data,inputLength);var groups=CalculationsHelper.GetInputLengthGroupIndexes(data,inputLength);
+        var slot=(int)series;if(slot<0||slot>=CamarillaPivotMath.Keys.Length)slot=0;
+        var levels=new double[close.Count];for(var i=1;i<levels.Length;i++)levels[i]=CamarillaPivotMath.Levels(high[i-1],low[i-1],close[i-1])[slot];
+        var buffer=context.Rent(data.Count);for(var i=0;i<data.Count;i++)buffer.WritableSpan[i]=levels[groups[i]];return buffer;
     }
 
     /// <summary>

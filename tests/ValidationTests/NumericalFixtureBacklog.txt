@@ -92,7 +92,6 @@ OoplesFinance.StockIndicators.Indicators.CalmarRatio/default
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/longer-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/minimum-periods
 OoplesFinance.StockIndicators.Indicators.CalmarRatio/shorter-periods
-OoplesFinance.StockIndicators.Indicators.CamarillaPivotPoint/default
 OoplesFinance.StockIndicators.Indicators.ChandeCompositeMomentumIndex/default
 OoplesFinance.StockIndicators.Indicators.ChandeCompositeMomentumIndex/longer-longLength
 OoplesFinance.StockIndicators.Indicators.ChandeCompositeMomentumIndex/longer-periods
