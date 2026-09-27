@@ -26807,45 +26807,13 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputePseudoPolynomialChannelFast(StockData data, ComputeContext context, int length = 14, double morph = 0.9, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // V1 Algorithm: Polynomial morphing with MA smoothing
-        // 1. Compute morphed k values with lookback to length and 2*length
-        // 2. Apply MA to k values to get k1 (middle band)
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        int count = data.Count;
-        length = Math.Max(length, 1);
-
-        // Calculate k values with morphing
-        using var kBuffer = context.Rent(count);
-        var kSpan = kBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        HighLowBandsWindow.ValidateShift(morph); length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new PseudoPolynomialWindow(maType, length, morph, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        if (external)
         {
-            double y = close[i];
-            double prevK = i >= length ? kSpan[i - length] : y;
-            double prevK2 = i >= length * 2 ? kSpan[i - (length * 2)] : y;
-            double prevIndex = i >= length ? (i - length) : 0;
-            double prevIndex2 = i >= length * 2 ? (i - (length * 2)) : 0;
-
-            double ky = (morph * prevK) + ((1 - morph) * y);
-            double ky2 = (morph * prevK2) + ((1 - morph) * y);
-
-            double k = prevIndex2 - prevIndex != 0 ? ky + ((i - prevIndex) / (prevIndex2 - prevIndex) * (ky2 - ky)) : 0;
-            kSpan[i] = k;
+            using var raw = context.Rent(input.Count); using var mean = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Generate(input[i], true).Publish(); MovingAverage(data, maType, length, raw.Span, mean.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var p = window.Finish(input[i], new RocBankValue(mean.Span[i]), true); result.WritableSpan[i] = outputKey == "UpperBand" ? p.Upper : outputKey == "LowerBand" ? p.Lower : p.Middle; }
         }
-
-        // Apply MA to k values to get k1 (middle band = primary output)
-        var result = context.Rent(count);
-        MovingAverage(data, maType, length, kBuffer.Span, result.WritableSpan);
-        if (outputKey is "UpperBand" or "LowerBand")
-        {
-            double errorSum = 0;
-            var line = result.WritableSpan;
-            for (var i = 0; i < count; i++)
-            {
-                errorSum += Math.Abs(close[i] - line[i]);
-                var width = i == 0 ? 0 : errorSum / i;
-                line[i] += outputKey == "UpperBand" ? width : -width;
-            }
-        }
+        else for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? p.Upper : outputKey == "LowerBand" ? p.Lower : p.Middle; }
         return result;
     }
 

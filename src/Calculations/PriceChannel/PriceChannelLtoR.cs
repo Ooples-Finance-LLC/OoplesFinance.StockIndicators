@@ -273,72 +273,16 @@ public static partial class Calculations
     public static StockData CalculatePseudoPolynomialChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14, double morph = 0.9)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> yK1List = new(stockData.Count);
-        List<double> indexList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double yk1Sum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(morph); length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new PseudoPolynomialWindow(maType, length, morph, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var y = inputList[i];
-            var prevK = i >= length ? kList[i - length] : y;
-            var prevK2 = i >= length * 2 ? kList[i - (length * 2)] : y;
-            var prevIndex = i >= length ? indexList[i - length] : 0;
-            var prevIndex2 = i >= length * 2 ? indexList[i - (length * 2)] : 0;
-            var ky = (morph * prevK) + ((1 - morph) * y);
-            var ky2 = (morph * prevK2) + ((1 - morph) * y);
-
-            double index = i;
-            indexList.Add(i);
-
-            var k = prevIndex2 - prevIndex != 0 ? ky + ((index - prevIndex) / (prevIndex2 - prevIndex) * (ky2 - ky)) : 0;
-            kList.Add(k);
+            var raw = input.Select(v => window.Generate(v, true).Publish()).ToList(); var mean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, raw);
+            for (var i = 0; i < input.Count; i++) { var p = window.Finish(input[i], new RocBankValue(mean[i]), true); upper.Add(p.Upper); middle.Add(p.Middle); lower.Add(p.Lower); }
         }
-
-        var k1List = GetMovingAverageList(stockData, maType, length, kList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var k1 = k1List[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var yk1 = Math.Abs(currentValue - k1);
-            yK1List.Add(yk1);
-
-            yk1Sum += yk1;
-            var er = i != 0 ? yk1Sum / i : 0;
-            var prevUpperBand = GetLastOrDefault(upperBandList);
-            var upperBand = k1 + er;
-            upperBandList.Add(upperBand);
-
-            var prevLowerBand = GetLastOrDefault(lowerBandList);
-            var lowerBand = k1 - er;
-            lowerBandList.Add(lowerBand);
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.Add(middleBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, 
-                upperBand, prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.PseudoPolynomialChannel;
-
-        return stockData;
+        else for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); upper.Add(p.Upper); middle.Add(p.Middle); lower.Add(p.Lower); }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.PseudoPolynomialChannel; return stockData;
     }
 
 

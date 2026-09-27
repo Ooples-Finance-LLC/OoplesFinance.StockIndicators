@@ -22555,5 +22555,183 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState",
     "scope": "public sealed class EfficientTrendStepChannelState :"
+  },
+  {
+    "id": "pseudo-polynomial-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_mean = new(kind, _length, capacityHint)",
+    "after": "_mean = new(kind, _length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-first-lag",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_history[_history.Count - _length]",
+    "after": "_history[_history.Count - 1]",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-second-lag",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_history[_history.Count - 2 * _length]",
+    "after": "_history[_history.Count - _length]",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-startup-price",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_history[_history.Count - 2 * _length] : price",
+    "after": "_history[_history.Count - 2 * _length] : BigInteger.Zero",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-morph",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_morph = ExactVarianceWindow.Units(morph)",
+    "after": "_morph = ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-extrapolation-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "(ky - ky2)",
+    "after": "(ky2 - ky)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-zero-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "distance == 0 ? BigInteger.Zero",
+    "after": "distance == 0 ? price",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-error-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "Round(BigInteger.Abs(ExactVarianceWindow.Units(close) - center))",
+    "after": "Round(ExactVarianceWindow.Units(close) - center)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-cumulative-error",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "var sum = _errorSum + error",
+    "after": "var sum = error",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-error-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "new BigInteger(_bandCount)",
+    "after": "new BigInteger(_bandCount + 1)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-first-width",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_bandCount == 0 ? BigInteger.Zero",
+    "after": "_bandCount == 0 ? sum",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "Round(center - width)",
+    "after": "Round(center + width)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "ExactMeanAccumulator.UnitRatio(upper + lower, new BigInteger(2))",
+    "after": "ExactMeanAccumulator.UnitRatio(center, BigInteger.One)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "if (commit) { _history",
+    "after": "if (true) { _history",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_mean.Next(k, commit)",
+    "after": "_mean.Next(k, true)",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-preview-error",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "if (commit) { _errorSum",
+    "after": "if (true) { _errorSum",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_count = _bandCount = 0;",
+    "after": "_bandCount = 0;",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_mean?.Reset();",
+    "after": "if (_count < 0) _mean?.Reset();",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-reset-error",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "_errorSum = default;",
+    "after": "_errorSum += 0;",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-nonfinite-morph-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/PseudoPolynomialWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(morph); _length = Math.Max(1, length); _morph = ExactVarianceWindow.Units(morph);",
+    "after": "_length = Math.Max(1, length); _morph = ExactVarianceWindow.Units(double.IsNaN(morph) || double.IsInfinity(morph) ? 0 : morph);",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "pseudo-polynomial-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory",
+    "scope": "internal static ComputeBuffer ComputePseudoPolynomialChannelFast("
+  },
+  {
+    "id": "pseudo-polynomial-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory",
+    "scope": "public sealed class PseudoPolynomialChannelState :"
   }
 ]

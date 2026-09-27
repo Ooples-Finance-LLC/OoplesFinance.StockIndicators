@@ -569,80 +569,16 @@ public sealed class PriceHeadleyAccelerationBandsState : IStreamingIndicatorStat
 [PrimaryOutput("MiddleBand")]
 public sealed class PseudoPolynomialChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _morph;
-    private readonly IMovingAverageSmoother _kSmoother;
-    private readonly PooledRingBuffer<double> _kWindow;
-    private readonly StreamingInputResolver _input;
-    private double _yk1Sum;
-    private int _count;
-
-    public PseudoPolynomialChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        double morph = 0.9)
-    {
-        _length = Math.Max(1, length);
-        _morph = morph;
-        _kSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _kWindow = new PooledRingBuffer<double>(_length * 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly PseudoPolynomialWindow _window;
+    public PseudoPolynomialChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, double morph = .9) { _window = new(maType, length, morph); }
     public IndicatorName Name => IndicatorName.PseudoPolynomialChannel;
-
-    public void Reset()
-    {
-        _kSmoother.Reset();
-        _kWindow.Clear();
-        _yk1Sum = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var index = (double)_count;
-        var prevK = _kWindow.Count >= _length ? _kWindow[_kWindow.Count - _length] : value;
-        var prevK2 = _kWindow.Count >= _length * 2 ? _kWindow[_kWindow.Count - (_length * 2)] : value;
-        var prevIndex = index >= _length ? index - _length : 0;
-        var prevIndex2 = index >= _length * 2 ? index - (_length * 2) : 0;
-        var ky = (_morph * prevK) + ((1 - _morph) * value);
-        var ky2 = (_morph * prevK2) + ((1 - _morph) * value);
-        var denom = prevIndex2 - prevIndex;
-        var k = denom != 0 ? ky + ((index - prevIndex) / denom * (ky2 - ky)) : 0;
-        var k1 = _kSmoother.Next(k, isFinal);
-        var yk1 = Math.Abs(value - k1);
-        var yk1Sum = _yk1Sum + yk1;
-        var er = index != 0 ? yk1Sum / index : 0;
-        var upper = k1 + er;
-        var lower = k1 - er;
-        var middle = (upper + lower) / 2;
-
-        if (isFinal)
-        {
-            _kWindow.TryAdd(k, out _);
-            _yk1Sum = yk1Sum;
-            _count++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", p.Upper }, { "MiddleBand", p.Middle }, { "LowerBand", p.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _kSmoother.Dispose();
-        _kWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]
