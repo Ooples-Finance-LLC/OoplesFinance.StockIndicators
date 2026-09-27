@@ -934,74 +934,22 @@ public sealed class TFSVolumeOscillatorState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Tri")]
 public sealed class TheRangeIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly IMovingAverageSmoother _triSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public TheRangeIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 10,
-        int smoothLength = 3)
+    private readonly RangeIndicatorWindow _window;
+    private readonly IMovingAverageSmoother _average;
+    public TheRangeIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 10, int smoothLength = 3)
     {
-        _ = smoothLength;
-        _length = Math.Max(1, length);
-        _maxWindow = new RollingWindowMax(_length);
-        _minWindow = new RollingWindowMin(_length);
-        _triSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
+        _window = new(length);
+        _average = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(Math.Max(1, length)) : MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
     }
-
     public IndicatorName Name => IndicatorName.TheRangeIndicator;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _triSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() { _window.Reset(); _average.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var v1 = _hasPrev && value > prevValue ? tr / (value - prevValue) : tr;
-        var v2 = isFinal ? _minWindow.Add(v1, out _) : _minWindow.Preview(v1, out _);
-        var v3 = isFinal ? _maxWindow.Add(v1, out _) : _maxWindow.Preview(v1, out _);
-        var stoch = v3 - v2 != 0
-            ? MathHelper.MinOrMax(100 * (v1 - v2) / (v3 - v2), 100, 0)
-            : MathHelper.MinOrMax(100 * (v1 - v2), 100, 0);
-        var tri = _triSmoother.Next(stoch, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Tri", tri }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tri, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _average.Next(_window.Next(bar.High, bar.Low, bar.Close, isFinal), isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Tri", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _triSmoother.Dispose();
-    }
+    public void Dispose() => _average.Dispose();
 }
 
 [PrimaryOutput("Tlmo")]

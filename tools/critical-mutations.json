@@ -30283,5 +30283,121 @@
     "before": "StochasticSmooth(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);",
     "after": "MovingAverage(data, maType, smoothLength, longFastK.Span, longFastD.WritableSpan);",
     "filter": "FullyQualifiedName~ValidationTests.TradingAgreementNumericalTests.ExtremeCandleRangesAndSmoothersPreserveFiniteAgreement"
+  },
+  {
+    "id": "range-indicator-initial-close",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "_count == 0 ? close : _previous",
+    "after": "_previous",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-gain-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "close > _previous",
+    "after": "close < _previous",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-ratio-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "value = RocBankValue.RoundUnits(value << 1074, gain);",
+    "after": "value = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(value << 1074, gain));",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-gain-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "var gain = RocBankValue.RoundUnits(c - p, BigInteger.One);",
+    "after": "var gain = ExactVarianceWindow.Units(close - _previous);",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-range-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "var value = RocBankValue.RoundUnits(tr, BigInteger.One);",
+    "after": "var value = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(tr, BigInteger.One));",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "(100 * (value - lower)) << 1074",
+    "after": "(50 * (value - lower)) << 1074",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RangeIndicatorWindow.cs",
+    "before": "_maximum.Clear();",
+    "after": "// retain maxima\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
+  },
+  {
+    "id": "range-indicator-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing",
+    "scope": "internal static ComputeBuffer ComputeTheRangeIndicatorFast("
+  },
+  {
+    "id": "range-indicator-raw-sma",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "StochasticSmooth(data, maType, length, stochastic.Span, output.WritableSpan);",
+    "after": "MovingAverage(data, maType, length, stochastic.Span, output.WritableSpan);",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing",
+    "scope": "internal static ComputeBuffer ComputeTheRangeIndicatorFast("
+  },
+  {
+    "id": "range-indicator-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing",
+    "scope": "public sealed class TheRangeIndicatorState"
+  },
+  {
+    "id": "range-indicator-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " TheRangeIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.EveryRouteMatchesIndependentRangeGainNormalization"
+  },
+  {
+    "id": "range-indicator-batch-smoothing-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "GetMovingAverageList(stockData, maType, length, stochastic)",
+    "after": "GetMovingAverageList(stockData, maType, smoothLength, stochastic)",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing",
+    "scope": "public static StockData CalculateTheRangeIndicator("
+  },
+  {
+    "id": "range-indicator-reference-gain",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.RangeIndicator.cs",
+    "before": "tr / RoundRocBankStage(close - previous)",
+    "after": "tr * RoundRocBankStage(close - previous)",
+    "filter": "FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.HandRangeUsesCurrentCloseSeedAndOnlyDividesRisingPrices|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.UnrepresentableRangeAndGainRatiosRemainBoundedAndRecover|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.SelectedRawClosesKeepOriginalExtrema|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.CustomerSmootherReceivesNormalizedRangeAndMainPeriodOnce|FullyQualifiedName~ValidationTests.RangeIndicatorNumericalTests.InvalidFieldsDoNotAdvanceRatioHistoryOrSmoothing"
   }
 ]

@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.TheRangeIndicator)
+        {
+            var rangeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RangeIndicatorOutputs(bars, Integer(rangeOptions, "Length", 10), AverageKind(rangeOptions, 3))["Tri"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TradingMadeMoreSimplerOscillator)
         {
             yield return IndicatorValidationRule.Reference(0, bars => TradingAgreementOutputs(bars, Integer(builtIn.CreateOptions(), "Length", 14))["Tmmso"], IndicatorErrorBudget.Exact);

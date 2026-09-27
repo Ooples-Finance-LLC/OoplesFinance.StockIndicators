@@ -2647,50 +2647,24 @@ public static partial class Calculations
     public static StockData CalculateTheRangeIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage
         , int length = 10, int smoothLength = 3)
     {
-        List<double> v1List = new(stockData.Count);
-        List<double> stochList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var v1Window = new RollingMinMax(length);
-
+        var (input, highs, lows, _, _) = GetInputValuesList(stockData);
+        var window = new RangeIndicatorWindow(length); List<double> stochastic = new(stockData.Count);
+        for (var i = 0; i < stockData.Count; i++) stochastic.Add(window.Next(highs[i], lows[i], input[i], true));
+        List<double> values;
+        if (maType == MovingAvgType.SimpleMovingAverage && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var mean = new Streaming.RoundedSimpleMovingAverageSmoother(Math.Max(1, length));
+            values = stochastic.Select(value => mean.Next(value, true)).ToList();
+        }
+        else values = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(stochastic), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, stochastic);
+        var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-
-            var v1 = i >= 1 && currentValue > prevValue ? tr / MinPastValues(i, 1, currentValue - prevValue) : tr;
-            v1List.Add(v1);
-
-            v1Window.Add(v1);
-            var v2 = v1Window.Min;
-            var v3 = v1Window.Max;
-
-            var stoch = v3 - v2 != 0 ? MinOrMax(100 * (v1 - v2) / (v3 - v2), 100, 0) : MinOrMax(100 * (v1 - v2), 100, 0);
-            stochList.Add(stoch);
+            var previous = i > 0 ? values[i - 1] : 0; var prior = i > 1 ? values[i - 2] : 0;
+            signals?.Add(GetRsiSignal(values[i] - previous, previous - prior, values[i], previous, 80, 20));
         }
-
-        var triList = GetMovingAverageList(stockData, maType, length, stochList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tri = triList[i];
-            var prevTri1 = i >= 1 ? triList[i - 1] : 0;
-            var prevTri2 = i >= 2 ? triList[i - 2] : 0;
-
-            var signal = GetRsiSignal(tri - prevTri1, prevTri1 - prevTri2, tri, prevTri1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Tri", triList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(triList);
-        stockData.IndicatorName = IndicatorName.TheRangeIndicator;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Tri", values } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.TheRangeIndicator;
         return stockData;
     }
 

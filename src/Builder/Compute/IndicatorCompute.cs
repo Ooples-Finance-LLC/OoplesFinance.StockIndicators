@@ -26618,36 +26618,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTheRangeIndicatorFast(StockData data, ComputeContext context, int length = 10,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateTheRangeIndicator divides the true range by the day's gain whenever the series rose, takes
-        // the stochastic of that over the window and smooths it with the SAME length - the batch never reads
-        // its smoothLength, so this arm does not take one. OscillatorCore.Range was just the high minus low.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        using var stochastic = context.Rent(count);
-        var stoch = stochastic.WritableSpan;
-        var window = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            // The first bar has no previous close, so the true range is measured against its own close.
-            var prevValue = i >= 1 ? input[i - 1] : input[i];
-            var tr = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevValue);
-
-            var v1 = i >= 1 && input[i] > prevValue ? tr / CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) : tr;
-            window.Add(v1);
-
-            var v2 = window.Min;
-            var v3 = window.Max;
-            stoch[i] = v3 - v2 != 0 ? MathHelper.MinOrMax(100 * (v1 - v2) / (v3 - v2), 100, 0) :
-                MathHelper.MinOrMax(100 * (v1 - v2), 100, 0);
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, stochastic.Span, buffer.WritableSpan);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var stochastic = context.Rent(input.Count); var window = new RangeIndicatorWindow(length);
+        for (var i = 0; i < input.Count; i++) stochastic.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true);
+        var output = context.Rent(input.Count); StochasticSmooth(data, maType, length, stochastic.Span, output.WritableSpan);
+        return output;
     }
 
     // Batch 34 - Remaining Indicators (Part 3)
