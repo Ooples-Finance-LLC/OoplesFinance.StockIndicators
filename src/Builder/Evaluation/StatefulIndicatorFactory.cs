@@ -817,6 +817,7 @@ internal static partial class StatefulIndicatorFactory
 
             // Additional MAs - using named parameters to skip MovingAvgType defaults
             VmaSpecOptions vma => new VariableMovingAverageState(length: vma.Length),
+            DailyAveragePriceDeltaSpecOptions daily => new DailyAveragePriceDeltaState(daily.MaType,daily.Length),
             AmaSpecOptions ama => new AdaptiveMovingAverageState(length: ama.Length),
             LinearQuadraticConvergenceDivergenceOscillatorSpecOptions linearQuadratic => new LinearQuadraticConvergenceDivergenceOscillatorState(length: linearQuadratic.Length),
             ModifiedGannHiloActivatorSpecOptions gann => new ModifiedGannHiloActivatorState(gann.MaType, gann.Length),

@@ -1,4 +1,6 @@
 
+using OoplesFinance.StockIndicators.Compatibility;
+
 namespace OoplesFinance.StockIndicators;
 
 public static partial class Calculations
@@ -170,43 +172,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDailyAveragePriceDelta(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 21)
     {
-        List<double> topList = new(stockData.Count);
-        List<double> bottomList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var smaHighList = GetMovingAverageList(stockData, maType, length, highList);
-        var smaLowList = GetMovingAverageList(stockData, maType, length, lowList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length=Math.Max(1,length);var high=stockData.HighPrices;var low=stockData.LowPrices;using var window=new DailyDeltaWindow(maType,length,high.Count);
+        var external=Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var ah=external?Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(high),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,high):null;var al=external?Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(low),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,low):null;
+        List<double> upper=new(high.Count),lower=new(low.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<high.Count;i++)
         {
-            var high = highList[i];
-            var low = lowList[i];
-            var highSma = smaHighList[i];
-            var lowSma = smaLowList[i];
-            var dapd = highSma - lowSma;
-
-            var prevTop = GetLastOrDefault(topList);
-            var top = high + dapd;
-            topList.Add(top);
-
-            var prevBottom = GetLastOrDefault(bottomList);
-            var bottom = low - dapd;
-            bottomList.Add(bottom);
-
-            var signal = GetConditionSignal(high > prevTop, low < prevBottom);
-            signalsList?.Add(signal);
+            var v=external?DailyDeltaWindow.Finish(high[i],low[i],ah![i],al![i]):window.Next(high[i],low[i],true);
+            signals?.Add(GetConditionSignal(high[i]>(i>0?upper[i-1]:0),low[i]<(i>0?lower[i-1]:0)));upper.Add(v.Upper);lower.Add(v.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", topList },
-            { "LowerBand", bottomList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.DailyAveragePriceDelta;
-
-        return stockData;
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"UpperBand",upper},{"LowerBand",lower}});stockData.SetSignals(signals);stockData.SetCustomValues(new List<double>());stockData.IndicatorName=IndicatorName.DailyAveragePriceDelta;return stockData;
     }
 
 

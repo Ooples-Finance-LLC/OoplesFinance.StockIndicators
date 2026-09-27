@@ -1371,51 +1371,16 @@ public sealed class DynamicSupportAndResistanceState : IStreamingIndicatorState,
 [PrimaryOutput("UpperBand")]
 public sealed class DailyAveragePriceDeltaState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _highSmoother;
-    private readonly IMovingAverageSmoother _lowSmoother;
-
-    public DailyAveragePriceDeltaState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 21)
+    private readonly DailyDeltaWindow _window;
+    public DailyAveragePriceDeltaState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int length=21)=>_window=new(maType,length);
+    public IndicatorName Name=>IndicatorName.DailyAveragePriceDelta;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        var resolved = Math.Max(1, length);
-        _highSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _lowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.High,bar.Low,isFinal);
+        return new(value.Upper,includeOutputs?new Dictionary<string,double>{{"UpperBand",value.Upper},{"LowerBand",value.Lower}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.DailyAveragePriceDelta;
-
-    public void Reset()
-    {
-        _highSmoother.Reset();
-        _lowSmoother.Reset();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var highSma = _highSmoother.Next(bar.High, isFinal);
-        var lowSma = _lowSmoother.Next(bar.Low, isFinal);
-        var dapd = highSma - lowSma;
-        var upper = bar.High + dapd;
-        var lower = bar.Low - dapd;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "UpperBand", upper },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(upper, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highSmoother.Dispose();
-        _lowSmoother.Dispose();
-    }
+    public void Dispose()=>_window.Dispose();
 }
 [PrimaryOutput("K")]
 public sealed class PeriodicChannelState : IStreamingIndicatorState, IDisposable

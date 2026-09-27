@@ -8275,29 +8275,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(StockData data, ComputeContext context,
         int length = 21, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool lower = false)
     {
-        // CalculateDailyAveragePriceDelta widens each bar by how far the average high sits above the average
-        // low, and this spec is bound to the upper band: the high widened upwards. The close never enters it.
-        var (_, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = highList.Count;
-        var high = SpanCompat.AsReadOnlySpan(highList);
-
-        using var averageHighBuffer = context.Rent(count);
-        using var averageLowBuffer = context.Rent(count);
-        var averageHigh = averageHighBuffer.WritableSpan;
-        var averageLow = averageLowBuffer.WritableSpan;
-        MovingAverage(data, maType, length, high, averageHigh);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(lowList), averageLow);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        length=Math.Max(1,length);var high=data.HighPrices;var low=data.LowPrices;var output=context.Rent(high.Count);
+        using var window=new DailyDeltaWindow(maType,length,high.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var width = averageHigh[i] - averageLow[i];
-            output[i] = lower ? lowList[i] - width : high[i] + width;
+            using var ah=context.Rent(high.Count);using var al=context.Rent(low.Count);
+            MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(high),ah.WritableSpan);MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(low),al.WritableSpan);
+            for(var i=0;i<high.Count;i++){var v=DailyDeltaWindow.Finish(high[i],low[i],ah.Span[i],al.Span[i]);output.WritableSpan[i]=lower?v.Lower:v.Upper;}
         }
-
-        return buffer;
+        else for(var i=0;i<high.Count;i++){var v=window.Next(high[i],low[i],true);output.WritableSpan[i]=lower?v.Lower:v.Upper;}
+        return output;
     }
 
     /// <summary>

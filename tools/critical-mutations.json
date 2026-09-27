@@ -26078,5 +26078,180 @@
     "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
     "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
     "filter": "FullyQualifiedName~AdaptiveRangeMeanNumericalTests.RangeGainAndConvexRecursionMatchIndependentFractions|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.SelectedPricesKeepOriginalRange|FullyQualifiedName~AdaptiveRangeMeanNumericalTests.InvalidFieldsCannotAdvanceExtremaOrRecursion"
+  },
+  {
+    "id": "daily-delta-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "difference.Add(averageLow, -1)",
+    "after": "difference.Add(averageLow)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-upper-price",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "upper.Add(high)",
+    "after": "upper.Add(low)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-lower-price",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "lower.Add(low)",
+    "after": "lower.Add(high)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-lower-width-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "width.AddTo(ref lower, -1)",
+    "after": "width.AddTo(ref lower)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-upper-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "width.AddTo(ref upper)",
+    "after": "upper.Add(width.Publish())",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-lower-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "width.AddTo(ref lower, -1)",
+    "after": "lower.Add(-width.Publish())",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-high-input",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "new RocBankValue(high), commit",
+    "after": "new RocBankValue(low), commit",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-low-input",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "new RocBankValue(low), commit",
+    "after": "new RocBankValue(high), commit",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-high-kind",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "_high = new(kind, length, capacityHint)",
+    "after": "_high = new(MovingAvgType.ExponentialMovingAverage, length, capacityHint)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-low-kind",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "_low = new(kind, length, capacityHint)",
+    "after": "_low = new(MovingAvgType.ExponentialMovingAverage, length, capacityHint)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "new RocBankValue(high), commit",
+    "after": "new RocBankValue(high), true",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-low-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "new RocBankValue(low), commit",
+    "after": "new RocBankValue(low), true",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "_high?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-reset-low",
+    "module": "numerical",
+    "file": "src/Helpers/DailyDeltaWindow.cs",
+    "before": "_low?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-raw-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(",
+    "before": "var high=data.HighPrices;var low=data.LowPrices;",
+    "after": "var high=CalculationsHelper.GetInputValuesList(data).highList;var low=CalculationsHelper.GetInputValuesList(data).lowList;",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "scope": "public static StockData CalculateDailyAveragePriceDelta(",
+    "before": "var high=stockData.HighPrices;var low=stockData.LowPrices;",
+    "after": "var high=GetInputValuesList(stockData).highList;var low=GetInputValuesList(stockData).lowList;",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-raw-high-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(",
+    "before": "MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(high),ah.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,SpanCompat.AsReadOnlySpan(high),ah.WritableSpan)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-raw-low-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDailyAveragePriceDeltaFast(",
+    "before": "MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(low),al.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,SpanCompat.AsReadOnlySpan(low),al.WritableSpan)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-batch-high-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "scope": "public static StockData CalculateDailyAveragePriceDelta(",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(high),length)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(high),length+1)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-batch-low-period",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelAtoD.cs",
+    "scope": "public static StockData CalculateDailyAveragePriceDelta(",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(low),length)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(low),length+1)",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
+  },
+  {
+    "id": "daily-delta-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DailyAveragePriceDeltaState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~DailyDeltaNumericalTests.SeparateAveragesAndExtendedBandsMatchIndependentFractions|FullyQualifiedName~DailyDeltaNumericalTests.SelectedClosesDoNotReplaceRangesAndBothCustomerStagesAreHonored|FullyQualifiedName~DailyDeltaNumericalTests.InvalidFieldsCannotAdvanceEitherAverage"
   }
 ]
