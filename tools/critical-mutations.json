@@ -22927,5 +22927,175 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState",
     "scope": "public sealed class AutoDispersionBandsState :"
+  },
+  {
+    "id": "kirshenbaum-fit-period",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_fit = new(_length)",
+    "after": "_fit = new(_length + 1)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_mean = new(kind, Math.Max(1, meanLength), capacityHint)",
+    "after": "_mean = new(kind, Math.Max(2, meanLength), capacityHint)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-future-fit",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_fit.Next(close, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_fit.Next(close, commit).Next)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-early-fit",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_fit.Next(close, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_fit.Next(close, commit).Last)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-price-residual",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "var error = endpoint - ExactVarianceWindow.Units(close)",
+    "after": "var error = endpoint",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-early-square",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "var square = error * error",
+    "after": "var square = ExactVarianceWindow.Units(Math.Pow(ExactMeanAccumulator.UnitRatio(error, BigInteger.One), 2)) << 1074",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-error-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "sum -= _squares[0]",
+    "after": "sum += _squares[0]",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-partial-count",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "Math.Min(_length, _count + 1)",
+    "after": "_length",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-factor",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "KeltnerWindow.Bands(middle, deviation, _factor)",
+    "after": "KeltnerWindow.Bands(middle, deviation, 1)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-overflow-fallback",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "new RocBankValue(ExactPopulationDeviation.RootRatio(sum, denominator << 2048), 1024)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.UnpublishableResidualRmsStillProducesFiniteHalfWidthBands"
+  },
+  {
+    "id": "kirshenbaum-root-scale",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "denominator << 2048",
+    "after": "denominator << 2046",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.UnpublishableResidualRmsStillProducesFiniteHalfWidthBands"
+  },
+  {
+    "id": "kirshenbaum-preview-fit",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_fit.Next(close, commit)",
+    "after": "_fit.Next(close, true)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_mean.Next(new RocBankValue(close), commit)",
+    "after": "_mean.Next(new RocBankValue(close), true)",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-preview-energy",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "if (commit) { _squares",
+    "after": "if (true) { _squares",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-reset-fit",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_fit.Reset();",
+    "after": "if (_count < 0) _fit.Reset();",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_mean?.Reset();",
+    "after": "if (_count < 0) _mean?.Reset();",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-reset-energy",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_sum = default;",
+    "after": "_sum += 0;",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "_count = 0;",
+    "after": "_count += 0;",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/KirshenbaumWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(factor);",
+    "after": "if (factor == 0) HighLowBandsWindow.ValidateShift(factor);",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "kirshenbaum-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeKirshenbaumBandsFast("
+  },
+  {
+    "id": "kirshenbaum-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~KirshenbaumNumericalTests.RoundedMovingFitResidualsPreserveSubnormalAndExtendedEndpoints|FullyQualifiedName~KirshenbaumNumericalTests.SelectedPricesFeedFitWhileCustomerAverageControlsCenter|FullyQualifiedName~KirshenbaumNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class KirshenbaumBandsState :"
   }
 ]

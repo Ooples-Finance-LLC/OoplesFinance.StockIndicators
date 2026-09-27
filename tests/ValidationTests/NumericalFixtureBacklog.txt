@@ -1363,15 +1363,6 @@ OoplesFinance.StockIndicators.Indicators.KaufmanBinaryWave/default
 OoplesFinance.StockIndicators.Indicators.KaufmanBinaryWave/longer-periods
 OoplesFinance.StockIndicators.Indicators.KaufmanBinaryWave/minimum-periods
 OoplesFinance.StockIndicators.Indicators.KaufmanBinaryWave/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/default
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/longer-length1
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/longer-length2
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/longer-periods
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/minimum-length1
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/minimum-length2
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KirshenbaumBands/weighted-average
 OoplesFinance.StockIndicators.Indicators.KlingerSignal/default
 OoplesFinance.StockIndicators.Indicators.KlingerSignal/longer-fastLength
 OoplesFinance.StockIndicators.Indicators.KlingerSignal/longer-periods

@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.KirshenbaumBands)
+        {
+            var kirshenbaumKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kirshenbaumKeys.Length; slot++) { var key = kirshenbaumKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KirshenbaumOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AutoDispersionBands)
         {
             var dispersionKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

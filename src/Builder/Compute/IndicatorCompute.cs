@@ -21397,22 +21397,10 @@ internal static partial class IndicatorCompute
         int length1 = 30, int length2 = 20, double stdDevFactor = 1,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(input.Length);
-        MovingAverage(data, maType, length1, input, buffer.WritableSpan);
-        if (band == ChannelBand.Middle) return buffer;
-        using var regression = new ExactLinearFitWindow(length2);
-        var energy = new RollingSum();
-        var multiplier = band == ChannelBand.Upper ? stdDevFactor : -stdDevFactor;
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < input.Length; i++)
-        {
-            var error = regression.Next(input[i], isFinal: true).Last - input[i];
-            energy.Add(error * error);
-            output[i] += multiplier * Math.Sqrt(Math.Max(0, energy.Average(length2)));
-        }
-        return buffer;
+        HighLowBandsWindow.ValidateShift(stdDevFactor); length1 = Math.Max(1, length1); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var mean = context.Rent(external ? input.Count : 0); if (external) MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(input), mean.WritableSpan);
+        using var window = new KirshenbaumWindow(maType, length1, length2, stdDevFactor, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true, external ? mean.Span[i] : null); result.WritableSpan[i] = band == ChannelBand.Upper ? p.Upper : band == ChannelBand.Lower ? p.Lower : p.Middle; }
+        return result;
     }
 
     /// <summary>

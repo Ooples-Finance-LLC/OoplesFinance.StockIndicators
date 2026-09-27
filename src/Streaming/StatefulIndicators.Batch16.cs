@@ -360,67 +360,16 @@ public sealed class KendallRankCorrelationCoefficientState : IStreamingIndicator
 [PrimaryOutput("MiddleBand")]
 public sealed class KirshenbaumBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly double _stdDevFactor;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly LinearRegressionState _linReg;
-    private readonly RollingWindowSum _errorSum;
-    private readonly StreamingInputResolver _input;
-
-    public KirshenbaumBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 30, int length2 = 20, double stdDevFactor = 1)
-    {
-        _length2 = Math.Max(1, length2);
-        _stdDevFactor = stdDevFactor;
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _linReg = new LinearRegressionState(_length2);
-        _errorSum = new RollingWindowSum(_length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KirshenbaumWindow _window;
+    public KirshenbaumBandsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 20, double stdDevFactor = 1) { _window = new(maType, length1, length2, stdDevFactor); }
     public IndicatorName Name => IndicatorName.KirshenbaumBands;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _linReg.Reset();
-        _errorSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _smoother.Next(value, isFinal);
-        var linReg = _linReg.Update(bar, isFinal, includeOutputs: false).Value;
-        var diff = linReg - value;
-        var sum = isFinal ? _errorSum.Add(diff * diff, out var count) : _errorSum.Preview(diff * diff, out count);
-        var sampleCount = Math.Min(_length2, count);
-        var stdError = sampleCount > 0 ? MathHelper.Sqrt(sum / sampleCount) : 0;
-        stdError = MathHelper.IsValueNullOrInfinity(stdError) ? 0 : stdError;
-        var ratio = stdError * _stdDevFactor;
-        var upper = middle + ratio;
-        var lower = middle - ratio;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", p.Upper }, { "MiddleBand", p.Middle }, { "LowerBand", p.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _linReg.Dispose();
-        _errorSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Kvo")]

@@ -438,57 +438,13 @@ public static partial class Calculations
     public static StockData CalculateKirshenbaumBands(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 30, int length2 = 20, double stdDevFactor = 1)
     {
-        List<double> topList = new(stockData.Count);
-        List<double> bottomList = new(stockData.Count);
-        List<double> tempInputList = new(stockData.Count);
-        List<double> tempLinRegList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum errorSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var linRegList = CalculateLinearRegression(stockData, length2).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(stdDevFactor); length1 = Math.Max(1, length1); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); var mean = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input) : null;
+        using var window = new KirshenbaumWindow(maType, length1, length2, stdDevFactor, external, Math.Max(1, input.Count)); List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentEma = emaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var currentValue = inputList[i];
-            tempInputList.Add(currentValue);
-
-            var currentLinReg = linRegList[i];
-            tempLinRegList.Add(currentLinReg);
-            var diff = currentLinReg - currentValue;
-            errorSumWindow.Add(diff * diff);
-
-            var sampleCount = Math.Min(length2, errorSumWindow.Count);
-            var stdError = sampleCount > 0 ? Sqrt(errorSumWindow.Sum(length2) / sampleCount) : 0;
-            stdError = IsValueNullOrInfinity(stdError) ? 0 : stdError;
-            var ratio = (double)stdError * stdDevFactor;
-
-            var prevTop = GetLastOrDefault(topList);
-            var top = currentEma + ratio;
-            topList.Add(top);
-
-            var prevBottom = GetLastOrDefault(bottomList);
-            var bottom = currentEma - ratio;
-            bottomList.Add(bottom);
-
-            var signal = GetBullishBearishSignal(currentValue - top, prevValue - prevTop, currentValue - bottom, prevValue - prevBottom);
-            signalsList?.Add(signal);
+            var p = window.Next(input[i], true, mean?[i]); signals?.Add(GetBullishBearishSignal(input[i] - p.Upper, i > 0 ? input[i - 1] - upper[i - 1] : 0, input[i] - p.Lower, i > 0 ? input[i - 1] - lower[i - 1] : 0)); upper.Add(p.Upper); middle.Add(p.Middle); lower.Add(p.Lower);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", topList },
-            { "MiddleBand", emaList },
-            { "LowerBand", bottomList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.KirshenbaumBands;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.KirshenbaumBands; return stockData;
     }
 
 
