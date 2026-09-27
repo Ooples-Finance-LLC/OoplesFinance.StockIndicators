@@ -2324,7 +2324,8 @@ public sealed class FormulaContractCoverageTests
         Check(new AdaptiveErgodicCandlestickOscillator(2, 2, 2), bars,
             new[] { 33.33333333333333, 33.33333333333333, -25 }, new[] { 33.33333333333333, 33.33333333333333, -5.555555555555557 });
         Check(new ApirineSlowRelativeStrengthIndex(2, 2), reversal, new[] { 100d, 100, 80 });
-        Check(new Ama(2), prices, new[] { 4d / 225, 364d / 405, 1660d / 729 });
+        // AMA rounds its alpha and gain before each exactly accumulated blend.
+        Check(new Ama(2), prices, new[] { 0.017777777777777778, 0.8987654320987654, 2.277091906721536 });
         Check(new PoweredKaufmanAdaptiveMovingAverage(2), prices, new[] { 0d, 0, 1 }, new[] { 1d, 1, 4 });
         Check(new AdaptiveStochastic(2, 3), prices, new[] { 0d, 1, 1 });
         Check(new AsymmetricalRelativeStrengthIndex(3), reversal, new[] { 100d, 100, 100d / 3 });
@@ -2387,7 +2388,8 @@ public sealed class FormulaContractCoverageTests
         Check(new BollingerBandsAvgTrueRange(2, 2, 2, MovingAvgType.SimpleMovingAverage), reversal, new[] { 0d, .25, .5 });
         var timingBars = Enumerable.Range(0, 5).Select(_ => new Bar(new DateTime(2021, 1, 4), 10, 11, 9, 10, 100)).ToArray();
         Check(new DailyAveragePriceDelta(2), timingBars, new[] { 11d, 13, 13, 13, 13 }, new[] { 9d, 7, 7, 7, 7 });
-        Check(new BelkhayateTiming(5), timingBars, new[] { 100d, 37.5, 50d / 3, 6.25, 0 });
+        // The range mean and binary64 .2 scale each round before the ratio.
+        Check(new BelkhayateTiming(5), timingBars, new[] { 99.99999999999999, 37.49999999999999, 16.666666666666668, 6.249999999999999, 0 });
         Check(new AutoLine(3), holdPrices, new[] { 1d, 2, 4, 4 });
         Check(new AutoLineWithDrift(3), holdPrices, new[] { 1d, 2, 4, 25d / 6 });
         Check(new AutoFilter(3), holdPrices, new[] { 0d, 0, 4, 3.7 });
@@ -2479,7 +2481,8 @@ public sealed class FormulaContractCoverageTests
             .Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new ChandeTrendScore(12), scorePrices, Enumerable.Repeat(2d, 11).Concat(new[] { 0d, -2 }).ToArray());
         Check(new WildersSummationMethod(2), prices, new[] { 1d, 2.5, 5.25 });
-        Check(new PpoMa(2, 3), prices, new[] { 0d, 0, 250d / 7 });
+        // Both EMA values round before the percentage difference is normalized.
+        Check(new PpoMa(2, 3), prices, new[] { 0d, 0, 35.7142857142857 });
         Check(new PriceMomentum(1), prices, new[] { 0d, 1, 2 });
         Check(new QuickMovingAverage(3), prices, new[] { .25, 1, 2.25 });
         Check(new QuickMovingAverage(1), prices, new[] { 1d / 3, 4d / 3, 8d / 3 });
