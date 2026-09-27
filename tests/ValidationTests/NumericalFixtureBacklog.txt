@@ -113,11 +113,6 @@ OoplesFinance.StockIndicators.Indicators.ChandelierExitShort/longer-periods
 OoplesFinance.StockIndicators.Indicators.ChandelierExitShort/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ChandelierExitShort/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ChandelierExitShort/weighted-average
-OoplesFinance.StockIndicators.Indicators.ChartmillValueIndicator/default
-OoplesFinance.StockIndicators.Indicators.ChartmillValueIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.ChartmillValueIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ChartmillValueIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ChartmillValueIndicator/weighted-average
 OoplesFinance.StockIndicators.Indicators.ChopZone/default
 OoplesFinance.StockIndicators.Indicators.ChopZone/longer-periods
 OoplesFinance.StockIndicators.Indicators.ChopZone/minimum-periods

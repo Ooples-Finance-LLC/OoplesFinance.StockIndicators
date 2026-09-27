@@ -4541,76 +4541,18 @@ public sealed class BelkhayateTimingState : IStreamingIndicatorState
 [PrimaryOutput("Cmvc")]
 public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly IMovingAverageSmoother _inputSmoother;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private StreamingInputResolver _input;
-    private readonly double _lengthSqrt;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public ChartmillValueIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
-    {
-        var resolved = Math.Max(1, length);
-        _inputSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.MedianPrice, null);
-        _lengthSqrt = MathHelper.Pow(resolved, 0.5);
-    }
-
+    private readonly ChartmillWindow _window;
+    private StreamingInputResolver _input = new(InputName.MedianPrice, null);
+    public ChartmillValueIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.ChartmillValueIndicator;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _inputSmoother.Reset();
-        _atrSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _input = new StreamingInputResolver(InputName.Close, null);
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var input = _input.GetValue(bar);
-        var f = _inputSmoother.Next(input, isFinal);
-        // For TrueRange on first bar, use current close
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        var denom = atr * _lengthSqrt;
-        var cmvC = denom != 0 ? MathHelper.MinOrMax((bar.Close - f) / denom, 1, -1) : 0;
-        var cmvO = denom != 0 ? MathHelper.MinOrMax((bar.Open - f) / denom, 1, -1) : 0;
-        var cmvH = denom != 0 ? MathHelper.MinOrMax((bar.High - f) / denom, 1, -1) : 0;
-        var cmvL = denom != 0 ? MathHelper.MinOrMax((bar.Low - f) / denom, 1, -1) : 0;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Cmvc", cmvC },
-                { "Cmvo", cmvO },
-                { "Cmvh", cmvH },
-                { "Cmvl", cmvL }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cmvC, outputs);
+        var input = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, bar.Open, bar.Close, input, isFinal);
+        return new(value.Close, includeOutputs ? new Dictionary<string, double> { { "Cmvc", value.Close }, { "Cmvo", value.Open }, { "Cmvh", value.High }, { "Cmvl", value.Low } } : null);
     }
-
-    public void Dispose()
-    {
-        _inputSmoother.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ca")]

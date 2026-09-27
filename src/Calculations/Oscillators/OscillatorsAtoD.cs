@@ -464,54 +464,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChartmillValueIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5)
     {
-        List<double> cmvCList = new(stockData.Count);
-        List<double> cmvOList = new(stockData.Count);
-        List<double> cmvHList = new(stockData.Count);
-        List<double> cmvLList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, closeList, _) = GetInputValuesList(InputName.MedianPrice, stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        var fList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, _, _) = GetInputValuesList(InputName.MedianPrice, stockData);
+        var close = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.ClosePrices;
+        List<double>? averages = null;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            averages = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        using var window = new ChartmillWindow(maType, length, input.Count);
+        var c = new List<double>(input.Count); var o = new List<double>(input.Count); var h = new List<double>(input.Count); var l = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var v = atrList[i];
-            var f = fList[i];
-            var prevCmvc1 = i >= 1 ? cmvCList[i - 1] : 0;
-            var prevCmvc2 = i >= 2 ? cmvCList[i - 2] : 0;
-            var currentClose = closeList[i];
-            var currentOpen = openList[i];
-
-            var cmvC = v != 0 ? MinOrMax((currentClose - f) / (v * Pow(length, 0.5)), 1, -1) : 0;
-            cmvCList.Add(cmvC);
-
-            var cmvO = v != 0 ? MinOrMax((currentOpen - f) / (v * Pow(length, 0.5)), 1, -1) : 0;
-            cmvOList.Add(cmvO);
-
-            var cmvH = v != 0 ? MinOrMax((currentHigh - f) / (v * Pow(length, 0.5)), 1, -1) : 0;
-            cmvHList.Add(cmvH);
-
-            var cmvL = v != 0 ? MinOrMax((currentLow - f) / (v * Pow(length, 0.5)), 1, -1) : 0;
-            cmvLList.Add(cmvL);
-
-            var signal = GetRsiSignal(cmvC - prevCmvc1, prevCmvc1 - prevCmvc2, cmvC, prevCmvc1, 0.5, -0.5);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], stockData.OpenPrices[i], close[i], input[i], true, averages?[i]);
+            var previous = i > 0 ? c[i - 1] : 0; var prior = i > 1 ? c[i - 2] : 0;
+            signals?.Add(GetRsiSignal(value.Close - previous, previous - prior, value.Close, previous, .5, -.5));
+            c.Add(value.Close); o.Add(value.Open); h.Add(value.High); l.Add(value.Low);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cmvc", cmvCList },
-            { "Cmvo", cmvOList },
-            { "Cmvh", cmvHList },
-            { "Cmvl", cmvLList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ChartmillValueIndicator;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cmvc", c }, { "Cmvo", o }, { "Cmvh", h }, { "Cmvl", l } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.ChartmillValueIndicator; return stockData;
     }
 
 

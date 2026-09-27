@@ -6647,33 +6647,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChartmillValueIndicatorFast(StockData data, ComputeContext context,
         int length = 5, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? key = null)
     {
-        // CalculateChartmillValueIndicator measures how far the close sits from an average of the median
-        // price, in units of the average true range widened by the square root of the length. Both the
-        // average and the range take whichever type the indicator was given.
-        var (inputList, highList, lowList, openList, closeList, _) =
-            CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
-        var selected = key == "Cmvh" ? highList : key == "Cmvl" ? lowList : key == "Cmvo" ? openList : closeList;
-        var count = inputList.Count;
-
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        var atrSpan = atr.Span;
-
-        using var fBuffer = context.Rent(count);
-        var f = fBuffer.WritableSpan;
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(inputList), f);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, _, _) = CalculationsHelper.GetInputValuesList(InputName.MedianPrice, data);
+        var close = data.ChainedValues.Count > 0 ? data.ChainedValues : data.ClosePrices; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var center = context.Rent(input.Count);
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), center.WritableSpan);
+        using var window = new ChartmillWindow(maType, length, input.Count); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
         {
-            var v = atrSpan[i];
-            output[i] = v != 0
-                ? MathHelper.MinOrMax((selected[i] - f[i]) / (v * MathHelper.Pow(length, 0.5)), 1, -1)
-                : 0;
+            var value = window.Next(data.HighPrices[i], data.LowPrices[i], data.OpenPrices[i], close[i], input[i], true, external ? center.Span[i] : null);
+            output.WritableSpan[i] = key == "Cmvo" ? value.Open : key == "Cmvh" ? value.High : key == "Cmvl" ? value.Low : value.Close;
         }
-
-        return buffer;
+        return output;
     }
 
     /// <summary>

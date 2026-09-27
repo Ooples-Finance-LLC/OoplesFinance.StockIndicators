@@ -31172,5 +31172,129 @@
     "before": "return Math.Max(0, Math.Min(100, result));",
     "after": "return result;",
     "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "chartmill-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "_scale = Math.Sqrt(length)",
+    "after": "_scale = length",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-difference",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "center.AddTo(ref difference, -1)",
+    "after": "center.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-atr-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "_range.Next(high, low, close, commit).Atr.Multiply(_scale)",
+    "after": "new RocBankValue(_range.Next(high, low, close, commit).Atr.Publish()).Multiply(_scale)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-range-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "_range.Next(high, low, close, commit)",
+    "after": "_range.Next(high, low, input, commit)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-open-output",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "Normalize(open, center, denominator)",
+    "after": "Normalize(close, center, denominator)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-high-output",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "Normalize(high, center, denominator)",
+    "after": "Normalize(low, center, denominator)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-low-output",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "Normalize(low, center, denominator)",
+    "after": "Normalize(high, center, denominator)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "_range.Next(high, low, close, commit)",
+    "after": "_range.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ChartmillWindow.cs",
+    "before": "_range.Reset();",
+    "after": "// retain range\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.ClosePrices",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeChartmillValueIndicatorFast("
+  },
+  {
+    "id": "chartmill-callback-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SpanCompat.AsReadOnlySpan(input), center.WritableSpan",
+    "after": "SpanCompat.AsReadOnlySpan(close), center.WritableSpan",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeChartmillValueIndicatorFast("
+  },
+  {
+    "id": "chartmill-native-selected",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_input = new StreamingInputResolver(InputName.Close, null)",
+    "after": "_input = new StreamingInputResolver(InputName.MedianPrice, null)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class ChartmillValueIndicatorState"
+  },
+  {
+    "id": "chartmill-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var input = _input.GetValue(bar);",
+    "after": "double input; try { input = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { input = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests.InvalidFieldsDoNotAdvanceCenterOrRange",
+    "scope": "public sealed class ChartmillValueIndicatorState"
+  },
+  {
+    "id": "chartmill-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " ChartmillValueIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chartmill-reference-scale",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Chartmill.cs",
+    "before": "ReferenceFraction.FromDouble(Math.Sqrt(length))",
+    "after": "ReferenceFraction.FromDouble(length)",
+    "filter": "FullyQualifiedName~ValidationTests.ChartmillNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]

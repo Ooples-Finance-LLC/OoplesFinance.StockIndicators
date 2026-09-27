@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ChartmillValueIndicator)
+        {
+            var chartmillOptions = builtIn.CreateOptions(); var chartmillKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chartmillKeys.Length; slot++)
+            {
+                var key = chartmillKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => ChartmillOutputs(bars, Integer(chartmillOptions, "Length", 5), AverageKind(chartmillOptions, 1), indicator.Source is not null)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.UltimateOscillator)
         {
             var ultimateOptions = builtIn.CreateOptions();
