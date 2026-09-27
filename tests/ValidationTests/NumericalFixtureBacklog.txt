@@ -33,10 +33,6 @@ OoplesFinance.StockIndicators.Indicators.AutoFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.AutoFilter/minimum-periods
 OoplesFinance.StockIndicators.Indicators.AutoFilter/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AutoFilter/weighted-average
-OoplesFinance.StockIndicators.Indicators.AutoLine/default
-OoplesFinance.StockIndicators.Indicators.AutoLine/longer-periods
-OoplesFinance.StockIndicators.Indicators.AutoLine/minimum-periods
-OoplesFinance.StockIndicators.Indicators.AutoLine/shorter-periods
 OoplesFinance.StockIndicators.Indicators.AutoLineWithDrift/default
 OoplesFinance.StockIndicators.Indicators.AutoLineWithDrift/longer-periods
 OoplesFinance.StockIndicators.Indicators.AutoLineWithDrift/minimum-periods

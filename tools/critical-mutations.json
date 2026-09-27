@@ -29886,5 +29886,56 @@
     "before": " SimplePriceZoneSpecOptions or ",
     "after": " ",
     "filter": "FullyQualifiedName~SimplePriceZoneNumericalTests"
+  },
+  {
+    "id": "auto-line-native-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "before": "            AutoLineSpecOptions autoLine => new AutoLineState(autoLine.Length),",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests"
+  },
+  {
+    "id": "auto-line-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " AutoLineSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests"
+  },
+  {
+    "id": "auto-line-native-held-line",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var x = value > prevX + dev ? value : value < prevX - dev ? value : prevX;",
+    "after": "var x = value;",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests",
+    "scope": "public sealed class AutoLineState"
+  },
+  {
+    "id": "auto-line-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests",
+    "scope": "public sealed class AutoLineState"
+  },
+  {
+    "id": "auto-line-reference-variance",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.AutoLine.cs",
+    "before": "PopulationDeviation(Closes(bars),Math.Max(1,length))",
+    "after": "PopulationVariance(Closes(bars),Math.Max(1,length))",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests"
+  },
+  {
+    "id": "auto-line-raw-held-line",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output[i] = currentValue > prevX + dev[i] ? currentValue\n                : currentValue < prevX - dev[i] ? currentValue\n                : prevX;",
+    "after": "output[i] = currentValue;",
+    "filter": "FullyQualifiedName~ValidationTests.AutoLineNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeAutoLineFast("
   }
 ]
