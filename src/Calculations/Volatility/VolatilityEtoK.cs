@@ -169,49 +169,13 @@ public static partial class Calculations
     public static StockData CalculateGopalakrishnanRangeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 5)
     {
-        // A logarithm base of one is undefined; use the smallest valid period.
-        length = Math.Max(2, length);
-        List<double> gapoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var range = highestHigh - lowestLow;
-            var rangeLog = range > 0 ? Math.Log(range) : 0;
-
-            var gapo = rangeLog / Math.Log(length);
-            gapoList.Add(gapo);
-        }
-
-        var gapoWmaList = GetMovingAverageList(stockData, maType, length, gapoList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var gapoWma = gapoWmaList[i];
-            var prevGapoWma = i >= 1 ? gapoWmaList[i - 1] : 0;
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var currentWma = wmaList[i];
-            var prevWma = i >= 1 ? wmaList[i - 1] : 0;
-
-            var signal = GetVolatilitySignal(currentValue - currentWma, prevValue - prevWma, gapoWma, prevGapoWma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Gapo", gapoList },
-            { "Signal", gapoWmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(gapoList);
-        stockData.IndicatorName = IndicatorName.GopalakrishnanRangeIndex;
-
-        return stockData;
+        length = Math.Max(2, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var wmaList = custom ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input) : StrengthWindow.Smooth(input, maType, length);
+        var window = new GopalakrishnanWindow(length); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) line.Add(window.Next(stockData.HighPrices[i], stockData.LowPrices[i], true));
+        var gapoWmaList = custom ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, line) : StrengthWindow.Smooth(line, maType, length);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetVolatilitySignal(input[i] - wmaList[i], i > 0 ? input[i - 1] - wmaList[i - 1] : 0, gapoWmaList[i], i > 0 ? gapoWmaList[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Gapo", line }, { "Signal", gapoWmaList } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.GopalakrishnanRangeIndex; return stockData;
     }
 
 

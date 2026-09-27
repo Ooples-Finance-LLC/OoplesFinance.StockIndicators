@@ -3278,60 +3278,21 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Gapo")]
 public sealed class GopalakrishnanRangeIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _logLength;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-
+    private readonly GopalakrishnanWindow _window;
+    private readonly RocBankAverage? _exact;
+    private readonly IMovingAverageSmoother? _fallback;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public GopalakrishnanRangeIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 5)
-    {
-        var resolved = Math.Max(2, length);
-        _logLength = Math.Log(resolved);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { length = Math.Max(2, length); _window = new(length); if (StrengthWindow.Supports(maType)) _exact = new(maType, length, int.MaxValue); else _fallback = MovingAverageSmootherFactory.Create(maType, length); }
     public IndicatorName Name => IndicatorName.GopalakrishnanRangeIndex;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _signal.Reset();
-    }
-
+    public void Reset() { _window.Reset(); _exact?.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        _ = _input.GetValue(bar);
-        var upper = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lower = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = upper - lower;
-        var rangeLog = range > 0 ? Math.Log(range) : 0;
-        var gapo = rangeLog / _logLength;
-        var signal = _signal.Next(gapo, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Gapo", gapo },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(gapo, outputs);
+        _ = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, isFinal);
+        var signal = _exact is null ? _fallback!.Next(value, isFinal) : _exact.Next(new RocBankValue(value), isFinal).Publish();
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Gapo", value }, { "Signal", signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() { _exact?.Dispose(); _fallback?.Dispose(); }
 }
 
 [PrimaryOutput("Hvp")]

@@ -1830,12 +1830,7 @@ internal static partial class IndicatorCompute
 
             // Batch 13 - Volatility Indicators with Core Methods
             MayerMultipleSpecOptions mm => ComputeMayerMultipleFast(data, context, mm.Length, mm.MaType),
-            GopalakrishnanRangeIndexSpecOptions gri => spec.OutputKey switch
-            {
-                "Signal" => SmoothPublished(data, context,
-                    ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length), gri.Length, gri.MaType),
-                _ => ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length)
-            },
+            GopalakrishnanRangeIndexSpecOptions gri => ComputeGopalakrishnanRangeIndexFast(data, context, gri.Length, gri.MaType, spec.OutputKey),
             HighLowMovingAverageSpecOptions hlma => ComputeHighLowMovingAverageFast(data, context, hlma.Length, hlma.MaType, spec.OutputKey),
             StiffnessIndicatorSpecOptions sti => ComputeStiffnessIndicatorFast(data, context, sti.Length1, sti.Length2, sti.SmoothingLength, sti.MaType),
             MarketMeannessIndexSpecOptions mmi => ComputeMarketMeannessIndexFast(data, context, mmi.Length, mmi.MaType, spec.OutputKey),
@@ -19885,33 +19880,17 @@ internal static partial class IndicatorCompute
     /// Computes Gopalakrishnan Range Index using zero-allocation fast path.
     /// GAPO = log(highestHigh - lowestLow) / log(length), then smoothed with MA.
     /// </summary>
-    internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5)
+    internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast(StockData data, ComputeContext context, int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, string? outputKey = null)
     {
-        // CalculateGopalakrishnanRangeIndex publishes the raw index: the log of the window range over the log
-        // of the length. Its moving average is the separate Signal series, so no moving average type reaches
-        // the published value and the arm no longer smooths what the batch leaves raw.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 2);
-        var lengthLog = Math.Log(length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var range = highWindow.Max - lowWindow.Min;
-            var rangeLog = range > 0 ? Math.Log(range) : 0;
-            output[i] = rangeLog / lengthLog;
-        }
-
-        return buffer;
+        length = Math.Max(2, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        if (ComponentAverage.HasOverrides) { using var prices = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), prices.WritableSpan); }
+        var window = new GopalakrishnanWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], true);
+        using var signal = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)) MovingAverage(data, maType, length, result.Span, signal.WritableSpan);
+        else { using var average = new RocBankAverage(maType, length, input.Count); for (var i = 0; i < input.Count; i++) signal.WritableSpan[i] = average.Next(new RocBankValue(result.Span[i]), true).Publish(); }
+        if (outputKey == "Signal") signal.Span.CopyTo(result.WritableSpan);
+        return result;
     }
 
     /// <summary>

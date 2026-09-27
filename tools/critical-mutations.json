@@ -31641,5 +31641,129 @@
     "after": "ComponentAverage.HasOverrides && data.Count < 0",
     "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
     "scope": "internal static ComputeBuffer ComputeChoppinessIndexFast("
+  },
+  {
+    "id": "gopalakrishnan-range",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "difference.Add(lowest, -1)",
+    "after": "difference.Add(lowest, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-upper-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "max.Value.Index <= _count - _length",
+    "after": "max.Value.Index <= _count - _length + 1",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-lower-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "min.Value.Index <= _count - _length",
+    "after": "min.Value.Index <= _count - _length + 1",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-log-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "range.UpperShift * Math.Log(2)",
+    "after": "0",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-length-log",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "Math.Log(_length)",
+    "after": "Math.Log(_length + 1d)",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "_high.Clear(); _low.Clear();",
+    "after": "// retain extrema\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "return result;",
+    "after": "return Math.Max(0, Math.Min(1, result));",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-raw-extrema",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(data.HighPrices[i], data.LowPrices[i], true)",
+    "after": "window.Next(input[i], data.LowPrices[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast("
+  },
+  {
+    "id": "gopalakrishnan-signal-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (outputKey == \"Signal\")",
+    "after": "if (outputKey == \"Gapo\")",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast("
+  },
+  {
+    "id": "gopalakrishnan-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_ = _input.GetValue(bar);",
+    "after": "try { _ = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { }",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GopalakrishnanRangeIndexState"
+  },
+  {
+    "id": "gopalakrishnan-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " GopalakrishnanRangeIndexSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-reference-length",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Gopalakrishnan.cs",
+    "before": "Math.Log(length)",
+    "after": "Math.Log(length + 1d)",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gopalakrishnan-callback-price",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComponentAverage.HasOverrides) { using var prices",
+    "after": "ComponentAverage.HasOverrides && data.Count < 0) { using var prices",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeGopalakrishnanRangeIndexFast("
+  },
+  {
+    "id": "gopalakrishnan-near-zero-erasure",
+    "module": "numerical",
+    "file": "src/Helpers/GopalakrishnanWindow.cs",
+    "before": "return result;",
+    "after": "return Math.Abs(result) < 1e-12 ? 0 : result;",
+    "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]
