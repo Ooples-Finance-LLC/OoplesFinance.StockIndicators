@@ -262,6 +262,7 @@ internal static partial class StatefulIndicatorFactory
             StandardPivotPointsSpecOptions => new StandardPivotPointsState(),
             DynamicPivotPointsSpecOptions => new DynamicPivotPointsState(),
             RateOfChangeBandsSpecOptions rocBands => new RateOfChangeBandsState(rocBands.MaType, rocBands.Length, rocBands.SmoothLength),
+            TrendTraderBandsSpecOptions trader => new TrendTraderBandsState(trader.MaType, trader.Length, trader.Mult, trader.BandStep),
             ScalpersChannelSpecOptions scalper => new ScalpersChannelState(scalper.MaType, scalper.Length1, scalper.Length2),
             StationaryExtrapolatedLevelsSpecOptions stationary => new StationaryExtrapolatedLevelsState(stationary.MaType, stationary.Length),
             PriceLineChannelSpecOptions lineChannel => new PriceLineChannelState(lineChannel.MaType, lineChannel.Length),

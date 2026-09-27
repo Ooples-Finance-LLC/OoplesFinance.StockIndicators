@@ -583,60 +583,19 @@ public static partial class Calculations
     public static StockData CalculateTrendTraderBands(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length = 21, double mult = 3, double bandStep = 20)
     {
-        List<double> retList = new(stockData.Count);
-        List<double> outerUpperBandList = new(stockData.Count);
-        List<double> outerLowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        TrendTraderWindow.Validate(mult, bandStep); var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        List<double>? atr = null;
+        if (external) { var ranges = GetTrueRangeList(stockData); atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), ranges); }
+        using var window = new TrendTraderWindow(maType, length, mult, bandStep, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), raw = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr[i])); raw.Add(point.Raw); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); }
+        if (external)
         {
-            var close = inputList[i];
-            var prevHighest = i >= 1 ? highestList[i - 1] : 0;
-            var prevLowest = i >= 1 ? lowestList[i - 1] : 0;
-            var prevAtr = i >= 1 ? atrList[i - 1] : 0;
-            var atrMult = prevAtr * mult;
-            var highLimit = prevHighest - atrMult;
-            var lowLimit = prevLowest + atrMult;
-
-            var ret = close > highLimit && close > lowLimit ? highLimit : close < lowLimit && close < highLimit ? lowLimit : GetLastOrDefault(retList);
-            retList.Add(ret);
+            var average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), raw);
+            for (var i = 0; i < input.Count; i++) { var point = TrendTraderWindow.Bands(new RocBankValue(average[i]), bandStep); upper[i] = point.Upper; middle[i] = point.Middle; lower[i] = point.Lower; }
         }
-
-        var retEmaList = GetMovingAverageList(stockData, maType, length, retList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var retEma = retEmaList[i];
-            var close = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var prevRetEma = i >= 1 ? retEmaList[i - 1] : 0;
-
-            var prevOuterUpperBand = GetLastOrDefault(outerUpperBandList);
-            var outerUpperBand = retEma + bandStep;
-            outerUpperBandList.Add(outerUpperBand);
-
-            var prevOuterLowerBand = GetLastOrDefault(outerLowerBandList);
-            var outerLowerBand = retEma - bandStep;
-            outerLowerBandList.Add(outerLowerBand);
-
-            var signal = GetBollingerBandsSignal(close - retEma, prevClose - prevRetEma, close, prevClose, outerUpperBand, 
-                prevOuterUpperBand, outerLowerBand, prevOuterLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", outerUpperBandList },
-            { "MiddleBand", retEmaList },
-            { "LowerBand", outerLowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.TrendTraderBands;
-
-        return stockData;
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.TrendTraderBands; return stockData;
     }
 
 

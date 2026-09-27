@@ -329,103 +329,16 @@ public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _mult;
-    private readonly double _bandStep;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _retSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevAtr;
-    private double _prevHighest;
-    private double _prevLowest;
-    private double _prevRet;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public TrendTraderBandsState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length = 21, double mult = 3, double bandStep = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _mult = mult;
-        _bandStep = bandStep;
-        _maxWindow = new RollingWindowMax(resolved);
-        _minWindow = new RollingWindowMin(resolved);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _retSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrendTraderWindow _window;
+    public TrendTraderBandsState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 21, double mult = 3, double bandStep = 20) { _window = new(maType, length, mult, bandStep); }
     public IndicatorName Name => IndicatorName.TrendTraderBands;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _atrSmoother.Reset();
-        _retSmoother.Reset();
-        _prevAtr = 0;
-        _prevHighest = 0;
-        _prevLowest = 0;
-        _prevRet = 0;
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var prevHighest = _hasPrev ? _prevHighest : 0;
-        var prevLowest = _hasPrev ? _prevLowest : 0;
-        var prevAtr = _hasPrev ? _prevAtr : 0;
-        var atrMult = prevAtr * _mult;
-        var highLimit = prevHighest - atrMult;
-        var lowLimit = prevLowest + atrMult;
-        var prevRet = _hasPrev ? _prevRet : 0;
-        var ret = close > highLimit && close > lowLimit ? highLimit
-            : close < lowLimit && close < highLimit ? lowLimit
-            : prevRet;
-        var retEma = _retSmoother.Next(ret, isFinal);
-        var upper = retEma + _bandStep;
-        var lower = retEma - _bandStep;
-
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevClose = _hasPrev ? _prevClose : close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-
-        if (isFinal)
-        {
-            _prevRet = ret;
-            _prevAtr = atr;
-            _prevHighest = _maxWindow.Add(close, out _);
-            _prevLowest = _minWindow.Add(close, out _);
-            _prevClose = close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", retEma },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(retEma, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _atrSmoother.Dispose();
-        _retSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ttf")]

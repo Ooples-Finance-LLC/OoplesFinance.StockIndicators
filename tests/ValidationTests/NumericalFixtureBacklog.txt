@@ -2203,11 +2203,6 @@ OoplesFinance.StockIndicators.Indicators.TrendStep/default
 OoplesFinance.StockIndicators.Indicators.TrendStep/longer-periods
 OoplesFinance.StockIndicators.Indicators.TrendStep/minimum-periods
 OoplesFinance.StockIndicators.Indicators.TrendStep/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TrendTraderBands/default
-OoplesFinance.StockIndicators.Indicators.TrendTraderBands/longer-periods
-OoplesFinance.StockIndicators.Indicators.TrendTraderBands/minimum-periods
-OoplesFinance.StockIndicators.Indicators.TrendTraderBands/shorter-periods
-OoplesFinance.StockIndicators.Indicators.TrendTraderBands/weighted-average
 OoplesFinance.StockIndicators.Indicators.Trender/default
 OoplesFinance.StockIndicators.Indicators.Trender/longer-periods
 OoplesFinance.StockIndicators.Indicators.Trender/minimum-periods

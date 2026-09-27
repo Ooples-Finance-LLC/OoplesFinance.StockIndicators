@@ -21376,5 +21376,135 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~ScalperChannelNumericalTests.ExtendedPiAtrLogarithmAndIndependentRangePeriodMatchReference|FullyQualifiedName~ScalperChannelNumericalTests.SelectedCloseAndCustomerAverageAtrStagesRemainIndependent|FullyQualifiedName~ScalperChannelNumericalTests.InvalidInputsNeverAdvanceNativeState",
     "scope": "public sealed class ScalpersChannelState :"
+  },
+  {
+    "id": "trend-trader-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "length = Math.Max(1, length)",
+    "after": "length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-current-atr",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_previousAtr.Multiply(_mult)",
+    "after": "atr.Multiply(_mult)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-upper-limit-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "Limit(_highest, width, -1)",
+    "after": "Limit(_highest, width, 1)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-lower-limit-sign",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "Limit(_lowest, width, 1)",
+    "after": "Limit(_lowest, width, -1)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "highSide > 0 && lowSide > 0",
+    "after": "highSide > 0 && lowSide >= 0",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-lower-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "highSide < 0 && lowSide < 0",
+    "after": "highSide <= 0 && lowSide < 0",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-inside-hold",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "? lowLimit : _stop",
+    "after": "? lowLimit : default",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-high-source",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_highest = _high.Add(close, out _)",
+    "after": "_highest = _high.Add(high, out _)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-low-source",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_lowest = _low.Add(close, out _)",
+    "after": "_lowest = _low.Add(low, out _)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-early-stop",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_average.Next(stop, commit)",
+    "after": "_average.Next(new RocBankValue(stop.Publish()), commit)",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-band-step",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_step = step",
+    "after": "_step = step + 1",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "if (commit) { _previousAtr",
+    "after": "{ _previousAtr",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "_highest = _lowest = 0;",
+    "after": "_highest = _lowest = 1;",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-coefficients",
+    "module": "numerical",
+    "file": "src/Helpers/TrendTraderWindow.cs",
+    "before": "Validate(mult, step);",
+    "after": "if (mult == 0 && step == 0) Validate(mult, step);",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState"
+  },
+  {
+    "id": "trend-trader-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "input[i], true, external",
+    "after": "data.ClosePrices[i], true, external",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeTrendTraderBandsFast("
+  },
+  {
+    "id": "trend-trader-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~TrendTraderNumericalTests.PreviousCloseExtremaAndExtendedAtrLimitsRetainStrictStopTies|FullyQualifiedName~TrendTraderNumericalTests.SelectedCloseAndOrderedCustomerAtrStopStagesDriveBothStrictTies|FullyQualifiedName~TrendTraderNumericalTests.InvalidInputsAndCoefficientsNeverAdvanceNativeState",
+    "scope": "public sealed class TrendTraderBandsState :"
   }
 ]

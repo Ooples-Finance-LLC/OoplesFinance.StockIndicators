@@ -21664,60 +21664,21 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeTrendTraderBandsFast(StockData data, ComputeContext context, int length = 21, double mult = 3,
         double bandStep = 20, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateTrendTraderBands smooths a trailing stop that flips between the previous bar's highest less
-        // a multiple of the average true range and its lowest plus the same, holding its last value while
-        // price sits between them. The outer bands are that line stepped by a fixed amount.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        using var stops = context.Rent(count);
-        var stop = stops.WritableSpan;
-
-        var window = new RollingMinMax(Math.Max(length, 2));
-        double previousStop = 0;
-        for (var i = 0; i < count; i++)
+        TrendTraderWindow.Validate(mult, bandStep); var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var atr = context.Rent(external ? input.Count : 0); using var raw = context.Rent(external ? input.Count : 0);
+        if (external) { var ranges = CalculationsHelper.GetTrueRangeList(data); MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(ranges), atr.WritableSpan); }
+        using var window = new TrendTraderWindow(maType, length, mult, bandStep, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
         {
-            // The batch reads the previous bar's extremes, so the window is read before this bar joins it.
-            var previousHighest = i >= 1 ? window.Max : 0;
-            var previousLowest = i >= 1 ? window.Min : 0;
-            window.Add(input[i]);
-
-            var atrMult = (i >= 1 ? atr[i - 1] : 0) * mult;
-            var highLimit = previousHighest - atrMult;
-            var lowLimit = previousLowest + atrMult;
-            var currentValue = input[i];
-
-            if (currentValue > highLimit && currentValue > lowLimit)
-            {
-                previousStop = highLimit;
-            }
-            else if (currentValue < lowLimit && currentValue < highLimit)
-            {
-                previousStop = lowLimit;
-            }
-
-            stop[i] = previousStop;
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(atr.Span[i]) : null); if (external) raw.WritableSpan[i] = point.Raw;
+            result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle;
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, stops.Span, buffer.WritableSpan);
-
-        if (band != ChannelBand.Middle)
+        if (external)
         {
-            var step = band == ChannelBand.Upper ? bandStep : -bandStep;
-            var output = buffer.WritableSpan;
-            for (var i = 0; i < count; i++)
-            {
-                output[i] += step;
-            }
+            MovingAverage(data, maType, Math.Max(1, length), raw.Span, result.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var point = TrendTraderWindow.Bands(new RocBankValue(result.Span[i]), bandStep); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>
