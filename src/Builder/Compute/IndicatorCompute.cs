@@ -5862,9 +5862,23 @@ internal static partial class IndicatorCompute
         int length1 = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 9,
         int length3 = 5, int length4 = 3)
     {
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+            using var window = new DerivativeWindow(maType, length1, length2, length3, length4); var result = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+            return result;
+        }
+
         // CalculateDerivativeOscillator smooths the relative strength index twice and then reports how far
         // that sits above its own length2 average, so it reads as a histogram around zero.
-        using var rsi = ComputeRsiFast(data, context, length1, maType);
+        using var rsi = context.Rent(data.Count);
+        if (StrengthWindow.Supports(maType))
+        {
+            var prices = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var rsiWindow = new PriceRsiWindow(maType, length1, prices.Count);
+            for (var i = 0; i < prices.Count; i++) rsi.WritableSpan[i] = rsiWindow.Next(prices[i], true);
+        }
+        else { using var ordinary = ComputeRsiFast(data, context, length1, maType); ordinary.Span.CopyTo(rsi.WritableSpan); }
         var count = rsi.Span.Length;
 
         using var firstBuffer = context.Rent(count);

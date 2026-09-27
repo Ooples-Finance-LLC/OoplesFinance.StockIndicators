@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.DerivativeOscillator)
+        {
+            var derivativeOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => DerivativeOutputs(bars, Integer(derivativeOptions, "Length", 14), 9, 5, 3, AverageKind(derivativeOptions, 3)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ErgodicCandlestickOscillator)
         {
             var candleOptions = builtIn.CreateOptions(); var candleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

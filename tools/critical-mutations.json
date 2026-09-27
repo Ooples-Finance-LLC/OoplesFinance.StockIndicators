@@ -30851,5 +30851,104 @@
     "before": "v * new ReferenceFraction(100)",
     "after": "v * new ReferenceFraction(1)",
     "filter": "FullyQualifiedName~ValidationTests.ErgodicCandleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-rsi-period",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_rsi = new(kind, rsi)",
+    "after": "_rsi = new(kind, first)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_mean = new(mean)",
+    "after": "_mean = new(first)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_second = new(kind, second)",
+    "after": "_second = new(kind, first)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "return second - _mean.Next(second, commit);",
+    "after": "return _mean.Next(second, commit) - second;",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_rsi.Next(price, commit)",
+    "after": "_rsi.Next(price, true)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_mean.Next(second, commit)",
+    "after": "_mean.Next(second, true)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DerivativeWindow.cs",
+    "before": "_rsi.Reset();",
+    "after": "// retain RSI\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeDerivativeOscillatorFast("
+  },
+  {
+    "id": "derivative-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class DerivativeOscillatorState"
+  },
+  {
+    "id": "derivative-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " DerivativeOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "derivative-callback-stage",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rsiEma1List), length4)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rsiList), length4)",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateDerivativeOscillator("
+  },
+  {
+    "id": "derivative-reference-mean",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Derivative.cs",
+    "before": "new ReferenceFraction(i - start + 1)",
+    "after": "new ReferenceFraction(Math.Max(1, mean))",
+    "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]

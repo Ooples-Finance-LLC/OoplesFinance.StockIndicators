@@ -5327,61 +5327,16 @@ public sealed class DetrendedSyntheticPriceState : IStreamingIndicatorState
 [PrimaryOutput("Do")]
 public sealed class DerivativeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly IMovingAverageSmoother _ema1;
-    private readonly IMovingAverageSmoother _ema2;
-    private readonly RollingWindowSum _sumWindow;
-    private readonly StreamingInputResolver _input;
-
-    public DerivativeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14, int length2 = 9,
-        int length3 = 5, int length4 = 3)
-    {
-        _rsi = new RsiState(maType, Math.Max(1, length1));
-        _ema1 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _ema2 = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _sumWindow = new RollingWindowSum(Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DerivativeWindow _window;
+    public DerivativeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14, int length2 = 9, int length3 = 5, int length4 = 3) => _window = new(maType, length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.DerivativeOscillator;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _ema1.Reset();
-        _ema2.Reset();
-        _sumWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var rsi = _rsi.Next(value, isFinal);
-        var ema1 = _ema1.Next(rsi, isFinal);
-        var ema2 = _ema2.Next(ema1, isFinal);
-        var sum = isFinal ? _sumWindow.Add(ema2, out var countAfter) : _sumWindow.Preview(ema2, out countAfter);
-        var s1Sma = countAfter > 0 ? sum / countAfter : 0;
-        var s2 = ema2 - s1Sma;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Do", s2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(s2, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Do", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _ema1.Dispose();
-        _ema2.Dispose();
-        _sumWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Do")]

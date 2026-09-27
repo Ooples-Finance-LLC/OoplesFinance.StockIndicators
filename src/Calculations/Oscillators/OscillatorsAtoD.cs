@@ -1249,15 +1249,29 @@ public static partial class Calculations
     public static StockData CalculateDerivativeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 14,
         int length2 = 9, int length3 = 5, int length4 = 3)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new DerivativeWindow(maType, length1, length2, length3, length4);
+            var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); signals?.Add(GetCompareSignal(value, i > 0 ? line[i - 1] : 0)); line.Add(value); }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Do", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DerivativeOscillator; return stockData;
+        }
+
         List<double> s1List = new(stockData.Count);
         List<double> s2List = new(stockData.Count);
         List<double> s1SmaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var s1SumWindow = new RollingSum();
 
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
-        var rsiEma1List = GetMovingAverageList(stockData, maType, length3, rsiList);
-        var rsiEma2List = GetMovingAverageList(stockData, maType, length4, rsiEma1List);
+        List<double> rsiList;
+        if (StrengthWindow.Supports(maType))
+        {
+            var (prices, _, _, _, _) = GetInputValuesList(stockData); using var rsiWindow = new PriceRsiWindow(maType, length1, prices.Count);
+            rsiList = prices.Select(v => rsiWindow.Next(v, true)).ToList();
+        }
+        else rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length1).ChainedValues;
+        var rsiEma1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rsiList), length3)?.ToList() ?? GetMovingAverageList(stockData, maType, length3, rsiList);
+        var rsiEma2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(rsiEma1List), length4)?.ToList() ?? GetMovingAverageList(stockData, maType, length4, rsiEma1List);
 
         for (var i = 0; i < rsiList.Count; i++)
         {
