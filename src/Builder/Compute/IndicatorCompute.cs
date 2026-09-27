@@ -1918,13 +1918,6 @@ internal static partial class IndicatorCompute
             },
 
             // Batch 17 - More Band and Channel Indicators
-            VolumeAdaptiveBandsSpecOptions vab => spec.OutputKey switch
-            {
-                null or "MiddleBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType),
-                "UpperBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType, ChannelBand.Upper),
-                "LowerBand" => ComputeVolumeAdaptiveBandsFast(data, context, vab.Length, vab.MaType, ChannelBand.Lower),
-                _ => null
-            },
             TrendTraderBandsSpecOptions ttb => spec.OutputKey switch
             {
                 null or "MiddleBand" => ComputeTrendTraderBandsFast(data, context, ttb.Length, ttb.Mult, ttb.BandStep, ttb.MaType),
@@ -1969,6 +1962,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            VolumeAdaptiveBandsSpecOptions volumeBands => ComputeVolumeAdaptiveBandsFast(data, context, volumeBands.Length, volumeBands.MaType, spec.OutputKey),
             RootMovingAverageSquaredErrorBandsSpecOptions rmse => ComputeRmseBandsFast(data, context, rmse.Length, rmse.StdDevFactor, rmse.MaType, spec.OutputKey),
             HurstBandsSpecOptions hurst => ComputeHurstBandsFast(data, context, hurst.Length, hurst.InnerMult, hurst.OuterMult, hurst.ExtremeMult, spec.OutputKey),
             FlaggingBandsSpecOptions flagging => ComputeFlaggingBandsFast(data, context, flagging.Length, spec.OutputKey),
@@ -21595,67 +21589,6 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Volume Adaptive Bands using zero-allocation fast path.
-    /// Returns the middle band (SMA).
-    /// </summary>
-    internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
-    {
-        // CalculateVolumeAdaptiveBands accumulates the series divided by the moving average of volume, once
-        // with that average and once with its negative, and smooths each accumulation into a band. The middle
-        // band is their average, and none of the three is a moving average of the price.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var volumeAverages = context.Rent(count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), volumeAverages.WritableSpan);
-        var volumeAverage = volumeAverages.Span;
-
-        using var raisedValues = context.Rent(count);
-        using var loweredValues = context.Rent(count);
-        var raised = raisedValues.WritableSpan;
-        var lowered = loweredValues.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var a = Math.Max(volumeAverage[i], 1);
-            var b = a * -1;
-
-            var previousRaised = i >= 1 ? raised[i - 1] : input[i];
-            var previousLowered = i >= 1 ? lowered[i - 1] : input[i];
-            raised[i] = (previousRaised + (input[i] * a)) / a;
-            lowered[i] = (previousLowered + (input[i] * b)) / b;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        if (band == ChannelBand.Upper)
-        {
-            MovingAverage(data, maType, length, raisedValues.Span, output);
-            return buffer;
-        }
-
-        if (band == ChannelBand.Lower)
-        {
-            MovingAverage(data, maType, length, loweredValues.Span, output);
-            return buffer;
-        }
-
-        using var upperBand = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        MovingAverage(data, maType, length, raisedValues.Span, upperBand.WritableSpan);
-        MovingAverage(data, maType, length, loweredValues.Span, lowerBand.WritableSpan);
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = (upperBand.Span[i] + lowerBand.Span[i]) / 2;
-        }
-
-        return buffer;
-    }
-
-    /// <summary>
     /// Computes Trend Trader Bands using zero-allocation fast path.
     /// Returns the middle band (WMA).
     /// </summary>
@@ -21858,6 +21791,22 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes separately smoothed volume-adaptive recursive boundaries.</summary>
+    internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
+    {
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var volume = data.Volumes; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var average = context.Rent(external ? input.Count : 0); using var rawUp = context.Rent(external ? input.Count : 0); using var rawDown = context.Rent(external ? input.Count : 0);
+        if (external) MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(volume), average.WritableSpan);
+        using var window = new VolumeAdaptiveBandWindow(maType, length, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], volume[i], true, external ? average.Span[i] : null); if (external) { rawUp.WritableSpan[i] = point.RawUp; rawDown.WritableSpan[i] = point.RawDown; } result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        if (external)
+        {
+            using var upper = context.Rent(input.Count); using var lower = context.Rent(input.Count); MovingAverage(data, maType, length, rawUp.Span, upper.WritableSpan); MovingAverage(data, maType, length, rawDown.Span, lower.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var point = VolumeAdaptiveBandWindow.Bands(new RocBankValue(upper.Span[i]), new RocBankValue(lower.Span[i])); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
+        }
         return result;
     }
 

@@ -22022,5 +22022,159 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~RmseBandNumericalTests.SquaredResidualSmoothingPreservesTinyWidthsAndExtendedRoots|FullyQualifiedName~RmseBandNumericalTests.SelectedPricesAndCustomerMeanThenSquaredResidualAverageKeepTheirOrder|FullyQualifiedName~RmseBandNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
     "scope": "public sealed class RootMovingAverageSquaredErrorBandsState :"
+  },
+  {
+    "id": "volume-adaptive-band-volume-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_volume = new(kind, length, capacityHint)",
+    "after": "_volume = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-upper-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_upper = new(kind, length, capacityHint)",
+    "after": "_upper = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-lower-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_lower = new(kind, length, capacityHint)",
+    "after": "_lower = new(kind, length + 1, capacityHint)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-floor",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "Math.Max(1, average)",
+    "after": "Math.Max(2, average)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-upper-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_hasPrevious ? _previousUp : new RocBankValue(close)",
+    "after": "_hasPrevious ? _previousUp : default",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "divisor, -1",
+    "after": "divisor, 1",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-early-product",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "sum.AddProduct(close, volume)",
+    "after": "sum.Add(close * volume)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-early-state",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_previousUp = up",
+    "after": "_previousUp = new RocBankValue(up.Publish())",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "sum.Mean(1)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-preview-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_volume.Next(new RocBankValue(volume), commit)",
+    "after": "_volume.Next(new RocBankValue(volume), true)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-preview-upper",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_upper.Next(up, commit)",
+    "after": "_upper.Next(up, true)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-preview-lower",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_lower.Next(down, commit)",
+    "after": "_lower.Next(down, true)",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "if (commit) { _previousUp",
+    "after": "if (true) { _previousUp",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-reset-volume",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_volume?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _volume?.Reset();",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-reset-upper",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_upper?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _upper?.Reset();",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-reset-lower",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_lower?.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _lower?.Reset();",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/VolumeAdaptiveBandWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "volume-adaptive-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeVolumeAdaptiveBandsFast("
+  },
+  {
+    "id": "volume-adaptive-band-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "public sealed class VolumeAdaptiveBandsState :"
   }
 ]

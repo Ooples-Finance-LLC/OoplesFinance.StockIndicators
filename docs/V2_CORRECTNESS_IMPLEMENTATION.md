@@ -1856,3 +1856,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Hand cases verify subnormal nonzero widths and an unpublishable root that still yields finite final bands. Selected prices, ordered customer callbacks, negative custom variance, legacy Hull averages, previews/reset and invalid inputs/factors are covered across five routes.
 - **83/83** checks passed (`rmse-bands.trx`). Campaign403a/403b caught **16/16** injected faults; **2,629** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `05f6283364e9d1b4ec33619cd3f6c3a9f8ce1fb059cdabc6e42d34f572559497` / `7e33bafce7f9b2e7f7699a44bf5f9dbeeace5bb8d3ea4934af6a9e01d74bf070`.
 - Inventory: **4,628/7,131**, **2,503** omissions across **416** types; no construction failures. 173 grouped batches cover **1,802 configurations / 329 types**. 761EABCB3D0E676B21812D5E5BD031D4B640E3B0941FF0F9641236455D46566B SHA256 `761EABCB3D0E676B21812D5E5BD031D4B640E3B0941FF0F9641236455D46566B`. Full coverage remains incomplete.
+
+
+### Volume Adaptive Band numerical contracts
+
+- Five configurations now share exact volume-divided recurrences with first-price seeding, a volume-average floor of one, separate upper/lower smoothing and an exact midpoint. Extended recursive values survive until smoothing and final publication.
+- Hand cases expose premature price-volume multiplication and a recursive state beyond binary64 that returns to finite outputs. Selected prices preserve volume, three customer averages retain their order, and legacy Hull averages, alternate previews/reset and invalid native fields are covered across five routes.
+- **83/83** checks passed (`volume-adaptive-bands.trx`). Campaign404a/404b caught **19/19** injected faults; **2,648** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `7f53fe9bb198f611945561e473101300f8c81df1479881f0267ee2b3cb652770` / `6385761c0a0ab4f07069a3f21f29e9de2d0f7a62fdd73802a81d7a32d571fa23`.
+- Inventory: **4,633/7,131**, **2,498** omissions across **415** types; no construction failures. 174 grouped batches cover **1,807 configurations / 330 types**. 6824763AACD23BFC24716FA72293E745FFD3554CD1ED39BB67F58F3AA60C558E SHA256 `6824763AACD23BFC24716FA72293E745FFD3554CD1ED39BB67F58F3AA60C558E`. Full coverage remains incomplete.

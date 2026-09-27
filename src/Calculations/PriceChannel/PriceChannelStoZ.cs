@@ -350,56 +350,19 @@ public static partial class Calculations
     public static StockData CalculateVolumeAdaptiveBands(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100)
     {
-        List<double> upList = new(stockData.Count);
-        List<double> dnList = new(stockData.Count);
-        List<double> middleBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var aList = GetMovingAverageList(stockData, maType, length, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, volume) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var average = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volume), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, volume) : null;
+        using var window = new VolumeAdaptiveBandWindow(maType, length, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), rawUp = new(input.Count), rawDown = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], volume[i], true, average?[i]); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); rawUp.Add(point.RawUp); rawDown.Add(point.RawDown); }
+        if (external)
         {
-            var currentValue = inputList[i];
-            var a = Math.Max(aList[i], 1);
-            var b = a * -1;
-
-            var prevUp = i >= 1 ? upList[i - 1] : currentValue;
-            var up = a != 0 ? (prevUp + (currentValue * a)) / a : 0;
-            upList.Add(up);
-
-            var prevDn = i >= 1 ? dnList[i - 1] : currentValue;
-            var dn = b != 0 ? (prevDn + (currentValue * b)) / b : 0;
-            dnList.Add(dn);
+            upper = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(rawUp), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, rawUp);
+            lower = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(rawDown), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, rawDown);
+            for (var i = 0; i < input.Count; i++) middle[i] = VolumeAdaptiveBandWindow.Bands(new RocBankValue(upper[i]), new RocBankValue(lower[i])).Middle;
         }
-
-        var upSmaList = GetMovingAverageList(stockData, maType, length, upList);
-        var dnSmaList = GetMovingAverageList(stockData, maType, length, dnList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var upperBand = upSmaList[i];
-            var lowerBand = dnSmaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.Add(middleBand);
-
-            var signal = GetCompareSignal(currentValue - middleBand, prevValue - prevMiddleBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upSmaList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", dnSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.VolumeAdaptiveBands;
-
-        return stockData;
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.VolumeAdaptiveBands; return stockData;
     }
 
 

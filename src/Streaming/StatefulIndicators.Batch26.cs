@@ -1737,76 +1737,16 @@ public sealed class VolumeAccumulationPercentState : IStreamingIndicatorState, I
 [PrimaryOutput("MiddleBand")]
 public sealed class VolumeAdaptiveBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _volumeMa;
-    private readonly IMovingAverageSmoother _upMa;
-    private readonly IMovingAverageSmoother _downMa;
-    private readonly StreamingInputResolver _input;
-    private double _prevUp;
-    private double _prevDn;
-    private bool _hasPrev;
-
-    public VolumeAdaptiveBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
-    {
-        var resolved = Math.Max(1, length);
-        _volumeMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _upMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _downMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolumeAdaptiveBandWindow _window;
+    public VolumeAdaptiveBandsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.VolumeAdaptiveBands;
-
-    public void Reset()
-    {
-        _volumeMa.Reset();
-        _upMa.Reset();
-        _downMa.Reset();
-        _prevUp = 0;
-        _prevDn = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volumeMa = _volumeMa.Next(bar.Volume, isFinal);
-        var a = Math.Max(volumeMa, 1);
-        var b = a * -1;
-        var prevUp = _hasPrev ? _prevUp : value;
-        var up = a != 0 ? (prevUp + (value * a)) / a : 0;
-        var prevDn = _hasPrev ? _prevDn : value;
-        var dn = b != 0 ? (prevDn + (value * b)) / b : 0;
-        var upperBand = _upMa.Next(up, isFinal);
-        var lowerBand = _downMa.Next(dn, isFinal);
-        var middleBand = (upperBand + lowerBand) / 2;
-
-        if (isFinal)
-        {
-            _prevUp = up;
-            _prevDn = dn;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upperBand },
-                { "MiddleBand", middleBand },
-                { "LowerBand", lowerBand }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middleBand, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeMa.Dispose();
-        _upMa.Dispose();
-        _downMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vama")]
