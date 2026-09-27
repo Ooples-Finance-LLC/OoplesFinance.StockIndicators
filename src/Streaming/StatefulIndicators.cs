@@ -5052,125 +5052,31 @@ public sealed class AroonOscillatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("BearPower")]
 public sealed class BearPowerIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signal;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public BearPowerIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-    }
-
+    private readonly CandlePowerWindow _window;
+    public BearPowerIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) { _window = new(false, maType, length); }
     public IndicatorName Name => IndicatorName.BearPowerIndicator;
-
-    public void Reset()
-    {
-        _signal.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var close = bar.Close;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var open = bar.Open;
-        var high = bar.High;
-        var low = bar.Low;
-
-        var bpi = close < open ? high - low : prevClose > open ? Math.Max(close - open, high - low) :
-            close > open ? Math.Max(open - low, high - close) : prevClose > open ? Math.Max(prevClose - low, high - close) :
-            high - close > close - low ? high - low : prevClose > open ? Math.Max(prevClose - open, high - low) :
-            high - close < close - low ? open - low : close > open ? Math.Max(close - low, high - close) :
-            close > open ? Math.Max(prevClose - open, high - close) : prevClose < open ? Math.Max(open - low, high - close) : high - low;
-        var signal = _signal.Next(bpi, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "BearPower", bpi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bpi, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "BearPower", p.Value }, { "Signal", p.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("BullPower")]
 public sealed class BullPowerIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signal;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public BullPowerIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
-    {
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-    }
-
+    private readonly CandlePowerWindow _window;
+    public BullPowerIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) { _window = new(true, maType, length); }
     public IndicatorName Name => IndicatorName.BullPowerIndicator;
-
-    public void Reset()
-    {
-        _signal.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var close = bar.Close;
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var open = bar.Open;
-        var high = bar.High;
-        var low = bar.Low;
-
-        var bpi = close < open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(high - prevClose, close - low) :
-            close > open ? Math.Max(open - prevClose, high - low) : prevClose > open ? high - low :
-            high - close > close - low ? high - open : prevClose < open ? Math.Max(high - prevClose, close - low) :
-            high - close < close - low ? Math.Max(open - close, high - low) : prevClose > open ? high - low :
-            prevClose > open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(open - close, high - low) : high - low;
-        var signal = _signal.Next(bpi, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "BullPower", bpi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bpi, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "BullPower", p.Value }, { "Signal", p.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ch")]

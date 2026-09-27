@@ -327,47 +327,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBearPowerIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> bpiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var close = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var open = openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            var bpi = close < open ? high - low : prevClose > open ? Math.Max(close - open, high - low) :
-                close > open ? Math.Max(open - low, high - close) : prevClose > open ? Math.Max(prevClose - low, high - close) :
-                high - close > close - low ? high - low : prevClose > open ? Math.Max(prevClose - open, high - low) :
-                high - close < close - low ? open - low : close > open ? Math.Max(close - low, high - close) :
-                close > open ? Math.Max(prevClose - open, high - close) : prevClose < open ? Math.Max(open - low, high - close) : high - low;
-            bpiList.Add(bpi);
-        }
-
-        var bpiEmaList = GetMovingAverageList(stockData, maType, length, bpiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var bpi = bpiList[i];
-            var bpiEma = bpiEmaList[i];
-            var prevBpi = i >= 1 ? bpiList[i - 1] : 0;
-            var prevBpiEma = i >= 1 ? bpiEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(bpi - bpiEma, prevBpi - prevBpiEma, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "BearPower", bpiList },
-            { "Signal", bpiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bpiList);
-        stockData.IndicatorName = IndicatorName.BearPowerIndicator;
-
-        return stockData;
+        length = Math.Max(1, length); var (input, high, low, open, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new CandlePowerWindow(false, maType, length, external, input.Count); List<double> values = new(input.Count), average = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], open[i], high[i], low[i], true); values.Add(p.Value); average.Add(p.Signal); }
+        if (external) average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, values);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - average[i], i > 0 ? values[i - 1] - average[i - 1] : 0, true));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "BearPower", values }, { "Signal", average } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.BearPowerIndicator; return stockData;
     }
 
 
@@ -381,47 +346,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBullPowerIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> bpiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var close = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var open = openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            var bpi = close < open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(high - prevClose, close - low) :
-                close > open ? Math.Max(open - prevClose, high - low) : prevClose > open ? high - low :
-                high - close > close - low ? high - open : prevClose < open ? Math.Max(high - prevClose, close - low) :
-                high - close < close - low ? Math.Max(open - close, high - low) : prevClose > open ? high - low :
-                prevClose > open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(open - close, high - low) : high - low;
-            bpiList.Add(bpi);
-        }
-
-        var bpiEmaList = GetMovingAverageList(stockData, maType, length, bpiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var bpi = bpiList[i];
-            var bpiEma = bpiEmaList[i];
-            var prevBpi = i >= 1 ? bpiList[i - 1] : 0;
-            var prevBpiEma = i >= 1 ? bpiEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(bpi - bpiEma, prevBpi - prevBpiEma, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "BullPower", bpiList },
-            { "Signal", bpiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bpiList);
-        stockData.IndicatorName = IndicatorName.BullPowerIndicator;
-
-        return stockData;
+        length = Math.Max(1, length); var (input, high, low, open, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new CandlePowerWindow(true, maType, length, external, input.Count); List<double> values = new(input.Count), average = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], open[i], high[i], low[i], true); values.Add(p.Value); average.Add(p.Signal); }
+        if (external) average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, values);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - average[i], i > 0 ? values[i - 1] - average[i - 1] : 0, true));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "BullPower", values }, { "Signal", average } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.BullPowerIndicator; return stockData;
     }
 
 

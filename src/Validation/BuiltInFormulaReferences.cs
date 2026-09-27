@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.BullPowerIndicator or IndicatorName.BearPowerIndicator)
+        {
+            var powerKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < powerKeys.Length; slot++) { var key = powerKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CandlePowerOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersCycleAmplitude)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CycleAmplitudeOutputs(bars, builtIn)["Eca"], IndicatorErrorBudget.Exact);

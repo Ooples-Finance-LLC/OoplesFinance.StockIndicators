@@ -23438,5 +23438,167 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~CycleAmplitudeNumericalTests.ExactEnergyKeepsLagExpirySubnormalAndExtendedPower|FullyQualifiedName~CycleAmplitudeNumericalTests.SelectedPricesFeedBothLaggedEnergyWindows|FullyQualifiedName~CycleAmplitudeNumericalTests.InvalidFieldsAndDeltaNeverAdvanceStateOrEnterEmptyExecution",
     "scope": "public sealed class EhlersCycleAmplitudeState :"
+  },
+  {
+    "id": "candle-power-bull-down",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "BigInteger.Max(h - o, c - l)",
+    "after": "BigInteger.Min(h - o, c - l)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bull-gap",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "BigInteger.Max(h - p, c - l)",
+    "after": "BigInteger.Max(h - o, c - l)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bull-rise",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "BigInteger.Max(o - p, h - l)",
+    "after": "o - p",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bull-flat-gap",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "else if (p > o) power = h - l;",
+    "after": "else if (p > o) power = h - o;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bull-wick",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "else if (h - c > c - l) power = h - o;",
+    "after": "else if (h - c < c - l) power = h - o;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-wick-early-round",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "else if (h - c > c - l) power = h - o;",
+    "after": "else if (RocBankValue.RoundUnits(h - c, BigInteger.One) > RocBankValue.RoundUnits(c - l, BigInteger.One)) power = h - o;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bear-down",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "if (c < o) power = h - l;",
+    "after": "if (c < o) power = h - c;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bear-gap",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "BigInteger.Max(c - o, h - l)",
+    "after": "c - o",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bear-rise",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "else if (c > o) power = BigInteger.Max(o - l, h - c);",
+    "after": "else if (c > o) power = BigInteger.Min(o - l, h - c);",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-bear-wick",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "else if (h - c < c - l) power = o - l;",
+    "after": "else if (h - c < c - l) power = h - l;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-overflow-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "new RocBankValue(ExactMeanAccumulator.UnitRatio(power, BigInteger.One << 1024), 1024)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, length), capacityHint)",
+    "after": "_signal = new(kind, Math.Max(2, length), capacityHint)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-signal-kind",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, length), capacityHint)",
+    "after": "_signal = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), capacityHint)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "low, _previous, _bull",
+    "after": "low, 0, _bull",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-preview-price",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "if (commit) _previous = close",
+    "after": "if (true) _previous = close",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-preview-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "_signal.Next(power, commit)",
+    "after": "_signal.Next(power, true)",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "_previous = 0;",
+    "after": "_previous += 0;",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CandlePowerWindow.cs",
+    "before": "_signal?.Reset();",
+    "after": "if (_previous != 0) _signal?.Reset();",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal"
+  },
+  {
+    "id": "candle-power-invalid-bull",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal",
+    "scope": "public sealed class BullPowerIndicatorState :"
+  },
+  {
+    "id": "candle-power-invalid-bear",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~CandlePowerNumericalTests.CandleDirectionsGapPrecedenceAndWickTiesKeepExactSignals|FullyQualifiedName~CandlePowerNumericalTests.SelectedCloseKeepsOriginalFieldsAndCustomerSignalControlsOnlyAverage|FullyQualifiedName~CandlePowerNumericalTests.InvalidFieldsNeverAdvancePreviousCloseOrSignal",
+    "scope": "public sealed class BearPowerIndicatorState :"
   }
 ]

@@ -409,10 +409,10 @@ internal static partial class IndicatorCompute
             CoppockCurveSpecOptions coppock => ComputeCoppockCurveFast(data, context, coppock.Length, coppock.MaType),
             ChandeForecastOscillatorSpecOptions cfo => ComputeChandeForecastOscillatorFast(data, context, cfo.Length),
             BullPowerSpecOptions bp => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeBullPowerFast(data, context, bp.Length), bp.Length, MovingAvgType.ExponentialMovingAverage)
+                ? ComputeBullPowerFast(data, context, bp.Length, MovingAvgType.ExponentialMovingAverage, signal: true)
                 : ComputeBullPowerFast(data, context, bp.Length),
             BearPowerSpecOptions bear => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeBearPowerFast(data, context, bear.Length), bear.Length, MovingAvgType.ExponentialMovingAverage)
+                ? ComputeBearPowerFast(data, context, bear.Length, MovingAvgType.ExponentialMovingAverage, signal: true)
                 : ComputeBearPowerFast(data, context, bear.Length),
             ElderForceIndexSpecOptions efi => ComputeElderForceIndexFast(data, context, efi.Length),
             RelativeVolatilityIndexSpecOptions rvi => ComputeRelativeVolatilityIndexFast(data, context, rvi.Length),
@@ -1719,10 +1719,10 @@ internal static partial class IndicatorCompute
             PremierStochasticOscillatorSpecOptions pso => ComputePremierStochasticFast(data, context, pso.Length, pso.SmoothLength,
                 pso.MaType),
             BullPowerIndicatorSpecOptions bpi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeBullPowerFast(data, context, bpi.Length), bpi.Length, bpi.MaType)
+                ? ComputeBullPowerFast(data, context, bpi.Length, bpi.MaType, signal: true)
                 : ComputeBullPowerFast(data, context, bpi.Length),
             BearPowerIndicatorSpecOptions beari => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeBearPowerFast(data, context, beari.Length), beari.Length, beari.MaType)
+                ? ComputeBearPowerFast(data, context, beari.Length, beari.MaType, signal: true)
                 : ComputeBearPowerFast(data, context, beari.Length),
             MomentumOscillatorSpecOptions mosc => spec.OutputKey switch
             {
@@ -4815,70 +4815,23 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bull Power using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeBullPowerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBullPowerFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // The mirror of the bear reading: how much of the bar the buyers took. Only its signal line is
-        // smoothed, so length does not reach the series this arm is bound to.
-        _ = length;
-        var (inputList, highList, lowList, openList, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var close = inputList[i];
-
-            // There is no previous close on the first bar.
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var open = openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            output[i] = close < open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(high - prevClose, close - low) :
-                close > open ? Math.Max(open - prevClose, high - low) : prevClose > open ? high - low :
-                high - close > close - low ? high - open : prevClose < open ? Math.Max(high - prevClose, close - low) :
-                high - close < close - low ? Math.Max(open - close, high - low) : prevClose > open ? high - low :
-                prevClose > open ? Math.Max(high - open, close - low) : prevClose < open ? Math.Max(open - close, high - low) : high - low;
-        }
-
-        return buffer;
+        length = Math.Max(1, length); var (input, high, low, open, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new CandlePowerWindow(true, maType, length, !signal || external, input.Count); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], open[i], high[i], low[i], true); result.WritableSpan[i] = signal && !external ? p.Signal : p.Value; }
+        if (signal && external) { using var power = context.Rent(input.Count); result.Span.CopyTo(power.WritableSpan); MovingAverage(data, maType, length, power.Span, result.WritableSpan); }
+        return result;
     }
 
     /// <summary>
     /// Computes Bear Power using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeBearPowerFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeBearPowerFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // CalculateBearPowerIndicator reads how much of the bar the sellers took, from the open, the previous
-        // close and where the close landed inside the range. Only its signal line is smoothed, so length does
-        // not reach the series this arm is bound to.
-        _ = length;
-        var (inputList, highList, lowList, openList, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var close = inputList[i];
-
-            // There is no previous close on the first bar.
-            var prevClose = i >= 1 ? inputList[i - 1] : 0;
-            var open = openList[i];
-            var high = highList[i];
-            var low = lowList[i];
-
-            output[i] = close < open ? high - low : prevClose > open ? Math.Max(close - open, high - low) :
-                close > open ? Math.Max(open - low, high - close) : prevClose > open ? Math.Max(prevClose - low, high - close) :
-                high - close > close - low ? high - low : prevClose > open ? Math.Max(prevClose - open, high - low) :
-                high - close < close - low ? open - low : close > open ? Math.Max(close - low, high - close) :
-                close > open ? Math.Max(prevClose - open, high - close) : prevClose < open ? Math.Max(open - low, high - close) : high - low;
-        }
-
-        return buffer;
+        length = Math.Max(1, length); var (input, high, low, open, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new CandlePowerWindow(false, maType, length, !signal || external, input.Count); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], open[i], high[i], low[i], true); result.WritableSpan[i] = signal && !external ? p.Signal : p.Value; }
+        if (signal && external) { using var power = context.Rent(input.Count); result.Span.CopyTo(power.WritableSpan); MovingAverage(data, maType, length, power.Span, result.WritableSpan); }
+        return result;
     }
 
     /// <summary>
