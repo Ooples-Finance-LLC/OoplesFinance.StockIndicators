@@ -907,6 +907,7 @@ internal static partial class IndicatorCompute
                 : ComputeProjectionOscillatorFast(data, context, projo.Length),
             RainbowOscillatorSpecOptions rbo => ComputeRainbowOscillatorFast(data, context, rbo.Length, maType: rbo.MaType, outputKey: spec.OutputKey),
             RegressionOscillatorSpecOptions regro => ComputeRegressionOscillatorFast(data, context, regro.Length),
+            NormalizedRelativeVigorIndexSpecOptions nv => ComputeNormalizedVigorFast(data, context, nv.Length, nv.MaType, spec.OutputKey),
             RexOscillatorSpecOptions rexo => spec.OutputKey == "Signal"
                 ? ComputeRexOscillatorFast(data, context, rexo.Length, rexo.MaType, true)
                 : ComputeRexOscillatorFast(data, context, rexo.Length, rexo.MaType),
@@ -9754,6 +9755,21 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Rex Oscillator using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeNormalizedVigorFast(StockData data, ComputeContext context, int length, MovingAvgType kind, string? outputKey = null)
+    {
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues; var output=context.Rent(input.Count);
+        if(ComponentAverage.HasOverrides || (!StrengthWindow.Supports(kind) && kind!=MovingAvgType.SymmetricallyWeightedMovingAverage))
+        {
+            length=Math.Max(1,length); using var bodies=context.Rent(input.Count); using var ranges=context.Rent(input.Count); using var body=context.Rent(input.Count); using var range=context.Rent(input.Count); using var ratios=context.Rent(input.Count);
+            for(var i=0;i<input.Count;i++){bodies.WritableSpan[i]=NormalizedVigorWindow.Difference(input[i],data.OpenPrices[i]).Publish();ranges.WritableSpan[i]=NormalizedVigorWindow.Difference(data.HighPrices[i],data.LowPrices[i]).Publish();}
+            MovingAverage(data,kind,length,bodies.Span,body.WritableSpan);MovingAverage(data,kind,length,ranges.Span,range.WritableSpan);
+            using var window=new NormalizedVigorWindow(kind,length,input.Count);for(var i=0;i<input.Count;i++)ratios.WritableSpan[i]=window.Ratio(new RocBankValue(body.Span[i]),new RocBankValue(range.Span[i]),true).Publish();
+            if(outputKey=="Signal")MovingAverage(data,kind,length,ratios.Span,output.WritableSpan);else ratios.Span.CopyTo(output.WritableSpan);
+        }
+        else {using var window=new NormalizedVigorWindow(kind,length,input.Count);for(var i=0;i<input.Count;i++){var r=window.Next(input[i],data.OpenPrices[i],data.HighPrices[i],data.LowPrices[i],true);output.WritableSpan[i]=outputKey=="Signal"?r.Signal:r.Value;}}
+        return output;
+    }
+
     internal static ComputeBuffer ComputeRexOscillatorFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {

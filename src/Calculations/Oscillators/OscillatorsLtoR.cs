@@ -1314,69 +1314,21 @@ public static partial class Calculations
     public static StockData CalculateNormalizedRelativeVigorIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.SymmetricallyWeightedMovingAverage, int length = 10)
     {
-        List<double> closeOpenList = new(stockData.Count);
-        List<double> highLowList = new(stockData.Count);
-        List<double> swmaCloseOpenSumList = new(stockData.Count);
-        List<double> swmaHighLowSumList = new(stockData.Count);
-        List<double> rvgiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        var swmaCloseOpenSumWindow = new RollingSum();
-        var swmaHighLowSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
+        length=Math.Max(1,length); var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;
+        List<double> values=new(input.Count), signal=new(input.Count); var signals=CreateSignalsList(stockData);
+        using var window=new NormalizedVigorWindow(maType,length,input.Count);
+        if(Builder.Compute.ComponentAverage.HasOverrides || (!StrengthWindow.Supports(maType) && maType!=MovingAvgType.SymmetricallyWeightedMovingAverage))
         {
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-
-            var closeOpen = currentClose - currentOpen;
-            closeOpenList.Add(closeOpen);
-
-            var highLow = currentHigh - currentLow;
-            highLowList.Add(highLow);
+            var bodies=input.Select((v,i)=>NormalizedVigorWindow.Difference(v,stockData.OpenPrices[i]).Publish()).ToList();
+            var ranges=input.Select((v,i)=>NormalizedVigorWindow.Difference(stockData.HighPrices[i],stockData.LowPrices[i]).Publish()).ToList();
+            var b=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(bodies),length)?.ToList()??GetMovingAverageList(stockData,maType,length,bodies);
+            var r=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(ranges),length)?.ToList()??GetMovingAverageList(stockData,maType,length,ranges);
+            for(var i=0;i<input.Count;i++) values.Add(window.Ratio(new RocBankValue(b[i]),new RocBankValue(r[i]),true).Publish());
+            signal=Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(values),length)?.ToList()??GetMovingAverageList(stockData,maType,length,values);
         }
-
-        var swmaCloseOpenList = GetMovingAverageList(stockData, maType, length, closeOpenList);
-        var swmaHighLowList = GetMovingAverageList(stockData, maType, length, highLowList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var swmaCloseOpen = swmaCloseOpenList[i];
-            swmaCloseOpenSumWindow.Add(swmaCloseOpen);
-            var closeOpenSum = swmaCloseOpenSumWindow.Sum(length);
-            swmaCloseOpenSumList.Add(closeOpenSum);
-
-            var swmaHighLow = swmaHighLowList[i];
-            swmaHighLowSumWindow.Add(swmaHighLow);
-            var highLowSum = swmaHighLowSumWindow.Sum(length);
-            swmaHighLowSumList.Add(highLowSum);
-
-            var rvgi = highLowSum != 0 ? closeOpenSum / highLowSum * 100 : 0;
-            rvgiList.Add(rvgi);
-        }
-
-        var rvgiSignalList = GetMovingAverageList(stockData, maType, length, rvgiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var rvgi = rvgiList[i];
-            var rvgiSig = rvgiSignalList[i];
-            var prevRvgi = i >= 1 ? rvgiList[i - 1] : 0;
-            var prevRvgiSig = i >= 1 ? rvgiSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(rvgi - rvgiSig, prevRvgi - prevRvgiSig);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Nrvi", rvgiList },
-            { "Signal", rvgiSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rvgiList);
-        stockData.IndicatorName = IndicatorName.NormalizedRelativeVigorIndex;
-
-        return stockData;
+        else for(var i=0;i<input.Count;i++) {var r=window.Next(input[i],stockData.OpenPrices[i],stockData.HighPrices[i],stockData.LowPrices[i],true);values.Add(r.Value);signal.Add(r.Signal);}
+        for(var i=0;i<input.Count;i++) signals?.Add(GetCompareSignal(values[i]-signal[i],i>0?values[i-1]-signal[i-1]:0));
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Nrvi",values},{"Signal",signal}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.NormalizedRelativeVigorIndex;return stockData;
     }
 
 

@@ -24922,5 +24922,192 @@
     "after": "EhlersVigorWindow.TrueValue(close[i], open[i], high[i], low[i]).Publish() * 100",
     "filter": "FullyQualifiedName~EhlersVigorNumericalTests.CandleRatiosAndUnequalAveragesMatchIndependentRoundedStages|FullyQualifiedName~EhlersVigorNumericalTests.ExtremeRangesAndRatiosRemainUsableBeforePublication|FullyQualifiedName~EhlersVigorNumericalTests.SelectedCloseAndTwoCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~EhlersVigorNumericalTests.InvalidFieldsCannotAdvanceEitherSmoothingStage",
     "scope": "internal static void EhlersRelativeVigorIndex("
+  },
+  {
+    "id": "normalized-vigor-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "sum.Add(right, -1);",
+    "after": "sum.Add(right, 1);",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-difference-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(left - right);",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-body-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_bodies.Count >= _length ? _bodies[0] : BigInteger.Zero",
+    "after": "_bodies.Count > _length ? _bodies[0] : BigInteger.Zero",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_ranges.Count >= _length ? _ranges[0] : BigInteger.Zero",
+    "after": "_ranges.Count > _length ? _ranges[0] : BigInteger.Zero",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "100 * bodySum",
+    "after": "10 * bodySum",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-zero-range",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "rangeSum.IsZero ? default :",
+    "after": "rangeSum.IsZero ? new RocBankValue(1) :",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-ratio-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "if(commit) { _bodySum=bodySum;",
+    "after": "if(true) { _bodySum=bodySum;",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-body-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_body.Next(Difference(close,open),commit)",
+    "after": "_body.Next(Difference(close,open),true)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_range.Next(Difference(high,low),commit)",
+    "after": "_range.Next(Difference(high,low),true)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_signal.Next(value,commit)",
+    "after": "_signal.Next(value,true)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_signal.Next(value,commit)",
+    "after": "_signal.Next(body,commit)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-signal-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_signal.Next(value,commit)",
+    "after": "_signal.Next(new RocBankValue(value.Publish()),commit)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-reset-body",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_body.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_signal.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-reset-sums",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_bodySum=_rangeSum=BigInteger.Zero;",
+    "after": "",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-triangle-even-width",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_bLength=length-_aLength+1;",
+    "after": "_bLength=_aLength;",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-triangle-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "(long)_aLength*_bLength",
+    "after": "(long)_aLength*_bLength+1",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-triangle-first-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_a.Count>=_aLength?_a[0]:BigInteger.Zero",
+    "after": "_a.Count>_aLength?_a[0]:BigInteger.Zero",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-triangle-second-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "_b!.Count>=_bLength?_b[0]:BigInteger.Zero",
+    "after": "_b!.Count>_bLength?_b[0]:BigInteger.Zero",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-triangle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/NormalizedVigorWindow.cs",
+    "before": "if(commit) { _aSum=aSum;",
+    "after": "if(true) { _aSum=aSum;",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage"
+  },
+  {
+    "id": "normalized-vigor-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage",
+    "scope": "internal static ComputeBuffer ComputeNormalizedVigorFast("
+  },
+  {
+    "id": "normalized-vigor-customer-third-stage",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data,kind,length,ratios.Span,output.WritableSpan)",
+    "after": "MovingAverage(data,kind,length,body.Span,output.WritableSpan)",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage",
+    "scope": "internal static ComputeBuffer ComputeNormalizedVigorFast("
+  },
+  {
+    "id": "normalized-vigor-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~NormalizedVigorNumericalTests.SmoothedLegsRollingRatioAndSignalMatchIndependentTriangularWeights|FullyQualifiedName~NormalizedVigorNumericalTests.ExtremeCandleLegsPreserveRatiosAndRecoverAfterCancellation|FullyQualifiedName~NormalizedVigorNumericalTests.SelectedCloseAndThreeCustomerStagesPreserveOriginalCandleFields|FullyQualifiedName~NormalizedVigorNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingOrSumStage",
+    "scope": "public sealed class NormalizedRelativeVigorIndexState :"
   }
 ]

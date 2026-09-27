@@ -1185,69 +1185,16 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
 [PrimaryOutput("Nrvi")]
 public sealed class NormalizedRelativeVigorIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _closeOpenSum;
-    private readonly RollingWindowSum _highLowSum;
-    private readonly IMovingAverageSmoother _closeOpenSmoother;
-    private readonly IMovingAverageSmoother _highLowSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public NormalizedRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SymmetricallyWeightedMovingAverage,
-        int length = 10)
-    {
-        var resolved = Math.Max(1, length);
-        _closeOpenSum = new RollingWindowSum(resolved);
-        _highLowSum = new RollingWindowSum(resolved);
-        _closeOpenSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _highLowSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly NormalizedVigorWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public NormalizedRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SymmetricallyWeightedMovingAverage, int length = 10) { _window = new(maType, length); }
     public IndicatorName Name => IndicatorName.NormalizedRelativeVigorIndex;
-
-    public void Reset()
-    {
-        _closeOpenSum.Reset();
-        _highLowSum.Reset();
-        _closeOpenSmoother.Reset();
-        _highLowSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var closeOpen = close - bar.Open;
-        var highLow = bar.High - bar.Low;
-        var closeOpenSmoothed = _closeOpenSmoother.Next(closeOpen, isFinal);
-        var highLowSmoothed = _highLowSmoother.Next(highLow, isFinal);
-        var closeOpenSum = isFinal ? _closeOpenSum.Add(closeOpenSmoothed, out _) : _closeOpenSum.Preview(closeOpenSmoothed, out _);
-        var highLowSum = isFinal ? _highLowSum.Add(highLowSmoothed, out _) : _highLowSum.Preview(highLowSmoothed, out _);
-        var rvgi = highLowSum != 0 ? closeOpenSum / highLowSum * 100 : 0;
-        var signal = _signalSmoother.Next(rvgi, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Nrvi", rvgi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rvgi, outputs);
+        StreamingInputValidation.Validate(bar); var r = _window.Next(_input.GetValue(bar), bar.Open, bar.High, bar.Low, isFinal); return new(r.Value, includeOutputs ? new Dictionary<string, double> { { "Nrvi", r.Value }, { "Signal", r.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _closeOpenSum.Dispose();
-        _highLowSum.Dispose();
-        _closeOpenSmoother.Dispose();
-        _highLowSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Nodo")]
