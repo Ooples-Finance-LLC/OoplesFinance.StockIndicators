@@ -1266,38 +1266,11 @@ public static partial class Calculations
     public static StockData CalculateForecastOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 3)
     {
-        List<double> pfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var pf = currentValue != 0 ? 100 * MinPastValues(i, 1, currentValue - prevValue) / currentValue : 0;
-            pfList.Add(pf);
-        }
-
-        var pfSmaList = GetMovingAverageList(stockData, maType, length, pfList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pfSma = pfSmaList[i];
-            var prevPfSma = i >= 1 ? pfSmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(pfSma, prevPfSma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fo", pfList },
-            { "Signal", pfSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pfList);
-        stockData.IndicatorName = IndicatorName.ForecastOscillator;
-
-        return stockData;
+        length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new OneBarReturnWindow(false, maType, length, external, input.Count); List<double> values = new(input.Count), average = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var p = window.Next(price, true); values.Add(p.Value); average.Add(p.Signal); }
+        if (external) average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, values);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(average[i], i > 0 ? average[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fo", values }, { "Signal", average } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.ForecastOscillator; return stockData;
     }
 
 

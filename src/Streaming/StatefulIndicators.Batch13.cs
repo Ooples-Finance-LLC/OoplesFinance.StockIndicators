@@ -1050,57 +1050,16 @@ public sealed class ForceIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Fo")]
 public sealed class ForecastOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public ForecastOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 3)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OneBarReturnWindow _window;
+    public ForecastOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 3) { _window = new(false, maType, length); }
     public IndicatorName Name => IndicatorName.ForecastOscillator;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var pf = value != 0 ? 100 * (_hasPrev ? value - prevValue : 0) / value : 0;
-        var signal = _signalSmoother.Next(pf, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fo", pf },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pf, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "Fo", p.Value }, { "Signal", p.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>

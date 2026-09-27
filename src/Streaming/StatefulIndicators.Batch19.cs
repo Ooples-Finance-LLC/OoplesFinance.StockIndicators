@@ -823,61 +823,16 @@ public sealed class PercentageTrendState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Pcco")]
 public sealed class PercentChangeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevPcc;
-    private bool _hasPrev;
-
-    public PercentChangeOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14)
-    {
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OneBarReturnWindow _window;
+    public PercentChangeOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14) { _window = new(true, maType, length); }
     public IndicatorName Name => IndicatorName.PercentChangeOscillator;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _prevPcc = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevPcc = _hasPrev ? _prevPcc : 0;
-        // (current / previous) - 1, not current / (previous - 1). See the batch side.
-        var pcc = prevValue != 0 ? prevPcc + ((value / prevValue) - 1) : 0;
-        var signal = _signalSmoother.Next(pcc, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevPcc = pcc;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Pcco", pcc },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(pcc, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Value, includeOutputs ? new Dictionary<string, double> { { "Pcco", p.Value }, { "Signal", p.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("PerformanceIndex")]

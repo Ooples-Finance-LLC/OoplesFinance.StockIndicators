@@ -23875,5 +23875,145 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~TimeSeriesForecastNumericalTests.RoundedEndpointAndCumulativeAbsoluteErrorPreserveAllBands|FullyQualifiedName~TimeSeriesForecastNumericalTests.SelectedPricesFeedBothRegressionAndCumulativeResiduals|FullyQualifiedName~TimeSeriesForecastNumericalTests.InvalidFieldsNeverAdvanceRegressionOrCumulativeError",
     "scope": "public sealed class TimeSeriesForecastState :"
+  },
+  {
+    "id": "onebar-return-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_cumulative ? _previous : close",
+    "after": "_cumulative ? close : _previous",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-startup",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "if (_hasPrevious && denominator != 0)",
+    "after": "if ((_hasPrevious || close != 0) && denominator != 0)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-scale",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "numerator.Add(close, _cumulative ? 1 : 100)",
+    "after": "numerator.Add(close, _cumulative ? 100 : 1)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-previous-sign",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "numerator.Add(_previous, _cumulative ? -1 : -100)",
+    "after": "numerator.Add(_previous, _cumulative ? 1 : 100)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-ratio-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "value = RocBankValue.Round(numerator, denominator)",
+    "after": "value = new RocBankValue((close / denominator - _previous / denominator) * (_cumulative ? 1 : 100))",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-cumulative",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_last.AddTo(ref total);",
+    "after": "if (_previous == 0) _last.AddTo(ref total);",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-zero-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "RocBankValue value = default;",
+    "after": "RocBankValue value = _last;",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, length), capacityHint)",
+    "after": "_signal = new(kind, Math.Max(2, length), capacityHint)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-signal-kind",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, length), capacityHint)",
+    "after": "_signal = new(MovingAvgType.SimpleMovingAverage, Math.Max(1, length), capacityHint)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-preview-signal",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_signal.Next(value, commit)",
+    "after": "_signal.Next(value, true)",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-preview-price",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/OneBarReturnWindow.cs",
+    "before": "_signal?.Reset();",
+    "after": "if (_hasPrevious) _signal?.Reset();",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal"
+  },
+  {
+    "id": "onebar-return-invalid-forecastoscillator",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal",
+    "scope": "public sealed class ForecastOscillatorState :"
+  },
+  {
+    "id": "onebar-return-selected-forecastoscillator",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal",
+    "scope": "internal static ComputeBuffer ComputeForecastOscillatorFast("
+  },
+  {
+    "id": "onebar-return-invalid-percentchangeoscillator",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal",
+    "scope": "public sealed class PercentChangeOscillatorState :"
+  },
+  {
+    "id": "onebar-return-selected-percentchangeoscillator",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal",
+    "scope": "internal static ComputeBuffer ComputePercentChangeOscillatorFast("
   }
 ]

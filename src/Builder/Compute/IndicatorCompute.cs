@@ -617,7 +617,7 @@ internal static partial class IndicatorCompute
             BreakoutRsiSpecOptions brsi => ComputeBreakoutRsiFast(data, context, brsi.Length),
             ChopZoneSpecOptions cz => ComputeChopZoneFast(data, context, cz.Length, cz.MaType),
             ForecastOscillatorSpecOptions fo => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeForecastOscillatorFast(data, context), fo.Length, fo.MaType)
+                ? ComputeForecastOscillatorFast(data, context, fo.Length, fo.MaType, signal: true)
                 : ComputeForecastOscillatorFast(data, context),
 
             // Batch 5 - Adaptive indicators
@@ -790,7 +790,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             PercentChangeOscillatorSpecOptions pcco => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputePercentChangeOscillatorFast(data, context), pcco.Length, pcco.MaType)
+                ? ComputePercentChangeOscillatorFast(data, context, pcco.Length, pcco.MaType, signal: true)
                 : ComputePercentChangeOscillatorFast(data, context),
             DecisionPointPriceMomentumOscillatorSpecOptions dppmo => ComputeDecisionPointPriceMomentumOscillatorFast(data, context,
                 (dppmo.Length * 2) + 7, dppmo.Length + 6, spec.OutputKey),
@@ -5993,27 +5993,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Forecast Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeForecastOscillatorFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeForecastOscillatorFast(StockData data, ComputeContext context, int length = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signal = false)
     {
-        // CalculateForecastOscillator publishes the unsmoothed percentage change of the chained series as its
-        // primary series - the moving average of it is the separate Signal key - so neither the spec's Length
-        // nor its MaType can reach this one. OscillatorCore.ForecastOscillator took the close and regressed it.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            output[i] = currentValue != 0
-                ? 100 * CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) / currentValue
-                : 0;
-        }
-
-        return buffer;
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new OneBarReturnWindow(false, maType, length, !signal || external, input.Count); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = signal && !external ? p.Signal : p.Value; }
+        if (signal && external) { using var values = context.Rent(input.Count); result.Span.CopyTo(values.WritableSpan); MovingAverage(data, maType, length, values.Span, result.WritableSpan); } return result;
     }
 
     /// <summary>
@@ -9681,26 +9665,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Percent Change Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputePercentChangeOscillatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, bool signal = false)
     {
-        // CalculatePercentChangeOscillator publishes "Pcco": the running total of the percentage change in the
-        // chained series. Neither the length nor the moving average type reaches that series - they smooth a
-        // series the batch never publishes - so the arm takes no parameters.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevPcc = i >= 1 ? output[i - 1] : 0;
-
-            output[i] = prevValue != 0 ? prevPcc + ((input[i] / prevValue) - 1) : 0;
-        }
-
-        return buffer;
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new OneBarReturnWindow(true, maType, length, !signal || external, input.Count); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = signal && !external ? p.Signal : p.Value; }
+        if (signal && external) { using var values = context.Rent(input.Count); result.Span.CopyTo(values.WritableSpan); MovingAverage(data, maType, length, values.Span, result.WritableSpan); } return result;
     }
 
     /// <summary>

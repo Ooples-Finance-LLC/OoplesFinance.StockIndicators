@@ -1564,45 +1564,11 @@ public static partial class Calculations
     public static StockData CalculatePercentChangeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 14)
     {
-        List<double> percentChangeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevPcc = GetLastOrDefault(percentChangeList);
-            // A percent change is (current / previous) - 1. The subtraction used to sit inside the
-            // divisor - current / (previous - 1) - which is a different quantity entirely: at a price
-            // of 100 it is 100/99, so the running total climbed by about 1.01 every bar no matter what
-            // price did. On a market that never moved it reached 909 after 900 bars.
-            var pcc = prevValue != 0 ? prevPcc + ((currentValue / prevValue) - 1) : 0;
-            percentChangeList.Add(pcc);
-        }
-
-        var pctChgWmaList = GetMovingAverageList(stockData, maType, length, percentChangeList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var pcc = percentChangeList[i];
-            var pccWma = pctChgWmaList[i];
-            var prevPcc = i >= 1 ? percentChangeList[i - 1] : 0;
-            var prevPccWma = i >= 1 ? pctChgWmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(pcc - pccWma, prevPcc - prevPccWma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pcco", percentChangeList },
-            { "Signal", pctChgWmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(percentChangeList);
-        stockData.IndicatorName = IndicatorName.PercentChangeOscillator;
-
-        return stockData;
+        length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new OneBarReturnWindow(true, maType, length, external, input.Count); List<double> values = new(input.Count), average = new(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var p = window.Next(price, true); values.Add(p.Value); average.Add(p.Signal); }
+        if (external) average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, values);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(values[i] - average[i], i > 0 ? values[i - 1] - average[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Pcco", values }, { "Signal", average } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.PercentChangeOscillator; return stockData;
     }
 
 

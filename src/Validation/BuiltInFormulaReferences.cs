@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.ForecastOscillator or IndicatorName.PercentChangeOscillator)
+        {
+            var returnKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < returnKeys.Length; slot++) { var key = returnKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => OneBarReturnOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.TimeSeriesForecast)
         {
             var forecastKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

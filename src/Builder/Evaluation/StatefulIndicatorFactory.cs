@@ -45,6 +45,8 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            ForecastOscillatorSpecOptions returns => new ForecastOscillatorState(returns.MaType, returns.Length),
+            PercentChangeOscillatorSpecOptions returns => new PercentChangeOscillatorState(returns.MaType, returns.Length),
             DemarkerSpecOptions demarker => new DemarkerState(demarker.MaType, demarker.Length),
             DeMarkerSpecOptions demarker => new DemarkerState(length: demarker.Length),
             BullPowerIndicatorSpecOptions power => new BullPowerIndicatorState(power.MaType, power.Length),
