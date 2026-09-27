@@ -261,87 +261,25 @@ public static partial class Calculations
     public static StockData CalculateHurstCycleChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3)
     {
-        List<double> sctList = new(stockData.Count);
-        List<double> scbList = new(stockData.Count);
-        List<double> mctList = new(stockData.Count);
-        List<double> mcbList = new(stockData.Count);
-        List<double> scmmList = new(stockData.Count);
-        List<double> mcmmList = new(stockData.Count);
-        List<double> omedList = new(stockData.Count);
-        List<double> oshortList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var scl = MinOrMax((int)Math.Ceiling((double)fastLength / 2));
-        var mcl = MinOrMax((int)Math.Ceiling((double)slowLength / 2));
-        var scl_2 = MinOrMax((int)Math.Ceiling((double)scl / 2));
-        var mcl_2 = MinOrMax((int)Math.Ceiling((double)mcl / 2));
-
-        var callerSeries = stockData.CaptureInputSeries();
-        var sclAtrList = CalculateAverageTrueRange(stockData, maType, scl).ChainedValues;
-        // Both channels are ATRs of the prices. The first ATR publishes itself onto CustomValuesList, and the
-        // second used to take it for the close - a true range measured against an ATR.
-        stockData.RestoreInputSeries(callerSeries);
-        var mclAtrList = CalculateAverageTrueRange(stockData, maType, mcl).ChainedValues;
-        var sclRmaList = GetMovingAverageList(stockData, maType, scl, inputList);
-        var mclRmaList = GetMovingAverageList(stockData, maType, mcl, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        HighLowBandsWindow.ValidateShift(fastMult); HighLowBandsWindow.ValidateShift(slowMult); var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var fastCycle = HurstCycleWindow.HalfCycle(fastLength); var slowCycle = HurstCycleWindow.HalfCycle(slowLength); List<double>? fastAtr = null, slowAtr = null, fastMean = null, slowMean = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var sclAtr = sclAtrList[i];
-            var mclAtr = mclAtrList[i];
-            var prevSclRma = i >= scl_2 ? sclRmaList[i - scl_2] : currentValue;
-            var prevMclRma = i >= mcl_2 ? mclRmaList[i - mcl_2] : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var scm_off = fastMult * sclAtr;
-            var mcm_off = slowMult * mclAtr;
-
-            var prevSct = GetLastOrDefault(sctList);
-            var sct = prevSclRma + scm_off;
-            sctList.Add(sct);
-
-            var prevScb = GetLastOrDefault(scbList);
-            var scb = prevSclRma - scm_off;
-            scbList.Add(scb);
-
-            var mct = prevMclRma + mcm_off;
-            mctList.Add(mct);
-
-            var mcb = prevMclRma - mcm_off;
-            mcbList.Add(mcb);
-
-            var scmm = (sct + scb) / 2;
-            scmmList.Add(scmm);
-
-            var mcmm = (mct + mcb) / 2;
-            mcmmList.Add(mcmm);
-
-            var omed = mct - mcb != 0 ? (scmm - mcb) / (mct - mcb) : 0;
-            omedList.Add(omed);
-
-            var oshort = mct - mcb != 0 ? (currentValue - mcb) / (mct - mcb) : 0;
-            oshortList.Add(oshort);
-
-            var signal = GetBullishBearishSignal(currentValue - sct, prevValue - prevSct, currentValue - scb, prevValue - prevScb);
-            signalsList?.Add(signal);
+            var ranges = GetTrueRangeList(stockData);
+            fastAtr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), fastCycle)?.ToList() ?? GetMovingAverageList(stockData, maType, fastCycle, ranges);
+            slowAtr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), slowCycle)?.ToList() ?? GetMovingAverageList(stockData, maType, slowCycle, ranges);
+            fastMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), fastCycle)?.ToList() ?? GetMovingAverageList(stockData, maType, fastCycle, input);
+            slowMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), slowCycle)?.ToList() ?? GetMovingAverageList(stockData, maType, slowCycle, input);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "FastUpperBand", sctList },
-            { "SlowUpperBand", mctList },
-            { "FastMiddleBand", scmmList },
-            { "SlowMiddleBand", mcmmList },
-            { "FastLowerBand", scbList },
-            { "SlowLowerBand", mcbList },
-            { "OMed", omedList },
-            { "OShort", oshortList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.HurstCycleChannel;
-
-        return stockData;
+        using var window = new HurstCycleWindow(maType, fastLength, slowLength, fastMult, slowMult, external, Math.Max(1, input.Count));
+        List<double> fu = new(input.Count), fm = new(input.Count), fl = new(input.Count), su = new(input.Count), sm = new(input.Count), sl = new(input.Count), om = new(input.Count), os = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(fastAtr![i]) : null, external ? new RocBankValue(slowAtr![i]) : null, external ? new RocBankValue(fastMean![i]) : null, external ? new RocBankValue(slowMean![i]) : null);
+            fu.Add(point.FastUpper); fm.Add(point.FastMiddle); fl.Add(point.FastLower); su.Add(point.SlowUpper); sm.Add(point.SlowMiddle); sl.Add(point.SlowLower); om.Add(point.OMed); os.Add(point.OShort);
+            signals?.Add(GetBullishBearishSignal(input[i] - fu[i], i > 0 ? input[i - 1] - fu[i - 1] : 0, input[i] - fl[i], i > 0 ? input[i - 1] - fl[i - 1] : 0));
+        }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "FastUpperBand", fu }, { "FastMiddleBand", fm }, { "FastLowerBand", fl }, { "SlowUpperBand", su }, { "SlowMiddleBand", sm }, { "SlowLowerBand", sl }, { "OMed", om }, { "OShort", os } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.HurstCycleChannel; return stockData;
     }
 
 

@@ -21667,66 +21667,21 @@ internal static partial class IndicatorCompute
         int slowLength = 30, double fastMult = 1, double slowMult = 3, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
         HurstCycleSeries series = HurstCycleSeries.FastMiddleBand)
     {
-        // CalculateHurstCycleChannel halves each length into a cycle, centres an envelope on the moving
-        // average of the chained series as it stood half a cycle ago, and offsets it by a multiple of the
-        // average true range over the same cycle. The two oscillators place the fast centre and price itself
-        // within the slow envelope. The switch this replaced was a moving average of the close, which is none
-        // of the eight.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        // Each cycle is clamped the way the batch clamps it: never shorter than two bars, never longer than
-        // 530, which is what MinOrMax does for a length.
-        var fastCycle = MathHelper.MinOrMax((int)Math.Ceiling((double)fastLength / 2));
-        var slowCycle = MathHelper.MinOrMax((int)Math.Ceiling((double)slowLength / 2));
-        var fastLag = MathHelper.MinOrMax((int)Math.Ceiling((double)fastCycle / 2));
-        var slowLag = MathHelper.MinOrMax((int)Math.Ceiling((double)slowCycle / 2));
-
-        using var fastRange = ComputeAtrFast(data, context, fastCycle, maType);
-        using var slowRange = ComputeAtrFast(data, context, slowCycle, maType);
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, fastCycle, input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, slowCycle, input, slowAverage.WritableSpan);
-
-        var fastAtr = fastRange.Span;
-        var slowAtr = slowRange.Span;
-        var fastMa = fastAverage.Span;
-        var slowMa = slowAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        HighLowBandsWindow.ValidateShift(fastMult); HighLowBandsWindow.ValidateShift(slowMult); var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var fastCycle = HurstCycleWindow.HalfCycle(fastLength); var slowCycle = HurstCycleWindow.HalfCycle(slowLength); var count = external ? input.Count : 0;
+        using var fastAtr = context.Rent(count); using var slowAtr = context.Rent(count); using var fastMean = context.Rent(count); using var slowMean = context.Rent(count);
+        if (external)
         {
-            var currentValue = input[i];
-            var fastCentre = i >= fastLag ? fastMa[i - fastLag] : currentValue;
-            var slowCentre = i >= slowLag ? slowMa[i - slowLag] : currentValue;
-            var fastOffset = fastMult * fastAtr[i];
-            var slowOffset = slowMult * slowAtr[i];
-
-            var fastUpper = fastCentre + fastOffset;
-            var fastLower = fastCentre - fastOffset;
-            var slowUpper = slowCentre + slowOffset;
-            var slowLower = slowCentre - slowOffset;
-            var fastMiddle = (fastUpper + fastLower) / 2;
-            var slowMiddle = (slowUpper + slowLower) / 2;
-            var slowRangeWidth = slowUpper - slowLower;
-
-            output[i] = series switch
-            {
-                HurstCycleSeries.FastUpperBand => fastUpper,
-                HurstCycleSeries.FastLowerBand => fastLower,
-                HurstCycleSeries.SlowUpperBand => slowUpper,
-                HurstCycleSeries.SlowLowerBand => slowLower,
-                HurstCycleSeries.SlowMiddleBand => slowMiddle,
-                HurstCycleSeries.OMed => slowRangeWidth != 0 ? (fastMiddle - slowLower) / slowRangeWidth : 0,
-                HurstCycleSeries.OShort => slowRangeWidth != 0 ? (currentValue - slowLower) / slowRangeWidth : 0,
-                _ => fastMiddle
-            };
+            var ranges = CalculationsHelper.GetTrueRangeList(data); MovingAverage(data, maType, fastCycle, SpanCompat.AsReadOnlySpan(ranges), fastAtr.WritableSpan); MovingAverage(data, maType, slowCycle, SpanCompat.AsReadOnlySpan(ranges), slowAtr.WritableSpan);
+            MovingAverage(data, maType, fastCycle, SpanCompat.AsReadOnlySpan(input), fastMean.WritableSpan); MovingAverage(data, maType, slowCycle, SpanCompat.AsReadOnlySpan(input), slowMean.WritableSpan);
         }
-
-        return buffer;
+        using var window = new HurstCycleWindow(maType, fastLength, slowLength, fastMult, slowMult, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        {
+            var point = window.Next(high[i], low[i], input[i], true, external ? new RocBankValue(fastAtr.Span[i]) : null, external ? new RocBankValue(slowAtr.Span[i]) : null, external ? new RocBankValue(fastMean.Span[i]) : null, external ? new RocBankValue(slowMean.Span[i]) : null);
+            result.WritableSpan[i] = series switch { HurstCycleSeries.FastUpperBand => point.FastUpper, HurstCycleSeries.FastLowerBand => point.FastLower, HurstCycleSeries.SlowUpperBand => point.SlowUpper, HurstCycleSeries.SlowMiddleBand => point.SlowMiddle, HurstCycleSeries.SlowLowerBand => point.SlowLower, HurstCycleSeries.OMed => point.OMed, HurstCycleSeries.OShort => point.OShort, _ => point.FastMiddle };
+        }
+        return result;
     }
 
     /// <summary>

@@ -22176,5 +22176,198 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~VolumeAdaptiveBandNumericalTests.VolumeFloorSeedAndSeparateRecurrencesPreserveExtendedValues|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.SelectedPricesKeepOriginalVolumeAndOrderedCustomerAverages|FullyQualifiedName~VolumeAdaptiveBandNumericalTests.InvalidFieldsNeverAdvanceNativeState",
     "scope": "public sealed class VolumeAdaptiveBandsState :"
+  },
+  {
+    "id": "hurst-cycle-ceil",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "(Math.Max(1, length) + 1L) / 2",
+    "after": "Math.Max(1, length) / 2L",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "Math.Max(2, (Math.Max(1, length) + 1L) / 2)",
+    "after": "Math.Max(1, (Math.Max(1, length) + 1L) / 2)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-cap",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "Math.Min(530, Math.Max(2, (Math.Max(1, length) + 1L) / 2))",
+    "after": "Math.Min(529, Math.Max(2, (Math.Max(1, length) + 1L) / 2))",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-fast-delay",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_fastHistory = new(HalfCycle(fastCycle))",
+    "after": "_fastHistory = new(HalfCycle(fastCycle) + 1)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-slow-delay",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slowHistory = new(HalfCycle(slowCycle))",
+    "after": "_slowHistory = new(HalfCycle(slowCycle) + 1)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-fast-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_fastHistory[0] : new RocBankValue(close)",
+    "after": "_fastHistory[0] : default",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-slow-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slowHistory[0] : new RocBankValue(close)",
+    "after": "_slowHistory[0] : default",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-fast-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "new(kind, fastCycle, fastCycle, kind, capacityHint)",
+    "after": "new(kind, fastCycle, slowCycle, kind, capacityHint)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-slow-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "new(kind, slowCycle, slowCycle, kind, capacityHint)",
+    "after": "new(kind, fastCycle, slowCycle, kind, capacityHint)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-slow-factor",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slowFactor = slowFactor",
+    "after": "_slowFactor = fastFactor",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slowFactor, -1",
+    "after": "_slowFactor, 1",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-early-atr",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "sum.AddProduct(atr.Mantissa, factor, sign); sum.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "sum.Add(atr.Publish() * factor, sign);",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "RocBankValue.Round(sum, count: 2)",
+    "after": "RocBankValue.Round(sum, count: 1)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-position-zero",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "denominator.IsExactlyZero ? 0 :",
+    "after": "denominator.IsExactlyZero ? 1 :",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-early-width",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "numerator.Ratio(denominator)",
+    "after": "numerator.Mean(1) / denominator.Mean(1)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-short-source",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "Position(new RocBankValue(close), su, sl)",
+    "after": "Position(fm, su, sl)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-preview-fast",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_fast?.Next(high, low, close, commit)",
+    "after": "_fast?.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-preview-slow",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slow?.Next(high, low, close, commit)",
+    "after": "_slow?.Next(high, low, close, true)",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "if (commit) { _fastHistory",
+    "after": "if (true) { _fastHistory",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_fast?.Reset();",
+    "after": "if (_fastFactor < 0 && _fastFactor > 0) _fast?.Reset();",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-reset-slow",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_slow?.Reset();",
+    "after": "if (_slowFactor < 0 && _slowFactor > 0) _slow?.Reset();",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "_fastHistory.Clear(); _slowHistory.Clear();",
+    "after": "if (_fastFactor < 0 && _fastFactor > 0) { _fastHistory.Clear(); _slowHistory.Clear(); }",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCycleWindow.cs",
+    "before": "HighLowBandsWindow.ValidateShift(slowFactor);",
+    "after": "if (slowFactor == 0) HighLowBandsWindow.ValidateShift(slowFactor);",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "hurst-cycle-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory",
+    "scope": "public sealed class HurstCycleChannelState :"
   }
 ]

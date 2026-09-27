@@ -1446,114 +1446,16 @@ public sealed class HurstBandsState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("FastMiddleBand")]
 public sealed class HurstCycleChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _sclOffset;
-    private readonly int _mclOffset;
-    private readonly IMovingAverageSmoother _sclAtrSmoother;
-    private readonly IMovingAverageSmoother _mclAtrSmoother;
-    private readonly IMovingAverageSmoother _sclRmaSmoother;
-    private readonly IMovingAverageSmoother _mclRmaSmoother;
-    private readonly PooledRingBuffer<double> _sclRmaValues;
-    private readonly PooledRingBuffer<double> _mclRmaValues;
-    private readonly double _fastMult;
-    private readonly double _slowMult;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public HurstCycleChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
-        int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var scl = MathHelper.MinOrMax((int)Math.Ceiling((double)resolvedFast / 2));
-        var mcl = MathHelper.MinOrMax((int)Math.Ceiling((double)resolvedSlow / 2));
-        _sclOffset = MathHelper.MinOrMax((int)Math.Ceiling((double)scl / 2));
-        _mclOffset = MathHelper.MinOrMax((int)Math.Ceiling((double)mcl / 2));
-        _sclAtrSmoother = MovingAverageSmootherFactory.Create(maType, scl);
-        _mclAtrSmoother = MovingAverageSmootherFactory.Create(maType, mcl);
-        _sclRmaSmoother = MovingAverageSmootherFactory.Create(maType, scl);
-        _mclRmaSmoother = MovingAverageSmootherFactory.Create(maType, mcl);
-        _sclRmaValues = new PooledRingBuffer<double>(Math.Max(1, _sclOffset));
-        _mclRmaValues = new PooledRingBuffer<double>(Math.Max(1, _mclOffset));
-        _fastMult = fastMult;
-        _slowMult = slowMult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HurstCycleWindow _window;
+    public HurstCycleChannelState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int fastLength = 10, int slowLength = 30, double fastMult = 1, double slowMult = 3) { _window = new(maType, fastLength, slowLength, fastMult, slowMult); }
     public IndicatorName Name => IndicatorName.HurstCycleChannel;
-
-    public void Reset()
-    {
-        _sclAtrSmoother.Reset();
-        _mclAtrSmoother.Reset();
-        _sclRmaSmoother.Reset();
-        _mclRmaSmoother.Reset();
-        _sclRmaValues.Clear();
-        _mclRmaValues.Clear();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var sclAtr = _sclAtrSmoother.Next(tr, isFinal);
-        var mclAtr = _mclAtrSmoother.Next(tr, isFinal);
-        var sclRma = _sclRmaSmoother.Next(value, isFinal);
-        var mclRma = _mclRmaSmoother.Next(value, isFinal);
-        var prevSclRma = _sclRmaValues.Count >= _sclOffset ? _sclRmaValues[_sclRmaValues.Count - _sclOffset] : value;
-        var prevMclRma = _mclRmaValues.Count >= _mclOffset ? _mclRmaValues[_mclRmaValues.Count - _mclOffset] : value;
-        var scmOff = _fastMult * sclAtr;
-        var mcmOff = _slowMult * mclAtr;
-        var sct = prevSclRma + scmOff;
-        var scb = prevSclRma - scmOff;
-        var mct = prevMclRma + mcmOff;
-        var mcb = prevMclRma - mcmOff;
-        var scmm = (sct + scb) / 2;
-        var mcmm = (mct + mcb) / 2;
-        var omed = mct - mcb != 0 ? (scmm - mcb) / (mct - mcb) : 0;
-        var oshort = mct - mcb != 0 ? (value - mcb) / (mct - mcb) : 0;
-
-        if (isFinal)
-        {
-            _sclRmaValues.TryAdd(sclRma, out _);
-            _mclRmaValues.TryAdd(mclRma, out _);
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(8)
-            {
-                { "FastUpperBand", sct },
-                { "SlowUpperBand", mct },
-                { "FastMiddleBand", scmm },
-                { "SlowMiddleBand", mcmm },
-                { "FastLowerBand", scb },
-                { "SlowLowerBand", mcb },
-                { "OMed", omed },
-                { "OShort", oshort }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(scmm, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(p.FastMiddle, includeOutputs ? new Dictionary<string, double> { { "FastUpperBand", p.FastUpper }, { "FastMiddleBand", p.FastMiddle }, { "FastLowerBand", p.FastLower }, { "SlowUpperBand", p.SlowUpper }, { "SlowMiddleBand", p.SlowMiddle }, { "SlowLowerBand", p.SlowLower }, { "OMed", p.OMed }, { "OShort", p.OShort } } : null);
     }
-
-    public void Dispose()
-    {
-        _sclAtrSmoother.Dispose();
-        _mclAtrSmoother.Dispose();
-        _sclRmaSmoother.Dispose();
-        _mclRmaSmoother.Dispose();
-        _sclRmaValues.Dispose();
-        _mclRmaValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Hcf")]
