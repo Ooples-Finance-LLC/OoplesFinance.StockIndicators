@@ -3476,6 +3476,21 @@ public static partial class Calculations
     public static StockData CalculateSMIErgodicIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 5,
         int slowLength = 20, int signalLength = 5)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (stableInput, _, _, _, _) = GetInputValuesList(stockData);
+            var stableLine = StrengthWindow.Compute(stableInput, maType, fastLength, slowLength).ToList();
+            var stableSignal = StrengthWindow.Smooth(stableLine, maType, signalLength); var stableSignals = CreateSignalsList(stockData);
+            for (var i = 0; i < stableLine.Count; i++)
+            {
+                var previous = i > 0 ? stableLine[i - 1] : 0; var previousSignal = i > 0 ? stableSignal[i - 1] : 0;
+                stableSignals?.Add(GetRsiSignal(stableLine[i] - stableSignal[i], previous - previousSignal, stableLine[i], previous, 10, -10));
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Smi", stableLine }, { "Signal", stableSignal } });
+            stockData.SetSignals(stableSignals); stockData.SetCustomValues(stableLine); stockData.IndicatorName = IndicatorName.SMIErgodicIndicator;
+            return stockData;
+        }
+
         List<double> pcList = new(stockData.Count);
         List<double> absPCList = new(stockData.Count);
         List<double> smiList = new(stockData.Count);
@@ -3494,10 +3509,10 @@ public static partial class Calculations
             absPCList.Add(absPC);
         }
 
-        var pcSmooth1List = GetMovingAverageList(stockData, maType, fastLength, pcList); 
-        var pcSmooth2List = GetMovingAverageList(stockData, maType, slowLength, pcSmooth1List);
-        var absPCSmooth1List = GetMovingAverageList(stockData, maType, fastLength, absPCList);
-        var absPCSmooth2List = GetMovingAverageList(stockData, maType, slowLength, absPCSmooth1List);
+        var pcSmooth1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(pcList), fastLength)?.ToList() ?? GetMovingAverageList(stockData, maType, fastLength, pcList);
+        var pcSmooth2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(pcSmooth1List), slowLength)?.ToList() ?? GetMovingAverageList(stockData, maType, slowLength, pcSmooth1List);
+        var absPCSmooth1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(absPCList), fastLength)?.ToList() ?? GetMovingAverageList(stockData, maType, fastLength, absPCList);
+        var absPCSmooth2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(absPCSmooth1List), slowLength)?.ToList() ?? GetMovingAverageList(stockData, maType, slowLength, absPCSmooth1List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var absSmooth2PC = absPCSmooth2List[i];
@@ -3507,7 +3522,7 @@ public static partial class Calculations
             smiList.Add(smi);
         }
 
-        var smiSignalList = GetMovingAverageList(stockData, maType, signalLength, smiList);
+        var smiSignalList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(smiList), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, smiList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var smi = smiList[i];

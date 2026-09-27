@@ -408,6 +408,7 @@ internal static partial class StatefulIndicatorFactory
             AlligatorLipsSpecOptions lips => new AlligatorIndexState(lipsLength: lips.Length),
             TillsonIE2SpecOptions tillson => new TillsonIE2State(tillson.MaType, tillson.Length),
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
+            SMIErgodicIndicatorSpecOptions smi => new SMIErgodicIndicatorState(smi.MaType, smi.FastLength, smi.SlowLength, smi.SignalLength),
             TurboTriggerSpecOptions turbo => new TurboTriggerState(turbo.MaType, turbo.Length),
             TradingMadeMoreSimplerOscillatorSpecOptions trading => new TradingMadeMoreSimplerOscillatorState(length1: trading.Length),
             BuffAverageSpecOptions buff => new BuffAverageState(buff.Length),

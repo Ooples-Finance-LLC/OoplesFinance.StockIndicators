@@ -30630,5 +30630,110 @@
     "before": "2d / (Math.Max(1, smoothing) + 1L)",
     "after": "1d / (Math.Max(1, smoothing) + 1L)",
     "filter": "FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.HandWarmupAndFlatWindowsUseMinusFifty|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.ExtremeRangesAndUnpublishedRecursionRecover|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.MaximumPeriodsKeepPositiveGainAndObservedHistory|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.RawSelectedClosesRetainOriginalExtrema|FullyQualifiedName~ValidationTests.SmoothedWilliamsNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrSmoothing"
+  },
+  {
+    "id": "smi-ergodic-legacy-stable-path",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides",
+    "after": "stockData.Count < 0",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateSMIErgodicIndicator("
+  },
+  {
+    "id": "smi-ergodic-legacy-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "StrengthWindow.Compute(stableInput, maType, fastLength, slowLength)",
+    "after": "StrengthWindow.Compute(stableInput, maType, fastLength, fastLength)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateSMIErgodicIndicator("
+  },
+  {
+    "id": "smi-ergodic-legacy-signal-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "StrengthWindow.Smooth(stableLine, maType, signalLength)",
+    "after": "StrengthWindow.Smooth(stableLine, maType, fastLength)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateSMIErgodicIndicator("
+  },
+  {
+    "id": "smi-ergodic-callback-stage",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsStoZ.cs",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(pcSmooth1List), slowLength)",
+    "after": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(pcList), slowLength)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public static StockData CalculateSMIErgodicIndicator("
+  },
+  {
+    "id": "smi-ergodic-raw-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SMIErgodicIndicatorSpecOptions smie => spec.OutputKey == \"Signal\"\n                ? SmoothStrength",
+    "after": "SMIErgodicIndicatorSpecOptions smie => spec.OutputKey == \"Signal\"\n                ? SmoothPublished",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "smi-ergodic-raw-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComputeTrueStrengthIndexFast(data, context, fastLength, slowLength, maType)",
+    "after": "ComputeTrueStrengthIndexFast(data, context, fastLength, fastLength, maType)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeSMIErgodicIndicatorFast("
+  },
+  {
+    "id": "smi-ergodic-native-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "new(maType, fastLength, slowLength, signalLength)",
+    "after": "new(maType, fastLength, fastLength, signalLength)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class SMIErgodicIndicatorState"
+  },
+  {
+    "id": "smi-ergodic-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "_strength.Update(bar, isFinal, includeOutputs)",
+    "after": "_strength.Update(bar, true, includeOutputs)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class SMIErgodicIndicatorState"
+  },
+  {
+    "id": "smi-ergodic-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "public void Reset() => _strength.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class SMIErgodicIndicatorState"
+  },
+  {
+    "id": "smi-ergodic-signal-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "value.Outputs![\"Signal\"]",
+    "after": "value.Value",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class SMIErgodicIndicatorState"
+  },
+  {
+    "id": "smi-ergodic-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SMIErgodicIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "smi-ergodic-reference-scale",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SmiErgodic.cs",
+    "before": "v * new ReferenceFraction(100)",
+    "after": "v * new ReferenceFraction(1)",
+    "filter": "FullyQualifiedName~ValidationTests.SmiErgodicNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]

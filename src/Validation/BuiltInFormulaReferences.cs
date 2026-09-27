@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SMIErgodicIndicator)
+        {
+            var smiOptions = builtIn.CreateOptions(); var smiKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < smiKeys.Length; slot++)
+            {
+                var key = smiKeys[slot];
+                yield return IndicatorValidationRule.Reference(slot, bars => SmiErgodicOutputs(bars, Integer(smiOptions, "FastLength", 5), Integer(smiOptions, "SlowLength", 20), Integer(smiOptions, "SignalLength", 5), AverageKind(smiOptions, 3))[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SmoothedWilliamsR)
         {
             var swrOptions = builtIn.CreateOptions();

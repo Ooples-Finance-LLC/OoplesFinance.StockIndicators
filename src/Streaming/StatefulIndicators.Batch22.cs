@@ -1193,77 +1193,15 @@ public sealed class SlowSmoothedMovingAverageState : IStreamingIndicatorState, I
 [PrimaryOutput("Smi")]
 public sealed class SMIErgodicIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _pcSmoothFast;
-    private readonly IMovingAverageSmoother _pcSmoothSlow;
-    private readonly IMovingAverageSmoother _absSmoothFast;
-    private readonly IMovingAverageSmoother _absSmoothSlow;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public SMIErgodicIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 5,
-        int slowLength = 20, int signalLength = 5)
-    {
-        _pcSmoothFast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _pcSmoothSlow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _absSmoothFast = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _absSmoothSlow = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrueStrengthIndexState _strength;
+    public SMIErgodicIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 5, int slowLength = 20, int signalLength = 5)
+        => _strength = new(maType, fastLength, slowLength, signalLength);
     public IndicatorName Name => IndicatorName.SMIErgodicIndicator;
-
-    public void Reset()
-    {
-        _pcSmoothFast.Reset();
-        _pcSmoothSlow.Reset();
-        _absSmoothFast.Reset();
-        _absSmoothSlow.Reset();
-        _signal.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _strength.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var pc = _hasPrev ? value - prevValue : 0;
-        var absPc = Math.Abs(pc);
-        var pcSmooth1 = _pcSmoothFast.Next(pc, isFinal);
-        var pcSmooth2 = _pcSmoothSlow.Next(pcSmooth1, isFinal);
-        var absSmooth1 = _absSmoothFast.Next(absPc, isFinal);
-        var absSmooth2 = _absSmoothSlow.Next(absSmooth1, isFinal);
-        var smi = absSmooth2 != 0 ? MathHelper.MinOrMax(100 * pcSmooth2 / absSmooth2, 100, -100) : 0;
-        var signal = _signal.Next(smi, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Smi", smi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(smi, outputs);
+        var value = _strength.Update(bar, isFinal, includeOutputs);
+        return new(value.Value, includeOutputs ? new Dictionary<string, double> { { "Smi", value.Value }, { "Signal", value.Outputs!["Signal"] } } : null);
     }
-
-    public void Dispose()
-    {
-        _pcSmoothFast.Dispose();
-        _pcSmoothSlow.Dispose();
-        _absSmoothFast.Dispose();
-        _absSmoothSlow.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _strength.Dispose();
 }

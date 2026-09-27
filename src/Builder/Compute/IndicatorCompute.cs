@@ -2347,7 +2347,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             SMIErgodicIndicatorSpecOptions smie => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
+                ? SmoothStrength(data, context, ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength,
                     smie.SlowLength, smie.MaType), smie.SignalLength, smie.MaType)
                 : ComputeSMIErgodicIndicatorFast(data, context, smie.FastLength, smie.SlowLength, smie.MaType),
             InsyncIndexSpecOptions ii => ComputeInsyncIndexFast(data, context, ii.FastLength, ii.SlowLength,
