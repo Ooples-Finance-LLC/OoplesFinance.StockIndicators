@@ -5,16 +5,18 @@ namespace OoplesFinance.StockIndicators.Streaming;
 internal sealed class DailyPivotLevels
 {
     private readonly bool _standard;
+    private readonly bool _woodie;
     private DateTime? _day;
     private double _open, _high, _low, _close;
     private double[] _levels;
     internal static readonly string[] StandardKeys = { "Pivot", "S1", "S2", "S3", "R1", "R2", "R3", "M1", "M2", "M3", "M4", "M5", "M6" };
     internal static readonly string[] DynamicKeys = { "Pivot", "S1", "R1" };
-    internal string[] Keys => _standard ? StandardKeys : DynamicKeys;
+    internal string[] Keys => _woodie ? WoodiePivotMath.Keys : _standard ? StandardKeys : DynamicKeys;
 
-    internal DailyPivotLevels(bool standard)
+    internal DailyPivotLevels(bool standard, bool woodie = false)
     {
         _standard = standard;
+        _woodie = woodie;
         _levels = new double[Keys.Length];
     }
 
@@ -35,6 +37,7 @@ internal sealed class DailyPivotLevels
 
     private double[] Calculate()
     {
+        if (_woodie) return WoodiePivotMath.Levels(_high, _low, _close);
         return DailyPivotMath.Levels(_open, _high, _low, _close, _standard);
     }
 

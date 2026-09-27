@@ -27834,5 +27834,180 @@
     "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~MassIndexNumericalTests.DoubleSmoothingRollingRatiosAndSignalMatchIndependentFractions|FullyQualifiedName~MassIndexNumericalTests.SelectedPricesKeepOriginalRangesAndThreeCustomerStagesStayOrdered|FullyQualifiedName~MassIndexNumericalTests.ExtendedCustomerRatiosCanCancelInTheRollingSum|FullyQualifiedName~MassIndexNumericalTests.InvalidFieldsCannotAdvanceAnySmoothingStage",
     "scope": "public sealed class MassIndexState :"
+  },
+  {
+    "id": "woodie-pivots-close-weight",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "total.Add(close,2)",
+    "after": "total.Add(close)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-pivot-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Round(total,count:4)",
+    "after": "Round(total,count:3)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-early-pivot",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "total.Add(high);total.Add(low);total.Add(close,2);",
+    "after": "total.Add(high+low+2*close);",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-support-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "left.Add(high,-1)",
+    "after": "left.Add(high)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-resistance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "right.Add(low,-1)",
+    "after": "right.Add(low)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Combine(new(high),new(low),-1)",
+    "after": "Combine(new(high),new(low))",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-second-support",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Combine(pivot,range,-1)",
+    "after": "Combine(pivot,range)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-second-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "r2=Combine(pivot,range)",
+    "after": "r2=Combine(pivot,range,-1)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-third-support",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Combine(new(low),down,-2)",
+    "after": "Combine(new(low),down,-1)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-third-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Combine(new(high),up,2)",
+    "after": "Combine(new(high),up)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-fourth-support",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "Combine(s3,range,-1)",
+    "after": "Combine(s3,range)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-fourth-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "r4=Combine(r3,range)",
+    "after": "r4=Combine(r3,range,-1)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-midpoint-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "count:divisor",
+    "after": "count:1",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-early-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/WoodiePivotMath.cs",
+    "before": "var sum=new ExactMeanAccumulator();a.AddTo(ref sum);b.AddTo(ref sum,weight);",
+    "after": "var sum=new ExactMeanAccumulator();sum.Add(a.Publish()+b.Publish()*weight);",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "woodie-pivots-raw-current-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "high[i-1],low[i-1],close[i-1]",
+    "after": "high[i],low[i],close[i]",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "internal static ComputeBuffer ComputeWoodiePivotPointFast("
+  },
+  {
+    "id": "woodie-pivots-raw-series",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "PivotSeries.Mid4=>12",
+    "after": "PivotSeries.Mid4=>11",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "internal static ComputeBuffer ComputeWoodiePivotPointFast("
+  },
+  {
+    "id": "woodie-pivots-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointStoZ.cs",
+    "before": "PivotPeriodInputs.Read(stockData, inputLength)",
+    "after": "GetInputValuesList(stockData, inputLength)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public static StockData CalculateWoodiePivotPoints("
+  },
+  {
+    "id": "woodie-pivots-native-formula",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "new(false, woodie: true)",
+    "after": "new(true)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class WoodiePivotPointsState :"
+  },
+  {
+    "id": "woodie-pivots-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "bar.Close, isFinal)",
+    "after": "bar.Close, true)",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class WoodiePivotPointsState :"
+  },
+  {
+    "id": "woodie-pivots-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class WoodiePivotPointsState :"
+  },
+  {
+    "id": "woodie-pivots-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "before": "public void Reset() => _daily.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~WoodiePivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~WoodiePivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~WoodiePivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~WoodiePivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~WoodiePivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class WoodiePivotPointsState :"
   }
 ]

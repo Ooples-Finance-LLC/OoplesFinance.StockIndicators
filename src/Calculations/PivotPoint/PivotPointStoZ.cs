@@ -157,7 +157,7 @@ public static partial class Calculations
         List<double> midpoint3List = new(stockData.Count);
         List<double> midpoint4List = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData, inputLength);
+        var (inputList, highList, lowList, _, _) = PivotPeriodInputs.Read(stockData, inputLength);
 
         for (var i = 0; i < inputList.Count; i++)
         {
@@ -167,44 +167,44 @@ public static partial class Calculations
             var prevClose = i >= 1 ? inputList[i - 1] : 0;
 
             var prevPivot = GetLastOrDefault(pivotList);
-            var range = prevHigh - prevLow;
-            var pivot = (prevHigh + prevLow + (prevClose * 2)) / 4;
+            var levels = WoodiePivotMath.Levels(prevHigh,prevLow,prevClose);
+            var pivot = levels[0];
             pivotList.Add(pivot);
 
-            var supportLevel1 = (pivot * 2) - prevHigh;
+            var supportLevel1 = levels[1];
             supportLevel1List.Add(supportLevel1);
 
-            var resistanceLevel1 = (pivot * 2) - prevLow;
+            var resistanceLevel1 = levels[5];
             resistanceLevel1List.Add(resistanceLevel1);
 
-            var supportLevel2 = pivot - range;
+            var supportLevel2 = levels[2];
             supportLevel2List.Add(supportLevel2);
 
-            var resistanceLevel2 = pivot + range;
+            var resistanceLevel2 = levels[6];
             resistanceLevel2List.Add(resistanceLevel2);
 
-            var supportLevel3 = prevLow - (2 * (prevHigh - pivot));
+            var supportLevel3 = levels[3];
             supportLevel3List.Add(supportLevel3);
 
-            var resistanceLevel3 = prevHigh + (2 * (pivot - prevLow));
+            var resistanceLevel3 = levels[7];
             resistanceLevel3List.Add(resistanceLevel3);
 
-            var supportLevel4 = supportLevel3 - range;
+            var supportLevel4 = levels[4];
             supportLevel4List.Add(supportLevel4);
 
-            var resistanceLevel4 = resistanceLevel3 + range;
+            var resistanceLevel4 = levels[8];
             resistanceLevel4List.Add(resistanceLevel4);
 
-            var midpoint1 = (supportLevel1 + supportLevel2) / 2;
+            var midpoint1 = levels[9];
             midpoint1List.Add(midpoint1);
 
-            var midpoint2 = (pivot + supportLevel1) / 2;
+            var midpoint2 = levels[10];
             midpoint2List.Add(midpoint2);
 
-            var midpoint3 = (resistanceLevel1 + pivot) / 2;
+            var midpoint3 = levels[11];
             midpoint3List.Add(midpoint3);
 
-            var midpoint4 = (resistanceLevel1 + resistanceLevel2) / 2;
+            var midpoint4 = levels[12];
             midpoint4List.Add(midpoint4);
 
             var signal = GetCompareSignal(currentClose - pivot, prevClose - prevPivot);
