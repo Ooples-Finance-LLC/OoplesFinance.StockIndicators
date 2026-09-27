@@ -2418,3 +2418,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **47/47 focused tests passed** (`damping-numerical.trx`). 45 family checks and2 enrollment checks cover five routes, independent hand lags, four smoothers, extreme values and recovery, callbacks, selected prices, preview/reset and invalid fields.
 - Campaign469: **14/14 faults caught** from passing baselines; **3,763 retained mutation sites**. Source/archive SHA256: `d74a7b69bdaeab900d8d1c7bdc9abb16dc9136a584b658d387f2f0e1b5ebbf93` / `931a86329e10b11a3531daca6ba8cc04592ae67f993fbac36181a14374f2dceb`. Second archive: `931a86329e10b11a3531daca6ba8cc04592ae67f993fbac36181a14374f2dceb`; source snapshots compared byte-for-byte.
 - Inventory: **5,033/7,131** enrollments; **2,098 omissions across333 types**. 237 grouped batches cover **2,207 configurations/412 types**. DLL SHA256 `EC2B4CBDCAC8BC5AEDF9ABDBC04FEF5A130CBF8A1F42D136F7E8E33071E68F9D`. Full coverage and release/performance gates remain incomplete.
+
+
+### Belkhayate Timing numerical contracts
+
+- The fixed five-bar window retains zero-padded startup, rounded midpoints and ranges, and extended rolling totals. Selected closes preserve original extrema. Scale uses the binary64 .2 factor, zero scale returns zero, and output remains unclamped. Published overflow can recover; the compatibility length remains unused.
+- **39/39 focused tests passed** (`belkhayate-numerical.trx`). 37 family checks and2 enrollment checks cover five routes, independent hand startup values, core span validation, extreme values and recovery, selected prices, compatibility length, preview/reset and invalid fields.
+- Campaign470: **14/14 faults caught** from passing baselines; **3,777 retained mutation sites**. Source/archive SHA256: `d78dc48e907e211fb03f0ab2d39a091ba03ad82ad4483c4069078edf88e21157` / `3c8966155c5d4bccb22cb44ff93271ecccd9ac2d6db4c8bd2012204121639043`. Second archive: `3c8966155c5d4bccb22cb44ff93271ecccd9ac2d6db4c8bd2012204121639043`; source snapshots compared byte-for-byte.
+- Inventory: **5,037/7,131** enrollments; **2,094 omissions across332 types**. 238 grouped batches cover **2,211 configurations/413 types**. DLL SHA256 `65670D45C057597AD4E43EC5114A85DF1F75476FD9E678947B6E2A153542A0E9`. Full coverage and release/performance gates remain incomplete.

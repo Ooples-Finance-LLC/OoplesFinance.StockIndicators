@@ -31411,5 +31411,120 @@
     "before": "i < 6 || average[i - 6].Sign == 0 ? 0 : (average[i - 1] / average[i - 6]).ToDouble()",
     "after": "i < 6 || average[i - 5].Sign == 0 ? 0 : (average[i - 1] / average[i - 5]).ToDouble()",
     "filter": "FullyQualifiedName~ValidationTests.DampingNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "RocBankValue.Round(pair, count: 2)",
+    "after": "RocBankValue.Round(pair, count: 1)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-center-padding",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "RocBankValue.Round(middleTotal, count: 5)",
+    "after": "RocBankValue.Round(middleTotal, count: Math.Min(5, _history.Count + 1))",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-range-padding",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "RocBankValue.Round(rangeTotal, count: 5)",
+    "after": "RocBankValue.Round(rangeTotal, count: Math.Min(5, _history.Count + 1))",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-scale-factor",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "Multiply(.2)",
+    "after": "Multiply(.5)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-range-difference",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "difference.Add(low, -1)",
+    "after": "difference.Add(low, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "if (_history.Count == 5) { var expired",
+    "after": "if (_history.Count == 4) { var expired",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "_history.Clear();",
+    "after": "// retain window\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeBelkhayateTimingFast("
+  },
+  {
+    "id": "belkhayate-core-extrema",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "window.Next(high[i], low[i], close[i], true)",
+    "after": "window.Next(low[i], high[i], close[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static void BelkhayateTiming("
+  },
+  {
+    "id": "belkhayate-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class BelkhayateTimingState"
+  },
+  {
+    "id": "belkhayate-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " BelkhayateTimingSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-reference-padding",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Belkhayate.cs",
+    "before": "centerSum / new ReferenceFraction(5)",
+    "after": "centerSum / new ReferenceFraction(4)",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "belkhayate-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/BelkhayateWindow.cs",
+    "before": "return result;",
+    "after": "return Math.Max(-4, Math.Min(4, result));",
+    "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
   }
 ]

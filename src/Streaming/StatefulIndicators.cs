@@ -4477,64 +4477,13 @@ public sealed class BalanceOfPowerState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Belkhayate")]
 public sealed class BelkhayateTimingState : IStreamingIndicatorState
 {
-    private double _prevHigh1;
-    private double _prevHigh2;
-    private double _prevHigh3;
-    private double _prevHigh4;
-    private double _prevLow1;
-    private double _prevLow2;
-    private double _prevLow3;
-    private double _prevLow4;
-
+    private readonly BelkhayateWindow _window = new();
     public IndicatorName Name => IndicatorName.BelkhayateTiming;
-
-    public void Reset()
-    {
-        _prevHigh1 = 0;
-        _prevHigh2 = 0;
-        _prevHigh3 = 0;
-        _prevHigh4 = 0;
-        _prevLow1 = 0;
-        _prevLow2 = 0;
-        _prevLow3 = 0;
-        _prevLow4 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var currentValue = bar.Close;
-        var currentHigh = bar.High;
-        var currentLow = bar.Low;
-        var middle = (((currentHigh + currentLow) / 2) + ((_prevHigh1 + _prevLow1) / 2) +
-                      ((_prevHigh2 + _prevLow2) / 2) + ((_prevHigh3 + _prevLow3) / 2) +
-                      ((_prevHigh4 + _prevLow4) / 2)) / 5;
-        var scale = ((currentHigh - currentLow + (_prevHigh1 - _prevLow1) + (_prevHigh2 - _prevLow2) +
-                      (_prevHigh3 - _prevLow3) + (_prevHigh4 - _prevLow4)) / 5) * 0.2;
-        var b = scale != 0 ? (currentValue - middle) / scale : 0;
-
-        if (isFinal)
-        {
-            _prevHigh4 = _prevHigh3;
-            _prevHigh3 = _prevHigh2;
-            _prevHigh2 = _prevHigh1;
-            _prevHigh1 = currentHigh;
-            _prevLow4 = _prevLow3;
-            _prevLow3 = _prevLow2;
-            _prevLow2 = _prevLow1;
-            _prevLow1 = currentLow;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Belkhayate", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Belkhayate", value } } : null);
     }
 }
 

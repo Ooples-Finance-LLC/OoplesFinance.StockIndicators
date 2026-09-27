@@ -47,10 +47,6 @@ OoplesFinance.StockIndicators.Indicators.BayesianOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.BayesianOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.BayesianOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.BayesianOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.BelkhayateTiming/default
-OoplesFinance.StockIndicators.Indicators.BelkhayateTiming/longer-periods
-OoplesFinance.StockIndicators.Indicators.BelkhayateTiming/minimum-periods
-OoplesFinance.StockIndicators.Indicators.BelkhayateTiming/shorter-periods
 OoplesFinance.StockIndicators.Indicators.BetterVolumeIndicator/default
 OoplesFinance.StockIndicators.Indicators.BetterVolumeIndicator/longer-lbLength
 OoplesFinance.StockIndicators.Indicators.BetterVolumeIndicator/longer-length

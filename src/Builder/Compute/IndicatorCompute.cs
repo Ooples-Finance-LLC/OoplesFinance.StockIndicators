@@ -12953,13 +12953,9 @@ internal static partial class IndicatorCompute
     /// <param name="length">Unused parameter for source generator compatibility.</param>
     internal static ComputeBuffer ComputeBelkhayateTimingFast(StockData data, ComputeContext context, int length = 5)
     {
-        _ = length; // Indicator has no configurable parameters
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.BelkhayateTiming(close, high, low, buffer.WritableSpan);
-        return buffer;
+        _ = length; // Compatibility option has no effect on the fixed five-bar formula.
+        var close = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var output = context.Rent(close.Count);
+        OscillatorCore.BelkhayateTiming(SpanCompat.AsReadOnlySpan(close), SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), output.WritableSpan); return output;
     }
 
     #endregion

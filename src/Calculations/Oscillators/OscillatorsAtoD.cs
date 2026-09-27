@@ -363,45 +363,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBelkhayateTiming(this StockData stockData)
     {
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new BelkhayateWindow(); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevHigh1 = i >= 1 ? highList[i - 1] : 0;
-            var prevLow1 = i >= 1 ? lowList[i - 1] : 0;
-            var prevHigh2 = i >= 2 ? highList[i - 2] : 0;
-            var prevLow2 = i >= 2 ? lowList[i - 2] : 0;
-            var prevHigh3 = i >= 3 ? highList[i - 3] : 0;
-            var prevLow3 = i >= 3 ? lowList[i - 3] : 0;
-            var prevHigh4 = i >= 4 ? highList[i - 4] : 0;
-            var prevLow4 = i >= 4 ? lowList[i - 4] : 0;
-            var prevB1 = i >= 1 ? bList[i - 1] : 0;
-            var prevB2 = i >= 2 ? bList[i - 2] : 0;
-            var middle = (((currentHigh + currentLow) / 2) + ((prevHigh1 + prevLow1) / 2) + ((prevHigh2 + prevLow2) / 2) +
-                          ((prevHigh3 + prevLow3) / 2) + ((prevHigh4 + prevLow4) / 2)) / 5;
-            var scale = ((currentHigh - currentLow + (prevHigh1 - prevLow1) + (prevHigh2 - prevLow2) + (prevHigh3 - prevLow3) +
-                          (prevHigh4 - prevLow4)) / 5) * 0.2;
-
-            var b = scale != 0 ? (currentValue - middle) / scale : 0;
-            bList.Add(b);
-
-            var signal = GetRsiSignal(b - prevB1, prevB1 - prevB2, b, prevB1, 4, -4);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true); var previous = i > 0 ? line[i - 1] : 0; var prior = i > 1 ? line[i - 2] : 0;
+            signals?.Add(GetRsiSignal(value - previous, previous - prior, value, previous, 4, -4)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Belkhayate", bList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bList);
-        stockData.IndicatorName = IndicatorName.BelkhayateTiming;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Belkhayate", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.BelkhayateTiming; return stockData;
     }
 
 

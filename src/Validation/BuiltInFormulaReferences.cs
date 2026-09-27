@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.BelkhayateTiming)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, BelkhayateOutputs, IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DampingIndex)
         {
             var dampingOptions = builtIn.CreateOptions();
