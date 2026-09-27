@@ -1085,80 +1085,16 @@ public sealed class EfficientPriceState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("MiddleBand")]
 public sealed class EfficientTrendStepChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. Both measure
-    // the same series - twice the resolved input - over two different windows, so here it is the lengths that
-    // must not be crossed rather than the series.
-    private readonly RollingStandardDeviation _fastStdDev;
-    private readonly RollingStandardDeviation _slowStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private bool _hasPrev;
-
-    public EfficientTrendStepChannelState(int length = 100, int fastLength = 50, int slowLength = 200)
-    {
-        _er = new EfficiencyRatioState(Math.Max(1, length));
-        // No moving-average type, and no selectors: the series is passed to Next directly.
-        _fastStdDev = new RollingStandardDeviation(Math.Max(1, fastLength));
-        _slowStdDev = new RollingStandardDeviation(Math.Max(1, slowLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EfficientTrendStepWindow _window;
+    public EfficientTrendStepChannelState(int length = 100, int fastLength = 50, int slowLength = 200) { _window = new(length, fastLength, slowLength); }
     public IndicatorName Name => IndicatorName.EfficientTrendStepChannel;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _fastStdDev.Reset();
-        _slowStdDev.Reset();
-        _prevA = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        // Both deviations measure the same series, twice the resolved input, as the batch calculation does
-        // over val2List - differing only in their window.
-        var stdDevInput = value * 2;
-        var fastStdDev = _fastStdDev.Next(stdDevInput, isFinal);
-        var slowStdDev = _slowStdDev.Next(stdDevInput, isFinal);
-        var er = _er.Next(value, isFinal);
-        var dev = (er * fastStdDev) + ((1 - er) * slowStdDev);
-
-        var prevA = _hasPrev ? _prevA : value;
-        var a = value > prevA + dev ? value : value < prevA - dev ? value : prevA;
-        var upper = a + dev;
-        var lower = a - dev;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", a },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", p.Upper }, { "MiddleBand", p.Middle }, { "LowerBand", p.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-        _fastStdDev.Dispose();
-        _slowStdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("E2bf")]

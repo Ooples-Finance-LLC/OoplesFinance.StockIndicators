@@ -22369,5 +22369,191 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~HurstCycleNumericalTests.DelayedMeansAndRoundedEnvelopesPreserveFiniteOscillatorRatios|FullyQualifiedName~HurstCycleNumericalTests.SelectedPricesAndFourCustomerAveragesKeepAtrThenMeanOrder|FullyQualifiedName~HurstCycleNumericalTests.InvalidFieldsAndMultipliersNeverAdvanceNativeHistory",
     "scope": "public sealed class HurstCycleChannelState :"
+  },
+  {
+    "id": "efficient-step-efficiency-period",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_efficiency = new(Math.Max(1, length))",
+    "after": "_efficiency = new(Math.Max(1, length) + 1)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_fast = new(fastLength)",
+    "after": "_fast = new(slowLength)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_slow = new(slowLength)",
+    "after": "_slow = new(fastLength)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-efficiency-blend",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "efficiency * (fast - slow)",
+    "after": "efficiency * (slow - fast)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "price > previous + deviation",
+    "after": "price >= previous + deviation",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-lower-tie",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "price < previous - deviation",
+    "after": "price <= previous - deviation",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-retained-center",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_previous = middle;",
+    "after": "_previous = close;",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "center - deviation",
+    "after": "center + deviation",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-double-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "4 * (count * squares - sum * sum)",
+    "after": "count * squares - sum * sum",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-population-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "var denominator = count * count",
+    "after": "var denominator = count * (count > 1 ? count - 1 : count)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_prices.Count >= _prices.Capacity - 1",
+    "after": "_prices.Count >= _prices.Capacity",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_sum + value - expired",
+    "after": "_sum + value + expired",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-early-double",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "var value = ExactVarianceWindow.Units(close);",
+    "after": "var value = ExactVarianceWindow.Units(close * 2) / 2;",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-preview-efficiency",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_efficiency.Next(close, commit)",
+    "after": "_efficiency.Next(close, true)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-preview-fast",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_fast.Next(close, commit)",
+    "after": "_fast.Next(close, true)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-preview-slow",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_slow.Next(close, commit)",
+    "after": "_slow.Next(close, true)",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-preview-center",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "if (commit) { _previous",
+    "after": "if (true) { _previous",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-reset-efficiency",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_efficiency.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _efficiency.Reset();",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_fast.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _fast.Reset();",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-reset-slow",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "_slow.Reset();",
+    "after": "if (_hasPrevious && !_hasPrevious) _slow.Reset();",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-early-root-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/EfficientTrendStepWindow.cs",
+    "before": "var numerator = 4 * (count * squares - sum * sum); var denominator = count * count; var root = ExactPopulationDeviation.RootRatio(numerator, denominator);",
+    "after": "var numerator = count * squares - sum * sum; var denominator = count * count; var root = 2 * ExactPopulationDeviation.RootRatio(numerator, denominator);",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "efficient-step-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeEfficientTrendStepFast("
+  },
+  {
+    "id": "efficient-step-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~EfficientTrendStepNumericalTests.EfficiencyBlendsDoubledPopulationDeviationsAndHoldsBoundaryTies|FullyQualifiedName~EfficientTrendStepNumericalTests.SelectedPricesDriveEfficiencyAndBothDeviations|FullyQualifiedName~EfficientTrendStepNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "public sealed class EfficientTrendStepChannelState :"
   }
 ]

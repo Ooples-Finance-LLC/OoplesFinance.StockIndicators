@@ -1962,6 +1962,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            EfficientTrendStepChannelSpecOptions step => ComputeEfficientTrendStepFast(data, context, step.Length, step.FastLength, step.SlowLength, spec.OutputKey),
             VolumeAdaptiveBandsSpecOptions volumeBands => ComputeVolumeAdaptiveBandsFast(data, context, volumeBands.Length, volumeBands.MaType, spec.OutputKey),
             RootMovingAverageSquaredErrorBandsSpecOptions rmse => ComputeRmseBandsFast(data, context, rmse.Length, rmse.StdDevFactor, rmse.MaType, spec.OutputKey),
             HurstBandsSpecOptions hurst => ComputeHurstBandsFast(data, context, hurst.Length, hurst.InnerMult, hurst.OuterMult, hurst.ExtremeMult, spec.OutputKey),
@@ -21746,6 +21747,14 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes an efficiency-weighted population-deviation step channel.</summary>
+    internal static ComputeBuffer ComputeEfficientTrendStepFast(StockData data, ComputeContext context, int length = 100, int fastLength = 50, int slowLength = 200, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new EfficientTrendStepWindow(length, fastLength, slowLength); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? p.Upper : outputKey == "LowerBand" ? p.Lower : p.Middle; }
         return result;
     }
 

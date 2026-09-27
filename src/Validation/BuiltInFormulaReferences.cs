@@ -32,6 +32,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EfficientTrendStepChannel)
+        {
+            var stepKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < stepKeys.Length; slot++) { var key = stepKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EfficientTrendStepOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.HurstCycleChannel)
         {
             var cycleKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

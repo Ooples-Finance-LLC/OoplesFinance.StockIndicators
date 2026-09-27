@@ -619,70 +619,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEfficientTrendStepChannel(this StockData stockData, int length = 100, int fastLength = 50, int slowLength = 200)
     {
-        List<double> val2List = new(stockData.Count);
-        List<double> upperList = new(stockData.Count);
-        List<double> lowerList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new EfficientTrendStepWindow(length, fastLength, slowLength);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-
-            var val2 = currentValue * 2;
-            val2List.Add(val2);
+            var point = window.Next(input[i], true); signals?.Add(GetBollingerBandsSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : -input[i], input[i], i > 0 ? input[i - 1] : 0, point.Upper, i > 0 ? upper[i - 1] : 0, point.Lower, i > 0 ? lower[i - 1] : 0)); upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower);
         }
-
-        stockData.SetCustomValues(val2List);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The step holds until price escapes a band of one deviation, blended between a fast and a slow
-        // one by the efficiency ratio, so sigma in that band is the windowed deviation; the quantity this
-        // replaces is about 55% wider on a typical price series, so both bands were too wide.
-        //
-        // Both are taken over the same list - val2List - at two different lengths. That is the opposite of the
-        // pairs elsewhere in this issue, where two deviations measure two different series over one window:
-        // here it is one series over two windows, and it is the lengths that must not be crossed. See #190.
-        var stdDevFastList = GetStandardDeviationList(val2List, fastLength);
-        var stdDevSlowList = GetStandardDeviationList(val2List, slowLength);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var er = erList[i];
-            var fastStdDev = stdDevFastList[i];
-            var slowStdDev = stdDevSlowList[i];
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var dev = (er * fastStdDev) + ((1 - er) * slowStdDev);
-
-            var a = currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
-            aList.Add(a);
-
-            var prevUpper = GetLastOrDefault(upperList);
-            var upper = a + dev;
-            upperList.Add(upper);
-
-            var prevLower = GetLastOrDefault(lowerList);
-            var lower = a - dev;
-            lowerList.Add(lower);
-
-            var signal = GetBollingerBandsSignal(currentValue - a, prevValue - prevA, currentValue, prevValue, upper, prevUpper, lower, prevLower);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperList },
-            { "MiddleBand", aList },
-            { "LowerBand", lowerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EfficientTrendStepChannel;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EfficientTrendStepChannel; return stockData;
     }
 }
 
