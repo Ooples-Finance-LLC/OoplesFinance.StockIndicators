@@ -1012,7 +1012,6 @@ OoplesFinance.StockIndicators.Indicators.FearAndGreedIndicator/minimum-slowLengt
 OoplesFinance.StockIndicators.Indicators.FearAndGreedIndicator/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.FearAndGreedIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.FearAndGreedIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.FibonacciPivotPoint/default
 OoplesFinance.StockIndicators.Indicators.FibonacciRetrace/default
 OoplesFinance.StockIndicators.Indicators.FibonacciRetrace/longer-length1
 OoplesFinance.StockIndicators.Indicators.FibonacciRetrace/longer-length2

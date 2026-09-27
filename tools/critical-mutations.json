@@ -28197,5 +28197,180 @@
     "after": "new TironeWindow(1)",
     "scope": "private static ComputeBuffer ComputeTironeFast(",
     "filter": "FullyQualifiedName~TironeNumericalTests.RollingLevelsMatchIndependentFractionsIncludingExtremeRanges|FullyQualifiedName~TironeNumericalTests.SelectedPricesKeepOriginalRollingExtrema|FullyQualifiedName~TironeNumericalTests.InvalidFieldsDoNotCommitExtrema"
+  },
+  {
+    "id": "fibonacci-pivots-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Round(total,count:3)",
+    "after": "Round(total,count:4)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-early-mean",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "total.Add(high);total.Add(low);total.Add(close);",
+    "after": "total.Add(high+low+close);",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Combine(new(high),new(low),-1)",
+    "after": "Combine(new(high),new(low))",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-first-width",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Scale(range,0.382)",
+    "after": "Scale(range,0.5)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-second-width",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Scale(range,MathHelper.InversePhi)",
+    "after": "Scale(range,0.5)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-extended-width",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "product.ScaleByPowerOfTwo(range.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-first-support",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Combine(pivot,first,-1)",
+    "after": "Combine(pivot,first)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-second-support",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Combine(pivot,second,-1)",
+    "after": "Combine(pivot,second)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-third-support",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "Combine(pivot,range,-1)",
+    "after": "Combine(pivot,range)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-first-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "r1=Combine(pivot,first)",
+    "after": "r1=Combine(pivot,first,-1)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-second-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "r2=Combine(pivot,second)",
+    "after": "r2=Combine(pivot,second,-1)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-third-resistance",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "r3=Combine(pivot,range)",
+    "after": "r3=Combine(pivot,range,-1)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-midpoint-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "count:divisor",
+    "after": "count:1",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-early-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciPivotMath.cs",
+    "before": "a.AddTo(ref sum);b.AddTo(ref sum,weight);",
+    "after": "sum.Add(a.Publish()+b.Publish()*weight);",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate"
+  },
+  {
+    "id": "fibonacci-pivots-raw-current-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "high[i-1],low[i-1],close[i-1]",
+    "after": "high[i],low[i],close[i]",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "internal static ComputeBuffer ComputeFibonacciPivotPointFast("
+  },
+  {
+    "id": "fibonacci-pivots-raw-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "PivotPeriodInputs.Read(data,inputLength)",
+    "after": "CalculationsHelper.GetInputValuesList(data,inputLength)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "internal static ComputeBuffer ComputeFibonacciPivotPointFast("
+  },
+  {
+    "id": "fibonacci-pivots-batch-selected-range",
+    "module": "numerical",
+    "file": "src/Calculations/PivotPoint/PivotPointEtoK.cs",
+    "before": "PivotPeriodInputs.Read(stockData, inputLength)",
+    "after": "GetInputValuesList(stockData, inputLength)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public static StockData CalculateFibonacciPivotPoints("
+  },
+  {
+    "id": "fibonacci-pivots-native-formula",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "new(false, fibonacci: true)",
+    "after": "new(true)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class FibonacciPivotPointsState :"
+  },
+  {
+    "id": "fibonacci-pivots-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "bar.Close, isFinal)",
+    "after": "bar.Close, true)",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class FibonacciPivotPointsState :"
+  },
+  {
+    "id": "fibonacci-pivots-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class FibonacciPivotPointsState :"
+  },
+  {
+    "id": "fibonacci-pivots-native-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "public void Reset() => _daily.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~FibonacciPivotNumericalTests.CompletedSessionLevelsAndMidpointsMatchIndependentFractions|FullyQualifiedName~FibonacciPivotNumericalTests.SelectedPricesPreserveSessionOpenAndExtremes|FullyQualifiedName~FibonacciPivotNumericalTests.LegacyCalendarPeriodsKeepTheirOwnCompletedPeriod|FullyQualifiedName~FibonacciPivotNumericalTests.InvalidFieldsCannotCommitASessionBoundary|FullyQualifiedName~FibonacciPivotNumericalTests.ResetStartsFreshEvenWhenTheNextBarUsesTheSameSessionDate",
+    "scope": "public sealed class FibonacciPivotPointsState :"
   }
 ]

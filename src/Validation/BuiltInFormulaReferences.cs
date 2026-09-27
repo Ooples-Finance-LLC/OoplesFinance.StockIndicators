@@ -92,6 +92,11 @@ internal static partial class BuiltInFormulaReferences
             var tironeKeys=new[]{"Tlh","Clh","Blh","Am","Eh","El","Rh","Rl"};var tironeLength=Integer(builtIn.CreateOptions(),"Length",20);
             for(var slot=0;slot<tironeKeys.Length;slot++){var key=tironeKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>TironeOutputs(bars,tironeLength)[key],IndicatorErrorBudget.Exact);}yield break;
         }
+        if (builtIn.BatchName == IndicatorName.FibonacciPivotPoints)
+        {
+            var fibonacciKeys=new[]{"Pivot","S1","S2","S3","R1","R2","R3","M1","M2","M3","M4","M5","M6"};
+            for(var slot=0;slot<fibonacciKeys.Length;slot++){var key=fibonacciKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>FibonacciPivotOutputs(bars)[key],IndicatorErrorBudget.Exact);}yield break;
+        }
         if (builtIn.BatchName == IndicatorName.WoodiePivotPoints)
         {
             var woodieKeys=new[]{"Pivot","S1","S2","S3","S4","R1","R2","R3","R4","M1","M2","M3","M4"};

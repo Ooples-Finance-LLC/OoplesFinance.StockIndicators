@@ -271,6 +271,7 @@ internal static partial class StatefulIndicatorFactory
             DemarkPressureRatioV1SpecOptions pressure => new DemarkPressureRatioV1State(pressure.Length),
             SentimentZoneOscillatorSpecOptions sentiment => new SentimentZoneOscillatorState(sentiment.MaType, sentiment.Length),
             SpearmanIndicatorSpecOptions spearman => new SpearmanIndicatorState(spearman.MaType, spearman.Length, spearman.SignalLength),
+            FibonacciPivotPointSpecOptions => new FibonacciPivotPointsState(),
             WoodiePivotPointSpecOptions => new WoodiePivotPointsState(),
             StandardPivotPointsSpecOptions => new StandardPivotPointsState(),
             DynamicPivotPointsSpecOptions => new DynamicPivotPointsState(),

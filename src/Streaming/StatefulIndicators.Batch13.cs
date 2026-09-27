@@ -359,73 +359,22 @@ public sealed class FearAndGreedIndicatorState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Pivot")]
 public sealed class FibonacciPivotPointsState : IStreamingIndicatorState
 {
-    private double _prevClose;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-
+    private readonly DailyPivotLevels _daily = new(false, fibonacci: true);
+    public FibonacciPivotPointsState() { }
     public IndicatorName Name => IndicatorName.FibonacciPivotPoints;
-
-    public void Reset()
-    {
-        _prevClose = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _daily.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var range = prevHigh - prevLow;
-        var pivot = (prevHigh + prevLow + prevClose) / 3;
-
-        var support1 = pivot - (range * 0.382);
-        var support2 = pivot - (range * MathHelper.InversePhi);
-        var support3 = pivot - (range * 1);
-        var resistance1 = pivot + (range * 0.382);
-        var resistance2 = pivot + (range * MathHelper.InversePhi);
-        var resistance3 = pivot + (range * 1);
-        var midpoint1 = (support3 + support2) / 2;
-        var midpoint2 = (support2 + support1) / 2;
-        var midpoint3 = (support1 + pivot) / 2;
-        var midpoint4 = (resistance1 + pivot) / 2;
-        var midpoint5 = (resistance2 + resistance1) / 2;
-        var midpoint6 = (resistance3 + resistance2) / 2;
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _hasPrev = true;
-        }
-
+        var levels = _daily.Next(bar.StartTime, bar.Open, bar.High, bar.Low, bar.Close, isFinal);
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
         {
-            outputs = new Dictionary<string, double>(13)
-            {
-                { "Pivot", pivot },
-                { "S1", support1 },
-                { "S2", support2 },
-                { "S3", support3 },
-                { "R1", resistance1 },
-                { "R2", resistance2 },
-                { "R3", resistance3 },
-                { "M1", midpoint1 },
-                { "M2", midpoint2 },
-                { "M3", midpoint3 },
-                { "M4", midpoint4 },
-                { "M5", midpoint5 },
-                { "M6", midpoint6 }
-            };
+            var values = new Dictionary<string, double>(levels.Length);
+            for (var i = 0; i < levels.Length; i++) values[_daily.Keys[i]] = levels[i];
+            outputs = values;
         }
-
-        return new StreamingIndicatorStateResult(pivot, outputs);
+        return new StreamingIndicatorStateResult(levels[0], outputs);
     }
 }
 
