@@ -21632,5 +21632,127 @@
     "before": "new NarrowSidewaysChannelState(narrow.MaType, narrow.Length)",
     "after": "new NarrowSidewaysChannelState(narrow.MaType, narrow.Length, (double)narrow.GetType().GetProperty(\"Pct\")!.GetValue(narrow)!)",
     "filter": "FullyQualifiedName~NarrowChannelNumericalTests.ObsoletePercentageDoesNotReplaceTheThreeDeviationContract"
+  },
+  {
+    "id": "uni-channel-early-product",
+    "module": "numerical",
+    "file": "src/Helpers/UniChannelArithmetic.cs",
+    "before": "sum.AddProduct(middle, factor)",
+    "after": "sum.Add(middle * factor)",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "uni-channel-mode",
+    "module": "numerical",
+    "file": "src/Helpers/UniChannelArithmetic.cs",
+    "before": "if (additive)",
+    "after": "if (!additive)",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "uni-channel-base",
+    "module": "numerical",
+    "file": "src/Helpers/UniChannelArithmetic.cs",
+    "before": "sum.Add(middle);",
+    "after": "sum.Add(middle, 0);",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "uni-channel-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "length = Math.Max(1, length)",
+    "after": "length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-upper-factor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_upper = ubFac",
+    "after": "_upper = lbFac",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-lower-sign",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "middle, -_lower, _additive",
+    "after": "middle, _lower, _additive",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "_mean.Next(bar.Close, isFinal)",
+    "after": "_mean.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "public void Reset() => _mean.Reset();",
+    "after": "public void Reset() { }",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public sealed class UniChannelState :"
+  },
+  {
+    "id": "uni-channel-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/UniChannelArithmetic.cs",
+    "before": "HighLowBandsWindow.ValidateShift(lower);",
+    "after": "if (lower == 0) HighLowBandsWindow.ValidateShift(lower);",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState"
+  },
+  {
+    "id": "uni-channel-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeUniChannelFast("
+  },
+  {
+    "id": "uni-channel-raw-lower-factor",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "band == ChannelBand.Upper ? ubFac : -lbFac",
+    "after": "band == ChannelBand.Upper ? ubFac : -ubFac",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeUniChannelFast("
+  },
+  {
+    "id": "uni-channel-batch-mode",
+    "module": "numerical",
+    "file": "src/Calculations/PriceChannel/PriceChannelStoZ.cs",
+    "before": "middle[i], ubFac, type1",
+    "after": "middle[i], ubFac, !type1",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "public static StockData CalculateUniChannel("
+  },
+  {
+    "id": "uni-channel-raw-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "&& !ComponentAverage.HasOverrides",
+    "after": "&& (!ComponentAverage.HasOverrides || true)",
+    "filter": "FullyQualifiedName~UniChannelNumericalTests.IndependentAdditiveAndProportionalOffsetsPreserveCancellation|FullyQualifiedName~UniChannelNumericalTests.SelectedPricesAndCustomerMeanFeedBothOffsetModes|FullyQualifiedName~UniChannelNumericalTests.InvalidFieldsAndFactorsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeUniChannelFast("
   }
 ]

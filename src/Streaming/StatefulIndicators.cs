@@ -533,54 +533,22 @@ public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDi
 [PrimaryOutput("MiddleBand")]
 public sealed class UniChannelState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _ubFac;
-    private readonly double _lbFac;
-    private readonly bool _type1;
-
-    public UniChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10, double ubFac = 0.02,
-        double lbFac = 0.02, bool type1 = false)
+    private readonly IMovingAverageSmoother _mean;
+    private readonly double _upper, _lower;
+    private readonly bool _additive;
+    public UniChannelState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10, double ubFac = .02, double lbFac = .02, bool type1 = false)
     {
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _ubFac = ubFac;
-        _lbFac = lbFac;
-        _type1 = type1;
-        _input = new StreamingInputResolver(InputName.Close, null);
+        UniChannelArithmetic.Validate(ubFac, lbFac); length = Math.Max(1, length); _upper = ubFac; _lower = lbFac; _additive = type1;
+        _mean = maType == MovingAvgType.SimpleMovingAverage ? new RoundedSimpleMovingAverageSmoother(length) : MovingAverageSmootherFactory.Create(maType, length);
     }
-
     public IndicatorName Name => IndicatorName.UniChannel;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-    }
-
+    public void Reset() => _mean.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var middle = _smoother.Next(value, isFinal);
-        var upper = _type1 ? middle + _ubFac : middle + (middle * _ubFac);
-        var lower = _type1 ? middle - _lbFac : middle - (middle * _lbFac);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var middle = _mean.Next(bar.Close, isFinal);
+        return new(middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", UniChannelArithmetic.Band(middle, _upper, _additive) }, { "MiddleBand", middle }, { "LowerBand", UniChannelArithmetic.Band(middle, -_lower, _additive) } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _mean.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

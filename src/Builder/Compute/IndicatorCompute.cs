@@ -27828,13 +27828,10 @@ internal static partial class IndicatorCompute
         double ubFac = 0.02, double lbFac = 0.02, bool type1 = false,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var result = context.Rent(input.Count);
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
-        if (band == ChannelBand.Middle) return result;
-        var factor = band == ChannelBand.Upper ? ubFac : -lbFac;
-        var output = result.WritableSpan;
-        for (var i = 0; i < output.Length; i++) output[i] += type1 ? factor : output[i] * factor;
+        UniChannelArithmetic.Validate(ubFac, lbFac); length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count);
+        if (maType == MovingAvgType.SimpleMovingAverage && !ComponentAverage.HasOverrides) BollingerArithmetic.Mean(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length);
+        else MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), result.WritableSpan);
+        if (band != ChannelBand.Middle) { var factor = band == ChannelBand.Upper ? ubFac : -lbFac; for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = UniChannelArithmetic.Band(result.Span[i], factor, type1); }
         return result;
     }
 

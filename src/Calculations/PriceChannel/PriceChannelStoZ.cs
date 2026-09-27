@@ -168,42 +168,16 @@ public static partial class Calculations
     public static StockData CalculateUniChannel(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 10, double ubFac = 0.02, double lbFac = 0.02, bool type1 = false)
     {
-        List<double> upperBandList = new(stockData.Count);
-        List<double> lowerBandList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        UniChannelArithmetic.Validate(ubFac, lbFac); length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var middle = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList()
+            ?? (maType == MovingAvgType.SimpleMovingAverage ? BollingerArithmetic.Mean(input, length) : GetMovingAverageList(stockData, maType, length, input));
+        List<double> upper = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentSma = smaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevSma = i >= 1 ? smaList[i - 1] : 0;
-
-            var prevUb = GetLastOrDefault(upperBandList);
-            var ub = type1 ? currentSma + ubFac : currentSma + (currentSma * ubFac);
-            upperBandList.Add(ub);
-
-            var prevLb = GetLastOrDefault(lowerBandList);
-            var lb = type1 ? currentSma - lbFac : currentSma - (currentSma * lbFac);
-            lowerBandList.Add(lb);
-
-            var signal = GetBollingerBandsSignal(currentValue - currentSma, prevValue - prevSma, currentValue, prevValue, ub, prevUb, lb, prevLb);
-            signalsList?.Add(signal);
+            upper.Add(UniChannelArithmetic.Band(middle[i], ubFac, type1)); lower.Add(UniChannelArithmetic.Band(middle[i], -lbFac, type1));
+            signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", smaList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.UniChannel;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.UniChannel; return stockData;
     }
 
 

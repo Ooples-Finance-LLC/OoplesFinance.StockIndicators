@@ -2296,11 +2296,6 @@ OoplesFinance.StockIndicators.Indicators.UltimateVolatilityIndicator/longer-peri
 OoplesFinance.StockIndicators.Indicators.UltimateVolatilityIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.UltimateVolatilityIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.UltimateVolatilityIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.UniChannel/default
-OoplesFinance.StockIndicators.Indicators.UniChannel/longer-periods
-OoplesFinance.StockIndicators.Indicators.UniChannel/minimum-periods
-OoplesFinance.StockIndicators.Indicators.UniChannel/shorter-periods
-OoplesFinance.StockIndicators.Indicators.UniChannel/weighted-average
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/default
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/longer-periods
 OoplesFinance.StockIndicators.Indicators.UtBotAlerts/minimum-periods
