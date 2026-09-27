@@ -19,15 +19,18 @@ def trx(outcome):
 
 class MutationShardTests(unittest.TestCase):
     def test_matrix_partitions_every_fault_once_with_bounded_shards(self):
-        for size in (1, 10, 11, 352, 2560):
+        for size in (1, 10, 11, 352, 2560, 2561, 2717, 10000):
             entries = [{"id": str(i)} for i in range(size)]
             matrix = shard_matrix(entries)["include"]
             parts = [select_shard(entries, item["shard"], item["count"]) for item in matrix]
-            self.assertTrue(all(0 < len(part) <= 10 for part in parts))
+            self.assertLessEqual(len(matrix), 256)
+            self.assertTrue(all(parts))
+            self.assertLessEqual(max(map(len, parts)) - min(map(len, parts)), 1)
+            if size <= 2560:
+                self.assertTrue(all(len(part) <= 10 for part in parts))
             self.assertEqual(list(range(size)), sorted(int(item["id"]) for part in parts for item in part))
-        for size in (0, 2561):
-            with self.assertRaises(ValueError):
-                shard_matrix([{}] * size)
+        with self.assertRaises(ValueError):
+            shard_matrix([])
         for index, count in ((None, 2), (0, None), (-1, 1), (1, 1), (0, 0), (0, 3)):
             with self.assertRaises(ValueError):
                 select_shard([{}, {}], index, count)

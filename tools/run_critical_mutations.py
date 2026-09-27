@@ -107,9 +107,11 @@ def select_shard(entries, index, count):
 
 
 def shard_matrix(entries):
-    count = (len(entries) + 9) // 10
-    if not 1 <= count <= 256:
-        raise ValueError("The manifest must fit GitHub's matrix limit with ten faults per shard.")
+    # Target ten faults per shard, then grow shards rather than dropping faults
+    # or exceeding GitHub's 256-job matrix limit as the catalog grows.
+    count = min(256, (len(entries) + 9) // 10)
+    if count == 0:
+        raise ValueError("The mutation manifest must be nonempty.")
     return {"include": [{"shard": index, "count": count} for index in range(count)]}
 
 

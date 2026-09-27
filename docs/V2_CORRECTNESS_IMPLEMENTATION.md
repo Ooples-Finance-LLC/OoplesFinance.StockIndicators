@@ -1872,3 +1872,9 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - All eight outputs are checked across five routes. Cases cover unequal odd/even periods, the 530-bar cap, signed/zero/extreme factors, selected inputs, four ordered customer averages, legacy Hull averages, previews/reset and invalid fields/multipliers.
 - **115/115** final checks passed (`hurst-cycle-final.trx`), after correcting a selected-input fixture to respect the custom-range rule. Campaign405a/405b caught **24/24** injected faults; **2,672** retained sites. All 11 staged files match the archived source. Source/archive SHA256: `608b278a7456e5de758f62feba380735180888bf2a7422e3f154ef137ed714b2` / `faef39cd004c6e3a722e4c1f46f5a02015c930f37bc8108ded6eb1184d249806`.
 - Inventory: **4,642/7,131**, **2,489** omissions across **414** types; no construction failures. 175 grouped batches cover **1,816 configurations / 331 types**. 82754B0A6C2BD4599616E0B9C222A431A70D33E1BFEFC681DB1F46CC6975D393 SHA256 `82754B0A6C2BD4599616E0B9C222A431A70D33E1BFEFC681DB1F46CC6975D393`. Full coverage remains incomplete.
+
+
+### Growing mutation catalogs stay within the CI matrix limit
+
+- The retained fault catalog exceeded the old 2,560-site ceiling, causing `--list-shards` to fail before CI could execute any faults. The planner now targets ten faults per shard and caps the matrix at 256 jobs, distributing larger catalogs across those jobs without omitting sites.
+- All **29 tooling tests passed**, including boundary sizes 2,560/2,561, the current 2,717-entry working catalog, and 10,000 entries. Partition assertions require every ID exactly once, nonempty balanced shards, and at most 256 jobs. Current matrix generation succeeds with 256 jobs. This repairs scheduling; it does not constitute a full mutation-gate run.
