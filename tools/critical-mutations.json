@@ -24015,5 +24015,160 @@
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~OneBarReturnNumericalTests.CurrentAndPreviousDenominatorsKeepDistinctZeroAndCumulativeRules|FullyQualifiedName~OneBarReturnNumericalTests.SelectedPricesAndCustomerAverageKeepPrimaryReturnsIndependent|FullyQualifiedName~OneBarReturnNumericalTests.InvalidFieldsNeverAdvancePriceCumulativeValueOrSignal",
     "scope": "internal static ComputeBuffer ComputePercentChangeOscillatorFast("
+  },
+  {
+    "id": "relative-volatility-deviation-period",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_deviation = new(Math.Max(1, length))",
+    "after": "_deviation = new(Math.Max(2, length))",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "smoothLength = Math.Max(1, smoothLength)",
+    "after": "smoothLength = Math.Max(2, smoothLength)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-up-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_up = new(kind, smoothLength, capacityHint)",
+    "after": "_up = new(MovingAvgType.SimpleMovingAverage, smoothLength, capacityHint)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-down-kind",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_down = new(kind, smoothLength, capacityHint)",
+    "after": "_down = new(MovingAvgType.SimpleMovingAverage, smoothLength, capacityHint)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "value > _previous ? deviation : 0",
+    "after": "value < _previous ? deviation : 0",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-preview-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_deviation.Next(value, commit)",
+    "after": "_deviation.Next(value, true)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-preview-direction",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "if (commit) _previous = value",
+    "after": "if (true) _previous = value",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-flat-limit",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "if (down.Mantissa == 0) return 100",
+    "after": "if (down.Mantissa == 0) return 50",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "up.AddTo(ref numerator, 100)",
+    "after": "up.AddTo(ref numerator, 1)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "down.AddTo(ref denominator);",
+    "after": "down.AddTo(ref denominator, 2);",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "return total.Mean(2)",
+    "after": "return total.Mean(1)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-reset-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_deviation.Reset();",
+    "after": "if (_previous == 0) _deviation.Reset();",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-reset-up",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_up?.Reset();",
+    "after": "if (_previous == 0) _up?.Reset();",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-reset-down",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_down?.Reset();",
+    "after": "if (_previous == 0) _down?.Reset();",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-preview-up",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_up.Next(new RocBankValue(moves.Up), commit)",
+    "after": "_up.Next(new RocBankValue(moves.Up), true)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-preview-down",
+    "module": "numerical",
+    "file": "src/Helpers/RelativeVolatilityWindow.cs",
+    "before": "_down.Next(new RocBankValue(moves.Down), commit)",
+    "after": "_down.Next(new RocBankValue(moves.Down), true)",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity"
+  },
+  {
+    "id": "relative-volatility-nan-open-fallback-v1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity",
+    "scope": "public sealed class RelativeVolatilityIndexV1State :"
+  },
+  {
+    "id": "relative-volatility-nan-open-fallback-v2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity",
+    "scope": "public sealed class RelativeVolatilityIndexV2State :"
+  },
+  {
+    "id": "relative-volatility-selected-source",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity",
+    "scope": "internal static ComputeBuffer ComputeRelativeVolatilityIndexFast("
   }
 ]

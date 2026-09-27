@@ -766,57 +766,16 @@ public static partial class Calculations
     public static StockData CalculateRelativeVolatilityIndexV1(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10, int smoothLength = 14)
     {
-        List<double> upList = new(stockData.Count);
-        List<double> downList = new(stockData.Count);
-        List<double> rviOriginalList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving
-        // average of it. The relative volatility index is the relative strength index with the standard
-        // deviation in place of the price change, so this is the quantity its definition names - and the one
-        // its own RviHigh and RviLow siblings already take, through VolatilityCore.StandardDeviation.
-        // See #190.
-        var stdDeviationList = GetStandardDeviationList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        smoothLength = Math.Max(1, smoothLength); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new RelativeVolatilityWindow(maType, length, smoothLength, external, input.Count); List<double> values = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentStdDeviation = stdDeviationList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var up = currentValue > prevValue ? currentStdDeviation : 0;
-            upList.Add(up);
-
-            var down = currentValue < prevValue ? currentStdDeviation : 0;
-            downList.Add(down);
+            List<double> up = new(input.Count), down = new(input.Count); foreach (var price in input) { var p = window.Generate(price, true); up.Add(p.Up); down.Add(p.Down); }
+            var upMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(up), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, up); var downMean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(down), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, down);
+            for (var i = 0; i < input.Count; i++) values.Add(RelativeVolatilityWindow.Ratio(new RocBankValue(upMean[i]), new RocBankValue(downMean[i])));
         }
-
-        var upAvgList = GetMovingAverageList(stockData, maType, smoothLength, upList);
-        var downAvgList = GetMovingAverageList(stockData, maType, smoothLength, downList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var avgUp = upAvgList[i];
-            var avgDown = downAvgList[i];
-            var prevRvi1 = i >= 1 ? rviOriginalList[i - 1] : 0;
-            var prevRvi2 = i >= 2 ? rviOriginalList[i - 2] : 0;
-            var rs = avgDown != 0 ? avgUp / avgDown : 0;
-
-            var rvi = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-            rviOriginalList.Add(rvi);
-
-            var signal = GetRsiSignal(rvi - prevRvi1, prevRvi1 - prevRvi2, rvi, prevRvi1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rvi", rviOriginalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rviOriginalList);
-        stockData.IndicatorName = IndicatorName.RelativeVolatilityIndexV1;
-
-        return stockData;
+        else foreach (var price in input) values.Add(window.Next(price, true));
+        for (var i = 0; i < input.Count; i++) { var previous = i > 0 ? values[i - 1] : 0; var older = i > 1 ? values[i - 2] : 0; signals?.Add(GetRsiSignal(values[i] - previous, previous - older, values[i], previous, 70, 30)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rvi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.RelativeVolatilityIndexV1; return stockData;
     }
 
 
@@ -848,7 +807,7 @@ public static partial class Calculations
             var prevRvi1 = i >= 1 ? rviList[i - 1] : 0;
             var prevRvi2 = i >= 2 ? rviList[i - 2] : 0;
 
-            var rvi = (rviOriginalHigh + rviOriginalLow) / 2;
+            var rvi = RelativeVolatilityWindow.Mean(rviOriginalHigh, rviOriginalLow);
             rviList.Add(rvi);
 
             var signal = GetRsiSignal(rvi - prevRvi1, prevRvi1 - prevRvi2, rvi, prevRvi1, 70, 30);

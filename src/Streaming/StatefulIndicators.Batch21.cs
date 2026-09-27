@@ -1048,83 +1048,18 @@ public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Rvi")]
 public sealed class RelativeVolatilityIndexV1State : IStreamingIndicatorState, IDisposable
 {
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. It is fed
-    // the resolved input rather than resolving one of its own, so a composed reading - the V2 indicator
-    // builds one of these on the high and one on the low - still measures the series it was composed on.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _upAvg;
-    private readonly IMovingAverageSmoother _downAvg;
+    private readonly RelativeVolatilityWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    // Internal: the library composes this state on a named input other than its own default -
-    // a volatility of volume, a relative volatility of the high and of the low. Every parameter is
-    // required, so this can never be chosen in place of the public constructor.
-    internal RelativeVolatilityIndexV1State(MovingAvgType maType, int length, int smoothLength, InputName inputName)
-    {
-        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
-        _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(inputName, null);
-    }
-
-    public RelativeVolatilityIndexV1State(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
-        int length = 10, int smoothLength = 14)
-    {
-        _stdDev = new RollingStandardDeviation(Math.Max(1, length));
-        _upAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _downAvg = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    internal RelativeVolatilityIndexV1State(MovingAvgType maType, int length, int smoothLength, InputName inputName) { _window = new(maType, length, smoothLength); _input = new(inputName, null); }
+    public RelativeVolatilityIndexV1State(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 10, int smoothLength = 14) : this(maType, length, smoothLength, InputName.Close) { }
     public IndicatorName Name => IndicatorName.RelativeVolatilityIndexV1;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _upAvg.Reset();
-        _downAvg.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var stdDev = _stdDev.Next(value, isFinal);
-        var up = value > prevValue ? stdDev : 0;
-        var down = value < prevValue ? stdDev : 0;
-        var avgUp = _upAvg.Next(up, isFinal);
-        var avgDown = _downAvg.Next(down, isFinal);
-        var rs = avgDown != 0 ? avgUp / avgDown : 0;
-        var rvi = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rvi", rvi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rvi, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Rvi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _upAvg.Dispose();
-        _downAvg.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rvi")]
@@ -1153,7 +1088,7 @@ public sealed class RelativeVolatilityIndexV2State : IStreamingIndicatorState, I
         StreamingInputValidation.Validate(bar);
         var rviHigh = _rviHigh.Update(bar, isFinal, includeOutputs: false).Value;
         var rviLow = _rviLow.Update(bar, isFinal, includeOutputs: false).Value;
-        var rvi = (rviHigh + rviLow) / 2;
+        var rvi = RelativeVolatilityWindow.Mean(rviHigh, rviLow);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)

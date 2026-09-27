@@ -32,6 +32,11 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.RelativeVolatilityIndexV1 or IndicatorName.RelativeVolatilityIndexV2)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RelativeVolatilityOutputs(bars, builtIn)["Rvi"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.ForecastOscillator or IndicatorName.PercentChangeOscillator)
         {
             var returnKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

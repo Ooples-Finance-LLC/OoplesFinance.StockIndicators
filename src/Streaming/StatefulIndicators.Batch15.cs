@@ -107,7 +107,7 @@ public sealed class InertiaIndicatorState : IStreamingIndicatorState, IDisposabl
         StreamingInputValidation.Validate(bar);
         var rviHigh = _rviHigh.Next(bar.High, bar, isFinal);
         var rviLow = _rviLow.Next(bar.Low, bar, isFinal);
-        var rvi = (rviHigh + rviLow) / 2;
+        var rvi = RelativeVolatilityWindow.Mean(rviHigh, rviLow);
 
         var inertia = _smoother.Next(rvi, isFinal);
 
@@ -1827,60 +1827,11 @@ public sealed class KaufmanAdaptiveCorrelationOscillatorState : IStreamingIndica
 
 internal sealed class RelativeVolatilityIndexEngine : IDisposable
 {
-    // The deviation of the window about its own mean, matching the batch calculation and the V1 state; see
-    // #190. This engine is the third implementation of the relative volatility index: the batch reaches it
-    // through CalculateRelativeVolatilityIndexV2, the V1 and V2 states are their own pair, and Inertia
-    // composes this. All three have to move together or Inertia's two engines disagree during warm-up.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _upSmoother;
-    private readonly IMovingAverageSmoother _downSmoother;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public RelativeVolatilityIndexEngine(MovingAvgType maType, int length, int smoothLength)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _stdDev = new RollingStandardDeviation(resolvedLength);
-        _upSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _downSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-    }
-
-    public double Next(double value, OhlcvBar bar, bool isFinal)
-    {
-        var stdDev = _stdDev.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var up = value > prevValue ? stdDev : 0;
-        var down = value < prevValue ? stdDev : 0;
-        var avgUp = _upSmoother.Next(up, isFinal);
-        var avgDown = _downSmoother.Next(down, isFinal);
-        var rs = avgDown != 0 ? avgUp / avgDown : 0;
-        var rvi = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        return rvi;
-    }
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _upSmoother.Reset();
-        _downSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _upSmoother.Dispose();
-        _downSmoother.Dispose();
-    }
+    private readonly RelativeVolatilityWindow _window;
+    public RelativeVolatilityIndexEngine(MovingAvgType maType, int length, int smoothLength) { _window = new(maType, length, smoothLength); }
+    public double Next(double value, OhlcvBar bar, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
 }
 
 internal sealed class KasePeakOscillatorV1Engine : IDisposable

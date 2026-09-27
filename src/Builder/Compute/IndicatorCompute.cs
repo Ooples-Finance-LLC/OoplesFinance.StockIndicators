@@ -4913,48 +4913,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRelativeVolatilityIndexFast(StockData data, ComputeContext context, int length = 10,
         int smoothLength = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
     {
-        // CalculateRelativeVolatilityIndexV1 is the relative strength index with the windowed standard
-        // deviation of the chained series in place of the price change: the deviation is booked as upside on a
-        // rising bar and downside on a falling one, each side is smoothed over smoothLength, and the ratio is
-        // scaled to 0..100. OscillatorCore.RelativeVolatilityIndex took the close and used one length for both.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        using var upside = context.Rent(count);
-        using var downside = context.Rent(count);
-        var up = upside.WritableSpan;
-        var down = downside.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            up[i] = input[i] > prevValue ? stdDev[i] : 0;
-            down[i] = input[i] < prevValue ? stdDev[i] : 0;
-        }
-
-        using var upAverage = context.Rent(count);
-        using var downAverage = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, upside.Span, upAverage.WritableSpan);
-        MovingAverage(data, maType, smoothLength, downside.Span, downAverage.WritableSpan);
-        var avgUpSpan = upAverage.Span;
-        var avgDownSpan = downAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var avgUp = avgUpSpan[i];
-            var avgDown = avgDownSpan[i];
-            var rs = avgDown != 0 ? avgUp / avgDown : 0;
-            output[i] = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); RelativeVolatilityIndexV1(data, context, SpanCompat.AsReadOnlySpan(input), length, smoothLength, maType, result.WritableSpan); return result;
     }
 
     /// <summary>
@@ -26141,38 +26100,15 @@ internal static partial class IndicatorCompute
     private static void RelativeVolatilityIndexV1(StockData data, ComputeContext context, ReadOnlySpan<double> series,
         int length, int smoothLength, MovingAvgType maType, Span<double> output)
     {
-        var count = series.Length;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(series, deviation.WritableSpan, Math.Max(1, length));
-        var stdDev = deviation.Span;
-
-        using var rises = context.Rent(count);
-        using var falls = context.Rent(count);
-        var up = rises.WritableSpan;
-        var down = falls.WritableSpan;
-        for (var i = 0; i < count; i++)
+        smoothLength = Math.Max(1, smoothLength); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new RelativeVolatilityWindow(maType, length, smoothLength, external, series.Length);
+        if (external)
         {
-            var previousValue = i >= 1 ? series[i - 1] : 0;
-            up[i] = series[i] > previousValue ? stdDev[i] : 0;
-            down[i] = series[i] < previousValue ? stdDev[i] : 0;
+            using var up = context.Rent(series.Length); using var down = context.Rent(series.Length); using var upMean = context.Rent(series.Length); using var downMean = context.Rent(series.Length);
+            for (var i = 0; i < series.Length; i++) { var p = window.Generate(series[i], true); up.WritableSpan[i] = p.Up; down.WritableSpan[i] = p.Down; }
+            MovingAverage(data, maType, smoothLength, up.Span, upMean.WritableSpan); MovingAverage(data, maType, smoothLength, down.Span, downMean.WritableSpan);
+            for (var i = 0; i < series.Length; i++) output[i] = RelativeVolatilityWindow.Ratio(new RocBankValue(upMean.Span[i]), new RocBankValue(downMean.Span[i]));
         }
-
-        using var upAverages = context.Rent(count);
-        using var downAverages = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, rises.Span, upAverages.WritableSpan);
-        MovingAverage(data, maType, smoothLength, falls.Span, downAverages.WritableSpan);
-
-        var avgUpSpan = upAverages.Span;
-        var avgDownSpan = downAverages.Span;
-        for (var i = 0; i < count; i++)
-        {
-            var avgUp = avgUpSpan[i];
-            var avgDown = avgDownSpan[i];
-            var rs = avgDown != 0 ? avgUp / avgDown : 0;
-
-            output[i] = avgDown == 0 ? 100 : avgUp == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-        }
+        else for (var i = 0; i < series.Length; i++) output[i] = window.Next(series[i], true);
     }
 
     internal static ComputeBuffer ComputeRelativeVolatilityIndexV2Fast(StockData data, ComputeContext context, int length = 10,
@@ -26196,7 +26132,7 @@ internal static partial class IndicatorCompute
         var rviLow = lowIndex.Span;
         for (var i = 0; i < count; i++)
         {
-            rvi[i] = (rviHigh[i] + rviLow[i]) / 2;
+            rvi[i] = RelativeVolatilityWindow.Mean(rviHigh[i], rviLow[i]);
         }
 
         return buffer;
