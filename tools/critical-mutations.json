@@ -31057,5 +31057,120 @@
     "after": "selected: indicator.Source is null)[key]",
     "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
     "scope": "internal static IEnumerable<IndicatorValidationRule> For("
+  },
+  {
+    "id": "ultimate-pressure-first-weight",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "slot == 0 ? 4 :",
+    "after": "slot == 0 ? 1 :",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-second-weight",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "slot == 1 ? 2 : 1",
+    "after": "slot == 1 ? 1 : 1",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-origin",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "_hasPrevious ? _previous : close",
+    "after": "_hasPrevious ? _previous : 0",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-lower",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "Math.Min(low, previous)",
+    "after": "Math.Max(low, previous)",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-upper",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "Math.Max(high, previous)",
+    "after": "Math.Min(high, previous)",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "var expired = _history[slot].Count == _lengths[slot] ? _history[slot].Peek() : default;",
+    "after": "var expired = default((BigInteger Pressure, BigInteger Range));",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "if (commit)\n            {",
+    "after": "if (true)\n            {",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-reset",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "_hasPrevious = false;",
+    "after": "_hasPrevious = true;",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes",
+    "scope": "internal static ComputeBuffer ComputeUltimateOscillatorFast("
+  },
+  {
+    "id": "ultimate-pressure-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new UltimatePressureWindow(length1, length2, length3)",
+    "after": "new UltimatePressureWindow(length1, length1, length1)",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes",
+    "scope": "internal static void UltimateOscillator("
+  },
+  {
+    "id": "ultimate-pressure-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// bypass validation\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes",
+    "scope": "public sealed class UltimateOscillatorState"
+  },
+  {
+    "id": "ultimate-pressure-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " UltimateOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-reference-weight",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.UltimatePressure.cs",
+    "before": "slot == 0 ? 4 :",
+    "after": "slot == 0 ? 3 :",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
+  },
+  {
+    "id": "ultimate-pressure-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/UltimatePressureWindow.cs",
+    "before": "return Math.Max(0, Math.Min(100, result));",
+    "after": "return result;",
+    "filter": "FullyQualifiedName~ValidationTests.UltimatePressureNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FormulaContractCoverageTests.DirectionalOscillatorsIgnorePriceTranslationFromTheFirstBar|FullyQualifiedName~FormulaContractCoverageTests.InsyncIndexHasHandCalculatedNeutralPricesAndDelayedVotes"
   }
 ]

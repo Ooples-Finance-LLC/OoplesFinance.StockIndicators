@@ -294,36 +294,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void UltimateOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length1 = 7, int length2 = 14, int length3 = 28)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        double bp1Sum = 0, tr1Sum = 0;
-        double bp2Sum = 0, tr2Sum = 0;
-        double bp3Sum = 0, tr3Sum = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevClose = i == 0 ? close[i] : close[i - 1];
-            var trueLow = Math.Min(low[i], prevClose);
-            var trueHigh = Math.Max(high[i], prevClose);
-            var bp = close[i] - trueLow;
-            var tr = trueHigh - trueLow;
-
-            bp1Sum += bp; tr1Sum += tr;
-            bp2Sum += bp; tr2Sum += tr;
-            bp3Sum += bp; tr3Sum += tr;
-
-            if (i >= length1) { var idx = i - length1; bp1Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr1Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-            if (i >= length2) { var idx = i - length2; bp2Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr2Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-            if (i >= length3) { var idx = i - length3; bp3Sum -= close[idx] - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); tr3Sum -= Math.Max(high[idx], close[Math.Max(0, idx - 1)]) - Math.Min(low[idx], close[Math.Max(0, idx - 1)]); }
-
-            var avg1 = tr1Sum != 0 ? bp1Sum / tr1Sum : 0;
-            var avg2 = tr2Sum != 0 ? bp2Sum / tr2Sum : 0;
-            var avg3 = tr3Sum != 0 ? bp3Sum / tr3Sum : 0;
-            output[i] = 100 * ((4 * avg1) + (2 * avg2) + avg3) / 7;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Input and output spans must cover all closes.");
+        var window = new UltimatePressureWindow(length1, length2, length3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>

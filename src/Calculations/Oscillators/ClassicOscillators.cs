@@ -543,55 +543,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateUltimateOscillator(this StockData stockData, int length1 = 7, int length2 = 14, int length3 = 28)
     {
-        List<double> uoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var bpSumWindow = new RollingSum();
-        var trSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new UltimatePressureWindow(length1, length2, length3);
+        var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-            var prevClose = i >= 1 ? inputList[i - 1] : currentClose;
-            var minValue = Math.Min(currentLow, prevClose);
-            var maxValue = Math.Max(currentHigh, prevClose);
-            var prevUo1 = i >= 1 ? uoList[i - 1] : 0;
-            var prevUo2 = i >= 2 ? uoList[i - 2] : 0;
-
-            var buyingPressure = currentClose - minValue;
-            bpSumWindow.Add(buyingPressure);
-
-            var trueRange = maxValue - minValue;
-            trSumWindow.Add(trueRange);
-
-            var bp7Sum = bpSumWindow.Sum(length1);
-            var bp14Sum = bpSumWindow.Sum(length2);
-            var bp28Sum = bpSumWindow.Sum(length3);
-            var tr7Sum = trSumWindow.Sum(length1);
-            var tr14Sum = trSumWindow.Sum(length2);
-            var tr28Sum = trSumWindow.Sum(length3);
-            var avg7 = tr7Sum != 0 ? bp7Sum / tr7Sum : 0;
-            var avg14 = tr14Sum != 0 ? bp14Sum / tr14Sum : 0;
-            var avg28 = tr28Sum != 0 ? bp28Sum / tr28Sum : 0;
-
-            var ultimateOscillator = MinOrMax(100 * (((4 * avg7) + (2 * avg14) + avg28) / (4 + 2 + 1)), 100, 0);
-            uoList.Add(ultimateOscillator);
-
-            var signal = GetRsiSignal(ultimateOscillator - prevUo1, prevUo1 - prevUo2, ultimateOscillator, prevUo1, 70, 30);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true); var previous = i > 0 ? line[i - 1] : 0; var prior = i > 1 ? line[i - 2] : 0;
+            signals?.Add(GetRsiSignal(value - previous, previous - prior, value, previous, 70, 30)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Uo", uoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(uoList);
-        stockData.IndicatorName = IndicatorName.UltimateOscillator;
-
-        return stockData;
-    }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Uo", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.UltimateOscillator; return stockData;
+}
 
     /// <summary>
     /// Calculates the vortex indicator.

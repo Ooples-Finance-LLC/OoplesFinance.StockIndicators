@@ -1425,93 +1425,16 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
 [PrimaryOutput("Uo")]
 public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowSum _bpSum1;
-    private readonly RollingWindowSum _bpSum2;
-    private readonly RollingWindowSum _bpSum3;
-    private readonly RollingWindowSum _trSum1;
-    private readonly RollingWindowSum _trSum2;
-    private readonly RollingWindowSum _trSum3;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public UltimateOscillatorState(int length1 = 7, int length2 = 14, int length3 = 28)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        _bpSum1 = new RollingWindowSum(resolved1);
-        _bpSum2 = new RollingWindowSum(resolved2);
-        _bpSum3 = new RollingWindowSum(resolved3);
-        _trSum1 = new RollingWindowSum(resolved1);
-        _trSum2 = new RollingWindowSum(resolved2);
-        _trSum3 = new RollingWindowSum(resolved3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly UltimatePressureWindow _window;
+    public UltimateOscillatorState(int length1 = 7, int length2 = 14, int length3 = 28) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.UltimateOscillator;
-
-    public void Reset()
-    {
-        _bpSum1.Reset();
-        _bpSum2.Reset();
-        _bpSum3.Reset();
-        _trSum1.Reset();
-        _trSum2.Reset();
-        _trSum3.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var high = bar.High;
-        var low = bar.Low;
-        var prevClose = _hasPrev ? _prevClose : close;
-        var minValue = Math.Min(low, prevClose);
-        var maxValue = Math.Max(high, prevClose);
-        var bp = close - minValue;
-        var tr = maxValue - minValue;
-
-        var bpSum1 = isFinal ? _bpSum1.Add(bp, out _) : _bpSum1.Preview(bp, out _);
-        var bpSum2 = isFinal ? _bpSum2.Add(bp, out _) : _bpSum2.Preview(bp, out _);
-        var bpSum3 = isFinal ? _bpSum3.Add(bp, out _) : _bpSum3.Preview(bp, out _);
-        var trSum1 = isFinal ? _trSum1.Add(tr, out _) : _trSum1.Preview(tr, out _);
-        var trSum2 = isFinal ? _trSum2.Add(tr, out _) : _trSum2.Preview(tr, out _);
-        var trSum3 = isFinal ? _trSum3.Add(tr, out _) : _trSum3.Preview(tr, out _);
-        var avg1 = trSum1 != 0 ? bpSum1 / trSum1 : 0;
-        var avg2 = trSum2 != 0 ? bpSum2 / trSum2 : 0;
-        var avg3 = trSum3 != 0 ? bpSum3 / trSum3 : 0;
-        var uo = MathHelper.MinOrMax(100 * (((4 * avg1) + (2 * avg2) + avg3) / 7), 100, 0);
-
-        if (isFinal)
-        {
-            _prevClose = close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Uo", uo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(uo, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Uo", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _bpSum1.Dispose();
-        _bpSum2.Dispose();
-        _bpSum3.Dispose();
-        _trSum1.Dispose();
-        _trSum2.Dispose();
-        _trSum3.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Uto")]

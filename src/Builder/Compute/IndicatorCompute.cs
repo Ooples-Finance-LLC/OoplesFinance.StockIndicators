@@ -3182,42 +3182,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeUltimateOscillatorFast(StockData data, ComputeContext context, int length1 = 7,
         int length2 = 14, int length3 = 28)
     {
-        // CalculateUltimateOscillator measures buying pressure as the chained series' distance above the lower
-        // of its own previous reading and the bar's low, against a true range taken the same way, and blends
-        // three windows in a 4:2:1 weighting. The core this replaced read the raw close instead of whatever is
-        // being chained, so it could not follow a chained series at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var buyingPressureSum = new RollingSum();
-        var trueRangeSum = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : currentValue;
-            var minValue = Math.Min(lows[i], prevValue);
-            var maxValue = Math.Max(highs[i], prevValue);
-
-            buyingPressureSum.Add(currentValue - minValue);
-            trueRangeSum.Add(maxValue - minValue);
-
-            var tr1 = trueRangeSum.Sum(length1);
-            var tr2 = trueRangeSum.Sum(length2);
-            var tr3 = trueRangeSum.Sum(length3);
-            var avg1 = tr1 != 0 ? buyingPressureSum.Sum(length1) / tr1 : 0;
-            var avg2 = tr2 != 0 ? buyingPressureSum.Sum(length2) / tr2 : 0;
-            var avg3 = tr3 != 0 ? buyingPressureSum.Sum(length3) / tr3 : 0;
-
-            output[i] = MathHelper.MinOrMax(100 * (((4 * avg1) + (2 * avg2) + avg3) / (4 + 2 + 1)), 100, 0);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var output = context.Rent(input.Count);
+        OscillatorCore.UltimateOscillator(SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), SpanCompat.AsReadOnlySpan(input), output.WritableSpan, length1, length2, length3);
+        return output;
     }
 
     /// <summary>
