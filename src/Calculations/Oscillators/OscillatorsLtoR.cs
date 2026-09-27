@@ -1729,35 +1729,17 @@ public static partial class Calculations
     public static StockData CalculatePrettyGoodOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 14)
     {
-        List<double> pgoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        length=Math.Max(1,length);var input=stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues;using var window=new PrettyGoodWindow(maType,length,input.Count);
+        var external=Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);List<double>? average=null,atr=null;
+        if(external)
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var atr = atrList[i];
-
-            var prevPgo = GetLastOrDefault(pgoList);
-            var pgo = atr != 0 ? (currentValue - sma) / atr : 0;
-            pgoList.Add(pgo);
-
-            var signal = GetCompareSignal(pgo, prevPgo);
-            signalsList?.Add(signal);
+            average=Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,input);
+            var ranges=PrettyGoodWindow.TrueRanges(stockData.HighPrices,stockData.LowPrices,input).ToList();
+            atr=Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length)?.ToList() ?? GetMovingAverageList(stockData,maType,length,ranges);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Pgo", pgoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(pgoList);
-        stockData.IndicatorName = IndicatorName.PrettyGoodOscillator;
-
-        return stockData;
+        List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<input.Count;i++){var value=external?PrettyGoodWindow.Finish(input[i],new RocBankValue(average![i]),new RocBankValue(atr![i])):window.Next(stockData.HighPrices[i],stockData.LowPrices[i],input[i],true);signals?.Add(GetCompareSignal(value,i>0?values[i-1]:0));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Pgo",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.PrettyGoodOscillator;return stockData;
     }
 
 

@@ -792,6 +792,7 @@ internal static partial class StatefulIndicatorFactory
             MarketMeannessIndexSpecOptions mmi => new MarketMeannessIndexState(mmi.MaType, mmi.Length),
             PzoSpecOptions pzo => new PriceZoneOscillatorState(length: pzo.Length),
             PriceZoneOscillatorSpecOptions pzoNamed => new PriceZoneOscillatorState(pzoNamed.MaType, pzoNamed.Length),
+            PrettyGoodOscillatorSpecOptions pretty => new PrettyGoodOscillatorState(pretty.MaType,pretty.Length),
             PgoSpecOptions pgo => new PrettyGoodOscillatorState(length: pgo.Length),
             VortexPlusSpecOptions vpAlias => new VortexIndicatorState(vpAlias.Length),
             VortexMinusSpecOptions vmAlias => new VortexIndicatorState(vmAlias.Length),

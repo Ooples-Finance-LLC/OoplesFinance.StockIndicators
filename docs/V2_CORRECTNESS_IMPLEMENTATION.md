@@ -2099,3 +2099,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 
 - Explicit disposal and finalization skip returning an array when construction failed before ArrayPool.Rent assigned the buffer. Ordinary rented-buffer disposal remains idempotent.
 - The focused regression models the uninitialized object and invokes its finalizer with automatic finalization suppressed, avoiding forced memory exhaustion or a test-host crash. Both cleanup paths and normal eviction/disposal passed (3 tests), alongside the Internal Bar Strength/enrollment/foundation run: **77/77** (`internal-bar-strength-buffer.trx`).
+
+
+### Pretty Good Oscillator alias numerical contracts
+
+- Nine configurations across Pgo and PrettyGoodOscillator use the selected average for both price and true range. Extended ATR values and exact distance ratios preserve finite results after otherwise overflowing intermediates. The core now uses the public simple-average contract; selected prices retain original candle ranges. Both ordered customer stages receive their intended series and periods.
+- **114/114** family/enrollment/foundation checks passed (`pretty-good.trx`). Four basic average types, all public routes, direct core, selected prices outside the candle, both customer averages, normal/subnormal/extreme values, preview/reset and invalid fields are covered. Campaign432a caught **21/21** faults; **3,208** retained sites.
+- Source/archive SHA256: `38429de91937f2568833b0b20a6c794f4c6aa00035a553117d38b8ff80525ffe` / `8e21ed32e2624fd82e3763ac735d3743c7c600ad04fef423d4883714b45cb013`.
+- Inventory: **4,871/7,131**, **2,260** omissions across **372** types; no construction failures. 202 grouped batches cover **2,045 configurations / 373 types**. DLL SHA256 `D89A74B29DC53969A7433EBDAEB72B9638A166193E49EDFC3FC307C3519CB124`. Full coverage and release gates remain incomplete.

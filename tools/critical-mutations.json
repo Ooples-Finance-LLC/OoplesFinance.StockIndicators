@@ -26590,5 +26590,183 @@
     "before": "new CenterLinearityWindow(length)",
     "after": "new CenterLinearityWindow(1)",
     "filter": "FullyQualifiedName~CenterLinearityNumericalTests.BarIndexedDifferencesAndRollingCancellationMatchIndependentFractions|FullyQualifiedName~CenterLinearityNumericalTests.RawAndBatchKeepSelectedPrices|FullyQualifiedName~CenterLinearityNumericalTests.InvalidFieldsCannotAdvanceAnyHistoryOrIndex"
+  },
+  {
+    "id": "pretty-good-price-period",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "new(kind, Math.Max(1, length), Math.Max(1, length), kind, capacityHint)",
+    "after": "new(kind, Math.Max(1, length)+1, Math.Max(1, length), kind, capacityHint)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-atr-period",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "new(kind, Math.Max(1, length), Math.Max(1, length), kind, capacityHint)",
+    "after": "new(kind, Math.Max(1, length), Math.Max(1, length)+1, kind, capacityHint)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-atr-kind",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "new(kind, Math.Max(1, length), Math.Max(1, length), kind, capacityHint)",
+    "after": "new(kind, Math.Max(1, length), Math.Max(1, length), MovingAvgType.WildersSmoothingMethod, capacityHint)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-zero-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "if (atr.Mantissa == 0) return 0",
+    "after": "if (atr.Mantissa == 0) return 1",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-average-sign",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "average.AddTo(ref numerator, -1)",
+    "after": "average.AddTo(ref numerator)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-early-difference",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "var numerator = new ExactMeanAccumulator(); numerator.Add(price); average.AddTo(ref numerator, -1);",
+    "after": "var numerator = new ExactMeanAccumulator(); numerator.Add(price - average.Publish());",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-early-atr",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "atr.AddTo(ref denominator)",
+    "after": "denominator.Add(atr.Publish())",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "atr.AddTo(ref denominator)",
+    "after": "average.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-preview",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "_averages.Next(high, low, price, commit)",
+    "after": "_averages.Next(high, low, price, true)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-reset",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "internal void Reset() => _averages.Reset();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-customer-range-close",
+    "module": "numerical",
+    "file": "src/Helpers/PrettyGoodWindow.cs",
+    "before": "range.Next(high[i], low[i], prices[i], true)",
+    "after": "range.Next(high[i], low[i], 0, true)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-raw-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePrettyGoodOscillatorFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-batch-selected-close",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePrettyGoodOscillator(",
+    "before": "stockData.ChainedValues.Count>0?stockData.ChainedValues:stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-raw-candle-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePrettyGoodOscillatorFast(",
+    "before": "window.Next(data.HighPrices[i],data.LowPrices[i],input[i],true)",
+    "after": "window.Next(input[i],input[i],input[i],true)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-batch-candle-range",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePrettyGoodOscillator(",
+    "before": "window.Next(stockData.HighPrices[i],stockData.LowPrices[i],input[i],true)",
+    "after": "window.Next(input[i],input[i],input[i],true)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-raw-price-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePrettyGoodOscillatorFast(",
+    "before": "MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(input),average.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,SpanCompat.AsReadOnlySpan(input),average.WritableSpan)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-raw-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePrettyGoodOscillatorFast(",
+    "before": "MovingAverage(data,maType,length,ranges,atr.WritableSpan)",
+    "after": "MovingAverage(data,maType,length+1,ranges,atr.WritableSpan)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-batch-price-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePrettyGoodOscillator(",
+    "before": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input),length)",
+    "after": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input),length+1)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-batch-atr-customer-period",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculatePrettyGoodOscillator(",
+    "before": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length)",
+    "after": "ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges),length+1)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch20.cs",
+    "scope": "public sealed class PrettyGoodOscillatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
+  },
+  {
+    "id": "pretty-good-core-kind",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void PrettyGoodOscillator(",
+    "before": "new PrettyGoodWindow(MovingAvgType.SimpleMovingAverage,length,close.Length)",
+    "after": "new PrettyGoodWindow(MovingAvgType.WildersSmoothingMethod,length,close.Length)",
+    "filter": "FullyQualifiedName~PrettyGoodNumericalTests.PriceDistanceAndExtendedAtrMatchIndependentFractions|FullyQualifiedName~PrettyGoodNumericalTests.SelectedPricesKeepOriginalCandlesAndBothCustomerStages|FullyQualifiedName~PrettyGoodNumericalTests.InvalidFieldsCannotAdvancePriceOrAtr"
   }
 ]

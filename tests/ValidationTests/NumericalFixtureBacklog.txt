@@ -1501,10 +1501,6 @@ OoplesFinance.StockIndicators.Indicators.Pfe/default
 OoplesFinance.StockIndicators.Indicators.Pfe/longer-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Pfe/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Pgo/default
-OoplesFinance.StockIndicators.Indicators.Pgo/longer-periods
-OoplesFinance.StockIndicators.Indicators.Pgo/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Pgo/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/default
 OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/longer-length
 OoplesFinance.StockIndicators.Indicators.PhaseChangeIndex/longer-periods
@@ -1558,11 +1554,6 @@ OoplesFinance.StockIndicators.Indicators.PremierStochasticOscillator/minimum-per
 OoplesFinance.StockIndicators.Indicators.PremierStochasticOscillator/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.PremierStochasticOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PremierStochasticOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.PrettyGoodOscillator/default
-OoplesFinance.StockIndicators.Indicators.PrettyGoodOscillator/longer-periods
-OoplesFinance.StockIndicators.Indicators.PrettyGoodOscillator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PrettyGoodOscillator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.PrettyGoodOscillator/weighted-average
 OoplesFinance.StockIndicators.Indicators.PriceCycleOscillator/default
 OoplesFinance.StockIndicators.Indicators.PriceCycleOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.PriceCycleOscillator/minimum-periods

@@ -4824,28 +4824,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputePrettyGoodOscillatorFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculatePrettyGoodOscillator measures how far the chained series sits from its own moving average
-        // in units of the average true range. OscillatorCore.PrettyGoodOscillator took the high, low and close
-        // and never saw the chained series or the moving average type at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var averages = context.Rent(count);
-        MovingAverage(data, maType, length, input, averages.WritableSpan);
-        var average = averages.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length=Math.Max(1,length);var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new PrettyGoodWindow(maType,length,input.Count);
+        if(ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            output[i] = atr[i] != 0 ? (input[i] - average[i]) / atr[i] : 0;
+            using var average=context.Rent(input.Count);using var atr=context.Rent(input.Count);
+            MovingAverage(data,maType,length,SpanCompat.AsReadOnlySpan(input),average.WritableSpan);
+            var ranges=PrettyGoodWindow.TrueRanges(data.HighPrices,data.LowPrices,input);MovingAverage(data,maType,length,ranges,atr.WritableSpan);
+            for(var i=0;i<input.Count;i++)output.WritableSpan[i]=PrettyGoodWindow.Finish(input[i],new RocBankValue(average.Span[i]),new RocBankValue(atr.Span[i]));
         }
-
-        return buffer;
+        else for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(data.HighPrices[i],data.LowPrices[i],input[i],true);
+        return output;
     }
 
     /// <summary>

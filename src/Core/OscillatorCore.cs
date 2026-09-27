@@ -1471,33 +1471,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void PrettyGoodOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smaArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var sma = smaArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-
-            MovingAverageCore.SimpleMovingAverage(close, sma, length);
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                output[i] = atr[i] != 0 ? (close[i] - sma[i]) / atr[i] : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(smaArray);
-            pool.Return(atrArray);
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new PrettyGoodWindow(MovingAvgType.SimpleMovingAverage,length,close.Length);
+        for(var i=0;i<close.Length;i++)output[i]=window.Next(high[i],low[i],close[i],true);
     }
 
     /// <summary>
