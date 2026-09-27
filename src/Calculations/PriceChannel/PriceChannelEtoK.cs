@@ -534,114 +534,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateFlaggingBands(this StockData stockData, int length = 14)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> tavgList = new(stockData.Count);
-        List<double> tsList = new(stockData.Count);
-        List<double> tosList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The bands decay by a fraction of a deviation and jump to price when price passes them, so the
-        // step is a deviation and it is the windowed one that names. The quantity this replaces is about 55%
-        // wider on a typical price series, so the bands decayed faster than the indicator specifies. See #190.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new FlaggingBandWindow(length);
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count), stops = new(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var stdDev = stdDevList[i];
-            var prevA1 = i >= 1 ? aList[i - 1] : currentValue;
-            var prevB1 = i >= 1 ? bList[i - 1] : currentValue;
-            var prevA2 = i >= 2 ? aList[i - 2] : currentValue;
-            var prevB2 = i >= 2 ? bList[i - 2] : currentValue;
-            var l = stdDev != 0 ? (double)1 / length * stdDev : 0;
-
-            // Each band carries forward from its own previous value. Written against the value two and
-            // three bars back, the band was two interleaved series that never interact - the odd bars
-            // reading only odd bars and the even only even - so once it stopped moving it held two
-            // different values for ever rather than one. On a market that never moved the spread across
-            // the last hundred bars was 6.88303 at a thousand bars, and still exactly 6.88303 at five
-            // thousand and at twenty thousand: a period-2 cycle, not convergence that needed more bars.
-            // The band jumps to price when price passes it and otherwise decays by l once it has gone
-            // flat, which is the behaviour the indicator is named for.
-            //
-            // The decay stops at price. Each band is an envelope - price rising above the upper one pulls
-            // it up, price falling below the lower one pulls it down - so the upper must not drift down
-            // through price, nor the lower drift up through it. That keeps a >= price >= b, which makes
-            // the two ordered by construction rather than by luck. Without it both seed at the first
-            // close, stdDev is zero through the warmup so l is zero and neither moves, and the first
-            // non-zero l steps them toward each other from the same value and crosses them at once - at
-            // bar 15 of the AAPL fixture, publishing an upper band 0.418 below the middle.
-            //
-            // The equality below is deliberate, and a tolerance would be wrong. It is not two
-            // computations that ought to agree to within rounding: it is one stored value against the one
-            // stored before it, asking whether the band carried forward untouched. Reading a real decay
-            // of l as "no change" would decay it a second time, and holding until price touches it is the
-            // behaviour this indicator is named for.
-#pragma warning disable S1244 // Floating point numbers should not be tested for equality
-            double a;
-            if (currentValue > prevA1)
-            {
-                a = currentValue;
-            }
-            else if (prevA1 == prevA2)
-            {
-                a = Math.Max(prevA1 - l, currentValue);
-            }
-            else
-            {
-                a = prevA1;
-            }
-
-            aList.Add(a);
-
-            double b;
-            if (currentValue < prevB1)
-            {
-                b = currentValue;
-            }
-            else if (prevB1 == prevB2)
-            {
-                b = Math.Min(prevB1 + l, currentValue);
-            }
-            else
-            {
-                b = prevB1;
-            }
-#pragma warning restore S1244
-
-            bList.Add(b);
-
-            var prevTos = GetLastOrDefault(tosList);
-            var tos = currentValue > prevA2 ? 1 : currentValue < prevB2 ? 0 : prevTos;
-            tosList.Add(tos);
-
-            var prevTavg = GetLastOrDefault(tavgList);
-            var avg = (a + b) / 2;
-            var tavg = tos == 1 ? (a + avg) / 2 : (b + avg) / 2;
-            tavgList.Add(tavg);
-
-            var ts = (tos * b) + ((1 - tos) * a);
-            tsList.Add(ts);
-
-            var signal = GetCompareSignal(currentValue - tavg, prevValue - prevTavg);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i] - point.Middle, i > 0 ? input[i - 1] - middle[i - 1] : 0));
+            upper.Add(point.Upper); middle.Add(point.Middle); lower.Add(point.Lower); stops.Add(point.Stop);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", aList },
-            { "MiddleBand", tavgList },
-            { "LowerBand", bList },
-            { "TrailingStop", tsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.FlaggingBands;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower }, { "TrailingStop", stops } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.FlaggingBands; return stockData;
     }
 
 

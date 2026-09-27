@@ -882,123 +882,16 @@ public sealed class FisherTransformStochasticOscillatorState : IStreamingIndicat
 [PrimaryOutput("MiddleBand")]
 public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly PooledRingBuffer<double> _aValues;
-    private readonly PooledRingBuffer<double> _bValues;
-    private readonly StreamingInputResolver _input;
-    private double _prevTos;
-    private bool _hasPrevTos;
-
-    public FlaggingBandsState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-
-        // No moving-average type: a windowed deviation is taken about the window's own mean.
-        _stdDev = new RollingStandardDeviation(_length);
-        _aValues = new PooledRingBuffer<double>(3);
-        _bValues = new PooledRingBuffer<double>(3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FlaggingBandWindow _window;
+    public FlaggingBandsState(int length = 14) { _window = new(length); }
     public IndicatorName Name => IndicatorName.FlaggingBands;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _aValues.Clear();
-        _bValues.Clear();
-        _prevTos = 0;
-        _hasPrevTos = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        // Fed the resolved input rather than the bar, matching the batch calculation.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var prevA1 = _aValues.Count >= 1 ? _aValues[_aValues.Count - 1] : value;
-        var prevA2 = _aValues.Count >= 2 ? _aValues[_aValues.Count - 2] : value;
-        var prevB1 = _bValues.Count >= 1 ? _bValues[_bValues.Count - 1] : value;
-        var prevB2 = _bValues.Count >= 2 ? _bValues[_bValues.Count - 2] : value;
-        var l = stdDev != 0 ? (double)1 / _length * stdDev : 0;
-
-        // Each band carries forward from its own previous value, and its decay stops at price, so the
-        // upper cannot drift down through price nor the lower up through it. That keeps the upper at or
-        // above price and price at or above the lower. See the batch calculation. Written against the
-        // value two and three bars back, the band was two interleaved series that never interact.
-        //
-        // The equality is deliberate and a tolerance would be wrong; see the batch calculation. It asks
-        // whether the band carried forward untouched, comparing one stored value against the one stored
-        // before it, not two computations that ought to agree to within rounding.
-#pragma warning disable S1244 // Floating point numbers should not be tested for equality
-        double a;
-        if (value > prevA1)
-        {
-            a = value;
-        }
-        else if (prevA1 == prevA2)
-        {
-            a = Math.Max(prevA1 - l, value);
-        }
-        else
-        {
-            a = prevA1;
-        }
-
-        double b;
-        if (value < prevB1)
-        {
-            b = value;
-        }
-        else if (prevB1 == prevB2)
-        {
-            b = Math.Min(prevB1 + l, value);
-        }
-        else
-        {
-            b = prevB1;
-        }
-#pragma warning restore S1244
-        var prevTos = _hasPrevTos ? _prevTos : 0;
-        var tos = value > prevA2 ? 1 : value < prevB2 ? 0 : prevTos;
-
-        var avg = (a + b) / 2;
-        var tavg = tos == 1 ? (a + avg) / 2 : (b + avg) / 2;
-        var ts = (tos * b) + ((1 - tos) * a);
-
-        if (isFinal)
-        {
-            _aValues.TryAdd(a, out _);
-            _bValues.TryAdd(b, out _);
-            _prevTos = tos;
-            _hasPrevTos = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "UpperBand", a },
-                { "MiddleBand", tavg },
-                { "LowerBand", b },
-                { "TrailingStop", ts }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tavg, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower }, { "TrailingStop", point.Stop } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _aValues.Dispose();
-        _bValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pivot")]

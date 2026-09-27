@@ -21107,5 +21107,143 @@
     "before": "double upper = 0, lower = 0;",
     "after": "double upper = 1, lower = 0;",
     "filter": "FullyQualifiedName~FractalBandNumericalTests.FiveRealBarsAndFourStrictNeighborsConfirmRetainedExtrema|FullyQualifiedName~FractalBandNumericalTests.InvalidInputsNeverAdvanceNativeHistory"
+  },
+  {
+    "id": "flagging-band-period",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "Math.Max(1, length)",
+    "after": "Math.Max(1, length + 1)",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-upper-seed",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "_history > 0 ? _upper : close",
+    "after": "_history > 0 ? _upper : 0",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-history-seed",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "_history >= 2 ? _olderLower : close",
+    "after": "_history >= 2 ? _olderLower : 0",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-upper-flat",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "previousUpper == olderUpper",
+    "after": "previousUpper != olderUpper",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-lower-flat",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "previousLower == olderLower",
+    "after": "previousLower != olderLower",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-upper-decay-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "Decay(previousUpper, deviation, -1)",
+    "after": "Decay(previousUpper, deviation, 1)",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-lower-decay-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "Decay(previousLower, deviation, 1)",
+    "after": "Decay(previousLower, deviation, -1)",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "sum.Mean(_length)",
+    "after": "sum.Mean(_length + 1L)",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-direction-history",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "var isLong = close > olderUpper",
+    "after": "var isLong = close > previousUpper",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-direction-lower",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "close < olderLower ? false : _long",
+    "after": "close > olderLower ? false : _long",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-middle-bias",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "Midpoint(isLong ? upper : lower, Midpoint(upper, lower))",
+    "after": "Midpoint(isLong ? lower : upper, Midpoint(upper, lower))",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-early-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "(a + b) / 2",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-stop-side",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "isLong ? lower : upper",
+    "after": "isLong ? upper : lower",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "if (commit) { _olderUpper",
+    "after": "{ _olderUpper",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/FlaggingBandWindow.cs",
+    "before": "_history = 0; _long = false;",
+    "after": "_history = 2; _long = false;",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState"
+  },
+  {
+    "id": "flagging-band-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeFlaggingBandsFast("
+  },
+  {
+    "id": "flagging-band-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~FlaggingBandNumericalTests.FlatBoundaryDecayAndTwoBarDirectionUseExactPopulationDeviation|FullyQualifiedName~FlaggingBandNumericalTests.SelectedCloseControlsDeviationAndDirection|FullyQualifiedName~FlaggingBandNumericalTests.InvalidInputsNeverAdvanceNativeState",
+    "scope": "public sealed class FlaggingBandsState :"
   }
 ]

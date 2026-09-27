@@ -1969,6 +1969,7 @@ internal static partial class IndicatorCompute
                 "LowerBand" => ComputePriceLineChannelFast(data, context, plc.Length, plc.MaType, ChannelBand.Lower),
                 _ => null
             },
+            FlaggingBandsSpecOptions flagging => ComputeFlaggingBandsFast(data, context, flagging.Length, spec.OutputKey),
             FractalChaosBandsSpecOptions => ComputeFractalChaosBandsFast(data, context, spec.OutputKey),
             MotionToAttractionChannelsSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, spec.OutputKey),
             MotionToAttractionTrailingStopSpecOptions motion => ComputeMotionAttractionFast(data, context, motion.Length, "Ts"),
@@ -21908,6 +21909,14 @@ internal static partial class IndicatorCompute
         using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null;
         using var window = new PriceDriftWindow(external ? MovingAvgType.SimpleMovingAverage : maType, length, false, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr is null ? null : new RocBankValue(atr.Value.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? point.Upper : band == ChannelBand.Lower ? point.Lower : point.Middle; }
+        return result;
+    }
+
+    /// <summary>Computes deviation-driven flagging boundaries, biased midpoint and trailing stop.</summary>
+    internal static ComputeBuffer ComputeFlaggingBandsFast(StockData data, ComputeContext context, int length = 14, string? outputKey = null)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); using var window = new FlaggingBandWindow(length);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "TrailingStop" ? point.Stop : outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Middle; }
         return result;
     }
 
