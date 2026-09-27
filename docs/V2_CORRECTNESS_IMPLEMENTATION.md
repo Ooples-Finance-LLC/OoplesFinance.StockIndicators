@@ -2037,3 +2037,11 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - Campaign424a caught **20/20** distinct faults with a passing baseline; **3,045** retained sites. Source/archive SHA256: `40c9981bab0fcf9ad5ed88f4d316b1f63b610eb296499e5fd887778bcbb14462` / `e89d670cfede94995b412726f0215014f2d11c236ff1ffcbb1bb893893523c72`.
 - Selected mutation builds now target only their tested net10.0 framework while continuing to rebuild changed production code. **30/30** tooling tests passed; separate cross-framework release gates remain required.
 - Inventory: **4,828/7,131**, **2,303** omissions across **382** types; no construction failures. 194 grouped batches cover **2,002 configurations / 363 types**. DLL SHA256 `E379DE88F05950C21AE8DECF1A97EF9D3346A26D8CBF2034F781885C3DC7C193`.
+
+
+### Center of Gravity alias numerical contracts
+
+- Eight configurations across both capitalization aliases use exact rolling sums and lag-weighted sums. The negative ratio rounds before adding the center; zero sums return zero. A growing queue avoids eager allocation for maximum integer periods.
+- **108/108** final family/enrollment/foundation checks passed (`center-gravity-final.trx`), including selected inputs, both core/raw aliases, all public routes, signed/extreme/subnormal inputs, preview/reset and the direct stochastic consumer. The initial allocation-failure run aborted and earns no passing credit. Its separately discovered pooled-buffer finalizer defect remains outside this batch pending scope approval.
+- Campaign425a caught **17/17** faults; **3,062** retained sites. Source/archive SHA256: `bbf4eda32e09d4e8f651a26f0af52a71bff3c1e9d5e09e2e655f05604fe0ee89` / `e4a32334ace553b20780242c4aa2bdfa52e29c465137663f981112290af35527`.
+- Inventory: **4,836/7,131**, **2,295** omissions across **380** types; no construction failures. 195 grouped batches cover **2,010 configurations / 365 types**. DLL SHA256 `5C3A24B177C53896B15CB9B5805EFC498F02CBDF0825A3F92F1A92664FA5065F`.

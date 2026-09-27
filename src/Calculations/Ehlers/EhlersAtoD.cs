@@ -140,37 +140,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersCenterofGravityOscillator(this StockData stockData, int length = 10)
     {
-        length = Math.Max(length, 1);
-        List<double> cgList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            double num = 0, denom = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? inputList[i - j] : 0;
-                num += (1 + j) * prevValue;
-                denom += prevValue;
-            }
-
-            var prevCg = GetLastOrDefault(cgList);
-            var cg = denom != 0 ? (-num / denom) + ((double)(length + 1) / 2) : 0;
-            cgList.Add(cg);
-
-            var signal = GetCompareSignal(cg, prevCg);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ecog", cgList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cgList);
-        stockData.IndicatorName = IndicatorName.EhlersCenterofGravityOscillator;
-
-        return stockData;
+        var (input,_,_,_,_)=GetInputValuesList(stockData);using var window=new CenterGravityWindow(length,input.Count);List<double> values=new(input.Count);var signals=CreateSignalsList(stockData);
+        foreach(var price in input){var value=window.Next(price,true);signals?.Add(GetCompareSignal(value,values.Count>0?values[values.Count-1]:0));values.Add(value);}
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Ecog",values}});stockData.SetSignals(signals);stockData.SetCustomValues(values);stockData.IndicatorName=IndicatorName.EhlersCenterofGravityOscillator;return stockData;
     }
 
 

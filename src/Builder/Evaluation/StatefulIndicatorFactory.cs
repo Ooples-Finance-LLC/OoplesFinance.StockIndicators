@@ -807,6 +807,8 @@ internal static partial class StatefulIndicatorFactory
             RangeActionVerificationIndexSpecOptions ravi => new RangeActionVerificationIndexState(ravi.MaType,ravi.FastLength,ravi.SlowLength),
             EhlersMovingAverageDifferenceIndicatorSpecOptions emad => new EhlersMovingAverageDifferenceIndicatorState(emad.MaType,emad.FastLength,emad.SlowLength),
             AnchoredMomentumSpecOptions anchor => new AnchoredMomentumState(anchor.MaType,momentumLength:anchor.Length),
+            EhlersCenterofGravityOscillatorSpecOptions cg => new EhlersCenterofGravityOscillatorState(cg.Length),
+            EhlersCenterOfGravityOscillatorSpecOptions cg => new EhlersCenterofGravityOscillatorState(cg.Length),
             RexOscillatorSpecOptions rex => new RexOscillatorState(rex.MaType, rex.Length),
             NthOrderDifferencingOscillatorSpecOptions difference => new NthOrderDifferencingOscillatorState(difference.Length),
             RelativeVigorIndexSpecOptions vigor => new RelativeVigorIndexState(vigor.MaType, vigor.Length),

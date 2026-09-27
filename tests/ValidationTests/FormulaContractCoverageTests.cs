@@ -2399,8 +2399,8 @@ public sealed class FormulaContractCoverageTests
         Check(new PercentRank(2), tiedPrices, new[] { 0d, 0, 50, 0, 100 });
         Check(new ChandeIntradayMomentumIndex(3), bars, new[] { 100d, 100, 200d / 3 });
         Check(new CumulativeVolumeIndex(3), bars, new[] { 0d, 200, 150 });
-        Check(new EhlersCenterofGravityOscillator(3), prices, new[] { 1d, 2d / 3, 3d / 7 });
-        Check(new EhlersCenterOfGravityOscillator(3), prices, new[] { 1d, 2d / 3, 3d / 7 });
+        Check(new EhlersCenterofGravityOscillator(3), prices, new[] { 1d, 2d - 4d / 3, 2d - 11d / 7 });
+        Check(new EhlersCenterOfGravityOscillator(3), prices, new[] { 1d, 2d - 4d / 3, 2d - 11d / 7 });
         Check(new Atr(2), bars, new[] { 1.5, 3.75, 4.875 });
         Check(new Mfi(2), bars, new[] { 100d, 100, 1175d / 14 });
         Check(new VolumeMomentum(1), bars, new[] { 0d, 100, -150 });

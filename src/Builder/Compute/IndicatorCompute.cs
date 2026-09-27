@@ -10757,10 +10757,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersCenterOfGravityOscillator(close, buffer.WritableSpan, length);
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new CenterGravityWindow(length,input.Count);for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);return output;
     }
 
     /// <summary>
@@ -17821,11 +17818,7 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersCenterofGravityOscillatorFast(StockData data, ComputeContext context, int length = 10)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersCenterofGravityOscillator(inputSpan, buffer.WritableSpan, length);
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var output=context.Rent(input.Count);using var window=new CenterGravityWindow(length,input.Count);for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);return output;
     }
 
     /// <summary>

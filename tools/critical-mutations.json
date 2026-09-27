@@ -25424,5 +25424,145 @@
     "after": "new AnchoredMomentumWindow(MovingAvgType.ExponentialMovingAverage,1,8,length,close.Length)",
     "filter": "FullyQualifiedName~AnchoredMomentumNumericalTests.PartialWindowsAndDerivedPeriodMatchIndependentArithmetic|FullyQualifiedName~AnchoredMomentumNumericalTests.SelectedPricesAndCustomerSmoothingKeepTheFixedPartialSignal|FullyQualifiedName~AnchoredMomentumNumericalTests.InvalidFieldsCannotAdvanceAnyAverageOrAnchor",
     "scope": "internal static void AnchoredMomentum("
+  },
+  {
+    "id": "center-gravity-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "_length=Math.Max(1,length)",
+    "after": "_length=Math.Max(2,length)",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "_values.Count>=_length?",
+    "after": "_values.Count>_length?",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "var sum=_sum+value-expired",
+    "after": "var sum=_sum+value+expired",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-weight-increment",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "_weighted+_sum+value",
+    "after": "_weighted-_sum+value",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "expired*(_length+1L)",
+    "after": "expired*_length",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-ratio-sign",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "(-weighted*sum.Sign)<<1074",
+    "after": "(weighted*sum.Sign)<<1074",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-zero-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "if(!sum.IsZero)",
+    "after": "if(!weighted.IsZero)",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-center-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "(_length+1L)/2d",
+    "after": "(_length+1)/2d",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-missing-center",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "ratio+center,BigInteger.One",
+    "after": "ratio+center*0,BigInteger.One",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-early-weighted-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "RocBankValue.RoundUnits((-weighted*sum.Sign)<<1074,BigInteger.Abs(sum))",
+    "after": "ExactVarianceWindow.Units(-ExactMeanAccumulator.UnitRatio(weighted,BigInteger.One)/ExactMeanAccumulator.UnitRatio(sum,BigInteger.One))",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "if(commit){_sum=sum;",
+    "after": "if(true){_sum=sum;",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-reset-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "_sum=_weighted=BigInteger.Zero",
+    "after": "_sum=BigInteger.Zero",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/CenterGravityWindow.cs",
+    "before": "internal void Reset(){_sum=_weighted=BigInteger.Zero;_values.Clear();}",
+    "after": "internal void Reset(){_sum=_weighted=BigInteger.Zero;}",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement"
+  },
+  {
+    "id": "center-gravity-lower-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement",
+    "scope": "internal static ComputeBuffer ComputeEhlersCenterofGravityOscillatorFast("
+  },
+  {
+    "id": "center-gravity-upper-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement",
+    "scope": "internal static ComputeBuffer ComputeEhlersCenterOfGravityOscillatorFast("
+  },
+  {
+    "id": "center-gravity-invalid-open-fallback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if(double.IsNaN(bar.Open))return new StreamingIndicatorStateResult(0,null);StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement",
+    "scope": "public sealed class EhlersCenterofGravityOscillatorState :"
+  },
+  {
+    "id": "center-gravity-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "before": "new CenterGravityWindow(length,close.Length)",
+    "after": "new CenterGravityWindow(Math.Max(2,length),close.Length)",
+    "filter": "FullyQualifiedName~CenterGravityNumericalTests.ExactRollingMomentsMatchDirectWeightedFractionsWithStagedRounding|FullyQualifiedName~CenterGravityNumericalTests.BothRawAliasesAndBatchUseSelectedPrices|FullyQualifiedName~CenterGravityNumericalTests.InvalidFieldsCannotAdvanceEitherMoment|FullyQualifiedName~CenterGravityNumericalTests.DirectStochasticConsumerRetainsBatchRawAndNativeAgreement",
+    "scope": "internal static void EhlersCenterOfGravityOscillator("
   }
 ]

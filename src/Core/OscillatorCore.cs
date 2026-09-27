@@ -5392,29 +5392,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCenterOfGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateEhlersCenterofGravityOscillator reads a bar that has not arrived as zero and keeps
-        // the full set of weights, so the centre of gravity of a partly filled window is measured rather
-        // than blanked. Those leading zeros contribute to neither sum, which leaves the opening bars
-        // weighted towards the newest price.
-        for (var i = 0; i < close.Length; i++)
-        {
-            var num = 0.0;
-            var denom = 0.0;
-
-            for (var j = 0; j < length; j++)
-            {
-                var price = i >= j ? close[i - j] : 0;
-                num += (j + 1) * price;
-                denom += price;
-            }
-
-            output[i] = denom != 0 ? (-num / denom) + ((length + 1) / 2.0) : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
@@ -8995,25 +8974,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersCenterofGravityOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            double num = 0, denom = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var prevValue = i >= j ? close[i - j] : 0;
-                num += (1 + j) * prevValue;
-                denom += prevValue;
-            }
-
-            output[i] = denom != 0 ? (-num / denom) + ((double)(length + 1) / 2) : 0;
-        }
+        if(output.Length<close.Length)throw new ArgumentException("Output span must be at least input length.",nameof(output));
+        using var window=new CenterGravityWindow(length,close.Length);for(var i=0;i<close.Length;i++)output[i]=window.Next(close[i],true);
     }
 
     /// <summary>
