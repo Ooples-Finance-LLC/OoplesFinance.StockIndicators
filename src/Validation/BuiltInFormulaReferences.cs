@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.GatorOscillator)
+        {
+            var gatorOptions = builtIn.CreateOptions(); var gatorKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < gatorKeys.Length; slot++)
+            {
+                var key = gatorKeys[slot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => GatorOutputs(bars, Integer(gatorOptions, "Length", 13), selected: indicator.Source is not null)[key], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DerivativeOscillator)
         {
             var derivativeOptions = builtIn.CreateOptions();

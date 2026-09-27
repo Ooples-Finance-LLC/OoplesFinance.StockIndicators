@@ -30950,5 +30950,112 @@
     "before": "new ReferenceFraction(i - start + 1)",
     "after": "new ReferenceFraction(Math.Max(1, mean))",
     "filter": "FullyQualifiedName~ValidationTests.DerivativeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gator-jaw-offset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "new(maType, jawLength, jawOffset)",
+    "after": "new(maType, jawLength, teethOffset)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-teeth-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "new(maType, teethLength, teethOffset)",
+    "after": "new(maType, jawLength, teethOffset)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-lips-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "new(maType, lipsLength, lipsOffset)",
+    "after": "new(maType, teethLength, lipsOffset)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-top-sign",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "var top = Math.Abs(jaw - teeth)",
+    "after": "var top = -Math.Abs(jaw - teeth)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-bottom-sign",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "var bottom = -Math.Abs(teeth - lips)",
+    "after": "var bottom = Math.Abs(teeth - lips)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "_jaw.Next(price, isFinal)",
+    "after": "_jaw.Next(price, true)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "_jaw.Reset();",
+    "after": "// retain jaw\n        ",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-selected-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "_input = new StreamingInputResolver(InputName.Close, null)",
+    "after": "_input = new StreamingInputResolver(InputName.MedianPrice, null)",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "StreamingInputValidation.Validate(bar); var price = _input.GetValue(bar);",
+    "after": "double price; try { StreamingInputValidation.Validate(bar); price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests.InvalidFieldsDoNotAdvanceAnyLine",
+    "scope": "public sealed class GatorOscillatorState"
+  },
+  {
+    "id": "gator-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " GatorOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "gator-raw-bottom-sign",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "output[i] = -Math.Abs(teeth[i] - lips[i]);",
+    "after": "output[i] = Math.Abs(teeth[i] - lips[i]);",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeGatorOscillatorFast("
+  },
+  {
+    "id": "gator-reference-source",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.cs",
+    "before": "selected: indicator.Source is not null)[key]",
+    "after": "selected: indicator.Source is null)[key]",
+    "filter": "FullyQualifiedName~ValidationTests.GatorNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static IEnumerable<IndicatorValidationRule> For("
   }
 ]
