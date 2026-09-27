@@ -16,122 +16,35 @@ namespace OoplesFinance.StockIndicators.Streaming;
 internal sealed class RelativeVolatilityIndexCore : IDisposable
 {
     private readonly int _length;
-    private readonly int _stdDevLength;
-    private readonly double _k;
-    private readonly PooledRingBuffer<double> _window;
-    private double _prevValue;
-    private double _upSum;
-    private double _downSum;
-    private double _upEma;
-    private double _downEma;
-    private int _barIndex;
-
-    public RelativeVolatilityIndexCore(int length, int stdDevLength)
-    {
-        _length = Math.Max(1, length);
-        _stdDevLength = Math.Max(1, stdDevLength);
-        _k = 1.0 / _length;
-        _window = new PooledRingBuffer<double>(_stdDevLength);
-    }
-
-    public void Reset()
-    {
-        _window.Clear();
-        _prevValue = 0;
-        _upSum = 0;
-        _downSum = 0;
-        _upEma = 0;
-        _downEma = 0;
-        _barIndex = 0;
-    }
-
+    private readonly ExactPopulationWindow _deviation;
+    private double _previous;
+    private int _index;
+    private ExactMeanAccumulator _upSeed, _downSeed;
+    private RocBankValue _up, _down;
+    public RelativeVolatilityIndexCore(int length, int stdDevLength) { _length = Math.Max(1, length); _deviation = new(Math.Max(1, stdDevLength)); }
+    public void Reset() { _deviation.Reset(); _previous = 0; _index = 0; _upSeed = default; _downSeed = default; _up = default; _down = default; }
     public double Next(double value, bool isFinal)
     {
-        double stdDev = 0;
-        if (_window.Count + 1 >= _stdDevLength)
+        var deviation = _deviation.Next(value, isFinal); var upSeed = _upSeed; var downSeed = _downSeed; var up = _up; var down = _down;
+        if (_index > 0)
         {
-            // Summed oldest first with this bar last, as the batch engine sums its window.
-            var start = _window.Count - (_stdDevLength - 1);
-            double sum = 0;
-            for (var i = start; i < _window.Count; i++)
+            var u = value > _previous ? deviation : 0; var d = value < _previous ? deviation : 0;
+            if (_index <= _length)
             {
-                sum += _window[i];
-            }
-
-            sum += value;
-
-            var mean = sum / _stdDevLength;
-            double variance = 0;
-            for (var i = start; i < _window.Count; i++)
-            {
-                var diff = _window[i] - mean;
-                variance += diff * diff;
-            }
-
-            var currentDiff = value - mean;
-            variance += currentDiff * currentDiff;
-            stdDev = Sqrt(variance / _stdDevLength);
-        }
-
-        double rvi = 0;
-        if (_barIndex >= 1)
-        {
-            var change = value - _prevValue;
-            var upMove = change > 0 ? stdDev : 0;
-            var downMove = change < 0 ? stdDev : 0;
-
-            if (_barIndex < _length)
-            {
-                var upSum = _upSum + upMove;
-                var downSum = _downSum + downMove;
-                if (isFinal)
-                {
-                    _upSum = upSum;
-                    _downSum = downSum;
-                }
-            }
-            else if (_barIndex == _length)
-            {
-                var upSum = _upSum + upMove;
-                var downSum = _downSum + downMove;
-                var upEma = upSum / _length;
-                var downEma = downSum / _length;
-                rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                if (isFinal)
-                {
-                    _upSum = upSum;
-                    _downSum = downSum;
-                    _upEma = upEma;
-                    _downEma = downEma;
-                }
+                upSeed.Add(u); downSeed.Add(d);
+                if (_index == _length) { up = RocBankValue.Round(upSeed, count: _length); down = RocBankValue.Round(downSeed, count: _length); }
             }
             else
             {
-                var upEma = (upMove * _k) + (_upEma * (1 - _k));
-                var downEma = (downMove * _k) + (_downEma * (1 - _k));
-                rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                if (isFinal)
-                {
-                    _upEma = upEma;
-                    _downEma = downEma;
-                }
+                var numerator = new ExactMeanAccumulator(); up.AddTo(ref numerator, _length - 1L); numerator.Add(u); up = RocBankValue.Round(numerator, count: _length);
+                numerator = new ExactMeanAccumulator(); down.AddTo(ref numerator, _length - 1L); numerator.Add(d); down = RocBankValue.Round(numerator, count: _length);
             }
         }
-
-        if (isFinal)
-        {
-            _window.TryAdd(value, out _);
-            _prevValue = value;
-            _barIndex++;
-        }
-
-        return rvi;
+        var result = _index < _length ? 0 : up.Mantissa == 0 && down.Mantissa == 0 ? 50 : RelativeVolatilityWindow.Ratio(up, down);
+        if (isFinal) { _previous = value; _index++; _upSeed = upSeed; _downSeed = downSeed; _up = up; _down = down; }
+        return result;
     }
-
-    public void Dispose()
-    {
-        _window.Dispose();
-    }
+    public void Dispose() => _deviation.Dispose();
 }
 
 /// <summary>
@@ -161,6 +74,7 @@ public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState,
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _ = _input.GetValue(bar);
         var rvi = _core.Next(bar.High, isFinal);
 
@@ -207,6 +121,7 @@ public sealed class RelativeVolatilityIndexLowState : IStreamingIndicatorState, 
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         _ = _input.GetValue(bar);
         var rvi = _core.Next(bar.Low, isFinal);
 

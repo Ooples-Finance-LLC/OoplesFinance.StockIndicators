@@ -77,8 +77,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRelativeVolatilityIndexHigh(this StockData stockData, int length = 14, int stdDevLength = 10)
     {
-        var (_, highList, _, _, _) = GetInputValuesList(stockData);
-        return CalculateRelativeVolatilityIndexOn(stockData, highList, length, stdDevLength,
+        return CalculateRelativeVolatilityIndexOn(stockData, stockData.HighPrices, length, stdDevLength,
             "RviHigh", IndicatorName.RelativeVolatilityIndexHigh);
     }
 
@@ -96,8 +95,7 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRelativeVolatilityIndexLow(this StockData stockData, int length = 14, int stdDevLength = 10)
     {
-        var (_, _, lowList, _, _) = GetInputValuesList(stockData);
-        return CalculateRelativeVolatilityIndexOn(stockData, lowList, length, stdDevLength,
+        return CalculateRelativeVolatilityIndexOn(stockData, stockData.LowPrices, length, stdDevLength,
             "RviLow", IndicatorName.RelativeVolatilityIndexLow);
     }
 
@@ -107,64 +105,9 @@ public static partial class Calculations
     private static StockData CalculateRelativeVolatilityIndexOn(StockData stockData, List<double> series, int length,
         int stdDevLength, string outputKey, IndicatorName name)
     {
-        length = Math.Max(length, 1);
-        stdDevLength = Math.Max(stdDevLength, 1);
-        var count = series.Count;
-        List<double> rviList = new(count);
-        List<Signal>? signalsList = CreateSignalsList(stockData, count);
-
-        var seriesSpan = SpanCompat.AsReadOnlySpan(series);
-        var stdDevBuffer = SpanCompat.CreateOutputBuffer(count);
-        VolatilityCore.StandardDeviation(seriesSpan, stdDevBuffer.Span, stdDevLength);
-
-        double upSum = 0, downSum = 0, upEma = 0, downEma = 0;
-        var k = 1.0 / length;
-        for (var i = 0; i < count; i++)
-        {
-            double rvi = 0;
-            if (i >= 1)
-            {
-                var change = series[i] - series[i - 1];
-                var upMove = change > 0 ? stdDevBuffer.Span[i] : 0;
-                var downMove = change < 0 ? stdDevBuffer.Span[i] : 0;
-
-                if (i < length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                }
-                else if (i == length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                    upEma = upSum / length;
-                    downEma = downSum / length;
-                    rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-                else
-                {
-                    upEma = (upMove * k) + (upEma * (1 - k));
-                    downEma = (downMove * k) + (downEma * (1 - k));
-                    rvi = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-            }
-
-            rviList.Add(rvi);
-
-            var prevRvi1 = i >= 1 ? rviList[i - 1] : 0;
-            var prevRvi2 = i >= 2 ? rviList[i - 2] : 0;
-            var signal = GetCompareSignal(rvi - prevRvi1, prevRvi1 - prevRvi2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { outputKey, rviList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rviList);
-        stockData.IndicatorName = name;
-
-        return stockData;
+        using var state = new Streaming.RelativeVolatilityIndexCore(length, stdDevLength); List<double> values = new(series.Count); var signals = CreateSignalsList(stockData, series.Count);
+        for (var i = 0; i < series.Count; i++) { var value = state.Next(series[i], true); var previous = i > 0 ? values[i - 1] : 0; var older = i > 1 ? values[i - 2] : 0; values.Add(value); signals?.Add(GetCompareSignal(value - previous, previous - older)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { outputKey, values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = name; return stockData;
     }
 
     /// <summary>

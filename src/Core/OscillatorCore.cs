@@ -1537,59 +1537,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void RelativeVolatilityIndex(ReadOnlySpan<double> close, Span<double> output, int length = 14, int stdDevLength = 10)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0) return;
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(close.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-            VolatilityCore.StandardDeviation(close, stdDev, stdDevLength);
-
-            double upSum = 0, downSum = 0;
-            double upEma = 0, downEma = 0;
-            var k = 1.0 / length;
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                var change = close[i] - close[i - 1];
-                var upMove = change > 0 ? stdDev[i] : 0;
-                var downMove = change < 0 ? stdDev[i] : 0;
-
-                if (i < length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                    output[i] = 0;
-                }
-                else if (i == length)
-                {
-                    upSum += upMove;
-                    downSum += downMove;
-                    upEma = upSum / length;
-                    downEma = downSum / length;
-                    output[i] = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-                else
-                {
-                    upEma = (upMove * k) + (upEma * (1 - k));
-                    downEma = (downMove * k) + (downEma * (1 - k));
-                    output[i] = upEma + downEma != 0 ? 100 * upEma / (upEma + downEma) : 50;
-                }
-            }
-
-            output[0] = 0;
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var state = new Streaming.RelativeVolatilityIndexCore(length, stdDevLength);
+        for (var i = 0; i < close.Length; i++) output[i] = state.Next(close[i], true);
     }
 
     /// <summary>

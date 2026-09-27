@@ -24170,5 +24170,185 @@
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~RelativeVolatilityNumericalTests.PopulationDeviationDirectionalAveragesAndPairedMeanStayBounded|FullyQualifiedName~RelativeVolatilityNumericalTests.SelectedCloseAndFourCustomerLegsPreserveTheirSourcesAndOrder|FullyQualifiedName~RelativeVolatilityNumericalTests.InvalidFieldsNeverAdvanceDeviationDirectionOrSmoothers|FullyQualifiedName~RelativeVolatilityNumericalTests.DirectInertiaConsumerKeepsBatchRawAndNativeParity",
     "scope": "internal static ComputeBuffer ComputeRelativeVolatilityIndexFast("
+  },
+  {
+    "id": "seeded-rvi-length",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-deviation-period",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_deviation = new(Math.Max(1, stdDevLength))",
+    "after": "_deviation = new(Math.Max(2, stdDevLength))",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-preview-deviation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_deviation.Next(value, isFinal)",
+    "after": "_deviation.Next(value, true)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-direction",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "value > _previous ? deviation : 0",
+    "after": "value < _previous ? deviation : 0",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-seed-divisor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "RocBankValue.Round(upSeed, count: _length)",
+    "after": "RocBankValue.Round(upSeed, count: _length + 1L)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-seed-sum",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "upSeed.Add(u);",
+    "after": "upSeed = default; upSeed.Add(u);",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-wilder-weight",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "up.AddTo(ref numerator, _length - 1L)",
+    "after": "up.AddTo(ref numerator, _length)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-wilder-divisor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "RocBankValue.Round(numerator, count: _length);\n                numerator",
+    "after": "RocBankValue.Round(numerator, count: _length + 1L);\n                numerator",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-flat-limit",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "? 50 : RelativeVolatilityWindow.Ratio",
+    "after": "? 100 : RelativeVolatilityWindow.Ratio",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-warmup",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "var result = _index < _length ? 0",
+    "after": "var result = _index < _length ? 50",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-preview-state",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "if (isFinal) { _previous",
+    "after": "if (true) { _previous",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-reset-deviation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_deviation.Reset();",
+    "after": "if (_index == 0) _deviation.Reset();",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-reset-index",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_index = 0; _upSeed",
+    "after": "_index = 1; _upSeed",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-reset-seed",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "internal sealed class RelativeVolatilityIndexCore :",
+    "before": "_upSeed = default; _downSeed = default;",
+    "after": "if (_index != 0) { _upSeed = default; _downSeed = default; }",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-nan-open-fallback-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "public sealed class RelativeVolatilityIndexHighState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-source-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "public sealed class RelativeVolatilityIndexHighState :",
+    "before": "_core.Next(bar.High, isFinal)",
+    "after": "_core.Next(bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-nan-open-fallback-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "public sealed class RelativeVolatilityIndexLowState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (double.IsNaN(bar.Open)) return new StreamingIndicatorStateResult(0, null); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-source-low",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch39.cs",
+    "scope": "public sealed class RelativeVolatilityIndexLowState :",
+    "before": "_core.Next(bar.Low, isFinal)",
+    "after": "_core.Next(bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference|FullyQualifiedName~SeededRelativeVolatilityNumericalTests.InvalidFieldsCannotContaminateSeedOrWilderState"
+  },
+  {
+    "id": "seeded-rvi-batch-source-high",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculateRelativeVolatilityIndexHigh(",
+    "before": "stockData.HighPrices",
+    "after": "GetInputValuesList(stockData).highList",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference"
+  },
+  {
+    "id": "seeded-rvi-batch-source-low",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculateRelativeVolatilityIndexLow(",
+    "before": "stockData.LowPrices",
+    "after": "GetInputValuesList(stockData).lowList",
+    "filter": "FullyQualifiedName~SeededRelativeVolatilityNumericalTests.DelayedSeedPopulationDeviationAndWilderRecurrenceMatchExactReference"
   }
 ]
