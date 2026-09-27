@@ -902,35 +902,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void ChoppinessIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        length = Math.Max(2, length);
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // CalculateChoppinessIndex sums true range and takes its extremes over however many bars have
-        // arrived, so the run-in is measured rather than blank. On the first bar the range and the sum are
-        // the same span, which makes the logarithm zero of its own accord.
-        for (var i = 0; i < close.Length; i++)
-        {
-            // Sum of ATR
-            double atrSum = 0;
-            var highestHigh = double.MinValue;
-            var lowestLow = double.MaxValue;
-
-            for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-            {
-                var prevClose = j > 0 ? close[j - 1] : close[j];
-                var tr = Math.Max(high[j] - low[j], Math.Max(Math.Abs(high[j] - prevClose), Math.Abs(low[j] - prevClose)));
-                atrSum += tr;
-
-                if (high[j] > highestHigh) highestHigh = high[j];
-                if (low[j] < lowestLow) lowestLow = low[j];
-            }
-
-            var range = highestHigh - lowestLow;
-            output[i] = range > 0 ? 100 * Math.Log10(atrSum / range) / Math.Log10(length) : 0;
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Input and output spans must cover all closes.");
+        var window = new ChoppinessWindow(length); for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true);
     }
 
     /// <summary>

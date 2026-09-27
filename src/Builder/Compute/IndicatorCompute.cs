@@ -360,7 +360,7 @@ internal static partial class IndicatorCompute
                 signalLength: pmo.SignalLength, outputKey: spec.OutputKey),
             KstSpecOptions kst => ComputeKstFast(data, context, kst.Length, spec.OutputKey),
             PercentRankSpecOptions pr => ComputePercentRankFast(data, context, pr.Length),
-            ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length),
+            ChoppinessIndexSpecOptions ci => ComputeChoppinessIndexFast(data, context, ci.Length, ci.MaType),
 
             // Batch 3 - Moving Averages
             SmmaSpecOptions smma => ComputeSmmaFast(data, context, smma.Length),
@@ -4385,22 +4385,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Choppiness Index using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeChoppinessIndexFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeChoppinessIndexFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var tickerList = data.TickerDataList;
-        var count = tickerList.Count;
-        var high = new double[count];
-        var low = new double[count];
-        var close = new double[count];
-        for (var i = 0; i < count; i++)
-        {
-            high[i] = (double)tickerList[i].High;
-            low[i] = (double)tickerList[i].Low;
-            close[i] = (double)tickerList[i].Close;
-        }
-        var buffer = context.Rent(count);
-        OscillatorCore.ChoppinessIndex(high, low, close, buffer.WritableSpan, length);
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        if (ComponentAverage.HasOverrides) { using var signal = context.Rent(input.Count); MovingAverage(data, maType, Math.Max(2, length), SpanCompat.AsReadOnlySpan(input), signal.WritableSpan); }
+        var output = context.Rent(input.Count); OscillatorCore.ChoppinessIndex(SpanCompat.AsReadOnlySpan(data.HighPrices), SpanCompat.AsReadOnlySpan(data.LowPrices), SpanCompat.AsReadOnlySpan(input), output.WritableSpan, length); return output;
     }
 
     #endregion

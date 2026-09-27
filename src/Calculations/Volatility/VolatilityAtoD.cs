@@ -242,49 +242,15 @@ public static partial class Calculations
     public static StockData CalculateChoppinessIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14)
     {
-        length = Math.Max(2, length);
-        List<double> ciList = new(stockData.Count);
-        List<double> trList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum trSumWindow = new();
-
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestHighList, lowestLowList) = GetMaxAndMinValuesList(highList, lowList, length);
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(2, length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var emaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        var window = new ChoppinessWindow(length); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentEma = emaList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var highestHigh = highestHighList[i];
-            var lowestLow = lowestLowList[i];
-            var range = highestHigh - lowestLow;
-
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-            trList.Add(tr);
-            trSumWindow.Add(tr);
-
-            var trSum = trSumWindow.Sum(length);
-            var ci = range > 0 ? 100 * Math.Log10(trSum / range) / Math.Log10(length) : 0;
-            ciList.Add(ci);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, ci, 38.2);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], true);
+            signals?.Add(GetVolatilitySignal(input[i] - emaList[i], (i > 0 ? input[i - 1] : input[i]) - (i > 0 ? emaList[i - 1] : 0), value, 38.2)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ci", ciList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ciList);
-        stockData.IndicatorName = IndicatorName.ChoppinessIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ci", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ChoppinessIndex; return stockData;
     }
 
 

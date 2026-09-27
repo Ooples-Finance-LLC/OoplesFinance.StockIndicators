@@ -114,11 +114,6 @@ OoplesFinance.StockIndicators.Indicators.ChopZone/longer-periods
 OoplesFinance.StockIndicators.Indicators.ChopZone/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ChopZone/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ChopZone/weighted-average
-OoplesFinance.StockIndicators.Indicators.ChoppinessIndex/default
-OoplesFinance.StockIndicators.Indicators.ChoppinessIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.ChoppinessIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ChoppinessIndex/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ChoppinessIndex/weighted-average
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/default
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/longer-periods
 OoplesFinance.StockIndicators.Indicators.ClosedFormDistanceVolatility/minimum-periods

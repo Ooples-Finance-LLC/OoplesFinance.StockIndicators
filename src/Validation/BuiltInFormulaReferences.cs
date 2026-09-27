@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ChoppinessIndex)
+        {
+            var choppinessOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChoppinessOutputs(bars, Integer(choppinessOptions, "Length", 14)), new IndicatorErrorBudget(1e-9, 1e-12, true));
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.BelkhayateTiming)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, BelkhayateOutputs, IndicatorErrorBudget.Exact);

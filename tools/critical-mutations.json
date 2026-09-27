@@ -31526,5 +31526,120 @@
     "before": "return result;",
     "after": "return Math.Max(-4, Math.Min(4, result));",
     "filter": "FullyQualifiedName~ValidationTests.BelkhayateNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "_count == 0 ? close : _previous",
+    "after": "_count == 0 ? 0 : _previous",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "_count == 0 ? close : _previous",
+    "after": "close",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "_sum + tr - (_ranges.Count == _length ? _ranges.Peek() : BigInteger.Zero)",
+    "after": "_sum + tr",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-range",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "ExactVarianceWindow.Units(highest) - ExactVarianceWindow.Units(lowest)",
+    "after": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-log-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "double.IsInfinity(ratio) ? (BigInteger.Log(sum) - BigInteger.Log(range)) / Math.Log(10) : Math.Log10(ratio)",
+    "after": "Math.Log10(ratio)",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-length-log",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "Math.Log10(_length)",
+    "after": "Math.Log10(Math.Min(_length, _ranges.Count + 1) + 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "_previous = 0;",
+    "after": "_previous = 1; _count = 1;",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ChoppinessWindow.cs",
+    "before": "return result;",
+    "after": "return Math.Max(0, Math.Min(100, result));",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeChoppinessIndexFast("
+  },
+  {
+    "id": "choppiness-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var close = _input.GetValue(bar);",
+    "after": "double close; try { close = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { close = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "public sealed class ChoppinessIndexState"
+  },
+  {
+    "id": "choppiness-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " ChoppinessIndexSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-reference-length",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Choppiness.cs",
+    "before": "Math.Log10(length)",
+    "after": "Math.Log10(length + 1d)",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "choppiness-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComponentAverage.HasOverrides",
+    "after": "ComponentAverage.HasOverrides && data.Count < 0",
+    "filter": "FullyQualifiedName~ValidationTests.ChoppinessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests",
+    "scope": "internal static ComputeBuffer ComputeChoppinessIndexFast("
   }
 ]

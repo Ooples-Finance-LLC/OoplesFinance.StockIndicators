@@ -3461,75 +3461,17 @@ public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Ci")]
 public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _trSum;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public ChoppinessIndexState(int length = 14)
-    {
-        _length = Math.Max(2, length);
-        _trSum = new RollingWindowSum(_length);
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ChoppinessWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public ChoppinessIndexState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.ChoppinessIndex;
-
-    public void Reset()
-    {
-        _trSum.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var currentValue = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : currentValue;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-
-        int trCount;
-        int highCount;
-        int lowCount;
-        var trSum = isFinal ? _trSum.Add(tr, out trCount) : _trSum.Preview(tr, out trCount);
-        var highest = isFinal ? _highWindow.Add(bar.High, out highCount) : _highWindow.Preview(bar.High, out highCount);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out lowCount) : _lowWindow.Preview(bar.Low, out lowCount);
-        var range = highest - lowest;
-
-        var ci = range > 0 ? 100 * Math.Log10(trSum / range) / Math.Log10(_length) : 0;
-
-        if (isFinal)
-        {
-            _prevValue = currentValue;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ci", ci }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ci, outputs);
+        var close = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ci", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _trSum.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Cmo")]
