@@ -21346,67 +21346,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAutoDispersionBandsFast(StockData data, ComputeContext context, int length = 90,
         int smoothLength = 140, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, ChannelBand band = ChannelBand.Middle)
     {
-        // CalculateAutoDispersionBands disperses each bar by the root mean square of the change over the
-        // window, takes the running extreme of each envelope and smooths it twice - once over the window and
-        // again over the smoothing length. The middle band is the average of the two, not a moving average of
-        // the close, which is what this computed.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-        smoothLength = Math.Max(smoothLength, 1);
-
-        using var aMaxima = context.Rent(count);
-        using var bMinima = context.Rent(count);
-        var aMax = aMaxima.WritableSpan;
-        var bMin = bMinima.WritableSpan;
-
-        var changeSquaredSum = new RollingSum();
-        var aWindow = new RollingMinMax(length);
-        var bWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AutoDispersionWindow(maType, length, smoothLength, external, Math.Max(1, input.Count)); var result = context.Rent(input.Count);
+        if (external)
         {
-            var currentValue = input[i];
-            var previousValue = i >= length ? input[i - length] : 0;
-            var change = CalculationsHelper.MinPastValues(i, length, currentValue - previousValue);
-            changeSquaredSum.Add(change * change);
-
-            var meanSquare = changeSquaredSum.Average(length);
-            var dispersion = meanSquare >= 0 ? MathHelper.Sqrt(meanSquare) : 0;
-
-            aWindow.Add(currentValue + dispersion);
-            bWindow.Add(currentValue - dispersion);
-            aMax[i] = aWindow.Max;
-            bMin[i] = bWindow.Min;
+            using var rawUpper = context.Rent(input.Count); using var rawLower = context.Rent(input.Count); using var first = context.Rent(input.Count); using var upper = context.Rent(input.Count); using var lower = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) { var p = window.Generate(input[i], true); rawUpper.WritableSpan[i] = p.Upper.Publish(); rawLower.WritableSpan[i] = p.Lower.Publish(); }
+            MovingAverage(data, maType, length, rawUpper.Span, first.WritableSpan); MovingAverage(data, maType, smoothLength, first.Span, upper.WritableSpan); MovingAverage(data, maType, length, rawLower.Span, first.WritableSpan); MovingAverage(data, maType, smoothLength, first.Span, lower.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var p = AutoDispersionWindow.Bands(new RocBankValue(upper.Span[i]), new RocBankValue(lower.Span[i])); result.WritableSpan[i] = band == ChannelBand.Upper ? p.Upper : band == ChannelBand.Lower ? p.Lower : p.Middle; }
         }
-
-        using var upperSmoothed = context.Rent(count);
-        using var upperBand = context.Rent(count);
-        MovingAverage(data, maType, length, aMaxima.Span, upperSmoothed.WritableSpan);
-        MovingAverage(data, maType, smoothLength, upperSmoothed.Span, upperBand.WritableSpan);
-
-        if (band == ChannelBand.Upper)
-        {
-            var upperOnly = context.Rent(count);
-            upperBand.Span.CopyTo(upperOnly.WritableSpan);
-            return upperOnly;
-        }
-
-        using var lowerSmoothed = context.Rent(count);
-        using var lowerBand = context.Rent(count);
-        MovingAverage(data, maType, length, bMinima.Span, lowerSmoothed.WritableSpan);
-        MovingAverage(data, maType, smoothLength, lowerSmoothed.Span, lowerBand.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var upper = upperBand.Span;
-        var lower = lowerBand.Span;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = band == ChannelBand.Lower ? lower[i] : (upper[i] + lower[i]) / 2;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); result.WritableSpan[i] = band == ChannelBand.Upper ? p.Upper : band == ChannelBand.Lower ? p.Lower : p.Middle; }
+        return result;
     }
 
     /// <summary>

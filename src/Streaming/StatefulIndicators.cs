@@ -7449,99 +7449,16 @@ public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicat
 [PrimaryOutput("MiddleBand")]
 public sealed class AutoDispersionBandsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _x2Sum;
-    private readonly RollingWindowMax _aMax;
-    private readonly RollingWindowMin _bMin;
-    private readonly IMovingAverageSmoother _aSmoother;
-    private readonly IMovingAverageSmoother _upperSmoother;
-    private readonly IMovingAverageSmoother _bSmoother;
-    private readonly IMovingAverageSmoother _lowerSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public AutoDispersionBandsState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 90,
-        int smoothLength = 140)
-    {
-        _length = Math.Max(1, length);
-        _x2Sum = new RollingWindowSum(_length);
-        _aMax = new RollingWindowMax(_length);
-        _bMin = new RollingWindowMin(_length);
-        _aSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _upperSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _bSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _lowerSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _values = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AutoDispersionWindow _window;
+    public AutoDispersionBandsState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 90, int smoothLength = 140) { _window = new(maType, length, smoothLength); }
     public IndicatorName Name => IndicatorName.AutoDispersionBands;
-
-    public void Reset()
-    {
-        _x2Sum.Reset();
-        _aMax.Reset();
-        _bMin.Reset();
-        _aSmoother.Reset();
-        _upperSmoother.Reset();
-        _bSmoother.Reset();
-        _lowerSmoother.Reset();
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= _length && _values.Count >= _length ? _values[_values.Count - _length] : 0;
-        var x = _index >= _length ? value - prevValue : 0;
-        var x2 = x * x;
-        int countAfter;
-        var x2Sum = isFinal ? _x2Sum.Add(x2, out countAfter) : _x2Sum.Preview(x2, out countAfter);
-        var x2Sma = countAfter > 0 ? x2Sum / countAfter : 0;
-        var sq = x2Sma >= 0 ? MathHelper.Sqrt(x2Sma) : 0;
-        var a = value + sq;
-        var aMax = isFinal ? _aMax.Add(a, out _) : _aMax.Preview(a, out _);
-        var aMa = _aSmoother.Next(aMax, isFinal);
-        var upper = _upperSmoother.Next(aMa, isFinal);
-        var b = value - sq;
-        var bMin = isFinal ? _bMin.Add(b, out _) : _bMin.Preview(b, out _);
-        var bMa = _bSmoother.Next(bMin, isFinal);
-        var lower = _lowerSmoother.Next(bMa, isFinal);
-        var middle = (upper + lower) / 2;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", upper },
-                { "MiddleBand", middle },
-                { "LowerBand", lower }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(middle, outputs);
+        StreamingInputValidation.Validate(bar); var p = _window.Next(bar.Close, isFinal);
+        return new(p.Middle, includeOutputs ? new Dictionary<string, double> { { "UpperBand", p.Upper }, { "MiddleBand", p.Middle }, { "LowerBand", p.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _x2Sum.Dispose();
-        _aMax.Dispose();
-        _bMin.Dispose();
-        _aSmoother.Dispose();
-        _upperSmoother.Dispose();
-        _bSmoother.Dispose();
-        _lowerSmoother.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Af")]

@@ -106,75 +106,20 @@ public static partial class Calculations
     public static StockData CalculateAutoDispersionBands(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, 
         int length = 90, int smoothLength = 140)
     {
-        List<double> middleBandList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> aMaxList = new(stockData.Count);
-        List<double> bMinList = new(stockData.Count);
-        List<double> x2List = new(stockData.Count);
-        var x2SumWindow = new RollingSum();
-        var aWindow = new RollingMinMax(length);
-        var bWindow = new RollingMinMax(length);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AutoDispersionWindow(maType, length, smoothLength, external, Math.Max(1, input.Count));
+        List<double> upper = new(input.Count), middle = new(input.Count), lower = new(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var x = MinPastValues(i, length, currentValue - prevValue);
-
-            var x2 = x * x;
-            x2List.Add(x2);
-            x2SumWindow.Add(x2);
-
-            var x2Sma = x2SumWindow.Average(length);
-            var sq = x2Sma >= 0 ? Sqrt(x2Sma) : 0;
-
-            var a = currentValue + sq;
-            aList.Add(a);
-            aWindow.Add(a);
-
-            var b = currentValue - sq;
-            bList.Add(b);
-            bWindow.Add(b);
-
-            aMaxList.Add(aWindow.Max);
-            bMinList.Add(bWindow.Min);
+            List<double> rawUpper = new(input.Count), rawLower = new(input.Count); foreach (var value in input) { var p = window.Generate(value, true); rawUpper.Add(p.Upper.Publish()); rawLower.Add(p.Lower.Publish()); }
+            var firstUpper = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(rawUpper), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, rawUpper);
+            upper = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(firstUpper), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, firstUpper);
+            var firstLower = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(rawLower), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, rawLower);
+            lower = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(firstLower), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, firstLower);
+            for (var i = 0; i < input.Count; i++) middle.Add(AutoDispersionWindow.Bands(new RocBankValue(upper[i]), new RocBankValue(lower[i])).Middle);
         }
-
-        var aMaList = GetMovingAverageList(stockData, maType, length, aMaxList);
-        var upperBandList = GetMovingAverageList(stockData, maType, smoothLength, aMaList);
-        var bMaList = GetMovingAverageList(stockData, maType, length, bMinList);
-        var lowerBandList = GetMovingAverageList(stockData, maType, smoothLength, bMaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var upperBand = upperBandList[i];
-            var lowerBand = lowerBandList[i];
-            var prevUpperBand = i >= 1 ? upperBandList[i - 1] : 0;
-            var prevLowerBand = i >= 1 ? lowerBandList[i - 1] : 0;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevMiddleBand = GetLastOrDefault(middleBandList);
-            var middleBand = (upperBand + lowerBand) / 2;
-            middleBandList.Add(middleBand);
-
-            var signal = GetBollingerBandsSignal(currentValue - middleBand, prevValue - prevMiddleBand, currentValue, prevValue, upperBand,
-                prevUpperBand, lowerBand, prevLowerBand);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", upperBandList },
-            { "MiddleBand", middleBandList },
-            { "LowerBand", lowerBandList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.AutoDispersionBands;
-
-        return stockData;
+        else foreach (var value in input) { var p = window.Next(value, true); upper.Add(p.Upper); middle.Add(p.Middle); lower.Add(p.Lower); }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetBollingerBandsSignal(input[i] - middle[i], i > 0 ? input[i - 1] - middle[i - 1] : 0, input[i], i > 0 ? input[i - 1] : 0, upper[i], i > 0 ? upper[i - 1] : 0, lower[i], i > 0 ? lower[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "MiddleBand", middle }, { "LowerBand", lower } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.AutoDispersionBands; return stockData;
     }
 
 

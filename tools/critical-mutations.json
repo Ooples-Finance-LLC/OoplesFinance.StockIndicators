@@ -22733,5 +22733,199 @@
     "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
     "filter": "FullyQualifiedName~PseudoPolynomialNumericalTests.TwoLagMorphingAndCumulativeErrorPreserveRoundedBandMidpoints|FullyQualifiedName~PseudoPolynomialNumericalTests.SelectedPricesAndCustomerSmoothingFeedThePublishedMidpoint|FullyQualifiedName~PseudoPolynomialNumericalTests.InvalidFieldsAndMorphNeverAdvanceNativeHistory",
     "scope": "public sealed class PseudoPolynomialChannelState :"
+  },
+  {
+    "id": "auto-dispersion-lookback",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "ExactVarianceWindow.Units(_prices[0])",
+    "after": "ExactVarianceWindow.Units(_prices[_prices.Count - 1])",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_count < _length ? BigInteger.Zero",
+    "after": "_count <= _length ? BigInteger.Zero",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-square-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "sum -= _squares[0]",
+    "after": "sum += _squares[0]",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-early-square",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "var square = change * change",
+    "after": "var square = ExactVarianceWindow.Units(Math.Pow(ExactMeanAccumulator.UnitRatio(change, BigInteger.One), 2)) << 1074",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-root-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "divisor << 2048",
+    "after": "divisor << 2046",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "price - width",
+    "after": "price + width",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-lower-extremum",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_minimum = new(_length, capacity, false)",
+    "after": "_minimum = new(_length, capacity, true)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-upper-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_upperFirst = new(kind, _length, capacityHint)",
+    "after": "_upperFirst = new(kind, smoothLength, capacityHint)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-upper-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_upperSecond = new(kind, smoothLength, capacityHint)",
+    "after": "_upperSecond = new(kind, _length, capacityHint)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-lower-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_lowerFirst = new(kind, _length, capacityHint)",
+    "after": "_lowerFirst = new(kind, smoothLength, capacityHint)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-lower-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_lowerSecond = new(kind, smoothLength, capacityHint)",
+    "after": "_lowerSecond = new(kind, _length, capacityHint)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "sum.Mean(2)",
+    "after": "sum.Mean(1)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "if (commit) { _prices",
+    "after": "if (true) { _prices",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-preview-upper",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_upperFirst.Next(raw.Upper, commit)",
+    "after": "_upperFirst.Next(raw.Upper, true)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-preview-lower",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_lowerSecond.Next(firstLower, commit)",
+    "after": "_lowerSecond.Next(firstLower, true)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-preview-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "var raw = Generate(close, commit)",
+    "after": "var raw = Generate(close, true)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "if (_count > 0 && _indices[_start] <= index - _length)",
+    "after": "if (_count > 0 && _indices[_start] < index - _length)",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "var skip = _count > 0 && _indices[_start] <= index - _length",
+    "after": "var skip = _count > 0 && _indices[_start] < index - _length",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-reset-upper",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_upperFirst?.Reset(); _upperSecond?.Reset();",
+    "after": "if (_count < 0) { _upperFirst?.Reset(); _upperSecond?.Reset(); }",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-reset-lower",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_lowerFirst?.Reset(); _lowerSecond?.Reset();",
+    "after": "if (_count < 0) { _lowerFirst?.Reset(); _lowerSecond?.Reset(); }",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_maximum.Reset(); _minimum.Reset();",
+    "after": "if (_count < 0) { _maximum.Reset(); _minimum.Reset(); }",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-reset-squares",
+    "module": "numerical",
+    "file": "src/Helpers/AutoDispersionWindow.cs",
+    "before": "_sum = default;",
+    "after": "_sum += 0;",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState"
+  },
+  {
+    "id": "auto-dispersion-selected-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "internal static ComputeBuffer ComputeAutoDispersionBandsFast("
+  },
+  {
+    "id": "auto-dispersion-invalid-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "if (bar.Volume < 0 && bar.Volume > 0) StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~AutoDispersionNumericalTests.ChangeRmsRollingExtremaAndTwoSmoothingStagesPreserveFiniteBands|FullyQualifiedName~AutoDispersionNumericalTests.SelectedPricesAndFourCustomerAveragesKeepBothSmoothingLengths|FullyQualifiedName~AutoDispersionNumericalTests.InvalidFieldsNeverAdvanceNativeState",
+    "scope": "public sealed class AutoDispersionBandsState :"
   }
 ]

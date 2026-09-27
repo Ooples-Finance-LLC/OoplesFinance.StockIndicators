@@ -182,6 +182,7 @@ internal static partial class StatefulIndicatorFactory
             PercentChangeSpecOptions change => new PerformanceIndexState(change.Length),
             PercentageChangeSpecOptions percentage => new PerformanceIndexState(percentage.Length),
             KaufmanAdaptiveBandsSpecOptions adaptive => new KaufmanAdaptiveBandsState(adaptive.Length, adaptive.StdDevFactor),
+            AutoDispersionBandsSpecOptions dispersion => new AutoDispersionBandsState(dispersion.MaType, dispersion.Length, dispersion.SmoothLength),
             EfficientTrendStepChannelSpecOptions efficient => new EfficientTrendStepChannelState(efficient.Length, efficient.FastLength, efficient.SlowLength),
             LinearChannelsSpecOptions step0 => new LinearChannelsState(step0.Length, step0.Mult),
             LinearTrailingStopSpecOptions step1 => new LinearTrailingStopState(step1.Length, step1.Mult),
