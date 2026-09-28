@@ -39344,5 +39344,158 @@
     "before": "new EhlersAdaptiveLaguerreFilterState(adaptiveLaguerre.Length)",
     "after": "new EhlersAdaptiveLaguerreFilterState(14)",
     "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "frama-odd-period",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "checked(length + (length & 1))",
+    "after": "length",
+    "filter": "FullyQualifiedName~FramaNumericalTests.EqualHalvesPreserveKnownStartupAndFirstSmoothedValue"
+  },
+  {
+    "id": "frama-startup",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "if (_index >= _length)",
+    "after": "if (_index >= _length - 1)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.EqualHalvesPreserveKnownStartupAndFirstSmoothedValue"
+  },
+  {
+    "id": "frama-lag",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "_lagged.Count == 0 ? recent : _lagged.Peek()",
+    "after": "recent",
+    "filter": "FullyQualifiedName~FramaNumericalTests.ExpiringHalfRangesAndZeroRangesRetainThePreviousGain"
+  },
+  {
+    "id": "frama-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "var expires = _index - length",
+    "after": "var expires = _index - length - 1",
+    "filter": "FullyQualifiedName~FramaNumericalTests.ExpiringHalfRangesAndZeroRangesRetainThePreviousGain"
+  },
+  {
+    "id": "frama-lag-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "if (_lagged.Count == _half)",
+    "after": "if (_lagged.Count > _half)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.ExpiringHalfRangesAndZeroRangesRetainThePreviousGain"
+  },
+  {
+    "id": "frama-gain-history",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "var gain = _gain",
+    "after": "var gain = 1d",
+    "filter": "FullyQualifiedName~FramaNumericalTests.ExpiringHalfRangesAndZeroRangesRetainThePreviousGain"
+  },
+  {
+    "id": "frama-range",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "range.Add(low, -1)",
+    "after": "range.Add(low)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.WideAndTinyCandlesRetainDimensionAndFeedback"
+  },
+  {
+    "id": "frama-dimension-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "sum.ScaleByPowerOfTwo(1)",
+    "after": "sum.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.EqualHalvesPreserveKnownStartupAndFirstSmoothedValue"
+  },
+  {
+    "id": "frama-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "-4.6 *",
+    "after": "-4.0 *",
+    "filter": "FullyQualifiedName~FramaNumericalTests.EqualHalvesPreserveKnownStartupAndFirstSmoothedValue"
+  },
+  {
+    "id": "frama-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "_filter.Add(ref sum, -gain)",
+    "after": "_filter.Add(ref sum, gain)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.WideAndTinyCandlesRetainDimensionAndFeedback"
+  },
+  {
+    "id": "frama-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~FramaNumericalTests.SubnormalFeedbackAccumulatesIntoARepresentableStep"
+  },
+  {
+    "id": "frama-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FramaWindow.cs",
+    "scope": "internal sealed class FramaWindow",
+    "before": "if (commit)\n        { if",
+    "after": "if (commit || price != 0)\n        { if",
+    "filter": "FullyQualifiedName~FramaNumericalTests.WideAndTinyCandlesRetainDimensionAndFeedback"
+  },
+  {
+    "id": "frama-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersFractalAdaptiveMovingAverage(",
+    "before": "window.Next(currentValue, stockData.HighPrices[i]",
+    "after": "window.Next(stockData.ClosePrices[i], stockData.HighPrices[i]",
+    "filter": "FullyQualifiedName~FramaNumericalTests.SelectedPricesPreserveOriginalHighAndLowAcrossBothArms"
+  },
+  {
+    "id": "frama-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersFramaFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~FramaNumericalTests.SelectedPricesPreserveOriginalHighAndLowAcrossBothArms"
+  },
+  {
+    "id": "frama-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersFractalAdaptiveMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~FramaNumericalTests.InvalidFieldsLeaveRangesGainAndFilterUnchanged"
+  },
+  {
+    "id": "frama-native-length",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersFractalAdaptiveMovingAverageState(ehlersFrama.Length)",
+    "after": "new EhlersFractalAdaptiveMovingAverageState(20)",
+    "filter": "FullyQualifiedName~FramaNumericalTests.EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "frama-custom-range",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersFractalAdaptiveMovingAverageState",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~FramaNumericalTests.SelectedPricesPreserveOriginalHighAndLowAcrossBothArms"
   }
 ]

@@ -991,116 +991,20 @@ public sealed class EhlersFourierSeriesAnalysisState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Fama")]
-public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
+public sealed class EhlersFractalAdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly int _length;
-    private readonly int _halfP;
-    private readonly RollingWindowMax _highWindow1;
-    private readonly RollingWindowMin _lowWindow1;
-    private readonly RollingWindowMax _highWindow2;
-    private readonly RollingWindowMin _lowWindow2;
-    private readonly PooledRingBuffer<double> _laggedHighest2;
-    private readonly PooledRingBuffer<double> _laggedLowest2;
-    private readonly StreamingInputResolver _input;
-    private double _prevFilter;
-    private bool _hasPrev;
-    private int _index;
-    private double _dimension;
-
-    public EhlersFractalAdaptiveMovingAverageState(int length = 20)
-    {
-        length = Math.Max(2, length);
-        _length = checked(length + (length & 1));
-        _halfP = _length / 2;
-        _highWindow1 = new RollingWindowMax(_length);
-        _lowWindow1 = new RollingWindowMin(_length);
-        _highWindow2 = new RollingWindowMax(_halfP);
-        _lowWindow2 = new RollingWindowMin(_halfP);
-        _laggedHighest2 = new PooledRingBuffer<double>(_halfP + 1);
-        _laggedLowest2 = new PooledRingBuffer<double>(_halfP + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly FramaWindow _window;
+    public EhlersFractalAdaptiveMovingAverageState(int length = 20) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersFractalAdaptiveMovingAverage;
-
-    public void Reset()
-    {
-        _highWindow1.Reset();
-        _lowWindow1.Reset();
-        _highWindow2.Reset();
-        _lowWindow2.Reset();
-        _laggedHighest2.Clear();
-        _laggedLowest2.Clear();
-        _prevFilter = 0;
-        _hasPrev = false;
-        _index = 0;
-        _dimension = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var highestHigh1 = isFinal ? _highWindow1.Add(bar.High, out _) : _highWindow1.Preview(bar.High, out _);
-        var lowestLow1 = isFinal ? _lowWindow1.Add(bar.Low, out _) : _lowWindow1.Preview(bar.Low, out _);
-        var highestHigh2 = isFinal ? _highWindow2.Add(bar.High, out _) : _highWindow2.Preview(bar.High, out _);
-        var lowestLow2 = isFinal ? _lowWindow2.Add(bar.Low, out _) : _lowWindow2.Preview(bar.Low, out _);
-
-        // The value halfP bars back, counting this bar (batch: lagIndex = Math.Max(i - halfP, 0)), read before
-        // this bar is committed so a preview and its commit read the same bar. Until halfP bars have passed
-        // the lag stays on the first bar, which is still the oldest in the buffer then.
-        var highestHigh3 = LaggedOrFirst(_laggedHighest2, highestHigh2);
-        var lowestLow3 = LaggedOrFirst(_laggedLowest2, lowestLow2);
-
-        if (isFinal)
-        {
-            _laggedHighest2.TryAdd(highestHigh2, out _);
-            _laggedLowest2.TryAdd(lowestLow2, out _);
-        }
-
-        var n3 = (highestHigh1 - lowestLow1) / _length;
-        var n1 = (highestHigh2 - lowestLow2) / _halfP;
-        var n2 = (highestHigh3 - lowestLow3) / _halfP;
-        var dm = _index >= _length - 1 && n1 > 0 && n2 > 0 && n3 > 0 ? (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2) : _dimension;
-
-        var alpha = MathHelper.MinOrMax(MathHelper.Exp(-4.6 * (dm - 1)), 1, 0.01);
-        var prevFilter = _hasPrev ? _prevFilter : value;
-        var filter = _index < _length ? value : (alpha * value) + ((1 - alpha) * prevFilter);
-
-        if (isFinal)
-        {
-            _prevFilter = filter;
-            _hasPrev = true;
-            _dimension = dm;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Fama", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Fama", value } } : null);
     }
+    public void Dispose() { }
 
-    /// <summary>The value halfP bars back counting the pending one, or the first value until there is one.</summary>
-    private double LaggedOrFirst(PooledRingBuffer<double> lagged, double pending) =>
-        lagged.Count >= _halfP
-            ? EhlersStreamingWindow.GetOffsetValue(lagged, pending, _halfP)
-            : lagged.Count > 0 ? lagged[0] : pending;
-
-    public void Dispose()
-    {
-        _highWindow1.Dispose();
-        _lowWindow1.Dispose();
-        _highWindow2.Dispose();
-        _lowWindow2.Dispose();
-        _laggedHighest2.Dispose();
-        _laggedLowest2.Dispose();
-    }
 }
 
 [PrimaryOutput("Egf4")]

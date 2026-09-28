@@ -344,32 +344,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Evidya", result));
                 });
             case IndicatorName.EhlersFractalAdaptiveMovingAverage:
-                var framaPeriod = Math.Max(2, length);
-                framaPeriod += framaPeriod % 2;
-                return new("Fama", new[] { "Fama" }, bars =>
-                {
-                    // John Ehlers, FRAMA, Figure 1: https://www.mesasoftware.com/papers/FRAMA.pdf
-                    // The library selects Close as its input; the paper's Price input is configurable.
-                    var result = new double[bars.Count];
-                    double dimension = 0;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        if (i + 1 >= framaPeriod)
-                        {
-                            var window = Window(bars, i, framaPeriod).ToArray();
-                            var older = window.Take(framaPeriod / 2).ToArray();
-                            var newer = window.Skip(framaPeriod / 2).ToArray();
-                            var oldRange = older.Max(b => b.High) - older.Min(b => b.Low);
-                            var newRange = newer.Max(b => b.High) - newer.Min(b => b.Low);
-                            var fullRange = window.Max(b => b.High) - window.Min(b => b.Low);
-                            if (oldRange > 0 && newRange > 0 && fullRange > 0)
-                                dimension = Math.Log(2 * (oldRange + newRange) / fullRange, 2);
-                        }
-                        var gain = Math.Max(.01, Math.Min(1, Math.Exp(-4.6 * (dimension - 1))));
-                        result[i] = i < framaPeriod ? bars[i].Close : result[i - 1] + gain * (bars[i].Close - result[i - 1]);
-                    }
-                    return Outputs(("Fama", result));
-                });
+                return new("Fama", new[] { "Fama" }, bars => Outputs(("Fama", FramaValues(bars, length))));
             case IndicatorName.AdaptiveLeastSquares:
                 return new("Als", new[] { "Als" }, bars =>
                 {

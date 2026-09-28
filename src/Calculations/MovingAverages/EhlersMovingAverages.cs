@@ -154,39 +154,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersFractalAdaptiveMovingAverage(this StockData stockData, int length = 20)
     {
+        var window = new FramaWindow(length);
         List<double> filterList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        length = Math.Max(2, length);
-        length = checked(length + (length & 1));
-        var halfP = length / 2;
-        double dimension = 0;
-
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(highList, lowList, length);
-        var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList, lowList, halfP);
-
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevFilter = i >= 1 ? GetLastOrDefault(filterList) : currentValue;
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var highestHigh1 = highestList1[i];
-            var lowestLow1 = lowestList1[i];
-            var highestHigh2 = highestList2[i];
-            var lowestLow2 = lowestList2[i];
-            var lagIndex = Math.Max(i - halfP, 0);
-            var highestHigh3 = highestList2[lagIndex];
-            var lowestLow3 = lowestList2[lagIndex];
-            var n3 = (highestHigh1 - lowestLow1) / length;
-            var n1 = (highestHigh2 - lowestLow2) / halfP;
-            var n2 = (highestHigh3 - lowestLow3) / halfP;
-            if (i >= length - 1 && n1 > 0 && n2 > 0 && n3 > 0)
-                dimension = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
-
-            var alpha = MinOrMax(Exp(-4.6 * (dimension - 1)), 1, 0.01);
-            var filter = i < length ? currentValue : (alpha * currentValue) + ((1 - alpha) * prevFilter);
-            filterList.Add(filter);
+            var currentValue = inputList[i]; var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevFilter = i >= 1 ? filterList[i - 1] : currentValue;
+            var filter = window.Next(currentValue, stockData.HighPrices[i], stockData.LowPrices[i], true); filterList.Add(filter);
 
             var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter);
             signalsList?.Add(signal);

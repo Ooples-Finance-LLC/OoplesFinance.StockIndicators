@@ -499,67 +499,10 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void FractalAdaptiveMovingAverage(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 16)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(2, length);
-        length = checked(length + (length & 1));
-        var halfLength = length / 2;
-        double dimension = 0;
-        double frama = 0;
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length - 1)
-            {
-                output[i] = close[i];
-                frama = close[i];
-                continue;
-            }
-
-            // Calculate N1 (first half)
-            var hh1 = double.MinValue;
-            var ll1 = double.MaxValue;
-            for (var j = i - length + 1; j <= i - halfLength; j++)
-            {
-                if (high[j] > hh1) hh1 = high[j];
-                if (low[j] < ll1) ll1 = low[j];
-            }
-            var n1 = (hh1 - ll1) / halfLength;
-
-            // Calculate N2 (second half)
-            var hh2 = double.MinValue;
-            var ll2 = double.MaxValue;
-            for (var j = i - halfLength + 1; j <= i; j++)
-            {
-                if (high[j] > hh2) hh2 = high[j];
-                if (low[j] < ll2) ll2 = low[j];
-            }
-            var n2 = (hh2 - ll2) / halfLength;
-
-            // Calculate N3 (full period)
-            var hh3 = double.MinValue;
-            var ll3 = double.MaxValue;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (high[j] > hh3) hh3 = high[j];
-                if (low[j] < ll3) ll3 = low[j];
-            }
-            var n3 = (hh3 - ll3) / length;
-
-            // Calculate fractal dimension
-            if (n1 > 0 && n2 > 0 && n3 > 0)
-                dimension = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
-
-            // Calculate alpha
-            var alpha = Math.Exp(-4.6 * (dimension - 1));
-            alpha = Math.Max(0.01, Math.Min(alpha, 1));
-
-            frama = i < length ? close[i] : (alpha * close[i]) + ((1 - alpha) * frama);
-            output[i] = frama;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must be at least close length.");
+        var window = new FramaWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], high[i], low[i], true);
     }
 
     /// <summary>

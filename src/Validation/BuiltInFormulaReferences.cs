@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersFractalAdaptiveMovingAverage)
+        {
+            var framaOptions = builtIn.CreateOptions(); var period = framaOptions is EhlersFramaSpecOptions ehlers ? ehlers.Length : ((FramaSpecOptions)framaOptions).Length;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FramaValues(bars, period), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAdaptiveLaguerreFilter)
         {
             var adaptive = (EhlersAdaptiveLaguerreFilterSpecOptions)builtIn.CreateOptions();

@@ -585,6 +585,7 @@ internal static partial class StatefulIndicatorFactory
             AlmaSpecOptions alma => new ArnaudLegouxMovingAverageState(alma.Length),
             LsmaSpecOptions lsma => new LeastSquaresMovingAverageState(lsma.Length),
             SimplifiedLeastSquaresMovingAverageSpecOptions simplifiedLsma => new SimplifiedLeastSquaresMovingAverageState(simplifiedLsma.Length),
+            EhlersFramaSpecOptions ehlersFrama => new EhlersFractalAdaptiveMovingAverageState(ehlersFrama.Length),
             FramaSpecOptions frama => new EhlersFractalAdaptiveMovingAverageState(frama.Length),
             McGinleyDynamicSpecOptions mcg => new McGinleyDynamicIndicatorState(length: mcg.Length),
             TillsonT3MovingAverageSpecOptions tillson => new TillsonT3MovingAverageState(tillson.MaType, tillson.Length, tillson.VFactor),

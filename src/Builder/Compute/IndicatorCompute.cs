@@ -12123,59 +12123,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersFramaFast(StockData data, ComputeContext context, int length = 20)
     {
-        // CalculateEhlersFractalAdaptiveMovingAverage derives its smoothing constant from the fractal
-        // dimension of the high-low range, comparing the full window against both halves - the recent half
-        // and the half one lag back. The core routine this replaced read the close and skipped the lagged
-        // half, so its dimension, and therefore its alpha, was a different number.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 2);
-        length = checked(length + (length & 1));
-        var halfP = length / 2;
-
-        using var halfHighest = context.Rent(count);
-        using var halfLowest = context.Rent(count);
-        var highest2 = halfHighest.WritableSpan;
-        var lowest2 = halfLowest.WritableSpan;
-
-        var fullHighWindow = new RollingMinMax(length);
-        var fullLowWindow = new RollingMinMax(length);
-        var halfHighWindow = new RollingMinMax(halfP);
-        var halfLowWindow = new RollingMinMax(halfP);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double prevFilter = 0, dimension = 0;
-        for (var i = 0; i < count; i++)
-        {
-            fullHighWindow.Add(highs[i]);
-            fullLowWindow.Add(lows[i]);
-            halfHighWindow.Add(highs[i]);
-            halfLowWindow.Add(lows[i]);
-            highest2[i] = halfHighWindow.Max;
-            lowest2[i] = halfLowWindow.Min;
-
-            if (i == 0)
-            {
-                prevFilter = input[i];
-            }
-
-            var lagIndex = Math.Max(i - halfP, 0);
-            var n3 = (fullHighWindow.Max - fullLowWindow.Min) / length;
-            var n1 = (highest2[i] - lowest2[i]) / halfP;
-            var n2 = (highest2[lagIndex] - lowest2[lagIndex]) / halfP;
-            if (i >= length - 1 && n1 > 0 && n2 > 0 && n3 > 0)
-                dimension = (Math.Log(n1 + n2) - Math.Log(n3)) / Math.Log(2);
-
-            var alpha = MathHelper.MinOrMax(MathHelper.Exp(-4.6 * (dimension - 1)), 1, 0.01);
-            prevFilter = i < length ? input[i] : (alpha * input[i]) + ((1 - alpha) * prevFilter);
-            output[i] = prevFilter;
-        }
-
+        var window = new FramaWindow(length);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true);
         return buffer;
     }
 

@@ -400,10 +400,6 @@ OoplesFinance.StockIndicators.Indicators.EhlersFourierSeriesAnalysis/default
 OoplesFinance.StockIndicators.Indicators.EhlersFourierSeriesAnalysis/longer-periods
 OoplesFinance.StockIndicators.Indicators.EhlersFourierSeriesAnalysis/minimum-periods
 OoplesFinance.StockIndicators.Indicators.EhlersFourierSeriesAnalysis/shorter-periods
-OoplesFinance.StockIndicators.Indicators.EhlersFrama/default
-OoplesFinance.StockIndicators.Indicators.EhlersFrama/longer-periods
-OoplesFinance.StockIndicators.Indicators.EhlersFrama/minimum-periods
-OoplesFinance.StockIndicators.Indicators.EhlersFrama/shorter-periods
 OoplesFinance.StockIndicators.Indicators.EhlersHilbertOscillator/default
 OoplesFinance.StockIndicators.Indicators.EhlersHilbertOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.EhlersHilbertOscillator/minimum-periods
@@ -704,10 +700,6 @@ OoplesFinance.StockIndicators.Indicators.FollowingAdaptiveMovingAverage/default
 OoplesFinance.StockIndicators.Indicators.FollowingAdaptiveMovingAverage/longer-periods
 OoplesFinance.StockIndicators.Indicators.FollowingAdaptiveMovingAverage/minimum-periods
 OoplesFinance.StockIndicators.Indicators.FollowingAdaptiveMovingAverage/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Frama/default
-OoplesFinance.StockIndicators.Indicators.Frama/longer-periods
-OoplesFinance.StockIndicators.Indicators.Frama/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Frama/shorter-periods
 OoplesFinance.StockIndicators.Indicators.FreedomOfMovement/default
 OoplesFinance.StockIndicators.Indicators.FreedomOfMovement/longer-periods
 OoplesFinance.StockIndicators.Indicators.FreedomOfMovement/minimum-periods
