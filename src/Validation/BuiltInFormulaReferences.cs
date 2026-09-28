@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersReflexIndicator)
+        {
+            var reflexLength = Integer(builtIn.CreateOptions(), "Length", 20);
+            yield return IndicatorValidationRule.Reference(0, bars => ReflexValues(bars, reflexLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersTrendflexIndicator)
         {
             var flexLength = Integer(builtIn.CreateOptions(), "Length", 20);

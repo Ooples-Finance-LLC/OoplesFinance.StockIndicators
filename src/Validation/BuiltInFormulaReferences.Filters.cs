@@ -238,40 +238,8 @@ internal static partial class BuiltInFormulaReferences
                 var trendflexLength = Integer(options, "Length", 20);
                 return new("Eti", new[] { "Eti" }, bars => Outputs(("Eti", TrendflexValues(bars, trendflexLength))));
             case IndicatorName.EhlersReflexIndicator:
-                var flexLength = Integer(options, "Length", 20);
-                var reflex = indicator.BatchName == IndicatorName.EhlersReflexIndicator;
-                var flexKey = reflex ? "Eri" : "Eti";
-                return new(flexKey, new[] { flexKey }, bars =>
-                {
-                    var angle = 2 * Math.Sqrt(2) * Math.PI / flexLength;
-                    var radius = Math.Exp(-angle);
-                    var feedback = 2 * radius * Math.Cos(angle);
-                    var squaredRadius = radius * radius;
-                    var feedforward = (1 - feedback + squaredRadius) / 2;
-                    var filtered = new double[bars.Count];
-                    double state1 = 0, state2 = 0;
-                    for (var i = 0; i < filtered.Length; i++)
-                    {
-                        // Transposed state-space realization of the two-pole Super Smoother.
-                        var value = bars[i].Close;
-                        var output = feedforward * value + state1;
-                        state1 = feedforward * value + feedback * output + state2;
-                        state2 = -squaredRadius * output;
-                        filtered[i] = output;
-                    }
-                    var deviations = filtered.Select((v, i) =>
-                    {
-                        var history = Enumerable.Range(1, flexLength).Select(j => i < j ? 0 : filtered[i - j]).ToArray();
-                        // Reflex measures departures from the endpoint chord; Trendflex from a level.
-                        var baseline = reflex ? v + (history[flexLength - 1] - v) * (flexLength + 1d) / (2 * flexLength) : v;
-                        return baseline - history.Average();
-                    }).ToArray();
-                    return Outputs((flexKey, deviations.Select((v, i) =>
-                    {
-                        var energy = Enumerable.Range(0, i + 1).Sum(j => .04 * Math.Pow(.96, i - j) * deviations[j] * deviations[j]);
-                        return energy == 0 ? 0 : v / Math.Sqrt(energy);
-                    }).ToArray()));
-                });
+                var reflexLength = Integer(options, "Length", 20);
+                return new("Eri", new[] { "Eri" }, bars => Outputs(("Eri", ReflexValues(bars, reflexLength))));
             case IndicatorName.EhlersGaussianFilter:
                 var gaussianLength = Math.Max(2, Integer(options, "Length", 14));
                 var gaussianPoles = Math.Max(1, Math.Min(4, Integer(options, "Poles", 3)));

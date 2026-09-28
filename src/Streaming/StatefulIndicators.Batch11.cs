@@ -24,84 +24,17 @@ public sealed class EhlersLaguerreFilterState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Eri")]
 public sealed class EhlersReflexIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _filterValues;
-    private double _prevMs;
-
-    public EhlersReflexIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        var period = 0.5 * _length;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(1);
-        _filterValues = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly TrendflexWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersReflexIndicatorState(int length = 20) { _window = new(length, reflex: true); }
     public IndicatorName Name => IndicatorName.EhlersReflexIndicator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _filterValues.Clear();
-        _prevMs = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevFilter1 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 1);
-        var prevFilter2 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 2);
-
-        var filter = (_c1 * ((value + prevValue) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-        var priorFilter = EhlersStreamingWindow.GetOffsetValue(_filterValues, filter, _length);
-        var slope = _length != 0 ? (priorFilter - filter) / _length : 0;
-
-        double sum = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var prevFilterCount = EhlersStreamingWindow.GetOffsetValue(_filterValues, filter, j);
-            sum += filter + (j * slope) - prevFilterCount;
-        }
-        sum /= _length;
-
-        var ms = (0.04 * sum * sum) + (0.96 * _prevMs);
-        var reflex = ms > 0 ? sum / MathHelper.Sqrt(ms) : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _filterValues.TryAdd(filter, out _);
-            _prevMs = ms;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eri", reflex }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(reflex, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eri", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _filterValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eiftrsi")]

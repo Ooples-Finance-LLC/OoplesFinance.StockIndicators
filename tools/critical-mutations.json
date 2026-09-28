@@ -38021,5 +38021,122 @@
     "before": "_input.GetValue(bar)",
     "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
     "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "reflex-current-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "_reflex ? _length - 1L : _length",
+    "after": "_reflex ? _length + 1L : _length",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-endpoint-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "_history.Count == _length ? _history.Peek() : default",
+    "after": "_history.Count == _length ? _first : default",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-endpoint-weight",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "endpoint.AddTo(ref deviationSum, _length + 1L)",
+    "after": "endpoint.AddTo(ref deviationSum, _length - 1L)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-chord-history",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "var secondHistory = _historySum; deviationSum.Subtract(secondHistory);",
+    "after": "var secondHistory = _historySum; _ = secondHistory;",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-batch-mode",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersReflexIndicator(",
+    "before": "new TrendflexWindow(length, reflex: true)",
+    "after": "new TrendflexWindow(length, reflex: false)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-alias-mode",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersReflex(",
+    "before": "new TrendflexWindow(length, reflex: true)",
+    "after": "new TrendflexWindow(length, reflex: false)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-indicator-mode",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersReflexIndicator(",
+    "before": "new TrendflexWindow(length, reflex: true)",
+    "after": "new TrendflexWindow(length, reflex: false)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-native-mode",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersReflexIndicatorState",
+    "before": "new(length, reflex: true)",
+    "after": "new(length, reflex: false)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersReflexIndicator(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-alias-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersReflexFast(",
+    "before": "ComputeEhlersReflexIndicatorFast(data, context, length)",
+    "after": "ComputeEhlersReflexIndicatorFast(data, context)",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-indicator-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersReflexIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersReflexIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~ReflexNumericalTests"
+  },
+  {
+    "id": "reflex-stable-gain",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "_c1 = gain.Mean(1);",
+    "after": "_c1 = 1 - _c2 - _c3;",
+    "filter": "FullyQualifiedName~ReflexNumericalTests|FullyQualifiedName~TrendflexNumericalTests"
   }
 ]
