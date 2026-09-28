@@ -1473,54 +1473,13 @@ internal static class MovingAverageCore
     /// <summary>
     /// Computes Ehlers Cyber Cycle.
     /// </summary>
-    internal static void EhlersCyberCycle(ReadOnlySpan<double> input, Span<double> output, double alpha = 0.07)
+    internal static void EhlersCyberCycle(ReadOnlySpan<double> input, Span<double> output, double alpha = .07)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smoothArray = pool.Rent(input.Length);
-
-        try
-        {
-            var smooth = smoothArray.AsSpan(0, input.Length);
-
-            // 4-bar weighted moving average for smoothing
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < 3)
-                {
-                    smooth[i] = input[i];
-                }
-                else
-                {
-                    smooth[i] = (input[i] + 2 * input[i - 1] + 2 * input[i - 2] + input[i - 3]) / 6;
-                }
-            }
-
-            // Cyber Cycle calculation
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (i < 7)
-                {
-                    output[i] = (input[i] - 2 * (i >= 1 ? input[i - 1] : 0) + (i >= 2 ? input[i - 2] : 0)) / 4;
-                }
-                else
-                {
-                    var prevCycle1 = output[i - 1];
-                    var prevCycle2 = output[i - 2];
-                    output[i] = ((1 - 0.5 * alpha) * (1 - 0.5 * alpha) * (smooth[i] - 2 * smooth[i - 1] + smooth[i - 2])) +
-                                (2 * (1 - alpha) * prevCycle1) - ((1 - alpha) * (1 - alpha) * prevCycle2);
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(smoothArray);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new CyberCycleWindow(alpha);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Stochastic.

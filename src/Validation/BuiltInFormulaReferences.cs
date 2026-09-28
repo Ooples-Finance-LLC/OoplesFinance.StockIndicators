@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersCyberCycle)
+        {
+            var cyberOptions = builtIn.CreateOptions(); var cyberAlpha = Number(cyberOptions, 2d / (Integer(cyberOptions, "Length", 14) + 1d), "Alpha");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CyberCycleValues(bars, cyberAlpha), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersImpulseResponse)
         {
             var impulseOptions = (EhlersImpulseResponseSpecOptions)builtIn.CreateOptions();

@@ -1666,42 +1666,17 @@ public static partial class Calculations
     /// <param name="alpha"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersCyberCycle(this StockData stockData, double alpha = 0.07)
+    public static StockData CalculateEhlersCyberCycle(this StockData stockData, double alpha = .07)
     {
-        List<double> smoothList = new(stockData.Count);
-        List<double> cycleList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new CyberCycleWindow(alpha);
+        var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevSmooth1 = i >= 1 ? smoothList[i - 1] : 0;
-            var prevSmooth2 = i >= 2 ? smoothList[i - 2] : 0;
-            var prevCycle1 = i >= 1 ? cycleList[i - 1] : 0;
-            var prevCycle2 = i >= 2 ? cycleList[i - 2] : 0;
-
-            var smooth = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-            smoothList.Add(smooth);
-
-            var cycle = i < 7 ? (currentValue - (2 * prevValue1) + prevValue2) / 4 : (Pow(1 - (0.5 * alpha), 2) * (smooth - (2 * prevSmooth1) + prevSmooth2)) +
-                (2 * (1 - alpha) * prevCycle1) - (Pow(1 - alpha, 2) * prevCycle2);
-            cycleList.Add(cycle);
-
-            var signal = GetCompareSignal(cycle - prevCycle1, prevCycle1 - prevCycle2);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); var previous = i == 0 ? 0 : output[i-1];
+            signals?.Add(GetCompareSignal(value-previous, previous-(i<2 ? 0 : output[i-2]))); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ecc", cycleList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cycleList);
-        stockData.IndicatorName = IndicatorName.EhlersCyberCycle;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ecc", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersCyberCycle;
         return stockData;
     }
 

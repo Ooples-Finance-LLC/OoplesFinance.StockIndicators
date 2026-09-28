@@ -37031,5 +37031,113 @@
     "before": "var value = _input.GetValue(bar);",
     "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal));",
     "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-startup",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "if (_startup < 7) cycle",
+    "after": "if (_startup < 6) cycle",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "count: 6",
+    "after": "count: 5",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "_retention = new RocBankValue(retention).Multiply(2)",
+    "after": "_retention = new RocBankValue(retention).Multiply(1)",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-extended",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(RocBankValue.Round(sum).Publish());",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-parameter",
+    "module": "numerical",
+    "file": "src/Helpers/CyberCycleWindow.cs",
+    "scope": "internal sealed class CyberCycleWindow",
+    "before": "throw new ArgumentOutOfRangeException(nameof(alpha));",
+    "after": "alpha = 0;",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersCyberCycle(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersCyberCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-alias-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersCyberCycleOscillatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersCyberCycleFast(",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-batch-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/BuilderArmTargets.cs",
+    "scope": null,
+    "before": "new BuilderArgument(\"Length\", \"alpha\", v => v is int n ? 2.0 / (Math.Max(1, n) + 1d) : v)",
+    "after": "new BuilderArgument(\"Length\", \"alpha\", v => v is int n ? 2.0 / (Math.Max(1, n) + 1) : v)",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "cyber-cycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersCyberCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~CyberCycleNumericalTests"
   }
 ]

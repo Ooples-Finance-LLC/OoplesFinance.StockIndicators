@@ -12257,9 +12257,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersCyberCycleFast(StockData data, ComputeContext context, int length = 14)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
+        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
         var buffer = context.Rent(data.Count);
-        var alpha = 2.0 / (length + 1); // Convert length to alpha
+        var alpha = 2.0 / (Math.Max(1, length) + 1d); // Convert length to alpha
         MovingAverageCore.EhlersCyberCycle(close, buffer.WritableSpan, alpha);
         return buffer;
     }

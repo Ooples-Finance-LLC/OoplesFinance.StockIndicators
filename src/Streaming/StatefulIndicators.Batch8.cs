@@ -487,78 +487,17 @@ public sealed class EhlersCycleAmplitudeState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ecc")]
 public sealed class EhlersCyberCycleState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevValue3;
-    private double _prevSmooth1;
-    private double _prevSmooth2;
-    private double _prevCycle1;
-    private double _prevCycle2;
-    private int _index;
-
-    public EhlersCyberCycleState(double alpha = 0.07)
-    {
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly CyberCycleWindow _window;
+    public EhlersCyberCycleState(double alpha = .07) => _window = new(alpha);
     public IndicatorName Name => IndicatorName.EhlersCyberCycle;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevValue3 = 0;
-        _prevSmooth1 = 0;
-        _prevSmooth2 = 0;
-        _prevCycle1 = 0;
-        _prevCycle2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevValue3 = _index >= 3 ? _prevValue3 : 0;
-        var prevSmooth1 = _index >= 1 ? _prevSmooth1 : 0;
-        var prevSmooth2 = _index >= 2 ? _prevSmooth2 : 0;
-        var prevCycle1 = _index >= 1 ? _prevCycle1 : 0;
-        var prevCycle2 = _index >= 2 ? _prevCycle2 : 0;
-
-        var smooth = (value + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-        var cycle = _index < 7
-            ? (value - (2 * prevValue1) + prevValue2) / 4
-            : (MathHelper.Pow(1 - (0.5 * _alpha), 2) * (smooth - (2 * prevSmooth1) + prevSmooth2)) +
-              (2 * (1 - _alpha) * prevCycle1) - (MathHelper.Pow(1 - _alpha, 2) * prevCycle2);
-
-        if (isFinal)
-        {
-            _prevValue3 = _prevValue2;
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevSmooth2 = _prevSmooth1;
-            _prevSmooth1 = smooth;
-            _prevCycle2 = _prevCycle1;
-            _prevCycle1 = cycle;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ecc", cycle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cycle, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string,double> { { "Ecc", value } } : null);
     }
 }
+
 
 [PrimaryOutput("Eci")]
 public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState

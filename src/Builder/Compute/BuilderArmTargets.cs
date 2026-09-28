@@ -282,7 +282,7 @@ internal static class BuilderArmTargets
         [typeof(EhlersCorrelationCycleIndicatorSpecOptions)] = new(IndicatorName.EhlersCorrelationCycleIndicator),
         [typeof(EhlersCorrelationTrendIndicatorSpecOptions)] = new(IndicatorName.EhlersCorrelationTrendIndicator),
         [typeof(EhlersCyberCycleOscillatorSpecOptions)] = new(IndicatorName.EhlersCyberCycle),
-        [typeof(EhlersCyberCycleSpecOptions)] = new(IndicatorName.EhlersCyberCycle, null, new BuilderArgument("Length", "alpha", v => v is int n ? 2.0 / (n + 1) : v)),
+        [typeof(EhlersCyberCycleSpecOptions)] = new(IndicatorName.EhlersCyberCycle, null, new BuilderArgument("Length", "alpha", v => v is int n ? 2.0 / (Math.Max(1, n) + 1d) : v)),
         [typeof(EhlersCycleAmplitudeSpecOptions)] = new(IndicatorName.EhlersCycleAmplitude),
         [typeof(EhlersCycleBandPassFilterSpecOptions)] = new(IndicatorName.EhlersCycleBandPassFilter),
         [typeof(EhlersDecyclerOscillatorV1SpecOptions)] = new(IndicatorName.EhlersDecyclerOscillatorV1, null, new BuilderArgument("Length", "fastLength"), new BuilderArgument("Length", "slowLength", v => v is int n ? n * 2d : v)),

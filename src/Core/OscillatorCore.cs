@@ -7739,50 +7739,13 @@ internal static class OscillatorCore
     /// <summary>
     /// Computes Ehlers CyberCycle.
     /// </summary>
-    internal static void EhlersCyberCycleOscillator(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
+    internal static void EhlersCyberCycleOscillator(ReadOnlySpan<double> close, Span<double> output, double alpha = .07)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var smoothArray = pool.Rent(close.Length);
-        var cycleArray = pool.Rent(close.Length);
-
-        try
-        {
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var cycle = cycleArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue1 = i >= 1 ? close[i - 1] : 0;
-                var prevValue2 = i >= 2 ? close[i - 2] : 0;
-                var prevValue3 = i >= 3 ? close[i - 3] : 0;
-                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
-                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
-                var prevCycle1 = i >= 1 ? cycle[i - 1] : 0;
-                var prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
-
-                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-
-                var cycleVal = i < 7
-                    ? (currentValue - (2 * prevValue1) + prevValue2) / 4
-                    : ((1 - (0.5 * alpha)) * (1 - (0.5 * alpha)) * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
-                      (2 * (1 - alpha) * prevCycle1) - ((1 - alpha) * (1 - alpha) * prevCycle2);
-
-                cycle[i] = cycleVal;
-                output[i] = cycleVal;
-            }
-        }
-        finally
-        {
-            pool.Return(smoothArray);
-            pool.Return(cycleArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new CyberCycleWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Band Pass Filter V1.
