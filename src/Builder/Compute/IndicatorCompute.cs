@@ -12778,8 +12778,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSimpleLinesFast(StockData data, ComputeContext context, int length = 10, double mult = 10)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var buffer = context.Rent(data.Count);
         var kernel = new Streaming.SimpleLinesKernel(length, mult);
+        var buffer = context.Rent(data.Count);
         for (var i = 0; i < data.Count; i++) buffer.WritableSpan[i] = kernel.Next(input[i], true);
         return buffer;
     }

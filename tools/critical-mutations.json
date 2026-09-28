@@ -32716,5 +32716,119 @@
     "before": "ReferenceFraction.FromDouble(bars[i].Close) + previous",
     "after": "ReferenceFraction.FromDouble(bars[i].Close) - previous",
     "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-lines-positive-threshold",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "displacement > 1",
+    "after": "displacement >= 1",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-negative-threshold",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "displacement < -1",
+    "after": "displacement <= -1",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-second-bar",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "_count == 1 ? priceTicks",
+    "after": "_count == 0 ? priceTicks",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-previous-ticks",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "_previousTicks = _ticks",
+    "after": "_previousTicks = ticks",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-tick-size",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "if (displacement > 1) ticks++;",
+    "after": "if (displacement > 1) ticks += 2;",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-residual-weight",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": ".Multiply(_multiplier)",
+    "after": ".Multiply(1)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-early-publication",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "Add(Add(priceTicks, new RocBankValue(ticks), -1), residual)",
+    "after": "Add(Add(new RocBankValue(priceTicks.Publish()), new RocBankValue(ticks), -1), residual)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-preview",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "if (isFinal)",
+    "after": "if (isFinal || value != 0)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-reset",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "_ticks = _previousTicks = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-nan-multiplier",
+    "module": "numerical",
+    "file": "src/Streaming/SimpleLinesKernel.cs",
+    "before": "double.IsNaN(multiplier) || double.IsInfinity(multiplier)",
+    "after": "double.IsInfinity(multiplier)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError",
+    "scope": "internal static ComputeBuffer ComputeSimpleLinesFast("
+  },
+  {
+    "id": "simple-lines-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "try { StreamingInputValidation.Validate(bar); } catch (ArgumentOutOfRangeException) { }",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError",
+    "scope": "public sealed class SimpleLinesState"
+  },
+  {
+    "id": "simple-lines-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SimpleLinesSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "simple-lines-reference-threshold",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SimpleLines.cs",
+    "before": "(displacement - one).Sign > 0",
+    "after": "(displacement - one).Sign >= 0",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
   }
 ]

@@ -55,6 +55,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SimpleCycleOutputs(bars, Integer(cycleOptions, "Length", 50)), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.SimpleLines)
+        {
+            var linesOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => SimpleLinesOutputs(bars, Integer(linesOptions, "Length", 10), Number(linesOptions, 10, "Multiplier")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
