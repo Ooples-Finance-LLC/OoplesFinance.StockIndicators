@@ -170,6 +170,8 @@ internal static partial class BuiltInFormulaReferences
                         .Sum(j => difference[j] * Math.Pow(pole, i - j))).ToArray()));
                 });
             case IndicatorName.EhlersRocketRelativeStrengthIndex:
+                if (options is EhlersRocketRelativeStrengthIndexSpecOptions rocket && rocket.MaType is MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 or MovingAvgType.WeightedMovingAverage)
+                    return new("Errsi", new[] { "Errsi" }, bars => Outputs(("Errsi", RocketRsiValues(bars, rocket.Length1, rocket.Length2, rocket.MaType, rocket.Mult))));
                 var rocketKind = AverageKind(options, 0);
                 var rocketSuper = options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.Ehlers2PoleSuperSmootherFilterV2;
                 if (!rocketSuper && rocketKind == 0) return null;

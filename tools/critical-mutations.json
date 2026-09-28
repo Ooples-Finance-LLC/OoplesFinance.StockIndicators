@@ -40208,5 +40208,131 @@
     "before": "Scaled.Round(sum, _length)",
     "after": "Scaled.Round(sum, _length + 1L)",
     "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "rocket-rsi-lag",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "var lag = _length - 1",
+    "after": "var lag = _length",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.LagAndFirstChangeUseZeroPrehistory"
+  },
+  {
+    "id": "rocket-rsi-argument",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "Scaled.Round(total, 2)",
+    "after": "Scaled.Round(total, 3)",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.CallbackReceivesUndifferencedMomentumAverage"
+  },
+  {
+    "id": "rocket-rsi-filter-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "_second.Add(ref filter, _feedback2 << 1)",
+    "after": "_second.Add(ref filter, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.WideAndTinyChangesRetainFilteredGainLossRatios"
+  },
+  {
+    "id": "rocket-rsi-gain",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "- _feedback1 - _feedback2",
+    "after": "- _feedback1",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.ExtremePeriodsAllocateOnlyConsumedHistory"
+  },
+  {
+    "id": "rocket-rsi-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(divisor);",
+    "after": "var shift = 0; var value = sum.Mean(divisor); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.SubnormalFilterStagesPreservePowerOfTwoInvariance"
+  },
+  {
+    "id": "rocket-rsi-wma",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "// weighted shift removed\n",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.WideAndTinyChangesRetainFilteredGainLossRatios"
+  },
+  {
+    "id": "rocket-rsi-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "expired.Add(ref sum, -1d);",
+    "after": "// expired signed change retained\n",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.SettledImpulseExpiresWithoutResidualGainLoss"
+  },
+  {
+    "id": "rocket-rsi-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "sum.Ratio(absolute)",
+    "after": "sum.Ratio(absolute) / 2",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.WideAndTinyChangesRetainFilteredGainLossRatios"
+  },
+  {
+    "id": "rocket-rsi-fisher",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "rounded == 1 ? value",
+    "after": "rounded == 1 ? 0",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.TinyFisherSignalsRetainTheirSign"
+  },
+  {
+    "id": "rocket-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "var argument = Argument(price, commit)",
+    "after": "var argument = Argument(price, true)",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.WideAndTinyChangesRetainFilteredGainLossRatios"
+  },
+  {
+    "id": "rocket-rsi-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RocketRsiWindow.cs",
+    "scope": "internal sealed class RocketRsiWindow",
+    "before": "_changes.Clear();",
+    "after": "// change history retained\n",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.WideAndTinyChangesRetainFilteredGainLossRatios"
+  },
+  {
+    "id": "rocket-rsi-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersRocketRelativeStrengthIndex(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "rocket-rsi-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRocketRsiFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "rocket-rsi-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersRocketRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~RocketRsiNumericalTests.InvalidFieldsLeaveFilterAndRollingSumsUnchanged"
   }
 ]

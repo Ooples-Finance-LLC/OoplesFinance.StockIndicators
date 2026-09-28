@@ -247,93 +247,17 @@ public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State : IStr
 [PrimaryOutput("Errsi")]
 public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly RocketChangeSum _upSum;
-    private readonly RocketChangeSum _downSum;
-    private readonly double _mult;
-    private readonly bool _filterChanges;
-    private double _previousArgument;
-    private double _prevMom;
-    private double _prevSsf;
-    private double _prevTmp;
-
-    public EhlersRocketRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2,
-        int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1)
-    {
-        _length1 = Math.Max(1, length1);
-        _filterChanges = maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2;
-        _smoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _values = new PooledRingBuffer<double>(_length1);
-        _upSum = new RocketChangeSum(_length1);
-        _downSum = new RocketChangeSum(_length1);
-        _mult = mult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RocketRsiWindow _window;
+    public EhlersRocketRelativeStrengthIndexState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1)
+    { RocketRsiWindow.Validate(obosLevel, mult); _window = new(maType, length1, length2, mult); }
     public IndicatorName Name => IndicatorName.EhlersRocketRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _upSum.Reset();
-        _downSum.Reset();
-        _smoother.Reset();
-        _previousArgument = 0;
-        _prevMom = 0;
-        _prevSsf = 0;
-        _prevTmp = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var lookback = _length1 - 1;
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, lookback);
-        var mom = _values.Count >= lookback ? value - prevValue : 0;
-        var arg = (mom + _prevMom) / 2;
-        var ssf = _smoother.Next(_filterChanges ? arg - _previousArgument : arg, isFinal);
-        var ssfMom = _filterChanges ? ssf : ssf - _prevSsf;
-
-        var upChg = ssfMom > 0 ? ssfMom : 0;
-        var downChg = ssfMom < 0 ? Math.Abs(ssfMom) : 0;
-
-        var upSum = _upSum.Next(upChg, isFinal);
-        var downSum = _downSum.Next(downChg, isFinal);
-        var denom = upSum + downSum;
-        var tmp = denom != 0 ? MathHelper.MinOrMax((upSum - downSum) / denom, 0.999, -0.999) : _prevTmp;
-        var tempLog = 1 - tmp != 0 ? (1 + tmp) / (1 - tmp) : 0;
-        var logVal = Math.Log(tempLog);
-        var rocketRsi = 0.5 * logVal * _mult;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _previousArgument = arg;
-            _prevMom = mom;
-            _prevSsf = ssf;
-            _prevTmp = tmp;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Errsi", rocketRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rocketRsi, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Errsi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Erfi")]

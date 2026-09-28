@@ -22576,57 +22576,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersRocketRsiFast(StockData data, ComputeContext context, int length1 = 10,
         int length2 = 8, double mult = 1, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2)
     {
-        // CalculateEhlersRocketRelativeStrengthIndex smooths the two bar average of the length1 momentum, then
-        // takes the Fisher transform of the up and down changes of that smoothed series summed over length1.
-        // Both sums run from the first bar, which the hand rolled window here started one bar late, and the
-        // logarithm is taken as the batch takes it rather than being clamped away.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-
-        using var arguments = context.Rent(count);
-        var arg = arguments.WritableSpan;
-        double previousMomentum = 0;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !RocketRsiWindow.Supports(maType);
+        using var window = new RocketRsiWindow(maType, length1, length2, mult, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            var previousValue = i >= length1 - 1 ? input[i - (length1 - 1)] : 0;
-            var momentum = CalculationsHelper.MinPastValues(i, length1 - 1, input[i] - previousValue);
-            arg[i] = (momentum + previousMomentum) / 2;
-            previousMomentum = momentum;
+            using var arguments = context.Rent(input.Count); using var smoothed = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) arguments.WritableSpan[i] = window.Prepare(input[i], true);
+            MovingAverage(data, maType, Math.Max(1, length2), arguments.Span, smoothed.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Finish(smoothed.Span[i], true);
         }
-
-        var filterChanges = maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 && !ComponentAverage.HasOverrides;
-        if (filterChanges)
-            for (var i = count - 1; i > 0; i--) arg[i] -= arg[i - 1];
-
-        using var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length2, arguments.Span, smoothed.WritableSpan);
-        var filtered = smoothed.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var upChanges = new Streaming.RocketChangeSum(length1);
-        var downChanges = new Streaming.RocketChangeSum(length1);
-        double previousRatio = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var momentum = filterChanges ? filtered[i] : filtered[i] - (i >= 1 ? filtered[i - 1] : 0);
-            var upSum = upChanges.Next(momentum > 0 ? momentum : 0, true);
-            var downSum = downChanges.Next(momentum < 0 ? Math.Abs(momentum) : 0, true);
-
-            var ratio = upSum + downSum != 0
-                ? MathHelper.MinOrMax((upSum - downSum) / (upSum + downSum), 0.999, -0.999)
-                : previousRatio;
-            previousRatio = ratio;
-
-            var transformed = 1 - ratio != 0 ? (1 + ratio) / (1 - ratio) : 0;
-            output[i] = 0.5 * Math.Log(transformed) * mult;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)

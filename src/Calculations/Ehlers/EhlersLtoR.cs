@@ -112,82 +112,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersRocketRelativeStrengthIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV2, 
         int length1 = 10, int length2 = 8, double obosLevel = 2, double mult = 1)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> momList = new(stockData.Count);
-        List<double> argList = new(stockData.Count);
-        List<double> ssf2PoleRocketRsiList = new(stockData.Count);
-        List<double> ssf2PoleUpChgList = new(stockData.Count);
-        List<double> ssf2PoleDownChgList = new(stockData.Count);
-        List<double> ssf2PoleTmpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        Streaming.RocketChangeSum ssf2PoleUpChgSum = new(length1);
-        Streaming.RocketChangeSum ssf2PoleDownChgSum = new(length1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var obLevel = obosLevel * mult;
-        var osLevel = -obosLevel * mult;
-
-        for (var i = 0; i < stockData.Count; i++)
+        RocketRsiWindow.Validate(obosLevel, mult); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !RocketRsiWindow.Supports(maType);
+        using var window = new RocketRsiWindow(maType, length1, length2, mult, external); var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length1 - 1 ? inputList[i - (length1 - 1)] : 0;
-
-            var prevMom = GetLastOrDefault(momList);
-            var mom = MinPastValues(i, length1 - 1, currentValue - prevValue);
-            momList.Add(mom);
-
-            var arg = (mom + prevMom) / 2;
-            argList.Add(arg);
+            var arguments = input.Select(price => window.Prepare(price, true)).ToList(); var smooth = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(arguments), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), arguments);
+            foreach (var value in smooth) values.Add(window.Finish(value, true));
         }
-
-        // For this zero-seeded linear filter, differentiation commutes with smoothing. Filter the
-        // changes directly to avoid subtracting nearly equal levels before a near-zero ratio.
-        var filterChanges = maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2;
-        if (filterChanges)
-            for (var i = argList.Count - 1; i > 0; i--) argList[i] -= argList[i - 1];
-        var argSsf2PoleList = GetMovingAverageList(stockData, maType, length2, argList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ssf2Pole = argSsf2PoleList[i];
-            var prevSsf2Pole = i >= 1 ? argSsf2PoleList[i - 1] : 0;
-            var prevRocketRsi1 = i >= 1 ? ssf2PoleRocketRsiList[i - 1] : 0;
-            var prevRocketRsi2 = i >= 2 ? ssf2PoleRocketRsiList[i - 2] : 0;
-            var ssf2PoleMom = filterChanges ? ssf2Pole : ssf2Pole - prevSsf2Pole;
-
-            var up2PoleChg = ssf2PoleMom > 0 ? ssf2PoleMom : 0;
-            ssf2PoleUpChgList.Add(up2PoleChg);
-            var up2PoleChgSum = ssf2PoleUpChgSum.Next(up2PoleChg, true);
-
-            var down2PoleChg = ssf2PoleMom < 0 ? Math.Abs(ssf2PoleMom) : 0;
-            ssf2PoleDownChgList.Add(down2PoleChg);
-            var down2PoleChgSum = ssf2PoleDownChgSum.Next(down2PoleChg, true);
-
-
-            var prevTmp2Pole = GetLastOrDefault(ssf2PoleTmpList);
-            var tmp2Pole = up2PoleChgSum + down2PoleChgSum != 0 ?
-                MinOrMax((up2PoleChgSum - down2PoleChgSum) / (up2PoleChgSum + down2PoleChgSum), 0.999, -0.999) : prevTmp2Pole;
-            ssf2PoleTmpList.Add(tmp2Pole);
-
-            var ssf2PoleTempLog = 1 - tmp2Pole != 0 ? (1 + tmp2Pole) / (1 - tmp2Pole) : 0;
-            var ssf2PoleLog = Math.Log(ssf2PoleTempLog);
-            var ssf2PoleRocketRsi = 0.5 * ssf2PoleLog * mult;
-            ssf2PoleRocketRsiList.Add(ssf2PoleRocketRsi);
-
-            var signal = GetRsiSignal(ssf2PoleRocketRsi - prevRocketRsi1, prevRocketRsi1 - prevRocketRsi2, ssf2PoleRocketRsi, prevRocketRsi1, obLevel, osLevel);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Errsi", ssf2PoleRocketRsiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ssf2PoleRocketRsiList);
-        stockData.IndicatorName = IndicatorName.EhlersRocketRelativeStrengthIndex;
-
-        return stockData;
+        else foreach (var price in input) values.Add(window.Next(price, true));
+        for (var i = 0; i < values.Count; i++) { var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetRsiSignal(values[i] - previous, previous - older, values[i], previous, obosLevel * mult, -obosLevel * mult)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Errsi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersRocketRelativeStrengthIndex; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Relative Vigor Index
