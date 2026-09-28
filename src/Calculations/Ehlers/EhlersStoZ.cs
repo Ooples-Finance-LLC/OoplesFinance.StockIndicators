@@ -993,37 +993,22 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSimpleWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
     {
-        length = Math.Max(length, 1);
-        List<double> rocList = new(stockData.Count);
-        List<double> derivList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new EhlersSimpleWindow(maType, length);
+        List<double> filtList = new(stockData.Count), rocList = new(stockData.Count), filtered = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentOpen = openList[i];
-            var currentValue = inputList[i];
-
-            var deriv = currentValue - currentOpen;
-            derivList.Add(deriv);
+            var derivList = input.Select((value, i) => EhlersSimpleWindow.Difference(value, stockData.OpenPrices[i]).Publish()).ToList();
+            filtList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(derivList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, derivList);
+            var second = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(filtList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, filtList);
+            filtered = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(second), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, second);
+            for (var i = 0; i < input.Count; i++) rocList.Add(window.Finish(new RocBankValue(filtList[i]), new RocBankValue(filtered[i]), true).Roc);
         }
-
-        var filtList = GetMovingAverageList(stockData, maType, length, derivList);
-        var filtMa1List = GetMovingAverageList(stockData, maType, length, filtList);
-        var filtMa2List = GetMovingAverageList(stockData, maType, length, filtMa1List);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var filt = filtMa2List[i];
-            var prevFilt1 = i >= 1 ? filtMa2List[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtMa2List[i - 2] : 0;
-
-            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
-            rocList.Add(roc);
-
-            var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
-            signalsList?.Add(signal);
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(stockData.OpenPrices[i], input[i], true); filtList.Add(value.Line); rocList.Add(value.Roc); filtered.Add(value.Filtered); }
         }
-
+        for (var i = 0; i < input.Count; i++) { var previous = i > 0 ? filtered[i - 1] : 0; var older = i > 1 ? filtered[i - 2] : 0; signalsList?.Add(GetCompareSignal(filtered[i] - previous, previous - older)); }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Etwi", filtList },
             { "Roc", rocList }

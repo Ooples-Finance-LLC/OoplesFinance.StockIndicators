@@ -1974,65 +1974,18 @@ public sealed class EhlersSimpleDerivIndicatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Etwi")]
 public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
+    private readonly EhlersSimpleWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _firstSmoother;
-    private readonly IMovingAverageSmoother _secondSmoother;
-    private readonly IMovingAverageSmoother _thirdSmoother;
-    private double _prevFilt;
-
     public EhlersSimpleWindowIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _firstSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _secondSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _thirdSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.EhlersSimpleWindowIndicator;
-
-    public void Reset()
-    {
-        _firstSmoother.Reset();
-        _secondSmoother.Reset();
-        _thirdSmoother.Reset();
-        _prevFilt = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var deriv = value - bar.Open;
-        var filt = _firstSmoother.Next(deriv, isFinal);
-        var filtMa1 = _secondSmoother.Next(filt, isFinal);
-        var filtMa2 = _thirdSmoother.Next(filtMa1, isFinal);
-        var roc = (_length / 2.0) * Math.PI * (filtMa2 - _prevFilt);
-
-        if (isFinal)
-        {
-            _prevFilt = filtMa2;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Etwi", filt },
-                { "Roc", roc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(bar.Open, price, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Etwi", value.Line }, { "Roc", value.Roc } } : null);
     }
-
-    public void Dispose()
-    {
-        _firstSmoother.Dispose();
-        _secondSmoother.Dispose();
-        _thirdSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sine")]

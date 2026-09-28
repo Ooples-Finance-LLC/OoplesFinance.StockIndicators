@@ -412,6 +412,7 @@ internal static partial class StatefulIndicatorFactory
             FastandSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(fsk.MaType, fsk.Length, fsk.Ratio),
             RepulseSpecOptions repulse => new RepulseState(repulse.MaType, repulse.Length),
             EhlersSimpleDerivIndicatorSpecOptions deriv => new EhlersSimpleDerivIndicatorState(deriv.MaType, deriv.Length, deriv.SignalLength),
+            EhlersSimpleWindowIndicatorSpecOptions simpleWindow => new EhlersSimpleWindowIndicatorState(simpleWindow.MaType, simpleWindow.Length),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

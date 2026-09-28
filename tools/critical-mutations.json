@@ -32487,5 +32487,120 @@
     "before": "lag <= 3",
     "after": "lag <= 2",
     "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-body",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "sum.Add(open, -1)",
+    "after": "sum.Add(open, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-first-output",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "return (first.Publish(), roc.Publish(), third.Publish())",
+    "after": "return (third.Publish(), roc.Publish(), third.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-third-stage",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "_third.Next(second, commit)",
+    "after": "_third.Next(first, commit)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-factor",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "length / 2.0 * Math.PI",
+    "after": "length * Math.PI",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-previous-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "_previous.AddTo(ref change, -1)",
+    "after": "_previous.AddTo(ref change, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-history-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "if (commit) _previous = third",
+    "after": "if (commit) _previous = new RocBankValue(third.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "return Finish(first, third, commit)",
+    "after": "return Finish(first, third, true)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-average-weight",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersSimpleWindow.cs",
+    "before": "_third.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast("
+  },
+  {
+    "id": "ehlers-simple-window-raw-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(data.OpenPrices[i], input[i], true)",
+    "after": "window.Next(input[i], input[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast("
+  },
+  {
+    "id": "ehlers-simple-window-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class EhlersSimpleWindowIndicatorState"
+  },
+  {
+    "id": "ehlers-simple-window-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersSimpleWindowIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-simple-window-reference-history",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.EhlersSimpleWindow.cs",
+    "before": "third[i - 1]",
+    "after": "first[i - 1]",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

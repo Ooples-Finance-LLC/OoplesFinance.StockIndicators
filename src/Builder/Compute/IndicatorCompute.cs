@@ -23532,9 +23532,17 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersSimpleWindowIndicatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // The batch smooths three times but publishes the first pass, so the extra passes only ever
-        // reached the Roc and Signal lines. The bound series is one moving average of close - open.
-        return EhlersWindowFilter(data, context, length, maType, outputKey, true);
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new EhlersSimpleWindow(maType, length); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        {
+            using var changes = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) changes.WritableSpan[i] = EhlersSimpleWindow.Difference(input[i], data.OpenPrices[i]).Publish();
+            using var first = context.Rent(input.Count); using var second = context.Rent(input.Count); using var third = context.Rent(input.Count);
+            MovingAverage(data, maType, length, changes.Span, first.WritableSpan); MovingAverage(data, maType, length, first.Span, second.WritableSpan); MovingAverage(data, maType, length, second.Span, third.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var value = window.Finish(new RocBankValue(first.Span[i]), new RocBankValue(third.Span[i]), true); result.WritableSpan[i] = outputKey == "Roc" ? value.Roc : value.Line; }
+        }
+        else for (var i = 0; i < input.Count; i++) { var value = window.Next(data.OpenPrices[i], input[i], true); result.WritableSpan[i] = outputKey == "Roc" ? value.Roc : value.Line; }
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(StockData data, ComputeContext context,
