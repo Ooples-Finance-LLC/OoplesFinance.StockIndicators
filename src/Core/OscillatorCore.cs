@@ -7513,44 +7513,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        var pool = ArrayPool<double>.Shared;
-        var smoothArray = pool.Rent(close.Length);
-        var cycleArray = pool.Rent(close.Length);
-
-        try
-        {
-            var smooth = smoothArray.AsSpan(0, close.Length);
-            var cycle_ = cycleArray.AsSpan(0, close.Length);
-
-            var alphaFactor = 1 - (0.5 * alpha);
-            var alphaFactorSq = alphaFactor * alphaFactor;
-            var oneMinusAlpha = 1 - alpha;
-            var oneMinusAlphaSq = oneMinusAlpha * oneMinusAlpha;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue1 = i >= 1 ? close[i - 1] : 0;
-                var prevValue2 = i >= 2 ? close[i - 2] : 0;
-                var prevValue3 = i >= 3 ? close[i - 3] : 0;
-                var prevSmooth1 = i >= 1 ? smooth[i - 1] : 0;
-                var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
-                var prevCycle1 = i >= 1 ? cycle_[i - 1] : 0;
-                var prevCycle2 = i >= 2 ? cycle_[i - 2] : 0;
-
-                smooth[i] = (currentValue + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-
-                cycle_[i] = (alphaFactorSq * (smooth[i] - (2 * prevSmooth1) + prevSmooth2)) +
-                           (2 * oneMinusAlpha * prevCycle1) - (oneMinusAlphaSq * prevCycle2);
-
-                output[i] = i < 7 ? (currentValue - (2 * prevValue1) + prevValue2) / 4 : cycle_[i];
-            }
-        }
-        finally
-        {
-            pool.Return(smoothArray);
-            pool.Return(cycleArray);
-        }
+        var window = new SimpleCycleIndicatorWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

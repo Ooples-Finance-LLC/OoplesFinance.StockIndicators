@@ -123,37 +123,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSimpleCycleIndicator(this StockData stockData, double alpha = 0.07)
     {
-        List<double> smoothList = new(stockData.Count);
-        List<double> cycleList = new(stockData.Count);
-        List<double> cycle_List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        List<double> cycleList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new SimpleCycleIndicatorWindow(alpha);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentMedianPrice = inputList[i];
-            var prevMedianPrice1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevMedianPrice2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevMedianPrice3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevSmooth1 = GetLastOrDefault(smoothList);
-            var prevCycle1 = GetLastOrDefault(cycle_List);
-            var prevSmooth2 = i >= 2 ? smoothList[i - 2] : 0;
-            var prevCycle2 = i >= 2 ? cycle_List[i - 2] : 0;
-            var prevCyc1 = i >= 1 ? cycleList[i - 1] : 0;
-            var prevCyc2 = i >= 2 ? cycleList[i - 2] : 0;
-
-            var smooth = (currentMedianPrice + (2 * prevMedianPrice1) + (2 * prevMedianPrice2) + prevMedianPrice3) / 6;
-            smoothList.Add(smooth);
-
-            var cycle_ = ((1 - (0.5 * alpha)) * (1 - (0.5 * alpha)) * (smooth - (2 * prevSmooth1) + prevSmooth2)) + (2 * (1 - alpha) * prevCycle1) -
-                         ((1 - alpha) * (1 - alpha) * prevCycle2);
-            cycle_List.Add(cycle_);
-
-            var cycle = i < 7 ? (currentMedianPrice - (2 * prevMedianPrice1) + prevMedianPrice2) / 4 : cycle_;
-            cycleList.Add(cycle);
-
-            var signal = GetCompareSignal(cycle - prevCyc1, prevCyc1 - prevCyc2);
-            signalsList?.Add(signal);
+            var previous1 = i > 0 ? cycleList[i - 1] : 0; var previous2 = i > 1 ? cycleList[i - 2] : 0;
+            var value = window.Next(inputList[i], true); cycleList.Add(value); signalsList?.Add(GetCompareSignal(value - previous1, previous1 - previous2));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

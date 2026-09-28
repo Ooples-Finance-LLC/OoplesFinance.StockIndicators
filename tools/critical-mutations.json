@@ -35597,5 +35597,119 @@
     "before": "Product(b3, phase2)",
     "after": "Product(b3, phase1)",
     "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-startup-length",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "_startup < 7 ?",
+    "after": "_startup < 6 ?",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-smoothing-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "count: 6",
+    "after": "count: 4",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-third-price",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "_price3);",
+    "after": "_price2);",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-second-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "Difference(smooth, _smooth1, _smooth2)",
+    "after": "Difference(smooth, _smooth1, _smooth1)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-second-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "Product(_square, _cycle2)",
+    "after": "Product(_square, _cycle1)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-coefficient-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "product.AddProduct(a.Mantissa, b.Mantissa); product.ScaleByPowerOfTwo(a.UpperShift + b.UpperShift);",
+    "after": "product.AddProduct(a.Publish(), b.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-hidden-history",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "_cycle1 = cycle;",
+    "after": "_cycle1 = new RocBankValue(result);",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "if (commit) { _price3",
+    "after": "if (commit || price != 0) { _price3",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleIndicatorWindow.cs",
+    "before": "_startup = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleCycleIndicatorFast("
+  },
+  {
+    "id": "simple-cycle-indicator-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersSimpleCycleIndicatorState"
+  },
+  {
+    "id": "simple-cycle-indicator-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersSimpleCycleIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "simple-cycle-indicator-reference-startup",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SimpleCycleIndicator.cs",
+    "before": "i < 7 ?",
+    "after": "i < 6 ?",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

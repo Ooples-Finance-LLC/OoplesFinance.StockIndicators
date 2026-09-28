@@ -1803,74 +1803,16 @@ public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Esci")]
 public sealed class EhlersSimpleCycleIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _smoothValues;
-    private readonly PooledRingBuffer<double> _cycleValues;
-    private int _index;
-
-    public EhlersSimpleCycleIndicatorState(double alpha = 0.07)
-    {
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(4);
-        _smoothValues = new PooledRingBuffer<double>(3);
-        _cycleValues = new PooledRingBuffer<double>(3);
-    }
-
+    private readonly SimpleCycleIndicatorWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersSimpleCycleIndicatorState(double alpha = .07) => _window = new(alpha);
     public IndicatorName Name => IndicatorName.EhlersSimpleCycleIndicator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _smoothValues.Clear();
-        _cycleValues.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevValue3 = EhlersStreamingWindow.GetOffsetValue(_values, value, 3);
-        var prevSmooth1 = EhlersStreamingWindow.GetOffsetValue(_smoothValues, 1);
-        var prevSmooth2 = EhlersStreamingWindow.GetOffsetValue(_smoothValues, 2);
-        var prevCycle1 = EhlersStreamingWindow.GetOffsetValue(_cycleValues, 1);
-        var prevCycle2 = EhlersStreamingWindow.GetOffsetValue(_cycleValues, 2);
-
-        var smooth = (value + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-        var cycle_ = (MathHelper.Pow(1 - (0.5 * _alpha), 2) * (smooth - (2 * prevSmooth1) + prevSmooth2)) +
-            (2 * (1 - _alpha) * prevCycle1) - (MathHelper.Pow(1 - _alpha, 2) * prevCycle2);
-        var cycle = _index < 7 ? (value - (2 * prevValue1) + prevValue2) / 4 : cycle_;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _smoothValues.TryAdd(smooth, out _);
-            _cycleValues.TryAdd(cycle_, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Esci", cycle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cycle, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Esci", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smoothValues.Dispose();
-        _cycleValues.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("MiddleBand")]
