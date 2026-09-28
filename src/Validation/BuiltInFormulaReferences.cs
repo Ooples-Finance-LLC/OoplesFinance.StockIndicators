@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ChopZone)
+        {
+            var chopOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => ChopZoneOutputs(bars, Integer(chopOptions, "Length", 30), 34, AverageKind(chopOptions, 3), indicator.Source is not null), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.GopalakrishnanRangeIndex)
         {
             var gapoOptions = builtIn.CreateOptions(); var gapoKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

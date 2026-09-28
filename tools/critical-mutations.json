@@ -489,9 +489,9 @@
     "module": "input-rejection",
     "file": "src/Streaming/StatefulIndicators.cs",
     "scope": "public sealed class ChopZoneState",
-    "before": "StreamingInputValidation.Validate(bar);",
-    "after": "// Fault: reject only after child calculations.",
-    "filter": "FullyQualifiedName~DiscoveredNativeInputRejectionTests"
+    "before": "var close = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, close, _selected, isFinal);",
+    "after": "var value = _window.Next(bar.High, bar.Low, bar.Close, _selected, isFinal); var close = _input.GetValue(bar);",
+    "filter": "FullyQualifiedName~ChopZoneNumericalTests.SharedRejectionContractChecksStateAfterRejectedBars"
   },
   {
     "id": "custom-wrapper-missing-raw-validation",
@@ -31765,5 +31765,120 @@
     "before": "return result;",
     "after": "return Math.Abs(result) < 1e-12 ? 0 : result;",
     "filter": "FullyQualifiedName~ValidationTests.GopalakrishnanNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests"
+  },
+  {
+    "id": "chopzone-previous-average",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "ExactVarianceWindow.Units(_previous) - ExactVarianceWindow.Units(average)",
+    "after": "-ExactVarianceWindow.Units(average)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-span",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "ExactVarianceWindow.Units(highest) - ExactVarianceWindow.Units(lowest)",
+    "after": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "ExactVarianceWindow.Units(25)",
+    "after": "ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-typical",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "total.Mean(3)",
+    "after": "total.Mean(2)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-selected",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "selected ? close : total.Mean(3)",
+    "after": "total.Mean(3)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-angle-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "result = -Math.Round",
+    "after": "result = Math.Round",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-angle-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "Math.Round(Math.Atan(published) * (180 / Math.PI))",
+    "after": "Math.Atan(published) * (180 / Math.PI)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ChopZoneWindow.cs",
+    "before": "_previous = 0;",
+    "after": "_previous = 1;",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0",
+    "after": "data.Count < 0",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeChopZoneFast("
+  },
+  {
+    "id": "chopzone-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var close = _input.GetValue(bar);",
+    "after": "double close; try { close = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { close = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class ChopZoneState"
+  },
+  {
+    "id": "chopzone-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " ChopZoneSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-reference-scale",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ChopZone.cs",
+    "before": "new ReferenceFraction(25)",
+    "after": "new ReferenceFraction(20)",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "chopzone-callback-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, length2,",
+    "after": "MovingAverage(data, maType, length1,",
+    "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeChopZoneFast("
   }
 ]

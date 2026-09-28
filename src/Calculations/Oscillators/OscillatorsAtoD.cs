@@ -584,41 +584,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateChopZone(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 34)
     {
-        List<double> emaAngleList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, closeList, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        var emaList = GetMovingAverageList(stockData, maType, length2, closeList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var ema = emaList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var range = highest - lowest != 0 ? 25 / (highest - lowest) * lowest : 0;
-            var avg = inputList[i];
-            var y = avg != 0 && range != 0 ? (prevEma - ema) / avg * range : 0;
-            var c = Sqrt(1 + (y * y));
-            var emaAngle1 = c != 0 ? Math.Round(Math.Acos(1 / c).ToDegrees()) : 0;
-
-            var prevEmaAngle = GetLastOrDefault(emaAngleList);
-            var emaAngle = y > 0 ? -emaAngle1 : emaAngle1;
-            emaAngleList.Add(emaAngle);
-
-            var signal = GetCompareSignal(emaAngle, prevEmaAngle);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cz", emaAngleList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(emaAngleList);
-        stockData.IndicatorName = IndicatorName.ChopZone;
-
-        return stockData;
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2); var selected = stockData.ChainedValues.Count > 0; var close = selected ? stockData.ChainedValues : stockData.ClosePrices;
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var emaList = custom ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(close), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, close) : null;
+        using var window = new ChopZoneWindow(maType, length1, length2, close.Count); var line = new List<double>(close.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < close.Count; i++)
+        { var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], close[i], selected, true, emaList?[i]); signals?.Add(GetCompareSignal(value, i > 0 ? line[i - 1] : 0)); line.Add(value); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cz", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ChopZone; return stockData;
     }
 
 

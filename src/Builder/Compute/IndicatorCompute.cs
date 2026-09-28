@@ -6811,39 +6811,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChopZoneFast(StockData data, ComputeContext context, int length1 = 30,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 34)
     {
-        // CalculateChopZone measures the angle of an average of the close, scaled by where the typical price
-        // sits inside the length1 range, and the average takes the type it was given.
-        var (inputList, highList, lowList, _, closeList, _) =
-            CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
-        var count = inputList.Count;
-
-        using var highestBuffer = context.Rent(count);
-        using var lowestBuffer = context.Rent(count);
-        var highest = highestBuffer.WritableSpan;
-        var lowest = lowestBuffer.WritableSpan;
-        HighestAndLowest(highList, lowList, highest, lowest, length1);
-
-        using var averageBuffer = context.Rent(count);
-        var average = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length2, SpanCompat.AsReadOnlySpan(closeList), average);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var span = highest[i] - lowest[i];
-            var range = span != 0 ? 25 / span * lowest[i] : 0;
-            var avg = inputList[i];
-            var previous = i >= 1 ? average[i - 1] : 0;
-            var y = avg != 0 && range != 0 ? (previous - average[i]) / avg * range : 0;
-            var c = Math.Sqrt(1 + (y * y));
-            var angle = c != 0 ? Math.Round(Math.Acos(1 / c).ToDegrees()) : 0;
-
-            // A falling average tilts the angle the other way.
-            output[i] = y > 0 ? -angle : angle;
-        }
-
-        return buffer;
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2); var selected = data.ChainedValues.Count > 0; var close = selected ? data.ChainedValues : data.ClosePrices;
+        var custom = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var average = context.Rent(close.Count);
+        if (custom) MovingAverage(data, maType, length2, SpanCompat.AsReadOnlySpan(close), average.WritableSpan);
+        using var window = new ChopZoneWindow(maType, length1, length2, close.Count); var result = context.Rent(close.Count);
+        for (var i = 0; i < close.Count; i++) result.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], close[i], selected, true, custom ? average.Span[i] : null);
+        return result;
     }
 
     /// <summary>

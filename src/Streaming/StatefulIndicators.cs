@@ -4759,74 +4759,19 @@ public sealed class ContractHighLowState : IStreamingIndicatorState
 [PrimaryOutput("Cz")]
 public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _ema;
-    private StreamingInputResolver _input;
-    private double _prevEma;
-    private bool _hasPrevEma;
-
-    public ChopZoneState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 34)
-    {
-        var resolved1 = Math.Max(1, length1);
-        _highWindow = new RollingWindowMax(resolved1);
-        _lowWindow = new RollingWindowMin(resolved1);
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
-    }
-
+    private readonly ChopZoneWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    private bool _selected;
+    public ChopZoneState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 34) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.ChopZone;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _ema.Reset();
-        _prevEma = 0;
-        _hasPrevEma = false;
-    }
-
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var ema = _ema.Next(bar.Close, isFinal);
-        var prevEma = _hasPrevEma ? _prevEma : 0;
-        var range = highest - lowest != 0 ? 25 / (highest - lowest) * lowest : 0;
-        var avg = _input.GetValue(bar);
-        var y = avg != 0 && range != 0 ? (prevEma - ema) / avg * range : 0;
-        var c = Math.Sqrt(1 + (y * y));
-        var emaAngle1 = c != 0 ? Math.Round(Math.Acos(1 / c).ToDegrees()) : 0;
-        var emaAngle = y > 0 ? -emaAngle1 : emaAngle1;
-
-        if (isFinal)
-        {
-            _prevEma = ema;
-            _hasPrevEma = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cz", emaAngle }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(emaAngle, outputs);
+        var close = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, close, _selected, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Cz", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _ema.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Col")]
