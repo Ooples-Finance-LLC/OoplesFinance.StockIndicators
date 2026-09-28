@@ -3318,40 +3318,16 @@ public static partial class Calculations
     public static StockData CalculateStiffnessIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 100, int length2 = 60, int smoothingLength = 3, double threshold = 90)
     {
-        List<double> stiffValueList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var aboveSumWindow = new RollingSum();
-
-        var smaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. Katsanos defines the stiffness indicator as the percentage of the last length2 closes lying
-        // above the average less a fifth of a standard deviation, so the bound is a band at 0.2 sigma and it is
-        // the windowed deviation that sigma names. CalculateStandardDeviationVolatility is a different quantity,
-        // about 55% wider, which lowered the bound and so overstated how many closes cleared it. See #190.
-        //
-        // This zeroes the deviation until the window fills, where the old quantity published a value from the
-        // first bar. Before bar length1 the bound is now the average itself, which is the honest answer: there
-        // is no length1-bar window to take a deviation over yet.
-        var stdDevList = GetStandardDeviationList(inputList, length1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length1 = Math.Max(1, length1); smoothingLength = Math.Max(1, smoothingLength);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new StiffnessWindow(maType, length1, length2, smoothingLength);
+        List<double> stiffnessList; List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var sma = smaList[i];
-            var stdDev = stdDevList[i];
-            var bound = sma - (0.2 * stdDev);
-
-            double above = currentValue > bound ? 1 : 0;
-            aboveSumWindow.Add(above);
-
-            var aboveSum = aboveSumWindow.Sum(length2);
-            var stiffValue = length2 != 0 ? aboveSum * 100 / length2 : 0;
-            stiffValueList.Add(stiffValue);
+            var averages = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, input);
+            var stiffValueList = input.Select((value, i) => window.Vote(value, true, averages[i])).ToList();
+            stiffnessList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(stiffValueList), smoothingLength)?.ToList() ?? GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, smoothingLength, stiffValueList);
         }
-
-        var stiffnessList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, smoothingLength, stiffValueList);
+        else stiffnessList = input.Select(value => window.Next(value, true)).ToList();
         for (var i = 0; i < stockData.Count; i++)
         {
             var stiffness = stiffnessList[i];

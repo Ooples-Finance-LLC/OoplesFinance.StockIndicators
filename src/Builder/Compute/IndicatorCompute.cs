@@ -19799,37 +19799,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStiffnessIndicatorFast(StockData data, ComputeContext context, int length1 = 100,
         int length2 = 60, int smoothingLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateStiffnessIndicator is the percentage of the last length2 closes of the chained series lying
-        // above its moving average less a fifth of the windowed standard deviation. The final smoothing is
-        // always exponential, whatever maType asks for, and maType reaches only the first average - the switch
-        // this replaced honoured two types in both places and silently fell back to a simple average for the
-        // rest.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length1, input, average.WritableSpan);
-        var sma = average.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length1);
-        var stdDev = deviation.Span;
-
-        using var stiffValue = context.Rent(count);
-        var stiff = stiffValue.WritableSpan;
-        var aboveSumWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
+        length1 = Math.Max(1, length1); smoothingLength = Math.Max(1, smoothingLength);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new StiffnessWindow(maType, length1, length2, smoothingLength); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var bound = sma[i] - (0.2 * stdDev[i]);
-            aboveSumWindow.Add(input[i] > bound ? 1 : 0);
-            stiff[i] = length2 != 0 ? aboveSumWindow.Sum(length2) * 100 / length2 : 0;
+            using var average = context.Rent(input.Count); MovingAverage(data, maType, length1, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            using var votes = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) votes.WritableSpan[i] = window.Vote(input[i], true, average.Span[i]);
+            MovingAverage(data, MovingAvgType.ExponentialMovingAverage, smoothingLength, votes.Span, result.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, smoothingLength, stiffValue.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

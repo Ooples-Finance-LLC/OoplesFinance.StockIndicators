@@ -561,76 +561,18 @@ public sealed class StationaryExtrapolatedLevelsOscillatorState : IStreamingIndi
 [PrimaryOutput("Si")]
 public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly IMovingAverageSmoother _sma;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. The two have
-    // to move together or the engines disagree about the bound, and a close counted as clearing it in one is
-    // not in the other.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingWindowSum _aboveSum;
-    private readonly IMovingAverageSmoother _signal;
+    private readonly StiffnessWindow _window;
     private readonly StreamingInputResolver _input;
-
-    public StiffnessIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 100, int length2 = 60, int smoothingLength = 3, double threshold = 90)
-    {
-        _ = threshold;
-        _length2 = Math.Max(1, length2);
-        var resolved = Math.Max(1, length1);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-
-        // No maType: a windowed deviation is taken about the window's own mean, so there is no moving average
-        // for a type to choose. maType still selects the average the bound is measured from, above.
-        _stdDev = new RollingStandardDeviation(resolved);
-        _aboveSum = new RollingWindowSum(_length2);
-        _signal = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, smoothingLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public StiffnessIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 100, int length2 = 60, int smoothingLength = 3, double threshold = 90)
+    { _window = new(maType, length1, length2, smoothingLength); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.StiffnessIndicator;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _stdDev.Reset();
-        _aboveSum.Reset();
-        _signal.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-
-        // Fed the resolved input rather than the bar, so a composed reading measures the series it was
-        // composed on rather than resolving a close of its own. See #190.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var bound = sma - (0.2 * stdDev);
-        var above = value > bound ? 1 : 0;
-        var aboveSum = isFinal ? _aboveSum.Add(above, out _) : _aboveSum.Preview(above, out _);
-        var stiffValue = _length2 != 0 ? aboveSum * 100 / _length2 : 0;
-        var stiffness = _signal.Next(stiffValue, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Si", stiffness }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stiffness, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Si", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _stdDev.Dispose();
-        _aboveSum.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sco")]

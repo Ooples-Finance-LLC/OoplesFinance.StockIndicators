@@ -413,6 +413,7 @@ internal static partial class StatefulIndicatorFactory
             RepulseSpecOptions repulse => new RepulseState(repulse.MaType, repulse.Length),
             EhlersSimpleDerivIndicatorSpecOptions deriv => new EhlersSimpleDerivIndicatorState(deriv.MaType, deriv.Length, deriv.SignalLength),
             EhlersSimpleWindowIndicatorSpecOptions simpleWindow => new EhlersSimpleWindowIndicatorState(simpleWindow.MaType, simpleWindow.Length),
+            StiffnessIndicatorSpecOptions stiffness => new StiffnessIndicatorState(stiffness.MaType, stiffness.Length1, stiffness.Length2, stiffness.SmoothingLength, stiffness.Threshold),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

@@ -32830,5 +32830,119 @@
     "before": "(displacement - one).Sign > 0",
     "after": "(displacement - one).Sign >= 0",
     "filter": "FullyQualifiedName~ValidationTests.SimpleLinesNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples|FullyQualifiedName~SimpleLinesDoesNotAccumulateFractionalStepError"
+  },
+  {
+    "id": "stiffness-strict-bound",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "var above = price > bound",
+    "after": "var above = price >= bound",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-sigma-scale",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "average - .2 * deviation",
+    "after": "average - 2 * deviation",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-deviation-startup",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "_prices.Count + 1L < _length",
+    "after": "_prices.Count + 2L < _length",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "var sum = _sum + units - expired",
+    "after": "var sum = _sum + units + expired",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-vote-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "_votes - (_flags.Count == _lookback && _flags.Peek() ? 1 : 0)",
+    "after": "_votes",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-vote-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "return votes * 100d / _lookback",
+    "after": "return votes * 100d / Math.Min(_lookback, _flags.Count + 1L)",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-signal-kind",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "_signal = new(MovingAvgType.ExponentialMovingAverage",
+    "after": "_signal = new(MovingAvgType.WildersSmoothingMethod",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-price-average",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "_average.Next(new RocBankValue(price), commit).Publish()",
+    "after": "price",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "Vote(price, commit)",
+    "after": "Vote(price, true)",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-reset",
+    "module": "numerical",
+    "file": "src/Helpers/StiffnessWindow.cs",
+    "before": "_votes = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeStiffnessIndicatorFast("
+  },
+  {
+    "id": "stiffness-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class StiffnessIndicatorState"
+  },
+  {
+    "id": "stiffness-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " StiffnessIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "stiffness-reference-bound",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Stiffness.cs",
+    "before": "value > mean[i]",
+    "after": "value >= mean[i]",
+    "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]
