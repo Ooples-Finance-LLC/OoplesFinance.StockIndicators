@@ -8250,80 +8250,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.");
         }
 
-        alpha = Math.Max(0.01, Math.Min(0.99, alpha));
-        var cc = 1 - alpha;
-
-        var pool = ArrayPool<double>.Shared;
-        var emaArray = pool.Rent(close.Length);
-        var re1Array = pool.Rent(close.Length);
-        var re2Array = pool.Rent(close.Length);
-        var re3Array = pool.Rent(close.Length);
-        var re4Array = pool.Rent(close.Length);
-        var re5Array = pool.Rent(close.Length);
-        var re6Array = pool.Rent(close.Length);
-        var re7Array = pool.Rent(close.Length);
-
-        try
-        {
-            var ema = emaArray.AsSpan(0, close.Length);
-            var re1 = re1Array.AsSpan(0, close.Length);
-            var re2 = re2Array.AsSpan(0, close.Length);
-            var re3 = re3Array.AsSpan(0, close.Length);
-            var re4 = re4Array.AsSpan(0, close.Length);
-            var re5 = re5Array.AsSpan(0, close.Length);
-            var re6 = re6Array.AsSpan(0, close.Length);
-            var re7 = re7Array.AsSpan(0, close.Length);
-
-            var cc2 = cc * cc;
-            var cc4 = cc2 * cc2;
-            var cc8 = cc4 * cc4;
-            var cc16 = cc8 * cc8;
-            var cc32 = cc16 * cc16;
-            var cc64 = cc32 * cc32;
-            var cc128 = cc64 * cc64;
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevEma = i >= 1 ? ema[i - 1] : 0;
-                ema[i] = (alpha * currentValue) + (cc * prevEma);
-
-                var prevRe1 = i >= 1 ? re1[i - 1] : 0;
-                re1[i] = (cc * ema[i]) + prevEma;
-
-                var prevRe2 = i >= 1 ? re2[i - 1] : 0;
-                re2[i] = (cc2 * re1[i]) + prevRe1;
-
-                var prevRe3 = i >= 1 ? re3[i - 1] : 0;
-                re3[i] = (cc4 * re2[i]) + prevRe2;
-
-                var prevRe4 = i >= 1 ? re4[i - 1] : 0;
-                re4[i] = (cc8 * re3[i]) + prevRe3;
-
-                var prevRe5 = i >= 1 ? re5[i - 1] : 0;
-                re5[i] = (cc16 * re4[i]) + prevRe4;
-
-                var prevRe6 = i >= 1 ? re6[i - 1] : 0;
-                re6[i] = (cc32 * re5[i]) + prevRe5;
-
-                var prevRe7 = i >= 1 ? re7[i - 1] : 0;
-                re7[i] = (cc64 * re6[i]) + prevRe6;
-
-                var re8 = (cc128 * re7[i]) + prevRe7;
-                output[i] = ema[i] - (alpha * re8);
-            }
-        }
-        finally
-        {
-            pool.Return(emaArray);
-            pool.Return(re1Array);
-            pool.Return(re2Array);
-            pool.Return(re3Array);
-            pool.Return(re4Array);
-            pool.Return(re5Array);
-            pool.Return(re6Array);
-            pool.Return(re7Array);
-        }
+        var window = new ReverseEmaWindow(alpha);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

@@ -35218,5 +35218,138 @@
     "before": "i >= length1 ? bars[i - length1].Close : 0",
     "after": "i > 0 ? bars[i - 1].Close : 0",
     "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-coefficient-power",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "1 << stage",
+    "after": "stage + 1",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-alpha-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "Math.Max(.01, Math.Min(.99, alpha))",
+    "after": "Math.Max(.02, Math.Min(.98, alpha))",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-ema-history",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "_history[0].Multiply(_complement)",
+    "after": "_history[1].Multiply(_complement)",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-stage-history",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "_history[stage]);",
+    "after": "_history[0]);",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-wave-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "reverse.Multiply(_alpha), -1",
+    "after": "reverse.Multiply(_alpha), 1",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "if (commit) next",
+    "after": "if (commit || price != 0) next",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ReverseEmaWindow.cs",
+    "before": "Array.Clear(_history, 0, _history.Length)",
+    "after": "Array.Clear(_history, 0, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-raw-selected1",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV1Fast("
+  },
+  {
+    "id": "reverse-ema-native-invalid1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "double value; try { value = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { value = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersReverseExponentialMovingAverageIndicatorV1State"
+  },
+  {
+    "id": "reverse-ema-live-registration1",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersReverseEmaIndicatorV1SpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-raw-selected2",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersReverseEmaIndicatorV2Fast("
+  },
+  {
+    "id": "reverse-ema-native-invalid2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "double value; try { value = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { value = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State"
+  },
+  {
+    "id": "reverse-ema-live-registration2",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersReverseEmaIndicatorV2SpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-reference-power",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ReverseEma.cs",
+    "before": "1 << stage",
+    "after": "stage + 1",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "reverse-ema-cycle-input",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "_cycleEngine.Next(value, isFinal)",
+    "after": "_cycleEngine.Next(trend, isFinal)",
+    "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State"
   }
 ]

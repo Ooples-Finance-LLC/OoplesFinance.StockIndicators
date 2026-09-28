@@ -172,6 +172,17 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ModularOutputs(bars, Integer(modularOptions, "Length", 200), Number(modularOptions, .8, "Beta")), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName is IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV1 or IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2)
+        {
+            var reverseOptions = builtIn.CreateOptions(); var version2 = builtIn.BatchName == IndicatorName.EhlersReverseExponentialMovingAverageIndicatorV2;
+            var reverseKeys = builtIn.BatchOutputKey is { } selectedReverse ? new[] { selectedReverse } : version2 ? new[] { "EremaCycle", "EremaTrend" } : new[] { "Erema" };
+            for (var output = 0; output < reverseKeys.Length; output++)
+            {
+                var alpha = version2 ? reverseKeys[output] == "EremaTrend" ? Number(reverseOptions, .05, "TrendAlpha") : Number(reverseOptions, .3, "CycleAlpha") : Number(reverseOptions, .1, "Alpha");
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(output, bars => ReverseEmaOutputs(bars, alpha), IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersImpulseReaction)
         {
             var reactionOptions = builtIn.CreateOptions();

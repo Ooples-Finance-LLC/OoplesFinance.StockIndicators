@@ -3836,91 +3836,10 @@ public sealed class EhlersSwissArmyKnifeIndicatorState : IStreamingIndicatorStat
 
 internal sealed class ReverseEmaEngine
 {
-    private readonly double _alpha;
-    private readonly double _cc;
-    private readonly double _cc2;
-    private readonly double _cc4;
-    private readonly double _cc8;
-    private readonly double _cc16;
-    private readonly double _cc32;
-    private readonly double _cc64;
-    private readonly double _cc128;
-    private double _ema;
-    private double _re1;
-    private double _re2;
-    private double _re3;
-    private double _re4;
-    private double _re5;
-    private double _re6;
-    private double _re7;
-
-    public ReverseEmaEngine(double alpha)
-    {
-        _alpha = alpha;
-        _cc = 1 - alpha;
-        _cc2 = MathHelper.Pow(_cc, 2);
-        _cc4 = MathHelper.Pow(_cc, 4);
-        _cc8 = MathHelper.Pow(_cc, 8);
-        _cc16 = MathHelper.Pow(_cc, 16);
-        _cc32 = MathHelper.Pow(_cc, 32);
-        _cc64 = MathHelper.Pow(_cc, 64);
-        _cc128 = MathHelper.Pow(_cc, 128);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevEma = _ema;
-        var prevRe1 = _re1;
-        var prevRe2 = _re2;
-        var prevRe3 = _re3;
-        var prevRe4 = _re4;
-        var prevRe5 = _re5;
-        var prevRe6 = _re6;
-        var prevRe7 = _re7;
-
-        var ema = (_alpha * value) + (_cc * prevEma);
-        var re1 = (_cc * ema) + prevEma;
-        var re2 = (_cc2 * re1) + prevRe1;
-        var re3 = (_cc4 * re2) + prevRe2;
-        var re4 = (_cc8 * re3) + prevRe3;
-        var re5 = (_cc16 * re4) + prevRe4;
-        var re6 = (_cc32 * re5) + prevRe5;
-        var re7 = (_cc64 * re6) + prevRe6;
-        var re8 = (_cc128 * re7) + prevRe7;
-        var wave = ema - (_alpha * re8);
-
-        // Protect against numerical instability (infinity/NaN)
-        if (double.IsNaN(wave) || double.IsInfinity(wave))
-        {
-            wave = ema; // Fall back to just the EMA
-        }
-
-        if (isFinal)
-        {
-            _ema = ema;
-            _re1 = re1;
-            _re2 = re2;
-            _re3 = re3;
-            _re4 = re4;
-            _re5 = re5;
-            _re6 = re6;
-            _re7 = re7;
-        }
-
-        return wave;
-    }
-
-    public void Reset()
-    {
-        _ema = 0;
-        _re1 = 0;
-        _re2 = 0;
-        _re3 = 0;
-        _re4 = 0;
-        _re5 = 0;
-        _re6 = 0;
-        _re7 = 0;
-    }
+    private readonly ReverseEmaWindow _window;
+    public ReverseEmaEngine(double alpha) => _window = new(alpha);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
 }
 
 internal sealed class Ehlers2PoleSuperSmootherFilterV1Smoother : IMovingAverageSmoother

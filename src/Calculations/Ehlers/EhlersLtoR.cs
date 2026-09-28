@@ -895,64 +895,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersReverseExponentialMovingAverageIndicatorV1(this StockData stockData, double alpha = 0.1)
     {
-        alpha = MinOrMax(alpha, 0.99, 0.01);
-        List<double> emaList = new(stockData.Count);
-        List<double> re1List = new(stockData.Count);
-        List<double> re2List = new(stockData.Count);
-        List<double> re3List = new(stockData.Count);
-        List<double> re4List = new(stockData.Count);
-        List<double> re5List = new(stockData.Count);
-        List<double> re6List = new(stockData.Count);
-        List<double> re7List = new(stockData.Count);
-        List<double> waveList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var cc = 1 - alpha;
-
+        List<double> waveList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new ReverseEmaWindow(alpha);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-
-            var prevEma = GetLastOrDefault(emaList);
-            var ema = (alpha * currentValue) + (cc * prevEma);
-            emaList.Add(ema);
-
-            var prevRe1 = GetLastOrDefault(re1List);
-            var re1 = (cc * ema) + prevEma;
-            re1List.Add(re1);
-
-            var prevRe2 = GetLastOrDefault(re2List);
-            var re2 = (Pow(cc, 2) * re1) + prevRe1;
-            re2List.Add(re2);
-
-            var prevRe3 = GetLastOrDefault(re3List);
-            var re3 = (Pow(cc, 4) * re2) + prevRe2;
-            re3List.Add(re3);
-
-            var prevRe4 = GetLastOrDefault(re4List);
-            var re4 = (Pow(cc, 8) * re3) + prevRe3;
-            re4List.Add(re4);
-
-            var prevRe5 = GetLastOrDefault(re5List);
-            var re5 = (Pow(cc, 16) * re4) + prevRe4;
-            re5List.Add(re5);
-
-            var prevRe6 = GetLastOrDefault(re6List);
-            var re6 = (Pow(cc, 32) * re5) + prevRe5;
-            re6List.Add(re6);
-
-            var prevRe7 = GetLastOrDefault(re7List);
-            var re7 = (Pow(cc, 64) * re6) + prevRe6;
-            re7List.Add(re7);
-
-            var re8 = (Pow(cc, 128) * re7) + prevRe7;
-            var prevWave = GetLastOrDefault(waveList);
-            var wave = ema - (alpha * re8);
-            waveList.Add(wave);
-
-            var signal = GetCompareSignal(wave, prevWave);
-            signalsList?.Add(signal);
+            var previous = GetLastOrDefault(waveList); var value = window.Next(inputList[i], true); waveList.Add(value);
+            signalsList?.Add(GetCompareSignal(value, previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
