@@ -1670,77 +1670,18 @@ public sealed class EhlersRecursiveMedianFilterState : IStreamingIndicatorState,
 [PrimaryOutput("Ermo")]
 public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha1;
-    private readonly double _alpha2;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly double[] _medianScratch;
-    private double _prevRm1;
-    private double _prevRm2;
-    private double _prevRmo1;
-    private double _prevRmo2;
-
-    public EhlersRecursiveMedianOscillatorState(int length1 = 5, int length2 = 12, int length3 = 30)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var alpha1Arg = MathHelper.MinOrMax(2 * Math.PI / resolved2, 0.99, 0.01);
-        var alpha1ArgCos = Math.Cos(alpha1Arg);
-        var alpha2Arg = MathHelper.MinOrMax((1 / MathHelper.Sqrt2) * 2 * Math.PI / resolved3, 0.99, 0.01);
-        var alpha2ArgCos = Math.Cos(alpha2Arg);
-        _alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
-        _alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(resolved1);
-        _medianScratch = new double[resolved1];
-    }
-
+    private readonly RecursiveMedianOscillatorWindow _window;
+    public EhlersRecursiveMedianOscillatorState(int length1 = 5, int length2 = 12, int length3 = 30) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.EhlersRecursiveMedianOscillator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevRm1 = 0;
-        _prevRm2 = 0;
-        _prevRmo1 = 0;
-        _prevRmo2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var median = EhlersStreamingWindow.GetMedian(_values, value, _medianScratch);
-        var rm = (_alpha1 * median) + ((1 - _alpha1) * _prevRm1);
-        var rmo = (MathHelper.Pow(1 - (_alpha2 / 2), 2) * (rm - (2 * _prevRm1) + _prevRm2)) +
-            (2 * (1 - _alpha2) * _prevRmo1) - (MathHelper.Pow(1 - _alpha2, 2) * _prevRmo2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevRm2 = _prevRm1;
-            _prevRm1 = rm;
-            _prevRmo2 = _prevRmo1;
-            _prevRmo1 = rmo;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ermo", rmo }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rmo, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ermo", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
+
 
 [PrimaryOutput("Esci")]
 public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, IDisposable

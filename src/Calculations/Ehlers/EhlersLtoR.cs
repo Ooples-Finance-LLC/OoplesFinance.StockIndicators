@@ -783,52 +783,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersRecursiveMedianOscillator(this StockData stockData, int length1 = 5, int length2 = 12, int length3 = 30)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> rmList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> rmoList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        using var tempMedian = new RollingMedian(length1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha1Arg = MinOrMax(2 * Math.PI / length2, 0.99, 0.01);
-        var alpha1ArgCos = Math.Cos(alpha1Arg);
-        var alpha2Arg = MinOrMax(1 / Sqrt(2) * 2 * Math.PI / length3, 0.99, 0.01);
-        var alpha2ArgCos = Math.Cos(alpha2Arg);
-        var alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
-        var alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RecursiveMedianOscillatorWindow(length1, length2, length3);
+        var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempMedian.Add(currentValue);
-
-            var median = tempMedian.Median;
-            var prevRm1 = i >= 1 ? rmList[i - 1] : 0;
-            var prevRm2 = i >= 2 ? rmList[i - 2] : 0;
-            var prevRmo1 = i >= 1 ? rmoList[i - 1] : 0;
-            var prevRmo2 = i >= 2 ? rmoList[i - 2] : 0;
-
-            var rm = (alpha1 * median) + ((1 - alpha1) * prevRm1);
-            rmList.Add(rm);
-
-            var rmo = (Pow(1 - (alpha2 / 2), 2) * (rm - (2 * prevRm1) + prevRm2)) + (2 * (1 - alpha2) * prevRmo1) - (Pow(1 - alpha2, 2) * prevRmo2);
-            rmoList.Add(rmo);
-
-            var signal = GetCompareSignal(rmo, prevRmo1);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); signals?.Add(GetCompareSignal(value, i == 0 ? 0 : output[i - 1])); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ermo", rmoList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rmoList);
-        stockData.IndicatorName = IndicatorName.EhlersRecursiveMedianOscillator;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ermo", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersRecursiveMedianOscillator;
         return stockData;
     }
 

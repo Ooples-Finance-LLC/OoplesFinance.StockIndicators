@@ -10539,45 +10539,14 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 12,
-        int length3 = 30)
+    internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 12, int length3 = 30)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        var alpha1Arg = MathHelper.MinOrMax(2 * Math.PI / length2, 0.99, 0.01);
-        var alpha1ArgCos = Math.Cos(alpha1Arg);
-        var alpha2Arg = MathHelper.MinOrMax(1 / MathHelper.Sqrt(2) * 2 * Math.PI / length3, 0.99, 0.01);
-        var alpha2ArgCos = Math.Cos(alpha2Arg);
-        var alpha1 = alpha1ArgCos != 0 ? (alpha1ArgCos + Math.Sin(alpha1Arg) - 1) / alpha1ArgCos : 0;
-        var alpha2 = alpha2ArgCos != 0 ? (alpha2ArgCos + Math.Sin(alpha2Arg) - 1) / alpha2ArgCos : 0;
-
-        using var median = new RollingMedian(length1);
-        using var recursiveMedian = context.Rent(count);
-        var rm = recursiveMedian.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            median.Add(input[i]);
-
-            var previousRm1 = i >= 1 ? rm[i - 1] : 0;
-            var previousRm2 = i >= 2 ? rm[i - 2] : 0;
-            var previousRmo1 = i >= 1 ? output[i - 1] : 0;
-            var previousRmo2 = i >= 2 ? output[i - 2] : 0;
-
-            rm[i] = (alpha1 * median.Median) + ((1 - alpha1) * previousRm1);
-            output[i] = (MathHelper.Pow(1 - (alpha2 / 2), 2) * (rm[i] - (2 * previousRm1) + previousRm2)) +
-                (2 * (1 - alpha2) * previousRmo1) - (MathHelper.Pow(1 - alpha2, 2) * previousRmo2);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new RecursiveMedianOscillatorWindow(length1, length2, length3); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
+        return output;
     }
+
 
     /// <summary>
     /// Computes Ehlers Stochastic Center of Gravity Oscillator using zero-allocation fast path.

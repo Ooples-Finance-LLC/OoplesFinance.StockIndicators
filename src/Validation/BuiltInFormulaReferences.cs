@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersRecursiveMedianOscillator)
+        {
+            var oscillatorOptions = (EhlersRecursiveMedianOscillatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveMedianOscillatorValues(bars, oscillatorOptions.Length1, oscillatorOptions.Length2, oscillatorOptions.Length3), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersRecursiveMedianFilter)
         {
             var medianOptions = (EhlersRecursiveMedianFilterSpecOptions)builtIn.CreateOptions();

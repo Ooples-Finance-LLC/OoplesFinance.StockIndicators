@@ -37508,5 +37508,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "new(length1, length2)",
+    "after": "new(length1, length3)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-highpass",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "Math.Max(1, length3)",
+    "after": "Math.Max(1, length2)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-difference",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "difference.Add(_previous, -2)",
+    "after": "difference.Add(_previous, -1)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-extended",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "RocBankValue.Round(difference).Multiply(_drive)",
+    "after": "new RocBankValue(difference.Mean(1)).Multiply(_drive)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "_first.Multiply(_feedback)",
+    "after": "_first.Multiply(_drive)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-decay",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "_second.Multiply(_decay).AddTo(ref sum, -1)",
+    "after": "_second.Multiply(_decay).AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianOscillatorWindow.cs",
+    "scope": "internal sealed class RecursiveMedianOscillatorWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersRecursiveMedianOscillator(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRecursiveMedianOscillatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "recursive-median-oscillator-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersRecursiveMedianOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
   }
 ]
