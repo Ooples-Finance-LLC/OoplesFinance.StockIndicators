@@ -33516,5 +33516,119 @@
     "before": "fit.CompareTo(previous)",
     "after": "previous.CompareTo(fit)",
     "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-sigma-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": ".Multiply(2);",
+    "after": ".Multiply(1);",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-extended-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "new RocBankValue(deviation).Multiply(2)",
+    "after": "new RocBankValue(deviation * 2)",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "Bound(_previous, twice, 1)) > 0",
+    "after": "Bound(_previous, twice, 1)) >= 0",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-lower-tie",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "Bound(_previous, twice, -1)) < 0",
+    "after": "Bound(_previous, twice, -1)) <= 0",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "var result = !full ||",
+    "after": "var result = _prices.Count + 1L < _length ||",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "_squares + current * current - expired * expired",
+    "after": "_squares + current * current + expired * expired",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-population-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "n * n);",
+    "after": "n * (n + 1));",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (commit || price != 0) { _sum = sum;",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendStepWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeTrendStepFast("
+  },
+  {
+    "id": "trend-step-raw-registration",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "ComputeTrendStepFast(data, context, trendStep.Length)",
+    "after": "ComputeTrendStepFast(data, context, 1)",
+    "filter": "FullyQualifiedName~TrendStepNumericalTests.SelectedPricesDriveDeviationAndSteps"
+  },
+  {
+    "id": "trend-step-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class TrendStepState"
+  },
+  {
+    "id": "trend-step-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " TrendStepSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trend-step-reference-sigma",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.TrendStep.cs",
+    "before": "* new ReferenceFraction(2)",
+    "after": "* new ReferenceFraction(1)",
+    "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

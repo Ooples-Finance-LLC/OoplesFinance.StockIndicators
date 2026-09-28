@@ -595,6 +595,7 @@ internal static class BuilderVerifiedArms
         typeof(TrendTraderBandsSpecOptions),
         typeof(TrenderSpecOptions),
         typeof(TriangularMovingAverageSpecOptions),
+        typeof(TrendStepSpecOptions),
         typeof(TrigonometricOscillatorSpecOptions),
         typeof(TrimeanSpecOptions),
         typeof(TrixSpecOptions),

@@ -153,25 +153,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrendStep(this StockData stockData, int length = 50)
     {
-        List<double> aList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. The step holds until price escapes a band two deviations either side of it, and sigma in a
-        // band is the windowed deviation; the quantity this replaces is about 55% wider on a typical price
-        // series, so the band was that much too wide and the step held through moves that should have moved
-        // it. The i < length guard below already covers the bars before the window fills. See #190.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
+        List<double> aList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new TrendStepWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var dev = stdDevList[i] * 2;
-
-            var prevA = i >= 1 ? aList[i - 1] : currentValue;
-            var a = i < length ? currentValue : currentValue > prevA + dev ? currentValue : currentValue < prevA - dev ? currentValue : prevA;
+            var currentValue = inputList[i]; var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevA = i >= 1 ? aList[i - 1] : currentValue; var a = window.Next(currentValue, true);
             aList.Add(a);
 
             var signal = GetCompareSignal(currentValue - a, prevValue - prevA);

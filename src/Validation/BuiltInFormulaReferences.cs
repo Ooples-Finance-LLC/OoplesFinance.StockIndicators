@@ -104,6 +104,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrigonometricOutputs(bars, trigonometricLength), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TrendStep)
+        {
+            var trendStepLength = Integer(builtIn.CreateOptions(), "Length", 50);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrendStepOutputs(bars, trendStepLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

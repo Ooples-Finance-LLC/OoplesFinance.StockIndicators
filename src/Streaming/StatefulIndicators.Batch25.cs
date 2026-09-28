@@ -264,66 +264,17 @@ public sealed class TrendPersistenceRateState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Ts")]
 public sealed class TrendStepState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
+    private readonly TrendStepWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevA;
-    private int _index;
-    private bool _hasPrev;
-
-    public TrendStepState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-
-        // No moving-average type: a windowed deviation is taken about the window's own mean.
-        _stdDev = new RollingStandardDeviation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public TrendStepState(int length = 50) { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.TrendStep;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _prevA = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        // Fed the resolved input rather than the bar, matching the batch calculation.
-        var dev = _stdDev.Next(value, isFinal) * 2;
-        var prevA = _hasPrev ? _prevA : value;
-        var a = _index < _length ? value : value > prevA + dev ? value : value < prevA - dev ? value : prevA;
-
-        if (isFinal)
-        {
-            _prevA = a;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ts", a }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ts", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

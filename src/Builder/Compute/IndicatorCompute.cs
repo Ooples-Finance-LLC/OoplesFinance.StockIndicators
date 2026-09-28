@@ -928,6 +928,7 @@ internal static partial class IndicatorCompute
             HistoricalVolatilityPercentileSpecOptions percentile => ComputeHistoricalVolatilityRanks(data, context, percentile, spec.OutputKey),
             QuantitativeQualitativeEstimationSpecOptions qqe => ComputeQqeWidths(data, context, qqe, spec.OutputKey),
             PrimeNumberOscillatorSpecOptions pno => ComputePrimeNumberOscillatorFast(data, context, pno.Length),
+            TrendStepSpecOptions trendStep => ComputeTrendStepFast(data, context, trendStep.Length),
             TrigonometricOscillatorSpecOptions trigo => ComputeTrigonometricOscillatorFast(data, context, trigo.Length),
             UltimateTraderOscillatorSpecOptions uto => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeUltimateTraderOscillatorFast(data, context, uto.Length, uto.MaType), 4, uto.MaType)
@@ -9849,6 +9850,14 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Trigonometric Oscillator using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeTrendStepFast(StockData data, ComputeContext context, int length = 50)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new TrendStepWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
+    }
+
     internal static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 200)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
