@@ -40334,5 +40334,122 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation removed\n",
     "filter": "FullyQualifiedName~RocketRsiNumericalTests.InvalidFieldsLeaveFilterAndRollingSumsUnchanged"
+  },
+  {
+    "id": "modified-rsi-roof-drive",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "numerator.Add(_price3);",
+    "after": "numerator.Add(_price3, -1);",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-roof-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "_high2.Add(ref secondSum, _pole)",
+    "after": "_high2.Add(ref secondSum, 0d)",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-low-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "- _feedback1 - _feedback2",
+    "after": "- _feedback1",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.ExtremePeriodsRetainGainWithoutEagerHistoryAllocation"
+  },
+  {
+    "id": "modified-rsi-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(divisor);",
+    "after": "var shift = 0; var value = sum.Mean(divisor); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.BelowRangeRoofingTailsStillDetermineTheGainLossRatio"
+  },
+  {
+    "id": "modified-rsi-gain-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "if (change.Mantissa > 0) change.Add(ref gains);",
+    "after": "if (change.Mantissa < 0) change.Add(ref gains);",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-matched-window",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "if (expired.Mantissa > 0) expired.Add(ref gains, -1d);",
+    "after": "// expired positive gain retained\n",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-adjacent-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "valid && _hadRatio ?",
+    "after": "valid ?",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.StartupRequiresTwoDefinedRatiosAndZeroHistoryStaysZero"
+  },
+  {
+    "id": "modified-rsi-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "Filter(line, _line1, _signal1, _signal2, true)",
+    "after": "Filter(line, default, _signal1, _signal2, true)",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedRsiWindow.cs",
+    "scope": "internal sealed class ModifiedRsiWindow",
+    "before": "_changes.Clear();",
+    "after": "// change history retained\n",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.WideAndTinyRoofingChangesRetainBothOutputs"
+  },
+  {
+    "id": "modified-rsi-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersModifiedRelativeStrengthIndex(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "modified-rsi-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeModifiedRsiFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "modified-rsi-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersModifiedRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.InvalidFieldsLeaveRoofingRatiosAndSignalUnchanged"
   }
 ]

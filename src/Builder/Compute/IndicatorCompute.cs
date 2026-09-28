@@ -18670,29 +18670,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Modified Stochastic Indicator using zero-allocation fast path.
     /// </summary>
-    private static ComputeBuffer ComputeModifiedRsiFast(StockData data, ComputeContext context,
+    internal static ComputeBuffer ComputeModifiedRsiFast(StockData data, ComputeContext context,
         EhlersModifiedRelativeStrengthIndexSpecOptions options, string? outputKey)
     {
-        using var roof = ComputeEhlersRoofingFilterV2Fast(data, context, options.Length1, options.Length2);
-        var radius = Math.Exp(-Math.Sqrt(2) * Math.PI / options.Length2);
-        var c2 = 2 * radius * Math.Cos(Math.Min(Math.Sqrt(2) * Math.PI / options.Length2, .99));
-        var c3 = -radius * radius; var c1 = 1 - c2 - c3;
-        var gains = new Streaming.AdaptiveWindowMean(options.Length3);
-        var movements = new Streaming.AdaptiveWindowMean(options.Length3);
-        double previousRatio = 0, previousTotal = 0, rsi1 = 0, rsi2 = 0, signal1 = 0, signal2 = 0;
-        var result = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++)
-        {
-            var change = roof.Span[i] - (i == 0 ? 0 : roof.Span[i - 1]);
-            var total = movements.Next(Math.Abs(change), options.Length3, true);
-            var gain = gains.Next(Math.Max(0, change), options.Length3, true);
-            var ratio = total == 0 ? 0 : gain / total;
-            var rsi = total != 0 && previousTotal != 0 ? c1 * (ratio + previousRatio) / 2 + c2 * rsi1 + c3 * rsi2 : 0;
-            var signal = c1 * (rsi + rsi1) / 2 + c2 * signal1 + c3 * signal2;
-            result.WritableSpan[i] = outputKey == "Signal" ? signal : rsi;
-            rsi2 = rsi1; rsi1 = rsi; signal2 = signal1; signal1 = signal;
-            previousRatio = ratio; previousTotal = total;
-        }
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new ModifiedRsiWindow(options.Length1, options.Length2, options.Length3); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.Signal : point.Line; }
         return result;
     }
 

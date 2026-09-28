@@ -294,28 +294,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersEvenBetterSineWaveIndicator:
                 return new("Ebsi", new[] { "Ebsi" }, bars => Outputs(("Ebsi", EvenBetterSineValues(bars, Integer(options, "Length1", 40), Integer(options, "Length2", 10)))));
             case IndicatorName.EhlersModifiedRelativeStrengthIndex:
-                return new("Emrsi", new[] { "Emrsi", "Signal" }, bars =>
-                {
-                    var lower = Integer(options, "Length2", 10);
-                    var lookback = Integer(options, "Length3", 10);
-                    var roof = HilbertRoofingTrajectory(Closes(bars), Integer(options, "Length1", 48), lower);
-                    var changes = roof.Select((v, i) => v - (i == 0 ? 0 : roof[i - 1])).ToArray();
-                    var total = changes.Select((_, i) => Window(changes, i, lookback).Sum(Math.Abs)).ToArray();
-                    var ratio = changes.Select((_, i) => total[i] == 0 ? 0 : Window(changes, i, lookback).Sum(v => Math.Max(0, v)) / total[i]).ToArray();
-                    var angle = Math.Min(Math.Sqrt(2) * Math.PI / lower, .99);
-                    var radius = Math.Exp(-Math.Sqrt(2) * Math.PI / lower);
-                    var line = HilbertLowPass(ratio, radius, angle);
-                    var impulse = Enumerable.Range(0, bars.Count).Select(lag => Math.Pow(radius, lag) * Math.Sin((lag + 1) * angle) / Math.Sin(angle)).ToArray();
-                    // The definition resets a sample with an undefined adjacent ratio. Inject a
-                    // correcting impulse, preserving its effect on subsequent filter history.
-                    for (var i = 0; i < line.Length; i++)
-                        if (total[i] == 0 || i == 0 || total[i - 1] == 0)
-                        {
-                            var correction = -line[i];
-                            for (var j = i; j < line.Length; j++) line[j] += correction * impulse[j - i];
-                        }
-                    return Outputs(("Emrsi", line), ("Signal", HilbertLowPass(line, radius, angle)));
-                });
+                return new("Emrsi", new[] { "Emrsi", "Signal" }, bars => ModifiedRsiValues(bars, Integer(options, "Length1", 48), Integer(options, "Length2", 10), Integer(options, "Length3", 10)));
             case IndicatorName.EhlersStochasticCenterOfGravityOscillator:
                 return new("Escog", new[] { "Escog" }, bars =>
                 {

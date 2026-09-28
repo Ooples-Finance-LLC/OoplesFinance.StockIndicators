@@ -223,6 +223,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersReflexSpecOptions),
         typeof(EhlersRelativeVigorIndexSpecOptions),
         typeof(EhlersReverseEmaIndicatorV2SpecOptions),
+        typeof(EhlersModifiedRelativeStrengthIndexSpecOptions),
         typeof(EhlersRocketRelativeStrengthIndexSpecOptions),
         typeof(EhlersRoofingFilterSpecOptions),
         typeof(EhlersRoofingFilterV1SpecOptions),

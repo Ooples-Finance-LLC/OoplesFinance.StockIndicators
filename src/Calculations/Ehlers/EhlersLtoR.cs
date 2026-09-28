@@ -220,70 +220,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersModifiedRelativeStrengthIndex(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> upChgList = new(stockData.Count);
-        List<double> upChgSumList = new(stockData.Count);
-        List<double> denomList = new(stockData.Count);
-        List<double> mrsiList = new(stockData.Count);
-        List<double> mrsiSigList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var upChgSumWindow = new Streaming.AdaptiveWindowMean(length3);
-        var absoluteChangeWindow = new Streaming.AdaptiveWindowMean(length3);
-
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ModifiedRsiWindow(length1, length2, length3); var values = new List<double>(stockData.Count); var signalValues = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var roofingFilter = roofingFilterList[i];
-            var prevRoofingFilter = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevMrsi1 = i >= 1 ? mrsiList[i - 1] : 0;
-            var prevMrsi2 = i >= 2 ? mrsiList[i - 2] : 0;
-            var prevMrsiSig1 = i >= 1 ? mrsiSigList[i - 1] : 0;
-            var prevMrsiSig2 = i >= 2 ? mrsiSigList[i - 2] : 0;
-
-            var upChg = roofingFilter > prevRoofingFilter ? roofingFilter - prevRoofingFilter : 0;
-            upChgList.Add(upChg);
-
-            var dnChg = roofingFilter < prevRoofingFilter ? prevRoofingFilter - roofingFilter : 0;
-            var prevUpChgSum = GetLastOrDefault(upChgSumList);
-            var upChgSum = upChgSumWindow.Next(upChg, length3, true);
-            upChgSumList.Add(upChgSum);
-
-            var prevDenom = GetLastOrDefault(denomList);
-            // Gains and total movement must cover the same RSI lookback.
-            var denom = absoluteChangeWindow.Next(upChg + dnChg, length3, true);
-            denomList.Add(denom);
-
-            var mrsi = denom != 0 && prevDenom != 0 ? (c1 * (((upChgSum / denom) + (prevUpChgSum / prevDenom)) / 2)) + (c2 * prevMrsi1) + (c3 * prevMrsi2) : 0;
-            mrsiList.Add(mrsi);
-
-            var mrsiSig = (c1 * ((mrsi + prevMrsi1) / 2)) + (c2 * prevMrsiSig1) + (c3 * prevMrsiSig2);
-            mrsiSigList.Add(mrsiSig);
-
-            var signal = GetRsiSignal(mrsi - mrsiSig, prevMrsi1 - prevMrsiSig1, mrsi, prevMrsi1, 0.7, 0.3);
-            signalsList?.Add(signal);
+            var point = window.Next(price, true); var previous = values.Count == 0 ? 0 : values[values.Count - 1]; var previousSignal = signalValues.Count == 0 ? 0 : signalValues[signalValues.Count - 1];
+            signals?.Add(GetRsiSignal(point.Line - point.Signal, previous - previousSignal, point.Line, previous, .7, .3)); values.Add(point.Line); signalValues.Add(point.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Emrsi", mrsiList },
-            { "Signal", mrsiSigList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(mrsiList);
-        stockData.IndicatorName = IndicatorName.EhlersModifiedRelativeStrengthIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Emrsi", values }, { "Signal", signalValues } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersModifiedRelativeStrengthIndex; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Roofing Filter Indicator

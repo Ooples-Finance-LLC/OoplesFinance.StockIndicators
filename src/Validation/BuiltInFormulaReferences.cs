@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersModifiedRelativeStrengthIndex)
+        {
+            var modified = (EhlersModifiedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();
+            foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Emrsi" : "Signal"; yield return IndicatorValidationRule.Reference(slot, bars => ModifiedRsiValues(bars, modified.Length1, modified.Length2, modified.Length3)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersRocketRelativeStrengthIndex && builtIn.CreateOptions() is EhlersRocketRelativeStrengthIndexSpecOptions rocket && rocket.MaType is MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 or MovingAvgType.WeightedMovingAverage)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RocketRsiValues(bars, rocket.Length1, rocket.Length2, rocket.MaType, rocket.Mult), new IndicatorErrorBudget(1e-12, 1e-12, true));

@@ -873,100 +873,16 @@ public sealed class EhlersModifiedOptimumEllipticFilterState : IStreamingIndicat
 [PrimaryOutput("Emrsi")]
 public sealed class EhlersModifiedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly AdaptiveWindowMean _upChgSum;
-    private readonly AdaptiveWindowMean _absoluteChangeSum;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private double _prevRoofingFilter;
-    private double _prevUpChgSum;
-    private double _prevDenom;
-    private double _prevMrsi1;
-    private double _prevMrsi2;
-    private double _prevMrsiSig1;
-    private double _prevMrsiSig2;
-    private bool _hasPrev;
-
-    public EhlersModifiedRelativeStrengthIndexState(int length1 = 48, int length2 = 10, int length3 = 10)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        _length = resolved3;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / resolved2, 0.99));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _upChgSum = new AdaptiveWindowMean(resolved3);
-        _absoluteChangeSum = new AdaptiveWindowMean(resolved3);
-        _roofingFilter = new EhlersRoofingFilterV2State(resolved1, resolved2);
-    }
-
+    private readonly ModifiedRsiWindow _window;
+    public EhlersModifiedRelativeStrengthIndexState(int length1 = 48, int length2 = 10, int length3 = 10) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.EhlersModifiedRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _upChgSum.Reset();
-        _absoluteChangeSum.Reset();
-        _roofingFilter.Reset();
-        _prevRoofingFilter = 0;
-        _prevUpChgSum = 0;
-        _prevDenom = 0;
-        _prevMrsi1 = 0;
-        _prevMrsi2 = 0;
-        _prevMrsiSig1 = 0;
-        _prevMrsiSig2 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevRoofingFilter = _hasPrev ? _prevRoofingFilter : 0;
-        var upChg = roofingFilter > prevRoofingFilter ? roofingFilter - prevRoofingFilter : 0;
-        var upChgSum = _upChgSum.Next(upChg, _length, isFinal);
-        var dnChg = roofingFilter < prevRoofingFilter ? prevRoofingFilter - roofingFilter : 0;
-        var denom = _absoluteChangeSum.Next(upChg + dnChg, _length, isFinal);
-
-        var mrsi = denom != 0 && _prevDenom != 0
-            ? (_c1 * (((upChgSum / denom) + (_prevUpChgSum / _prevDenom)) / 2)) + (_c2 * _prevMrsi1) + (_c3 * _prevMrsi2)
-            : 0;
-
-        var mrsiSig = (_c1 * ((mrsi + _prevMrsi1) / 2)) + (_c2 * _prevMrsiSig1) + (_c3 * _prevMrsiSig2);
-
-        if (isFinal)
-        {
-            _prevRoofingFilter = roofingFilter;
-            _prevUpChgSum = upChgSum;
-            _prevDenom = denom;
-            _prevMrsi2 = _prevMrsi1;
-            _prevMrsi1 = mrsi;
-            _prevMrsiSig2 = _prevMrsiSig1;
-            _prevMrsiSig1 = mrsiSig;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Emrsi", mrsi },
-                { "Signal", mrsiSig }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(mrsi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Emrsi", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Emsi")]
