@@ -8,68 +8,17 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Obvm")]
 public sealed class OnBalanceVolumeModifiedState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _obvSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private ExactMeanAccumulator _obvTotal;
-    private bool _hasPrev;
-
-    public OnBalanceVolumeModifiedState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 7,
-        int length2 = 10)
-    {
-        _obvSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ModifiedObvWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public OnBalanceVolumeModifiedState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 7, int length2 = 10) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.OnBalanceVolumeModified;
-
-    public void Reset()
-    {
-        _obvSmoother.Reset();
-        _signalSmoother.Reset();
-        _prevClose = 0;
-        _obvTotal = default;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevClose = _hasPrev ? _prevClose : 0;
-        var total = _obvTotal;
-        if (value > prevClose) total.Add(bar.Volume);
-        else if (value < prevClose) total.Add(bar.Volume, -1);
-        var obv = total.Mean(1);
-        var obvm = _obvSmoother.Next(obv, isFinal);
-        var signal = _signalSmoother.Next(obvm, isFinal);
-
-        if (isFinal)
-        {
-            _prevClose = value;
-            _obvTotal = total;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Obvm", obvm },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(obvm, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Obvm", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _obvSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Obvr")]

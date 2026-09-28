@@ -275,9 +275,11 @@ public static partial class Calculations
     {
         List<Signal>? signalsList = CreateSignalsList(stockData);
 
-        var obvList = CalculateOnBalanceVolume(stockData, maType, length1).ChainedValues;
-        var obvmList = GetMovingAverageList(stockData, maType, length1, obvList);
-        var sigList = GetMovingAverageList(stockData, maType, length2, obvmList);
+        var (input, _, _, _, volumes) = GetInputValuesList(stockData);
+        List<double> obvmList = new(stockData.Count), sigList = new(stockData.Count);
+        using var window = new ModifiedObvWindow(maType, length1, length2);
+        for (var i = 0; i < stockData.Count; i++)
+        { var value = window.Next(input[i], volumes[i], true); obvmList.Add(value.Line); sigList.Add(value.Signal); }
 
         for (var i = 0; i < stockData.Count; i++)
         {

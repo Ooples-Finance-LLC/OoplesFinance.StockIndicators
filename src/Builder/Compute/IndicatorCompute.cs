@@ -2114,9 +2114,7 @@ internal static partial class IndicatorCompute
                 ? SmoothPublished(data, context, ComputeOceanIndicatorFast(data, context, oi.Length), oi.Length, oi.MaType)
                 : ComputeOceanIndicatorFast(data, context, oi.Length),
             OCHistogramSpecOptions och => ComputeOCHistogramFast(data, context, och.Length, och.MaType),
-            OnBalanceVolumeModifiedSpecOptions obvmod => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType), obvmod.Length2, obvmod.MaType)
-                : ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType),
+            OnBalanceVolumeModifiedSpecOptions obvmod => ComputeOnBalanceVolumeModifiedFast(data, context, obvmod.Length1, obvmod.Length2, obvmod.MaType, spec.OutputKey),
 
             // Batch 23 - Volume and Statistical Indicators
             OnBalanceVolumeReflexSpecOptions obvr => spec.OutputKey == "Signal"
@@ -22334,33 +22332,12 @@ internal static partial class IndicatorCompute
     /// Computes On Balance Volume Modified using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeOnBalanceVolumeModifiedFast(StockData data, ComputeContext context, int length1 = 7,
-        int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        int length2 = 10, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateOnBalanceVolumeModified publishes the on balance volume smoothed once over the first
-        // length; the second length only smooths the signal line, which is a separate key. The arm this
-        // replaced averaged the close and never touched volume at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-
-        using var onBalanceVolume = context.Rent(count);
-        var obv = onBalanceVolume.WritableSpan;
-        var running = new ExactMeanAccumulator();
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var volume = i < volumes.Length ? volumes[i] : 0;
-
-            if (currentValue > previousValue) running.Add(volume);
-            else if (currentValue < previousValue) running.Add(volume, -1);
-            obv[i] = running.Mean(1);
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length1, onBalanceVolume.Span, buffer.WritableSpan);
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); using var window = new ModifiedObvWindow(maType, length1, length2);
+        for (var i = 0; i < input.Count; i++)
+        { var value = window.Next(input[i], i < data.Volumes.Count ? data.Volumes[i] : 0, true); buffer.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line; }
         return buffer;
     }
 

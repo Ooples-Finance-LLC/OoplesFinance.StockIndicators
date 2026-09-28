@@ -1922,10 +1922,10 @@
   {
     "id": "obv-modified-rounds-total",
     "module": "obv",
-    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
-    "scope": "public sealed class OnBalanceVolumeModifiedState",
-    "before": "var total = _obvTotal;",
-    "after": "var total = new ExactMeanAccumulator();\n        total.Add(_obvTotal.Mean(1));",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "scope": "internal sealed class ModifiedObvWindow",
+    "before": "var total = _total;",
+    "after": "var total = new ExactMeanAccumulator(); total.Add(_total.Mean(1));",
     "filter": "FullyQualifiedName~ObvNumericalTests.ModifiedConsumerRetainsTheSmallCumulativeContribution"
   },
   {
@@ -35711,5 +35711,111 @@
     "before": "i < 7 ?",
     "after": "i < 6 ?",
     "filter": "FullyQualifiedName~ValidationTests.SimpleCycleIndicatorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-ties",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "if (price > _previous)",
+    "after": "if (price >= _previous)",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-falling-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "total.Add(volume, -1);",
+    "after": "total.Add(volume);",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "_signal.Next(line, commit)",
+    "after": "_signal.Next(new RocBankValue(line.Publish()), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, length2));",
+    "after": "_signal = new(kind, Math.Max(1, length1));",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "if (commit) { _total",
+    "after": "if (commit || price != 0) { _total",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "_previous = 0;",
+    "after": "_previous = 1;",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "_line.Reset(); _signal.Reset();",
+    "after": "_line.Reset();",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 1L)",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-simple-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ModifiedObvWindow.cs",
+    "before": "_history.Count + 1L < _length ? default :",
+    "after": "_history.Count + 1L < _length ? value :",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeOnBalanceVolumeModifiedFast("
+  },
+  {
+    "id": "modified-obv-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class OnBalanceVolumeModifiedState"
+  },
+  {
+    "id": "modified-obv-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " OnBalanceVolumeModifiedSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modified-obv-reference-volume",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ModifiedObv.cs",
+    "before": "ReferenceFraction.FromDouble(bars[i].Volume)",
+    "after": "ReferenceFraction.FromDouble(bars[i].Close)",
+    "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

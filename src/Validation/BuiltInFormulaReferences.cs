@@ -25,6 +25,14 @@ internal static partial class BuiltInFormulaReferences
             { var key = fskKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowKurtosisOutputs(bars, Integer(fskOptions, "Length", 3), Number(fskOptions, .03, "Ratio"), fskKind)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.OnBalanceVolumeModified)
+        {
+            var modifiedObvOptions = builtIn.CreateOptions(); var modifiedObvKind = AverageKind(modifiedObvOptions, 3); if (modifiedObvKind == 0) yield break;
+            var modifiedObvKeys = builtIn.BatchOutputKey is { } selectedOnBalanceVolumeModified ? new[] { selectedOnBalanceVolumeModified } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < modifiedObvKeys.Length; slot++)
+            { var key = modifiedObvKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ModifiedObvOutputs(bars, Integer(modifiedObvOptions, "Length1", 7), Integer(modifiedObvOptions, "Length2", 10), modifiedObvKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.Repulse)
         {
             var repulseOptions = builtIn.CreateOptions(); var repulseKind = AverageKind(repulseOptions, 3); if (repulseKind == 0) yield break;
