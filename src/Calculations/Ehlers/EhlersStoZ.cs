@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 using OoplesFinance.StockIndicators.Streaming;
 
 namespace OoplesFinance.StockIndicators;
@@ -582,29 +583,19 @@ public static partial class Calculations
     public static StockData CalculateEhlersSimpleDerivIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 2, int signalLength = 8)
     {
-        length = Math.Max(length, 1);
-        signalLength = Math.Max(signalLength, 1);
-        List<double> derivList = new(stockData.Count);
-        List<double> z3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        signalLength = Math.Max(1, signalLength); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new EhlersDerivWindow(maType, length, signalLength);
+        List<double> z3List = new(stockData.Count), z3EmaList; List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var prevDeriv1 = i >= 1 ? derivList[i - 1] : 0;
-            var prevDeriv2 = i >= 2 ? derivList[i - 2] : 0;
-            var prevDeriv3 = i >= 3 ? derivList[i - 3] : 0;
-
-            var deriv = MinPastValues(i, length, currentValue - prevValue);
-            derivList.Add(deriv);
-
-            var z3 = deriv + prevDeriv1 + prevDeriv2 + prevDeriv3;
-            z3List.Add(z3);
+            foreach (var price in input) z3List.Add(window.Line(price, true).Publish());
+            z3EmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(z3List), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, z3List);
         }
-
-        var z3EmaList = GetMovingAverageList(stockData, maType, signalLength, z3List);
+        else
+        {
+            z3EmaList = new(stockData.Count);
+            foreach (var price in input) { var value = window.Next(price, true); z3List.Add(value.Line); z3EmaList.Add(value.Signal); }
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var z3Ema = z3EmaList[i];

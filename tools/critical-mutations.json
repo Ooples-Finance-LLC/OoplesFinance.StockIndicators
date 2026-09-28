@@ -32372,5 +32372,120 @@
     "before": "RoundRocBankStage(v - bears[i])",
     "after": "RoundRocBankStage(v + bears[i])",
     "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-difference",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "change.Add(_prices.Peek(), -1)",
+    "after": "change.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-last-term",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "Add(Add(Add(difference, _last), _older), _oldest)",
+    "after": "Add(Add(difference, _older), _oldest)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-oldest-term",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "Add(Add(Add(difference, _last), _older), _oldest)",
+    "after": "Add(Add(difference, _last), _older)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-history-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "_last = difference;",
+    "after": "_last = new RocBankValue(difference.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-signal-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "_signal.Next(line, commit)",
+    "after": "_signal.Next(new RocBankValue(line.Publish()), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "Line(price, commit)",
+    "after": "Line(price, true)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-signal-weight",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDerivWindow.cs",
+    "before": "_signal.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast("
+  },
+  {
+    "id": "ehlers-deriv-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? value.Signal : value.Line",
+    "after": "value.Line",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast("
+  },
+  {
+    "id": "ehlers-deriv-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class EhlersSimpleDerivIndicatorState"
+  },
+  {
+    "id": "ehlers-deriv-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersSimpleDerivIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "ehlers-deriv-reference-history",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.EhlersDeriv.cs",
+    "before": "lag <= 3",
+    "after": "lag <= 2",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersDerivNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

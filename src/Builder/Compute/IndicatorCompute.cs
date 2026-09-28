@@ -19504,26 +19504,15 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersSimpleDerivIndicatorFast(StockData data, ComputeContext context, int length = 2, int signalLength = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // The batch publishes the raw z3 sum of the last four derivatives; its moving average of that
-        // series only ever reaches the Signal line.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        using var derivatives = context.Rent(count);
-        var deriv = derivatives.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new EhlersDerivWindow(maType, length, signalLength); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var previousValue = i >= length ? input[i - length] : 0;
-            deriv[i] = CalculationsHelper.MinPastValues(i, length, input[i] - previousValue);
-            output[i] = deriv[i] + (i >= 1 ? deriv[i - 1] : 0) + (i >= 2 ? deriv[i - 2] : 0) + (i >= 3 ? deriv[i - 3] : 0);
+            using var line = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = window.Line(input[i], true).Publish();
+            using var signal = context.Rent(input.Count); MovingAverage(data, maType, Math.Max(1, signalLength), line.Span, signal.WritableSpan);
+            (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(result.WritableSpan);
         }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, signalLength, maType) : buffer;
+        else for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line; }
+        return result;
     }
 
     /// <summary>

@@ -33,6 +33,14 @@ internal static partial class BuiltInFormulaReferences
             { var key = repulseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => RepulseOutputs(bars, Integer(repulseOptions, "Length", 5), repulseKind)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleDerivIndicator)
+        {
+            var derivOptions = builtIn.CreateOptions(); var derivKind = AverageKind(derivOptions, 3); if (derivKind == 0) yield break;
+            var derivKeys = builtIn.BatchOutputKey is { } selectedDeriv ? new[] { selectedDeriv } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < derivKeys.Length; slot++)
+            { var key = derivKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersDerivOutputs(bars, Integer(derivOptions, "Length", 2), Integer(derivOptions, "SignalLength", 8), derivKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
