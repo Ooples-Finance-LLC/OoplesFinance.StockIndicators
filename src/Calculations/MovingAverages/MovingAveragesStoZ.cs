@@ -1625,30 +1625,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSettingLessTrendStepFiltering(this StockData stockData)
     {
-        List<double> chgList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        double chgSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        List<double> bList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new SettingLessStepWindow();
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var prevA = GetLastOrDefault(aList);
-            var sc = Math.Abs(currentValue - prevB) + prevA != 0 ? Math.Abs(currentValue - prevB) / (Math.Abs(currentValue - prevB) + prevA) : 0;
-            var sltsf = (sc * currentValue) + ((1 - sc) * prevB);
-
-            var chg = Math.Abs(sltsf - prevB);
-            chgList.Add(chg);
-            chgSum += chg;
-
-            var a = chgSum / chgList.Count * (1 + sc);
-            aList.Add(a);
-
-            var b = sltsf > prevB + a ? sltsf : sltsf < prevB - a ? sltsf : prevB;
+            var currentValue = inputList[i]; var prevValue = i >= 1 ? inputList[i - 1] : 0; var prevB = i >= 1 ? bList[i - 1] : currentValue;
+            var b = window.Next(currentValue, true);
             bList.Add(b);
 
             var signal = GetCompareSignal(currentValue - b, prevValue - prevB);

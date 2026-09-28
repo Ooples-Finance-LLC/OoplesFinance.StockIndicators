@@ -33744,5 +33744,119 @@
     "before": "stochastic * 2 - 100",
     "after": "stochastic * 2 - 50",
     "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "setting-less-step-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "_count == 0 ? current : _held",
+    "after": "_held",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-absolute-distance",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "new(Math.Abs(value.Mantissa), value.UpperShift)",
+    "after": "new(-Math.Abs(value.Mantissa), value.UpperShift)",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-gain-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "Add(distance, _width).AddTo(ref denominator)",
+    "after": "_width.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-blend",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "previous.Multiply(1 - gain)",
+    "after": "previous.Multiply(gain)",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-running-sum",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "Add(_sum, Abs(Add(line, previous, -1)))",
+    "after": "Abs(Add(line, previous, -1))",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-sum-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "Add(_sum, Abs(Add(line, previous, -1)))",
+    "after": "Add(new RocBankValue(_sum.Publish()), Abs(Add(line, previous, -1)))",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-count",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "count: _count + 1",
+    "after": "count: _count + 2",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "Add(previous, width)) > 0",
+    "after": "Add(previous, width)) >= 0",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (commit || price != 0) { _sum = sum;",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SettingLessStepWindow.cs",
+    "before": "_count = 0;",
+    "after": "_count = 1;",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests",
+    "scope": "internal static ComputeBuffer ComputeSettingLessTrendStepFilteringFast("
+  },
+  {
+    "id": "setting-less-step-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests",
+    "scope": "public sealed class SettingLessTrendStepFilteringState"
+  },
+  {
+    "id": "setting-less-step-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SettingLessTrendStepFilteringSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "setting-less-step-reference-gain",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SettingLessStep.cs",
+    "before": "(distance / denominator).ToDouble()",
+    "after": "(width / denominator).ToDouble()",
+    "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
   }
 ]

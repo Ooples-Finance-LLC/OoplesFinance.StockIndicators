@@ -826,62 +826,15 @@ public sealed class SequentiallyFilteredMovingAverageState : IStreamingIndicator
 [PrimaryOutput("Sltsf")]
 public sealed class SettingLessTrendStepFilteringState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _chgSum;
-    private int _chgCount;
-    private double _prevA;
-    private double _prevB;
-    private bool _hasPrev;
-
-    public SettingLessTrendStepFilteringState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SettingLessStepWindow _window = new();
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public SettingLessTrendStepFilteringState() { }
     public IndicatorName Name => IndicatorName.SettingLessTrendStepFiltering;
-
-    public void Reset()
-    {
-        _chgSum = 0;
-        _chgCount = 0;
-        _prevA = 0;
-        _prevB = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevB = _hasPrev ? _prevB : value;
-        var prevA = _hasPrev ? _prevA : 0;
-        var diff = Math.Abs(value - prevB);
-        var sc = diff + prevA != 0 ? diff / (diff + prevA) : 0;
-        var sltsf = (sc * value) + ((1 - sc) * prevB);
-        var chg = Math.Abs(sltsf - prevB);
-        var chgSum = _chgSum + chg;
-        var count = _chgCount + 1;
-        var a = count > 0 ? (chgSum / count) * (1 + sc) : 0;
-        var b = sltsf > prevB + a ? sltsf : sltsf < prevB - a ? sltsf : prevB;
-
-        if (isFinal)
-        {
-            _chgSum = chgSum;
-            _chgCount = count;
-            _prevA = a;
-            _prevB = b;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sltsf", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Sltsf", value } } : null);
     }
 }
 

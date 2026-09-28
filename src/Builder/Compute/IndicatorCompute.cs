@@ -14793,35 +14793,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSettingLessTrendStepFilteringFast(StockData data, ComputeContext context)
     {
-        // CalculateSettingLessTrendStepFiltering takes no length at all - that is what settingless means. The
-        // step it holds inside is the running mean of its own past steps, scaled by how far the current value
-        // has pulled away from the line, so the band widens exactly as much as the series has been moving.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double chgSum = 0;
-        double prevA = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevB = i >= 1 ? output[i - 1] : currentValue;
-
-            var distance = Math.Abs(currentValue - prevB);
-            var sc = distance + prevA != 0 ? distance / (distance + prevA) : 0;
-            var sltsf = (sc * currentValue) + ((1 - sc) * prevB);
-
-            chgSum += Math.Abs(sltsf - prevB);
-            var a = chgSum / (i + 1) * (1 + sc);
-            prevA = a;
-
-            output[i] = sltsf > prevB + a ? sltsf : sltsf < prevB - a ? sltsf : prevB;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new SettingLessStepWindow(); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>
