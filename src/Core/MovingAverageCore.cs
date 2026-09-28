@@ -1386,29 +1386,8 @@ internal static class MovingAverageCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        gamma = Math.Max(0, Math.Min(1, gamma));
-        var baseline = input.Length > 0 ? input[0] : 0;
-        double l0 = 0;
-        var l1 = l0;
-        var l2 = l0;
-        var l3 = l0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            var prevL0 = l0;
-            var prevL1 = l1;
-            var prevL2 = l2;
-
-            l0 = ((1 - gamma) * (input[i] - baseline)) + (gamma * l0);
-            l1 = (-gamma * l0) + prevL0 + (gamma * l1);
-            l2 = (-gamma * l1) + prevL1 + (gamma * l2);
-            l3 = (-gamma * l2) + prevL2 + (gamma * l3);
-
-            var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
-            var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
-
-            output[i] = cu + cd != 0 ? Math.Max(0, Math.Min(1, cu / (cu + cd))) : 0;
-        }
+        var window = new LaguerreRsiWindow(gamma);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true);
     }
 
     /// <summary>

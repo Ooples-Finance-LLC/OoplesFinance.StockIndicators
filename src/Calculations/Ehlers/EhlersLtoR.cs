@@ -960,46 +960,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLaguerreRelativeStrengthIndex(this StockData stockData, double gamma = 0.5)
     {
-        gamma = MinOrMax(gamma, 1, 0);
+        var window = new LaguerreRsiWindow(gamma);
         List<double> laguerreRsiList = new(stockData.Count);
-        List<double> l0List = new(stockData.Count);
-        List<double> l1List = new(stockData.Count);
-        List<double> l2List = new(stockData.Count);
-        List<double> l3List = new(stockData.Count);
-        List<double> cuList = new(stockData.Count);
-        List<double> cdList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i] - inputList[0];
-            var prevL0 = i >= 1 ? GetLastOrDefault(l0List) : currentValue;
-            var prevL1 = i >= 1 ? GetLastOrDefault(l1List) : currentValue;
-            var prevL2 = i >= 1 ? GetLastOrDefault(l2List) : currentValue;
-            var prevL3 = i >= 1 ? GetLastOrDefault(l3List) : currentValue;
             var prevRsi1 = i >= 1 ? laguerreRsiList[i - 1] : 0;
             var prevRsi2 = i >= 2 ? laguerreRsiList[i - 2] : 0;
-
-            var l0 = ((1 - gamma) * currentValue) + (gamma * prevL0);
-            l0List.Add(l0);
-
-            var l1 = (-1 * gamma * l0) + prevL0 + (gamma * prevL1);
-            l1List.Add(l1);
-
-            var l2 = (-1 * gamma * l1) + prevL1 + (gamma * prevL2);
-            l2List.Add(l2);
-
-            var l3 = (-1 * gamma * l2) + prevL2 + (gamma * prevL3);
-            l3List.Add(l3);
-
-            var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
-            cuList.Add(cu);
-
-            var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
-            cdList.Add(cd);
-
-            var laguerreRsi = cu + cd != 0 ? MinOrMax(cu / (cu + cd), 1, 0) : 0;
+            var laguerreRsi = window.Next(inputList[i], true);
             laguerreRsiList.Add(laguerreRsi);
 
             var signal = GetRsiSignal(laguerreRsi - prevRsi1, prevRsi1 - prevRsi2, laguerreRsi, prevRsi1, 0.8, 0.2);

@@ -38912,5 +38912,149 @@
     "before": "new EhlersEvenBetterSineWaveIndicatorState(sineWave.Length1, sineWave.Length2)",
     "after": "new EhlersEvenBetterSineWaveIndicatorState(sineWave.Length2, sineWave.Length1)",
     "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "laguerre-rsi-center",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "centered.Add(_baseline, -1)",
+    "after": "centered.Add(_baseline)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-gain",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "_gain = 1 - _gamma",
+    "after": "_gain = _gamma",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "_l0.Add(ref first, _gamma)",
+    "after": "_l1.Add(ref first, _gamma)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-allpass",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "current.Add(ref sum, -_gamma)",
+    "after": "current.Add(ref sum, _gamma)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-stage-order",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "Stage(l2, _l2, _l3)",
+    "after": "Stage(l2, _l1, _l3)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-direction",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "if (difference.Sign < 0)",
+    "after": "if (difference.Sign > 0)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-last-difference",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "Direction(l2, l3, ref up, ref down)",
+    "after": "Direction(l1, l3, ref up, ref down)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "total.Subtract(negativeDown)",
+    "after": "total.Subtract(down)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.FirstImpulseEndpointsAndConstantInputHaveKnownValues"
+  },
+  {
+    "id": "laguerre-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "if (commit) { if",
+    "after": "if (commit || price != 0) { if",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.WideAndTinyValuesRetainFourStagesAndDirectionalSums"
+  },
+  {
+    "id": "laguerre-rsi-finite-gamma",
+    "module": "numerical",
+    "file": "src/Helpers/LaguerreRsiWindow.cs",
+    "scope": "internal sealed class LaguerreRsiWindow",
+    "before": "double.IsNaN(gamma) || double.IsInfinity(gamma)",
+    "after": "double.IsNaN(gamma)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.NonfiniteGammaIsRejectedEvenForEmptyInputs"
+  },
+  {
+    "id": "laguerre-rsi-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersLaguerreRelativeStrengthIndex(",
+    "before": "window.Next(inputList[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.SelectedPricesReachBatchAndTypedArm"
+  },
+  {
+    "id": "laguerre-rsi-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersLaguerreRsiFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.SelectedPricesReachBatchAndTypedArm"
+  },
+  {
+    "id": "laguerre-rsi-native-length",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "Math.Max(1, laguerreRsi.Length) + 1d",
+    "after": "Math.Max(1, laguerreRsi.Length) + 1",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.PeriodConversionNormalizesAndDoesNotOverflow"
+  },
+  {
+    "id": "laguerre-rsi-bound-length",
+    "module": "numerical",
+    "file": "src/Builder/Compute/BuilderArmTargets.cs",
+    "scope": null,
+    "before": "new BuilderArgument(\"Length\", \"gamma\", v => v is int n ? 1 - (2.0 / (Math.Max(1, n) + 1d)) : v)",
+    "after": "new BuilderArgument(\"Length\", \"gamma\", v => v is int n ? 1 - (2.0 / (Math.Max(1, n) + 1)) : v)",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.MaximumPublicLengthPreservesBoundBatchAndNativeMapping"
+  },
+  {
+    "id": "laguerre-rsi-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersLaguerreRelativeStrengthIndexState",
+    "before": "var value = _window.Next(_input.GetValue(bar), isFinal);",
+    "after": "bar = new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal); var value = _window.Next(_input.GetValue(bar), isFinal);",
+    "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.InvalidFieldsLeaveBaselineAndStageHistoryUnchanged"
   }
 ]

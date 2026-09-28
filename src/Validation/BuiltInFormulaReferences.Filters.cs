@@ -287,26 +287,7 @@ internal static partial class BuiltInFormulaReferences
                         return .33 * (2 * current - 1.75 * prior) * bars[j].Close;
                     })).ToArray())));
             case IndicatorName.EhlersLaguerreRelativeStrengthIndex:
-                var laguerreGamma = 1 - 2d / (Integer(options, "Length", 14) + 1d);
-                return new("Elrsi", new[] { "Elrsi" }, bars =>
-                {
-                    var baseline = bars.Count == 0 ? 0 : bars[0].Close;
-                    var first = bars.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j =>
-                        (1 - laguerreGamma) * Math.Pow(laguerreGamma, i - j) * (bars[j].Close - baseline))).ToArray();
-                    // Each following stage has the all-pass impulse response (-g, 1-g², g*(1-g²), ...).
-                    double[] AllPass(double[] values) => values.Select((v, i) => -laguerreGamma * v +
-                        Enumerable.Range(0, i).Sum(j => (1 - laguerreGamma * laguerreGamma) * Math.Pow(laguerreGamma, i - j - 1) * values[j])).ToArray();
-                    var second = AllPass(first);
-                    var third = AllPass(second);
-                    var fourth = AllPass(third);
-                    var line = bars.Select((_, i) =>
-                    {
-                        var differences = new[] { first[i] - second[i], second[i] - third[i], third[i] - fourth[i] };
-                        var variation = differences.Sum(Math.Abs);
-                        return variation == 0 ? 0 : differences.Sum(v => Math.Max(v, 0)) / variation;
-                    }).ToArray();
-                    return Outputs(("Elrsi", line));
-                });
+                return new("Elrsi", new[] { "Elrsi" }, bars => Outputs(("Elrsi", LaguerreRsiValues(bars, 1 - 2d / (Math.Max(1, Integer(options, "Length", 14)) + 1d)))));
             case IndicatorName.EhlersLaguerreFilter:
                 var gain = 2d / (Integer(options, "Length", 9) + 1d);
                 var gamma = 1 - gain;

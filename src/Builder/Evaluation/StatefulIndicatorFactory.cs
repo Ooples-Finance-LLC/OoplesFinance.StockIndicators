@@ -494,6 +494,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersBandPassFilterV1SpecOptions bandV1 => new EhlersBandPassFilterV1State(bandV1.Length, bandV1.Bw),
             EhlersStochasticCyberCycleSpecOptions cyberStoch => new EhlersStochasticCyberCycleState(cyberStoch.Length, cyberStoch.Alpha),
             EhlersRoofingFilterIndicatorSpecOptions originalRoof => new EhlersRoofingFilterIndicatorState(originalRoof.Length1, originalRoof.Length2),
+            EhlersLaguerreRsiSpecOptions laguerreRsi => new EhlersLaguerreRelativeStrengthIndexState(1 - 2d / (Math.Max(1, laguerreRsi.Length) + 1d)),
             EhlersEarlyOnsetTrendIndicatorSpecOptions onset => new EhlersEarlyOnsetTrendIndicatorState(onset.Length1, onset.Length2, onset.K),
             EhlersRoofingFilterV1SpecOptions roofV1 => new EhlersRoofingFilterV1State(roofV1.MaType, roofV1.Length1, roofV1.Length2),
             EhlersRoofingFilterSpecOptions roofAlias => new EhlersRoofingFilterV1State(length1: roofAlias.HpLength, length2: roofAlias.LpLength),

@@ -527,71 +527,15 @@ public sealed class EhlersSignalToNoiseRatioV2State : IStreamingIndicatorState, 
 [PrimaryOutput("Elrsi")]
 public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicatorState
 {
-    private readonly double _gamma;
-    private readonly StreamingInputResolver _input;
-    private double _prevL0;
-    private double _prevL1;
-    private double _prevL2;
-    private double _prevL3;
-    private bool _hasPrev;
-    private double _baseline;
-
-    public EhlersLaguerreRelativeStrengthIndexState(double gamma = 0.5)
-    {
-        _gamma = Math.Max(0, Math.Min(1, gamma));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly LaguerreRsiWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersLaguerreRelativeStrengthIndexState(double gamma = 0.5) => _window = new(gamma);
     public IndicatorName Name => IndicatorName.EhlersLaguerreRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _prevL0 = 0;
-        _prevL1 = 0;
-        _prevL2 = 0;
-        _prevL3 = 0;
-        _hasPrev = false;
-        _baseline = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var price = _input.GetValue(bar);
-        var value = _hasPrev ? price - _baseline : 0;
-        var prevL0 = _hasPrev ? _prevL0 : value;
-        var prevL1 = _hasPrev ? _prevL1 : value;
-        var prevL2 = _hasPrev ? _prevL2 : value;
-        var prevL3 = _hasPrev ? _prevL3 : value;
-
-        var l0 = ((1 - _gamma) * value) + (_gamma * prevL0);
-        var l1 = (-1 * _gamma * l0) + prevL0 + (_gamma * prevL1);
-        var l2 = (-1 * _gamma * l1) + prevL1 + (_gamma * prevL2);
-        var l3 = (-1 * _gamma * l2) + prevL2 + (_gamma * prevL3);
-
-        var cu = (l0 >= l1 ? l0 - l1 : 0) + (l1 >= l2 ? l1 - l2 : 0) + (l2 >= l3 ? l2 - l3 : 0);
-        var cd = (l0 >= l1 ? 0 : l1 - l0) + (l1 >= l2 ? 0 : l2 - l1) + (l2 >= l3 ? 0 : l3 - l2);
-        var laguerreRsi = cu + cd != 0 ? MathHelper.MinOrMax(cu / (cu + cd), 1, 0) : 0;
-
-        if (isFinal)
-        {
-            _prevL0 = l0;
-            _prevL1 = l1;
-            _prevL2 = l2;
-            _prevL3 = l3;
-            if (!_hasPrev) _baseline = price;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Elrsi", laguerreRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(laguerreRsi, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Elrsi", value } } : null);
     }
 }
 
