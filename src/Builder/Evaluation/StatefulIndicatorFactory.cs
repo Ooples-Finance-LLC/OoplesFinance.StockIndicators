@@ -422,6 +422,7 @@ internal static partial class StatefulIndicatorFactory
             VolatilitySwitchIndicatorSpecOptions volatilitySwitch => new VolatilitySwitchIndicatorState(volatilitySwitch.MaType, volatilitySwitch.Length),
             EhlersDetrendedLeadingIndicatorSpecOptions detrendedLeading => new EhlersDetrendedLeadingIndicatorState(detrendedLeading.Length),
             FallingRisingFilterSpecOptions fallingRising => new FallingRisingFilterState(fallingRising.Length),
+            VolatilityRatioSpecOptions volatilityRatio => new VolatilityRatioState(volatilityRatio.MaType, volatilityRatio.Length),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

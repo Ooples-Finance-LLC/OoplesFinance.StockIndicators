@@ -7466,49 +7466,10 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVolatilityRatioFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateVolatilityRatio divides the true range by the range of the window ending at the previous
-        // bar, widened to take in the value from one bar beyond the window. The window is one shorter than the
-        // length, and the first bar's true range is measured against its own close so it is not inflated.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var rangeLength = Math.Max(length - 1, 1);
-
-        using var highest = context.Rent(count);
-        using var lowest = context.Rent(count);
-        var hh = highest.WritableSpan;
-        var ll = lowest.WritableSpan;
-        var highWindow = new RollingMinMax(rangeLength);
-        var lowWindow = new RollingMinMax(rangeLength);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-            hh[i] = highWindow.Max;
-            ll[i] = lowWindow.Min;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevHighest = i >= 1 ? hh[i - 1] : 0;
-            var prevLowest = i >= 1 ? ll[i - 1] : 0;
-            var priorValue = i >= length + 1 ? input[i - (length + 1)] : 0;
-            var prevValue = i >= 1 ? input[i - 1] : input[i];
-
-            var tr = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevValue);
-            var max = priorValue != 0 ? Math.Max(prevHighest, priorValue) : prevHighest;
-            var min = priorValue != 0 ? Math.Min(prevLowest, priorValue) : prevLowest;
-
-            output[i] = max - min != 0 ? tr / (max - min) : 0;
-        }
-
-        return buffer;
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new VolatilityRatioWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true);
+        if (ComponentAverage.HasOverrides) { using var signal = context.Rent(input.Count); MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(input), signal.WritableSpan); }
+        return result;
     }
 
     internal static ComputeBuffer ComputeVolatilityStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)

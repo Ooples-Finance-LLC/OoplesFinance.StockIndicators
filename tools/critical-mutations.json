@@ -34761,5 +34761,120 @@
     "before": "Blend(upper, lower, beta) : Blend(lower, upper, beta)",
     "after": "Blend(upper, lower, .5) : Blend(lower, upper, .5)",
     "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-range-length",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "Math.Max(1, length - 1)",
+    "after": "Math.Max(1, length)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-price-lag",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "_lag = length + 1L",
+    "after": "_lag = length",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-zero-prior",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "if (prior != 0)",
+    "after": "if (_count > 0)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-denominator-publication",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "Difference(maximum, minimum).AddTo(ref denominator)",
+    "after": "denominator.Add(Difference(maximum, minimum).Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-range-publication",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "range.AddTo(ref numerator)",
+    "after": "numerator.Add(range.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "Abs(Difference(low, previous))",
+    "after": "Abs(Difference(high, previous))",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "values.First.Value.Index <= _count - _rangeLength",
+    "after": "values.First.Value.Index < _count - _rangeLength",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "if (commit) { Commit",
+    "after": "if (commit || price != 0) { Commit",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityRatioWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeVolatilityRatioFast("
+  },
+  {
+    "id": "volatility-ratio-raw-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (data.Count < 0)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeVolatilityRatioFast("
+  },
+  {
+    "id": "volatility-ratio-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class VolatilityRatioState"
+  },
+  {
+    "id": "volatility-ratio-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " VolatilityRatioSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-ratio-reference-range",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VolatilityRatio.cs",
+    "before": "Math.Max(1, length - 1)",
+    "after": "Math.Max(1, length)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

@@ -42,34 +42,13 @@ public static partial class Calculations
     public static StockData CalculateVolatilityRatio(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 14, double breakoutLevel = 0.5)
     {
-        List<double> vrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length - 1);
-
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
+        length = Math.Max(1, length); List<double> vrList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new VolatilityRatioWindow(length);
+        var emaList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentEma = emaList[i];
-            var prevHighest = i >= 1 ? highestList[i - 1] : 0;
-            var prevLowest = i >= 1 ? lowestList[i - 1] : 0;
-            var priorValue = i >= length + 1 ? inputList[i - (length + 1)] : 0;
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-            var max = priorValue != 0 ? Math.Max(prevHighest, priorValue) : prevHighest;
-            var min = priorValue != 0 ? Math.Min(prevLowest, priorValue) : prevLowest;
-
-            var vr = max - min != 0 ? tr / (max - min) : 0;
-            vrList.Add(vr);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, vr, breakoutLevel);
-            signalsList?.Add(signal);
+            var value = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], inputList[i], true); vrList.Add(value);
+            signalsList?.Add(GetVolatilitySignal(inputList[i] - emaList[i], (i == 0 ? inputList[i] : inputList[i - 1]) - (i == 0 ? 0 : emaList[i - 1]), value, breakoutLevel));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

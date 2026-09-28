@@ -1525,92 +1525,17 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Vr")]
 public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevHighest;
-    private double _prevLowest;
-    private bool _hasPrev;
-    private bool _hasWindow;
-
-    public VolatilityRatioState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
-        double breakoutLevel = 0.5)
-    {
-        _length = Math.Max(1, length);
-        var windowLength = Math.Max(1, _length - 1);
-        _ema = MovingAverageSmootherFactory.Create(maType, _length);
-        _highWindow = new RollingWindowMax(windowLength);
-        _lowWindow = new RollingWindowMin(windowLength);
-        _values = new PooledRingBuffer<double>(_length + 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _ = breakoutLevel;
-    }
-
+    private readonly VolatilityRatioWindow _window; private readonly StreamingInputResolver _input;
+    public VolatilityRatioState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14, double breakoutLevel = .5)
+    { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.VolatilityRatio;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _values.Clear();
-        _prevValue = 0;
-        _prevHighest = 0;
-        _prevLowest = 0;
-        _hasPrev = false;
-        _hasWindow = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _ema.Next(value, isFinal);
-        // The first bar has no previous value, so it stands in for itself, as the batch does.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var prevHighest = _hasWindow ? _prevHighest : 0;
-        var prevLowest = _hasWindow ? _prevLowest : 0;
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length + 1);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var max = priorValue != 0 ? Math.Max(prevHighest, priorValue) : prevHighest;
-        var min = priorValue != 0 ? Math.Min(prevLowest, priorValue) : prevLowest;
-        var vr = max - min != 0 ? tr / (max - min) : 0;
-
-        var currentHighest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var currentLowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevValue = value;
-            _prevHighest = currentHighest;
-            _prevLowest = currentLowest;
-            _hasPrev = true;
-            _hasWindow = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vr", vr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vr, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Vr", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Vwma")]
