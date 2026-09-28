@@ -542,85 +542,18 @@ public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicat
 [PrimaryOutput("Elrsiwsa")]
 public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly RollingWindowMax _highMax;
-    private readonly RollingWindowMin _lowMin;
-    private readonly RollingWindowSum _ratioSum;
-    private double _prevValue;
-    private bool _hasPrev;
-    private AdaptiveLaguerreStages _stages;
-
-    public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length = 13)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _highMax = new RollingWindowMax(_length);
-        _lowMin = new RollingWindowMin(_length);
-        _ratioSum = new RollingWindowSum(_length);
-    }
-
+    private readonly SelfAdjustingLaguerreWindow _window;
+    public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length = 13) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha;
-
-    public void Reset()
-    {
-        _highMax.Reset();
-        _lowMin.Reset();
-        _ratioSum.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-        _stages = default;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var high = bar.High;
-        var low = bar.Low;
-        var open = bar.Open;
-
-        var highestHigh = isFinal ? _highMax.Add(high, out _) : _highMax.Preview(high, out _);
-        var lowestLow = isFinal ? _lowMin.Add(low, out _) : _lowMin.Preview(low, out _);
-
-        var oc = (open + prevValue) / 2;
-        var hc = Math.Max(high, prevValue);
-        var lc = Math.Min(low, prevValue);
-        var feValue = (oc + hc + lc + value) / 4;
-
-        var ratio = highestHigh - lowestLow != 0 ? (hc - lc) / (highestHigh - lowestLow) : 0;
-        var ratioSum = isFinal ? _ratioSum.Add(ratio, out _) : _ratioSum.Preview(ratio, out _);
-        var alpha = ratioSum <= 0 ? 0.01 : _length == 1 ? 0.99
-            : MathHelper.MinOrMax(Math.Log(ratioSum) / Math.Log(_length), 0.99, 0.01);
-
-        var next = _stages;
-        var laguerreRsi = next.Next(feValue, alpha);
-
-        if (isFinal)
-        {
-            _stages = next;
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Elrsiwsa", laguerreRsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(laguerreRsi, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, bar.Open, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Elrsiwsa", value } } : null);
     }
+    public void Dispose() { }
 
-    public void Dispose()
-    {
-        _highMax.Dispose();
-        _lowMin.Dispose();
-        _ratioSum.Dispose();
-    }
 }
 
 [PrimaryOutput("Eli")]

@@ -39056,5 +39056,149 @@
     "before": "var value = _window.Next(_input.GetValue(bar), isFinal);",
     "after": "bar = new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal); var value = _window.Next(_input.GetValue(bar), isFinal);",
     "filter": "FullyQualifiedName~LaguerreRsiNumericalTests.InvalidFieldsLeaveBaselineAndStageHistoryUnchanged"
+  },
+  {
+    "id": "self-adjusting-laguerre-source",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "source.Add(_previous)",
+    "after": "source.Add(price)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-range",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "denominator.Add(lowest, -1)",
+    "after": "denominator.Add(lowest)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-gap",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "Math.Max(high, _previous)",
+    "after": "high",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.GapRatiosRetainValuesBeyondBinary64Range"
+  },
+  {
+    "id": "self-adjusting-laguerre-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "numerator.Shift - denominator.Shift",
+    "after": "0",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.GapRatiosRetainValuesBeyondBinary64Range"
+  },
+  {
+    "id": "self-adjusting-laguerre-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "var expires = _index - _length",
+    "after": "var expires = _index - _length - 1",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.ExpiringRangesAndRatiosChangeTheAdaptiveGain"
+  },
+  {
+    "id": "self-adjusting-laguerre-ratio-history",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "_ratios.Peek().Add(ref ratioSum, -1)",
+    "after": "_ratios.Peek().Add(ref ratioSum, 0)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.ExpiringRangesAndRatiosChangeTheAdaptiveGain"
+  },
+  {
+    "id": "self-adjusting-laguerre-log",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "Math.Log(_length)",
+    "after": "Math.Log(_length + 1d)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.ExpiringRangesAndRatiosChangeTheAdaptiveGain"
+  },
+  {
+    "id": "self-adjusting-laguerre-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "_l0.Add(ref first, -gain)",
+    "after": "_l1.Add(ref first, -gain)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-stage",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "oldOutput.Add(ref sum, -gain)",
+    "after": "oldOutput.Add(ref sum, gain)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-direction",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "if (delta.Sign < 0)",
+    "after": "if (delta.Sign > 0)",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-deadband",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "deadband.Sign <= 0",
+    "after": "variation.IsExactlyZero",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.ZeroRangesAndConstantTailKeepTheDeadbandContract"
+  },
+  {
+    "id": "self-adjusting-laguerre-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SelfAdjustingLaguerreWindow.cs",
+    "scope": "internal sealed class SelfAdjustingLaguerreWindow",
+    "before": "if (commit)\n        {\n            if (_ratios.Count",
+    "after": "if (commit || price != 0)\n        {\n            if (_ratios.Count",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.WideAndTinyCandlesRetainSourceGainAndStages"
+  },
+  {
+    "id": "self-adjusting-laguerre-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha(",
+    "before": "window.Next(inputList[i], openList[i]",
+    "after": "window.Next(stockData.ClosePrices[i], openList[i]",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.SelectedPricesPreserveOriginalOpenHighAndLow"
+  },
+  {
+    "id": "self-adjusting-laguerre-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSelfAdjustingLaguerreFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.SelectedPricesPreserveOriginalOpenHighAndLow"
+  },
+  {
+    "id": "self-adjusting-laguerre-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.InvalidFieldsLeaveRangesRatiosAndStagesUnchanged"
   }
 ]

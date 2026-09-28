@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha)
+        {
+            var adaptive = (EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SelfAdjustingLaguerreValues(bars, adaptive.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersLaguerreRelativeStrengthIndex)
         {
             var laguerre = (EhlersLaguerreRsiSpecOptions)builtIn.CreateOptions();

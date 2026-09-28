@@ -995,39 +995,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha(this StockData stockData, int length = 13)
     {
-        length = Math.Max(length, 1);
+        var window = new SelfAdjustingLaguerreWindow(length);
         List<double> laguerreRsiList = new(stockData.Count);
-        List<double> ratioList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum ratioSumWindow = new();
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var stages = new Streaming.AdaptiveLaguerreStages();
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var highList = stockData.HighPrices; var lowList = stockData.LowPrices; var openList = stockData.OpenPrices;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentOpen = openList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
             var prevRsi1 = i >= 1 ? laguerreRsiList[i - 1] : 0;
             var prevRsi2 = i >= 2 ? laguerreRsiList[i - 2] : 0;
-            var oc = (currentOpen + prevValue) / 2;
-            var hc = Math.Max(currentHigh, prevValue);
-            var lc = Math.Min(currentLow, prevValue);
-            var feValue = (oc + hc + lc + currentValue) / 4;
-
-            var ratio = highestHigh - lowestLow != 0 ? (hc - lc) / (highestHigh - lowestLow) : 0;
-            ratioList.Add(ratio);
-            ratioSumWindow.Add(ratio);
-
-            var ratioSum = ratioSumWindow.Sum(length);
-            var alpha = ratioSum <= 0 ? 0.01 : length == 1 ? 0.99
-                : MinOrMax(Math.Log(ratioSum) / Math.Log(length), 0.99, 0.01);
-            var laguerreRsi = stages.Next(feValue, alpha);
+            var laguerreRsi = window.Next(inputList[i], openList[i], highList[i], lowList[i], true);
             laguerreRsiList.Add(laguerreRsi);
 
             var signal = GetRsiSignal(laguerreRsi - prevRsi1, prevRsi1 - prevRsi2, laguerreRsi, prevRsi1, 0.8, 0.2);

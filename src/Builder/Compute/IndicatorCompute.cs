@@ -1051,6 +1051,7 @@ internal static partial class IndicatorCompute
 
             // Batch 7 - Ehlers Laguerre
             EhlersLaguerreFilterSpecOptions elf => ComputeEhlersLaguerreFilterFast(data, context, elf.Length),
+            EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSpecOptions adaptiveLaguerre => ComputeSelfAdjustingLaguerreFast(data, context, adaptiveLaguerre.Length),
             EhlersLaguerreRsiSpecOptions elrsi => ComputeEhlersLaguerreRsiFast(data, context, elrsi.Length),
             EhlersZeroLagEmaSpecOptions ezle => ComputeEhlersZeroLagEmaFast(data, context, ezle.Length),
             EhlersFramaSpecOptions eframa => ComputeEhlersFramaFast(data, context, eframa.Length),
@@ -12074,6 +12075,14 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(input.Count);
         var window = new LaguerreFilterWindow(2d / (Math.Max(1, length) + 1d));
         for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
+        return buffer;
+    }
+
+    internal static ComputeBuffer ComputeSelfAdjustingLaguerreFast(StockData data, ComputeContext context, int length)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new SelfAdjustingLaguerreWindow(length); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], true);
         return buffer;
     }
 

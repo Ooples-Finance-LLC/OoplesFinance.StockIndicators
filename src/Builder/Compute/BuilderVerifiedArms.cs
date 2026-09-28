@@ -206,6 +206,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersCommodityChannelIndexInverseFisherTransformSpecOptions),
         typeof(EhlersKaufmanAdaptiveMovingAverageSpecOptions),
         typeof(EhlersLaguerreFilterSpecOptions),
+        typeof(EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSpecOptions),
         typeof(EhlersLaguerreRsiSpecOptions),
         typeof(EhlersLeadingIndicatorSpecOptions),
         typeof(EhlersMedianAverageAdaptiveFilterSpecOptions),
