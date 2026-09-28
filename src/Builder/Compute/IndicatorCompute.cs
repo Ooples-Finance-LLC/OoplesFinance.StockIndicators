@@ -2358,9 +2358,7 @@ internal static partial class IndicatorCompute
                     _ => SelfAdjustingRsiSeries.SaRsi
                 }),
             SmoothedWilliamsAccumulationDistributionSpecOptions swad => ComputeSmoothedWilliamsAccumulationDistributionFast(data, context, swad.Length, swad.MaType, spec.OutputKey),
-            StatisticalVolatilitySpecOptions sv => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2), sv.Length1, sv.MaType)
-                : ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2),
+            StatisticalVolatilitySpecOptions sv => ComputeStatisticalVolatilityFast(data, context, sv.Length1, sv.Length2, sv.MaType, spec.OutputKey),
             TradersDynamicIndexSpecOptions tdi => ComputeTradersDynamicIndexFast(data, context, tdi.Length1, tdi.Length3, tdi.MaType,
                 tdi.Length2, tdi.Length4, spec.OutputKey switch
                 {
@@ -25093,41 +25091,12 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeStatisticalVolatilityFast(StockData data, ComputeContext context, int length1 = 30,
-        int length2 = 253)
+        int length2 = 253, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateStatisticalVolatility reads the log range of the chained series and of the bars' own highs
-        // and lows over the same window, annualises each by the square root of the bar count in a year and
-        // averages them. The published series is that raw reading; the average type smooths only the signal
-        // line, so it never reaches this one. VolatilityCore.HistoricalVolatility is the deviation of log
-        // returns, which is a different measure of a different series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        var annualSqrt = MathHelper.Sqrt((double)length2 / length1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var closeWindow = new RollingMinMax(Math.Max(length1, 1));
-        var highWindow = new RollingMinMax(length1);
-        var lowWindow = new RollingMinMax(length1);
-        for (var i = 0; i < count; i++)
-        {
-            closeWindow.Add(input[i]);
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var minC = closeWindow.Min;
-            var minL = lowWindow.Min;
-            var cLog = minC != 0 ? Math.Log(closeWindow.Max / minC) : 0;
-            var hlLog = minL != 0 ? Math.Log(highWindow.Max / minL) : 0;
-
-            output[i] = MathHelper.MinOrMax(((0.6 * cLog * annualSqrt) + (0.6 * hlLog * annualSqrt)) * 0.5, 2.99, 0);
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); using var window = new StatisticalVolatilityWindow(maType, length1, length2);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true); buffer.WritableSpan[i] = outputKey == "Signal" ? point.Signal : point.Line; }
         return buffer;
     }
 

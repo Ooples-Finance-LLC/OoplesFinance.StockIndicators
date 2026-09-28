@@ -2549,7 +2549,7 @@ internal static partial class BuiltInFormulaReferences
                             ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], IndicatorErrorBudget.Exact)
                         : builtIn.BatchName is IndicatorName.MayerMultiple or IndicatorName.JapaneseCorrelationCoefficient
                             ? IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))
-                            : builtIn.BatchName is IndicatorName.HistoricalVolatility or IndicatorName.KaseSerialDependencyIndex
+                            : builtIn.BatchName is IndicatorName.StatisticalVolatility or IndicatorName.HistoricalVolatility or IndicatorName.KaseSerialDependencyIndex
                                 or IndicatorName.CloseToCloseVolatility or IndicatorName.ParkinsonVolatility
                                 or IndicatorName.GarmanKlassVolatility or IndicatorName.RogersSatchellVolatility or IndicatorName.YangZhangVolatility
                                 ? IndicatorValidationRule.Reference(slot, bars => fixtures.GetValue(bars, b => foundation.Compute(b))[key], new IndicatorErrorBudget(0, 1e-9, requireSameSign: true))

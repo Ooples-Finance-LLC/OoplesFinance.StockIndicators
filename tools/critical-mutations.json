@@ -35924,5 +35924,77 @@
     "before": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;",
     "after": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal, true) : bar;",
     "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "statistical-range-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "StableLogRatio.OfSameSign(_high.Next(high, commit), _low.Next(low, commit))",
+    "after": "Math.Log(_high.Next(high, commit) / _low.Next(low, commit))",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-annual",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "Math.Sqrt((double)Math.Max(1, annual) / length)",
+    "after": "Math.Sqrt((double)Math.Max(1, annual) / (length + 1d))",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-cap",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "Math.Min(2.99,",
+    "after": "Math.Min(3.99,",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-signal",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "return (line, _signal.Next(new RocBankValue(line), commit).Publish());",
+    "after": "return (line, _signal.Next(new RocBankValue(line), commit).Publish() + line);",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "private sealed class Extreme",
+    "before": "if (commit)",
+    "after": "if (commit || !commit)",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-fast-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeStatisticalVolatilityFast(",
+    "before": "window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true)",
+    "after": "window.Next(input[i], input[i], input[i], true)",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityStoZ.cs",
+    "scope": "public static StockData CalculateStatisticalVolatility(",
+    "before": "window.Next(stockData.HighPrices[i], stockData.LowPrices[i], inputList[i], true)",
+    "after": "window.Next(stockData.HighPrices[i], stockData.LowPrices[i], stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "statistical-range-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class StatisticalVolatilityState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
   }
 ]

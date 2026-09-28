@@ -255,19 +255,7 @@ internal static partial class BuiltInFormulaReferences
                 if (kind == 0) return null;
                 var rangePeriod = Integer(options, "Length1", 30);
                 var annualPeriod = Integer(options, "Length2", 253);
-                return new("Sv", new[] { "Sv", "Signal" }, bars =>
-                {
-                    var line = bars.Select((_, i) =>
-                    {
-                        var window = Window(bars, i, rangePeriod).ToArray();
-                        var minClose = window.Min(b => b.Close);
-                        var minLow = window.Min(b => b.Low);
-                        var closeRange = minClose == 0 ? 0 : Math.Log(window.Max(b => b.Close) / minClose);
-                        var wickRange = minLow == 0 ? 0 : Math.Log(window.Max(b => b.High) / minLow);
-                        return Math.Max(0, Math.Min(2.99, .3 * Math.Sqrt(annualPeriod / (double)rangePeriod) * (closeRange + wickRange)));
-                    }).ToArray();
-                    return Outputs(("Sv", line), ("Signal", Average(line, rangePeriod, kind)));
-                });
+                return new("Sv", new[] { "Sv", "Signal" }, bars => StatisticalRangeOutputs(bars, rangePeriod, annualPeriod, kind));
             case IndicatorName.LinearRegressionLine:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;

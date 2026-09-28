@@ -1023,74 +1023,22 @@ public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Sv")]
-public sealed class StatisticalVolatilityState : IStreamingIndicatorState, IDisposable
+public sealed class StatisticalVolatilityState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly RollingWindowMax _closeMax;
-    private readonly RollingWindowMin _closeMin;
-    private readonly RollingWindowMax _highMax;
-    private readonly RollingWindowMin _lowMin;
-    private readonly IMovingAverageSmoother _volSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _annualSqrt;
-
-    public StatisticalVolatilityState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30,
-        int length2 = 253)
-    {
-        var resolved = Math.Max(1, length1);
-        _closeMax = new RollingWindowMax(resolved);
-        _closeMin = new RollingWindowMin(resolved);
-        _highMax = new RollingWindowMax(resolved);
-        _lowMin = new RollingWindowMin(resolved);
-        _volSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _annualSqrt = Math.Sqrt((double)length2 / resolved);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly StatisticalVolatilityWindow _window;
+    public StatisticalVolatilityState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 30, int length2 = 253)
+        => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.StatisticalVolatility;
-
-    public void Reset()
-    {
-        _closeMax.Reset();
-        _closeMin.Reset();
-        _highMax.Reset();
-        _lowMin.Reset();
-        _volSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var maxC = isFinal ? _closeMax.Add(value, out _) : _closeMax.Preview(value, out _);
-        var minC = isFinal ? _closeMin.Add(value, out _) : _closeMin.Preview(value, out _);
-        var maxH = isFinal ? _highMax.Add(bar.High, out _) : _highMax.Preview(bar.High, out _);
-        var minL = isFinal ? _lowMin.Add(bar.Low, out _) : _lowMin.Preview(bar.Low, out _);
-
-        var cLog = minC != 0 ? Math.Log(maxC / minC) : 0;
-        var hlLog = minL != 0 ? Math.Log(maxH / minL) : 0;
-        var vol = MathHelper.MinOrMax(((0.6 * cLog * _annualSqrt) + (0.6 * hlLog * _annualSqrt)) * 0.5, 2.99, 0);
-        var signal = _volSmoother.Next(vol, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Sv", vol },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vol, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs ? new Dictionary<string, double> { { "Sv", point.Line }, { "Signal", point.Signal } } : null;
+        return new StreamingIndicatorStateResult(point.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _closeMax.Dispose();
-        _closeMin.Dispose();
-        _highMax.Dispose();
-        _lowMin.Dispose();
-        _volSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Vsi")]

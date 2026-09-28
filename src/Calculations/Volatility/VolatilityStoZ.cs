@@ -607,30 +607,18 @@ public static partial class Calculations
     public static StockData CalculateStatisticalVolatility(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 30, int length2 = 253)
     {
-        List<double> volList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList1, lowestList1) = length1 <= 1 ? (inputList, inputList) : GetMaxAndMinValuesList(inputList, length1);
-        var (highestList2, lowestList2) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        var annualSqrt = Sqrt((double)length2 / length1);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2);
+        List<double> volList = new(stockData.Count), volEmaList = new(stockData.Count);
+        var signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var emaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(inputList), length1)?.ToList()
+            ?? GetMovingAverageList(stockData, maType, length1, inputList);
+        using var window = new StatisticalVolatilityWindow(maType, length1, length2);
         for (var i = 0; i < stockData.Count; i++)
-        {
-            var maxC = highestList1[i];
-            var minC = lowestList1[i];
-            var maxH = highestList2[i];
-            var minL = lowestList2[i];
-            var cLog = minC != 0 ? Math.Log(maxC / minC) : 0;
-            var hlLog = minL != 0 ? Math.Log(maxH / minL) : 0;
-
-            var vol = MinOrMax(((0.6 * cLog * annualSqrt) + (0.6 * hlLog * annualSqrt)) * 0.5, 2.99, 0);
-            volList.Add(vol);
-        }
-
-        var volEmaList = GetMovingAverageList(stockData, maType, length1, volList);
+        { var point = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], inputList[i], true); volList.Add(point.Line); volEmaList.Add(point.Signal); }
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+            volEmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(volList), length1)?.ToList()
+                ?? GetMovingAverageList(stockData, maType, length1, volList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentEma = emaList[i];
