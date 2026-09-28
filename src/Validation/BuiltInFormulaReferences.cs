@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersTruncatedBandPassFilter)
+        {
+            var truncated = (EhlersTruncatedBandPassFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TruncatedBandPassValues(bars, truncated.Length1, truncated.Length2, truncated.Bandwidth), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DynamicallyAdjustableFilter)
         {
             var dynamicFilter = (DynamicallyAdjustableFilterSpecOptions)builtIn.CreateOptions();

@@ -662,43 +662,16 @@ public static partial class Calculations
     /// <param name="bw"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersTruncatedBandPassFilter(this StockData stockData, int length1 = 20, int length2 = 10, double bw = 0.1)
+    public static StockData CalculateEhlersTruncatedBandPassFilter(this StockData stockData, int length1 = 20, int length2 = 10, double bw = .1)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> bptList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var l1 = Math.Cos(MinOrMax(2 * Math.PI / length1, 0.99, 0.01));
-        var g1 = Math.Cos(bw * 2 * Math.PI / length1);
-        var s1 = (1 / g1) - Sqrt((1 / Pow(g1, 2)) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new TruncatedBandPassWindow(length1, length2, bw); var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var trunArray = new double[length2 + 3];
-            for (var j = length2; j > 0; j--)
-            {
-                var prevValue1 = i >= j - 1 ? inputList[i - (j - 1)] : 0;
-                var prevValue2 = i >= j + 1 ? inputList[i - (j + 1)] : 0;
-                trunArray[j] = (0.5 * (1 - s1) * (prevValue1 - prevValue2)) + (l1 * (1 + s1) * trunArray[j + 1]) - (s1 * trunArray[j + 2]);
-            }
-
-            var prevBpt = GetLastOrDefault(bptList);
-            var bpt = trunArray[1];
-            bptList.Add(bpt);
-
-            var signal = GetCompareSignal(bpt, prevBpt);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); signals?.Add(GetCompareSignal(value, i == 0 ? 0 : output[i - 1])); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Etbpf", bptList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bptList);
-        stockData.IndicatorName = IndicatorName.EhlersTruncatedBandPassFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Etbpf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersTruncatedBandPassFilter;
         return stockData;
     }
 

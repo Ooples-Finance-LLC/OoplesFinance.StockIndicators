@@ -7691,33 +7691,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersTruncatedBandPassFilter(ReadOnlySpan<double> close, Span<double> output, int length1 = 20, int length2 = 10, double bw = 0.1)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var l1 = Math.Cos(Math.Max(0.01, Math.Min(0.99, 2 * Math.PI / length1)));
-        var g1 = Math.Cos(bw * 2 * Math.PI / length1);
-        var s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var trunArray = new double[length2 + 3];
-
-            for (var j = length2; j > 0; j--)
-            {
-                var idx1 = i - (j - 1);
-                var idx2 = i - (j + 1);
-                var prevValue1 = idx1 >= 0 ? close[idx1] : 0;
-                var prevValue2 = idx2 >= 0 ? close[idx2] : 0;
-                trunArray[j] = (0.5 * (1 - s1) * (prevValue1 - prevValue2)) + (l1 * (1 + s1) * trunArray[j + 1]) - (s1 * trunArray[j + 2]);
-            }
-
-            output[i] = trunArray[1];
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new TruncatedBandPassWindow(length1, length2, bw);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
 
     /// <summary>

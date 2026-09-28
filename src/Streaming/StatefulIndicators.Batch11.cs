@@ -2826,67 +2826,16 @@ public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorStat
 [PrimaryOutput("Etbpf")]
 public sealed class EhlersTruncatedBandPassFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly double _l1;
-    private readonly double _s1;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly double[] _scratch;
-
-    public EhlersTruncatedBandPassFilterState(int length1 = 20, int length2 = 10, double bw = 0.1)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
-        var g1 = Math.Cos(bw * 2 * Math.PI / resolvedLength1);
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length2 + 2);
-        _scratch = new double[_length2 + 3];
-    }
-
+    private readonly TruncatedBandPassWindow _window;
+    public EhlersTruncatedBandPassFilterState(int length1 = 20, int length2 = 10, double bw = .1) => _window = new(length1, length2, bw);
     public IndicatorName Name => IndicatorName.EhlersTruncatedBandPassFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        Array.Clear(_scratch, 0, _scratch.Length);
-        for (var j = _length2; j > 0; j--)
-        {
-            var prevValue1 = EhlersStreamingWindow.GetOffsetValue(_values, value, j - 1);
-            var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, j + 1);
-            _scratch[j] = (0.5 * (1 - _s1) * (prevValue1 - prevValue2)) + (_l1 * (1 + _s1) * _scratch[j + 1]) -
-                          (_s1 * _scratch[j + 2]);
-        }
-
-        var bpt = _scratch[1];
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Etbpf", bpt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bpt, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Etbpf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Euo")]

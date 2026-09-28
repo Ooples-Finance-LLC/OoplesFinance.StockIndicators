@@ -36626,5 +36626,104 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-phase",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "angle.AddProduct(bandwidth, 2 * Math.PI)",
+    "after": "angle.AddProduct(bandwidth, Math.PI)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "difference.Add(At(lag + 1), -1)",
+    "after": "difference.Add(At(lag), -1)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-cutoff",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "Math.Min((long)_cutoff, _values.Count + 1L)",
+    "after": "Math.Min(1L, _values.Count + 1L)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "first.Multiply(_feedback).AddTo(ref sum)",
+    "after": "first.Multiply(-_feedback).AddTo(ref sum)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-extended",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "RocBankValue.Round(difference).Multiply(_drive)",
+    "after": "new RocBankValue(RocBankValue.Round(difference).Publish()).Multiply(_drive)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-history",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "_values.Count > _cutoff",
+    "after": "_values.Count >= _cutoff",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-parameter",
+    "module": "numerical",
+    "file": "src/Helpers/TruncatedBandPassWindow.cs",
+    "scope": "internal sealed class TruncatedBandPassWindow",
+    "before": "double.IsNaN(phase) || double.IsInfinity(phase)",
+    "after": "double.IsNaN(phase) && double.IsInfinity(phase)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersTruncatedBandPassFilter(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTruncatedBandPassFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "truncated-band-pass-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersTruncatedBandPassFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
   }
 ]
