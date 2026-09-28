@@ -12246,53 +12246,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(StockData data, ComputeContext context, int length1 = 14,
         int length2 = 5)
     {
-        // CalculateEhlersAdaptiveLaguerreFilter runs a four-stage Laguerre filter whose coefficient is not
-        // fixed: each bar ranks how far the series strayed from the filter against the window's own extremes
-        // and takes the median of those ranks as the coefficient.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var deviationWindow = new RollingMinMax(length1);
-        using var ranks = new RollingMedian(length2);
-
-        double l0 = 0;
-        double l1 = 0;
-        double l2 = 0;
-        double l3 = 0;
-        double alpha = (double)2 / (length1 + 1);
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-
-            // The opening bar has no filter yet, so every stage starts from the series itself.
-            var previousL0 = i >= 1 ? l0 : currentValue;
-            var previousL1 = i >= 1 ? l1 : currentValue;
-            var previousL2 = i >= 1 ? l2 : currentValue;
-            var previousL3 = i >= 1 ? l3 : currentValue;
-            var previousFilter = i >= 1 ? output[i - 1] : currentValue;
-
-            var deviation = Math.Abs(currentValue - previousFilter);
-            deviationWindow.Add(deviation);
-
-            var highest = deviationWindow.Max;
-            var lowest = deviationWindow.Min;
-            var rank = AdaptiveLaguerreRank.Calculate(deviation, lowest, highest, currentValue, previousFilter);
-            ranks.Add(rank);
-
-            alpha = rank != 0 ? ranks.Median : alpha;
-
-            l0 = (alpha * currentValue) + ((1 - alpha) * previousL0);
-            l1 = (-1 * (1 - alpha) * l0) + previousL0 + ((1 - alpha) * previousL1);
-            l2 = (-1 * (1 - alpha) * l1) + previousL1 + ((1 - alpha) * previousL2);
-            l3 = (-1 * (1 - alpha) * l2) + previousL2 + ((1 - alpha) * previousL3);
-
-            output[i] = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new AdaptiveLaguerreWindow(length1, length2); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

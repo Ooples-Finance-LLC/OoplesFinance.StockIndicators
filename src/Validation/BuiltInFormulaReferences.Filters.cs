@@ -10,41 +10,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.EhlersAdaptiveLaguerreFilter:
-                return new("Ealf", new[] { "Ealf" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var lookback = Integer(options, "Length", 14);
-                    var differences = new double[prices.Length];
-                    var ranks = new double[prices.Length];
-                    var line = new double[prices.Length];
-                    var stages = new double[4];
-                    var gain = 2d / (lookback + 1);
-                    for (var i = 0; i < prices.Length; i++)
-                    {
-                        var prior = i == 0 ? prices[i] : line[i - 1];
-                        if (i == 0) for (var stage = 0; stage < stages.Length; stage++) stages[stage] = prices[i];
-                        differences[i] = Math.Abs(prices[i] - prior);
-                        var sample = Window(differences, i, lookback).ToArray();
-                        var low = sample.Min(); var high = sample.Max();
-                        // The public numerical contract treats deviations within 32 price-scale
-                        // machine epsilons as ties, before normalization can amplify their noise.
-                        var uncertainty = (32d / 4503599627370496d) * Math.Max(Math.Abs(prices[i]), Math.Abs(prior));
-                        ranks[i] = high - low <= uncertainty || differences[i] - low <= uncertainty ? 0
-                            : high - differences[i] <= uncertainty ? 1 : (differences[i] - low) / (high - low);
-                        if (ranks[i] != 0)
-                        {
-                            var sorted = Window(ranks, i, 5).OrderBy(v => v).ToArray();
-                            gain = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2;
-                        }
-                        var next = new double[4];
-                        next[0] = stages[0] + gain * (prices[i] - stages[0]);
-                        for (var stage = 1; stage < 4; stage++)
-                            next[stage] = stages[stage - 1] + (1 - gain) * (stages[stage] - next[stage - 1]);
-                        line[i] = next.Select((v, j) => (j == 0 || j == 3 ? 1 : 2) * v).Sum() / 6;
-                        stages = next;
-                    }
-                    return Outputs(("Ealf", line));
-                });
+                return new("Ealf", new[] { "Ealf" }, bars => Outputs(("Ealf", AdaptiveLaguerreValues(bars, Integer(options, "Length", 14)))));
             case IndicatorName.EdgePreservingFilter:
                 var edgeLength = Integer(options, "Length", 200);
                 var edgeKind = AverageKind(options, 1);

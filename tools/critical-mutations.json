@@ -39200,5 +39200,149 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation removed",
     "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.InvalidFieldsLeaveRangesRatiosAndStagesUnchanged"
+  },
+  {
+    "id": "adaptive-laguerre-initial-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "2d / (_length + 1d)",
+    "after": "2d / (_length + 2d)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.PriceScaleTieBandPreventsNoiseFromChangingGain"
+  },
+  {
+    "id": "adaptive-laguerre-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "Difference(input, previous)",
+    "after": "Difference(input, _l0)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.WideAndTinyPricesRetainRankMedianAndStageHistory"
+  },
+  {
+    "id": "adaptive-laguerre-extrema-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "var expires = _index - _length",
+    "after": "var expires = _index - _length - 1",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.RankExtremaMedianExpirationAndZeroRanksRetainTheirSemantics"
+  },
+  {
+    "id": "adaptive-laguerre-median-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "var full = _history.Count == _medianLength",
+    "after": "var full = _history.Count > _medianLength",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.RankExtremaMedianExpirationAndZeroRanksRetainTheirSemantics"
+  },
+  {
+    "id": "adaptive-laguerre-median-even",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "mean.Mean(even ? 2 : 1)",
+    "after": "mean.Mean(1)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.RankExtremaMedianExpirationAndZeroRanksRetainTheirSemantics"
+  },
+  {
+    "id": "adaptive-laguerre-zero-rank",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "rank != 0 ? median : _gain",
+    "after": "median",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.PriceScaleTieBandPreventsNoiseFromChangingGain"
+  },
+  {
+    "id": "adaptive-laguerre-tieband",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "rangeGuard.Sign <= 0 || bottomGuard.Sign <= 0",
+    "after": "range.IsExactlyZero || bottom.IsExactlyZero",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.PriceScaleTieBandPreventsNoiseFromChangingGain"
+  },
+  {
+    "id": "adaptive-laguerre-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "oldOutput.Add(ref sum, -gain)",
+    "after": "oldOutput.Add(ref sum, gain)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.WideAndTinyPricesRetainRankMedianAndStageHistory"
+  },
+  {
+    "id": "adaptive-laguerre-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "l2.Add(ref sum, 2)",
+    "after": "l2.Add(ref sum)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.WideAndTinyPricesRetainRankMedianAndStageHistory"
+  },
+  {
+    "id": "adaptive-laguerre-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "Scaled.Round(sum, 6)",
+    "after": "Scaled.Round(sum, 5)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.ConstantInputsAndFirstBarAreExactlyPreserved"
+  },
+  {
+    "id": "adaptive-laguerre-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(count);",
+    "after": "var shift = 0; var value = sum.Mean(count); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests|FullyQualifiedName~AdaptiveLaguerreDoesNotAmplifyPriceOffsetRoundoff|FullyQualifiedName~AdaptiveLaguerreMatchesAllRoutes"
+  },
+  {
+    "id": "adaptive-laguerre-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLaguerreWindow.cs",
+    "scope": "internal sealed class AdaptiveLaguerreWindow",
+    "before": "if (commit) { _l0",
+    "after": "if (commit || price != 0) { _l0",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.WideAndTinyPricesRetainRankMedianAndStageHistory"
+  },
+  {
+    "id": "adaptive-laguerre-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersAdaptiveLaguerreFilter(",
+    "before": "window.Next(currentValue, true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.SelectedPricesReachBatchAndTypedArm"
+  },
+  {
+    "id": "adaptive-laguerre-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveLaguerreFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.SelectedPricesReachBatchAndTypedArm"
+  },
+  {
+    "id": "adaptive-laguerre-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveLaguerreFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.InvalidFieldsLeaveRanksMedianAndStagesUnchanged"
+  },
+  {
+    "id": "adaptive-laguerre-native-length",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersAdaptiveLaguerreFilterState(adaptiveLaguerre.Length)",
+    "after": "new EhlersAdaptiveLaguerreFilterState(14)",
+    "filter": "FullyQualifiedName~AdaptiveLaguerreNumericalTests.EveryRouteMatchesIndependentLagDifferences"
   }
 ]

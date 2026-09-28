@@ -198,104 +198,17 @@ public sealed class EhlersAdaptiveCenterOfGravityOscillatorState : IStreamingInd
 [PrimaryOutput("Ealf")]
 public sealed class EhlersAdaptiveLaguerreFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly StreamingInputResolver _input;
-    private readonly RollingWindowMax _diffMax;
-    private readonly RollingWindowMin _diffMin;
-    private readonly PooledRingBuffer<double> _midValues;
-    private readonly double[] _medianScratch;
-    private double _prevValue;
-    private double _prevL0;
-    private double _prevL1;
-    private double _prevL2;
-    private double _prevL3;
-    private double _prevFilter;
-    private double _prevAlpha;
-    private bool _hasPrev;
-
-    public EhlersAdaptiveLaguerreFilterState(int length1 = 14, int length2 = 5)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _diffMax = new RollingWindowMax(_length1);
-        _diffMin = new RollingWindowMin(_length1);
-        _midValues = new PooledRingBuffer<double>(resolved2);
-        _medianScratch = new double[resolved2];
-        _prevAlpha = (double)2 / (_length1 + 1);
-    }
-
+    private readonly AdaptiveLaguerreWindow _window;
+    public EhlersAdaptiveLaguerreFilterState(int length1 = 14, int length2 = 5) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveLaguerreFilter;
-
-    public void Reset()
-    {
-        _diffMax.Reset();
-        _diffMin.Reset();
-        _midValues.Clear();
-        _prevValue = 0;
-        _prevL0 = 0;
-        _prevL1 = 0;
-        _prevL2 = 0;
-        _prevL3 = 0;
-        _prevFilter = 0;
-        _prevAlpha = (double)2 / (_length1 + 1);
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevL0 = _hasPrev ? _prevL0 : value;
-        var prevL1 = _hasPrev ? _prevL1 : value;
-        var prevL2 = _hasPrev ? _prevL2 : value;
-        var prevL3 = _hasPrev ? _prevL3 : value;
-        var prevFilter = _hasPrev ? _prevFilter : value;
-
-        var diff = Math.Abs(value - prevFilter);
-        var highestHigh = isFinal ? _diffMax.Add(diff, out _) : _diffMax.Preview(diff, out _);
-        var lowestLow = isFinal ? _diffMin.Add(diff, out _) : _diffMin.Preview(diff, out _);
-        var mid = AdaptiveLaguerreRank.Calculate(diff, lowestLow, highestHigh, value, prevFilter);
-        var median = EhlersStreamingWindow.GetMedian(_midValues, mid, _medianScratch);
-        var alpha = mid != 0 ? median : _prevAlpha;
-
-        var l0 = (alpha * value) + ((1 - alpha) * prevL0);
-        var l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * prevL1);
-        var l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * prevL2);
-        var l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * prevL3);
-        var filter = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-
-        if (isFinal)
-        {
-            _midValues.TryAdd(mid, out _);
-            _prevValue = value;
-            _prevL0 = l0;
-            _prevL1 = l1;
-            _prevL2 = l2;
-            _prevL3 = l3;
-            _prevFilter = filter;
-            _prevAlpha = alpha;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ealf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ealf", value } } : null);
     }
+    public void Dispose() { }
 
-    public void Dispose()
-    {
-        _diffMax.Dispose();
-        _diffMin.Dispose();
-        _midValues.Dispose();
-    }
 }
 
 [PrimaryOutput("Eapps")]

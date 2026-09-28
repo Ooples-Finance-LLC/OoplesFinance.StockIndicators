@@ -656,58 +656,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveLaguerreFilter(this StockData stockData, int length1 = 14, int length2 = 5)
     {
+        var window = new AdaptiveLaguerreWindow(length1, length2);
         List<double> filterList = new(stockData.Count);
-        List<double> l0List = new(stockData.Count);
-        List<double> l1List = new(stockData.Count);
-        List<double> l2List = new(stockData.Count);
-        List<double> l3List = new(stockData.Count);
-        List<double> diffList = new(stockData.Count);
-        List<double> midList = new(stockData.Count);
-        List<double> alphaList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax diffWindow = new(length1);
-        using var midMedian = new RollingMedian(length2);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevL0 = i >= 1 ? GetLastOrDefault(l0List) : currentValue;
-            var prevL1 = i >= 1 ? GetLastOrDefault(l1List) : currentValue;
-            var prevL2 = i >= 1 ? GetLastOrDefault(l2List) : currentValue;
-            var prevL3 = i >= 1 ? GetLastOrDefault(l3List) : currentValue;
-            var prevFilter = i >= 1 ? GetLastOrDefault(filterList) : currentValue;
-
-            var diff = Math.Abs(currentValue - prevFilter);
-            diffList.Add(diff);
-            diffWindow.Add(diff);
-
-            var highestHigh = diffWindow.Max;
-            var lowestLow = diffWindow.Min;
-
-            var mid = AdaptiveLaguerreRank.Calculate(diff, lowestLow, highestHigh, currentValue, prevFilter);
-            midList.Add(mid);
-            midMedian.Add(mid);
-
-            var prevAlpha = i >= 1 ? GetLastOrDefault(alphaList) : (double)2 / (length1 + 1);
-            var alpha = mid != 0 ? midMedian.Median : prevAlpha;
-            alphaList.Add(alpha);
-
-            var l0 = (alpha * currentValue) + ((1 - alpha) * prevL0);
-            l0List.Add(l0);
-
-            var l1 = (-1 * (1 - alpha) * l0) + prevL0 + ((1 - alpha) * prevL1);
-            l1List.Add(l1);
-
-            var l2 = (-1 * (1 - alpha) * l1) + prevL1 + ((1 - alpha) * prevL2);
-            l2List.Add(l2);
-
-            var l3 = (-1 * (1 - alpha) * l2) + prevL2 + ((1 - alpha) * prevL3);
-            l3List.Add(l3);
-
-            var filter = (l0 + (2 * l1) + (2 * l2) + l3) / 6;
-            filterList.Add(filter);
+            var currentValue = inputList[i]; var prevValue = i >= 1 ? inputList[i - 1] : 0;
+            var prevFilter = i >= 1 ? filterList[i - 1] : currentValue;
+            var filter = window.Next(currentValue, true); filterList.Add(filter);
 
             var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter);
             signalsList?.Add(signal);
