@@ -72,65 +72,16 @@ public sealed class EhlersAdaptiveCyberCycleState : IStreamingIndicatorState, ID
 [PrimaryOutput("Eacog")]
 public sealed class EhlersAdaptiveCenterOfGravityOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveCyberCyclePeriodState _periodState;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersAdaptiveCenterOfGravityOscillatorState(int length = 5)
-    {
-        var resolved = Math.Max(1, length);
-        _periodState = new AdaptiveCyberCyclePeriodState(resolved, 0.07);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(Math.Max(64, resolved * 2));
-    }
-
+    private readonly AdaptiveGravityWindow _window;
+    public EhlersAdaptiveCenterOfGravityOscillatorState(int length = 5) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveCenterOfGravityOscillator;
-
-    public void Reset()
-    {
-        _periodState.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var period = _periodState.Next(value, isFinal);
-        var intPeriod = MathHelper.CeilingCycle(period / 2);
-        double num = 0;
-        double denom = 0;
-        for (var j = 0; j < intPeriod; j++)
-        {
-            var prevPrice = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            num += (1 + j) * prevPrice;
-            denom += prevPrice;
-        }
-
-        var halfPeriod = (intPeriod + 1) / 2;
-        var cg = denom != 0 ? (-num / denom) + halfPeriod : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eacog", cg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cg, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eacog", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodState.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Ealf")]

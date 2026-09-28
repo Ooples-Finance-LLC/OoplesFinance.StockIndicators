@@ -86,46 +86,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveCenterOfGravityOscillator(this StockData stockData, int length = 5)
     {
-        length = Math.Max(length, 1);
-        List<double> cgList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var pList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersAdaptiveCyberCycle(data, length: length))["Period"];
-
+        var (selected, _, _, _, _) = GetInputValuesList(stockData); var window = new AdaptiveGravityWindow(length); var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var p = pList[i];
-            var intPeriod = (int)Math.Ceiling(p / 2);
-            var prevCg1 = i >= 1 ? cgList[i - 1] : 0;
-            var prevCg2 = i >= 2 ? cgList[i - 2] : 0;
-
-            double num = 0, denom = 0;
-            for (var j = 0; j <= intPeriod - 1; j++)
-            {
-                var prevPrice = i >= j ? inputList[i - j] : 0;
-                num += (1 + j) * prevPrice;
-                denom += prevPrice;
-            }
-
-            var cg = denom != 0 ? (-num / denom) + ((intPeriod + 1) / 2) : 0;
-            cgList.Add(cg);
-
-            var signal = GetCompareSignal(cg - prevCg1, prevCg1 - prevCg2);
-            signalsList?.Add(signal);
+            var value = window.Next(selected[i], true); values.Add(value); var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetCompareSignal(value - previous, previous - older));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacog", cgList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cgList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveCenterOfGravityOscillator;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacog", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAdaptiveCenterOfGravityOscillator; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Decycler Oscillator V1

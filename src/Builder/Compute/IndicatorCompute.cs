@@ -10558,37 +10558,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersAdaptiveCenterOfGravityOscillatorFast(StockData data, ComputeContext context, int length = 5)
     {
-        // CalculateEhlersAdaptiveCenterOfGravityOscillator takes the centre of gravity of the chained series
-        // over half the measured dominant cycle, so its window changes bar by bar. The arm this replaces used
-        // a fixed window over the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var adaptiveCycle = context.Rent(count);
-        using var periods = context.Rent(count);
-        EhlersAdaptiveCyberCycle(context, input, length, 0.07, adaptiveCycle.WritableSpan, periods.WritableSpan);
-        var period = periods.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var intPeriod = (int)Math.Ceiling(period[i] / 2);
-
-            double num = 0, denom = 0;
-            for (var j = 0; j <= intPeriod - 1; j++)
-            {
-                var prevPrice = i >= j ? input[i - j] : 0;
-                num += (1 + j) * prevPrice;
-                denom += prevPrice;
-            }
-
-            // The centring term is integer division in the batch, so half of an odd period truncates. Keep it.
-            output[i] = denom != 0 ? (-num / denom) + ((intPeriod + 1) / 2) : 0;
-        }
-
-        return buffer;
+        var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new AdaptiveGravityWindow(length); var result = context.Rent(selected.Count);
+        for (var i = 0; i < selected.Count; i++) result.WritableSpan[i] = window.Next(selected[i], true);
+        return result;
     }
 
     /// <summary>
