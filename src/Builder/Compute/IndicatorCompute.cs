@@ -9851,42 +9851,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeTrigonometricOscillatorFast(StockData data, ComputeContext context, int length = 200)
     {
-        // CalculateTrigonometricOscillator turns the direction of the linear regression of the chained series
-        // into an angle, unwraps it onto a continuous branch, fits that angle over the same window and takes its
-        // arctangent.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var angle = context.Rent(count);
-        var u = angle.WritableSpan;
-
-        var wb = Math.Asin(Math.Sign(1)) * 2;
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            double prevS = 0;
-            for (var i = 0; i < count; i++)
-            {
-                var s = regression.Next(input[i], isFinal: true).Last;
-                var wa = Math.Asin(Math.Sign(s - prevS)) * 2;
-                prevS = s;
-
-                u[i] = wa + (2 * Math.PI * Math.Round((wa - wb) / (2 * Math.PI)));
-            }
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(length))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                output[i] = Math.Atan(regression.Next(angle.Span[i], isFinal: true).Last);
-            }
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new TrigonometricWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

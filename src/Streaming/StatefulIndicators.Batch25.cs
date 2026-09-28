@@ -376,65 +376,16 @@ public sealed class TreynorRatioState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("To")]
 public sealed class TrigonometricOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly LinearRegressionState _sRegression;
-    private readonly LinearRegressionState _uRegression;
-    private double _uValue;
-    private double _prevS;
-    private bool _hasPrev;
-
-    public TrigonometricOscillatorState(int length = 200)
-    {
-        var resolved = Math.Max(1, length);
-        _sRegression = new LinearRegressionState(resolved);
-        _uRegression = new LinearRegressionState(resolved, _ => _uValue);
-    }
-
+    private readonly TrigonometricWindow _window;
+    public TrigonometricOscillatorState(int length = 200) => _window = new(length);
     public IndicatorName Name => IndicatorName.TrigonometricOscillator;
-
-    public void Reset()
-    {
-        _sRegression.Reset();
-        _uRegression.Reset();
-        _uValue = 0;
-        _prevS = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var s = _sRegression.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevS = _hasPrev ? _prevS : 0;
-        var wa = Math.Asin(Math.Sign(s - prevS)) * 2;
-        var wb = Math.Asin(Math.Sign(1)) * 2;
-        var u = wa + (2 * Math.PI * Math.Round((wa - wb) / (2 * Math.PI)));
-        _uValue = u;
-        var uReg = _uRegression.Update(bar, isFinal, includeOutputs: false).Value;
-        var o = Math.Atan(uReg);
-
-        if (isFinal)
-        {
-            _prevS = s;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "To", o }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(o, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "To", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sRegression.Dispose();
-        _uRegression.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Trimean")]

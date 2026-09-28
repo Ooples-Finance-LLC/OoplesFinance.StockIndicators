@@ -33402,5 +33402,119 @@
     "before": "new ReferenceFraction(4) * v * v / energy",
     "after": "new ReferenceFraction(4) * v * v * energy",
     "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-endpoint-publication",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "_price.Next(price, commit).RoundedLastUnits",
+    "after": "ExactVarianceWindow.Units(_price.Next(price, commit).Last)",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-previous-fit",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "fit.CompareTo(_previous)",
+    "after": "fit.CompareTo(BigInteger.Zero)",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-tie-angle",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "direction > 0 ? Math.PI",
+    "after": "direction >= 0 ? Math.PI",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-falling-angle",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "direction < 0 ? -3 * Math.PI",
+    "after": "direction < 0 ? -Math.PI",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-second-fit",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "_angle.Next(angle, commit).Last",
+    "after": "_angle.Next(angle, commit).Slope",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-minimum-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(3, length)",
+    "filter": "FullyQualifiedName~TrigonometricNumericalTests.HandRisingFallingAndFlatAngles"
+  },
+  {
+    "id": "trigonometric-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted + _sum + expired",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "if (commit) _previous = fit;",
+    "after": "if (commit || price != 0) _previous = fit;",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrigonometricWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeTrigonometricOscillatorFast("
+  },
+  {
+    "id": "trigonometric-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch25.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// skipped validation\n",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class TrigonometricOscillatorState"
+  },
+  {
+    "id": "trigonometric-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " TrigonometricOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-reference-weights",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Trigonometric.cs",
+    "before": "6L * j - 2L * n + 4",
+    "after": "6L * j - 2L * n + 3",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "trigonometric-reference-direction",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Trigonometric.cs",
+    "before": "fit.CompareTo(previous)",
+    "after": "previous.CompareTo(fit)",
+    "filter": "FullyQualifiedName~ValidationTests.TrigonometricNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

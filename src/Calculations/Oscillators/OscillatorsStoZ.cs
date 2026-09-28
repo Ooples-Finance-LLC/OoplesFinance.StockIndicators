@@ -1954,32 +1954,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateTrigonometricOscillator(this StockData stockData, int length = 200)
     {
-        List<double> uList = new(stockData.Count);
-        List<double> oList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var sList = CalculateLinearRegression(stockData, length).ChainedValues;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new TrigonometricWindow(length);
+        List<double> oList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var s = sList[i];
-            var prevS = i >= 1 ? sList[i - 1] : 0;
-            var wa = Math.Asin(Math.Sign(s - prevS)) * 2;
-            var wb = Math.Asin(Math.Sign(1)) * 2;
-
-            var u = wa + (2 * Math.PI * Math.Round((wa - wb) / (2 * Math.PI)));
-            uList.Add(u);
-        }
-
-        stockData.SetCustomValues(uList);
-        var uLinregList = CalculateLinearRegression(stockData, length).ChainedValues;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var u = uLinregList[i];
-            var prevO1 = i >= 1 ? oList[i - 1] : 0;
-            var prevO2 = i >= 2 ? oList[i - 2] : 0;
-
-            var o = Math.Atan(u);
+            var prevO1 = i >= 1 ? oList[i - 1] : 0; var prevO2 = i >= 2 ? oList[i - 2] : 0;
+            var o = window.Next(input[i], true);
             oList.Add(o);
 
             var signal = GetRsiSignal(o - prevO1, prevO1 - prevO2, o, prevO1, 1, -1);

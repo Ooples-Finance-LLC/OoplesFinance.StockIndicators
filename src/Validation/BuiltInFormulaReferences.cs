@@ -98,6 +98,12 @@ internal static partial class BuiltInFormulaReferences
             { var key = clipKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersClipOutputs(bars, Integer(clipOptions, "Length1", 2), Integer(clipOptions, "Length3", 50), Integer(clipOptions, "SignalLength", 22), clipKind)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.TrigonometricOscillator)
+        {
+            var trigonometricLength = Integer(builtIn.CreateOptions(), "Length", 200);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrigonometricOutputs(bars, trigonometricLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
