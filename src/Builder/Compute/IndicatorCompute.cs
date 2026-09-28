@@ -13417,37 +13417,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeFallingRisingFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        length = Math.Max(2, length);
-        // CalculateFallingRisingFilter tracks the chained series by correcting its estimate with the previous
-        // error twice over: once at the fixed exponential rate, and once at a rate that jumps to one whenever
-        // the current value breaks out of the range of the preceding window. The published series is that
-        // estimate, which starts at zero because the first correction has no error to work from.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var alpha = (double)2 / (length + 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingMinMax(length);
-        double prevError = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevA = i >= 1 ? output[i - 1] : 0;
-
-            window.Add(i >= 1 ? input[i - 1] : 0);
-
-            var beta = currentValue > window.Max || currentValue < window.Min ? 1 : alpha;
-            output[i] = prevA + (alpha * prevError) + (beta * prevError);
-
-            prevError = currentValue - output[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new FallingRisingWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Line;
+        return result;
     }
 
     /// <summary>

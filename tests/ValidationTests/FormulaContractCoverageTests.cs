@@ -2375,7 +2375,8 @@ public sealed class FormulaContractCoverageTests
         Check(new FibonacciRetrace(2, 2, .25), reversal, new[] { 1d, 1.75, 1.75 }, new[] { 1d, 1.25, 1.25 });
         Check(new FullTypicalPrice(14), reversal, new[] { 1d, 2, 1 });
         Check(new FareySequenceWeightedMovingAverage(2), reversal, new[] { 2d / 3, 5d / 3, 4d / 3 });
-        Check(new FallingRisingFilter(2), reversal, new[] { 0d, 5d / 3, 19d / 9 });
+        // The alpha correction rounds before adding the breakout correction.
+        Check(new FallingRisingFilter(2), reversal, new[] { 0d, (2d / 3) + 1, 19d / 9 });
         Check(new ForecastOscillator(2), reversal, new[] { 0d, 50, -100 }, new[] { 0d, 25, -25 });
         Check(new DynamicSupportAndResistance(2), reversal,
             new[] { 1d, 2 - .5 * Math.Sqrt(2), 2 - .75 * Math.Sqrt(2) },

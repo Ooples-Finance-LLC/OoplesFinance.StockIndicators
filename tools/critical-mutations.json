@@ -34318,5 +34318,120 @@
     "before": "RoundRocBankStage(v - prices[i - 1])",
     "after": "RoundRocBankStage(v + prices[i - 1])",
     "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "_length + 1d",
+    "after": "_length + 1",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-upper-tie",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "price > high",
+    "after": "price >= high",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-lower-tie",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "price < low",
+    "after": "price <= low",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "var node = values.First; while (node is not null && node.Value.Index <= _count - _length) node = node.Next;",
+    "after": "var node = values.First;",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-error-publication",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "_error = error;",
+    "after": "_error = new RocBankValue(error.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-alpha-correction",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "Add(_line, _error.Multiply(_alpha))",
+    "after": "_line",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-beta-correction",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "_error.Multiply(beta)",
+    "after": "_error.Multiply(_alpha)",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "if (commit) { Commit",
+    "after": "if (commit || price != 0) { Commit",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FallingRisingWindow.cs",
+    "before": "_line = _error = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeFallingRisingFilterFast("
+  },
+  {
+    "id": "falling-rising-raw-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "new FallingRisingWindow(length)",
+    "after": "new FallingRisingWindow(2)",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeFallingRisingFilterFast("
+  },
+  {
+    "id": "falling-rising-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class FallingRisingFilterState"
+  },
+  {
+    "id": "falling-rising-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " FallingRisingFilterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "falling-rising-reference-error",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.FallingRising.cs",
+    "before": "ReferenceFraction.FromDouble(bars[i].Close) - line",
+    "after": "ReferenceFraction.FromDouble(bars[i].Close) + line",
+    "filter": "FullyQualifiedName~ValidationTests.FallingRisingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

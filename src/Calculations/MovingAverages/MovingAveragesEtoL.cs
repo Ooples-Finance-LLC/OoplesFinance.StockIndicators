@@ -1032,36 +1032,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateFallingRisingFilter(this StockData stockData, int length = 14)
     {
-        length = Math.Max(2, length);
-        List<double> tempList = new(stockData.Count);
-        List<double> aList = new(stockData.Count);
-        List<double> errorList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax tempWindow = new(length);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
+        List<double> aList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new FallingRisingWindow(length); double previousError = 0;
         for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevA = i >= 1 ? aList[i - 1] : 0;
-            var prevError = i >= 1 ? errorList[i - 1] : 0;
-
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            tempList.Add(prevValue);
-            tempWindow.Add(prevValue);
-
-            var beta = currentValue > tempWindow.Max || currentValue < tempWindow.Min ? 1 : alpha;
-            var a = prevA + (alpha * prevError) + (beta * prevError);
-            aList.Add(a);
-
-            var error = currentValue - a;
-            errorList.Add(error);
-
-            var signal = GetCompareSignal(error, prevError);
-            signalsList?.Add(signal);
-        }
+        { var point = window.Next(inputList[i], true); aList.Add(point.Line); signalsList?.Add(GetCompareSignal(point.Error, previousError)); previousError = point.Error; }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Frf", aList }

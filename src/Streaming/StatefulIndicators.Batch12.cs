@@ -974,73 +974,16 @@ public sealed class ErgodicTrueStrengthIndexV2State : IStreamingIndicatorState, 
 [PrimaryOutput("Frf")]
 public sealed class FallingRisingFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly RollingWindowMax _tempMax;
-    private readonly RollingWindowMin _tempMin;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevA;
-    private double _prevError;
-    private bool _hasPrev;
-
-    public FallingRisingFilterState(int length = 14)
-    {
-        var resolved = Math.Max(2, length);
-        _alpha = (double)2 / (resolved + 1);
-        _tempMax = new RollingWindowMax(resolved);
-        _tempMin = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FallingRisingWindow _window; private readonly StreamingInputResolver _input;
+    public FallingRisingFilterState(int length = 14) { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.FallingRisingFilter;
-
-    public void Reset()
-    {
-        _tempMax.Reset();
-        _tempMin.Reset();
-        _prevValue = 0;
-        _prevA = 0;
-        _prevError = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevA = _hasPrev ? _prevA : 0;
-        var prevError = _hasPrev ? _prevError : 0;
-        var maxPrev = isFinal ? _tempMax.Add(prevValue, out _) : _tempMax.Preview(prevValue, out _);
-        var minPrev = isFinal ? _tempMin.Add(prevValue, out _) : _tempMin.Preview(prevValue, out _);
-        var beta = value > maxPrev || value < minPrev ? 1 : _alpha;
-        var a = prevA + (_alpha * prevError) + (beta * prevError);
-        var error = value - a;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevA = a;
-            _prevError = error;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Frf", a }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(a, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal).Line;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Frf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _tempMax.Dispose();
-        _tempMin.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Fswma")]
