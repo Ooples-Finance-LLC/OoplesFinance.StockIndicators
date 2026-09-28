@@ -419,59 +419,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSuperPassbandFilter(this StockData stockData, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
-        fastLength = Math.Max(fastLength, 1);
-        slowLength = Math.Max(slowLength, 1);
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> espfList = new(stockData.Count);
-        List<double> squareList = new(stockData.Count);
-        List<double> rmsList = new(stockData.Count);
-        List<double> negRmsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum squareSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = MinOrMax((double)length1 / fastLength, 0.99, 0.01);
-        var a2 = MinOrMax((double)length1 / slowLength, 0.99, 0.01);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new SuperPassbandWindow(fastLength, slowLength, length1, length2); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var upper = new List<double>(input.Count); var lower = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        double previous = 0, previousUpper = 0, previousLower = 0;
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevEspf1 = i >= 1 ? espfList[i - 1] : 0;
-            var prevEspf2 = i >= 2 ? espfList[i - 2] : 0;
-
-            var espf = ((a1 - a2) * currentValue) + (((a2 * (1 - a1)) - (a1 * (1 - a2))) * prevValue1) + ((1 - a1 + (1 - a2)) * prevEspf1) - 
-                       ((1 - a1) * (1 - a2) * prevEspf2);
-            espfList.Add(espf);
-
-            var espfPow = Pow(espf, 2);
-            squareList.Add(espfPow);
-            squareSum.Add(espfPow);
-
-            var squareAvg = squareSum.Average(length2);
-            var prevRms = GetLastOrDefault(rmsList);
-            var rms = Sqrt(squareAvg);
-            rmsList.Add(rms);
-
-            var prevNegRms = GetLastOrDefault(negRmsList);
-            var negRms = -rms;
-            negRmsList.Add(negRms);
-
-            var signal = GetBullishBearishSignal(espf - rms, prevEspf1 - prevRms, espf - negRms, prevEspf1 - prevNegRms);
-            signalsList?.Add(signal);
+            var value = window.Next(price, true); line.Add(value.Line); upper.Add(value.Upper); lower.Add(value.Lower);
+            signals?.Add(GetBullishBearishSignal(value.Line - value.Upper, previous - previousUpper, value.Line - value.Lower, previous - previousLower));
+            previous = value.Line; previousUpper = value.Upper; previousLower = value.Lower;
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Espf", espfList },
-            { "UpperBand", rmsList },
-            { "LowerBand", negRmsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(espfList);
-        stockData.IndicatorName = IndicatorName.EhlersSuperPassbandFilter;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Espf", line }, { "UpperBand", upper }, { "LowerBand", lower } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersSuperPassbandFilter; return stockData;
     }
 
 

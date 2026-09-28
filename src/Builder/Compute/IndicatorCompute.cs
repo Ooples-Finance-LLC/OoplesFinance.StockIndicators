@@ -16730,27 +16730,13 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(StockData data, ComputeContext context, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50, string? outputKey = null)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersSuperPassbandFilter(inputSpan, buffer.WritableSpan, fastLength, slowLength, length1, length2);
-        if (outputKey is "UpperBand" or "LowerBand")
-        {
-            var squares = new OoplesFinance.StockIndicators.Streaming.RollingWindowSum(Math.Max(1, length2));
-            try
-            {
-                var values = buffer.WritableSpan;
-                for (var i = 0; i < values.Length; i++)
-                {
-                    var sum = squares.Add(values[i] * values[i], out var count);
-                    values[i] = (outputKey == "UpperBand" ? 1 : -1) * Math.Sqrt(Math.Max(0, sum / count));
-                }
-            }
-            finally { squares.Dispose(); }
-        }
-        else if (outputKey is not (null or "Espf")) throw new ArgumentOutOfRangeException(nameof(outputKey));
+        if (outputKey is not (null or "Espf" or "UpperBand" or "LowerBand")) throw new ArgumentOutOfRangeException(nameof(outputKey));
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(input.Count);
+        var window = new SuperPassbandWindow(fastLength, slowLength, length1, length2);
+        for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); buffer.WritableSpan[i] = outputKey == "UpperBand" ? value.Upper : outputKey == "LowerBand" ? value.Lower : value.Line; }
         return buffer;
     }
+
 
     /// <summary>
     /// Computes Ehlers Roofing Filter V2 using fast path.

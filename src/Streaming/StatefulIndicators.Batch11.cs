@@ -2351,79 +2351,17 @@ public sealed class EhlersUniversalTradingFilterState : IStreamingIndicatorState
 [PrimaryOutput("Espf")]
 public sealed class EhlersSuperPassbandFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _a1;
-    private readonly double _a2;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _espfValues;
-    private readonly RollingWindowSum _powerSum;
-
-    public EhlersSuperPassbandFilterState(int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _a1 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedFast, 0.99, 0.01);
-        _a2 = MathHelper.MinOrMax((double)resolvedLength1 / resolvedSlow, 0.99, 0.01);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(1);
-        _espfValues = new PooledRingBuffer<double>(2);
-        _powerSum = new RollingWindowSum(resolvedLength2);
-    }
-
+    private readonly SuperPassbandWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersSuperPassbandFilterState(int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50) { _window = new(fastLength, slowLength, length1, length2); }
     public IndicatorName Name => IndicatorName.EhlersSuperPassbandFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _espfValues.Clear();
-        _powerSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevEspf1 = EhlersStreamingWindow.GetOffsetValue(_espfValues, 1);
-        var prevEspf2 = EhlersStreamingWindow.GetOffsetValue(_espfValues, 2);
-
-        var espf = ((_a1 - _a2) * value) +
-                   (((_a2 * (1 - _a1)) - (_a1 * (1 - _a2))) * prevValue) +
-                   ((1 - _a1 + (1 - _a2)) * prevEspf1) -
-                   ((1 - _a1) * (1 - _a2) * prevEspf2);
-
-        var espfPow = espf * espf;
-        var sum = isFinal ? _powerSum.Add(espfPow, out var count) : _powerSum.Preview(espfPow, out count);
-        var rms = count > 0 ? MathHelper.Sqrt(sum / count) : 0;
-        var negRms = -rms;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _espfValues.TryAdd(espf, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Espf", espf },
-                { "UpperBand", rms },
-                { "LowerBand", negRms }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(espf, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Espf", value.Line }, { "UpperBand", value.Upper }, { "LowerBand", value.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _espfValues.Dispose();
-        _powerSum.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Essf")]

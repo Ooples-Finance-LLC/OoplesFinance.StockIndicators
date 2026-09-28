@@ -7871,30 +7871,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersSuperPassbandFilter(ReadOnlySpan<double> close, Span<double> output, int fastLength = 40, int slowLength = 60, int length1 = 5, int length2 = 50)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.");
-        }
-
-        fastLength = Math.Max(1, fastLength);
-        slowLength = Math.Max(1, slowLength);
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var a1 = Math.Max(0.01, Math.Min(0.99, (double)length1 / fastLength));
-        var a2 = Math.Max(0.01, Math.Min(0.99, (double)length1 / slowLength));
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue1 = i >= 1 ? close[i - 1] : 0;
-            var prevEspf1 = i >= 1 ? output[i - 1] : 0;
-            var prevEspf2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = ((a1 - a2) * currentValue) + (((a2 * (1 - a1)) - (a1 * (1 - a2))) * prevValue1) +
-                        ((1 - a1 + (1 - a2)) * prevEspf1) - ((1 - a1) * (1 - a2) * prevEspf2);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
+        var window = new SuperPassbandWindow(fastLength, slowLength, length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
+
 
     /// <summary>
     /// Calculates Ehlers Roofing Filter V2.

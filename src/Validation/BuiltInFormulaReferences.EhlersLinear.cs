@@ -660,18 +660,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs((primary, filtered), ("UpperBand", rms), ("LowerBand", rms.Select(v => -v).ToArray()));
                 });
             case IndicatorName.EhlersSuperPassbandFilter:
-                return new("Espf", new[] { "Espf", "UpperBand", "LowerBand" }, bars =>
-                {
-                    var numerator = Integer(options, "Length1", 5);
-                    var fastGain = Clamp((double)numerator / Integer(options, "FastLength", 40), .01, .99);
-                    var slowGain = Clamp((double)numerator / Integer(options, "SlowLength", 60), .01, .99);
-                    // Difference of two zero-seeded exponential kernels, not the production second-order recurrence.
-                    var line = bars.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => bars[j].Close
-                        * (fastGain * Math.Pow(1 - fastGain, i - j) - slowGain * Math.Pow(1 - slowGain, i - j)))).ToArray();
-                    var power = line.Select(v => v * v).ToArray();
-                    var rms = line.Select((_, i) => Math.Sqrt(Window(power, i, Integer(options, "Length2", 50)).Average())).ToArray();
-                    return Outputs(("Espf", line), ("UpperBand", rms), ("LowerBand", rms.Select(v => -v).ToArray()));
-                });
+                return new("Espf", new[] { "Espf", "UpperBand", "LowerBand" }, bars => SuperPassbandOutputs(bars, Integer(options, "FastLength", 40), Integer(options, "SlowLength", 60), Integer(options, "Length1", 5), Integer(options, "Length2", 50)));
             case IndicatorName.EhlersUniversalOscillator:
                 var signalKind = AverageKind(options, 3);
                 if (signalKind == 0) return null;

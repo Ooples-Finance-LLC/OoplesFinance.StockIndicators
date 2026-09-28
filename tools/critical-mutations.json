@@ -38390,5 +38390,131 @@
     "before": "value.AddTo(ref weighted, _length)",
     "after": "value.AddTo(ref weighted, Math.Max(1, _length - 1))",
     "filter": "FullyQualifiedName~RoofingV1NumericalTests.WideValuesStayExtendedThroughEverySupportedAverage"
+  },
+  {
+    "id": "super-passband-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "difference.Add(_price, -1)",
+    "after": "difference.Add(_price)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-gain",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "_gain = a - b",
+    "after": "_gain = b - a",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-fast-pole",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "_fastPole = 1 - a",
+    "after": "_fastPole = 1 - b",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-second-pole",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "Product(ref secondSum, _second, _slowPole)",
+    "after": "Product(ref secondSum, _first, _slowPole)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "if (_history.Count == _length) total.Subtract(_history.Peek());",
+    "after": "if (_history.Count > _length) total.Subtract(_history.Peek());",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.HandImpulseAndPartialRmsStartupMatchTransferFunction"
+  },
+  {
+    "id": "super-passband-startup-count",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "Math.Min((long)_length, _history.Count + 1L)",
+    "after": "_length",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.HandImpulseAndPartialRmsStartupMatchTransferFunction"
+  },
+  {
+    "id": "super-passband-square-range",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "total.SqrtMean(Math.Min((long)_length, _history.Count + 1L))",
+    "after": "Math.Sqrt(total.Mean(Math.Min((long)_length, _history.Count + 1L)))",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SuperPassbandWindow.cs",
+    "scope": "internal sealed class SuperPassbandWindow",
+    "before": "if (commit)",
+    "after": "if (commit || price != 0)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSuperPassbandFilter(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.SelectedPricesReachEveryOutputAndTypedArm"
+  },
+  {
+    "id": "super-passband-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.SelectedPricesReachEveryOutputAndTypedArm"
+  },
+  {
+    "id": "super-passband-upper-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSuperPassbandFilterFast(",
+    "before": "outputKey == \"UpperBand\" ? value.Upper",
+    "after": "outputKey == \"UpperBand\" ? value.Lower",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.SelectedPricesReachEveryOutputAndTypedArm"
+  },
+  {
+    "id": "super-passband-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSuperPassbandFilterState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.InvalidFieldsLeaveBothPolesAndRollingSquaresUnchanged"
+  },
+  {
+    "id": "super-passband-native-periods",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSuperPassbandFilterState",
+    "before": "new(fastLength, slowLength, length1, length2)",
+    "after": "new(slowLength, fastLength, length1, length2)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "super-passband-core-periods",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersSuperPassbandFilter(",
+    "before": "new SuperPassbandWindow(fastLength, slowLength, length1, length2)",
+    "after": "new SuperPassbandWindow(fastLength, slowLength, length2, length1)",
+    "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
   }
 ]

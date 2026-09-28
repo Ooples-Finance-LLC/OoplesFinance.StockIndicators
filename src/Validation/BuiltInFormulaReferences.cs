@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSuperPassbandFilter)
+        {
+            var pass = (EhlersSuperPassbandFilterSpecOptions)builtIn.CreateOptions(); var passKeys = new[] { "Espf", "UpperBand", "LowerBand" };
+            for (var index = 0; index < passKeys.Length; index++) { var key = passKeys[index]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(index, bars => SuperPassbandOutputs(bars, pass.FastLength, pass.SlowLength, pass.Length1, pass.Length2)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersRoofingFilterV1)
         {
             var v1 = RoofingV1Options(builtIn.CreateOptions());
