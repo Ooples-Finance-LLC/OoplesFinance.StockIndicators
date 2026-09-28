@@ -410,34 +410,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersImpulseReaction(this StockData stockData, int length1 = 2, int length2 = 20, double qq = 0.9)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> reactionList = new(stockData.Count);
-        List<double> ireactList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var c2 = 2 * qq * Math.Cos(2 * Math.PI / length2);
-        var c3 = -qq * qq;
-        var c1 = (1 + c3) / 2;
-
+        List<double> ireactList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new ImpulseReactionWindow(length1, length2, qq);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var priorValue = i >= length1 ? inputList[i - length1] : 0;
-            var prevReaction1 = i >= 1 ? reactionList[i - 1] : 0;
-            var prevReaction2 = i >= 2 ? reactionList[i - 2] : 0;
-            var prevIReact1 = i >= 1 ? ireactList[i - 1] : 0;
-            var prevIReact2 = i >= 2 ? ireactList[i - 2] : 0;
-
-            var reaction = (c1 * (currentValue - priorValue)) + (c2 * prevReaction1) + (c3 * prevReaction2);
-            reactionList.Add(reaction);
-
-            var ireact = currentValue != 0 ? 100 * reaction / currentValue : 0;
-            ireactList.Add(ireact);
-
-            var signal = GetCompareSignal(ireact - prevIReact1, prevIReact1 - prevIReact2);
-            signalsList?.Add(signal);
+            var previous1 = i > 0 ? ireactList[i - 1] : 0; var previous2 = i > 1 ? ireactList[i - 2] : 0;
+            var value = window.Next(inputList[i], true); ireactList.Add(value);
+            signalsList?.Add(GetCompareSignal(value - previous1, previous1 - previous2));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

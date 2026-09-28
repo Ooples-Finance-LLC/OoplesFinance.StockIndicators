@@ -35104,5 +35104,119 @@
     "before": "Round(smooth[i] + error[i]).ToDouble()",
     "after": "smooth[i].ToDouble()",
     "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-cosine-period",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "Math.Cos(2 * Math.PI / length2)",
+    "after": "Math.Cos(Math.PI / length2)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-squared-gain-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "new RocBankValue(-q).Multiply(q)",
+    "after": "new RocBankValue(q).Multiply(q)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-first-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "_c3).Multiply(.5)",
+    "after": "_c3).Multiply(1)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-lag-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "_lag = Math.Max(1, length1)",
+    "after": "_lag = Math.Max(1, length1 - 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-second-reaction",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "Product(_c3, _previous2)",
+    "after": "Product(_c3, _previous1)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-coefficient-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "product.AddProduct(a.Mantissa, b.Mantissa); product.ScaleByPowerOfTwo(a.UpperShift + b.UpperShift);",
+    "after": "product.AddProduct(a.Publish(), b.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-percent",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "reaction.Multiply(100)",
+    "after": "reaction.Multiply(1)",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "if (commit) { if",
+    "after": "if (commit || price != 0) { if",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseReactionWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersImpulseReactionFast("
+  },
+  {
+    "id": "impulse-reaction-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersImpulseReactionState"
+  },
+  {
+    "id": "impulse-reaction-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersImpulseReactionSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "impulse-reaction-reference-lag",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ImpulseReaction.cs",
+    "before": "i >= length1 ? bars[i - length1].Close : 0",
+    "after": "i > 0 ? bars[i - 1].Close : 0",
+    "filter": "FullyQualifiedName~ValidationTests.ImpulseReactionNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

@@ -849,76 +849,16 @@ public sealed class EhlersHurstCoefficientState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Eir")]
 public sealed class EhlersImpulseReactionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevReaction1;
-    private double _prevReaction2;
-    private double _prevIReact1;
-    private double _prevIReact2;
-    private int _index;
-
-    public EhlersImpulseReactionState(int length1 = 2, int length2 = 20, double qq = 0.9)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length1);
-        _c2 = 2 * qq * Math.Cos(2 * Math.PI / resolvedLength2);
-        _c3 = -qq * qq;
-        _c1 = (1 + _c3) / 2;
-    }
-
+    private readonly ImpulseReactionWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersImpulseReactionState(int length1 = 2, int length2 = 20, double qq = .9) => _window = new(length1, length2, qq);
     public IndicatorName Name => IndicatorName.EhlersImpulseReaction;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevReaction1 = 0;
-        _prevReaction2 = 0;
-        _prevIReact1 = 0;
-        _prevIReact2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var prevReaction1 = _index >= 1 ? _prevReaction1 : 0;
-        var prevReaction2 = _index >= 2 ? _prevReaction2 : 0;
-        var reaction = (_c1 * (value - priorValue)) + (_c2 * prevReaction1) + (_c3 * prevReaction2);
-        var ireact = value != 0 ? 100 * reaction / value : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevReaction2 = prevReaction1;
-            _prevReaction1 = reaction;
-            _prevIReact2 = _prevIReact1;
-            _prevIReact1 = ireact;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eir", ireact }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ireact, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eir", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Eiirf")]

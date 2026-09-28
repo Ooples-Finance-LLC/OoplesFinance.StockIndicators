@@ -172,6 +172,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ModularOutputs(bars, Integer(modularOptions, "Length", 200), Number(modularOptions, .8, "Beta")), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersImpulseReaction)
+        {
+            var reactionOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ImpulseReactionOutputs(bars, Integer(reactionOptions, "Length1", 2), Integer(reactionOptions, "Length2", 20), Number(reactionOptions, .9, "Q")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAverageErrorFilter)
         {
             var errorOptions = builtIn.CreateOptions();
