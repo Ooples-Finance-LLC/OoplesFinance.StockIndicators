@@ -37139,5 +37139,104 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~CyberCycleNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "_cycle = new(alpha);",
+    "after": "_cycle = new(Math.Max(.01, Math.Min(.99, alpha)));",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-extended",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "var cycle = _cycle.NextExtended(value, commit);",
+    "after": "var cycle = new RocBankValue(_cycle.NextExtended(value, commit).Publish());",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "Compare(v, low) < 0",
+    "after": "Compare(v, low) > 0",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-window",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "_history.Count == _length ? 1 : 0",
+    "after": "0",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "numerator.Ratio(range)",
+    "after": "numerator.Ratio(range) * .5",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-weights",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "4 * raw + 3 * _raw1",
+    "after": "3 * raw + 4 * _raw1",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-trigger",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "_previous + .02",
+    "after": "line + .02",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-preview",
+    "module": "numerical",
+    "file": "src/Helpers/StochasticCyberWindow.cs",
+    "scope": "internal sealed class StochasticCyberWindow",
+    "before": "_cycle.NextExtended(value, commit)",
+    "after": "_cycle.NextExtended(value, true)",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersStochasticCyberCycle(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersStochasticCyberCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "stochastic-cyber-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersStochasticCyberCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
   }
 ]

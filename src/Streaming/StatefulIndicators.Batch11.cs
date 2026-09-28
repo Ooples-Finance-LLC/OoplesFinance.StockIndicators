@@ -2985,88 +2985,18 @@ public sealed class EhlersZeroCrossingsDominantCycleState : IStreamingIndicatorS
 [PrimaryOutput("Escc")]
 public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _windowLength;
-    private readonly EhlersCyberCycleState _cycleState;
-    private readonly PooledRingBuffer<double> _cycleValues;
-    private readonly PooledRingBuffer<double> _stochValues;
-    private double _prevStochCc;
-
-    public EhlersStochasticCyberCycleState(int length = 14, double alpha = 0.7)
-    {
-        _length = Math.Max(1, length);
-        _windowLength = Math.Max(_length, 2);
-        _cycleState = new EhlersCyberCycleState(alpha);
-        _cycleValues = new PooledRingBuffer<double>(_windowLength);
-        _stochValues = new PooledRingBuffer<double>(3);
-    }
-
+    private readonly StochasticCyberWindow _window;
+    public EhlersStochasticCyberCycleState(int length = 14, double alpha = .7) => _window = new(length, alpha);
     public IndicatorName Name => IndicatorName.EhlersStochasticCyberCycle;
-
-    public void Reset()
-    {
-        _cycleState.Reset();
-        _cycleValues.Clear();
-        _stochValues.Clear();
-        _prevStochCc = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var cycle = _cycleState.Update(bar, isFinal, includeOutputs: false).Value;
-        var min = cycle;
-        var max = cycle;
-        // Skip oldest value when buffer is full to match batch's sliding window behavior
-        var start = _cycleValues.Count == _windowLength ? 1 : 0;
-        for (var i = start; i < _cycleValues.Count; i++)
-        {
-            var value = _cycleValues[i];
-            if (value < min)
-            {
-                min = value;
-            }
-
-            if (value > max)
-            {
-                max = value;
-            }
-        }
-
-        var stoch = max - min != 0 ? MathHelper.MinOrMax((cycle - min) / (max - min), 1, 0) : 0;
-        var prevStoch1 = EhlersStreamingWindow.GetOffsetValue(_stochValues, 1);
-        var prevStoch2 = EhlersStreamingWindow.GetOffsetValue(_stochValues, 2);
-        var prevStoch3 = EhlersStreamingWindow.GetOffsetValue(_stochValues, 3);
-        var stochCc = MathHelper.MinOrMax(
-            2 * ((((4 * stoch) + (3 * prevStoch1) + (2 * prevStoch2) + prevStoch3) / 10) - 0.5), 1, -1);
-        var trigger = MathHelper.MinOrMax(0.96 * (_prevStochCc + 0.02), 1, -1);
-
-        if (isFinal)
-        {
-            _cycleValues.TryAdd(cycle, out _);
-            _stochValues.TryAdd(stoch, out _);
-            _prevStochCc = stochCc;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Escc", stochCc },
-                { "Signal", trigger }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stochCc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string,double> { { "Escc", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _cycleValues.Dispose();
-        _stochValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
+
 
 [PrimaryOutput("Es")]
 public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposable

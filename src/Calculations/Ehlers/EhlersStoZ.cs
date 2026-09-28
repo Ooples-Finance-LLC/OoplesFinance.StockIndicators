@@ -1245,50 +1245,17 @@ public static partial class Calculations
     /// <param name="alpha"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersStochasticCyberCycle(this StockData stockData, int length = 14, double alpha = 0.7)
+    public static StockData CalculateEhlersStochasticCyberCycle(this StockData stockData, int length = 14, double alpha = .7)
     {
-        length = Math.Max(length, 1);
-        List<double> stochList = new(stockData.Count);
-        List<double> stochCCList = new(stockData.Count);
-        List<double> triggerList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var cyberCycleList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersCyberCycle(data, alpha));
-        var (maxCycleList, minCycleList) = GetMaxAndMinValuesList(cyberCycleList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new StochasticCyberWindow(length, alpha);
+        var line = new List<double>(input.Count); var trigger = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var prevStoch1 = i >= 1 ? stochList[i - 1] : 0;
-            var prevStoch2 = i >= 2 ? stochList[i - 2] : 0;
-            var prevStoch3 = i >= 3 ? stochList[i - 3] : 0;
-            var cycle = cyberCycleList[i];
-            var maxCycle = maxCycleList[i];
-            var minCycle = minCycleList[i];
-
-            var stoch = maxCycle - minCycle != 0 ? MinOrMax((cycle - minCycle) / (maxCycle - minCycle), 1, 0) : 0;
-            stochList.Add(stoch);
-
-            var prevStochCC = GetLastOrDefault(stochCCList);
-            var stochCC = MinOrMax(2 * ((((4 * stoch) + (3 * prevStoch1) + (2 * prevStoch2) + prevStoch3) / 10) - 0.5), 1, -1);
-            stochCCList.Add(stochCC);
-
-            var prevTrigger = GetLastOrDefault(triggerList);
-            var trigger = MinOrMax(0.96 * (prevStochCC + 0.02), 1, -1);
-            triggerList.Add(trigger);
-
-            var signal = GetRsiSignal(stochCC - trigger, prevStochCC - prevTrigger, stochCC, prevStochCC, 0.5, -0.5);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true); var previous = i == 0 ? 0 : line[i-1]; var previousTrigger = i == 0 ? 0 : trigger[i-1];
+            signals?.Add(GetRsiSignal(point.Line-point.Signal, previous-previousTrigger, point.Line, previous, .5, -.5)); line.Add(point.Line); trigger.Add(point.Signal);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Escc", stochCCList },
-            { "Signal", triggerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stochCCList);
-        stockData.IndicatorName = IndicatorName.EhlersStochasticCyberCycle;
-
+        stockData.SetOutputValues(() => new Dictionary<string,List<double>> { { "Escc", line }, { "Signal", trigger } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersStochasticCyberCycle;
         return stockData;
     }
 

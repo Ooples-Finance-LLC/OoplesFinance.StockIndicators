@@ -13,13 +13,14 @@ internal sealed class CyberCycleWindow
     private static RocBankValue Product(RocBankValue a, RocBankValue b)
     { var product = new ExactMeanAccumulator(); product.AddProduct(a.Mantissa, b.Mantissa); product.ScaleByPowerOfTwo(a.UpperShift + b.UpperShift); return RocBankValue.Round(product); }
     private static RocBankValue Difference(RocBankValue value, RocBankValue previous1, RocBankValue previous2) => Add(Add(value, previous1.Multiply(2), -1), previous2);
-    internal double Next(double price, bool commit)
+    internal double Next(double price, bool commit) => NextExtended(price, commit).Publish();
+    internal RocBankValue NextExtended(double price, bool commit)
     {
         var current = new RocBankValue(price); var total = Add(Add(Add(current, _price1.Multiply(2)), _price2.Multiply(2)), _price3);
         var sum = new ExactMeanAccumulator(); total.AddTo(ref sum); var smooth = RocBankValue.Round(sum, count: 6);
         var cycle = Add(Add(Product(_lead, Difference(smooth, _smooth1, _smooth2)), Product(_retention, _cycle1)), Product(_square, _cycle2), -1);
         if (_startup < 7) cycle = Difference(current, _price1, _price2).Multiply(.25);
-        var result = cycle.Publish();
+        var result = cycle;
         if (commit) { _price3 = _price2; _price2 = _price1; _price1 = current; _smooth2 = _smooth1; _smooth1 = smooth; _cycle2 = _cycle1; _cycle1 = cycle; if (_startup < 7) _startup++; }
         return result;
     }

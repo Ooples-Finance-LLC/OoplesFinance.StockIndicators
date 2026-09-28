@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersStochasticCyberCycle)
+        {
+            var stochasticCyber = (EhlersStochasticCyberCycleSpecOptions)builtIn.CreateOptions();
+            var stochasticCyberKeys = builtIn.BatchOutputKey is { } stochasticCyberSelected ? new[] { stochasticCyberSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for(var slot=0;slot<stochasticCyberKeys.Length;slot++) {var key=stochasticCyberKeys[slot];yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot,bars=>StochasticCyberValues(bars,stochasticCyber.Length,stochasticCyber.Alpha)[key],IndicatorErrorBudget.Exact);}
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersCyberCycle)
         {
             var cyberOptions = builtIn.CreateOptions(); var cyberAlpha = Number(cyberOptions, 2d / (Integer(cyberOptions, "Length", 14) + 1d), "Alpha");
