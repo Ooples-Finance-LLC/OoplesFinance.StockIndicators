@@ -364,7 +364,7 @@ public static partial class Calculations
         RollingSum vmnSum = new();
         var (inputList, _, _, _, _, volumeList) = GetInputValuesList(InputName.TypicalPrice, stockData);
 
-        var mavList = GetMovingAverageList(stockData, maType, length, volumeList);
+        var mavList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volumeList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, volumeList);
         var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
 
         for (var i = 0; i < stockData.Count; i++)
@@ -393,7 +393,7 @@ public static partial class Calculations
             vpnList.Add(vpn);
         }
 
-        var vpnEmaList = GetMovingAverageList(stockData, maType, smoothLength, vpnList);
+        var vpnEmaList = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(vpnList), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, vpnList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var vpnEma = vpnEmaList[i];

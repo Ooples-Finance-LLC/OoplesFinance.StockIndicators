@@ -82,6 +82,16 @@ public sealed class ComponentAverageParityTests
     }
 
     [Fact]
+    public async Task VolumePressureUsesSeparateVolumeRangeAndSignalComponents()
+    {
+        var bars = new[] { 1d, 3, 2 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 10 * Math.Pow(2, i))).ToArray();
+        var custom = new VolumePositiveNegativeIndicator(2, 3, new ScaledAverage(2), new ScaledAverage(0), new ScaledAverage(3));
+        using var run = await new StockIndicatorBuilder().ConfigureSource(Bars.From(bars)).ConfigureIndicators(custom).BuildAsync();
+        Assert.Equal(new[] { 25d, 37.5, -12.5 }, run[custom].ToArray());
+        Assert.Equal(new[] { 75d, 112.5, -37.5 }, run[custom.Signal].ToArray());
+    }
+
+    [Fact]
     public async Task SlowMeanPreservesHeterogeneousCustomerStages()
     {
         var bars = Walk(120);

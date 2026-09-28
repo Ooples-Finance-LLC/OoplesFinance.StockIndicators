@@ -35834,5 +35834,23 @@
     "before": "null or \"FastMa\" => MovingAverageBandSeries.FastMa,",
     "after": "\"FastMa\" => MovingAverageBandSeries.FastMa,",
     "filter": "FullyQualifiedName~BandPrimaryOutputTests"
+  },
+  {
+    "id": "volume-pressure-component-volume",
+    "module": "numerical",
+    "file": "src/Calculations/Volume/VolumeStoZ.cs",
+    "scope": "public static StockData CalculateVolumePositiveNegativeIndicator(",
+    "before": "Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(volumeList), length)?.ToList() ?? ",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumePressureUsesSeparateVolumeRangeAndSignalComponents"
+  },
+  {
+    "id": "volume-pressure-component-signal",
+    "module": "numerical",
+    "file": "src/Calculations/Volume/VolumeStoZ.cs",
+    "scope": "public static StockData CalculateVolumePositiveNegativeIndicator(",
+    "before": "Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(vpnList), smoothLength)?.ToList() ?? ",
+    "after": "",
+    "filter": "FullyQualifiedName~VolumePressureUsesSeparateVolumeRangeAndSignalComponents"
   }
 ]

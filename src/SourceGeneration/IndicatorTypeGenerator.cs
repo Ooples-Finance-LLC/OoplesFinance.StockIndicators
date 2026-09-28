@@ -386,6 +386,8 @@ public class IndicatorTypeGenerator : IIncrementalGenerator
         if (name.Groups[1].Value == "KasePeakOscillatorV2") asks = 1;
         if (name.Groups[1].Value is "VariableMovingAverageBands" or "SortinoRatio" or "TwiggsMoneyFlow") asks = 2;
         if (name.Groups[1].Value == "QuantitativeQualitativeEstimation") asks = 5;
+        // Volume, nested ATR, then the published pressure signal each consume a component.
+        if (name.Groups[1].Value == "VolumePositiveNegativeIndicator") asks = 3;
         // These wrappers consume two averages inside the oscillator and one after it.
         if (name.Groups[1].Value is "EhlersRelativeStrengthIndexInverseFisherTransform"
             or "EhlersCommodityChannelIndexInverseFisherTransform") asks = 3;
