@@ -468,70 +468,18 @@ public sealed class FibonacciWeightedMovingAverageState : IStreamingIndicatorSta
 [PrimaryOutput("Fve")]
 public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _factor;
-    private readonly IMovingAverageSmoother _volumeSmoother;
+    private readonly FiniteVolumeWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevTypicalPrice;
-    private double _prevFve;
-    private bool _hasPrev;
-
-    public FiniteVolumeElementsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 22, double factor = 0.3)
-    {
-        _length = Math.Max(1, length);
-        _factor = factor;
-        _volumeSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public FiniteVolumeElementsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 22, double factor = .3)
+    { _window = new(maType, length, factor); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.FiniteVolumeElements;
-
-    public void Reset()
-    {
-        _volumeSmoother.Reset();
-        _prevTypicalPrice = 0;
-        _prevFve = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var medianPrice = (bar.High + bar.Low) / 2;
-        var typicalPrice = (bar.High + bar.Low + value) / 3;
-        var prevTypicalPrice = _hasPrev ? _prevTypicalPrice : 0;
-        var avgVolume = _volumeSmoother.Next(bar.Volume, isFinal);
-
-        var nmf = value - medianPrice + typicalPrice - prevTypicalPrice;
-        var nvlm = nmf > _factor * value / 100 ? bar.Volume : nmf < -_factor * value / 100 ? -bar.Volume : 0;
-
-        var prevFve = _hasPrev ? _prevFve : 0;
-        var fve = avgVolume != 0 && _length != 0 ? prevFve + (nvlm / avgVolume / _length * 100) : prevFve;
-
-        if (isFinal)
-        {
-            _prevTypicalPrice = typicalPrice;
-            _prevFve = fve;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Fve", fve }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fve, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(bar.High, bar.Low, price, bar.Volume, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Fve", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fo")]

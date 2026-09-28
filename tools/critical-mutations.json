@@ -32944,5 +32944,119 @@
     "before": "value > mean[i]",
     "after": "value >= mean[i]",
     "filter": "FullyQualifiedName~ValidationTests.StiffnessNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-previous-typical",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "new RocBankValue(_previousTypical), -1",
+    "after": "new RocBankValue(_previousTypical), 1",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-positive-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "Compare(flow, threshold) > 0",
+    "after": "Compare(flow, threshold) >= 0",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-negative-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "Compare(flow, threshold, 1) < 0",
+    "after": "Compare(flow, threshold, -1) < 0",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-threshold-publication",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "Divide(new RocBankValue(close).Multiply(_factor), 100)",
+    "after": "Divide(new RocBankValue(new RocBankValue(close).Multiply(_factor).Publish()), 100)",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-normalization-period",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "average), _length).Multiply(100)",
+    "after": "average), 1).Multiply(100)",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-normalization-volume",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "Divide(new RocBankValue(direction * volume), average)",
+    "after": "Divide(new RocBankValue(direction * volume), volume)",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": ".Multiply(100));",
+    "after": ".Multiply(1));",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-accumulation",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "var value = _previous;",
+    "after": "var value = default(RocBankValue);",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "if (commit) { _previousTypical",
+    "after": "if (commit || volume != 0) { _previousTypical",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FiniteVolumeWindow.cs",
+    "before": "_previous = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeFiniteVolumeElementsFast("
+  },
+  {
+    "id": "finite-volume-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class FiniteVolumeElementsState"
+  },
+  {
+    "id": "finite-volume-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " FiniteVolumeElementsSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "finite-volume-reference-previous",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.FiniteVolume.cs",
+    "before": ") - previousTypical)",
+    "after": ") + previousTypical)",
+    "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

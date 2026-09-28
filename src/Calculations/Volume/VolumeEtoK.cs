@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -296,35 +297,15 @@ public static partial class Calculations
     public static StockData CalculateFiniteVolumeElements(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 22, double factor = 0.3)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> fveList = new(stockData.Count);
-        List<double> bullList = new(stockData.Count);
-        List<double> bearList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-
-        var medianPriceList = CalculateMedianPrice(stockData).ChainedValues;
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var typicalPriceList = CalculateTypicalPrice(stockData).ChainedValues;
-        var volumeSmaList = GetMovingAverageList(stockData, maType, length, volumeList);
-
+        length = Math.Max(1, length); var (input, _, _, _, volumeList) = GetInputValuesList(stockData);
+        using var window = new FiniteVolumeWindow(maType, length, factor);
+        List<double> fveList = new(stockData.Count), bullList = new(stockData.Count), bearList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var volumeSmaList = custom ? Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(volumeList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, volumeList) : null;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var medianPrice = medianPriceList[i];
-            var typicalPrice = typicalPriceList[i];
-            var prevTypicalPrice = i >= 1 ? typicalPriceList[i - 1] : 0;
-            var volumeSma = volumeSmaList[i];
-            var volume = volumeList[i];
-            var close = inputList[i];
-            var nmf = close - medianPrice + typicalPrice - prevTypicalPrice;
-            var nvlm = nmf > factor * close / 100 ? volume : nmf < -factor * close / 100 ? -volume : 0;
-
-            var prevFve = i >= 1 ? fveList[i - 1] : 0;
-            var prevFve2 = i >= 2 ? fveList[i - 2] : 0;
-            var fve = volumeSma != 0 && length != 0 ? prevFve + (nvlm / volumeSma / length * 100) : prevFve;
-            fveList.Add(fve);
-
+            var prevFve = i > 0 ? fveList[i - 1] : 0; var prevFve2 = i > 1 ? fveList[i - 2] : 0;
+            var fve = window.Next(stockData.HighPrices[i], stockData.LowPrices[i], input[i], volumeList[i], true, volumeSmaList?[i]); fveList.Add(fve);
             var prevBullSlope = i >= 1 ? bullList[i - 1] : 0;
             var bullSlope = fve - Math.Max(prevFve, prevFve2);
             bullList.Add(bullSlope);

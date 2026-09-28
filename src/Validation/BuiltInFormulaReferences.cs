@@ -67,6 +67,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.Reference(0, bars => StiffnessOutputs(bars, Integer(stiffnessOptions, "Length1", 100), Integer(stiffnessOptions, "Length2", 60), Integer(stiffnessOptions, "SmoothingLength", 3), stiffnessKind), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.FiniteVolumeElements)
+        {
+            var finiteVolumeOptions = builtIn.CreateOptions(); var finiteVolumeKind = AverageKind(finiteVolumeOptions, 1); if (finiteVolumeKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FiniteVolumeOutputs(bars, Integer(finiteVolumeOptions, "Length", 22), Number(finiteVolumeOptions, .3, "Factor"), finiteVolumeKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

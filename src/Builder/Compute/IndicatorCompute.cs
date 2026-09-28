@@ -21128,43 +21128,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFiniteVolumeElementsFast(StockData data, ComputeContext context, int length = 22,
         double factor = 0.3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateFiniteVolumeElements accumulates volume signed by where the close sits relative to the
-        // median price and by the change in the typical price, but only once that displacement clears factor
-        // percent of the close. Each contribution is normalised by the moving average of volume and by the
-        // length. The arm this replaced published a moving average of the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var medianPrice = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hl2));
-        var typicalPrice = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Hlc3));
-
-        using var smoothedVolume = context.Rent(count);
-        MovingAverage(data, maType, length, volumes, smoothedVolume.WritableSpan);
-        var volumeSma = smoothedVolume.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double fve = 0;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new FiniteVolumeWindow(maType, length, factor); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var close = input[i];
-            var prevTypicalPrice = i >= 1 ? typicalPrice[i - 1] : 0;
-            var nmf = close - medianPrice[i] + typicalPrice[i] - prevTypicalPrice;
-            var threshold = factor * close / 100;
-            var nvlm = nmf > threshold ? volumes[i] : nmf < -threshold ? -volumes[i] : 0;
-
-            if (volumeSma[i] != 0 && length != 0)
-            {
-                fve += nvlm / volumeSma[i] / length * 100;
-            }
-
-            output[i] = fve;
+            using var average = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(data.Volumes), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true, average.Span[i]);
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(data.HighPrices[i], data.LowPrices[i], input[i], data.Volumes[i], true);
+        return result;
     }
 
     /// <summary>
