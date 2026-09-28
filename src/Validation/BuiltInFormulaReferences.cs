@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersVossPredictiveFilter)
+        {
+            var voss = (EhlersVossPredictiveFilterSpecOptions)builtIn.CreateOptions();
+            var vossKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < vossKeys.Length; slot++) { var key = vossKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VossPredictiveValues(bars, voss.Length, voss.Predict, voss.Bandwidth)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersTruncatedBandPassFilter)
         {
             var truncated = (EhlersTruncatedBandPassFilterSpecOptions)builtIn.CreateOptions();

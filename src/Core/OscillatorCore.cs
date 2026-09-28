@@ -7564,52 +7564,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersVossPredictiveFilter(ReadOnlySpan<double> close, Span<double> output, int length = 20, double predict = 3, double bw = 0.25, bool filterOutput = false)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length = Math.Max(1, length);
-        var order = (int)Math.Max(2, Math.Min(Math.Ceiling(3 * predict), 530));
-        var f1 = Math.Cos(2 * Math.PI / length);
-        var g1 = Math.Cos(bw * 2 * Math.PI / length);
-        var s1 = g1 != 0 ? (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1) : 0;
-
-        var pool = ArrayPool<double>.Shared;
-        var filtArray = pool.Rent(close.Length);
-        var vossArray = pool.Rent(close.Length);
-
-        try
-        {
-            var filt = filtArray.AsSpan(0, close.Length);
-            var voss = vossArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevFilt1 = i >= 1 ? filt[i - 1] : 0;
-                var prevFilt2 = i >= 2 ? filt[i - 2] : 0;
-                var prevValue = i >= 2 ? close[i - 2] : 0;
-
-                filt[i] = i <= 5 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (f1 * (1 + s1) * prevFilt1) - (s1 * prevFilt2);
-
-                double sumC = 0;
-                for (var j = 0; j <= order - 1; j++)
-                {
-                    var idx = i - (order - j);
-                    var prevVoss = idx >= 0 ? voss[idx] : 0;
-                    sumC += (double)(j + 1) / order * prevVoss;
-                }
-
-                voss[i] = ((double)(3 + order) / 2 * filt[i]) - sumC;
-                output[i] = filterOutput ? filt[i] : voss[i];
-            }
-        }
-        finally
-        {
-            pool.Return(filtArray);
-            pool.Return(vossArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new VossPredictiveWindow(length, predict, bw);
+        for (var i = 0; i < close.Length; i++) { var point = window.Next(close[i], true); output[i] = filterOutput ? point.Filter : point.Voss; }
     }
 
     /// <summary>

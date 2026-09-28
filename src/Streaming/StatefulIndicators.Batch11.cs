@@ -3323,84 +3323,16 @@ public sealed class EhlersZeroLagExponentialMovingAverageState : IStreamingIndic
 [PrimaryOutput("Voss")]
 public sealed class EhlersVossPredictiveFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _order;
-    private readonly double _f1;
-    private readonly double _s1;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _filterValues;
-    private readonly PooledRingBuffer<double> _vossValues;
-    private int _index;
-
-    public EhlersVossPredictiveFilterState(int length = 20, double predict = 3, double bw = 0.25)
-    {
-        var resolved = Math.Max(1, length);
-        _order = MathHelper.MinOrMax((int)Math.Ceiling(3 * predict));
-        _f1 = Math.Cos(2 * Math.PI / resolved);
-        var g1 = Math.Cos(bw * 2 * Math.PI / resolved);
-        _s1 = (1 / g1) - MathHelper.Sqrt((1 / (g1 * g1)) - 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-        _filterValues = new PooledRingBuffer<double>(2);
-        _vossValues = new PooledRingBuffer<double>(_order);
-    }
-
+    private readonly VossPredictiveWindow _window;
+    public EhlersVossPredictiveFilterState(int length = 20, double predict = 3, double bw = .25) => _window = new(length, predict, bw);
     public IndicatorName Name => IndicatorName.EhlersVossPredictiveFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _filterValues.Clear();
-        _vossValues.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevFilt1 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 1);
-        var prevFilt2 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 2);
-        var filt = _index <= 5
-            ? 0
-            : (0.5 * (1 - _s1) * (value - prevValue)) + (_f1 * (1 + _s1) * prevFilt1) - (_s1 * prevFilt2);
-
-        double sumC = 0;
-        for (var j = 0; j <= _order - 1; j++)
-        {
-            var prevVoss = EhlersStreamingWindow.GetOffsetValue(_vossValues, _order - j);
-            sumC += (double)(j + 1) / _order * prevVoss;
-        }
-
-        var voss = (((double)(3 + _order) / 2) * filt) - sumC;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _filterValues.TryAdd(filt, out _);
-            _vossValues.TryAdd(voss, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Voss", voss },
-                { "Filt", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(voss, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Voss, includeOutputs ? new Dictionary<string, double> { { "Voss", point.Voss }, { "Filt", point.Filter } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _filterValues.Dispose();
-        _vossValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("SmaFilter")]

@@ -968,52 +968,18 @@ public static partial class Calculations
     /// <param name="bw"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersVossPredictiveFilter(this StockData stockData, int length = 20, double predict = 3, double bw = 0.25)
+    public static StockData CalculateEhlersVossPredictiveFilter(this StockData stockData, int length = 20, double predict = 3, double bw = .25)
     {
-        length = Math.Max(length, 1);
-        List<double> filtList = new(stockData.Count);
-        List<double> vossList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var order = MinOrMax((int)Math.Ceiling(3 * predict));
-        var f1 = Math.Cos(2 * Math.PI / length);
-        var g1 = Math.Cos(bw * 2 * Math.PI / length);
-        var s1 = (1 / g1) - Sqrt((1 / (g1 * g1)) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new VossPredictiveWindow(length, predict, bw);
+        var voss = new List<double>(input.Count); var filter = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-
-            var filt = i <= 5 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (f1 * (1 + s1) * prevFilt1) - (s1 * prevFilt2);
-            filtList.Add(filt);
-
-            double sumC = 0;
-            for (var j = 0; j <= order - 1; j++)
-            {
-                var prevVoss = i >= order - j ? vossList[i - (order - j)] : 0;
-                sumC += (double)(j + 1) / order * prevVoss;
-            }
-
-            var prevvoss = GetLastOrDefault(vossList);
-            var voss = ((double)(3 + order) / 2 * filt) - sumC;
-            vossList.Add(voss);
-
-            var signal = GetCompareSignal(voss - filt, prevvoss - prevFilt1);
-            signalsList?.Add(signal);
+            var point = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(point.Voss - point.Filter, i == 0 ? 0 : voss[i - 1] - filter[i - 1]));
+            voss.Add(point.Voss); filter.Add(point.Filter);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Voss", vossList },
-            { "Filt", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersVossPredictiveFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Voss", voss }, { "Filt", filter } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersVossPredictiveFilter;
         return stockData;
     }
 

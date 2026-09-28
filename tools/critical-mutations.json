@@ -36725,5 +36725,113 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~TruncatedBandPassNumericalTests"
+  },
+  {
+    "id": "voss-predictive-phase",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "angle.AddProduct(bandwidth, 2 * Math.PI)",
+    "after": "angle.AddProduct(bandwidth, Math.PI)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-order",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "Math.Min(530, Math.Ceiling(3 * predict))",
+    "after": "Math.Min(529, Math.Ceiling(3 * predict))",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "_startup >= 6",
+    "after": "_startup >= 5",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-lag",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "delta.Add(_older, -1)",
+    "after": "delta.Add(_previous, -1)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "_first.Multiply(_feedback)",
+    "after": "_first.Multiply(-_feedback)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-extended",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "RocBankValue.Round(delta).Multiply(_drive)",
+    "after": "new RocBankValue(RocBankValue.Round(delta).Publish()).Multiply(_drive)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-weight",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "_order - _predictions.Count + j + 1",
+    "after": "_order - _predictions.Count + j",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-parameter",
+    "module": "numerical",
+    "file": "src/Helpers/VossPredictiveWindow.cs",
+    "scope": "internal sealed class VossPredictiveWindow",
+    "before": "if (double.IsInfinity(phase)) throw",
+    "after": "if (false) throw",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersVossPredictiveFilter(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersVossPredictiveFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "voss-predictive-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersVossPredictiveFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
   }
 ]
