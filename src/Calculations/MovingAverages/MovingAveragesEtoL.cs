@@ -716,33 +716,12 @@ public static partial class Calculations
     public static StockData CalculateGeneralFilterEstimator(this StockData stockData, int length = 100, double beta = 5.25, double gamma = 1,
         double zeta = 1)
     {
-        List<double> dList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var p = beta != 0 ? (int)Math.Ceiling(length / beta) : 0;
-
+        List<double> dList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new GeneralFilterWindow(length, beta, gamma, zeta);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorB = i >= p ? bList[i - p] : currentValue;
-            var a = currentValue - priorB;
-
-            var prevB = i >= 1 ? bList[i - 1] : currentValue;
-            var b = prevB + (a / p * gamma);
-            bList.Add(b);
-
-            var priorD = i >= p ? dList[i - p] : b;
-            var c = b - priorD;
-
-            var prevD = i >= 1 ? dList[i - 1] : currentValue;
-            var d = prevD + (((zeta * a) + ((1 - zeta) * c)) / p * gamma);
-            dList.Add(d);
-
-            var signal = GetCompareSignal(currentValue - d, prevValue - prevD);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? inputList[i] : dList[i - 1]; var value = window.Next(inputList[i], true); dList.Add(value);
+            signalsList?.Add(GetCompareSignal(inputList[i] - value, (i == 0 ? 0 : inputList[i - 1]) - previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

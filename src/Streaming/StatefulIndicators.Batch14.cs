@@ -29,69 +29,16 @@ public sealed class GatorOscillatorState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Gfe")]
 public sealed class GeneralFilterEstimatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _p;
-    private readonly double _gamma;
-    private readonly double _zeta;
-    private readonly PooledRingBuffer<double> _bValues;
-    private readonly PooledRingBuffer<double> _dValues;
-    private readonly StreamingInputResolver _input;
-
-    public GeneralFilterEstimatorState(int length = 100, double beta = 5.25, double gamma = 1, double zeta = 1)
-    {
-        _length = Math.Max(1, length);
-        _p = beta != 0 ? (int)Math.Ceiling(_length / beta) : 0;
-        _gamma = gamma;
-        _zeta = zeta;
-        var windowLength = Math.Max(1, _p);
-        _bValues = new PooledRingBuffer<double>(windowLength);
-        _dValues = new PooledRingBuffer<double>(windowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly GeneralFilterWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public GeneralFilterEstimatorState(int length = 100, double beta = 5.25, double gamma = 1, double zeta = 1) => _window = new(length, beta, gamma, zeta);
     public IndicatorName Name => IndicatorName.GeneralFilterEstimator;
-
-    public void Reset()
-    {
-        _bValues.Clear();
-        _dValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorB = _p > 0 && _bValues.Count >= _p ? _bValues[0] : value;
-        var a = value - priorB;
-        var prevB = _bValues.Count > 0 ? _bValues[_bValues.Count - 1] : value;
-        var b = prevB + (a / _p * _gamma);
-        var priorD = _p > 0 && _dValues.Count >= _p ? _dValues[0] : b;
-        var c = b - priorD;
-        var prevD = _dValues.Count > 0 ? _dValues[_dValues.Count - 1] : value;
-        var d = prevD + (((_zeta * a) + ((1 - _zeta) * c)) / _p * _gamma);
-
-        if (isFinal)
-        {
-            _bValues.TryAdd(b, out _);
-            _dValues.TryAdd(d, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Gfe", d }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(d, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Gfe", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _bValues.Dispose();
-        _dValues.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Gdema")]

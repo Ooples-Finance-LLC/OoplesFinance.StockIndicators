@@ -13468,39 +13468,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeGeneralFilterEstimatorFast(StockData data, ComputeContext context, int length = 100,
         double beta = 5.25, double gamma = 1, double zeta = 1)
     {
-        // CalculateGeneralFilterEstimator runs two nested recursions over a period that is the length divided
-        // by beta: an inner series corrected by how far the chained value has come since that period ago, and
-        // the published series corrected by a blend of that same distance with the inner series' own. Both are
-        // seeded from the current value, not from zero.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var p = beta != 0 ? (int)Math.Ceiling(length / beta) : 0;
-
-        using var inner = context.Rent(count);
-        var b = inner.WritableSpan;
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var priorB = i >= p ? b[i - p] : currentValue;
-            var a = currentValue - priorB;
-
-            var prevB = i >= 1 ? b[i - 1] : currentValue;
-            b[i] = prevB + (a / p * gamma);
-
-            var priorD = i >= p ? output[i - p] : b[i];
-            var c = b[i] - priorD;
-
-            var prevD = i >= 1 ? output[i - 1] : currentValue;
-            output[i] = prevD + (((zeta * a) + ((1 - zeta) * c)) / p * gamma);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new GeneralFilterWindow(length, beta, gamma, zeta); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

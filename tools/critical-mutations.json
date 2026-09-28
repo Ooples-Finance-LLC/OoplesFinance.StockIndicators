@@ -34876,5 +34876,119 @@
     "before": "Math.Max(1, length - 1)",
     "after": "Math.Max(1, length)",
     "filter": "FullyQualifiedName~ValidationTests.VolatilityRatioNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-period-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "Math.Ceiling(Math.Max(1, length) / beta)",
+    "after": "Math.Floor(Math.Max(1, length) / beta)",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-inner-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "Add(current, prior.Item1, -1)",
+    "after": "Add(current, _seeded ? _b : current, -1)",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-outer-lag",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "_history.Count == _period ? prior.Item2 : b",
+    "after": "_history.Count == _period ? prior.Item1 : b",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-inner-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "_seeded ? _b : current",
+    "after": "_b",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-outer-seed",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "_seeded ? _d : current",
+    "after": "_d",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-blend-complement",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "c.Multiply(1 - _zeta)",
+    "after": "c.Multiply(_zeta)",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-gamma",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "Multiply(_gamma)",
+    "after": "Multiply(1)",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-preview",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "if (commit) { if",
+    "after": "if (commit || price != 0) { if",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-reset",
+    "module": "numerical",
+    "file": "src/Helpers/GeneralFilterWindow.cs",
+    "before": "_seeded = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeGeneralFilterEstimatorFast("
+  },
+  {
+    "id": "general-filter-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class GeneralFilterEstimatorState"
+  },
+  {
+    "id": "general-filter-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " GeneralFilterEstimatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "general-filter-reference-blend",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.GeneralFilter.cs",
+    "before": "Product(c, 1 - zeta)",
+    "after": "Product(c, zeta)",
+    "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]
