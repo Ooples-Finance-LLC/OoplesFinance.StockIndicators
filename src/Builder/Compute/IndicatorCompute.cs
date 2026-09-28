@@ -15179,6 +15179,13 @@ internal static partial class IndicatorCompute
         var input = SpanCompat.AsReadOnlySpan(inputList);
         var count = inputList.Count;
 
+        if (DeviationSuperSmootherWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            var result = context.Rent(count); var window = new DeviationSuperSmootherWindow(maType, length1, length2);
+            for (var i = 0; i < count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+            return result;
+        }
+
         using var momentumBuffer = context.Rent(count);
         using var filteredBuffer = context.Rent(count);
         using var powerBuffer = context.Rent(count);

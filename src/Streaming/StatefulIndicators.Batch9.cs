@@ -69,6 +69,24 @@ public sealed class EhlersDeviationScaledMovingAverageState : IStreamingIndicato
 [PrimaryOutput("Edsss")]
 public sealed class EhlersDeviationScaledSuperSmootherState : IStreamingIndicatorState, IDisposable
 {
+    private readonly DeviationSuperSmootherWindow? _window;
+    private readonly LegacyDeviationScaledSuperSmootherState? _legacy;
+    public EhlersDeviationScaledSuperSmootherState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length1 = 12, int length2 = 50)
+    { if (DeviationSuperSmootherWindow.Supports(maType)) _window = new(maType, length1, length2); else _legacy = new(maType, length1, length2); }
+    public IndicatorName Name => IndicatorName.EhlersDeviationScaledSuperSmoother;
+    public void Reset() { _window?.Reset(); _legacy?.Reset(); }
+    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
+    {
+        StreamingInputValidation.Validate(bar);
+        if (_window is null) return _legacy!.Update(bar, isFinal, includeOutputs);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Edsss", value } } : null);
+    }
+    public void Dispose() => _legacy?.Dispose();
+}
+
+internal sealed class LegacyDeviationScaledSuperSmootherState : IStreamingIndicatorState, IDisposable
+{
     private readonly int _length1;
     private readonly StreamingInputResolver _input;
     private readonly IMovingAverageSmoother _smoother;
@@ -79,7 +97,7 @@ public sealed class EhlersDeviationScaledSuperSmootherState : IStreamingIndicato
     private double _prevValue;
     private int _index;
 
-    public EhlersDeviationScaledSuperSmootherState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
+    public LegacyDeviationScaledSuperSmootherState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 12, int length2 = 50)
     {
         _length1 = Math.Max(1, length1);

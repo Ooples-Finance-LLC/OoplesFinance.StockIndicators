@@ -39650,5 +39650,131 @@
     "before": "checked(2 * Math.Max(1, length))",
     "after": "unchecked(2 * Math.Max(1, length))",
     "filter": "FullyQualifiedName~DeviationScaledNumericalTests.PublicDoubledPeriodRejectsOverflowBeforeAllocation"
+  },
+  {
+    "id": "deviation-super-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "difference.Add(_prices.Peek(), -1)",
+    "after": "difference.Add(_previousPrice, -1)",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-hann",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "1 - Math.Cos(2 * Math.PI",
+    "after": "1 + Math.Cos(2 * Math.PI",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": ": smoothing - lag;",
+    "after": ": lag + 1d;",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-rms-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "squares -= expired * expired",
+    "after": "squares += expired * expired",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-rms-count",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "Root(squares, Math.Min(_filtered.Count + 1, _rmsLength), grid)",
+    "after": "Root(squares, 1, grid)",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-adaptive",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "Math.PI * magnitude / _length",
+    "after": "Math.PI / _length",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "_second.Add(ref resultSum, feedback2 << 1)",
+    "after": "_second.Add(ref resultSum, -feedback2 << 1)",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.SubnormalStepAccumulatesThroughBothFeedbackStages"
+  },
+  {
+    "id": "deviation-super-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (commit || price != 0)\n        {",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "deviation-super-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersDeviationScaledSuperSmoother(",
+    "before": "window.Next(selected[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "deviation-super-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(",
+    "before": "SpanCompat.AsReadOnlySpan(inputList)",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices)",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "deviation-super-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersDeviationScaledSuperSmootherState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.InvalidFieldsLeaveMomentumRmsAndFeedbackUnchanged"
+  },
+  {
+    "id": "deviation-super-fast-component",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDeviationScaledSuperSmootherFast(",
+    "before": " && !ComponentAverage.HasOverrides",
+    "after": "",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.ComponentOverridesStillReceiveTheMomentumSeries"
+  },
+  {
+    "id": "deviation-super-underflow-neutral",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationSuperSmootherWindow.cs",
+    "scope": "internal sealed class DeviationSuperSmootherWindow",
+    "before": "if (magnitude == 0) magnitude = 1;",
+    "after": "// zero ratio is left unnormalized",
+    "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
   }
 ]

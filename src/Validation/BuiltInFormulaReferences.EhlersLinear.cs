@@ -188,6 +188,9 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.EhlersDeviationScaledSuperSmoother:
+                var superDeviationOptions = (Builder.Specs.EhlersDeviationScaledSuperSmootherSpecOptions)options;
+                if (superDeviationOptions.MaType is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+                    return new("Edsss", new[] { "Edsss" }, bars => Outputs(("Edsss", DeviationSuperValues(bars, superDeviationOptions.Length, 50, superDeviationOptions.MaType))));
                 var deviationKind = AverageKind(options, 0);
                 var deviationHann = options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.EhlersHannMovingAverage;
                 if (deviationKind == 0 && !deviationHann) return null;

@@ -930,6 +930,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersDeviationScaledSuperSmoother(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 12, int length2 = 50)
     {
+        if (DeviationSuperSmootherWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var (selected, _, _, _, _) = GetInputValuesList(stockData); var window = new DeviationSuperSmootherWindow(maType, length1, length2);
+            var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < stockData.Count; i++)
+            {
+                var value = window.Next(selected[i], true); values.Add(value);
+                signals?.Add(GetCompareSignal(selected[i] - value, i == 0 ? 0 : selected[i - 1] - values[i - 1]));
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Edsss", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersDeviationScaledSuperSmoother; return stockData;
+        }
         List<double> momList = new(stockData.Count);
         List<double> dsssList = new(stockData.Count);
         List<double> filtPowList = new(stockData.Count);

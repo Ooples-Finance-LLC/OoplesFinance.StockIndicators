@@ -17,6 +17,15 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersDeviationScaledSuperSmoother)
+        {
+            var superDeviationOptions = (EhlersDeviationScaledSuperSmootherSpecOptions)builtIn.CreateOptions();
+            if (superDeviationOptions.MaType is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DeviationSuperValues(bars, superDeviationOptions.Length, 50, superDeviationOptions.MaType), IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
         if (builtIn.BatchName is IndicatorName.EhlersDeviationScaledMovingAverage or IndicatorName.EhlersFisherizedDeviationScaledOscillator)
         {
             var fisherDeviation = builtIn.BatchName == IndicatorName.EhlersFisherizedDeviationScaledOscillator;
