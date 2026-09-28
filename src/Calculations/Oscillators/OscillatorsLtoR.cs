@@ -2848,34 +2848,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRunningEquity(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
     {
-        List<double> reqList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var chgXSumWindow = new RollingSum();
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); List<double> reqList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new RunningEquityWindow(maType, length);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma = smaList[i];
-
-            var prevX = GetLastOrDefault(xList);
-            double x = Math.Sign(currentValue - sma);
-            xList.Add(x);
-
-            var chgX = MinPastValues(i, 1, currentValue - prevValue) * prevX;
-            chgXSumWindow.Add(chgX);
-
-            var prevReq = GetLastOrDefault(reqList);
-            var req = chgXSumWindow.Sum(length);
-            reqList.Add(req);
-
-            var signal = GetCompareSignal(req, prevReq);
-            signalsList?.Add(signal);
+            var smaList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            for (var i = 0; i < stockData.Count; i++) reqList.Add(window.WithAverage(inputList[i], smaList[i], true));
         }
+        else foreach (var price in inputList) reqList.Add(window.Next(price, true));
+        for (var i = 0; i < stockData.Count; i++) signalsList?.Add(GetCompareSignal(reqList[i], i == 0 ? 0 : reqList[i - 1]));
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Req", reqList }

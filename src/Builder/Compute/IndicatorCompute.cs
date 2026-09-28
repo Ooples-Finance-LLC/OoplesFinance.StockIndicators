@@ -25675,34 +25675,15 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRunningEquityFast(StockData data, ComputeContext context, int length = 100,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateRunningEquity is the profit a sign-of-the-average rule would have made over the window:
-        // each bar's change signed by whether the PREVIOUS bar sat above its moving average, summed over the
-        // window. The core routine did not trade the rule at all.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var sma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var window = new RollingSum();
-        double prevX = 0;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new RunningEquityWindow(maType, length); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-
-            window.Add(CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) * prevX);
-            output[i] = window.Sum(length);
-
-            prevX = Math.Sign(currentValue - sma[i]);
+            using var average = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.WithAverage(input[i], average.Span[i], true);
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     // Batch 33 - Remaining Indicators (Part 2)

@@ -154,6 +154,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FallingRisingOutputs(bars, Integer(fallingOptions, "Length", 14)), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.RunningEquity)
+        {
+            var equityOptions = builtIn.CreateOptions(); var equityKind = AverageKind(equityOptions, 1); if (equityKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RunningEquityOutputs(bars, Integer(equityOptions, "Length", 100), equityKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

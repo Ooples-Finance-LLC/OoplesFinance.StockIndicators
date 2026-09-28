@@ -314,68 +314,16 @@ public sealed class RSMKIndicatorState : IMultiSeriesIndicatorState, IDisposable
 [PrimaryOutput("Req")]
 public sealed class RunningEquityState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingWindowSum _chgXSum;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevX;
-    private bool _hasPrev;
-
-    public RunningEquityState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _chgXSum = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RunningEquityWindow _window; private readonly StreamingInputResolver _input;
+    public RunningEquityState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100) { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.RunningEquity;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _chgXSum.Reset();
-        _prevValue = 0;
-        _prevX = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevX = _hasPrev ? _prevX : 0;
-        var x = Math.Sign(value - sma);
-        var chgX = _hasPrev ? (value - prevValue) * prevX : 0;
-        var sum = isFinal ? _chgXSum.Add(chgX, out _) : _chgXSum.Preview(chgX, out _);
-        var req = sum;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevX = x;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Req", req }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(req, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Req", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _chgXSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Stc")]
