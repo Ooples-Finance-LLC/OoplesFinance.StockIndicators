@@ -416,6 +416,7 @@ internal static partial class StatefulIndicatorFactory
             StiffnessIndicatorSpecOptions stiffness => new StiffnessIndicatorState(stiffness.MaType, stiffness.Length1, stiffness.Length2, stiffness.SmoothingLength, stiffness.Threshold),
             FiniteVolumeElementsSpecOptions fve => new FiniteVolumeElementsState(fve.MaType, fve.Length, fve.Factor),
             ReallySimpleIndicatorSpecOptions simple => new ReallySimpleIndicatorState(simple.MaType, simple.Length, simple.SmoothLength),
+            SurfaceRoughnessEstimatorSpecOptions surface => new SurfaceRoughnessEstimatorState(surface.MaType, surface.Length),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

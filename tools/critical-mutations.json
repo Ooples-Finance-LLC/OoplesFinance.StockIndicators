@@ -33173,5 +33173,120 @@
     "before": "FromDouble(b.Low) - averages[i]",
     "after": "FromDouble(b.Low) + averages[i]",
     "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "surface-roughness-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "Units(_previous)",
+    "after": "Units(value)",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "var oldest = full ? _history.Peek() : default;",
+    "after": "var oldest = full ? default : _history.Count > 0 ? _history.Peek() : default;",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-cross-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "var covariance = n * sxy - sx * sy;",
+    "after": "var covariance = sx * sy - n * sxy;",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-partial-count",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "new BigInteger(full ? _history.Count : _history.Count + 1)",
+    "after": "new BigInteger(_length)",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-neutral",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "xSpread.IsZero || ySpread.IsZero ? 0",
+    "after": "xSpread.IsZero || ySpread.IsZero ? 1",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-mapping",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "1 - ((correlation + 1) / 2)",
+    "after": "(correlation + 1) / 2",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-previous-update",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "_previous = value;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "if (commit)\n        {",
+    "after": "if (commit || value != 0)\n        {",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SurfaceRoughnessWindow.cs",
+    "before": "_previous = 0; _x = _y = _xx = _yy = _xy = default;",
+    "after": "_previous = 1; _x = _y = _xx = _yy = _xy = default;",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast("
+  },
+  {
+    "id": "surface-roughness-callback-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "MovingAverage(data, maType, length, result.Span, unused.WritableSpan);",
+    "after": "MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), unused.WritableSpan);",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast("
+  },
+  {
+    "id": "surface-roughness-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class SurfaceRoughnessEstimatorState"
+  },
+  {
+    "id": "surface-roughness-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SurfaceRoughnessEstimatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "surface-roughness-reference-lag",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SurfaceRoughness.cs",
+    "before": "bars[j - 1].Close",
+    "after": "bars[j].Close",
+    "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

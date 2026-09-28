@@ -2416,7 +2416,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             SupportResistanceSpecOptions sr2 => ComputeSupportResistanceFast(data, context, sr2.Length, sr2.MaType, spec.OutputKey == "Resistance"),
-            SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length),
+            SurfaceRoughnessEstimatorSpecOptions sre => ComputeSurfaceRoughnessEstimatorFast(data, context, sre.Length, sre.MaType),
             TechnicalRatingsSpecOptions tr => spec.OutputKey switch
             {
                 null or "Tr" => ComputeTechnicalRatingsFast(data, context, tr.MaType, tr.AoLength1, tr.AoLength2,
@@ -26073,44 +26073,18 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100)
+    internal static ComputeBuffer ComputeSurfaceRoughnessEstimatorFast(StockData data, ComputeContext context, int length = 100,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateSurfaceRoughnessEstimator correlates the chained series with itself lagged one bar and maps
-        // that onto zero to one, so a series that repeats itself reads as smooth. The correlation runs over
-        // whatever part of the window has filled, not only once the window is full, and the published series
-        // is that reading itself - the moving average smooths the signal line the spec does not address.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var previous = context.Rent(count);
-        var prev = previous.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new SurfaceRoughnessWindow(maType, length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Line(input[i], true);
+        if (ComponentAverage.HasOverrides)
         {
-            prev[i] = i >= 1 ? input[i - 1] : 0;
+            using var unused = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), unused.WritableSpan);
+            MovingAverage(data, maType, length, result.Span, unused.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var window = Math.Min(length, i + 1);
-            double correlation = 0;
-            if (length > 1 && window > 1)
-            {
-                var start = i + 1 - window;
-                correlation = WindowCorrelation.Pearson(previous.Span.Slice(start, window), input.Slice(start, window));
-            }
-
-            if (MathHelper.IsValueNullOrInfinity(correlation))
-            {
-                correlation = 0;
-            }
-
-            output[i] = 1 - ((correlation + 1) / 2);
-        }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>

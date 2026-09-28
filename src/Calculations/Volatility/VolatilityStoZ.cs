@@ -901,36 +901,18 @@ public static partial class Calculations
     public static StockData CalculateSurfaceRoughnessEstimator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 100)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> prevList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        List<double> aList = new(stockData.Count), emaList = new(stockData.Count), aEmaList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        using var window = new SurfaceRoughnessWindow(maType, length);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            prevList.Add(prevValue);
-
-            corrWindow.Add(prevValue, currentValue);
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add(corr);
-            var a = 1 - (((double)corr + 1) / 2);
-            aList.Add(a);
+            emaList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            for (var i = 0; i < stockData.Count; i++) aList.Add(window.Line(inputList[i], true));
+            aEmaList = Builder.Compute.ComponentAverage.Take(aList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, aList);
         }
-
-        var aEmaList = GetMovingAverageList(stockData, maType, length, aList);
+        else for (var i = 0; i < stockData.Count; i++) { var point = window.Next(inputList[i], true); aList.Add(point.Line); emaList.Add(point.Average); aEmaList.Add(point.Signal); }
         for (var i = 0; i < stockData.Count; i++)
         {
-            var corr = corrList[i];
             var currentValue = inputList[i];
             var ema = emaList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;

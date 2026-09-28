@@ -84,6 +84,12 @@ internal static partial class BuiltInFormulaReferences
             }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.SurfaceRoughnessEstimator)
+        {
+            var surfaceLength = Integer(builtIn.CreateOptions(), "Length", 100);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SurfaceRoughnessOutputs(bars, surfaceLength), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

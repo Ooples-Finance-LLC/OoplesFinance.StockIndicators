@@ -1087,58 +1087,18 @@ public sealed class SupportAndResistanceOscillatorState : IStreamingIndicatorSta
 [PrimaryOutput("Sre")]
 public sealed class SurfaceRoughnessEstimatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowCorrelation _corrWindow;
+    private readonly SurfaceRoughnessWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
     public SurfaceRoughnessEstimatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 100)
-    {
-        _ = maType;
-        var resolved = Math.Max(1, length);
-        _corrWindow = new RollingWindowCorrelation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.SurfaceRoughnessEstimator;
-
-    public void Reset()
-    {
-        _corrWindow.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var corr = isFinal ? _corrWindow.Add(prevValue, value, out _) : _corrWindow.Preview(prevValue, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-        var sre = 1 - ((corr + 1) / 2);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sre", sre }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sre, outputs);
+        var price = _input.GetValue(bar); var value = _window.Line(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Sre", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _corrWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Svama")]
