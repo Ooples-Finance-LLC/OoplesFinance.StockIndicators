@@ -736,9 +736,7 @@ internal static partial class IndicatorCompute
             AtrPercentSpecOptions atrp => ComputeNormalizedAtrFast(data, context, atrp.Length),
 
             // Batch 5 - Trend/Activator indicators
-            RepulseSpecOptions rep => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeRepulseFast(data, context, rep.Length, rep.MaType), rep.Length, rep.MaType)
-                : ComputeRepulseFast(data, context, rep.Length, rep.MaType),
+            RepulseSpecOptions rep => ComputeRepulseFast(data, context, rep.Length, rep.MaType, spec.OutputKey),
             GannHiLoActivatorSpecOptions ghla => ComputeGannHiLoActivatorFast(data, context, ghla.Length, ghla.MaType),
             HalfTrendSpecOptions ht => ComputeHalfTrendFast(data, context, ht.Length, ht.MaType),
 
@@ -6004,54 +6002,22 @@ internal static partial class IndicatorCompute
     /// Computes Repulse Indicator using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeRepulseFast(StockData data, ComputeContext context, int length = 5,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateRepulse measures bull and bear power against the window's extremes and the previous open,
-        // smooths each over five times the length, and publishes their difference. Its Repulse key is that
-        // raw difference; the further average over length is the Signal series.
-        var count = data.Count;
-        var input = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-
-        using var bullPower = context.Rent(count);
-        using var bearPower = context.Rent(count);
-        var bull = bullPower.WritableSpan;
-        var bear = bearPower.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new RepulseWindow(maType, length); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var currentClose = input[i];
-            var prevOpen = i >= 1 ? opens[i - 1] : 0;
-            bull[i] = currentClose != 0
-                ? 100 * ((3 * currentClose) - (2 * lowWindow.Min) - prevOpen) / currentClose
-                : 0;
-            bear[i] = currentClose != 0
-                ? 100 * (prevOpen + (2 * highWindow.Max) - (3 * currentClose)) / currentClose
-                : 0;
+            using var bullPower = context.Rent(input.Count); using var bearPower = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) { var powers = window.Powers(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], input[i], true); bullPower.WritableSpan[i] = powers.Bull.Publish(); bearPower.WritableSpan[i] = powers.Bear.Publish(); }
+            using var bull = context.Rent(input.Count); using var bear = context.Rent(input.Count); var powerPeriod = RepulseWindow.PowerPeriod(length);
+            MovingAverage(data, maType, powerPeriod, bullPower.Span, bull.WritableSpan); MovingAverage(data, maType, powerPeriod, bearPower.Span, bear.WritableSpan);
+            using var line = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = bull.Span[i] - bear.Span[i];
+            using var signal = context.Rent(input.Count); MovingAverage(data, maType, length, line.Span, signal.WritableSpan);
+            (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(result.WritableSpan);
         }
-
-        using var bullAverage = context.Rent(count);
-        using var bearAverage = context.Rent(count);
-        MovingAverage(data, maType, length * 5, bullPower.Span, bullAverage.WritableSpan);
-        MovingAverage(data, maType, length * 5, bearPower.Span, bearAverage.WritableSpan);
-        var bullEma = bullAverage.Span;
-        var bearEma = bearAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = bullEma[i] - bearEma[i];
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var value = window.Next(data.OpenPrices[i], data.HighPrices[i], data.LowPrices[i], input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line; }
+        return result;
     }
 
     /// <summary>

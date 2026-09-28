@@ -32241,5 +32241,136 @@
     "before": "ReferenceFraction.FromDouble(1 - ratio)",
     "after": "ReferenceFraction.FromDouble(ratio)",
     "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-power-period",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "Math.Max(1L, length) * 5",
+    "after": "Math.Max(1L, length) * 4",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "(int)Math.Min(int.MaxValue, Math.Max(1L, length) * 5)",
+    "after": "Math.Max(1, unchecked(length * 5))",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-triple-close",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "new RocBankValue(close).Multiply(3)",
+    "after": "new RocBankValue(close).Multiply(2)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-low-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "new RocBankValue(lowest).Multiply(2)",
+    "after": "new RocBankValue(lowest).Multiply(3)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-high-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "new RocBankValue(highest).Multiply(2)",
+    "after": "new RocBankValue(highest).Multiply(3)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-previous-open",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "new RocBankValue(_previousOpen)",
+    "after": "new RocBankValue(open)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "numerator.Multiply(100)",
+    "after": "numerator.Multiply(10)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-power-publication",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "_bull.Next(power.Bull, commit)",
+    "after": "_bull.Next(new RocBankValue(power.Bull.Publish()), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-line-sign",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "var line = Add(bull, bear, -1)",
+    "after": "var line = Add(bull, bear, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "Powers(open, high, low, close, commit)",
+    "after": "Powers(open, high, low, close, true)",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RepulseWindow.cs",
+    "before": "_bull.Reset(); _bear.Reset(); _signal.Reset();",
+    "after": "_bull.Reset(); _bear.Reset();",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeRepulseFast("
+  },
+  {
+    "id": "repulse-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? value.Signal : value.Line",
+    "after": "value.Line",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeRepulseFast("
+  },
+  {
+    "id": "repulse-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "var close = _input.GetValue(bar);",
+    "after": "double close; try { close = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { close = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class RepulseState"
+  },
+  {
+    "id": "repulse-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " RepulseSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "repulse-reference-sign",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Repulse.cs",
+    "before": "RoundRocBankStage(v - bears[i])",
+    "after": "RoundRocBankStage(v + bears[i])",
+    "filter": "FullyQualifiedName~ValidationTests.RepulseNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

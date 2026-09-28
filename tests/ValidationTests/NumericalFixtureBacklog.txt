@@ -1518,11 +1518,6 @@ OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/minimum-slowLeng
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/shorter-periods
 OoplesFinance.StockIndicators.Indicators.RelativeSpreadStrength/weighted-average
-OoplesFinance.StockIndicators.Indicators.Repulse/default
-OoplesFinance.StockIndicators.Indicators.Repulse/longer-periods
-OoplesFinance.StockIndicators.Indicators.Repulse/minimum-periods
-OoplesFinance.StockIndicators.Indicators.Repulse/shorter-periods
-OoplesFinance.StockIndicators.Indicators.Repulse/weighted-average
 OoplesFinance.StockIndicators.Indicators.RetentionAccelerationFilter/default
 OoplesFinance.StockIndicators.Indicators.RetentionAccelerationFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.RetentionAccelerationFilter/minimum-periods

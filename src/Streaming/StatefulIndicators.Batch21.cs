@@ -943,79 +943,18 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Repulse")]
 public sealed class RepulseState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _bullMa;
-    private readonly IMovingAverageSmoother _bearMa;
-    private readonly IMovingAverageSmoother _signal;
+    private readonly RepulseWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevOpen;
-    private bool _hasPrevOpen;
-
     public RepulseState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 5)
-    {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _bullMa = MovingAverageSmootherFactory.Create(maType, resolved * 5);
-        _bearMa = MovingAverageSmootherFactory.Create(maType, resolved * 5);
-        _signal = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.Repulse;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _bullMa.Reset();
-        _bearMa.Reset();
-        _signal.Reset();
-        _prevOpen = 0;
-        _hasPrevOpen = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var close = _input.GetValue(bar);
-        var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var prevOpen = _hasPrevOpen ? _prevOpen : 0;
-        var bullPower = close != 0 ? 100 * ((3 * close) - (2 * lowestLow) - prevOpen) / close : 0;
-        var bearPower = close != 0 ? 100 * (prevOpen + (2 * highestHigh) - (3 * close)) / close : 0;
-        var bullMa = _bullMa.Next(bullPower, isFinal);
-        var bearMa = _bearMa.Next(bearPower, isFinal);
-        var repulse = bullMa - bearMa;
-        var signal = _signal.Next(repulse, isFinal);
-
-        if (isFinal)
-        {
-            _prevOpen = bar.Open;
-            _hasPrevOpen = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Repulse", repulse },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(repulse, outputs);
+        var close = _input.GetValue(bar); var value = _window.Next(bar.Open, bar.High, bar.Low, close, isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Repulse", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _bullMa.Dispose();
-        _bearMa.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rma")]

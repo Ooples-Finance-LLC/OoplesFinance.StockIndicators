@@ -2535,39 +2535,24 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRepulse(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 5)
     {
-        List<double> bullPowerList = new(stockData.Count);
-        List<double> bearPowerList = new(stockData.Count);
-        List<double> repulseList = new(stockData.Count);
+        length = Math.Max(1, length); var powerPeriod = RepulseWindow.PowerPeriod(length);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new RepulseWindow(maType, length);
+        List<double> repulseList = new(stockData.Count), repulseEmaList;
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, openList, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentClose = inputList[i];
-            var lowestLow = lowestList[i];
-            var highestHigh = highestList[i];
-            var prevOpen = i >= 1 ? openList[i - 1] : 0;
-
-            var bullPower = currentClose != 0 ? 100 * ((3 * currentClose) - (2 * lowestLow) - prevOpen) / currentClose : 0;
-            bullPowerList.Add(bullPower);
-
-            var bearPower = currentClose != 0 ? 100 * (prevOpen + (2 * highestHigh) - (3 * currentClose)) / currentClose : 0;
-            bearPowerList.Add(bearPower);
+            List<double> bullPowerList = new(stockData.Count), bearPowerList = new(stockData.Count);
+            for (var i = 0; i < input.Count; i++) { var powers = window.Powers(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], true); bullPowerList.Add(powers.Bull.Publish()); bearPowerList.Add(powers.Bear.Publish()); }
+            var bull = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(bullPowerList), powerPeriod)?.ToList() ?? GetMovingAverageList(stockData, maType, powerPeriod, bullPowerList);
+            var bear = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(bearPowerList), powerPeriod)?.ToList() ?? GetMovingAverageList(stockData, maType, powerPeriod, bearPowerList);
+            for (var i = 0; i < input.Count; i++) repulseList.Add(bull[i] - bear[i]);
+            repulseEmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(repulseList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, repulseList);
         }
-
-        var bullPowerEmaList = GetMovingAverageList(stockData, maType, length * 5, bullPowerList);
-        var bearPowerEmaList = GetMovingAverageList(stockData, maType, length * 5, bearPowerList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var bullPowerEma = bullPowerEmaList[i];
-            var bearPowerEma = bearPowerEmaList[i];
-
-            var repulse = bullPowerEma - bearPowerEma;
-            repulseList.Add(repulse);
+            repulseEmaList = new(stockData.Count);
+            for (var i = 0; i < input.Count; i++) { var value = window.Next(stockData.OpenPrices[i], stockData.HighPrices[i], stockData.LowPrices[i], input[i], true); repulseList.Add(value.Line); repulseEmaList.Add(value.Signal); }
         }
-
-        var repulseEmaList = GetMovingAverageList(stockData, maType, length, repulseList);
         for (var i = 0; i < stockData.Count; i++)
         {
             var repulse = repulseList[i];

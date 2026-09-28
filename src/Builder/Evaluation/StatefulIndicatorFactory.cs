@@ -410,6 +410,7 @@ internal static partial class StatefulIndicatorFactory
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
             FastSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(length: fsk.Length),
             FastandSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(fsk.MaType, fsk.Length, fsk.Ratio),
+            RepulseSpecOptions repulse => new RepulseState(repulse.MaType, repulse.Length),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),
