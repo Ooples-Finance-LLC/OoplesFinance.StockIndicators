@@ -1772,59 +1772,13 @@ internal sealed class EhlersMotherOfAdaptiveMovingAveragesEngine : IDisposable
 
 internal sealed class EhlersImpulseResponseEngine : IDisposable
 {
-    private readonly double _l1;
-    private readonly double _s1;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevBp1;
-    private double _prevBp2;
-    private int _index;
-
-    public EhlersImpulseResponseEngine(MovingAvgType maType, int length, double bw)
-    {
-        var resolved = Math.Max(1, length);
-        var hannLength = MathHelper.MinOrMax((int)Math.Ceiling(resolved / 1.4));
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolved, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / resolved, 0.99, 0.01));
-        _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, hannLength);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevValue2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
-        var bp = _index < 3
-            ? 0
-            : (0.5 * (1 - _s1) * (value - prevValue2)) + (_l1 * (1 + _s1) * _prevBp1) - (_s1 * _prevBp2);
-        var filt = _smoother.Next(bp, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _index++;
-        }
-
-        return filt;
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _index = 0;
-        _smoother.Reset();
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smoother.Dispose();
-    }
+    private readonly ImpulseResponseWindow _window;
+    public EhlersImpulseResponseEngine(MovingAvgType maType, int length, double bw) => _window = new(maType, length, bw);
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal);
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Dispose();
 }
+
 
 internal static class EhlersStreamingWindow
 {

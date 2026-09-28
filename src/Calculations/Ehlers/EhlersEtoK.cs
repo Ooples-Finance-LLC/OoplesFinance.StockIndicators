@@ -317,45 +317,15 @@ public static partial class Calculations
     public static StockData CalculateEhlersImpulseResponse(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length = 20, double bw = 1)
     {
-        length = Math.Max(length, 1);
-        List<double> bpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var hannLength = MinOrMax((int)Math.Ceiling(length / 1.4));
-        var l1 = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var g1 = Math.Cos(MinOrMax(bw * 2 * Math.PI / length, 0.99, 0.01));
-        var s1 = (1 / g1) - Sqrt(1 / Pow(g1, 2) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new ImpulseResponseWindow(maType, length, bw);
+        var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.Add(bp);
+            var value = window.Next(input[i], true); var previous = i == 0 ? 0 : output[i - 1];
+            signals?.Add(GetCompareSignal(value - previous, previous - (i < 2 ? 0 : output[i - 2]))); output.Add(value);
         }
-
-        var filtList = GetMovingAverageList(stockData, maType, hannLength, bpList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var filt = filtList[i];
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eir", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersImpulseResponse;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eir", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersImpulseResponse;
         return stockData;
     }
 

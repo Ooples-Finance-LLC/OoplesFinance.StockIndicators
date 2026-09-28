@@ -36923,5 +36923,113 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "impulse-response-bandwidth",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "bandwidth * 2 * Math.PI / length",
+    "after": "2 * Math.PI / length",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "_startup >= 3",
+    "after": "_startup >= 2",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "delta.Add(_older, -1)",
+    "after": "delta.Add(_previous, -1)",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "_first.Multiply(_feedback)",
+    "after": "_first.Multiply(-_feedback)",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-extended",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "RocBankValue.Round(delta).Multiply(_drive)",
+    "after": "new RocBankValue(RocBankValue.Round(delta).Publish()).Multiply(_drive)",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-weights",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "_weights[lag], -1",
+    "after": "_weights[0], -1",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-history",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "_history[_history.Count - lag]",
+    "after": "_history[_history.Count - 1]",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "if (commit) { _second",
+    "after": "if (true) { _second",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-parameter",
+    "module": "numerical",
+    "file": "src/Helpers/ImpulseResponseWindow.cs",
+    "scope": "internal sealed class ImpulseResponseWindow",
+    "before": "HighLowBandsWindow.ValidateShift(bandwidth);",
+    "after": "_ = bandwidth;",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersImpulseResponse(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersImpulseResponseFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
+  },
+  {
+    "id": "impulse-response-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersImpulseResponseState",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal));",
+    "filter": "FullyQualifiedName~ImpulseResponseNumericalTests"
   }
 ]

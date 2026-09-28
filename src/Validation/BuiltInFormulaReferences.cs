@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersImpulseResponse)
+        {
+            var impulseOptions = (EhlersImpulseResponseSpecOptions)builtIn.CreateOptions();
+            var impulseKind = impulseOptions.MaType == MovingAvgType.EhlersHannMovingAverage ? 7 : AverageKind(impulseOptions, 0);
+            if (impulseKind is 1 or 2 or 3 or 6 or 7)
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ImpulseResponseValues(bars, impulseOptions.Length, impulseOptions.Bw, impulseKind), IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersChebyshevLowPassFilter)
         {
             var chebyshevKeys = builtIn.BatchOutputKey is { } chebyshevSelected ? new[] { chebyshevSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

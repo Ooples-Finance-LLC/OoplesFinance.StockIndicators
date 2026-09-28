@@ -18965,31 +18965,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersImpulseResponseFast(StockData data, ComputeContext context, int length = 20, double bw = 1,
         MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var hannLength = MathHelper.MinOrMax((int)Math.Ceiling(length / 1.4));
-        var l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / length, 0.99, 0.01));
-        var s1 = (1 / g1) - MathHelper.Sqrt((1 / MathHelper.Pow(g1, 2)) - 1);
-
-        using var bandPass = context.Rent(count);
-        var bp = bandPass.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 2 ? input[i - 2] : 0;
-            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
-            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
-
-            bp[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (input[i] - previousValue)) + (l1 * (1 + s1) * previousBp1) - (s1 * previousBp2);
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, hannLength, bandPass.Span, buffer.WritableSpan);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new ImpulseResponseWindow(maType, length, bw); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
+
 
     /// <summary>
     /// Computes Ehlers Modified Stochastic Indicator using zero-allocation fast path.
@@ -22761,36 +22742,8 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, double bw = 1)
     {
-        // V1 Algorithm: Anticipate indicator using impulse response correlation
-        // 1. Compute bandpass filter (from EhlersImpulseResponse)
-        // 2. Apply MA to bandpass
-        // 3. Correlate with sine wave to find best phase, output predict
-        var close = SpanCompat.AsReadOnlySpan(data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues);
-        int count = data.Count;
-        length = Math.Max(1, length);
-
-        // Step 1: Compute bandpass filter coefficients
-        int hannLength = Math.Max(2, Math.Min(530, (int)Math.Ceiling(length / 1.4)));
-        double l1 = Math.Cos(Math.Min(Math.Max(2 * Math.PI / length, 0.01), 0.99));
-        double g1 = Math.Cos(Math.Min(Math.Max(bw * 2 * Math.PI / length, 0.01), 0.99));
-        double s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
-
-        // Step 2: Calculate bandpass filter
-        var bpBuffer = context.Rent(count);
-        var bpSpan = bpBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            double currentValue = close[i];
-            double prevValue = i >= 2 ? close[i - 2] : 0;
-            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
-            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
-            bpSpan[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-        }
-
-        // Step 3: Apply MA to bandpass (hFilt)
-        var hFiltBuffer = context.Rent(count);
-        MovingAverage(data, maType, hannLength, bpBuffer.Span, hFiltBuffer.WritableSpan);
-        bpBuffer.Dispose();
+        var count = data.Count; length = Math.Max(1, length);
+        using var hFiltBuffer = ComputeEhlersImpulseResponseFast(data, context, length, bw, maType);
         var hFiltSpan = hFiltBuffer.Span;
 
         // Step 4: Correlate with sine wave to find predict
@@ -22805,7 +22758,6 @@ internal static partial class IndicatorCompute
             resultSpan[i] = phaseMatcher.Predict(history);
         }
 
-        hFiltBuffer.Dispose();
         return result;
     }
 
