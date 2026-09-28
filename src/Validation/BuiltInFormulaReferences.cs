@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersEvenBetterSineWaveIndicator)
+        {
+            var sine = (EhlersEvenBetterSineWaveIndicatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EvenBetterSineValues(bars, sine.Length1, sine.Length2), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersEarlyOnsetTrendIndicator)
         {
             var onset = (EhlersEarlyOnsetTrendIndicatorSpecOptions)builtIn.CreateOptions();

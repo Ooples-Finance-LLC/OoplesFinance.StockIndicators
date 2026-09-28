@@ -38786,5 +38786,131 @@
     "before": "new EhlersEarlyOnsetTrendIndicatorState(onset.Length1, onset.Length2, onset.K)",
     "after": "new EhlersEarlyOnsetTrendIndicatorState(onset.Length2, onset.Length1, onset.K)",
     "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "even-better-sine-drive",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "delta.Add(_price, -1)",
+    "after": "delta.Add(_price)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-nyquist",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "_change.Add(ref drive)",
+    "after": "_change.Add(ref drive, -1)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-high-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "_high.Add(ref highSum, _pole)",
+    "after": "_high.Add(ref highSum, _gain)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-low-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "_filter2.Add(ref filterSum, _c3)",
+    "after": "_filter1.Add(ref filterSum, _c3)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-sample-count",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "negative.AddProduct(value.Mantissa, value.Mantissa, -3)",
+    "after": "negative.AddProduct(value.Mantissa, value.Mantissa, -2)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.FirstMotionUsesThreeSamplesAndConstantInputStaysZero"
+  },
+  {
+    "id": "even-better-sine-numerator-history",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "_filter2.Add(ref sum)",
+    "after": "_filter1.Add(ref sum)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-energy-history",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "Square(ref power, _filter2, shift)",
+    "after": "Square(ref power, _filter1, shift)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-subnormal",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.FirstMotionUsesThreeSamplesAndConstantInputStaysZero"
+  },
+  {
+    "id": "even-better-sine-normalization-scale",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "var result = 0d;",
+    "after": "shift = Math.Max(0, shift); var result = 0d;",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.FirstMotionUsesThreeSamplesAndConstantInputStaysZero"
+  },
+  {
+    "id": "even-better-sine-preview",
+    "module": "numerical",
+    "file": "src/Streaming/EvenBetterSineWaveKernel.cs",
+    "scope": "internal sealed class EvenBetterSineWaveKernel",
+    "before": "if (final) { _price",
+    "after": "if (final || value != 0) { _price",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
+  },
+  {
+    "id": "even-better-sine-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersEvenBetterSineWaveIndicator(",
+    "before": "kernel.Next(inputList[i], true)",
+    "after": "kernel.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.SelectedPricesReachBatchCoreAndTypedArm"
+  },
+  {
+    "id": "even-better-sine-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersEvenBetterSineWaveIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.SelectedPricesReachBatchCoreAndTypedArm"
+  },
+  {
+    "id": "even-better-sine-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersEvenBetterSineWaveIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "bar = new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal); StreamingInputValidation.Validate(bar);",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.InvalidFieldsLeaveHighPassLowPassAndSampleHistoryUnchanged"
+  },
+  {
+    "id": "even-better-sine-native-periods",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersEvenBetterSineWaveIndicatorState(sineWave.Length1, sineWave.Length2)",
+    "after": "new EhlersEvenBetterSineWaveIndicatorState(sineWave.Length2, sineWave.Length1)",
+    "filter": "FullyQualifiedName~EvenBetterSineNumericalTests.WideAndTinyValuesRetainFilterAndThreeSampleNormalization"
   }
 ]

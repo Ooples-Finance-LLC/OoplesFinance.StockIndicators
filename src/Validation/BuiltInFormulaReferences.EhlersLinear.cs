@@ -322,25 +322,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Efmd", demodulatorSuper ? PoleTrajectory(source, period, 2, 1, 1, 0) : Average(source, period, demodulatorKind)));
                 });
             case IndicatorName.EhlersEvenBetterSineWaveIndicator:
-                return new("Ebsi", new[] { "Ebsi" }, bars =>
-                {
-                    var highAngle = Clamp(2 * Math.PI / Integer(options, "Length1", 40), .01, .99);
-                    var pole = Math.Cos(highAngle) / (1 + Math.Sin(highAngle));
-                    var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var drive = changes.Select((v, i) => (v + (i == 0 ? 0 : changes[i - 1])) / 2).ToArray();
-                    var high = drive.Select((_, i) => (1 + pole) / 2 * Enumerable.Range(0, i + 1)
-                        .Sum(j => drive[j] * Math.Pow(pole, i - j))).ToArray();
-                    var angle = Clamp(1.414 * Math.PI / Integer(options, "Length2", 10), .01, .99);
-                    var filtered = HilbertLowPass(high, Math.Exp(-angle), angle, averageInput: false);
-                    return Outputs(("Ebsi", filtered.Select((_, i) =>
-                    {
-                        var samples = Enumerable.Range(0, 3).Select(lag => i < lag ? 0 : filtered[i - lag]).ToArray();
-                        var scale = samples.Max(Math.Abs);
-                        if (scale == 0) return 0;
-                        var normalized = samples.Select(v => v / scale).ToArray();
-                        return normalized.Sum() / Math.Sqrt(3 * normalized.Sum(v => v * v));
-                    }).ToArray()));
-                });
+                return new("Ebsi", new[] { "Ebsi" }, bars => Outputs(("Ebsi", EvenBetterSineValues(bars, Integer(options, "Length1", 40), Integer(options, "Length2", 10)))));
             case IndicatorName.EhlersModifiedRelativeStrengthIndex:
                 return new("Emrsi", new[] { "Emrsi", "Signal" }, bars =>
                 {
