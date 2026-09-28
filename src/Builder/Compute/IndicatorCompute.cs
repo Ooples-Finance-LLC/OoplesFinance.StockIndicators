@@ -2179,9 +2179,7 @@ internal static partial class IndicatorCompute
                     cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType),
                     spec.OutputKey == "FastSignal" ? cbci.FastLength : cbci.SlowLength, cbci.MaType)
                 : ComputeConstanceBrownCompositeIndexFast(data, context, cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType),
-            EhlersAMDetectorSpecOptions eamd => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType), eamd.Length2, eamd.MaType)
-                : ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType),
+            EhlersAMDetectorSpecOptions eamd => ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType, spec.OutputKey == "Signal"),
             EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType, eai.Bw),
             EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length1, eacr.Length2, eacr.Length3, eacr.MaType),
             EhlersEmpiricalModeDecompositionSpecOptions eemd => ComputeEhlersEmpiricalModeDecompositionFast(data, context, eemd.Length1, eemd.Length2, eemd.Delta, eemd.Fraction, eemd.MaType, spec.OutputKey),
@@ -22593,49 +22591,24 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
-    internal static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signal = false)
     {
-        // V1 Algorithm: Ehlers AM Detector
-        // 1. Calculate derivative: close - open
-        // 2. Take absolute value
-        // 3. Calculate rolling max over length1 window
-        // 4. Apply MA over length2 to get vol (primary output)
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var open = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        int count = data.Count;
-
-        // Calculate absolute derivative (close - open)
-        var absDerBuffer = context.Rent(count);
-        var absDerSpan = absDerBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new AmDetectorWindow(maType, length1, length2); var output = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            absDerSpan[i] = Math.Abs(close[i] - open[i]);
+            _ = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1));
+            using var envelope = context.Rent(input.Count); using var line = context.Rent(input.Count); using var smooth = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) envelope.WritableSpan[i] = window.Envelope(data.OpenPrices[i], input[i], true).Publish();
+            MovingAverage(data, maType, Math.Max(1, length2), envelope.Span, line.WritableSpan);
+            MovingAverage(data, maType, Math.Max(1, length2), line.Span, smooth.WritableSpan);
+            (signal ? smooth.Span : line.Span).CopyTo(output.WritableSpan);
         }
-
-        // Calculate rolling max over length1 window
-        var envBuffer = context.Rent(count);
-        var envSpan = envBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
-        {
-            double maxVal = 0;
-            int startIdx = Math.Max(0, i - length1 + 1);
-            for (int j = startIdx; j <= i; j++)
-            {
-                if (absDerSpan[j] > maxVal)
-                    maxVal = absDerSpan[j];
-            }
-            envSpan[i] = maxVal;
-        }
-
-        // Apply MA to envelope to get vol (primary output)
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(envBuffer.Span, result.WritableSpan, length2);
-
-        absDerBuffer.Dispose();
-        envBuffer.Dispose();
-        return result;
+        else for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(data.OpenPrices[i], input[i], true); output.WritableSpan[i] = signal ? point.Signal : point.Line; }
+        return output;
     }
+
 
     internal static ComputeBuffer ComputeEhlersAnticipateIndicatorFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, double bw = 1)
     {

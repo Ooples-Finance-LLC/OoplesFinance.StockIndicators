@@ -717,59 +717,21 @@ public sealed class EhlersAlternateSignalToNoiseRatioState : IStreamingIndicator
 }
 
 [PrimaryOutput("Eamd")]
-public sealed class EhlersAMDetectorState : IStreamingIndicatorState, IDisposable
+public sealed class EhlersAMDetectorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
-    private readonly RollingWindowMax _absDerMax;
-    private readonly IMovingAverageSmoother _volMa;
-    private readonly IMovingAverageSmoother _volSignalMa;
-
-    public EhlersAMDetectorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 4,
-        int length2 = 8)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _absDerMax = new RollingWindowMax(resolved1);
-        _volMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _volSignalMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-    }
-
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private readonly AmDetectorWindow _window;
+    public EhlersAMDetectorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 4, int length2 = 8) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.EhlersAMDetector;
-
-    public void Reset()
-    {
-        _absDerMax.Reset();
-        _volMa.Reset();
-        _volSignalMa.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var absDer = Math.Abs(bar.Close - bar.Open);
-        var env = isFinal ? _absDerMax.Add(absDer, out _) : _absDerMax.Preview(absDer, out _);
-        var vol = _volMa.Next(env, isFinal);
-        var volEma = _volSignalMa.Next(vol, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eamd", vol },
-                { "Signal", volEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vol, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Open, bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Eamd", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _absDerMax.Dispose();
-        _volMa.Dispose();
-        _volSignalMa.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
+
 
 [PrimaryOutput("Eir")]
 public sealed class EhlersImpulseResponseState : IStreamingIndicatorState, IDisposable

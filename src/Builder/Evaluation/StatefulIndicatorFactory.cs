@@ -45,6 +45,7 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            EhlersAMDetectorSpecOptions detector => new EhlersAMDetectorState(detector.MaType, detector.Length1, detector.Length2),
             EhlersRecursiveMedianFilterSpecOptions median => new EhlersRecursiveMedianFilterState(median.Length),
             EhlersDistanceCoefficientFilterSpecOptions distance => new EhlersDistanceCoefficientFilterState(distance.Length),
             EhlersFilterSpecOptions filter => new EhlersFilterState(filter.Length),

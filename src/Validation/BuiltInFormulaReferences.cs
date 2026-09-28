@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersAMDetector)
+        {
+            var detectorOptions = (EhlersAMDetectorSpecOptions)builtIn.CreateOptions(); var detectorKind = AverageKind(detectorOptions, 1);
+            if (Helpers.StrengthWindow.Supports(detectorOptions.MaType))
+            {
+                foreach (var key in new[] { "Eamd", "Signal" })
+                { var outputKey = key; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(Array.IndexOf(new[] { "Eamd", "Signal" }, key), bars => AmDetectorOutputs(bars, detectorOptions.Length1, detectorOptions.Length2, detectorKind)[outputKey], IndicatorErrorBudget.Exact); }
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersRecursiveMedianOscillator)
         {
             var oscillatorOptions = (EhlersRecursiveMedianOscillatorSpecOptions)builtIn.CreateOptions();

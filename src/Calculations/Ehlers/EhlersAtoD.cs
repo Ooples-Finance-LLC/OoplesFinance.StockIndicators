@@ -1690,56 +1690,25 @@ public static partial class Calculations
     /// <param name="length2"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersAMDetector(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 4, 
-        int length2 = 8)
+    public static StockData CalculateEhlersAMDetector(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 4, int length2 = 8)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> absDerList = new(stockData.Count);
-        List<double> envList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax absDerWindow = new(length1);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, open, _) = GetInputValuesList(stockData);
+        using var window = new AmDetectorWindow(maType, length1, length2);
+        var average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length1), input);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentClose = inputList[i];
-            var currentOpen = openList[i];
-            var der = currentClose - currentOpen;
-
-            var absDer = Math.Abs(der);
-            absDerList.Add(absDer);
-            absDerWindow.Add(absDer);
-
-            var env = absDerWindow.Max;
-            envList.Add(env);
+            var envelope = new List<double>(input.Count);
+            for (var i = 0; i < input.Count; i++) envelope.Add(window.Envelope(open[i], input[i], true).Publish());
+            line = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(envelope), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), envelope);
+            signal = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(line), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), line);
         }
-
-        var volList = GetMovingAverageList(stockData, maType, length2, envList);
-        var volEmaList = GetMovingAverageList(stockData, maType, length2, volList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var vol = volList[i];
-            var volEma = volEmaList[i];
-            var ema = emaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, vol, volEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eamd", volList },
-            { "Signal", volEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(volList);
-        stockData.IndicatorName = IndicatorName.EhlersAMDetector;
-
+        else for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(open[i], input[i], true); line.Add(point.Line); signal.Add(point.Signal); }
+        for (var i = 0; i < input.Count; i++)
+            signals?.Add(GetVolatilitySignal(input[i] - average[i], i == 0 ? 0 : input[i - 1] - average[i - 1], line[i], signal[i]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eamd", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersAMDetector;
         return stockData;
     }
 

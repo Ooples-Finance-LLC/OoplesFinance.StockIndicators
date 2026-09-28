@@ -37598,5 +37598,104 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~RecursiveMedianOscillatorNumericalTests"
+  },
+  {
+    "id": "am-detector-open",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "ExactVarianceWindow.Units(open)",
+    "after": "ExactVarianceWindow.Units(0)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "BigInteger.Abs(ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open))",
+    "after": "ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "BigInteger.Max(difference, node.Value.Value)",
+    "after": "BigInteger.Min(difference, node.Value.Value)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "node.Value.Index <= _count - _length",
+    "after": "node.Value.Index < _count - _length",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-extended",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "_signal.Next(line, commit)",
+    "after": "_signal.Next(default, commit)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AmDetectorWindow.cs",
+    "scope": "internal sealed class AmDetectorWindow",
+    "before": "Envelope(open, close, commit)",
+    "after": "Envelope(open, close, true)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersAMDetector(",
+    "before": "window.Next(open[i], input[i], true)",
+    "after": "window.Next(open[i], stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAMDetectorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAMDetectorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "am-detector-components",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAMDetectorFast(",
+    "before": "_ = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1));",
+    "after": "_ = input.Count;",
+    "filter": "FullyQualifiedName~AmDetectorNumericalTests"
   }
 ]
