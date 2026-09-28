@@ -19,6 +19,36 @@ internal interface ICustomInputConsumer
     void ReadCloseAsInput();
 }
 
+/// <summary>Identifies formulas that retain candle ranges when their input series changes.</summary>
+internal interface ICustomInputRangePolicy
+{
+    bool PreserveOriginalRange { get; }
+}
+
+/// <summary>Tracks the last committed selected value for formulas that derive custom ranges.</summary>
+internal struct CustomInputRange
+{
+    private double _previous;
+    private bool _hasPrevious;
+
+    internal void Reset() { _previous = 0; _hasPrevious = false; }
+
+    internal OhlcvBar Next(OhlcvBar bar, double value, bool isFinal, bool preserveOriginalRange = false)
+    {
+        var high = bar.High;
+        var low = bar.Low;
+        if (!preserveOriginalRange && !CalculationsHelper.IsWithinBarRange(value, low, high))
+        {
+            var previous = _hasPrevious ? _previous : value;
+            high = Math.Max(previous, value);
+            low = Math.Min(previous, value);
+        }
+        if (isFinal) { _previous = value; _hasPrevious = true; }
+        return new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime,
+            bar.Open, high, low, value, bar.Volume, bar.IsFinal);
+    }
+}
+
 /// <summary>
 /// Computes any streaming indicator on a series the caller supplies rather than on the bar's close.
 /// </summary>
@@ -31,7 +61,8 @@ internal interface ICustomInputConsumer
 /// Every state accepts this, so no state can take custom input in one engine and not the other.
 /// </para>
 /// <para>
-/// Each bar, the inner state sees the caller's value as the close, and a high and low decided by the
+/// Each bar, the inner state sees the caller's value as the close. Formulas that use original candle
+/// ranges retain the bar's high and low. Other formulas use a high and low decided by the
 /// same per-bar rule the batch engine applies to a chained series (see
 /// <c>CalculationsHelper.GetCustomRangeLists</c>). A value inside the bar's range keeps the bar's true
 /// high and low - a median price, a chained moving average. A value outside it is its own scale, and
@@ -47,8 +78,7 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
 {
     private readonly IStreamingIndicatorState _inner;
     private readonly IInputSeries _series;
-    private double _prevValue;
-    private bool _hasPrev;
+    private CustomInputRange _range;
 
     /// <summary>
     /// Wraps <paramref name="inner"/> so that it computes on <paramref name="selector"/>'s values.
@@ -94,8 +124,7 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
     {
         _inner.Reset();
         _series.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
+        _range.Reset();
     }
 
     /// <inheritdoc />
@@ -110,28 +139,8 @@ public sealed class CustomInputState : IStreamingIndicatorState, IDisposable
         var value = _series.Next(bar, isFinal);
         StreamingInputValidation.Finite(value, nameof(value));
 
-        double high;
-        double low;
-        if (CalculationsHelper.IsWithinBarRange(value, bar.Low, bar.High))
-        {
-            high = bar.High;
-            low = bar.Low;
-        }
-        else
-        {
-            var prev = _hasPrev ? _prevValue : value;
-            high = Math.Max(prev, value);
-            low = Math.Min(prev, value);
-        }
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        var custom = new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime,
-            bar.Open, high, low, value, bar.Volume, bar.IsFinal);
+        var preserveRange = _inner is ICustomInputRangePolicy policy && policy.PreserveOriginalRange;
+        var custom = _range.Next(bar, value, isFinal, preserveRange);
 
         return _inner.Update(custom, isFinal, includeOutputs);
     }

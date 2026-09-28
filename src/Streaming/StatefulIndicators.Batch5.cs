@@ -184,8 +184,10 @@ public sealed class DemarkerState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class DemarkPivotPointsState : IStreamingIndicatorState
+public sealed class DemarkPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false, demark: true);
     public DemarkPivotPointsState() { }
     public IndicatorName Name => IndicatorName.DemarkPivotPoints;
@@ -206,8 +208,10 @@ public sealed class DemarkPivotPointsState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Dpr")]
-public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisposable
+public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DemarkPressureWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public DemarkPressureRatioV1State(int length = 13) => _window = new DemarkPressureWindow(length, false);
@@ -223,8 +227,10 @@ public sealed class DemarkPressureRatioV1State : IStreamingIndicatorState, IDisp
 }
 
 [PrimaryOutput("Dpr")]
-public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisposable
+public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DemarkPressureWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public DemarkPressureRatioV2State(int length = 10) => _window = new DemarkPressureWindow(length, true);
@@ -240,8 +246,10 @@ public sealed class DemarkPressureRatioV2State : IStreamingIndicatorState, IDisp
 }
 
 [PrimaryOutput("Drei")]
-public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, IDisposable
+public sealed class DemarkRangeExpansionIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DemarkRangeWindow _window;
     public DemarkRangeExpansionIndexState(int length=5)=>_window=new DemarkRangeWindow(length);
     public IndicatorName Name=>IndicatorName.DemarkRangeExpansionIndex;
@@ -1039,8 +1047,10 @@ public sealed class DoubleStochasticOscillatorState : IStreamingIndicatorState, 
 }
 
 [PrimaryOutput("Eom")]
-public sealed class EaseOfMovementState : IStreamingIndicatorState
+public sealed class EaseOfMovementState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly EaseWindow _window;
     public EaseOfMovementState(double divisor = 1000000) => _window = new EaseWindow(divisor);
     public IndicatorName Name => IndicatorName.EaseOfMovement;

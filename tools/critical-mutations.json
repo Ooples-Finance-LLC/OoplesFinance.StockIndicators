@@ -35870,5 +35870,59 @@
     "before": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)",
     "after": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides && length2 < 0)",
     "filter": "FullyQualifiedName~CompositeStageParityTests"
+  },
+  {
+    "id": "custom-range-original",
+    "module": "numerical",
+    "file": "src/Streaming/CustomInputState.cs",
+    "scope": "public sealed class CustomInputState",
+    "before": "_range.Next(bar, value, isFinal, preserveRange)",
+    "after": "_range.Next(bar, value, isFinal, false)",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "custom-range-derived",
+    "module": "numerical",
+    "file": "src/Streaming/CustomInputState.cs",
+    "scope": "internal struct CustomInputRange",
+    "before": "if (!preserveOriginalRange && !CalculationsHelper.IsWithinBarRange(value, low, high))",
+    "after": "if (false && !preserveOriginalRange && !CalculationsHelper.IsWithinBarRange(value, low, high))",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "custom-range-preview",
+    "module": "numerical",
+    "file": "src/Streaming/CustomInputState.cs",
+    "scope": "internal struct CustomInputRange",
+    "before": "if (isFinal) { _previous = value; _hasPrevious = true; }",
+    "after": "if (true) { _previous = value; _hasPrevious = true; }",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "custom-range-reset",
+    "module": "numerical",
+    "file": "src/Streaming/CustomInputState.cs",
+    "scope": "internal struct CustomInputRange",
+    "before": "internal void Reset() { _previous = 0; _hasPrevious = false; }",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "custom-range-insync",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class InsyncIndexState",
+    "before": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;",
+    "after": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal, true) : bar;",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
+  },
+  {
+    "id": "custom-range-ratings",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TechnicalRatingsState",
+    "before": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;",
+    "after": "var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal, true) : bar;",
+    "filter": "FullyQualifiedName~CustomInputRangeTests"
   }
 ]

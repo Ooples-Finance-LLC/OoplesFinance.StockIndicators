@@ -6,8 +6,10 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 [PrimaryOutput("Deli")]
-public sealed class EhlersDetrendedLeadingIndicatorState : IStreamingIndicatorState
+public sealed class EhlersDetrendedLeadingIndicatorState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DetrendedLeadingWindow _window;
     public EhlersDetrendedLeadingIndicatorState(int length = 14) { _window = new(length); }
     public IndicatorName Name => IndicatorName.EhlersDetrendedLeadingIndicator;

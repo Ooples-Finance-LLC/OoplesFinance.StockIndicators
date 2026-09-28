@@ -38,8 +38,10 @@ public sealed class ElasticVolumeWeightedMovingAverageV2State : IStreamingIndica
 }
 
 [PrimaryOutput("Emt")]
-public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDisposable
+public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ElderThermometerWindow _window;
     public ElderMarketThermometerState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 22)
         => _window = new ElderThermometerWindow(maType, length);
@@ -450,8 +452,10 @@ public sealed class EquityMovingAverageState : IStreamingIndicatorState, IDispos
 }
 
 [PrimaryOutput("Eco")]
-public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ErgodicCandleWindow _window;
     public ErgodicCandlestickOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 32, int length2 = 12) => _window = new(maType, length1, length2);
     public IndicatorName Name => IndicatorName.ErgodicCandlestickOscillator;

@@ -159,8 +159,10 @@ public sealed class EhlersRelativeStrengthIndexInverseFisherTransformState : ISt
 }
 
 [PrimaryOutput("Ervi")]
-public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, IDisposable
+public sealed class EhlersRelativeVigorIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly EhlersVigorWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public EhlersRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 10, int signalLength = 4) { _window = new(maType, length, signalLength); }

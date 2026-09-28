@@ -878,8 +878,10 @@ public sealed class DynamicMomentumOscillatorState : IStreamingIndicatorState, I
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class DynamicPivotPointsState : IStreamingIndicatorState
+public sealed class DynamicPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false);
     public DynamicPivotPointsState() { }
     public IndicatorName Name => IndicatorName.DynamicPivotPoints;
@@ -900,8 +902,10 @@ public sealed class DynamicPivotPointsState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Esr")]
-public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+public sealed class EarningSupportResistanceLevelsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly PooledRingBuffer<double> _inputValues;
     private readonly PooledRingBuffer<double> _lowValues;
     private StreamingInputResolver _input;

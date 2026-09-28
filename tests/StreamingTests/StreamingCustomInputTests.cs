@@ -57,8 +57,8 @@ public sealed class StreamingCustomInputTests : GlobalTestData
         InRange,
 
         /// <summary>
-        /// The natural log of the close: outside every bar's range, so high and low come from the
-        /// series itself under the per-bar rule, and a non-linear transform, so it is a genuinely
+        /// The natural log of the close: outside every bar's range, exercising each formula's
+        /// original or derived range policy, and a non-linear transform, so it is a genuinely
         /// different series even to an indicator that ignores scale.
         /// </summary>
         OutOfRange,

@@ -960,8 +960,10 @@ public sealed class PivotDetectorOscillatorState : IStreamingIndicatorState, IDi
 }
 
 [PrimaryOutput("Pivot1")]
-public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposable
+public sealed class PivotPointAverageState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly IMovingAverageSmoother _pp1Smoother;
     private readonly IMovingAverageSmoother _pp2Smoother;
     private readonly IMovingAverageSmoother _pp3Smoother;

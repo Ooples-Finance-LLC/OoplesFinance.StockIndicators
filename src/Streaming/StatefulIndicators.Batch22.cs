@@ -6,8 +6,10 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 [PrimaryOutput("Ro")]
-public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class RexOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RexWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public RexOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14) { _window = new(maType, length); }
@@ -850,8 +852,10 @@ public sealed class SharpModifiedMovingAverageState : IStreamingIndicatorState, 
 }
 
 [PrimaryOutput("ARatio")]
-public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDisposable
+public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ShinoharaWindow _window;
     public ShinoharaIntensityRatioState(int length = 14) => _window = new ShinoharaWindow(length);
     public IndicatorName Name => IndicatorName.ShinoharaIntensityRatio;

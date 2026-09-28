@@ -150,8 +150,12 @@ public sealed class InformationRatioState : IStreamingIndicatorState, IDisposabl
 }
 
 [PrimaryOutput("Iidx")]
-public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private bool _customInput;
+    private CustomInputRange _componentRange;
+
     private readonly int _smaLength;
     private readonly RelativeStrengthIndexState _rsi;
     private readonly CommodityChannelIndexState _cci;
@@ -205,12 +209,14 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
     // ones that must switch to reading the close when this state is wrapped.
     void ICustomInputConsumer.ReadCloseAsInput()
     {
+        _customInput = true;
         ((ICustomInputConsumer)_cci).ReadCloseAsInput();
         ((ICustomInputConsumer)_mfi).ReadCloseAsInput();
     }
 
     public void Reset()
     {
+        _componentRange.Reset();
         _rsi.Reset();
         _cci.Reset();
         _mfi.Reset();
@@ -234,6 +240,7 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         StreamingInputValidation.Validate(bar);
+        var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;
         var rsi = _rsi.Update(bar, isFinal, includeOutputs: false).Value;
         var cci = _cci.Update(bar, isFinal, includeOutputs: false).Value;
         var mfi = _mfi.Update(bar, isFinal, includeOutputs: false).Value;
@@ -272,8 +279,8 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
         double rocinsb = InsyncVotes.Direction(roc, rocSma);
         double rsiins = InsyncVotes.Band(rsi, 30, 70);
 
-        var highestHigh = isFinal ? _stochHigh.Add(bar.High, out _) : _stochHigh.Preview(bar.High, out _);
-        var lowestLow = isFinal ? _stochLow.Add(bar.Low, out _) : _stochLow.Preview(bar.Low, out _);
+        var highestHigh = isFinal ? _stochHigh.Add(ranged.High, out _) : _stochHigh.Preview(ranged.High, out _);
+        var lowestLow = isFinal ? _stochLow.Add(ranged.Low, out _) : _stochLow.Preview(ranged.Low, out _);
         var range = highestHigh - lowestLow;
         var fastK = range != 0 ? MathHelper.MinOrMax((bar.Close - lowestLow) / range * 100, 100, 0) : 0;
         var fastD = _stochFast.Next(fastK, isFinal);
@@ -324,8 +331,10 @@ public sealed class InsyncIndexState : IStreamingIndicatorState, IDisposable, IC
 }
 
 [PrimaryOutput("Ibs")]
-public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class InternalBarStrengthIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly InternalBarStrengthWindow _window;
     private readonly StreamingInputResolver _input=new(InputName.Close,null);
     public InternalBarStrengthIndicatorState(int length=14,int smoothLength=3)=>_window=new(length,smoothLength);

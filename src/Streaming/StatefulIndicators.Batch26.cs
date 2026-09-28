@@ -1523,8 +1523,10 @@ public sealed class VolatilityMovingAverageState : IStreamingIndicatorState, IDi
 }
 
 [PrimaryOutput("Vr")]
-public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable
+public sealed class VolatilityRatioState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly VolatilityRatioWindow _window; private readonly StreamingInputResolver _input;
     public VolatilityRatioState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14, double breakoutLevel = .5)
     { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
@@ -1626,8 +1628,10 @@ public sealed class VolatilityWaveMovingAverageState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Vao")]
-public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly VolumeBalanceWindow _window;
     public VolumeAccumulationOscillatorState(int length = 14) => _window = new VolumeBalanceWindow(length, VolumeBalanceKind.Accumulation);
     public IndicatorName Name => IndicatorName.VolumeAccumulationOscillator;
@@ -1642,8 +1646,10 @@ public sealed class VolumeAccumulationOscillatorState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Vapc")]
-public sealed class VolumeAccumulationPercentState : IStreamingIndicatorState, IDisposable
+public sealed class VolumeAccumulationPercentState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly MoneyFlowPercentWindow _window;
     public VolumeAccumulationPercentState(int length = 10)
         => _window = new MoneyFlowPercentWindow(length);

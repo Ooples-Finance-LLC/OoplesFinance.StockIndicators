@@ -61,8 +61,10 @@ public sealed class PremierStochasticOscillatorState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Pgo")]
-public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly PrettyGoodWindow _window;
     private readonly StreamingInputResolver _input=new(InputName.Close,null);
     public PrettyGoodOscillatorState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int length=14)=>_window=new(maType,length);
@@ -77,8 +79,10 @@ public sealed class PrettyGoodOscillatorState : IStreamingIndicatorState, IDispo
 }
 
 [PrimaryOutput("Pco")]
-public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class PriceCycleOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly PriceCycleWindow _window;
     private readonly StreamingInputResolver _input=new(InputName.Close,null);
     public PriceCycleOscillatorState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int length=22)=>_window=new(maType,length);

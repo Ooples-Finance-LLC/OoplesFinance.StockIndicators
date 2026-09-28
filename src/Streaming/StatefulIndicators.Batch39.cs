@@ -54,8 +54,10 @@ internal sealed class RelativeVolatilityIndexCore : IDisposable
 /// The streaming twin of <c>Calculations.CalculateRelativeVolatilityIndexHigh</c>.
 /// </remarks>
 [PrimaryOutput("RviHigh")]
-public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState, IDisposable
+public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RelativeVolatilityIndexCore _core;
     private readonly StreamingInputResolver _input;
 
@@ -101,8 +103,10 @@ public sealed class RelativeVolatilityIndexHighState : IStreamingIndicatorState,
 /// <see cref="RelativeVolatilityIndexHighState"/>.
 /// </remarks>
 [PrimaryOutput("RviLow")]
-public sealed class RelativeVolatilityIndexLowState : IStreamingIndicatorState, IDisposable
+public sealed class RelativeVolatilityIndexLowState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RelativeVolatilityIndexCore _core;
     private readonly StreamingInputResolver _input;
 

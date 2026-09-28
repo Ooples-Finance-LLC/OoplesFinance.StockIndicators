@@ -43,8 +43,10 @@ public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Rsi")]
-public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ReallySimpleWindow _window;
     private readonly StreamingInputResolver _input;
     public ReallySimpleIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21, int smoothLength = 10)
@@ -812,8 +814,10 @@ public sealed class RelativeStrength3DIndicatorState : IMultiSeriesIndicatorStat
 }
 
 [PrimaryOutput("Rvi")]
-public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposable
+public sealed class RelativeVigorIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RelativeVigorWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public RelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) { _window = new(maType, length); }
@@ -908,8 +912,10 @@ public sealed class RelativeVolumeIndicatorState : IStreamingIndicatorState, IDi
 }
 
 [PrimaryOutput("Repulse")]
-public sealed class RepulseState : IStreamingIndicatorState, IDisposable
+public sealed class RepulseState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RepulseWindow _window;
     private readonly StreamingInputResolver _input;
     public RepulseState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 5)
@@ -1023,8 +1029,10 @@ public sealed class RetentionAccelerationFilterState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Rcc")]
-public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorState, IDisposable
+public sealed class RetrospectiveCandlestickChartState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly RetrospectiveCandleWindow _window;
     public RetrospectiveCandlestickChartState(int length=100)=>_window=new RetrospectiveCandleWindow(length);
     public IndicatorName Name=>IndicatorName.RetrospectiveCandlestickChart;

@@ -157,8 +157,10 @@ public sealed class SmoothedRateOfChangeState : IStreamingIndicatorState, IDispo
 }
 
 [PrimaryOutput("Swad")]
-public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIndicatorState, IDisposable
+public sealed class SmoothedWilliamsAccumulationDistributionState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly WilliamsAccumulationWindow _window = new();
     private readonly RocBankAverage? _average;
     private readonly IMovingAverageSmoother? _fallback;
@@ -454,8 +456,10 @@ public sealed class SqueezeMomentumIndicatorState : IStreamingIndicatorState, ID
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class StandardPivotPointsState : IStreamingIndicatorState
+public sealed class StandardPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(true);
     public StandardPivotPointsState() { }
     public IndicatorName Name => IndicatorName.StandardPivotPoints;
@@ -576,8 +580,10 @@ public sealed class StiffnessIndicatorState : IStreamingIndicatorState, IDisposa
 }
 
 [PrimaryOutput("Sco")]
-public sealed class StochasticCustomOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class StochasticCustomOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly StochasticCustomWindow _window;
     public StochasticCustomOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 7, int length2 = 3, int length3 = 12)
         => _window = new(maType, length1, length2, length3);

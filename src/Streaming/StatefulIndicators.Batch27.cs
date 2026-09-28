@@ -915,8 +915,10 @@ public sealed class WellRoundedMovingAverageState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Wad")]
-public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorState
+public sealed class WilliamsAccumulationDistributionState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly WilliamsAccumulationWindow _window = new();
     public IndicatorName Name => IndicatorName.WilliamsAccumulationDistribution;
     public void Reset() { _window.Reset();  }
@@ -1193,8 +1195,10 @@ public sealed class WoodieCommodityChannelIndexState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class WoodiePivotPointsState : IStreamingIndicatorState
+public sealed class WoodiePivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false, woodie: true);
     public WoodiePivotPointsState() { }
     public IndicatorName Name => IndicatorName.WoodiePivotPoints;

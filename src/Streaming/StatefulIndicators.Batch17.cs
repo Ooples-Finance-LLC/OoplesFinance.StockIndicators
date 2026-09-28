@@ -67,8 +67,10 @@ public sealed class MartinRatioState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Mi")]
-public sealed class MassIndexState : IStreamingIndicatorState, IDisposable
+public sealed class MassIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly MassIndexWindow _window;
     public MassIndexState(MovingAvgType maType=MovingAvgType.ExponentialMovingAverage,int length1=21,int length2=21,int length3=25,int signalLength=9)
         =>_window=new(maType,length1,length2,length3,signalLength);

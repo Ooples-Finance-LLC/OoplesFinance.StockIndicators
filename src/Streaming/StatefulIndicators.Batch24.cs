@@ -6,8 +6,12 @@ using OoplesFinance.StockIndicators.Helpers;
 namespace OoplesFinance.StockIndicators.Streaming;
 
 [PrimaryOutput("Tr")]
-public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+    private bool _customInput;
+    private CustomInputRange _componentRange;
+
     private readonly int _uoLength1;
     private readonly int _uoLength2;
     private readonly int _uoLength3;
@@ -119,12 +123,14 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
     // ones that must switch to reading the close when this state is wrapped.
     void ICustomInputConsumer.ReadCloseAsInput()
     {
+        _customInput = true;
         ((ICustomInputConsumer)_ao).ReadCloseAsInput();
         ((ICustomInputConsumer)_cci).ReadCloseAsInput();
     }
 
     public void Reset()
     {
+        _componentRange.Reset();
         _bpSum1.Reset();
         _bpSum2.Reset();
         _bpSum3.Reset();
@@ -177,6 +183,8 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
+        var ranged = _customInput ? _componentRange.Next(bar, bar.Close, isFinal) : bar;
         var value = _input.GetValue(bar);
         var prevValue = _hasPrev ? _prevValue : 0;
         var rsi = _rsi.Update(bar, isFinal, includeOutputs: false).Value;
@@ -200,8 +208,8 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var volumePriceAvg = vwmaCount > 0 ? volumePriceSum / vwmaCount : 0;
         var vwma = volumeSma != 0 ? volumePriceAvg / volumeSma : 0;
 
-        var stochHigh = isFinal ? _stochHighWindow.Add(bar.High, out _) : _stochHighWindow.Preview(bar.High, out _);
-        var stochLow = isFinal ? _stochLowWindow.Add(bar.Low, out _) : _stochLowWindow.Preview(bar.Low, out _);
+        var stochHigh = isFinal ? _stochHighWindow.Add(ranged.High, out _) : _stochHighWindow.Preview(ranged.High, out _);
+        var stochLow = isFinal ? _stochLowWindow.Add(ranged.Low, out _) : _stochLowWindow.Preview(ranged.Low, out _);
         var stochRange = stochHigh - stochLow;
         var kSto = stochRange != 0 ? MathHelper.MinOrMax((value - stochLow) / stochRange * 100, 100, 0) : 0;
         var dSto = _stochFastSmoother.Next(kSto, isFinal);
@@ -241,14 +249,14 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var avg3 = trSum3 != 0 ? bpSum3 / trSum3 : 0;
         var uo = MathHelper.MinOrMax(100 * (((4 * avg1) + (2 * avg2) + avg3) / 7), 100, 0);
 
-        var ichimokuResult = _ichimoku.Update(bar, isFinal, includeOutputs: true);
+        var ichimokuResult = _ichimoku.Update(ranged, isFinal, includeOutputs: true);
         var ichimokuOutputs = ichimokuResult.Outputs!;
         var conLine = ichimokuOutputs["TenkanSen"];
         var baseLine = ichimokuOutputs["KijunSen"];
         var leadLine1 = ichimokuOutputs["SenkouSpanA"];
         var leadLine2 = ichimokuOutputs["SenkouSpanB"];
 
-        var adxResult = _adx.Update(bar, isFinal, includeOutputs: true);
+        var adxResult = _adx.Update(ranged, isFinal, includeOutputs: true);
         var adxOutputs = adxResult.Outputs!;
         var adx = adxResult.Value;
         var adxPlus = adxOutputs["DiPlus"];
@@ -259,14 +267,14 @@ public sealed class TechnicalRatingsState : IStreamingIndicatorState, IDisposabl
         var cci = _cci.Update(bar, isFinal, includeOutputs: false).Value;
         var prevCci = _hasPrev ? _prevCci : 0;
 
-        var elderResult = _elderRay.Update(bar, isFinal, includeOutputs: true);
+        var elderResult = _elderRay.Update(ranged, isFinal, includeOutputs: true);
         var elderOutputs = elderResult.Outputs!;
         var bullPower = elderOutputs["BullPower"];
         var bearPower = elderOutputs["BearPower"];
         var prevBullPower = _hasPrev ? _prevBullPower : 0;
         var prevBearPower = _hasPrev ? _prevBearPower : 0;
 
-        var wr = _williamsR.Update(bar, isFinal, includeOutputs: false).Value;
+        var wr = _williamsR.Update(ranged, isFinal, includeOutputs: false).Value;
         var prevWr = _hasPrev ? _prevWr : 0;
 
         var mom = _momentum.Update(bar, isFinal, includeOutputs: false).Value;
@@ -706,11 +714,17 @@ public sealed class TotalPowerIndicatorState : IStreamingIndicatorState, IDispos
 }
 
 [PrimaryOutput("Tpx")]
-public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDisposable
+public sealed class TraderPressureIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => _preserveOriginalRange;
+
     private readonly TraderPressureWindow _window;
-    public TraderPressureIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 7, int length2 = 2, int smoothLength = 3) =>
+    private readonly bool _preserveOriginalRange;
+    public TraderPressureIndexState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 7, int length2 = 2, int smoothLength = 3)
+    {
+        _preserveOriginalRange = StrengthWindow.Supports(maType);
         _window = new TraderPressureWindow(maType, length1, length2, smoothLength);
+    }
     public IndicatorName Name => IndicatorName.TraderPressureIndex;
     public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
@@ -1251,8 +1265,10 @@ public sealed class TimePriceIndicatorState : IStreamingIndicatorState, IDisposa
 }
 
 [PrimaryOutput("Am")]
-public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable
+public sealed class TironeLevelsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly TironeWindow _window;
     public TironeLevelsState(int length=20)=>_window=new(length);
     public IndicatorName Name=>IndicatorName.TironeLevels;

@@ -582,8 +582,10 @@ public sealed class PseudoPolynomialChannelState : IStreamingIndicatorState, IDi
 }
 
 [PrimaryOutput("MiddleBand")]
-public sealed class ProjectedSupportAndResistanceState : IStreamingIndicatorState, IDisposable
+public sealed class ProjectedSupportAndResistanceState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ProjectedLevelsWindow _window;
     public ProjectedSupportAndResistanceState(int length=25)=>_window=new(length);
     public IndicatorName Name=>IndicatorName.ProjectedSupportAndResistance;
@@ -1217,8 +1219,10 @@ public sealed class DynamicSupportAndResistanceState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("UpperBand")]
-public sealed class DailyAveragePriceDeltaState : IStreamingIndicatorState, IDisposable
+public sealed class DailyAveragePriceDeltaState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyDeltaWindow _window;
     public DailyAveragePriceDeltaState(MovingAvgType maType=MovingAvgType.SimpleMovingAverage,int length=21)=>_window=new(maType,length);
     public IndicatorName Name=>IndicatorName.DailyAveragePriceDelta;
@@ -2659,8 +2663,10 @@ public sealed class StochasticConnorsRelativeStrengthIndexState : IStreamingIndi
 }
 
 [PrimaryOutput("Smi")]
-public sealed class StochasticMomentumIndexState : IStreamingIndicatorState, IDisposable
+public sealed class StochasticMomentumIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly StochasticMomentumWindow _window;
     public StochasticMomentumIndexState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 8, int smoothLength1 = 5, int smoothLength2 = 5)
         => _window = new(maType, length1, length2, smoothLength1, smoothLength2);
@@ -3165,8 +3171,10 @@ public sealed class GarmanKlassVolatilityState : IStreamingIndicatorState, IDisp
 }
 
 [PrimaryOutput("Gapo")]
-public sealed class GopalakrishnanRangeIndexState : IStreamingIndicatorState, IDisposable
+public sealed class GopalakrishnanRangeIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly GopalakrishnanWindow _window;
     private readonly RocBankAverage? _exact;
     private readonly IMovingAverageSmoother? _fallback;
@@ -3309,8 +3317,10 @@ public sealed class FastZScoreState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Ci")]
-public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable
+public sealed class ChoppinessIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ChoppinessWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public ChoppinessIndexState(int length = 14) => _window = new(length);
@@ -3970,8 +3980,10 @@ public sealed class OnBalanceVolumeState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Cmf")]
-public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposable
+public sealed class ChaikinMoneyFlowState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ChaikinFlowWindow _window;
     public ChaikinMoneyFlowState(int length=20)=>_window=new(length);
     public IndicatorName Name=>IndicatorName.ChaikinMoneyFlow;
@@ -4016,8 +4028,10 @@ public sealed class MoneyFlowIndexState : IStreamingIndicatorState, IDisposable,
 }
 
 [PrimaryOutput("Adl")]
-public sealed class AccumulationDistributionLineState : IStreamingIndicatorState, IDisposable
+public sealed class AccumulationDistributionLineState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly MoneyFlowAverageWindow _window;
     public AccumulationDistributionLineState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
         => _window = new MoneyFlowAverageWindow(maType, length);
@@ -4034,8 +4048,10 @@ public sealed class AccumulationDistributionLineState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("ChaikinOsc")]
-public sealed class ChaikinOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class ChaikinOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly MoneyFlowAverageWindow _window;
     public ChaikinOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 3, int slowLength = 10)
         => _window = new MoneyFlowAverageWindow(maType, fastLength, slowLength);
@@ -4267,8 +4283,10 @@ public sealed class BalanceOfPowerState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Belkhayate")]
-public sealed class BelkhayateTimingState : IStreamingIndicatorState
+public sealed class BelkhayateTimingState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly BelkhayateWindow _window = new();
     public IndicatorName Name => IndicatorName.BelkhayateTiming;
     public void Reset() => _window.Reset();
@@ -4280,8 +4298,10 @@ public sealed class BelkhayateTimingState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Cmvc")]
-public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+public sealed class ChartmillValueIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ChartmillWindow _window;
     private StreamingInputResolver _input = new(InputName.MedianPrice, null);
     public ChartmillValueIndicatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5) => _window = new(maType, length);
@@ -4646,8 +4666,10 @@ public sealed class ContractHighLowState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Cz")]
-public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
+public sealed class ChopZoneState : IStreamingIndicatorState, IDisposable, ICustomInputConsumer, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ChopZoneWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     private bool _selected;
@@ -4680,8 +4702,10 @@ public sealed class CenterOfLinearityState : IStreamingIndicatorState, IDisposab
 }
 
 [PrimaryOutput("Cv")]
-public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposable
+public sealed class ChaikinVolatilityState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly ChaikinVolatilityWindow _window;
     public ChaikinVolatilityState(MovingAvgType maType=MovingAvgType.ExponentialMovingAverage,int length1=10,int length2=12)=>_window=new(maType,length1,length2);
     public IndicatorName Name=>IndicatorName.ChaikinVolatility;
@@ -5240,8 +5264,10 @@ public sealed class DisparityIndexState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Di")]
-public sealed class DampingIndexState : IStreamingIndicatorState, IDisposable
+public sealed class DampingIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DampingWindow _window;
     public DampingIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 5, double threshold = 1.5) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.DampingIndex;
@@ -5492,8 +5518,10 @@ public sealed class UlcerIndexState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("ViPlus")]
-public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable
+public sealed class VortexIndicatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly VortexWindow _window;
     public VortexIndicatorState(int length = 14) => _window = new VortexWindow(length);
     public IndicatorName Name => IndicatorName.VortexIndicator;
@@ -5968,8 +5996,10 @@ public sealed class _4PercentagePriceOscillatorState : IStreamingIndicatorState,
 }
 
 [PrimaryOutput("Ama")]
-public sealed class AdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable
+public sealed class AdaptiveMovingAverageState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly AdaptiveRangeMeanWindow _window;
     private readonly StreamingInputResolver _input=new(InputName.Close,null);
     public AdaptiveMovingAverageState(int fastLength=2,int slowLength=14,int length=14)=>_window=new(fastLength,slowLength,length);
@@ -7525,8 +7555,10 @@ public sealed class CalmarRatioState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class CamarillaPivotPointsState : IStreamingIndicatorState
+public sealed class CamarillaPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false, camarilla: true);
     public CamarillaPivotPointsState() { }
     public IndicatorName Name => IndicatorName.CamarillaPivotPoints;

@@ -293,8 +293,10 @@ public sealed class TrendTraderBandsState : IStreamingIndicatorState, IDisposabl
 }
 
 [PrimaryOutput("Ttf")]
-public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposable
+public sealed class TrendTriggerFactorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly TrendTriggerWindow _window;
     public TrendTriggerFactorState(int length = 15) => _window = new(length);
     public IndicatorName Name => IndicatorName.TrendTriggerFactor;
@@ -879,8 +881,10 @@ public sealed class TurboTriggerState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Tmf")]
-public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable
+public sealed class TwiggsMoneyFlowState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly MoneyFlowPercentWindow _window;
     public TwiggsMoneyFlowState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21)
         => _window = new MoneyFlowPercentWindow(length, maType);
@@ -1325,8 +1329,10 @@ public sealed class UltimateMovingAverageBandsState : IStreamingIndicatorState, 
 }
 
 [PrimaryOutput("Uo")]
-public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposable
+public sealed class UltimateOscillatorState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly UltimatePressureWindow _window;
     public UltimateOscillatorState(int length1 = 7, int length2 = 14, int length3 = 28) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.UltimateOscillator;

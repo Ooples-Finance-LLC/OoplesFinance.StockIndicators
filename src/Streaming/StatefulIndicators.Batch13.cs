@@ -357,8 +357,10 @@ public sealed class FearAndGreedIndicatorState : IStreamingIndicatorState, IDisp
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class FibonacciPivotPointsState : IStreamingIndicatorState
+public sealed class FibonacciPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false, fibonacci: true);
     public FibonacciPivotPointsState() { }
     public IndicatorName Name => IndicatorName.FibonacciPivotPoints;
@@ -466,8 +468,10 @@ public sealed class FibonacciWeightedMovingAverageState : IStreamingIndicatorSta
 }
 
 [PrimaryOutput("Fve")]
-public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDisposable
+public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly FiniteVolumeWindow _window;
     private readonly StreamingInputResolver _input;
     public FiniteVolumeElementsState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 22, double factor = .3)
@@ -792,8 +796,10 @@ public sealed class FlaggingBandsState : IStreamingIndicatorState, IDisposable
 }
 
 [PrimaryOutput("Pivot")]
-public sealed class FloorPivotPointsState : IStreamingIndicatorState
+public sealed class FloorPivotPointsState : IStreamingIndicatorState, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly DailyPivotLevels _daily = new(false, floor: true);
     private readonly int _primarySlot;
     public FloorPivotPointsState() : this(0) { }

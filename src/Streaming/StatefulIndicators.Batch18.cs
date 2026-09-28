@@ -1144,8 +1144,10 @@ public sealed class NickRypockTrailingReverseState : IStreamingIndicatorState
 }
 
 [PrimaryOutput("Nrvi")]
-public sealed class NormalizedRelativeVigorIndexState : IStreamingIndicatorState, IDisposable
+public sealed class NormalizedRelativeVigorIndexState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
+
     private readonly NormalizedVigorWindow _window;
     private readonly StreamingInputResolver _input = new(InputName.Close, null);
     public NormalizedRelativeVigorIndexState(MovingAvgType maType = MovingAvgType.SymmetricallyWeightedMovingAverage, int length = 10) { _window = new(maType, length); }
