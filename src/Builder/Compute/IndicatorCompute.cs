@@ -13205,34 +13205,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersAverageErrorFilterFast(StockData data, ComputeContext context, int length = 27)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
-        var c2 = b1;
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        using var superSmoothed = context.Rent(count);
-        using var errorFilter = context.Rent(count);
-        var ssf = superSmoothed.WritableSpan;
-        var e1 = errorFilter.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-
-            ssf[i] = i < 3 ? input[i] : (0.5 * c1 * (input[i] + previousValue)) + (c2 * ssf[i - 1]) + (c3 * ssf[i - 2]);
-            e1[i] = i < 3 ? 0 : (c1 * (input[i] - ssf[i])) + (c2 * e1[i - 1]) + (c3 * e1[i - 2]);
-            output[i] = ssf[i] + e1[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new AverageErrorWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

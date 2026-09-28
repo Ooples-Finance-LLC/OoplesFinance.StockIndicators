@@ -370,6 +370,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersVossPredictiveFilterSpecOptions voss => new EhlersVossPredictiveFilterState(voss.Length, voss.Predict, voss.Bandwidth),
             EhlersTruncatedBandPassFilterSpecOptions truncated => new EhlersTruncatedBandPassFilterState(truncated.Length1, truncated.Length2, truncated.Bandwidth),
             EhlersSwissArmyKnifeSpecOptions swiss => new EhlersSwissArmyKnifeIndicatorState(swiss.Length, swiss.Delta),
+            EhlersAverageErrorFilterSpecOptions averageError => new EhlersAverageErrorFilterState(averageError.Length),
             GeneralFilterEstimatorSpecOptions estimator => new GeneralFilterEstimatorState(estimator.Length),
             GroverLlorensActivatorSpecOptions activator => new GroverLlorensActivatorState(activator.MaType, activator.Length, activator.Mult),
             GroverLlorensCycleOscillatorSpecOptions cycle => new GroverLlorensCycleOscillatorState(cycle.MaType, cycle.Length),

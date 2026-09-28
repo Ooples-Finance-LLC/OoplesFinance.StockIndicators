@@ -34990,5 +34990,119 @@
     "before": "Product(c, 1 - zeta)",
     "after": "Product(c, zeta)",
     "filter": "FullyQualifiedName~ValidationTests.GeneralFilterNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-decay-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "Math.Max(-.99,",
+    "after": "Math.Max(-.999,",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-cosine-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "Math.Min(.99, angle)",
+    "after": "Math.Min(.999, angle)",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-smooth-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "var smooth = _startup < 3",
+    "after": "var smooth = _startup < 2",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-error-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "var error = _startup < 3",
+    "after": "var error = _startup < 4",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-smooth-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "_smooth2.Multiply(_c3)",
+    "after": "_smooth1.Multiply(_c3)",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-error-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "_error2.Multiply(_c3)",
+    "after": "_error1.Multiply(_c3)",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-error-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "Add(current, smooth, -1)",
+    "after": "Add(current, smooth, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "if (commit) { _price",
+    "after": "if (commit || price != 0) { _price",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AverageErrorWindow.cs",
+    "before": "_startup = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersAverageErrorFilterFast("
+  },
+  {
+    "id": "average-error-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersAverageErrorFilterState"
+  },
+  {
+    "id": "average-error-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersAverageErrorFilterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "average-error-reference-error",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.AverageError.cs",
+    "before": "Round(smooth[i] + error[i]).ToDouble()",
+    "after": "smooth[i].ToDouble()",
+    "filter": "FullyQualifiedName~ValidationTests.AverageErrorNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

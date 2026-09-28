@@ -625,39 +625,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAverageErrorFilter(this StockData stockData, int length = 27)
     {
-        List<double> filtList = new(stockData.Count);
-        List<double> ssfList = new(stockData.Count);
-        List<double> e1List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
-        var c2 = b1;
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
+        List<double> filtList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new AverageErrorWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevE11 = i >= 1 ? e1List[i - 1] : 0;
-            var prevE12 = i >= 2 ? e1List[i - 2] : 0;
-            var prevSsf1 = i >= 1 ? ssfList[i - 1] : 0;
-            var prevSsf2 = i >= 2 ? ssfList[i - 2] : 0;
-
-            var ssf = i < 3 ? currentValue : (0.5 * c1 * (currentValue + prevValue)) + (c2 * prevSsf1) + (c3 * prevSsf2);
-            ssfList.Add(ssf);
-
-            var e1 = i < 3 ? 0 : (c1 * (currentValue - ssf)) + (c2 * prevE11) + (c3 * prevE12);
-            e1List.Add(e1);
-
-            var prevFilt = GetLastOrDefault(filtList);
-            var filt = ssf + e1;
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilt);
-            signalsList?.Add(signal);
+            var previous = GetLastOrDefault(filtList); var value = window.Next(inputList[i], true); filtList.Add(value);
+            signalsList?.Add(GetCompareSignal(inputList[i] - value, (i == 0 ? 0 : inputList[i - 1]) - previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

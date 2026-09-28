@@ -771,74 +771,14 @@ public sealed class EhlersCommodityChannelIndexInverseFisherTransformState : ISt
 [PrimaryOutput("Eaef")]
 public sealed class EhlersAverageErrorFilterState : IStreamingIndicatorState
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevE11;
-    private double _prevE12;
-    private double _prevSsf1;
-    private double _prevSsf2;
-    private int _index;
-
-    public EhlersAverageErrorFilterState(int length = 27)
-    {
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length), -0.01, -0.999));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length), 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -1 * a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AverageErrorWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersAverageErrorFilterState(int length = 27) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersAverageErrorFilter;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevE11 = 0;
-        _prevE12 = 0;
-        _prevSsf1 = 0;
-        _prevSsf2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevE11 = _index >= 1 ? _prevE11 : 0;
-        var prevE12 = _index >= 2 ? _prevE12 : 0;
-        var prevSsf1 = _index >= 1 ? _prevSsf1 : 0;
-        var prevSsf2 = _index >= 2 ? _prevSsf2 : 0;
-
-        var ssf = _index < 3
-            ? value
-            : (0.5 * _c1 * (value + prevValue)) + (_c2 * prevSsf1) + (_c3 * prevSsf2);
-        var e1 = _index < 3 ? 0 : (_c1 * (value - ssf)) + (_c2 * prevE11) + (_c3 * prevE12);
-        var filt = ssf + e1;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevE12 = _prevE11;
-            _prevE11 = e1;
-            _prevSsf2 = _prevSsf1;
-            _prevSsf1 = ssf;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eaef", filt }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eaef", value } } : null);
     }
 }
 
