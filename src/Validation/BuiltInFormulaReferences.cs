@@ -17,6 +17,17 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersTripleDelayLineDetrender)
+        {
+            var delayOptions = (EhlersTripleDelayLineDetrenderSpecOptions)builtIn.CreateOptions();
+            var delayKind = delayOptions.MaType == MovingAvgType.EhlersModifiedOptimumEllipticFilter ? 7 : AverageKind(delayOptions, 1);
+            if (Helpers.TripleDelayWindow.Supports(delayOptions.MaType))
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TripleDelayOutputs(bars, delayOptions.Length, delayKind)["Etdld"], IndicatorErrorBudget.Exact);
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => TripleDelayOutputs(bars, delayOptions.Length, delayKind)["Signal"], IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAMDetector)
         {
             var detectorOptions = (EhlersAMDetectorSpecOptions)builtIn.CreateOptions(); var detectorKind = AverageKind(detectorOptions, 1);

@@ -37697,5 +37697,113 @@
     "before": "_ = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1));",
     "after": "_ = input.Count;",
     "filter": "FullyQualifiedName~AmDetectorNumericalTests"
+  },
+  {
+    "id": "triple-delay-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "(_index + 6) % 12",
+    "after": "(_index + 5) % 12",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-first",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "olderFirst.Multiply(.088)",
+    "after": "olderFirst.Multiply(.88)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-second",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "olderSecond.Multiply(1.2)",
+    "after": "olderSecond.Multiply(.2)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-decay",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "oldestSecond.Multiply(.7)",
+    "after": "oldestSecond.Multiply(.3)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-difference",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "olderSecond.Multiply(2)",
+    "after": "olderSecond.Multiply(1)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-extended",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "return raw;",
+    "after": "return new RocBankValue(raw.Publish());",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-elliptic",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "Product(ref sum, previous, 1.2103)",
+    "after": "Product(ref sum, previous, 1.1103)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TripleDelayWindow.cs",
+    "scope": "internal sealed class TripleDelayWindow",
+    "before": "Detrend(price, commit)",
+    "after": "Detrend(price, true)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersTripleDelayLineDetrender(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersTripleDelayLineDetrenderState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "triple-delay-components",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(",
+    "before": "MovingAverage(data, maType, length, line.Span, smooth.WritableSpan)",
+    "after": "MovingAverage(data, maType, length, raw.Span, smooth.WritableSpan)",
+    "filter": "FullyQualifiedName~TripleDelayNumericalTests"
   }
 ]

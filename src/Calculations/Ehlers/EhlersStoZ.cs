@@ -1328,57 +1328,20 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersTripleDelayLineDetrender(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter, 
-        int length = 14)
+    public static StockData CalculateEhlersTripleDelayLineDetrender(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter, int length = 14)
     {
-        length = Math.Max(length, 1);
-        List<double> tmp1List = new(stockData.Count);
-        List<double> tmp2List = new(stockData.Count);
-        List<double> detrenderList = new(stockData.Count);
-        List<double> histList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new TripleDelayWindow(maType, length);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !TripleDelayWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevTmp1_6 = i >= 6 ? tmp1List[i - 6] : 0;
-            var prevTmp2_6 = i >= 6 ? tmp2List[i - 6] : 0;
-            var prevTmp2_12 = i >= 12 ? tmp2List[i - 12] : 0;
-
-            var tmp1 = currentValue + (0.088 * prevTmp1_6);
-            tmp1List.Add(tmp1);
-
-            var tmp2 = tmp1 - prevTmp1_6 + (1.2 * prevTmp2_6) - (0.7 * prevTmp2_12);
-            tmp2List.Add(tmp2);
-
-            var detrender = prevTmp2_12 - (2 * prevTmp2_6) + tmp2;
-            detrenderList.Add(detrender);
+            var raw = new List<double>(input.Count); for (var i = 0; i < input.Count; i++) raw.Add(window.Detrend(input[i], true).Publish());
+            line = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, raw);
+            signal = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(line), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, line);
         }
-
-        var tdldList = GetMovingAverageList(stockData, maType, length, detrenderList);
-        var tdldSignalList = GetMovingAverageList(stockData, maType, length, tdldList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var tdld = tdldList[i];
-            var tdldSignal = tdldSignalList[i];
-
-            var prevHist = GetLastOrDefault(histList);
-            var hist = tdld - tdldSignal;
-            histList.Add(hist);
-
-            var signal = GetCompareSignal(hist, prevHist);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Etdld", tdldList },
-            { "Signal", tdldSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tdldList);
-        stockData.IndicatorName = IndicatorName.EhlersTripleDelayLineDetrender;
-
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); line.Add(point.Line); signal.Add(point.Signal); }
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Etdld", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersTripleDelayLineDetrender;
         return stockData;
     }
 

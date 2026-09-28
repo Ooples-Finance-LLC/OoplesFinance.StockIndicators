@@ -2981,74 +2981,18 @@ public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Etdld")]
 public sealed class EhlersTripleDelayLineDetrenderState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _tmp1Values;
-    private readonly PooledRingBuffer<double> _tmp2Values;
-
-    public EhlersTripleDelayLineDetrenderState(MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter,
-        int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _tmp1Values = new PooledRingBuffer<double>(6);
-        _tmp2Values = new PooledRingBuffer<double>(12);
-    }
-
+    private readonly TripleDelayWindow _window;
+    public EhlersTripleDelayLineDetrenderState(MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.EhlersTripleDelayLineDetrender;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _signalSmoother.Reset();
-        _tmp1Values.Clear();
-        _tmp2Values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevTmp1_6 = EhlersStreamingWindow.GetOffsetValue(_tmp1Values, 6);
-        var prevTmp2_6 = EhlersStreamingWindow.GetOffsetValue(_tmp2Values, 6);
-        var prevTmp2_12 = EhlersStreamingWindow.GetOffsetValue(_tmp2Values, 12);
-
-        var tmp1 = value + (0.088 * prevTmp1_6);
-        var tmp2 = tmp1 - prevTmp1_6 + (1.2 * prevTmp2_6) - (0.7 * prevTmp2_12);
-        var detrender = prevTmp2_12 - (2 * prevTmp2_6) + tmp2;
-
-        var tdld = _smoother.Next(detrender, isFinal);
-        var tdldSignal = _signalSmoother.Next(tdld, isFinal);
-
-        if (isFinal)
-        {
-            _tmp1Values.TryAdd(tmp1, out _);
-            _tmp2Values.TryAdd(tmp2, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Etdld", tdld },
-                { "Signal", tdldSignal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tdld, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Etdld", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _signalSmoother.Dispose();
-        _tmp1Values.Dispose();
-        _tmp2Values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
+
 
 [PrimaryOutput("Evidya")]
 public sealed class EhlersVariableIndexDynamicAverageState : IStreamingIndicatorState, IDisposable

@@ -23004,44 +23004,21 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeEhlersTripleDelaySignalFast(StockData data, ComputeContext context, int length, MovingAvgType maType)
-    {
-        using var line = ComputeEhlersTripleDelayLineDetrenderFast(data, context, length, maType);
-        var signal = context.Rent(data.Count);
-        MovingAverage(data, maType, length, line.Span, signal.WritableSpan);
-        return signal;
-    }
+        => ComputeEhlersTripleDelayLineDetrenderFast(data, context, length, maType, true);
 
-    internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context,
-        int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter)
+    internal static ComputeBuffer ComputeEhlersTripleDelayLineDetrenderFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.EhlersModifiedOptimumEllipticFilter, bool signal = false)
     {
-        // CalculateEhlersTripleDelayLineDetrender runs the chained series through three six-bar delay lines
-        // and publishes one smoothing of the detrended result; the second smoothing is the signal line. This
-        // read the raw close and could not follow a chain.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var firstLine = context.Rent(count);
-        using var secondLine = context.Rent(count);
-        using var detrended = context.Rent(count);
-        var tmp1 = firstLine.WritableSpan;
-        var tmp2 = secondLine.WritableSpan;
-        var detrender = detrended.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; length = Math.Max(1, length);
+        using var window = new TripleDelayWindow(maType, length); var output = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !TripleDelayWindow.Supports(maType))
         {
-            var prevTmp1By6 = i >= 6 ? tmp1[i - 6] : 0;
-            var prevTmp2By6 = i >= 6 ? tmp2[i - 6] : 0;
-            var prevTmp2By12 = i >= 12 ? tmp2[i - 12] : 0;
-
-            tmp1[i] = input[i] + (0.088 * prevTmp1By6);
-            tmp2[i] = tmp1[i] - prevTmp1By6 + (1.2 * prevTmp2By6) - (0.7 * prevTmp2By12);
-            detrender[i] = prevTmp2By12 - (2 * prevTmp2By6) + tmp2[i];
+            using var raw = context.Rent(input.Count); using var line = context.Rent(input.Count); using var smooth = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Detrend(input[i], true).Publish();
+            MovingAverage(data, maType, length, raw.Span, line.WritableSpan); MovingAverage(data, maType, length, line.Span, smooth.WritableSpan);
+            (signal ? smooth.Span : line.Span).CopyTo(output.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, detrended.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); output.WritableSpan[i] = signal ? point.Signal : point.Line; }
+        return output;
     }
 
     // Batch 26 - Ehlers V2 and Universal Trading Filter
