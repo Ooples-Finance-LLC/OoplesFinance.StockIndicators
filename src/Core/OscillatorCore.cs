@@ -6325,19 +6325,10 @@ internal static class OscillatorCore
     /// <param name="factor">Scaling factor.</param>
     internal static void MultiLevelIndicator(ReadOnlySpan<double> close, ReadOnlySpan<double> open, Span<double> output, int length = 14, double factor = 10000)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var prevOpen = i >= length ? open[i - length] : 0;
-            var currentOpen = open[i];
-            var currentClose = close[i];
-
-            output[i] = (prevOpen - currentOpen) * factor;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (open.Length < close.Length) throw new ArgumentException("Open span must be at least input length.", nameof(open));
+        var window = new MultiLevelWindow(length, factor);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(open[i], true);
     }
 
     /// <summary>

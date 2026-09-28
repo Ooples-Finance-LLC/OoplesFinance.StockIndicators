@@ -302,55 +302,16 @@ public sealed class MultiDepthZeroLagExponentialMovingAverageState : IStreamingI
 [PrimaryOutput("Mli")]
 public sealed class MultiLevelIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _factor;
-    private readonly PooledRingBuffer<double> _openValues;
-    private readonly StreamingInputResolver _input;
-
-    public MultiLevelIndicatorState(int length = 14, double factor = 10000)
-    {
-        _length = Math.Max(1, length);
-        _factor = factor;
-        _openValues = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MultiLevelWindow _window;
+    public MultiLevelIndicatorState(int length = 14, double factor = 10000) { _window = new(length, factor); }
     public IndicatorName Name => IndicatorName.MultiLevelIndicator;
-
-    public void Reset()
-    {
-        _openValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var currentOpen = bar.Open;
-        var currentClose = _input.GetValue(bar);
-        var prevOpen = EhlersStreamingWindow.GetOffsetValue(_openValues, currentOpen, _length);
-        var z = (prevOpen - currentOpen) * _factor;
-
-        if (isFinal)
-        {
-            _openValues.TryAdd(currentOpen, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mli", z }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(z, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Open, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Mli", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _openValues.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Mvo")]

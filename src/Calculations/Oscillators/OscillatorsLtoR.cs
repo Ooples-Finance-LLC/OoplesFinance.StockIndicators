@@ -3126,23 +3126,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMultiLevelIndicator(this StockData stockData, int length = 14, double factor = 10000)
     {
-        List<double> zList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
+        List<double> zList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData); var window = new MultiLevelWindow(length, factor);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevOpen = i >= length ? openList[i - length] : 0;
-            var currentOpen = openList[i];
-            var currentClose = inputList[i];
-            var prevZ1 = i >= 1 ? zList[i - 1] : 0;
-            var prevZ2 = i >= 2 ? zList[i - 2] : 0;
-
-            var z = (prevOpen - currentOpen) * factor;
-            zList.Add(z);
-
-            var signal = GetRsiSignal(z - prevZ1, prevZ1 - prevZ2, z, prevZ1, 5, -5);
-            signalsList?.Add(signal);
+            var previous = i == 0 ? 0 : zList[i - 1]; var older = i < 2 ? 0 : zList[i - 2];
+            var value = window.Next(stockData.OpenPrices[i], true); zList.Add(value);
+            signalsList?.Add(GetRsiSignal(value - previous, previous - older, value, previous, 5, -5));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

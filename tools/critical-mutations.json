@@ -34548,5 +34548,104 @@
     "before": "bars[i - 1].Close.CompareTo(average[i - 1].ToDouble())",
     "after": "bars[i].Close.CompareTo(average[i].ToDouble())",
     "filter": "FullyQualifiedName~ValidationTests.RunningEquityNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-difference-publication",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "RocBankValue.Round(sum).Multiply(factor).Publish()",
+    "after": "RocBankValue.Round(sum).Publish() * factor",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "sum.Add(current, -1)",
+    "after": "sum.Add(current, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-seed",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "full ? _history.Peek() : 0",
+    "after": "full ? _history.Peek() : open",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "_history.Count == _length",
+    "after": "_history.Count == _length - 1",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-factor",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "Multiply(factor)",
+    "after": "Multiply(1)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "if (commit) { if (full)",
+    "after": "if (commit || open != 0) { if (full)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MultiLevelWindow.cs",
+    "before": "internal void Reset() => _history.Clear();",
+    "after": "internal void Reset() { }",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-raw-open",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "SpanCompat.AsReadOnlySpan(data.OpenPrices)",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeMultiLevelIndicatorFast("
+  },
+  {
+    "id": "multi-level-legacy-open",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "before": "window.Next(stockData.OpenPrices[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public static StockData CalculateMultiLevelIndicator("
+  },
+  {
+    "id": "multi-level-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch18.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class MultiLevelIndicatorState"
+  },
+  {
+    "id": "multi-level-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " MultiLevelIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "multi-level-reference-open",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.MultiLevel.cs",
+    "before": "ReferenceFraction.FromDouble(bar.Open)",
+    "after": "ReferenceFraction.FromDouble(bar.Close)",
+    "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]
