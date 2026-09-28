@@ -93,6 +93,16 @@ public sealed class SelfAdjustingLaguerreNumericalTests
         var expected = BuiltInFormulaReferences.SelfAdjustingLaguerreValues(bars.Select((b, i) => new Bar(b.Time, b.Open, b.High, b.Low, selected[i], b.Volume)).ToArray(), 3);
         var batch = Data(bars); batch.SetCustomValues(selected); batch.CalculateEhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha(3); Assert.Equal(expected, batch.CustomValuesList);
         using var context = new ComputeContext(); var data = Data(bars); data.SetCustomValues(selected); using var arm = IndicatorCompute.ComputeArm(data, new IndicatorSpec(IndicatorName.EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha, new EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaSpecOptions(3), "Elrsiwsa"), context); Assert.NotNull(arm); Assert.Equal(expected, arm.Value.ToArray());
+        using var selectedState = new CustomInputState(new EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(3), bar => bar.Volume);
+        for (var replay = 0; replay < 2; replay++)
+        {
+            selectedState.Reset();
+            for (var i = 0; i < bars.Length; i++)
+            {
+                var original = bars[i]; var bar = Native(new Bar(original.Time, original.Open, original.High, original.Low, original.Close, selected[i]));
+                foreach (var commit in new[] { false, false, true }) Assert.Equal(expected[i], selectedState.Update(bar, commit, true).Value);
+            }
+        }
     }
     [Fact]
     public void InvalidFieldsLeaveRangesRatiosAndStagesUnchanged()

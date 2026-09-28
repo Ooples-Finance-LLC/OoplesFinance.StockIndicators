@@ -540,8 +540,9 @@ public sealed class EhlersLaguerreRelativeStrengthIndexState : IStreamingIndicat
 }
 
 [PrimaryOutput("Elrsiwsa")]
-public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState : IStreamingIndicatorState, IDisposable
+public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState : IStreamingIndicatorState, IDisposable, ICustomInputRangePolicy
 {
+    bool ICustomInputRangePolicy.PreserveOriginalRange => true;
     private readonly SelfAdjustingLaguerreWindow _window;
     public EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState(int length = 13) => _window = new(length);
     public IndicatorName Name => IndicatorName.EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlpha;

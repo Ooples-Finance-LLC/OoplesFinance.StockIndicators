@@ -39497,5 +39497,14 @@
     "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
     "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
     "filter": "FullyQualifiedName~FramaNumericalTests.SelectedPricesPreserveOriginalHighAndLowAcrossBothArms"
+  },
+  {
+    "id": "self-adjusting-laguerre-custom-range",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersLaguerreRelativeStrengthIndexWithSelfAdjustingAlphaState",
+    "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
+    "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
+    "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.SelectedPricesPreserveOriginalOpenHighAndLow"
   }
 ]
