@@ -10481,58 +10481,22 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersUniversalSignalFast(StockData data, ComputeContext context, int length, MovingAvgType maType)
     {
-        using var line = ComputeEhlersUniversalOscillatorFast(data, context, length);
-        var signal = context.Rent(data.Count);
-        MovingAverage(data, maType, 9, line.Span, signal.WritableSpan);
-        return signal;
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
+        { using var line = ComputeEhlersUniversalOscillatorFast(data, context, length); var result = context.Rent(data.Count); MovingAverage(data, maType, 9, line.Span, result.WritableSpan); return result; }
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(input.Count);
+        using var window = new UniversalOscillatorWindow(maType, length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true).Signal;
+        return buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersUniversalOscillatorFast(StockData data, ComputeContext context, int length = 20)
     {
-        // CalculateEhlersUniversalOscillator passes the two-bar difference of the series - Ehlers' "whitenoise"
-        // - through a two-pole super smoother, then divides by a peak that decays by 0.9% a bar when it is not
-        // being renewed. Only the Signal key is a moving average of that, so neither maType nor signalLength
-        // reaches this output and the arm takes neither.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var a1 = MathHelper.Exp(-MathHelper.MinOrMax(1.414 * Math.PI / length, 0.99, 0.01));
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousWhitenoise = 0;
-        double previousFilt1 = 0;
-        double previousFilt2 = 0;
-        double previousPeak = 0;
-        double previousEuo = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 2 ? input[i - 2] : 0;
-            var whitenoise = CalculationsHelper.MinPastValues(i, 2, input[i] - previousValue) / 2;
-
-            var filt = (c1 * ((whitenoise + previousWhitenoise) / 2)) + (c2 * previousFilt1) + (c3 * previousFilt2);
-            var peak = Math.Max(Math.Abs(filt), 0.991 * previousPeak);
-
-            // A peak of zero means nothing has moved yet, so the oscillator holds its last reading.
-            var euo = peak == 0 ? previousEuo : filt / peak;
-            output[i] = euo;
-
-            previousWhitenoise = whitenoise;
-            previousFilt2 = previousFilt1;
-            previousFilt1 = filt;
-            previousPeak = peak;
-            previousEuo = euo;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(input.Count);
+        using var window = new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Line(input[i], true);
         return buffer;
     }
+
 
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator using zero-allocation fast path.

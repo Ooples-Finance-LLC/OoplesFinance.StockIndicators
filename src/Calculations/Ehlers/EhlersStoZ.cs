@@ -1033,66 +1033,22 @@ public static partial class Calculations
     public static StockData CalculateEhlersUniversalOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 20, int signalLength = 9)
     {
-        length = Math.Max(length, 1);
-        signalLength = Math.Max(signalLength, 1);
-        List<double> euoList = new(stockData.Count);
-        List<double> whitenoiseList = new(stockData.Count);
-        List<double> filtList = new(stockData.Count);
-        List<double> pkList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = Exp(-MinOrMax(1.414 * Math.PI / length, 0.99, 0.01));
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < stockData.Count; i++)
+        signalLength = Math.Max(1, signalLength); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new UniversalOscillatorWindow(maType, length, signalLength); var line = new List<double>(input.Count); List<double> signal;
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var prevWhitenoise = GetLastOrDefault(whitenoiseList);
-            var whitenoise = MinPastValues(i, 2, currentValue - prevValue) / 2;
-            whitenoiseList.Add(whitenoise);
-
-            var prevFilt1 = GetLastOrDefault(filtList);
-            var filt = (c1 * ((whitenoise + prevWhitenoise) / 2)) + (c2 * prevFilt1) + (c3 * prevFilt2);
-            filtList.Add(filt);
-
-            var prevPk = GetLastOrDefault(pkList);
-            var pk = Math.Max(Math.Abs(filt), 0.991 * prevPk);
-            pkList.Add(pk);
-
-            var denom = pk == 0 ? -1 : pk;
-            var prevEuo = GetLastOrDefault(euoList);
-            var euo = denom == -1 ? prevEuo : pk != 0 ? filt / pk : 0;
-            euoList.Add(euo);
+            foreach (var price in input) line.Add(window.Line(price, true));
+            signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, line);
         }
-
-        var euoMaList = GetMovingAverageList(stockData, maType, signalLength, euoList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var euo = euoList[i];
-            var euoMa = euoMaList[i];
-            var prevEuo = i >= 1 ? euoList[i - 1] : 0;
-            var prevEuoMa = i >= 1 ? euoMaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(euo - euoMa, prevEuo - prevEuoMa);
-            signalsList?.Add(signal);
+            signal = new(input.Count);
+            foreach (var price in input) { var value = window.Next(price, true); line.Add(value.Line); signal.Add(value.Signal); }
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Euo", euoList },
-            { "Signal", euoMaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(euoList);
-        stockData.IndicatorName = IndicatorName.EhlersUniversalOscillator;
-
-        return stockData;
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(line[i] - signal[i], i == 0 ? 0 : line[i - 1] - signal[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Euo", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersUniversalOscillator; return stockData;
     }
 
 

@@ -664,18 +664,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersUniversalOscillator:
                 var signalKind = AverageKind(options, 3);
                 if (signalKind == 0) return null;
-                return new("Euo", new[] { "Euo", "Signal" }, bars =>
-                {
-                    var noise = bars.Select((b, i) => i < 2 ? 0 : (b.Close - bars[i - 2].Close) / 2).ToArray();
-                    var angle = 1.414 * Math.PI / length;
-                    var filtered = HilbertLowPass(noise, Math.Exp(-Clamp(angle, .01, .99)), angle);
-                    var line = filtered.Select((v, i) =>
-                    {
-                        var peak = Enumerable.Range(0, i + 1).Max(j => Math.Pow(.991, i - j) * Math.Abs(filtered[j]));
-                        return peak == 0 ? 0 : v / peak;
-                    }).ToArray();
-                    return Outputs(("Euo", line), ("Signal", Average(line, 9, signalKind)));
-                });
+                return new("Euo", new[] { "Euo", "Signal" }, bars => UniversalOscillatorOutputs(bars, length, signalKind));
             case IndicatorName.EhlersTripleDelayLineDetrender:
                 var delayKind = AverageKind(options, 0);
                 var elliptic = options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.EhlersModifiedOptimumEllipticFilter;

@@ -5254,78 +5254,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersUniversalOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 20)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var whitenArray = pool.Rent(close.Length);
-        var filtArray = pool.Rent(close.Length);
-
-        try
-        {
-            var whiten = whitenArray.AsSpan(0, close.Length);
-            var filt = filtArray.AsSpan(0, close.Length);
-
-            var a1 = Math.Exp(-1.414 * Math.PI / length);
-            var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length);
-            var c2 = b1;
-            var c3 = -a1 * a1;
-            var c1 = 1 - c2 - c3;
-
-            // Whitening
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < 1)
-                {
-                    whiten[i] = close[i];
-                }
-                else
-                {
-                    whiten[i] = close[i] - close[i - 1];
-                }
-            }
-
-            // Super smoother filter
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < 2)
-                {
-                    filt[i] = whiten[i];
-                }
-                else
-                {
-                    filt[i] = c1 * (whiten[i] + whiten[i - 1]) / 2 + c2 * filt[i - 1] + c3 * filt[i - 2];
-                }
-            }
-
-            // RMS normalization
-            for (var i = 0; i < close.Length; i++)
-            {
-                if (i < length)
-                {
-                    output[i] = 0;
-                }
-                else
-                {
-                    var rms = 0.0;
-                    for (var j = 0; j < length; j++)
-                    {
-                        rms += filt[i - j] * filt[i - j];
-                    }
-                    rms = Math.Sqrt(rms / length);
-
-                    output[i] = rms != 0 ? filt[i] / rms : 0;
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(whitenArray);
-            pool.Return(filtArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Line(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Recursive Median Oscillator.

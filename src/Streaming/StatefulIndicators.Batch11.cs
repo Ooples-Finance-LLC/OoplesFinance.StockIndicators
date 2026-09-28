@@ -2478,84 +2478,17 @@ public sealed class EhlersTruncatedBandPassFilterState : IStreamingIndicatorStat
 [PrimaryOutput("Euo")]
 public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevWhitenoise;
-    private double _prevFilt1;
-    private double _prevFilt2;
-    private double _prevPk;
-    private double _prevEuo;
-
-    public EhlersUniversalOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 20, int signalLength = 9)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSignal = Math.Max(1, signalLength);
-        var a1 = MathHelper.Exp(-MathHelper.MinOrMax(1.414 * Math.PI / resolvedLength, 0.99, 0.01));
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolvedLength);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolvedSignal);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly UniversalOscillatorWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersUniversalOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, int signalLength = 9) { _window = new(maType, length, signalLength); }
     public IndicatorName Name => IndicatorName.EhlersUniversalOscillator;
-
-    public void Reset()
-    {
-        _signalSmoother.Reset();
-        _values.Clear();
-        _prevWhitenoise = 0;
-        _prevFilt1 = 0;
-        _prevFilt2 = 0;
-        _prevPk = 0;
-        _prevEuo = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var whitenoise = _values.Count >= 2 ? (value - prevValue) / 2 : 0;
-        var filt = (_c1 * ((whitenoise + _prevWhitenoise) / 2)) + (_c2 * _prevFilt1) + (_c3 * _prevFilt2);
-        var pk = Math.Max(Math.Abs(filt), 0.991 * _prevPk);
-        var euo = pk == 0 ? _prevEuo : filt / pk;
-        var signal = _signalSmoother.Next(euo, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevWhitenoise = whitenoise;
-            _prevFilt2 = _prevFilt1;
-            _prevFilt1 = filt;
-            _prevPk = pk;
-            _prevEuo = euo;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Euo", euo },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(euo, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value.Line, includeOutputs ? new Dictionary<string, double> { { "Euo", value.Line }, { "Signal", value.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _signalSmoother.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ezcdc")]

@@ -38516,5 +38516,140 @@
     "before": "new SuperPassbandWindow(fastLength, slowLength, length1, length2)",
     "after": "new SuperPassbandWindow(fastLength, slowLength, length2, length1)",
     "filter": "FullyQualifiedName~SuperPassbandNumericalTests.WideAndSubnormalInputsPreserveFilterAndExactRms"
+  },
+  {
+    "id": "universal-osc-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.TwoBarStartupAndFirstTinyImpulseReachUnitPeak"
+  },
+  {
+    "id": "universal-osc-startup",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "if (_count >= 2)",
+    "after": "if (_count >= 1)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-lag",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "difference.Add(_price2, -1)",
+    "after": "difference.Add(_price1, -1)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-noise-mean",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "_noise.Add(ref mean)",
+    "after": "noise.Add(ref mean)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "_second.Add(ref total, _c3)",
+    "after": "_first.Add(ref total, _c3)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-decay",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "_peak.Add(ref retained, .991)",
+    "after": "_peak.Add(ref retained, .99)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-peak",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "if (comparison.Sign > 0)",
+    "after": "if (comparison.Sign < 0)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.TwoBarStartupAndFirstTinyImpulseReachUnitPeak"
+  },
+  {
+    "id": "universal-osc-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "if (commit) { _price2",
+    "after": "if (commit || price != 0) { _price2",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-average",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalOscillatorWindow.cs",
+    "scope": "internal sealed class UniversalOscillatorWindow",
+    "before": "_signal = new(kind, Math.Max(1, signalLength))",
+    "after": "_signal = new(MovingAvgType.ExponentialMovingAverage, Math.Max(1, signalLength))",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SignedExponentScalingPreservesTinyAndWideNormalization"
+  },
+  {
+    "id": "universal-osc-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersUniversalOscillator(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData)",
+    "after": "var (input, _, _, _, _) = GetInputValuesList(stockData); input = stockData.ClosePrices",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SelectedPricesReachBothOutputsAndTypedArms"
+  },
+  {
+    "id": "universal-osc-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersUniversalOscillatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SelectedPricesReachBothOutputsAndTypedArms"
+  },
+  {
+    "id": "universal-osc-signal-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersUniversalSignalFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.SelectedPricesReachBothOutputsAndTypedArms"
+  },
+  {
+    "id": "universal-osc-callback",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersUniversalOscillator(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.CallbackReceivesNormalizedLineOnce"
+  },
+  {
+    "id": "universal-osc-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersUniversalOscillatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.InvalidFieldsLeaveFilterPeakAndSignalUnchanged"
+  },
+  {
+    "id": "universal-osc-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersUniversalOscillator(",
+    "before": "new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, length)",
+    "after": "new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, 20)",
+    "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.TwoBarStartupAndFirstTinyImpulseReachUnitPeak"
   }
 ]

@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersUniversalOscillator)
+        {
+            var universal = (EhlersUniversalOscillatorSpecOptions)builtIn.CreateOptions(); var universalKind = AverageKind(universal, 3);
+            if (Helpers.StrengthWindow.Supports(universal.MaType))
+            {
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => UniversalOscillatorOutputs(bars, universal.Length, universalKind)["Euo"], IndicatorErrorBudget.Exact);
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => UniversalOscillatorOutputs(bars, universal.Length, universalKind)["Signal"], IndicatorErrorBudget.Exact);
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSuperPassbandFilter)
         {
             var pass = (EhlersSuperPassbandFilterSpecOptions)builtIn.CreateOptions(); var passKeys = new[] { "Espf", "UpperBand", "LowerBand" };
