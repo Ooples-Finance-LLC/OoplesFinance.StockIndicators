@@ -236,6 +236,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersDecyclerOscillatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int fastLength = 10, int slowLength = 20)
     {
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues;
+            using var window = new DecyclerV2Window(maType, fastLength, slowLength);
+            var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+            for (var i = 0; i < input.Count; i++)
+            { var value = window.Next(input[i], true); signals?.Add(GetCompareSignal(value, i > 0 ? values[i - 1] : 0)); values.Add(value); }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Edo", values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersDecyclerOscillatorV2;
+            return stockData;
+        }
         var callerSeries = stockData.CaptureInputSeries();
         fastLength = Math.Max(fastLength, 1);
         slowLength = Math.Max(slowLength, 1);

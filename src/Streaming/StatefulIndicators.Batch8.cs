@@ -59,50 +59,18 @@ public sealed class EhlersDecyclerOscillatorV1State : IStreamingIndicatorState
 [PrimaryOutput("Edo")]
 public sealed class EhlersDecyclerOscillatorV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly HighPassFilterV2Engine _fastHp;
-    private readonly HighPassFilterV2Engine _slowHp;
-    private readonly StreamingInputResolver _input;
-
-    public EhlersDecyclerOscillatorV2State(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int fastLength = 10, int slowLength = 20)
-    {
-        _fastHp = new HighPassFilterV2Engine(maType, fastLength);
-        _slowHp = new HighPassFilterV2Engine(maType, slowLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DecyclerV2Window _window;
+    public EhlersDecyclerOscillatorV2State(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int fastLength = 10, int slowLength = 20)
+        => _window = new(maType, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.EhlersDecyclerOscillatorV2;
-
-    public void Reset()
-    {
-        _fastHp.Reset();
-        _slowHp.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var hp1 = _fastHp.Next(value, isFinal);
-        var hp2 = _slowHp.Next(value, isFinal);
-        var dec = hp2 - hp1;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Edo", dec }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dec, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Edo", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastHp.Dispose();
-        _slowHp.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ed")]

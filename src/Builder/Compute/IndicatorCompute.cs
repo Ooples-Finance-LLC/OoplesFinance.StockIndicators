@@ -11230,23 +11230,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(StockData data, ComputeContext context,
         int fastLength = 10, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int slowLength = 20)
     {
-        // The slow high-pass filter less the fast one. Both read the caller's own series: the second is not
-        // chained onto the first, which is the distinction CalculateEhlersDecyclerOscillatorV2 restores its
-        // input series to make.
-        using var fastBuffer = EhlersHighPassFilterV2(data, context, fastLength, maType);
-        using var slowBuffer = EhlersHighPassFilterV2(data, context, slowLength, maType);
-        var fast = fastBuffer.Span;
-        var slow = slowBuffer.Span;
-        var count = fast.Length;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = slow[i] - fast[i];
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new DecyclerV2Window(maType, fastLength, slowLength);
+        var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

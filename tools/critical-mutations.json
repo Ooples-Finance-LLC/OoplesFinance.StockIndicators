@@ -36068,5 +36068,68 @@
     "before": "var value = _input.GetValue(bar);",
     "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal));",
     "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-extended",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerV2Window.cs",
+    "scope": "internal sealed class DecyclerV2Window",
+    "before": "slow.AddTo(ref sum); fast.AddTo(ref sum, -1);",
+    "after": "sum.Add(slow.Publish()); sum.Add(fast.Publish(), -1);",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerV2Window.cs",
+    "scope": "internal sealed class DecyclerV2Window",
+    "before": "fast.AddTo(ref sum, -1)",
+    "after": "fast.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerV2Window.cs",
+    "scope": "internal sealed class DecyclerV2Window",
+    "before": "_slow = new(kind, slow)",
+    "after": "_slow = new(kind, fast)",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DecyclerV2Window.cs",
+    "scope": "internal sealed class DecyclerV2Window",
+    "before": "_fast.Reset(); _slow.Reset();",
+    "after": "_fast.Reset();",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersDecyclerOscillatorV2(",
+    "before": "stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDecyclerOscillatorV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "decycler-v2-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersDecyclerOscillatorV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
   }
 ]

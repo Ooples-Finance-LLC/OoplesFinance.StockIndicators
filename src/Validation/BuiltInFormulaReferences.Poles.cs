@@ -107,6 +107,12 @@ internal static partial class BuiltInFormulaReferences
     }
 
     internal static double[] HighPassV2Trajectory(double[] prices, int length, int kind)
+        => HighPassV2Stages(prices, length, kind).Select(v => v.ToDouble()).ToArray();
+
+    internal static double[] DecyclerV2Trajectory(double[] prices, int fast, int slow, int kind)
+        => HighPassV2Stages(prices, slow, kind).Zip(HighPassV2Stages(prices, fast, kind), (a, b) => (a - b).ToDouble()).ToArray();
+
+    private static ReferenceFraction[] HighPassV2Stages(double[] prices, int length, int kind)
     {
         length = Math.Max(1, length);
         var angle = Math.Sqrt(2) * Math.PI / length;
@@ -125,7 +131,7 @@ internal static partial class BuiltInFormulaReferences
             var olderTerm = RoundRocBankStage(result[i - 2] * coefficients[2]);
             result[i] = RoundRocBankStage(RoundRocBankStage(inputTerm + previousTerm) + olderTerm);
         }
-        return SmoothRocBankStage(SmoothRocBankStage(result, length, kind), length, kind).Select(v => v.ToDouble()).ToArray();
+        return SmoothRocBankStage(SmoothRocBankStage(result, length, kind), length, kind);
     }
 
     private static IReadOnlyDictionary<string, double[]> ChebyshevTrajectories(double[] prices)
