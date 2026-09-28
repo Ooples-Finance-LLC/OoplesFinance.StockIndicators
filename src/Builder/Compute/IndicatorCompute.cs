@@ -15251,28 +15251,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(StockData data, ComputeContext context, int length1 = 5, int length2 = 12)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        // Alpha is derived from length2, not supplied: the batch has no alpha parameter.
-        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / Math.Max(length2, 1), 0.99, 0.01);
-        var alphaArgCos = Math.Cos(alphaArg);
-        var alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
-
-        using var median = new RollingMedian(Math.Max(length1, 1));
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            median.Add(input[i]);
-
-            var previousFilter = i >= 1 ? output[i - 1] : 0;
-            output[i] = (alpha * median.Median) + ((1 - alpha) * previousFilter);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new RecursiveMedianWindow(length1, length2); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
+        return output;
     }
+
 
     /// <summary>
     /// Computes Ehlers Roofing Filter using zero-allocation fast path.

@@ -514,41 +514,18 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersRecursiveMedianFilter(this StockData stockData, int length1 = 5, int length2 = 12)
     {
-        List<double> tempList = new(stockData.Count);
-        List<double> rmfList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        using var tempMedian = new RollingMedian(length1);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alphaArg = MinOrMax(2 * Math.PI / length2, 0.99, 0.01);
-        var alphaArgCos = Math.Cos(alphaArg);
-        var alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RecursiveMedianWindow(length1, length2);
+        var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var prevValue = GetLastOrDefault(tempList);
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-            tempMedian.Add(currentValue);
-
-            var median = tempMedian.Median;
-            var prevRmf = GetLastOrDefault(rmfList);
-            var rmf = (alpha * median) + ((1 - alpha) * prevRmf);
-            rmfList.Add(rmf);
-
-            var signal = GetCompareSignal(currentValue - rmf, prevValue - prevRmf);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true);
+            signals?.Add(GetCompareSignal(input[i] - value, i == 0 ? 0 : input[i - 1] - output[i - 1])); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ermf", rmfList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rmfList);
-        stockData.IndicatorName = IndicatorName.EhlersRecursiveMedianFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ermf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersRecursiveMedianFilter;
         return stockData;
     }
+
 
     /// <summary>
     /// Calculates the Ehlers Super Smoother Filter

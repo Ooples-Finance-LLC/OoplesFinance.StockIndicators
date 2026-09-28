@@ -1654,61 +1654,18 @@ public sealed class EhlersPhaseCalculationState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Ermf")]
 public sealed class EhlersRecursiveMedianFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly double[] _medianScratch;
-    private double _prevRmf;
-
-    public EhlersRecursiveMedianFilterState(int length1 = 5, int length2 = 12)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var alphaArg = MathHelper.MinOrMax(2 * Math.PI / resolved2, 0.99, 0.01);
-        var alphaArgCos = Math.Cos(alphaArg);
-        _alpha = alphaArgCos != 0 ? (alphaArgCos + Math.Sin(alphaArg) - 1) / alphaArgCos : 0;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(resolved1);
-        _medianScratch = new double[resolved1];
-    }
-
+    private readonly RecursiveMedianWindow _window;
+    public EhlersRecursiveMedianFilterState(int length1 = 5, int length2 = 12) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersRecursiveMedianFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevRmf = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var median = EhlersStreamingWindow.GetMedian(_values, value, _medianScratch);
-        var rmf = (_alpha * median) + ((1 - _alpha) * _prevRmf);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevRmf = rmf;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ermf", rmf }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rmf, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ermf", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
+
 
 [PrimaryOutput("Ermo")]
 public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorState, IDisposable

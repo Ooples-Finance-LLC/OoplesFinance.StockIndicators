@@ -37418,5 +37418,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "recursive-median-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "Math.Max(1, smoothing)",
+    "after": "Math.Max(1, length)",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "middle.Mean(even ? 2 : 1)",
+    "after": "_lower.Max.Value",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-extended",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "middle.Mean(even ? 2 : 1)",
+    "after": "even ? (_lower.Max.Value + _upper.Min.Value) / 2 : _lower.Max.Value",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "if (full) Remove(expired);",
+    "after": "if (full && _length == 1) Remove(expired);",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "next.AddProduct(_alpha, _previous, -1)",
+    "after": "next.AddProduct(_alpha, _previous, 1)",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "if (commit)",
+    "after": "if (commit || price != 0)",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveMedianWindow.cs",
+    "scope": "internal sealed class RecursiveMedianWindow",
+    "before": "_previous = 0;",
+    "after": "_previous = 1;",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersRecursiveMedianFilter(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRecursiveMedianFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
+  },
+  {
+    "id": "recursive-median-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersRecursiveMedianFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~RecursiveMedianNumericalTests"
   }
 ]
