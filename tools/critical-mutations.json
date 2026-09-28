@@ -37238,5 +37238,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~StochasticCyberNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "_prices.Count == _lag ? _prices.Peek() : 0",
+    "after": "price",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-extended",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "BigInteger.Abs(ExactVarianceWindow.Units(price) - ExactVarianceWindow.Units(previous))",
+    "after": "ExactVarianceWindow.Units(Math.Abs(price - previous))",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-mass",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "mass -= oldest.Weight",
+    "after": "mass += oldest.Weight",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "numerator.Add(oldest.Price, -oldest.Weight)",
+    "after": "numerator.Add(oldest.Price, oldest.Weight)",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-flat",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "mass.IsZero ? price",
+    "after": "mass.IsZero ? 0",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-period",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersDistanceFilterWindow.cs",
+    "scope": "internal sealed class EhlersDistanceFilterWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersFilter(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "ehlers-distance-filter-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
   }
 ]

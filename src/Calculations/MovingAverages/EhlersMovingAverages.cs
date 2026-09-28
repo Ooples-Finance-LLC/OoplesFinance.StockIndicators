@@ -821,46 +821,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersFilter(this StockData stockData, int length1 = 15, int length2 = 5)
     {
-        List<double> filterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new EhlersDistanceFilterWindow(length1, length2);
+        var output = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double num = 0, sumC = 0;
-            for (var j = 0; j <= length1 - 1; j++)
-            {
-                var currentPrice = i >= j ? inputList[i - j] : 0;
-                var prevPrice = i >= j + length2 ? inputList[i - (j + length2)] : 0;
-                var priceDiff = Math.Abs(currentPrice - prevPrice);
-
-                num += priceDiff * currentPrice;
-                sumC += priceDiff;
-            }
-
-            var prevEhlersFilter = GetLastOrDefault(filterList);
-            // sumC is a sum of absolute price differences: zero means the window holds one repeated price, and
-            // a weighted average of that window is that price. Ehlers leaves Filt at its previous value here,
-            // which is not the same thing - the last value before the window flattened is still catching up.
-            var ehlersFilter = sumC != 0 ? num / sumC : currentValue;
-            filterList.Add(ehlersFilter);
-
-            var signal = GetCompareSignal(currentValue - ehlersFilter, prevValue - prevEhlersFilter);
-            signalsList?.Add(signal);
+            var value = window.Next(input[i], true); signals?.Add(GetCompareSignal(input[i]-value, i==0 ? 0 : input[i-1]-output[i-1])); output.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ef", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string,List<double>> { { "Ef", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersFilter;
         return stockData;
     }
+
 
     /// <summary>
     /// Calculates the Ehlers Distance Coefficient Filter

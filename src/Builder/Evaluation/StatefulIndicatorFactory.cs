@@ -45,6 +45,7 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            EhlersFilterSpecOptions filter => new EhlersFilterState(filter.Length),
             EhlersCyberCycleSpecOptions cyber => new EhlersCyberCycleState(2d / (cyber.Length + 1d)),
             EhlersCyberCycleOscillatorSpecOptions cyber => new EhlersCyberCycleState(cyber.Alpha),
             EhlersChebyshevLowPassFilterSpecOptions => new EhlersChebyshevLowPassFilterState(),

@@ -716,65 +716,18 @@ public sealed class EhlersEvenBetterSineWaveIndicatorState : IStreamingIndicator
 [PrimaryOutput("Ef")]
 public sealed class EhlersFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersFilterState(int length1 = 15, int length2 = 5)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length1 + _length2);
-    }
-
+    private readonly EhlersDistanceFilterWindow _window;
+    public EhlersFilterState(int length1 = 15, int length2 = 5) => _window = new(length1,length2);
     public IndicatorName Name => IndicatorName.EhlersFilter;
-
-    public void Reset()
+    public void Reset() => _window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _values.Clear();
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Ef",value}}:null);
     }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-
-        double num = 0;
-        double sumC = 0;
-        for (var j = 0; j <= _length1 - 1; j++)
-        {
-            var currentPrice = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var prevPrice = EhlersStreamingWindow.GetOffsetValue(_values, value, j + _length2);
-            var priceDiff = Math.Abs(currentPrice - prevPrice);
-            num += priceDiff * currentPrice;
-            sumC += priceDiff;
-        }
-
-        var filter = sumC != 0 ? num / sumC : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ef", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
+
 
 [PrimaryOutput("Efirf")]
 public sealed class EhlersFiniteImpulseResponseFilterState : IStreamingIndicatorState, IDisposable

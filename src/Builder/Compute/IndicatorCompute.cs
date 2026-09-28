@@ -12610,32 +12610,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersFilterFast(StockData data, ComputeContext context, int length1 = 15, int length2 = 5)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double numerator = 0, coefficientSum = 0;
-            for (var j = 0; j <= length1 - 1; j++)
-            {
-                var currentPrice = i >= j ? input[i - j] : 0;
-                var previousPrice = i >= j + length2 ? input[i - (j + length2)] : 0;
-                var priceDiff = Math.Abs(currentPrice - previousPrice);
-
-                numerator += priceDiff * currentPrice;
-                coefficientSum += priceDiff;
-            }
-
-            // coefficientSum is a sum of absolute price differences: zero means the window holds one repeated
-            // price, and a weighted average of that window is that price.
-            output[i] = coefficientSum != 0 ? numerator / coefficientSum : input[i];
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new EhlersDistanceFilterWindow(length1,length2); var output = context.Rent(input.Count);
+        for(var i=0;i<input.Count;i++) output.WritableSpan[i]=window.Next(input[i],true);
+        return output;
     }
+
 
     /// <summary>
     /// Computes Ehlers Finite Impulse Response Filter using zero-allocation fast path.
