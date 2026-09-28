@@ -1059,6 +1059,7 @@ internal static partial class IndicatorCompute
             // so it does reach the bound series and is forwarded. Length2 is fixed by the batch.
             EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length,
                 maType: eift.MaType),
+            DominantCycleTunedRelativeStrengthIndexSpecOptions cycleTunedRsi => ComputeDominantCycleTunedRsiFast(data, context, cycleTunedRsi.Length),
             EhlersAdaptiveCyberCycleSpecOptions adaptiveCyber => spec.OutputKey switch
             {
                 null or "Eacc" => ComputeEhlersAdaptiveCyberCycleFast(data, context, adaptiveCyber.Length, adaptiveCyber.Alpha),
@@ -10567,6 +10568,13 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers' adaptive cyber cycle and the dominant cycle period it measures, so that indicators
     /// built on either series can reach it without materialising a second indicator's output dictionary.
     /// </summary>
+    internal static ComputeBuffer ComputeDominantCycleTunedRsiFast(StockData data, ComputeContext context, int length = 5)
+    {
+        var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new CycleTunedRsiWindow(length); var result = context.Rent(selected.Count);
+        for (var i = 0; i < selected.Count; i++) result.WritableSpan[i] = window.Next(selected[i], true);
+        return result;
+    }
+
     internal static ComputeBuffer ComputeEhlersAdaptiveCyberCycleFast(StockData data, ComputeContext context, int length = 5, double alpha = .07, bool periodOutput = false)
     {
         var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new AdaptiveCyberWindow(length, alpha); var result = context.Rent(selected.Count);

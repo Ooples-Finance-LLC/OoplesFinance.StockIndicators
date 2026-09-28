@@ -40019,5 +40019,77 @@
     "before": "new(length, .07)",
     "after": "new(5, .07)",
     "filter": "FullyQualifiedName~AdaptiveGravityNumericalTests.WideAndTinyPricesPreserveSignedMoments"
+  },
+  {
+    "id": "cycle-tuned-rsi-seed",
+    "module": "numerical",
+    "file": "src/Helpers/CycleTunedRsiWindow.cs",
+    "scope": "internal sealed class CycleTunedRsiWindow",
+    "before": "_hasPrevious ? _gain : gainChange",
+    "after": "_gain",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.FirstChangeSeedsTheAverageAndZeroLossUsesOneHundred"
+  },
+  {
+    "id": "cycle-tuned-rsi-adaptive-weight",
+    "module": "numerical",
+    "file": "src/Helpers/CycleTunedRsiWindow.cs",
+    "scope": "internal sealed class CycleTunedRsiWindow",
+    "before": "1 / period",
+    "after": "1 / 14d",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.WideAndTinyChangesPreserveAdaptiveGainLossRatios"
+  },
+  {
+    "id": "cycle-tuned-rsi-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/CycleTunedRsiWindow.cs",
+    "scope": "internal sealed class CycleTunedRsiWindow",
+    "before": "numerator.Ratio(denominator)",
+    "after": "100 - (100 - numerator.Ratio(denominator))",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.TinyPositiveGainsAreNotErasedByRsiSubtraction"
+  },
+  {
+    "id": "cycle-tuned-rsi-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/CycleTunedRsiWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.SubnormalAveragesStillFormANonzeroRatio"
+  },
+  {
+    "id": "cycle-tuned-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CycleTunedRsiWindow.cs",
+    "scope": "internal sealed class CycleTunedRsiWindow",
+    "before": "_period.Next(price, commit)",
+    "after": "_period.Next(price, true)",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.WideAndTinyChangesPreserveAdaptiveGainLossRatios"
+  },
+  {
+    "id": "cycle-tuned-rsi-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Rsi/RsiAtoD.cs",
+    "scope": "public static StockData CalculateDominantCycleTunedRelativeStrengthIndex(",
+    "before": "window.Next(selected[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "cycle-tuned-rsi-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDominantCycleTunedRsiFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "cycle-tuned-rsi-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DominantCycleTunedRelativeStrengthIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.InvalidFieldsLeavePeriodAndAveragesUnchanged"
   }
 ]

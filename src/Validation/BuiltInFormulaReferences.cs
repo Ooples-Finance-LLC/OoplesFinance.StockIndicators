@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.DominantCycleTunedRelativeStrengthIndex)
+        {
+            var cycleTunedRsiOptions = (DominantCycleTunedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => CycleTunedRsiValues(bars, cycleTunedRsiOptions.Length), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAdaptiveCenterOfGravityOscillator)
         {
             var adaptiveGravityOptions = (EhlersAdaptiveCenterOfGravityOscillatorSpecOptions)builtIn.CreateOptions();

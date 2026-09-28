@@ -428,72 +428,16 @@ public sealed class DecisionPointBreadthSwenlinTradingOscillatorState : IStreami
 [PrimaryOutput("DctRsi")]
 public sealed class DominantCycleTunedRelativeStrengthIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveCyberCyclePeriodState _periodState;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevA;
-    private double _prevB;
-    private bool _hasPrev;
-
-    public DominantCycleTunedRelativeStrengthIndexState(int length = 5)
-    {
-        _periodState = new AdaptiveCyberCyclePeriodState(length, 0.07);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly CycleTunedRsiWindow _window;
+    public DominantCycleTunedRelativeStrengthIndexState(int length = 5) => _window = new(length);
     public IndicatorName Name => IndicatorName.DominantCycleTunedRelativeStrengthIndex;
-
-    public void Reset()
-    {
-        _periodState.Reset();
-        _prevValue = 0;
-        _prevA = 0;
-        _prevB = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var period = _periodState.Next(value, isFinal);
-        var p = period != 0 ? 1 / period : 0.07;
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var aChg = value > prevValue ? Math.Abs(value - prevValue) : 0;
-        var bChg = value < prevValue ? Math.Abs(value - prevValue) : 0;
-
-        var prevA = _hasPrev ? _prevA : aChg;
-        var a = (p * aChg) + ((1 - p) * prevA);
-
-        var prevB = _hasPrev ? _prevB : bChg;
-        var b = (p * bChg) + ((1 - p) * prevB);
-
-        var r = b != 0 ? a / b : 0;
-        var rsi = b == 0 ? 100 : a == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + r)), 100, 0);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevA = a;
-            _prevB = b;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "DctRsi", rsi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rsi, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "DctRsi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodState.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("UpWalk")]

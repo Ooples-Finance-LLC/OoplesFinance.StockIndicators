@@ -179,6 +179,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersChebyshevLowPassFilterSpecOptions),
         typeof(EhlersClassicHilbertTransformerSpecOptions),
         typeof(EhlersCorrelationTrendIndicatorSpecOptions),
+        typeof(DominantCycleTunedRelativeStrengthIndexSpecOptions),
         typeof(EhlersAdaptiveCyberCycleSpecOptions),
         typeof(EhlersCyberCycleSpecOptions),
         typeof(EhlersDecyclerOscillatorV1SpecOptions),

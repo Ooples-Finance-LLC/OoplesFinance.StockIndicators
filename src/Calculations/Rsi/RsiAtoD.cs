@@ -427,51 +427,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDominantCycleTunedRelativeStrengthIndex(this StockData stockData, int length = 5)
     {
-        List<double> aList = new(stockData.Count);
-        List<double> bList = new(stockData.Count);
-        List<double> rsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var v1List = CalculateEhlersAdaptiveCyberCycle(stockData, length).ChainedOutputs["Period"];
-
+        var (selected, _, _, _, _) = GetInputValuesList(stockData); var window = new CycleTunedRsiWindow(length); var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var v1 = v1List[i];
-            var p = v1 != 0 ? 1 / v1 : 0.07;
-            var price = inputList[i];
-            var prevPrice = i >= 1 ? inputList[i - 1] : 0;
-            var aChg = price > prevPrice ? Math.Abs(price - prevPrice) : 0;
-            var bChg = price < prevPrice ? Math.Abs(price - prevPrice) : 0;
-            var prevRsi1 = i >= 1 ? rsiList[i - 1] : 0;
-            var prevRsi2 = i >= 2 ? rsiList[i - 2] : 0;
-
-            var prevA = i >= 1 ? aList[i - 1] : aChg;
-            var a = (p * aChg) + ((1 - p) * prevA);
-            aList.Add(a);
-
-            var prevB = i >= 1 ? bList[i - 1] : bChg;
-            var b = (p * bChg) + ((1 - p) * prevB);
-            bList.Add(b);
-
-            var r = b != 0 ? a / b : 0;
-            var rsi = b == 0 ? 100 : a == 0 ? 0 : MinOrMax(100 - (100 / (1 + r)), 100, 0);
-            rsiList.Add(rsi);
-
-            var signal = GetRsiSignal(rsi - prevRsi1, prevRsi1 - prevRsi2, rsi, prevRsi1, 70, 30);
-            signalsList?.Add(signal);
+            var value = window.Next(selected[i], true); values.Add(value); var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetRsiSignal(value - previous, previous - older, value, previous, 70, 30));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "DctRsi", rsiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(rsiList);
-        stockData.IndicatorName = IndicatorName.DominantCycleTunedRelativeStrengthIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "DctRsi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.DominantCycleTunedRelativeStrengthIndex; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the CCT Stochastic Relative Strength Index
