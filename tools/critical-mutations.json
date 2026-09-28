@@ -33630,5 +33630,119 @@
     "before": "* new ReferenceFraction(2)",
     "after": "* new ReferenceFraction(1)",
     "filter": "FullyQualifiedName~ValidationTests.TrendStepNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "_lag = Math.Max(1, movement) - 1",
+    "after": "_lag = Math.Max(1, movement)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "delta.Add(previous, -1)",
+    "after": "delta.Add(previous, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-return-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "RocBankValue.Round(second, previous)",
+    "after": "RocBankValue.Round(second, price)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "_average.Next(move, commit)",
+    "after": "_average.Next(new RocBankValue(move.Publish()), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-minimum-range",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "_rangeLength = Math.Max(2, length)",
+    "after": "_rangeLength = Math.Max(1, length)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-range-low",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "Extreme(_low, value, false)",
+    "after": "Extreme(_low, value, true)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-center",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "stochastic * 2 - 100",
+    "after": "stochastic * 2 - 50",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "if (commit && _lag > 0)",
+    "after": "if ((commit || price != 0) && _lag > 0)",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "_prices.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeStrengthOfMovementFast("
+  },
+  {
+    "id": "movement-strength-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/MovementStrengthWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, smoothing))",
+    "after": "_signal = new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class StrengthOfMovementState"
+  },
+  {
+    "id": "movement-strength-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " StrengthOfMovementSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "movement-strength-reference-centering",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.MovementStrength.cs",
+    "before": "stochastic * 2 - 100",
+    "after": "stochastic * 2 - 50",
+    "filter": "FullyQualifiedName~ValidationTests.MovementStrengthNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

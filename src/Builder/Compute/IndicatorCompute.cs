@@ -16723,42 +16723,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeStrengthOfMovementFast(StockData data, ComputeContext context, int length1 = 10,
         int length2 = 3, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int smoothingLength = 3)
     {
-        // CalculateStrengthOfMovement averages the chained series' move over length2 bars as a fraction of
-        // where it started, smooths that ratio, takes its stochastic against its own range - not against the
-        // bars' highs and lows - centres it on zero and smooths it once more. The core this replaced read the
-        // close with the highs and the lows and took neither average.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var averageMove = context.Rent(count);
-        var aaSe = averageMove.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length1 = Math.Max(1, length1); smoothingLength = Math.Max(1, smoothingLength);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new MovementStrengthWindow(maType, length1, length2, smoothingLength); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= length2 - 1 ? input[i - (length2 - 1)] : 0;
-            var moveSe = CalculationsHelper.MinPastValues(i, length2 - 1, input[i] - prevValue);
-            var avgMoveSe = length2 > 1 ? moveSe / (length2 - 1) : 0;
-            aaSe[i] = prevValue != 0 ? avgMoveSe / prevValue : 0;
+            using var movement = context.Rent(input.Count); using var average = context.Rent(input.Count); using var centered = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) movement.WritableSpan[i] = window.Movement(input[i], true).Publish();
+            MovingAverage(data, maType, length1, movement.Span, average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) centered.WritableSpan[i] = window.Center(new RocBankValue(average.Span[i]), true);
+            MovingAverage(data, maType, smoothingLength, centered.Span, result.WritableSpan);
         }
-
-        using var smoothedMove = context.Rent(count);
-        MovingAverage(data, maType, length1, averageMove.Span, smoothedMove.WritableSpan);
-        var b = smoothedMove.Span;
-
-        using var centred = context.Rent(count);
-        var sSe = centred.WritableSpan;
-        var window = new RollingMinMax(Math.Max(length1, 2));
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(b[i]);
-            var range = window.Max - window.Min;
-            var bSto = range != 0 ? MathHelper.MinOrMax((b[i] - window.Min) / range * 100, 100, 0) : 0;
-            sSe[i] = (bSto * 2) - 100;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothingLength, centred.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

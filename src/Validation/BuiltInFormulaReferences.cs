@@ -110,6 +110,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => TrendStepOutputs(bars, trendStepLength), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.StrengthOfMovement)
+        {
+            var movementOptions = builtIn.CreateOptions(); var movementKind = AverageKind(movementOptions, 2); if (movementKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MovementStrengthOutputs(bars, Integer(movementOptions, "Length1", 10), Integer(movementOptions, "Length2", 3), 3, movementKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

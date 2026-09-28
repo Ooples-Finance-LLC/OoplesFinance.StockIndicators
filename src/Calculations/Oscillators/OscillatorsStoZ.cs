@@ -2905,36 +2905,17 @@ public static partial class Calculations
     public static StockData CalculateStrengthOfMovement(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 10, 
         int length2 = 3, int smoothingLength = 3)
     {
-        List<double> aaSeList = new(stockData.Count);
-        List<double> sSeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length1 = Math.Max(1, length1); smoothingLength = Math.Max(1, smoothingLength);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new MovementStrengthWindow(maType, length1, length2, smoothingLength);
+        List<double> ssSeList; List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length2 - 1 ? inputList[i - (length2 - 1)] : 0;
-            var moveSe = MinPastValues(i, length2 - 1, currentValue - prevValue);
-            var avgMoveSe = length2 > 1 ? moveSe / (length2 - 1) : 0;
-
-            var aaSe = prevValue != 0 ? avgMoveSe / prevValue : 0;
-            aaSeList.Add(aaSe);
+            var aaSeList = inputList.Select(value => window.Movement(value, true).Publish()).ToList();
+            var bList = Builder.Compute.ComponentAverage.Take(aaSeList.ToArray(), length1)?.ToList() ?? GetMovingAverageList(stockData, maType, length1, aaSeList);
+            var sSeList = bList.Select(value => window.Center(new RocBankValue(value), true)).ToList();
+            ssSeList = Builder.Compute.ComponentAverage.Take(sSeList.ToArray(), smoothingLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothingLength, sSeList);
         }
-
-        var bList = GetMovingAverageList(stockData, maType, length1, aaSeList);
-        // The stochastic of b over b's own range. Chained into the stochastic indicator, b was measured against
-        // the bars' highs and lows - a ratio set against a price range.
-        var (bHighestList, bLowestList) = GetMaxAndMinValuesList(bList, length1);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var bRange = bHighestList[i] - bLowestList[i];
-            var bSto = bRange != 0 ? MinOrMax((bList[i] - bLowestList[i]) / bRange * 100, 100, 0) : 0;
-
-            var sSe = (bSto * 2) - 100;
-            sSeList.Add(sSe);
-        }
-
-        var ssSeList = GetMovingAverageList(stockData, maType, smoothingLength, sSeList);
+        else ssSeList = inputList.Select(value => window.Next(value, true)).ToList();
         for (var i = 0; i < stockData.Count; i++)
         {
             var ssSe = ssSeList[i];

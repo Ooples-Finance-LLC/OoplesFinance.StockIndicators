@@ -791,84 +791,18 @@ public sealed class StochasticRegularState : IStreamingIndicatorState, IDisposab
 [PrimaryOutput("Som")]
 public sealed class StrengthOfMovementState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly IMovingAverageSmoother _bSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
+    private readonly MovementStrengthWindow _window;
     private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public StrengthOfMovementState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 10,
-        int length2 = 3, int smoothingLength = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _maxWindow = new RollingWindowMax(Math.Max(2, _length1));
-        _minWindow = new RollingWindowMin(Math.Max(2, _length1));
-        _bSmoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothingLength));
-        _values = new PooledRingBuffer<double>(_length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public StrengthOfMovementState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 10, int length2 = 3, int smoothingLength = 3)
+    { _window = new(maType, length1, length2, smoothingLength); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.StrengthOfMovement;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _bSmoother.Reset();
-        _signalSmoother.Reset();
-        _values.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= _length2 - 1
-            ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length2 - 1)
-            : 0;
-        var moveSe = _index >= _length2 - 1 ? value - prevValue : 0;
-        var avgMoveSe = _length2 > 1 ? moveSe / (_length2 - 1) : 0;
-        var aaSe = prevValue != 0 ? avgMoveSe / prevValue : 0;
-        var b = _bSmoother.Next(aaSe, isFinal);
-        var highest = isFinal ? _maxWindow.Add(b, out _) : _maxWindow.Preview(b, out _);
-        var lowest = isFinal ? _minWindow.Add(b, out _) : _minWindow.Preview(b, out _);
-        var range = highest - lowest;
-        var fastK = range != 0 ? MathHelper.MinOrMax((b - lowest) / range * 100, 100, 0) : 0;
-        var sSe = (fastK * 2) - 100;
-        var som = _signalSmoother.Next(sSe, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Som", som }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(som, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Som", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _bSmoother.Dispose();
-        _signalSmoother.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Trend")]
