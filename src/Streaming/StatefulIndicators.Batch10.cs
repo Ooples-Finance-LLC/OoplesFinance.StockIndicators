@@ -213,59 +213,18 @@ public sealed class EhlersHannMovingAverageState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Ehwi")]
 public sealed class EhlersHannWindowIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private double _prevFilt;
-    private bool _hasPrev;
-
+    private readonly HannIndicatorWindow _window;
     public EhlersHannWindowIndicatorState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-    }
-
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.EhlersHannWindowIndicator;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _prevFilt = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var deriv = value - bar.Open;
-        var filt = _smoother.Next(deriv, isFinal);
-        var prevFilt = _hasPrev ? _prevFilt : 0;
-        var roc = _length / 2.0 * Math.PI * (filt - prevFilt);
-
-        if (isFinal)
-        {
-            _prevFilt = filt;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ehwi", filt },
-                { "Roc", roc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Open, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ehwi", point.Line }, { "Roc", point.Roc } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Hp")]
