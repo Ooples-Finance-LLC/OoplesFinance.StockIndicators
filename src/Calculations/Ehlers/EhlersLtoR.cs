@@ -501,14 +501,21 @@ public static partial class Calculations
     {
         length1 = Math.Max(length1, 1);
         length2 = Math.Max(length2, 1);
-        List<double> argList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-
         var (prices, _, _, _, _) = GetInputValuesList(stockData);
-        var inputKernel = new Streaming.EhlersRoofingInputKernel(length1);
-        for (var i = 0; i < stockData.Count; i++) argList.Add(inputKernel.Next(prices[i], true));
-
-        var roofingFilter2PoleList = GetMovingAverageList(stockData, maType, length2, argList);
+        List<double> roofingFilter2PoleList;
+        if (Streaming.EhlersRoofingV1Window.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            using var window = new Streaming.EhlersRoofingV1Window(maType, length1, length2);
+            roofingFilter2PoleList = new(stockData.Count);
+            for (var i = 0; i < stockData.Count; i++) roofingFilter2PoleList.Add(window.Next(prices[i], true));
+        }
+        else
+        {
+            var inputKernel = new Streaming.EhlersRoofingInputKernel(length1); var argList = new List<double>(stockData.Count);
+            for (var i = 0; i < stockData.Count; i++) argList.Add(inputKernel.Next(prices[i], true));
+            roofingFilter2PoleList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(argList), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, argList);
+        }
         for (var i = 0; i < stockData.Count; i++)
         {
             var roofingFilter = roofingFilter2PoleList[i];

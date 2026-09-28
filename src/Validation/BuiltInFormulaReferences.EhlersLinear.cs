@@ -514,8 +514,11 @@ internal static partial class BuiltInFormulaReferences
                         return 1 + k * ratio == 0 ? 0 : (ratio + k) / (1 + k * ratio);
                     }).ToArray()));
                 });
-            case IndicatorName.EhlersModifiedStochasticIndicator:
             case IndicatorName.EhlersRoofingFilterV1:
+                var v1Options = RoofingV1Options(options);
+                if (v1Options.Kind == 0) return null;
+                return new("Erf", new[] { "Erf" }, bars => Outputs(("Erf", RoofingV1Values(bars, v1Options.High, v1Options.Low, v1Options.Kind))));
+            case IndicatorName.EhlersModifiedStochasticIndicator:
             case IndicatorName.EhlersStochastic:
                 var smoother = options.GetType().GetProperty("MaType")?.GetValue(options);
                 var superSmoother = smoother is null || smoother is MovingAvgType.Ehlers2PoleSuperSmootherFilterV1;

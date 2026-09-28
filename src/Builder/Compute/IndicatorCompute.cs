@@ -15254,6 +15254,12 @@ internal static partial class IndicatorCompute
     {
         var count = data.Count;
         var prices = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        if (EhlersRoofingV1Window.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            using var window = new EhlersRoofingV1Window(maType, length1, length2); var output = context.Rent(count);
+            for (var i = 0; i < count; i++) output.WritableSpan[i] = window.Next(prices[i], true);
+            return output;
+        }
         var kernel = new Streaming.EhlersRoofingInputKernel(length1);
         using var averaged = context.Rent(count);
         for (var i = 0; i < count; i++) averaged.WritableSpan[i] = kernel.Next(prices[i], true);

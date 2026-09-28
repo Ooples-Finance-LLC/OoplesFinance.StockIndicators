@@ -355,8 +355,7 @@ public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState
 [PrimaryOutput("Erf")]
 public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersRoofingInputKernel _hp;
-    private readonly IMovingAverageSmoother _smoother;
+    private readonly EhlersRoofingV1Window _window;
     private readonly StreamingInputResolver _input;
 
     public EhlersRoofingFilterV1State(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
@@ -364,8 +363,7 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
     {
         var resolved1 = Math.Max(1, length1);
         var resolved2 = Math.Max(1, length2);
-        _hp = new EhlersRoofingInputKernel(resolved1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolved2);
+        _window = new EhlersRoofingV1Window(maType, resolved1, resolved2);
         _input = new StreamingInputResolver(InputName.Close, null);
     }
 
@@ -373,15 +371,13 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
 
     public void Reset()
     {
-        _hp.Reset();
-        _smoother.Reset();
+        _window.Reset();
     }
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
         var value = _input.GetValue(bar);
-        var arg = _hp.Next(value, isFinal);
-        var roofingFilter = _smoother.Next(arg, isFinal);
+        var roofingFilter = _window.Next(value, isFinal);
 
         IReadOnlyDictionary<string, double>? outputs = null;
         if (includeOutputs)
@@ -397,7 +393,7 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
 
     public void Dispose()
     {
-        _smoother.Dispose();
+        _window.Dispose();
     }
 }
 

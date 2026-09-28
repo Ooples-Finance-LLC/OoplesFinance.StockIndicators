@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersRoofingFilterV1)
+        {
+            var v1 = RoofingV1Options(builtIn.CreateOptions());
+            if (v1.Kind != 0) { yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofingV1Values(bars, v1.High, v1.Low, v1.Kind), IndicatorErrorBudget.Exact); yield break; }
+        }
         if (builtIn.BatchName is IndicatorName.EhlersRoofingFilterV2 or IndicatorName.EhlersRoofingFilterIndicator)
         {
             var roofOriginal = builtIn.BatchName == IndicatorName.EhlersRoofingFilterIndicator; var roofOptions = builtIn.CreateOptions();
