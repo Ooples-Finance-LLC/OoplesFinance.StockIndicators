@@ -704,7 +704,7 @@ public sealed class EhlersFisherizedDeviationScaledOscillatorState : IStreamingI
 
         var prevEfdso = _hasPrev ? _prevEfdso : 0;
         var efdso = Math.Abs(scaledFilter) < 2
-            ? 0.5 * Math.Log((1 + (scaledFilter / 2)) / (1 - (scaledFilter / 2)))
+            ? FisherArithmetic.Transform(scaledFilter / 2)
             : prevEfdso;
 
         if (isFinal)
@@ -1165,6 +1165,20 @@ internal sealed class StandardDeviationVolatilityEngine : IDisposable
 
 internal sealed class EhlersDeviationScaledMovingAverageEngine : IDisposable
 {
+    private readonly DeviationScaledWindow? _precise;
+    private readonly LegacyDeviationScaledMovingAverageEngine? _legacy;
+    public EhlersDeviationScaledMovingAverageEngine(MovingAvgType maType, int fastLength, int slowLength)
+    {
+        if (maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2) _precise = new(fastLength, slowLength);
+        else _legacy = new(maType, fastLength, slowLength);
+    }
+    public double Next(double value, bool isFinal, out double scaledFilter) => _precise != null ? _precise.Next(value, isFinal, out scaledFilter) : _legacy!.Next(value, isFinal, out scaledFilter);
+    public void Reset() { _precise?.Reset(); _legacy?.Reset(); }
+    public void Dispose() => _legacy?.Dispose();
+}
+
+internal sealed class LegacyDeviationScaledMovingAverageEngine : IDisposable
+{
     private readonly int _slowLength;
     private readonly IMovingAverageSmoother _smoother;
     private readonly StandardDeviationVolatilityEngine _stdDev;
@@ -1174,7 +1188,7 @@ internal sealed class EhlersDeviationScaledMovingAverageEngine : IDisposable
     private double _prevEdsma;
     private int _index;
 
-    public EhlersDeviationScaledMovingAverageEngine(MovingAvgType maType, int fastLength, int slowLength)
+    public LegacyDeviationScaledMovingAverageEngine(MovingAvgType maType, int fastLength, int slowLength)
     {
         var resolvedFast = Math.Max(1, fastLength);
         _slowLength = Math.Max(1, slowLength);

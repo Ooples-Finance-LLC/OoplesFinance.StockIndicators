@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersDeviationScaledMovingAverage or IndicatorName.EhlersFisherizedDeviationScaledOscillator)
+        {
+            var fisherDeviation = builtIn.BatchName == IndicatorName.EhlersFisherizedDeviationScaledOscillator;
+            var deviationOptions = builtIn.CreateOptions(); var scaledFastPeriod = Math.Max(1, fisherDeviation ? ((EhlersFisherizedDeviationScaledOscillatorSpecOptions)deviationOptions).Length : ((EhlersDeviationScaledMovingAverageSpecOptions)deviationOptions).Length);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DeviationScaledValues(bars, scaledFastPeriod, fisherDeviation ? 40 : checked(2 * scaledFastPeriod), fisherDeviation), fisherDeviation ? FisherBudget : IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersFractalAdaptiveMovingAverage)
         {
             var framaOptions = builtIn.CreateOptions(); var period = framaOptions is EhlersFramaSpecOptions ehlers ? ehlers.Length : ((FramaSpecOptions)framaOptions).Length;

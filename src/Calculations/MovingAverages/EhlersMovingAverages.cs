@@ -836,6 +836,8 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
+        var precise = maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 && !Builder.Compute.ComponentAverage.HasOverrides ? new DeviationScaledWindow(fastLength, slowLength) : null;
+        if (precise == null)
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
@@ -849,23 +851,24 @@ public static partial class Calculations
             avgZerosList.Add(avgZeros);
         }
 
-        var ssf2PoleList = GetMovingAverageList(stockData, maType, fastLength, avgZerosList);
-        stockData.SetCustomValues(ssf2PoleList);
-        var ssf2PoleStdDevList = GetStandardDeviationList(ssf2PoleList, slowLength);
+        var ssf2PoleList = precise == null ? GetMovingAverageList(stockData, maType, fastLength, avgZerosList) : new List<double>();
+        if (precise == null) stockData.SetCustomValues(ssf2PoleList);
+        var ssf2PoleStdDevList = precise == null ? GetStandardDeviationList(ssf2PoleList, slowLength) : new List<double>();
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];
-            var currentSsf2Pole = ssf2PoleList[i];
-            var currentSsf2PoleStdDev = ssf2PoleStdDevList[i];
             var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevScaledFilter2Pole = GetLastOrDefault(scaledFilter2PoleList);
-            var scaledFilter2Pole = currentSsf2PoleStdDev != 0 ? currentSsf2Pole / currentSsf2PoleStdDev : prevScaledFilter2Pole;
-            scaledFilter2PoleList.Add(scaledFilter2Pole);
-
-            var alpha2Pole = MinOrMax(5 * Math.Abs(scaledFilter2Pole) / slowLength, 0.99, 0.01);
             var prevEdsma2pole = GetLastOrDefault(edsma2PoleList);
-            var edsma2Pole = (alpha2Pole * currentValue) + ((1 - alpha2Pole) * prevEdsma2pole);
+            double edsma2Pole;
+            if (precise != null) edsma2Pole = precise.Next(currentValue, true, out _);
+            else
+            {
+                var currentSsf2Pole = ssf2PoleList[i]; var currentSsf2PoleStdDev = ssf2PoleStdDevList[i];
+                var scaledFilter2Pole = currentSsf2PoleStdDev != 0 ? currentSsf2Pole / currentSsf2PoleStdDev : GetLastOrDefault(scaledFilter2PoleList);
+                scaledFilter2PoleList.Add(scaledFilter2Pole);
+                var alpha2Pole = MinOrMax(5 * Math.Abs(scaledFilter2Pole) / slowLength, .99, .01);
+                edsma2Pole = alpha2Pole * currentValue + (1 - alpha2Pole) * prevEdsma2pole;
+            }
             edsma2PoleList.Add(edsma2Pole);
 
             var signal = GetCompareSignal(currentValue - edsma2Pole, prevValue - prevEdsma2pole);

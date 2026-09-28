@@ -39506,5 +39506,149 @@
     "before": "bool ICustomInputRangePolicy.PreserveOriginalRange => true;",
     "after": "bool ICustomInputRangePolicy.PreserveOriginalRange => false;",
     "filter": "FullyQualifiedName~SelfAdjustingLaguerreNumericalTests.SelectedPricesPreserveOriginalOpenHighAndLow"
+  },
+  {
+    "id": "deviation-scaled-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "difference.Add(_price2, -1)",
+    "after": "difference.Add(_price1, -1)",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-smoother-drive",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "_drive.Add(ref filtered, _gain)",
+    "after": "_drive.Add(ref filtered, -_gain)",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-population",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "_slow * squares - sum * sum",
+    "after": "_slow * squares + sum * sum",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "sum -= expired; squares -= expired * expired",
+    "after": "sum += expired; squares += expired * expired",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "if (_samples.Count >= _slow - 1)",
+    "after": "if (_samples.Count >= _slow)",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-gain",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "gainValue.Mean(_slow)",
+    "after": "gainValue.Mean(1)",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "_average.Add(ref averageSum, -gain)",
+    "after": "_average.Add(ref averageSum, gain)",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.SubnormalFeedbackAccumulatesIntoARepresentableStep"
+  },
+  {
+    "id": "deviation-scaled-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (commit || price != 0)\n        {",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "_ratio = _average = default",
+    "after": "_ratio = default",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.WideAndTinyChangesPreservePopulationDeviationAndFeedback"
+  },
+  {
+    "id": "deviation-scaled-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersDeviationScaledMovingAverage(",
+    "before": "precise.Next(currentValue, true",
+    "after": "precise.Next(stockData.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.SelectedPricesReachBothFastArms"
+  },
+  {
+    "id": "deviation-scaled-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDeviationScaledMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.SelectedPricesReachBothFastArms"
+  },
+  {
+    "id": "deviation-scaled-fisher-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersFisherizedDeviationScaledOscillatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.SelectedPricesReachBothFastArms"
+  },
+  {
+    "id": "deviation-scaled-fisher-tiny",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersFisherizedDeviationScaledOscillatorState",
+    "before": "FisherArithmetic.Transform(scaledFilter / 2)",
+    "after": "0.5 * Math.Log((1 + scaledFilter / 2) / (1 - scaledFilter / 2))",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.FisherRetainsTinySignalsAndHoldsOutsideItsDomain"
+  },
+  {
+    "id": "deviation-scaled-fisher-domain",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersFisherizedDeviationScaledOscillatorState",
+    "before": ": prevEfdso;",
+    "after": ": 0;",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.FisherRetainsTinySignalsAndHoldsOutsideItsDomain"
+  },
+  {
+    "id": "deviation-scaled-double-period",
+    "module": "numerical",
+    "file": "src/Helpers/DeviationScaledWindow.cs",
+    "scope": "internal sealed class DeviationScaledWindow",
+    "before": "checked(2 * Math.Max(1, length))",
+    "after": "unchecked(2 * Math.Max(1, length))",
+    "filter": "FullyQualifiedName~DeviationScaledNumericalTests.PublicDoubledPeriodRejectsOverflowBeforeAllocation"
   }
 ]

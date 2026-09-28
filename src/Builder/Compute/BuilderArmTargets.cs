@@ -289,7 +289,7 @@ internal static class BuilderArmTargets
         [typeof(EhlersDecyclerOscillatorV2SpecOptions)] = new(IndicatorName.EhlersDecyclerOscillatorV2),
         [typeof(EhlersDecyclerSpecOptions)] = new(IndicatorName.EhlersDecycler),
         [typeof(EhlersDetrendedLeadingIndicatorSpecOptions)] = new(IndicatorName.EhlersDetrendedLeadingIndicator),
-        [typeof(EhlersDeviationScaledMovingAverageSpecOptions)] = new(IndicatorName.EhlersDeviationScaledMovingAverage, null, new BuilderArgument("Length", "fastLength"), new BuilderArgument("Length", "slowLength", v => v is int n ? n * 2 : v)),
+        [typeof(EhlersDeviationScaledMovingAverageSpecOptions)] = new(IndicatorName.EhlersDeviationScaledMovingAverage, null, new BuilderArgument("Length", "fastLength"), new BuilderArgument("Length", "slowLength", v => v is int n ? DeviationScaledWindow.ResolveSlow(n) : v)),
         [typeof(EhlersDeviationScaledSuperSmootherSpecOptions)] = new(IndicatorName.EhlersDeviationScaledSuperSmoother, null, new BuilderArgument("Length", "length1")),
         [typeof(EhlersDistanceCoefficientFilterSpecOptions)] = new(IndicatorName.EhlersDistanceCoefficientFilter),
         [typeof(EhlersEarlyOnsetTrendIndicatorSpecOptions)] = new(IndicatorName.EhlersEarlyOnsetTrendIndicator),

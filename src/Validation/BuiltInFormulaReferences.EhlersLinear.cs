@@ -5,37 +5,6 @@ namespace OoplesFinance.StockIndicators.Validation;
 
 internal static partial class BuiltInFormulaReferences
 {
-    private static double[] DeviationAverageReference(double[] prices, int fast, int slow)
-    {
-        var changes = prices.Select((v, i) => i < 2 ? 0 : v - prices[i - 2]).ToArray();
-        var drive = changes.Select((v, i) => (v + (i == 0 ? 0 : changes[i - 1])) / 2).ToArray();
-        var filtered = PoleTrajectory(drive, fast, 2, 1, 1, 0);
-        var weights = new double[prices.Length];
-        double scaled = 0;
-        for (var i = 0; i < prices.Length; i++)
-        {
-            if (i >= slow - 1)
-            {
-                var samples = Window(filtered, i, slow).ToArray();
-                var mean = samples.Average();
-                var deviation = Math.Sqrt(samples.Sum(v => (v - mean) * (v - mean)) / slow);
-                if (deviation != 0) scaled = filtered[i] / deviation;
-            }
-            weights[i] = Clamp(5 * Math.Abs(scaled) / slow, .01, .99);
-        }
-        // Expand the time-varying exponential average into its weighted price history.
-        return prices.Select((_, i) =>
-        {
-            double survival = 1, value = 0;
-            for (var j = i; j >= 0; j--)
-            {
-                value += survival * weights[j] * prices[j];
-                survival *= 1 - weights[j];
-            }
-            return value;
-        }).ToArray();
-    }
-
     private static FormulaDefinition? EhlersLinear(IBuiltInIndicator indicator)
     {
         var options = indicator.CreateOptions();
@@ -260,15 +229,8 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersDeviationScaledMovingAverage:
             case IndicatorName.EhlersFisherizedDeviationScaledOscillator:
                 var fisherDeviation = indicator.BatchName == IndicatorName.EhlersFisherizedDeviationScaledOscillator;
-                var deviationKey = fisherDeviation ? "Efdso" : "Edsma";
-                return new(deviationKey, new[] { deviationKey }, bars =>
-                {
-                    var fast = Integer(options, "Length", 20);
-                    var line = DeviationAverageReference(Closes(bars), fast, fisherDeviation ? 40 : fast * 2);
-                    if (!fisherDeviation) return Outputs((deviationKey, line));
-                    double held = 0;
-                    return Outputs((deviationKey, line.Select(v => held = Math.Abs(v) < 2 ? (Math.Log(2 + v) - Math.Log(2 - v)) / 2 : held).ToArray()));
-                });
+                var deviationKey = fisherDeviation ? "Efdso" : "Edsma"; var deviationFast = Math.Max(1, Integer(options, "Length", 20));
+                return new(deviationKey, new[] { deviationKey }, bars => Outputs((deviationKey, DeviationScaledValues(bars, deviationFast, fisherDeviation ? 40 : checked(2 * deviationFast), fisherDeviation))));
             case IndicatorName.EhlersRecursiveMedianOscillator:
                 return new("Ermo", new[] { "Ermo" }, bars =>
                 {

@@ -330,7 +330,7 @@ internal static partial class StatefulIndicatorFactory
             EhlersFMDemodulatorIndicatorSpecOptions demodulator => new EhlersFMDemodulatorIndicatorState(demodulator.MaType, demodulator.FastLength, demodulator.SlowLength),
             EhlersEmpiricalModeDecompositionSpecOptions emd => new EhlersEmpiricalModeDecompositionState(emd.MaType, emd.Length1, emd.Length2, emd.Delta, emd.Fraction),
             EhlersDeviationScaledSuperSmootherSpecOptions scaledSuper => new EhlersDeviationScaledSuperSmootherState(scaledSuper.MaType, scaledSuper.Length),
-            EhlersDeviationScaledMovingAverageSpecOptions deviation => new EhlersDeviationScaledMovingAverageState(fastLength: deviation.Length, slowLength: 2 * deviation.Length),
+            EhlersDeviationScaledMovingAverageSpecOptions deviation => new EhlersDeviationScaledMovingAverageState(fastLength: deviation.Length, slowLength: DeviationScaledWindow.ResolveSlow(deviation.Length)),
             EhlersFisherizedDeviationScaledOscillatorSpecOptions fisherDeviation => new EhlersFisherizedDeviationScaledOscillatorState(fastLength: fisherDeviation.Length),
             EhlersSquelchIndicatorSpecOptions squelch => new EhlersSquelchIndicatorState(squelch.Length1, squelch.Length2, squelch.Length3),
             EhlersAdaptiveCyberCycleSpecOptions cyber => new EhlersAdaptiveCyberCycleState(cyber.Length, cyber.Alpha),

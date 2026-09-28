@@ -357,8 +357,7 @@ public static partial class Calculations
             var prevEfdsoPole1 = i >= 1 ? efdso2PoleList[i - 1] : 0;
             var prevEfdsoPole2 = i >= 2 ? efdso2PoleList[i - 2] : 0;
 
-            var efdso2Pole = Math.Abs(currentScaledFilter2Pole) < 2 ? 0.5 * Math.Log((1 + (currentScaledFilter2Pole / 2)) / 
-                (1 - (currentScaledFilter2Pole / 2))) : prevEfdsoPole1;
+            var efdso2Pole = Math.Abs(currentScaledFilter2Pole) < 2 ? FisherArithmetic.Transform(currentScaledFilter2Pole / 2) : prevEfdsoPole1;
             efdso2PoleList.Add(efdso2Pole);
 
             var signal = GetRsiSignal(efdso2Pole - prevEfdsoPole1, prevEfdsoPole1 - prevEfdsoPole2, efdso2Pole, prevEfdsoPole1, 2, -2);

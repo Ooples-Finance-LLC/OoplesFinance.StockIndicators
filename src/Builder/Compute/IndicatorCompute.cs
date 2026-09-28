@@ -10541,7 +10541,7 @@ internal static partial class IndicatorCompute
         for (var i = 0; i < count; i++)
         {
             var half = filter[i] / 2;
-            output[i] = Math.Abs(filter[i]) < 2 ? 0.5 * Math.Log((1 + half) / (1 - half)) : i >= 1 ? output[i - 1] : 0;
+            output[i] = Math.Abs(filter[i]) < 2 ? FisherArithmetic.Transform(half) : i >= 1 ? output[i - 1] : 0;
         }
 
         return buffer;
@@ -11759,8 +11759,9 @@ internal static partial class IndicatorCompute
         var count = inputList.Count;
         length = Math.Max(length, 1);
 
+        var slowLength = DeviationScaledWindow.ResolveSlow(length);
         var buffer = context.Rent(count);
-        EhlersDeviationScaledMovingAverage(data, context, SpanCompat.AsReadOnlySpan(inputList), length, length * 2, maType,
+        EhlersDeviationScaledMovingAverage(data, context, SpanCompat.AsReadOnlySpan(inputList), length, slowLength, maType,
             buffer.WritableSpan);
         return buffer;
     }
@@ -11772,6 +11773,12 @@ internal static partial class IndicatorCompute
     private static void EhlersDeviationScaledMovingAverage(StockData data, ComputeContext context, ReadOnlySpan<double> input,
         int fastLength, int slowLength, MovingAvgType maType, Span<double> output)
     {
+        if (maType == MovingAvgType.Ehlers2PoleSuperSmootherFilterV2 && !ComponentAverage.HasOverrides)
+        {
+            var window = new DeviationScaledWindow(fastLength, slowLength);
+            for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true, out _);
+            return;
+        }
         var count = input.Length;
         fastLength = Math.Max(fastLength, 1);
         slowLength = Math.Max(slowLength, 1);
