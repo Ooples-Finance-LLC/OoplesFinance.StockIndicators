@@ -690,6 +690,7 @@ public sealed class PercentageTrendState : IStreamingIndicatorState, IDisposable
 
     public PercentageTrendState(int length = 20, double pct = 0.15)
     {
+        if (double.IsNaN(pct) || double.IsInfinity(pct)) throw new ArgumentOutOfRangeException(nameof(pct));
         _length = Math.Max(1, length);
         _pct = pct;
         _values = new PooledRingBuffer<double>(_length + 1);
@@ -706,6 +707,7 @@ public sealed class PercentageTrendState : IStreamingIndicatorState, IDisposable
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _input.GetValue(bar);
         var period = 0;
         var trend = value;

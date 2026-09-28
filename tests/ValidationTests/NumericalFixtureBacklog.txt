@@ -1250,10 +1250,6 @@ OoplesFinance.StockIndicators.Indicators.PeakValleyEstimation/minimum-periods
 OoplesFinance.StockIndicators.Indicators.PeakValleyEstimation/minimum-smoothLength
 OoplesFinance.StockIndicators.Indicators.PeakValleyEstimation/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PeakValleyEstimation/weighted-average
-OoplesFinance.StockIndicators.Indicators.PercentageTrend/default
-OoplesFinance.StockIndicators.Indicators.PercentageTrend/longer-periods
-OoplesFinance.StockIndicators.Indicators.PercentageTrend/minimum-periods
-OoplesFinance.StockIndicators.Indicators.PercentageTrend/shorter-periods
 OoplesFinance.StockIndicators.Indicators.PeriodicChannel/default
 OoplesFinance.StockIndicators.Indicators.PeriodicChannel/longer-length1
 OoplesFinance.StockIndicators.Indicators.PeriodicChannel/longer-length2

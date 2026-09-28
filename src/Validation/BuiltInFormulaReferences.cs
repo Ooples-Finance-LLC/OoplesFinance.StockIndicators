@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.PercentageTrend)
+        {
+            var percentageOptions = (PercentageTrendSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => PercentageTrendValues(bars, percentageOptions.Length, percentageOptions.Pct), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersHammingWindowIndicator)
         {
             var hammingOptions = (EhlersHammingWindowIndicatorSpecOptions)builtIn.CreateOptions();

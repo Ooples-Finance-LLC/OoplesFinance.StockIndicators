@@ -36473,5 +36473,77 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "percentage-trend-batch-factor",
+    "module": "numerical",
+    "file": "src/Calculations/Trend/TrendLtoR.cs",
+    "scope": "public static StockData CalculatePercentageTrend(",
+    "before": "highest1 * (1 - pct)",
+    "after": "highest1 * (1 + pct)",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-fast-factor",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePercentageTrendFast(",
+    "before": "highest1 * (1 - pct)",
+    "after": "highest1 * (1 + pct)",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-native-factor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrendState",
+    "before": "highest1 * (1 - _pct)",
+    "after": "highest1 * (1 + _pct)",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrendState",
+    "before": "if (isFinal)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrendState",
+    "before": "StreamingInputValidation.Validate(bar);\n        var value = _input.GetValue(bar);",
+    "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal));",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-parameter",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class PercentageTrendState",
+    "before": "double.IsNaN(pct) || double.IsInfinity(pct)",
+    "after": "double.IsNaN(pct) && double.IsInfinity(pct)",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-batch-length",
+    "module": "numerical",
+    "file": "src/Calculations/Trend/TrendLtoR.cs",
+    "scope": "public static StockData CalculatePercentageTrend(",
+    "before": "length = Math.Max(1, length);",
+    "after": "_ = length;",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "percentage-trend-fast-length",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputePercentageTrendFast(",
+    "before": "length = Math.Max(1, length);",
+    "after": "_ = length;",
+    "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
   }
 ]

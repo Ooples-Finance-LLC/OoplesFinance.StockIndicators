@@ -16137,6 +16137,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputePercentageTrendFast(StockData data, ComputeContext context, int length = 20, double pct = 0.15)
     {
+        length = Math.Max(1, length);
+        if (double.IsNaN(pct) || double.IsInfinity(pct)) throw new ArgumentOutOfRangeException(nameof(pct));
         // CalculatePercentageTrend walks the whole window afresh on every bar, restarting its period count
         // whenever the trend line is crossed and stepping the line to a percentage below the running high or
         // above the running low. The two inner scans differ in where they start, and both are reproduced as

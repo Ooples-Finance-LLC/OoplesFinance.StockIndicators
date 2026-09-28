@@ -317,6 +317,8 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculatePercentageTrend(this StockData stockData, int length = 20, double pct = 0.15)
     {
+        length = Math.Max(1, length);
+        if (double.IsNaN(pct) || double.IsInfinity(pct)) throw new ArgumentOutOfRangeException(nameof(pct));
         List<double> trendList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
