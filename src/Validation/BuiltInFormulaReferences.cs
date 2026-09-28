@@ -49,6 +49,12 @@ internal static partial class BuiltInFormulaReferences
             { var key = simpleWindowKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersSimpleWindowOutputs(bars, Integer(simpleWindowOptions, "Length", 20), simpleWindowKind)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.SimpleCycle)
+        {
+            var cycleOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SimpleCycleOutputs(bars, Integer(cycleOptions, "Length", 50)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

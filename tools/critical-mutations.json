@@ -32602,5 +32602,119 @@
     "before": "third[i - 1]",
     "after": "first[i - 1]",
     "filter": "FullyQualifiedName~ValidationTests.EhlersSimpleWindowNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-source-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "Add(new RocBankValue(price), _previous)",
+    "after": "new RocBankValue(price)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-source-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "_sources.Peek()",
+    "after": "_sources.Last()",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-ema-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "Math.Max(.01, Math.Min(.99, 2d / (_length + 1d)))",
+    "after": "Math.Min(.99, 2d / (_length + 1d))",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-ema-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "_ema.Multiply(1 - _emaWeight)",
+    "after": "_ema.Multiply(_emaWeight)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-residual-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "Add(_previous, ema, -1)",
+    "after": "Add(_previous, ema, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "Add(source, prior, -1)",
+    "after": "Add(source, prior, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-retained-weight",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "residual.Multiply(1 - _alpha)",
+    "after": "residual.Multiply(_alpha)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-source-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "_sources.Enqueue(source)",
+    "after": "_sources.Enqueue(new RocBankValue(source.Publish()))",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "if (commit)",
+    "after": "if (commit || price != 0)",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SimpleCycleWindow.cs",
+    "before": "_previous = _ema = default",
+    "after": "_previous = default",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeSimpleCycleFast("
+  },
+  {
+    "id": "simple-cycle-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class SimpleCycleState"
+  },
+  {
+    "id": "simple-cycle-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SimpleCycleSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "simple-cycle-reference-feedback",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SimpleCycle.cs",
+    "before": "ReferenceFraction.FromDouble(bars[i].Close) + previous",
+    "after": "ReferenceFraction.FromDouble(bars[i].Close) - previous",
+    "filter": "FullyQualifiedName~ValidationTests.SimpleCycleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

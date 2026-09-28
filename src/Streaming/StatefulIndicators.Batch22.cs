@@ -967,66 +967,18 @@ public sealed class ShinoharaIntensityRatioState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Sc")]
 public sealed class SimpleCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly PooledRingBuffer<double> _srcValues;
+    private readonly SimpleCycleWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevCema;
-    private double _prevC;
-    private int _count;
-
     public SimpleCycleState(int length = 50)
-    {
-        _length = Math.Max(1, length);
-        _alpha = 1d / _length;
-        _srcValues = new PooledRingBuffer<double>(_length + 1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.SimpleCycle;
-
-    public void Reset()
-    {
-        _srcValues.Clear();
-        _prevCema = 0;
-        _prevC = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevC = _count >= 1 ? _prevC : 0;
-        var prevSrc = EhlersStreamingWindow.GetOffsetValue(_srcValues, _length);
-        var src = value + prevC;
-        var cEma = CalculationsHelper.CalculateEMA(prevC, _prevCema, _length);
-        var b = prevC - cEma;
-        var c = (_alpha * (src - prevSrc)) + ((1 - _alpha) * b);
-
-        if (isFinal)
-        {
-            _srcValues.TryAdd(src, out _);
-            _prevCema = cEma;
-            _prevC = c;
-            _count++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Sc", c }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(c, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Sc", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _srcValues.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Sl")]

@@ -12766,38 +12766,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeSimpleCycleFast(StockData data, ComputeContext context, int length = 50)
     {
-        // CalculateSimpleCycle feeds the cycle back into its own source: the source is the chained value plus
-        // the previous cycle, and the cycle is the windowed change in that source blended with how far the
-        // previous cycle sits above its own exponential average. OscillatorCore.SimpleCycle read the close and
-        // carried neither feedback term.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var a = (double)1 / length;
-
-        using var source = context.Rent(count);
-        var src = source.WritableSpan;
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double prevCEma = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var prevC = i >= 1 ? output[i - 1] : 0;
-            var priorSrc = i >= length ? src[i - length] : 0;
-
-            src[i] = input[i] + prevC;
-
-            var cEma = CalculationsHelper.CalculateEMA(prevC, prevCEma, length);
-            prevCEma = cEma;
-
-            var b = prevC - cEma;
-            output[i] = (a * (src[i] - priorSrc)) + ((1 - a) * b);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new SimpleCycleWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

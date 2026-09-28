@@ -1562,10 +1562,6 @@ OoplesFinance.StockIndicators.Indicators.SigmaSpikes/longer-periods
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/minimum-periods
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/shorter-periods
 OoplesFinance.StockIndicators.Indicators.SigmaSpikes/weighted-average
-OoplesFinance.StockIndicators.Indicators.SimpleCycle/default
-OoplesFinance.StockIndicators.Indicators.SimpleCycle/longer-periods
-OoplesFinance.StockIndicators.Indicators.SimpleCycle/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SimpleCycle/shorter-periods
 OoplesFinance.StockIndicators.Indicators.SimpleLines/default
 OoplesFinance.StockIndicators.Indicators.SimpleLines/longer-periods
 OoplesFinance.StockIndicators.Indicators.SimpleLines/minimum-periods

@@ -3286,35 +3286,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSimpleCycle(this StockData stockData, int length = 50)
     {
-        List<double> srcList = new(stockData.Count);
-        List<double> cEmaList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a = (double)1 / length;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new SimpleCycleWindow(length);
+        List<double> cList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var prevC1 = i >= 1 ? cList[i - 1] : 0;
-            var prevC2 = i >= 2 ? cList[i - 2] : 0;
-            var prevSrc = i >= length ? srcList[i - length] : 0;
-
-            var src = currentValue + prevC1;
-            srcList.Add(src);
-
-            var cEma = CalculateEMA(prevC1, GetLastOrDefault(cEmaList), length);
-            cEmaList.Add(cEma);
-
-            var b = prevC1 - cEma;
-            var c = (a * (src - prevSrc)) + ((1 - a) * b);
-            cList.Add(c);
-
-            var signal = GetCompareSignal(c - prevC1, prevC1 - prevC2);
-            signalsList?.Add(signal);
+            var value = window.Next(price, true); var previous = cList.Count > 0 ? cList[cList.Count - 1] : 0; var older = cList.Count > 1 ? cList[cList.Count - 2] : 0;
+            cList.Add(value); signalsList?.Add(GetCompareSignal(value - previous, previous - older));
         }
-
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
             { "Sc", cList }
         });
