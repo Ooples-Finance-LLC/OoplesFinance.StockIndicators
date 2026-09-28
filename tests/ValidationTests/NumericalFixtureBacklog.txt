@@ -1244,10 +1244,6 @@ OoplesFinance.StockIndicators.Indicators.ModifiedGannHiloActivator/minimum-lookb
 OoplesFinance.StockIndicators.Indicators.ModifiedGannHiloActivator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ModifiedGannHiloActivator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ModifiedGannHiloActivator/weighted-average
-OoplesFinance.StockIndicators.Indicators.ModularFilter/default
-OoplesFinance.StockIndicators.Indicators.ModularFilter/longer-periods
-OoplesFinance.StockIndicators.Indicators.ModularFilter/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ModularFilter/shorter-periods
 OoplesFinance.StockIndicators.Indicators.MorphedSineWave/default
 OoplesFinance.StockIndicators.Indicators.MorphedSineWave/longer-periods
 OoplesFinance.StockIndicators.Indicators.MorphedSineWave/minimum-periods

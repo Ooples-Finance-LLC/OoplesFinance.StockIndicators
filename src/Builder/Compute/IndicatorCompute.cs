@@ -14212,42 +14212,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeModularFilterFast(StockData data, ComputeContext context, int length = 200, double beta = 0.8)
     {
-        // CalculateModularFilter tracks two exponential envelopes - one that can only be pulled up by a new
-        // high and one that can only be pulled down by a new low - and blends them by which of the two the
-        // series last touched. Its z parameter reaches nothing in the batch body, so binding the spec's Z to
-        // it cannot change the result and the arm does not take it either.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var alpha = (double)2 / (length + 1);
-        double b2 = 0;
-        double c2 = 0;
-        double os2 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevB2 = i >= 1 ? b2 : currentValue;
-            var prevC2 = i >= 1 ? c2 : currentValue;
-
-            var upperFilter = (alpha * currentValue) + ((1 - alpha) * prevB2);
-            b2 = currentValue > upperFilter ? currentValue : upperFilter;
-
-            var lowerFilter = (alpha * currentValue) + ((1 - alpha) * prevC2);
-            c2 = currentValue < lowerFilter ? currentValue : lowerFilter;
-
-            os2 = currentValue == b2 ? 1 : currentValue == c2 ? 0 : os2;
-
-            var upper2 = (beta * b2) + ((1 - beta) * c2);
-            var lower2 = (beta * c2) + ((1 - beta) * b2);
-            output[i] = (os2 * upper2) + ((1 - os2) * lower2);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new ModularWindow(length, beta); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

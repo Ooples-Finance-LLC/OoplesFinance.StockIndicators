@@ -1351,41 +1351,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateModularFilter(this StockData stockData, int length = 200, double beta = 0.8, double z = 0.5)
     {
-        List<double> b2List = new(stockData.Count);
-        List<double> c2List = new(stockData.Count);
-        List<double> os2List = new(stockData.Count);
-        List<double> ts2List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alpha = (double)2 / (length + 1);
-
+        List<double> ts2List = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new ModularWindow(length, beta); _ = z;
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevB2 = i >= 1 ? b2List[i - 1] : currentValue;
-            var b2 = currentValue > (alpha * currentValue) + ((1 - alpha) * prevB2) ? currentValue : (alpha * currentValue) + ((1 - alpha) * prevB2);
-            b2List.Add(b2);
-
-            var prevC2 = i >= 1 ? c2List[i - 1] : currentValue;
-            var c2 = currentValue < (alpha * currentValue) + ((1 - alpha) * prevC2) ? currentValue : (alpha * currentValue) + ((1 - alpha) * prevC2);
-            c2List.Add(c2);
-
-            var prevOs2 = GetLastOrDefault(os2List);
-            var os2 = currentValue == b2 ? 1 : currentValue == c2 ? 0 : prevOs2;
-            os2List.Add(os2);
-
-            var upper2 = (beta * b2) + ((1 - beta) * c2);
-            var lower2 = (beta * c2) + ((1 - beta) * b2);
-
-            var prevTs2 = GetLastOrDefault(ts2List);
-            var ts2 = (os2 * upper2) + ((1 - os2) * lower2);
-            ts2List.Add(ts2);
-
-            var signal = GetCompareSignal(currentValue - ts2, prevValue - prevTs2);
-            signalsList?.Add(signal);
+            var previous = GetLastOrDefault(ts2List); var value = window.Next(inputList[i], true); ts2List.Add(value);
+            signalsList?.Add(GetCompareSignal(inputList[i] - value, i == 0 ? 0 : inputList[i - 1] - previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

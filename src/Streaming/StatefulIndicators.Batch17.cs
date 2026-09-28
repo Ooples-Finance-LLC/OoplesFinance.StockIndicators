@@ -915,65 +915,14 @@ public sealed class ModifiedPriceVolumeTrendState : IStreamingIndicatorState, ID
 [PrimaryOutput("Mf")]
 public sealed class ModularFilterState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _beta;
-    private readonly StreamingInputResolver _input;
-    private double _prevB2;
-    private double _prevC2;
-    private double _prevOs2;
-    private bool _hasPrev;
-
-    public ModularFilterState(int length = 200, double beta = 0.8, double z = 0.5)
-    {
-        _alpha = 2d / (Math.Max(1, length) + 1);
-        _beta = beta;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _ = z;
-    }
-
+    private readonly ModularWindow _window; private readonly StreamingInputResolver _input;
+    public ModularFilterState(int length = 200, double beta = .8, double z = .5) { _window = new(length, beta); _input = new StreamingInputResolver(InputName.Close, null); _ = z; }
     public IndicatorName Name => IndicatorName.ModularFilter;
-
-    public void Reset()
-    {
-        _prevB2 = 0;
-        _prevC2 = 0;
-        _prevOs2 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevB2 = _hasPrev ? _prevB2 : value;
-        var prevC2 = _hasPrev ? _prevC2 : value;
-        var b2Base = (_alpha * value) + ((1 - _alpha) * prevB2);
-        var c2Base = (_alpha * value) + ((1 - _alpha) * prevC2);
-        var b2 = value > b2Base ? value : b2Base;
-        var c2 = value < c2Base ? value : c2Base;
-        var prevOs2 = _hasPrev ? _prevOs2 : 0;
-        var os2 = value == b2 ? 1 : value == c2 ? 0 : prevOs2;
-        var upper2 = (_beta * b2) + ((1 - _beta) * c2);
-        var lower2 = (_beta * c2) + ((1 - _beta) * b2);
-        var ts2 = (os2 * upper2) + ((1 - os2) * lower2);
-
-        if (isFinal)
-        {
-            _prevB2 = b2;
-            _prevC2 = c2;
-            _prevOs2 = os2;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Mf", ts2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ts2, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Mf", value } } : null);
     }
 }
 

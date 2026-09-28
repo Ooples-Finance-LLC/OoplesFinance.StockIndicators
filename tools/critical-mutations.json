@@ -34647,5 +34647,119 @@
     "before": "ReferenceFraction.FromDouble(bar.Open)",
     "after": "ReferenceFraction.FromDouble(bar.Close)",
     "filter": "FullyQualifiedName~ValidationTests.MultiLevelNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "Math.Max(1, length) + 1d",
+    "after": "Math.Max(1, length) + 1",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-upper-envelope",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "Compare(current, upper) > 0",
+    "after": "Compare(current, upper) < 0",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-lower-envelope",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "Compare(current, lower) < 0",
+    "after": "Compare(current, lower) > 0",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-seed",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "_seeded ? _upper : current",
+    "after": "_upper",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-held-side",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "Compare(current, lower) == 0 ? 0 : _side",
+    "after": "Compare(current, lower) == 0 ? 0 : 1",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-blend-complement",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "b.Multiply(1 - gain)",
+    "after": "b.Multiply(gain)",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-blend-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-lower-selection",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "Blend(lower, upper, _beta)",
+    "after": "Blend(upper, lower, _beta)",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "if (commit) { _upper",
+    "after": "if (commit || price != 0) { _upper",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ModularWindow.cs",
+    "before": "_seeded = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeModularFilterFast("
+  },
+  {
+    "id": "modular-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class ModularFilterState"
+  },
+  {
+    "id": "modular-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " ModularFilterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "modular-reference-beta",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Modular.cs",
+    "before": "Blend(upper, lower, beta) : Blend(lower, upper, beta)",
+    "after": "Blend(upper, lower, .5) : Blend(lower, upper, .5)",
+    "filter": "FullyQualifiedName~ValidationTests.ModularNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]
