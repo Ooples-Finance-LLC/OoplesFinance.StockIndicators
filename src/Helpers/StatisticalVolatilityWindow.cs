@@ -14,9 +14,27 @@ internal sealed class StatisticalVolatilityWindow : IDisposable
     }
     internal double Line(double high, double low, double close, bool commit)
     {
-        var closeLog = StableLogRatio.OfSameSign(_closeHigh.Next(close, commit), _closeLow.Next(close, commit));
-        var rangeLog = StableLogRatio.OfSameSign(_high.Next(high, commit), _low.Next(low, commit));
+        var closeHigh = _closeHigh.Next(close, commit); var closeLow = _closeLow.Next(close, commit);
+        var rangeHigh = _high.Next(high, commit); var rangeLow = _low.Next(low, commit);
+        var closeLog = StableLogRatio.OfSameSign(closeHigh, closeLow);
+        var rangeLog = StableLogRatio.OfSameSign(rangeHigh, rangeLow);
+        // Opposing logarithms can cancel below either term's binary64 precision.
+        if (closeLog < 0 && rangeLog > 0 || closeLog > 0 && rangeLog < 0)
+        { closeLog = CombinedLog(closeHigh, closeLow, rangeHigh, rangeLow); rangeLog = 0; }
         return Math.Max(0, Math.Min(2.99, ((0.6 * closeLog * _annual) + (0.6 * rangeLog * _annual)) * 0.5));
+    }
+    private static double CombinedLog(double closeHigh, double closeLow, double high, double low)
+    {
+        var numerator = ExactVarianceWindow.Units(Math.Abs(closeHigh)) * ExactVarianceWindow.Units(Math.Abs(high));
+        var denominator = ExactVarianceWindow.Units(Math.Abs(closeLow)) * ExactVarianceWindow.Units(Math.Abs(low));
+        // Nonpositive log sums are clamped to zero by the published volatility contract.
+        if (numerator <= denominator) return 0;
+        var relative = ExactMeanAccumulator.UnitRatio((numerator - denominator) << 1074, denominator);
+        if (relative <= 1e-8) return relative - relative * relative * 0.5;
+        if (relative <= 0.5)
+        { var argument = 1 + relative; return Math.Log(argument) * (relative / (argument - 1)); }
+        var ratio = ExactMeanAccumulator.UnitRatio(numerator << 1074, denominator);
+        return double.IsInfinity(ratio) ? System.Numerics.BigInteger.Log(numerator) - System.Numerics.BigInteger.Log(denominator) : Math.Log(ratio);
     }
     internal (double Line, double Signal) Next(double high, double low, double close, bool commit)
     { var line = Line(high, low, close, commit); return (line, _signal.Next(new RocBankValue(line), commit).Publish()); }

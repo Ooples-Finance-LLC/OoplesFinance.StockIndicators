@@ -109,4 +109,23 @@ public sealed class StatisticalRangeNumericalTests
                 Assert.Equal(control.Update(bar, true, true).Value, state.Update(bar, true, true).Value);
         }
     }
+    [Fact]
+    public void OpposingLogarithmsPreserveZeroAndTinyResiduals()
+    {
+        var step = Math.Pow(2, -52);
+        var cases = new[] {
+            new[] { Candle(-5, 5, 2), Candle(-2, 5, 2) },
+            new[] { Candle(-(1 + step), 1, 1 - step), Candle(-1, 1, 1 - step) },
+            new[] { Candle(-1, 1 + step, 1), Candle(-(1 - step), 1 + step, 1) },
+            new[] { Candle(-(1 + step), 1 + 1e-7, 1), Candle(-1, 1 + 1e-7, 1) }
+        };
+        Assert.Equal(0, BuiltInFormulaReferences.StatisticalRangeOutputs(cases[0], 2, 2, 3)["Sv"][1]);
+        var positive = BuiltInFormulaReferences.StatisticalRangeOutputs(cases[1], 2, 2, 3)["Sv"][1];
+        Assert.True(positive > 0 && positive < 1e-30);
+        Assert.Equal(0, BuiltInFormulaReferences.StatisticalRangeOutputs(cases[2], 2, 2, 3)["Sv"][1]);
+        foreach (var bars in cases)
+        foreach (var kind in new[] { MovingAvgType.SimpleMovingAverage, MovingAvgType.WeightedMovingAverage, MovingAvgType.ExponentialMovingAverage, MovingAvgType.WildersSmoothingMethod })
+            Check(bars, 2, 2, kind);
+    }
+
 }

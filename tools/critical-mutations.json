@@ -35930,8 +35930,8 @@
     "module": "numerical",
     "file": "src/Helpers/StatisticalVolatilityWindow.cs",
     "scope": "internal sealed class StatisticalVolatilityWindow",
-    "before": "StableLogRatio.OfSameSign(_high.Next(high, commit), _low.Next(low, commit))",
-    "after": "Math.Log(_high.Next(high, commit) / _low.Next(low, commit))",
+    "before": "StableLogRatio.OfSameSign(rangeHigh, rangeLow)",
+    "after": "Math.Log(rangeHigh / rangeLow)",
     "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
   },
   {
@@ -36221,5 +36221,32 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "statistical-cancellation-opposing",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "if (closeLog < 0 && rangeLog > 0 || closeLog > 0 && rangeLog < 0)",
+    "after": "if (closeLog < 0 && rangeLog < 0)",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests.OpposingLogarithmsPreserveZeroAndTinyResiduals"
+  },
+  {
+    "id": "statistical-cancellation-tiny-residual",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "ExactMeanAccumulator.UnitRatio((numerator - denominator) << 1074, denominator)",
+    "after": "ExactMeanAccumulator.UnitRatio(numerator << 1074, denominator) - 1",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests.OpposingLogarithmsPreserveZeroAndTinyResiduals"
+  },
+  {
+    "id": "statistical-cancellation-pairing",
+    "module": "numerical",
+    "file": "src/Helpers/StatisticalVolatilityWindow.cs",
+    "scope": "internal sealed class StatisticalVolatilityWindow",
+    "before": "ExactVarianceWindow.Units(Math.Abs(high))",
+    "after": "ExactVarianceWindow.Units(Math.Abs(low))",
+    "filter": "FullyQualifiedName~StatisticalRangeNumericalTests.OpposingLogarithmsPreserveZeroAndTinyResiduals"
   }
 ]
