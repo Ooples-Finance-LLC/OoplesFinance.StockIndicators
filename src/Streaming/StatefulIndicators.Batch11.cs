@@ -888,79 +888,16 @@ public sealed class EhlersModifiedRelativeStrengthIndexState : IStreamingIndicat
 [PrimaryOutput("Emsi")]
 public sealed class EhlersModifiedStochasticIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersRoofingFilterV1State _roofingFilter;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private double _prevStoc;
-    private double _prevModStoc1;
-    private double _prevModStoc2;
-
-    public EhlersModifiedStochasticIndicatorState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
-        int length1 = 48, int length2 = 10, int length3 = 20)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(2, length3);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved1);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved1, 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, resolved1, resolved2);
-        _maxWindow = new RollingWindowMax(resolved3);
-        _minWindow = new RollingWindowMin(resolved3);
-    }
-
+    private readonly RoofingStochasticWindow _window;
+    public EhlersModifiedStochasticIndicatorState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, int length1 = 48, int length2 = 10, int length3 = 20) => _window = new(maType, length1, length2, length3, true);
     public IndicatorName Name => IndicatorName.EhlersModifiedStochasticIndicator;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _prevStoc = 0;
-        _prevModStoc1 = 0;
-        _prevModStoc2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var highest = isFinal ? _maxWindow.Add(roofingFilter, out _) : _maxWindow.Preview(roofingFilter, out _);
-        var lowest = isFinal ? _minWindow.Add(roofingFilter, out _) : _minWindow.Preview(roofingFilter, out _);
-
-        var stoc = highest - lowest != 0 ? (roofingFilter - lowest) / (highest - lowest) * 100 : 0;
-        var modStoc = (_c1 * ((stoc + _prevStoc) / 2)) + (_c2 * _prevModStoc1) + (_c3 * _prevModStoc2);
-
-        if (isFinal)
-        {
-            _prevStoc = stoc;
-            _prevModStoc2 = _prevModStoc1;
-            _prevModStoc1 = modStoc;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Emsi", modStoc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(modStoc, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Emsi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Emad")]
@@ -2226,83 +2163,16 @@ public sealed class EhlersStochasticCyberCycleState : IStreamingIndicatorState, 
 [PrimaryOutput("Es")]
 public sealed class EhlersStochasticState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly int _windowLength;
-    private readonly EhlersRoofingFilterV1State _roofingFilter;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _rfValues;
-    private double _prevStoch;
-
-    public EhlersStochasticState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
-        int length1 = 48, int length2 = 20, int length3 = 10)
-    {
-        _length2 = Math.Max(1, length2);
-        _windowLength = Math.Max(_length2, 2);
-        _roofingFilter = new EhlersRoofingFilterV1State(maType, Math.Max(1, length1), Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
-        _rfValues = new PooledRingBuffer<double>(_windowLength);
-    }
-
+    private readonly RoofingStochasticWindow _window;
+    public EhlersStochasticState(MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, int length1 = 48, int length2 = 20, int length3 = 10) => _window = new(maType, length1, length3, length2, false);
     public IndicatorName Name => IndicatorName.EhlersStochastic;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _signalSmoother.Reset();
-        _rfValues.Clear();
-        _prevStoch = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var rf = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var min = rf;
-        var max = rf;
-        // Skip oldest value when buffer is full to match batch's sliding window behavior
-        var start = _rfValues.Count == _windowLength ? 1 : 0;
-        for (var i = start; i < _rfValues.Count; i++)
-        {
-            var value = _rfValues[i];
-            if (value < min)
-            {
-                min = value;
-            }
-
-            if (value > max)
-            {
-                max = value;
-            }
-        }
-
-        var stoch = max - min != 0 ? MathHelper.MinOrMax((rf - min) / (max - min), 1, 0) : 0;
-        var arg = (stoch + _prevStoch) / 2;
-        var estoch = _signalSmoother.Next(arg, isFinal);
-
-        if (isFinal)
-        {
-            _rfValues.TryAdd(rf, out _);
-            _prevStoch = stoch;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Es", estoch }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(estoch, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Es", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _signalSmoother.Dispose();
-        _rfValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Etdld")]

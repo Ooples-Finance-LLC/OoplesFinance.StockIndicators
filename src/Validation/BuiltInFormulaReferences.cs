@@ -17,6 +17,16 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersModifiedStochasticIndicator or IndicatorName.EhlersStochastic)
+        {
+            var stochasticOptions = builtIn.CreateOptions(); var stochasticKind = (MovingAvgType)stochasticOptions.GetType().GetProperty("MaType")!.GetValue(stochasticOptions)!;
+            if (stochasticKind is MovingAvgType.Ehlers2PoleSuperSmootherFilterV1 or MovingAvgType.WeightedMovingAverage)
+            {
+                var modifiedStochastic = stochasticOptions is EhlersModifiedStochasticIndicatorSpecOptions;
+                var high = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length1 : 48; var low = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length2 : 10; var length = modifiedStochastic ? ((EhlersModifiedStochasticIndicatorSpecOptions)stochasticOptions).Length3 : ((EhlersStochasticSpecOptions)stochasticOptions).Length;
+                yield return IndicatorValidationRule.Reference(0, bars => RoofingStochasticValues(bars, high, low, length, stochasticKind, modifiedStochastic), IndicatorErrorBudget.Exact); yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersModifiedRelativeStrengthIndex)
         {
             var modified = (EhlersModifiedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();

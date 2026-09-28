@@ -439,6 +439,11 @@ internal static partial class BuiltInFormulaReferences
                 return new("Erf", new[] { "Erf" }, bars => Outputs(("Erf", RoofingV1Values(bars, v1Options.High, v1Options.Low, v1Options.Kind))));
             case IndicatorName.EhlersModifiedStochasticIndicator:
             case IndicatorName.EhlersStochastic:
+                if (options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType stochasticKind && stochasticKind is MovingAvgType.Ehlers2PoleSuperSmootherFilterV1 or MovingAvgType.WeightedMovingAverage)
+                {
+                    var modified = indicator.BatchName == IndicatorName.EhlersModifiedStochasticIndicator; var high = modified ? Integer(options, "Length1", 48) : 48; var low = modified ? Integer(options, "Length2", 10) : 10; var rankLength = modified ? Integer(options, "Length3", 20) : length; var stochasticOutputKey = modified ? "Emsi" : "Es";
+                    return new(stochasticOutputKey, new[] { stochasticOutputKey }, bars => Outputs((stochasticOutputKey, RoofingStochasticValues(bars, high, low, rankLength, stochasticKind, modified))));
+                }
                 var smoother = options.GetType().GetProperty("MaType")?.GetValue(options);
                 var superSmoother = smoother is null || smoother is MovingAvgType.Ehlers2PoleSuperSmootherFilterV1;
                 var roofKind = AverageKind(options, 0);

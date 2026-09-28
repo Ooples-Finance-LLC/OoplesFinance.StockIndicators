@@ -1117,52 +1117,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersStochastic(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1, 
         int length1 = 48, int length2 = 20, int length3 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> stoch2PoleList = new(stockData.Count);
-        List<double> arg2PoleList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var roofingFilter2PoleList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV1(data, maType, length1, length3));
-        var (max2PoleList, min2PoleList) = GetMaxAndMinValuesList(roofingFilter2PoleList, length2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !RoofingStochasticWindow.Supports(maType);
+        using var window = new RoofingStochasticWindow(maType, length1, length3, length2, false, external); var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var rf2Pole = roofingFilter2PoleList[i];
-            var min2Pole = min2PoleList[i];
-            var max2Pole = max2PoleList[i];
-
-            var prevStoch2Pole = GetLastOrDefault(stoch2PoleList);
-            var stoch2Pole = max2Pole - min2Pole != 0 ? MinOrMax((rf2Pole - min2Pole) / (max2Pole - min2Pole), 1, 0) : 0;
-            stoch2PoleList.Add(stoch2Pole);
-
-            var arg2Pole = (stoch2Pole + prevStoch2Pole) / 2;
-            arg2PoleList.Add(arg2Pole);
+            var raw = input.Select(price => window.Prepare(price, true)).ToList(); var roof = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length3))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length3), raw);
+            var arguments = roof.Select(value => window.PrepareFinal(window.Rank(value, true), true)).ToList(); values = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(arguments), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), arguments);
         }
-
-        var estoch2PoleList = GetMovingAverageList(stockData, maType, length2, arg2PoleList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var estoch2Pole = estoch2PoleList[i];
-            var prevEstoch2Pole1 = i >= 1 ? estoch2PoleList[i - 1] : 0;
-            var prevEstoch2Pole2 = i >= 2 ? estoch2PoleList[i - 2] : 0;
-
-            var signal = GetRsiSignal(estoch2Pole - prevEstoch2Pole1, prevEstoch2Pole1 - prevEstoch2Pole2, estoch2Pole, prevEstoch2Pole1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Es", estoch2PoleList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(estoch2PoleList);
-        stockData.IndicatorName = IndicatorName.EhlersStochastic;
-
-        return stockData;
+        else foreach (var price in input) values.Add(window.Next(price, true));
+        for (var i = 0; i < values.Count; i++) { var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetRsiSignal(values[i] - previous, previous - older, values[i], previous, .8, .2)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Es", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersStochastic; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Triple Delay Line Detrender

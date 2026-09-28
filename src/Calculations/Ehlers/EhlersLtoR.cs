@@ -162,52 +162,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersModifiedStochasticIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1,
         int length1 = 48, int length2 = 10, int length3 = 20)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> stocList = new(stockData.Count);
-        List<double> modStocList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length1);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99));
-        var c2 = b1;
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV1(data, maType, length1, length2));
-        var (highestList, lowestList) = GetMaxAndMinValuesList(roofingFilterList, length3);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !RoofingStochasticWindow.Supports(maType);
+        using var window = new RoofingStochasticWindow(maType, length1, length2, length3, true, external); var values = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var roofingFilter = roofingFilterList[i];
-            var prevModStoc1 = i >= 1 ? modStocList[i - 1] : 0;
-            var prevModStoc2 = i >= 2 ? modStocList[i - 2] : 0;
-
-            var prevStoc = GetLastOrDefault(stocList);
-            var stoc = highest - lowest != 0 ? (roofingFilter - lowest) / (highest - lowest) * 100 : 0;
-            stocList.Add(stoc);
-
-            var modStoc = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevModStoc1) + (c3 * prevModStoc2);
-            modStocList.Add(modStoc);
-
-            var signal = GetRsiSignal(modStoc - prevModStoc1, prevModStoc1 - prevModStoc2, modStoc, prevModStoc1, 70, 30);
-            signalsList?.Add(signal);
+            var raw = input.Select(price => window.Prepare(price, true)).ToList(); var roof = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length2))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length2), raw);
+            foreach (var value in roof) values.Add(window.Finish(window.Rank(value, true), true));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Emsi", modStocList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(modStocList);
-        stockData.IndicatorName = IndicatorName.EhlersModifiedStochasticIndicator;
-
-        return stockData;
+        else foreach (var price in input) values.Add(window.Next(price, true));
+        for (var i = 0; i < values.Count; i++) { var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetRsiSignal(values[i] - previous, previous - older, values[i], previous, 70, 30)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Emsi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersModifiedStochasticIndicator; return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Modified Relative Strength Index

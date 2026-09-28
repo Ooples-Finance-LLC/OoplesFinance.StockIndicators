@@ -40451,5 +40451,167 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation removed\n",
     "filter": "FullyQualifiedName~ModifiedRsiNumericalTests.InvalidFieldsLeaveRoofingRatiosAndSignalUnchanged"
+  },
+  {
+    "id": "roofing-stochastic-high-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private Scaled HighPass(",
+    "before": "_high2.Add(ref secondSum, _pole)",
+    "after": "_high2.Add(ref secondSum, 0d)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-startup",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "if (_count < 3) result = input;",
+    "after": "if (_count < 2) result = input;",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.ZeroRangeAndNyquistCutoffStayZeroFromStartup"
+  },
+  {
+    "id": "roofing-stochastic-filter-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "_older.Add(ref filter, _feedback2)",
+    "after": "_older.Add(ref filter, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(divisor);",
+    "after": "var shift = 0; var value = sum.Mean(divisor); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.BelowRangeRoofingTailsStillReachTheUpperRank"
+  },
+  {
+    "id": "roofing-stochastic-wma",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted.Subtract(sum);",
+    "after": "// weighted shift removed\n",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "internal sealed class RoofingStochasticWindow",
+    "before": "_length = Math.Max(2, length)",
+    "after": "_length = Math.Max(1, length)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.MinimumRankWindowIncludesTwoObservations"
+  },
+  {
+    "id": "roofing-stochastic-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private double Rank(Scaled value",
+    "before": "_index - _length + 1",
+    "after": "_index - _length",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.TiedExtremaExpireAndPreviewsDoNotAlterDequeOrder"
+  },
+  {
+    "id": "roofing-stochastic-rank-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private double Rank(Scaled value",
+    "before": "_modified ? 100d : 1d",
+    "after": "1d",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-long-period-angle",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "internal RoofingStochasticWindow(",
+    "before": "Math.Cos(Math.Min(angle, .99))",
+    "after": "Math.Cos(Math.Max(.01, Math.Min(angle, .99)))",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.ExtremePeriodsUseConsumedHistoryAndRetainFilterGain"
+  },
+  {
+    "id": "roofing-stochastic-final-average",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "internal double Finish(",
+    "before": "Publish(_finalAverage!.Next(argument, commit))",
+    "after": "Publish(argument)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "private double Rank(Scaled value",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.TiedExtremaExpireAndPreviewsDoNotAlterDequeOrder"
+  },
+  {
+    "id": "roofing-stochastic-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RoofingStochasticWindow.cs",
+    "scope": "internal sealed class RoofingStochasticWindow",
+    "before": "_minimum.Clear();",
+    "after": "// minimum deque retained\n",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.WideAndTinyRoofingValuesRetainWindowRanks"
+  },
+  {
+    "id": "roofing-stochastic-modified-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersModifiedStochasticIndicator(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "roofing-stochastic-ordinary-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersStochastic(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "roofing-stochastic-modified-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersModifiedStochasticFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "roofing-stochastic-ordinary-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersStochasticFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "roofing-stochastic-modified-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersModifiedStochasticIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.InvalidFieldsLeaveRoofingRangeAndOutputUnchanged"
+  },
+  {
+    "id": "roofing-stochastic-ordinary-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersStochasticState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.InvalidFieldsLeaveRoofingRangeAndOutputUnchanged"
   }
 ]

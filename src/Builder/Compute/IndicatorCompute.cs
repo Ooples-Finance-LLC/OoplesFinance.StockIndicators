@@ -12104,34 +12104,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersStochasticFast(StockData data, ComputeContext context, int length1 = 48,
         int length2 = 20, int length3 = 10, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
     {
-        // CalculateEhlersStochastic takes the stochastic of the roofing filter over its own range, averages
-        // each reading with the one before it, and smooths that with the same moving average the roofing
-        // filter uses. MovingAverageCore.EhlersStochastic measured the close against its own window instead,
-        // which is a different indicator entirely.
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        using var roofing = EhlersRoofingFilterV1Core(data, context, length1, length3, maType);
-        var rf = roofing.Span;
-
-        using var argument = context.Rent(count);
-        var arg = argument.WritableSpan;
-        var window = new RollingMinMax(Math.Max(length2, 2));
-        var prevStoch = 0d;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !RoofingStochasticWindow.Supports(maType);
+        using var window = new RoofingStochasticWindow(maType, length1, length3, length2, false, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            window.Add(rf[i]);
-            var range = window.Max - window.Min;
-            var stoch = range != 0 ? MathHelper.MinOrMax((rf[i] - window.Min) / range, 1, 0) : 0;
-            arg[i] = (stoch + prevStoch) / 2;
-            prevStoch = stoch;
+            using var raw = context.Rent(input.Count); using var roof = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Prepare(input[i], true);
+            MovingAverage(data, maType, Math.Max(1, length3), raw.Span, roof.WritableSpan);
+            using var arguments = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) arguments.WritableSpan[i] = window.PrepareFinal(window.Rank(roof.Span[i], true), true);
+            MovingAverage(data, maType, Math.Max(1, length2), arguments.Span, result.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length2, argument.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>
@@ -18681,39 +18665,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersModifiedStochasticFast(StockData data, ComputeContext context, int length1 = 48,
         int length2 = 10, int length3 = 20, MovingAvgType maType = MovingAvgType.Ehlers2PoleSuperSmootherFilterV1)
     {
-        // CalculateEhlersModifiedStochasticIndicator stochasticises the roofing filter over length3 and then
-        // runs the two-bar average of that through a two pole super smoother whose coefficients come from
-        // length1. The arm this replaces measured the close against its own window and ignored the filter.
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / length1);
-        var c2 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99));
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        using var roofing = EhlersRoofingFilterV1Core(data, context, length1, length2, maType);
-        var rf = roofing.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var window = new RollingMinMax(Math.Max(length3, 2));
-        var prevStoc = 0d;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !RoofingStochasticWindow.Supports(maType);
+        using var window = new RoofingStochasticWindow(maType, length1, length2, length3, true, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            window.Add(rf[i]);
-            var range = window.Max - window.Min;
-            var stoc = range != 0 ? (rf[i] - window.Min) / range * 100 : 0;
-            var prevModStoc1 = i >= 1 ? output[i - 1] : 0;
-            var prevModStoc2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevModStoc1) + (c3 * prevModStoc2);
-            prevStoc = stoc;
+            using var raw = context.Rent(input.Count); using var roof = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Prepare(input[i], true);
+            MovingAverage(data, maType, Math.Max(1, length2), raw.Span, roof.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Finish(window.Rank(roof.Span[i], true), true);
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>
