@@ -1006,76 +1006,18 @@ public sealed class VerticalHorizontalFilterState : IStreamingIndicatorState, ID
 [PrimaryOutput("Ss")]
 public sealed class SigmaSpikesState : IStreamingIndicatorState, IDisposable    
 {
-    private readonly IMovingAverageSmoother _meanSmoother;
-    private readonly RollingStandardDeviation _stdDevCalc;
-    private readonly IMovingAverageSmoother _signalSmoother;
+    private readonly SigmaSpikesWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-    private double _prevStd;
-    private bool _hasStd;
-
     public SigmaSpikesState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _meanSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDevCalc = new RollingStandardDeviation(resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.SigmaSpikes;
-
-    public void Reset()
-    {
-        _meanSmoother.Reset();
-        _stdDevCalc.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-        _prevStd = 0;
-        _hasStd = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
-
-        var mean = _meanSmoother.Next(ret, isFinal);
-        var stdDev = _stdDevCalc.Next(ret, isFinal);
-
-        var sigma = _hasStd && _prevStd != 0 ? ret / _prevStd : 0;
-        var signal = _signalSmoother.Next(sigma, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-            _prevStd = stdDev;
-            _hasStd = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ss", sigma },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sigma, outputs);
+        var price = _input.GetValue(bar); var point = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ss", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _meanSmoother.Dispose();
-        _stdDevCalc.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Sv")]

@@ -2396,9 +2396,7 @@ internal static partial class IndicatorCompute
             RunningEquitySpecOptions re => ComputeRunningEquityFast(data, context, re.Length, re.MaType),
 
             // Batch 33 - Remaining Indicators (Part 2)
-            SigmaSpikesSpecOptions ss => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeSigmaSpikesFast(data, context, ss.Length), ss.Length, ss.MaType)
-                : ComputeSigmaSpikesFast(data, context, ss.Length),
+            SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length, ss.MaType, spec.OutputKey ?? "Ss"),
             StandardDevationSpecOptions sd => spec.OutputKey switch
             {
                 null or "Std" => ComputeStandardDevationFast(data, context, sd.Length, sd.MaType),
@@ -25783,37 +25781,19 @@ internal static partial class IndicatorCompute
 
     // Batch 33 - Remaining Indicators (Part 2)
 
-    internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20)
+    internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20,
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateSigmaSpikes divides each bar's return by the standard deviation of the returns as it stood
-        // at the PREVIOUS bar, and publishes that ratio raw - the moving average of it is the separate Signal
-        // series, which is why this arm takes no moving average type. It is not the deviation of the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var returns = context.Rent(count);
-        var ret = returns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new SigmaSpikesWindow(maType, length); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            ret[i] = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
+            using var line = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = window.Line(input[i], true).Publish();
+            if (outputKey is null) { line.Span.CopyTo(result.WritableSpan); return result; }
+            MovingAverage(data, maType, length, line.Span, result.WritableSpan); if (outputKey != "Signal") line.Span.CopyTo(result.WritableSpan);
         }
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(returns.Span, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevStd = i >= 1 ? stdDev[i - 1] : 0;
-            output[i] = prevStd != 0 ? returns.Span[i] / prevStd : 0;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.Signal : point.Line; }
+        return result;
     }
 
     internal static ComputeBuffer ComputeStandardDevationFast(StockData data, ComputeContext context, int length = 14,

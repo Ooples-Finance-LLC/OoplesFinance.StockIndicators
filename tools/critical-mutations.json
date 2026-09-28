@@ -33858,5 +33858,120 @@
     "before": "(distance / denominator).ToDouble()",
     "after": "(width / denominator).ToDouble()",
     "filter": "FullyQualifiedName~ValidationTests.SettingLessStepNumericalTests"
+  },
+  {
+    "id": "sigma-spikes-previous-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "Ratio(ret, _previousDeviation)",
+    "after": "Ratio(ret, deviation)",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-return-offset",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "difference.Add(-1)",
+    "after": "difference.Add(1)",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-return-publication",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "ratio.AddTo(ref difference)",
+    "after": "difference.Add(ratio.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-root-extension",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "return new(value, shift)",
+    "after": "return new(value)",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-deviation-startup",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "_returns.Count + 1L < _length",
+    "after": "_returns.Count + 1L <= _length",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units + expired * expired",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-zero-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "var line = Ratio(ret, _previousDeviation);",
+    "after": "var line = _previousDeviation.Mantissa == 0 ? ret : Ratio(ret, _previousDeviation);",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "if (commit) { _previousPrice",
+    "after": "if (commit || price != 0) { _previousPrice",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SigmaSpikesWindow.cs",
+    "before": "_returns.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeSigmaSpikesFast("
+  },
+  {
+    "id": "sigma-spikes-raw-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? point.Signal : point.Line",
+    "after": "point.Line",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeSigmaSpikesFast("
+  },
+  {
+    "id": "sigma-spikes-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class SigmaSpikesState"
+  },
+  {
+    "id": "sigma-spikes-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " SigmaSpikesSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "sigma-spikes-reference-lag",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.SigmaSpikes.cs",
+    "before": "RoundRocBankStage(returns[i] / deviation[i - 1])",
+    "after": "RoundRocBankStage(returns[i] / deviation[i])",
+    "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

@@ -843,32 +843,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSigmaSpikes(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20)
     {
-        List<double> retList = new(stockData.Count);
-        List<double> sigmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new SigmaSpikesWindow(maType, length);
+        List<double> sigmaList = new(stockData.Count), ssList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var ret = prevValue != 0 ? (currentValue / prevValue) - 1 : 0;
-            retList.Add(ret);
+            foreach (var price in inputList) sigmaList.Add(window.Line(price, true).Publish());
+            ssList = Builder.Compute.ComponentAverage.Take(sigmaList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, sigmaList);
         }
-
-        stockData.SetCustomValues(retList);
-        var stdList = GetStandardDeviationList(retList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevStd = i >= 1 ? stdList[i - 1] : 0;
-            var ret = retList[i];
-
-            var sigma = prevStd != 0 ? ret / prevStd : 0;
-            sigmaList.Add(sigma);
-        }
-
-        var ssList = GetMovingAverageList(stockData, maType, length, sigmaList);
+        else foreach (var price in inputList) { var point = window.Next(price, true); sigmaList.Add(point.Line); ssList.Add(point.Signal); }
         for (var i = 0; i < stockData.Count; i++)
         {
             var ss = ssList[i];
