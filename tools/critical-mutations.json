@@ -36248,5 +36248,86 @@
     "before": "ExactVarianceWindow.Units(Math.Abs(high))",
     "after": "ExactVarianceWindow.Units(Math.Abs(low))",
     "filter": "FullyQualifiedName~StatisticalRangeNumericalTests.OpposingLogarithmsPreserveZeroAndTinyResiduals"
+  },
+  {
+    "id": "triangle-indicator-mass",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "_mass = half * (_length + 1L - half)",
+    "after": "_mass = _length",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-weights",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "Math.Min(lag + 1, _length - lag)",
+    "after": "1",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-difference",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "sum.Add(open, -1)",
+    "after": "sum.Add(open, 1)",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-extended",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "if (commit) _previous = line;",
+    "after": "if (commit) _previous = new RocBankValue(line.Publish());",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "if (commit) _previous = line;",
+    "after": "_previous = line;",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-roc",
+    "module": "numerical",
+    "file": "src/Helpers/TriangleIndicatorWindow.cs",
+    "scope": "internal sealed class TriangleIndicatorWindow",
+    "before": "_previous.AddTo(ref difference, -1)",
+    "after": "_previous.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersTriangleWindowIndicator(",
+    "before": "window.Next(open[i], input[i], true)",
+    "after": "window.Next(open[i], stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTriangleWindowFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
+  },
+  {
+    "id": "triangle-indicator-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersTriangleWindowIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~TriangleIndicatorNumericalTests"
   }
 ]

@@ -17,6 +17,15 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersTriangleWindowIndicator)
+        {
+            var triangleOptions = (EhlersTriangleWindowIndicatorSpecOptions)builtIn.CreateOptions();
+            var triangleKind = triangleOptions.MaType == MovingAvgType.EhlersTriangleMovingAverage ? 7 : AverageKind(triangleOptions, 1); if (triangleKind == 0) yield break;
+            var triangleKeys = builtIn.BatchOutputKey is { } selectedTriangle ? new[] { selectedTriangle } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < triangleKeys.Length; slot++)
+            { var key = triangleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TriangleIndicatorOutputs(bars, triangleOptions.Length, triangleKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.RecursiveDifferenciator)
         {
             var recursiveOptions = builtIn.CreateOptions(); var recursiveKind = AverageKind(recursiveOptions, 3); if (recursiveKind == 0) yield break;

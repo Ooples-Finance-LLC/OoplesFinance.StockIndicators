@@ -2809,56 +2809,18 @@ public sealed class EhlersTriangleMovingAverageState : IStreamingIndicatorState,
 [PrimaryOutput("Etwi")]
 public sealed class EhlersTriangleWindowIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private double _prevFilt;
-
-    public EhlersTriangleWindowIndicatorState(MovingAvgType maType = MovingAvgType.EhlersTriangleMovingAverage,
-        int length = 20)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-    }
-
+    private readonly TriangleIndicatorWindow _window;
+    public EhlersTriangleWindowIndicatorState(MovingAvgType maType = MovingAvgType.EhlersTriangleMovingAverage, int length = 20)
+        => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.EhlersTriangleWindowIndicator;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _prevFilt = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var deriv = value - bar.Open;
-        var filt = _smoother.Next(deriv, isFinal);
-        var roc = (_length / 2.0) * Math.PI * (filt - _prevFilt);
-
-        if (isFinal)
-        {
-            _prevFilt = filt;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Etwi", filt },
-                { "Roc", roc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Open, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Etwi", point.Line }, { "Roc", point.Roc } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Etbpf")]
