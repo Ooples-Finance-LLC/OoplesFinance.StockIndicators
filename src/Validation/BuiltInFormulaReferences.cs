@@ -172,6 +172,12 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ModularOutputs(bars, Integer(modularOptions, "Length", 200), Number(modularOptions, .8, "Beta")), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersAllPassPhaseShifter)
+        {
+            var allPassOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AllPassPhaseOutputs(bars, Integer(allPassOptions, "Length", 20)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersHpLpRoofingFilter or IndicatorName.EhlersZeroMeanRoofingFilter)
         {
             var roofOptions = builtIn.CreateOptions(); var zeroRoof = builtIn.BatchName == IndicatorName.EhlersZeroMeanRoofingFilter;

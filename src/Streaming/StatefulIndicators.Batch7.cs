@@ -301,67 +301,16 @@ public sealed class EhlersAdaptiveLaguerreFilterState : IStreamingIndicatorState
 [PrimaryOutput("Eapps")]
 public sealed class EhlersAllPassPhaseShifterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _a2;
-    private readonly double _a3;
-    private readonly double _b2;
-    private readonly double _b3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevPhaser1;
-    private double _prevPhaser2;
-
-    public EhlersAllPassPhaseShifterState(int length = 20, double qq = 0.5)
-    {
-        _a2 = qq != 0 && length != 0 ? -2 * Math.Cos(2 * Math.PI / length) / qq : 0;
-        _a3 = qq != 0 ? MathHelper.Pow(1 / qq, 2) : 0;
-        _b2 = length != 0 ? -2 * qq * Math.Cos(2 * Math.PI / length) : 0;
-        _b3 = MathHelper.Pow(qq, 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly AllPassPhaseWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersAllPassPhaseShifterState(int length = 20, double qq = .5) => _window = new(length, qq);
     public IndicatorName Name => IndicatorName.EhlersAllPassPhaseShifter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevPhaser1 = 0;
-        _prevPhaser2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
-        var prevValue2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
-        var prevPhaser1 = _prevPhaser1;
-        var prevPhaser2 = _prevPhaser2;
-
-        var phaser = (_b3 * (value + (_a2 * prevValue1) + (_a3 * prevValue2))) - (_b2 * prevPhaser1) - (_b3 * prevPhaser2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevPhaser2 = prevPhaser1;
-            _prevPhaser1 = phaser;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eapps", phaser }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(phaser, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eapps", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Mama")]

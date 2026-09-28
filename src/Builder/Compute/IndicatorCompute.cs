@@ -13175,29 +13175,10 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast(StockData data, ComputeContext context, int length = 20, double qq = 0.5)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        var a2 = qq != 0 && length != 0 ? -2 * Math.Cos(2 * Math.PI / length) / qq : 0;
-        var a3 = qq != 0 ? MathHelper.Pow(1 / qq, 2) : 0;
-        var b2 = length != 0 ? -2 * qq * Math.Cos(2 * Math.PI / length) : 0;
-        var b3 = MathHelper.Pow(qq, 2);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue1 = i >= 1 ? input[i - 1] : 0;
-            var previousValue2 = i >= 2 ? input[i - 2] : 0;
-            var previousPhaser1 = i >= 1 ? output[i - 1] : 0;
-            var previousPhaser2 = i >= 2 ? output[i - 2] : 0;
-
-            output[i] = (b3 * (input[i] + (a2 * previousValue1) + (a3 * previousValue2))) - (b2 * previousPhaser1) -
-                (b3 * previousPhaser2);
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new AllPassPhaseWindow(length, qq); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        return result;
     }
 
     /// <summary>

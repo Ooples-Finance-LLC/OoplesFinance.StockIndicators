@@ -35483,5 +35483,119 @@
     "before": "Round(roof[i] - Previous(roof, i - 1))",
     "after": "roof[i]",
     "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-period",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Math.Cos(2 * Math.PI / length)",
+    "after": "Math.Cos(Math.PI / length)",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-reciprocal-square",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Product(reciprocal, reciprocal)",
+    "after": "reciprocal",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-price-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Product(_a3, _price2)",
+    "after": "Product(_a3, _price1)",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-phase-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Product(_b3, _phase2)",
+    "after": "Product(_b3, _phase1)",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-first-phase-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Product(_b2, _phase1), -1",
+    "after": "Product(_b2, _phase1), 1",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-second-phase-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "Product(_b3, _phase2), -1",
+    "after": "Product(_b3, _phase2), 1",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-coefficient-publication",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "product.AddProduct(a.Mantissa, b.Mantissa); product.ScaleByPowerOfTwo(a.UpperShift + b.UpperShift);",
+    "after": "product.AddProduct(a.Publish(), b.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "if (commit) { _price2",
+    "after": "if (commit || price != 0) { _price2",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AllPassPhaseWindow.cs",
+    "before": "_price1 = _price2 = _phase1 = _phase2 = default;",
+    "after": "_price1 = _price2 = default;",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersAllPassPhaseShifterFast("
+  },
+  {
+    "id": "all-pass-phase-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersAllPassPhaseShifterState"
+  },
+  {
+    "id": "all-pass-phase-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersAllPassPhaseShifterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "all-pass-phase-reference-lag",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.AllPassPhase.cs",
+    "before": "Product(b3, phase2)",
+    "after": "Product(b3, phase1)",
+    "filter": "FullyQualifiedName~ValidationTests.AllPassPhaseNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

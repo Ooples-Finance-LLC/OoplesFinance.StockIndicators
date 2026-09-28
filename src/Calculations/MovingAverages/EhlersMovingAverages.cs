@@ -1297,28 +1297,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAllPassPhaseShifter(this StockData stockData, int length = 20, double qq = 0.5)
     {
-        List<double> phaserList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a2 = qq != 0 && length != 0 ? -2 * Math.Cos(2 * Math.PI / length) / qq : 0;
-        var a3 = qq != 0 ? Pow(1 / qq, 2) : 0;
-        var b2 = length != 0 ? -2 * qq * Math.Cos(2 * Math.PI / length) : 0;
-        var b3 = Pow(qq, 2);
-
+        List<double> phaserList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); var window = new AllPassPhaseWindow(length, qq);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevPhaser1 = i >= 1 ? phaserList[i - 1] : 0;
-            var prevPhaser2 = i >= 2 ? phaserList[i - 2] : 0;
-
-            var phaser = (b3 * (currentValue + (a2 * prevValue1) + (a3 * prevValue2))) - (b2 * prevPhaser1) - (b3 * prevPhaser2);
-            phaserList.Add(phaser);
-
-            var signal = GetCompareSignal(currentValue - phaser, prevValue1 - prevPhaser1);
-            signalsList?.Add(signal);
+            var previous = GetLastOrDefault(phaserList); var value = window.Next(inputList[i], true); phaserList.Add(value);
+            signalsList?.Add(GetCompareSignal(inputList[i] - value, (i == 0 ? 0 : inputList[i - 1]) - previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
