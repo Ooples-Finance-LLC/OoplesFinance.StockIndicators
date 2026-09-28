@@ -25302,37 +25302,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRecursiveDifferenciatorFast(StockData data, ComputeContext context, int length = 14,
         double alpha = 0.6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateRecursiveDifferenciator smooths the relative strength of the averaged chained series, but
-        // it feeds the recursion from the previous windowed CHANGE in that smoothed value rather than from
-        // the previous value itself, and seeds it from the current reading. Reproduce that exactly - the arm
-        // this replaces read the close and carried the previous value forward instead.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-
-        using var strength = context.Rent(count);
-        OscillatorCore.RelativeStrengthIndex(average.Span, strength.WritableSpan, length);
-        var rsi = strength.Span;
-
-        using var change = context.Rent(count);
-        var bChg = change.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var priorB = i >= length ? output[i - length] : 0;
-            var a = rsi[i] / 100;
-            var prevBChg = i >= 1 ? bChg[i - 1] : a;
-
-            output[i] = (alpha * a) + ((1 - alpha) * prevBChg);
-            bChg[i] = output[i] - priorB;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new RecursiveDifferenciatorWindow(maType, length, alpha);
+        var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true).Line;
         return buffer;
     }
 

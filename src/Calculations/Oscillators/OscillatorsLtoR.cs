@@ -2241,6 +2241,24 @@ public static partial class Calculations
     public static StockData CalculateRecursiveDifferenciator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 14, double alpha = 0.6)
     {
+        length = Math.Max(1, length);
+        if (StrengthWindow.Supports(maType) && !Builder.Compute.ComponentAverage.HasOverrides)
+        {
+            var input = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues;
+            using var window = new RecursiveDifferenciatorWindow(maType, length, alpha);
+            var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+            double previous = 0, older = 0;
+            for (var i = 0; i < input.Count; i++)
+            {
+                var point = window.Next(input[i], true); var prior = i == 0 ? 1 : previous;
+                signals?.Add(GetCompareSignal(point.Change - prior, prior - older)); values.Add(point.Line);
+                older = prior; previous = point.Change;
+            }
+            stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rd", values } });
+            stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.RecursiveDifferenciator;
+            return stockData;
+        }
+        using var feedback = new RecursiveDifferenciatorWindow(maType, length, alpha);
         List<double> bList = new(stockData.Count);
         List<double> bChgList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
@@ -2252,17 +2270,12 @@ public static partial class Calculations
 
         for (var i = 0; i < stockData.Count; i++)
         {
-            var rsi = rsiList[i];
-            var priorB = i >= length ? bList[i - length] : 0;
-            var a = rsi / 100;
+            var a = rsiList[i] / 100;
             var prevBChg1 = i >= 1 ? bChgList[i - 1] : a;
             var prevBChg2 = i >= 2 ? bChgList[i - 2] : 0;
-
-            var b = (alpha * a) + ((1 - alpha) * prevBChg1);
-            bList.Add(b);
-
-            var bChg = b - priorB;
-            bChgList.Add(bChg);
+            var point = feedback.Finish(rsiList[i], true);
+            bList.Add(point.Line); bChgList.Add(point.Change);
+            var bChg = point.Change;
 
             var signal = GetCompareSignal(bChg - prevBChg1, prevBChg1 - prevBChg2);
             signalsList?.Add(signal);

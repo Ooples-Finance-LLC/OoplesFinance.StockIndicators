@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RecursiveDifferenciator)
+        {
+            var recursiveOptions = builtIn.CreateOptions(); var recursiveKind = AverageKind(recursiveOptions, 3); if (recursiveKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RecursiveDifferenciatorTrajectory(bars, Integer(recursiveOptions, "Length", 14), Number(recursiveOptions, .6, "Alpha"), recursiveKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersDecyclerOscillatorV2)
         {
             var decyclerOptions = builtIn.CreateOptions(); var decyclerKind = AverageKind(decyclerOptions, 2); if (decyclerKind == 0) yield break;

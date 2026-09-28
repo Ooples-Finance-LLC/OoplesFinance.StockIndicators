@@ -64,92 +64,18 @@ public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Rd")]
 public sealed class RecursiveDifferenciatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly WilderState _avgGain;
-    private readonly WilderState _avgLoss;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _bValues;
-    private double _prevEma;
-    private bool _hasPrevEma;
-    private double _prevBChg1;
-    private double _prevBChg2;
-    private bool _hasPrevBChg;
-
-    public RecursiveDifferenciatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 14, double alpha = 0.6)
-    {
-        _length = Math.Max(1, length);
-        _alpha = alpha;
-        _ema = MovingAverageSmootherFactory.Create(maType, _length);
-        _avgGain = new WilderState(_length);
-        _avgLoss = new WilderState(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _bValues = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly RecursiveDifferenciatorWindow _window;
+    public RecursiveDifferenciatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14, double alpha = 0.6)
+        => _window = new(maType, length, alpha);
     public IndicatorName Name => IndicatorName.RecursiveDifferenciator;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _avgGain.Reset();
-        _avgLoss.Reset();
-        _bValues.Clear();
-        _prevEma = 0;
-        _hasPrevEma = false;
-        _prevBChg1 = 0;
-        _prevBChg2 = 0;
-        _hasPrevBChg = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ema = _ema.Next(value, isFinal);
-        var prevEma = _hasPrevEma ? _prevEma : 0;
-        var priceChg = _hasPrevEma ? ema - prevEma : 0;
-        var gain = priceChg > 0 ? priceChg : 0;
-        var loss = priceChg < 0 ? Math.Abs(priceChg) : 0;
-        var avgGain = _avgGain.GetNext(gain, isFinal);
-        var avgLoss = _avgLoss.GetNext(loss, isFinal);
-        var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-        var rsi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + rs)), 100, 0);
-
-        var a = rsi / 100;
-        var prevBChg1 = _hasPrevBChg ? _prevBChg1 : a;
-        var b = (_alpha * a) + ((1 - _alpha) * prevBChg1);
-        var priorB = _bValues.Count >= _length ? _bValues[_bValues.Count - _length] : 0;
-        var bChg = b - priorB;
-
-        if (isFinal)
-        {
-            _bValues.TryAdd(b, out _);
-            _prevEma = ema;
-            _hasPrevEma = true;
-            _prevBChg2 = _hasPrevBChg ? _prevBChg1 : 0;
-            _prevBChg1 = bChg;
-            _hasPrevBChg = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rd", b }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(b, outputs);
+        StreamingInputValidation.Validate(bar);
+        var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Rd", point.Line } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _bValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rmta")]

@@ -36131,5 +36131,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DecyclerV2NumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-strength",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "_strength = new(MovingAvgType.WildersSmoothingMethod, _length)",
+    "after": "_strength = new(MovingAvgType.ExponentialMovingAverage, _length)",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-delay",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "if (_values.Count == _length) _values.Peek().AddTo(ref difference, -1);",
+    "after": "if (_values.Count < 0) _values.Peek().AddTo(ref difference, -1);",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "_change = change; _started = true;",
+    "after": "_change = line; _started = true;",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-seed",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "var previous = _started ? _change : source;",
+    "after": "var previous = _started ? _change : default;",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-extended",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "_change = change; _started = true;",
+    "after": "_change = new RocBankValue(change.Publish()); _started = true;",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "if (commit)\n        { if (_values.Count",
+    "after": "if (true)\n        { if (_values.Count",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveDifferenciatorWindow.cs",
+    "scope": "internal sealed class RecursiveDifferenciatorWindow",
+    "before": "double.IsNaN(alpha) || double.IsInfinity(alpha)",
+    "after": "double.IsNaN(alpha) && double.IsInfinity(alpha)",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsLtoR.cs",
+    "scope": "public static StockData CalculateRecursiveDifferenciator(",
+    "before": "stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues",
+    "after": "stockData.ClosePrices",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeRecursiveDifferenciatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
+  },
+  {
+    "id": "recursive-differenciator-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "scope": "public sealed class RecursiveDifferenciatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~RecursiveDifferenciatorNumericalTests"
   }
 ]
