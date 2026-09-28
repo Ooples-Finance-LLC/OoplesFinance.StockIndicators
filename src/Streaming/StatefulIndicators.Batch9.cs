@@ -281,68 +281,18 @@ public sealed class EhlersDiscreteFourierTransformSpectralEstimateState : IStrea
 [PrimaryOutput("Edcf")]
 public sealed class EhlersDistanceCoefficientFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersDistanceCoefficientFilterState(int length = 14)
+    private readonly DistanceCoefficientWindow _window;
+    public EhlersDistanceCoefficientFilterState(int length=14)=>_window=new(length);
+    public IndicatorName Name=>IndicatorName.EhlersDistanceCoefficientFilter;
+    public void Reset()=>_window.Reset();
+    public StreamingIndicatorStateResult Update(OhlcvBar bar,bool isFinal,bool includeOutputs)
     {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length * 2);
+        StreamingInputValidation.Validate(bar);var value=_window.Next(bar.Close,isFinal);
+        return new(value,includeOutputs?new Dictionary<string,double>{{"Edcf",value}}:null);
     }
-
-    public IndicatorName Name => IndicatorName.EhlersDistanceCoefficientFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-    }
-
-    public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        double srcSum = 0;
-        double coefSum = 0;
-        for (var count = 0; count <= _length - 1; count++)
-        {
-            var prevCount = EhlersStreamingWindow.GetOffsetValue(_values, value, count);
-
-            double distance = 0;
-            for (var lookBack = 1; lookBack <= _length - 1; lookBack++)
-            {
-                var prevCountLookBack = EhlersStreamingWindow.GetOffsetValue(_values, value, count + lookBack);
-                distance += MathHelper.Pow(prevCount - prevCountLookBack, 2);
-            }
-
-            srcSum += distance * prevCount;
-            coefSum += distance;
-        }
-
-        var filter = coefSum != 0 ? srcSum / coefSum : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Edcf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose()=>_window.Reset();
 }
+
 
 [PrimaryOutput("V2")]
 public sealed class EhlersDominantCycleTunedBypassFilterState : IStreamingIndicatorState, IDisposable

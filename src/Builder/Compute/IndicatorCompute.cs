@@ -13099,49 +13099,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Distance Coefficient Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data, ComputeContext context, int length = 14)
+    internal static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(StockData data,ComputeContext context,int length=14)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-
-        // The squared distance of a bar from its own lookback window depends only on that bar, so it is
-        // computed once per bar and reused across the coefficient sums.
-        using var distances = context.Rent(count);
-        var distanceByBar = distances.WritableSpan;
-        for (var p = 0; p < count; p++)
-        {
-            double distance = 0;
-            for (var lookBack = 1; lookBack <= length - 1; lookBack++)
-            {
-                var back = p >= lookBack ? input[p - lookBack] : 0;
-                distance += MathHelper.Pow(input[p] - back, 2);
-            }
-
-            distanceByBar[p] = distance;
-        }
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double sourceSum = 0, coefficientSum = 0;
-            for (var j = 0; j <= length - 1; j++)
-            {
-                var previousValue = i >= j ? input[i - j] : 0;
-                var distance = i >= j ? distanceByBar[i - j] : 0;
-
-                sourceSum += distance * previousValue;
-                coefficientSum += distance;
-            }
-
-            // Every coefficient is a sum of squared distances, so a zero total means the window never moved,
-            // and the coefficient-weighted average of a flat window is the level it is flat at.
-            output[i] = coefficientSum != 0 ? sourceSum / coefficientSum : input[i];
-        }
-
-        return buffer;
+        var input=data.ChainedValues.Count>0?data.ChainedValues:data.InputValues;var window=new DistanceCoefficientWindow(length);var output=context.Rent(input.Count);
+        for(var i=0;i<input.Count;i++)output.WritableSpan[i]=window.Next(input[i],true);
+        return output;
     }
+
 
     /// <summary>
     /// Computes Ehlers Kaufman Adaptive Moving Average using zero-allocation fast path.

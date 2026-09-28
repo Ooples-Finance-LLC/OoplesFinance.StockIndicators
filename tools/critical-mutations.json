@@ -37328,5 +37328,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~EhlersDistanceFilterNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-zero-padding",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "(_length-1L)*units*units",
+    "after": "_prices.Count*units*units",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-cross-term",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "2*units*_priceSum",
+    "after": "units*_priceSum",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-moment-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "_priceSum-=oldest",
+    "after": "_priceSum+=oldest",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-squares",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "_priceSquares+=units*units",
+    "after": "_priceSquares+=2*units*units",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-mass",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "mass-=oldest.Weight",
+    "after": "mass+=oldest.Weight",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-flat",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "mass.IsZero?price",
+    "after": "mass.IsZero?0",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DistanceCoefficientWindow.cs",
+    "scope": "internal sealed class DistanceCoefficientWindow",
+    "before": "if(commit)",
+    "after": "if(true)",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersDistanceCoefficientFilter(",
+    "before": "window.Next(input[i],true)",
+    "after": "window.Next(stockData.ClosePrices[i],true)",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersDistanceCoefficientFilterFast(",
+    "before": "data.ChainedValues.Count>0?data.ChainedValues:data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
+  },
+  {
+    "id": "distance-coefficient-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersDistanceCoefficientFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DistanceCoefficientNumericalTests"
   }
 ]

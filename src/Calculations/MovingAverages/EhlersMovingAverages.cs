@@ -840,62 +840,19 @@ public static partial class Calculations
     /// <param name="length"></param>
     /// <returns></returns>
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
-    public static StockData CalculateEhlersDistanceCoefficientFilter(this StockData stockData, int length = 14)
+    public static StockData CalculateEhlersDistanceCoefficientFilter(this StockData stockData,int length=14)
     {
-        List<double> filterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // distance(p) = Σ_{lookBack=1..length-1} (input[p] - input[p-lookBack])² depends only on p = i-count
-        // (not on i and count separately), so it repeats across bars. Precompute it once per p — turning the
-        // O(Count·length²) triple loop into O(Count·length). Bit-identical (same operands + order; input[neg]=0).
-        var distanceByP = new double[stockData.Count];
-        for (var p = 0; p < stockData.Count; p++)
+        var(input,_,_,_,_)=GetInputValuesList(stockData);var window=new DistanceCoefficientWindow(length);
+        var output=new List<double>(input.Count);var signals=CreateSignalsList(stockData);
+        for(var i=0;i<input.Count;i++)
         {
-            double distance = 0;
-            for (var lookBack = 1; lookBack <= length - 1; lookBack++)
-            {
-                var back = p >= lookBack ? inputList[p - lookBack] : 0;
-                distance += Pow(inputList[p] - back, 2);
-            }
-
-            distanceByP[p] = distance;
+            var value=window.Next(input[i],true);signals?.Add(GetCompareSignal(input[i]-value,i==0?0:input[i-1]-output[i-1]));output.Add(value);
         }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            double srcSum = 0, coefSum = 0;
-            for (var count = 0; count <= length - 1; count++)
-            {
-                var prevCount = i >= count ? inputList[i - count] : 0;
-                var distance = i >= count ? distanceByP[i - count] : 0;
-
-                srcSum += distance * prevCount;
-                coefSum += distance;
-            }
-
-            var prevFilter = GetLastOrDefault(filterList);
-            // Every coefficient is a sum of squared distances, so a zero total means the window never moved,
-            // and the coefficient-weighted average of a flat window is the level it is flat at.
-            var filter = coefSum != 0 ? srcSum / coefSum : currentValue;
-            filterList.Add(filter);
-
-            var signal = GetCompareSignal(currentValue - filter, prevValue - prevFilter);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Edcf", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersDistanceCoefficientFilter;
-
+        stockData.SetOutputValues(()=>new Dictionary<string,List<double>>{{"Edcf",output}});
+        stockData.SetSignals(signals);stockData.SetCustomValues(output);stockData.IndicatorName=IndicatorName.EhlersDistanceCoefficientFilter;
         return stockData;
     }
+
 
     /// <summary>
     /// Calculates the Ehlers Finite Impulse Response Filter

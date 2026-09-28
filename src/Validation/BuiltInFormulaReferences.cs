@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if(builtIn.BatchName==IndicatorName.EhlersDistanceCoefficientFilter)
+        {
+            var coefficientOptions=(EhlersDistanceCoefficientFilterSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0,bars=>DistanceCoefficientValues(bars,coefficientOptions.Length),IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if(builtIn.BatchName==IndicatorName.EhlersFilter)
         {
             var distanceOptions=(EhlersFilterSpecOptions)builtIn.CreateOptions();
