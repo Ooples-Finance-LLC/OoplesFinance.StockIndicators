@@ -1323,144 +1323,23 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersChebyshevLowPassFilter(this StockData stockData)
     {
-        List<double> v1Neg2List = new(stockData.Count);
-        List<double> waveNeg2List = new(stockData.Count);
-        List<double> v1Neg1List = new(stockData.Count);
-        List<double> waveNeg1List = new(stockData.Count);
-        List<double> v10List = new(stockData.Count);
-        List<double> wave0List = new(stockData.Count);
-        List<double> v11List = new(stockData.Count);
-        List<double> wave1List = new(stockData.Count);
-        List<double> v12List = new(stockData.Count);
-        List<double> wave2List = new(stockData.Count);
-        List<double> v13List = new(stockData.Count);
-        List<double> wave3List = new(stockData.Count);
-        List<double> v14List = new(stockData.Count);
-        List<double> wave4List = new(stockData.Count);
-        List<double> v15List = new(stockData.Count);
-        List<double> wave5List = new(stockData.Count);
-        List<double> v16List = new(stockData.Count);
-        List<double> wave6List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var windows = Enumerable.Range(0, 9).Select(w => new ChebyshevWaveWindow(w)).ToArray();
+        var output = Enumerable.Range(0, 9).Select(_ => new List<double>(input.Count)).ToArray(); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevV1Neg2_1 = i >= 1 ? v1Neg2List[i - 1] : 0;
-            var prevV1Neg2_2 = i >= 2 ? v1Neg2List[i - 2] : 0;
-            var prevWaveNeg2_1 = i >= 1 ? waveNeg2List[i - 1] : 0;
-            var prevWaveNeg2_2 = i >= 2 ? waveNeg2List[i - 2] : 0;
-            var prevV1Neg1_1 = i >= 1 ? v1Neg1List[i - 1] : 0;
-            var prevV1Neg1_2 = i >= 2 ? v1Neg1List[i - 2] : 0;
-            var prevWaveNeg1_1 = i >= 1 ? waveNeg1List[i - 1] : 0;
-            var prevWaveNeg1_2 = i >= 2 ? waveNeg1List[i - 2] : 0;
-            var prevV10_1 = i >= 1 ? v10List[i - 1] : 0;
-            var prevV10_2 = i >= 2 ? v10List[i - 2] : 0;
-            var prevWave0_1 = i >= 1 ? wave0List[i - 1] : 0;
-            var prevWave0_2 = i >= 2 ? wave0List[i - 2] : 0;
-            var prevV11_1 = i >= 1 ? v11List[i - 1] : 0;
-            var prevV11_2 = i >= 2 ? v11List[i - 2] : 0;
-            var prevWave1_1 = i >= 1 ? wave1List[i - 1] : 0;
-            var prevWave1_2 = i >= 2 ? wave1List[i - 2] : 0;
-            var prevV12_1 = i >= 1 ? v12List[i - 1] : 0;
-            var prevV12_2 = i >= 2 ? v12List[i - 2] : 0;
-            var prevWave2_1 = i >= 1 ? wave2List[i - 1] : 0;
-            var prevWave2_2 = i >= 2 ? wave2List[i - 2] : 0;
-            var prevV13_1 = i >= 1 ? v13List[i - 1] : 0;
-            var prevV13_2 = i >= 2 ? v13List[i - 2] : 0;
-            var prevWave3_1 = i >= 1 ? wave3List[i - 1] : 0;
-            var prevWave3_2 = i >= 2 ? wave3List[i - 2] : 0;
-            var prevV14_1 = i >= 1 ? v14List[i - 1] : 0;
-            var prevV14_2 = i >= 2 ? v14List[i - 2] : 0;
-            var prevWave4_1 = i >= 1 ? wave4List[i - 1] : 0;
-            var prevWave4_2 = i >= 2 ? wave4List[i - 2] : 0;
-            var prevV15_1 = i >= 1 ? v15List[i - 1] : 0;
-            var prevV15_2 = i >= 2 ? v15List[i - 2] : 0;
-            var prevWave5_1 = i >= 1 ? wave5List[i - 1] : 0;
-            var prevWave5_2 = i >= 2 ? wave5List[i - 2] : 0;
-            var prevV16_1 = i >= 1 ? v16List[i - 1] : 0;
-            var prevV16_2 = i >= 2 ? v16List[i - 2] : 0;
-            var prevWave6_1 = i >= 1 ? wave6List[i - 1] : 0;
-            var prevWave6_2 = i >= 2 ? wave6List[i - 2] : 0;
-
-            var v1Neg2 = (EhlersChebyshevGains.Minus2 * (currentValue + (1.907 * prevValue1) + prevValue2)) + (0.293 * prevV1Neg2_1) - (0.063 * prevV1Neg2_2);
-            v1Neg2List.Add(v1Neg2);
-
-            var waveNeg2 = v1Neg2 + (0.513 * prevV1Neg2_1) + prevV1Neg2_2 + (0.451 * prevWaveNeg2_1) - (0.481 * prevWaveNeg2_2);
-            waveNeg2List.Add(waveNeg2);
-
-            var v1Neg1 = (EhlersChebyshevGains.Minus1 * (currentValue + (1.777 * prevValue1) + prevValue2)) + (0.731 * prevV1Neg1_1) - (0.166 * prevV1Neg1_2);
-            v1Neg1List.Add(v1Neg1);
-
-            var waveNeg1 = v1Neg1 + (0.977 * prevV1Neg1_1) + prevV1Neg1_2 + (1.008 * prevWaveNeg1_1) - (0.561 * prevWaveNeg1_2);
-            waveNeg1List.Add(waveNeg1);
-
-            var v10 = (EhlersChebyshevGains.Zero * (currentValue + (1.572 * prevValue1) + prevValue2)) + (1.026 * prevV10_1) - (0.282 * prevV10_2);
-            v10List.Add(v10);
-
-            var wave0 = v10 + (0.356 * prevV10_1) + prevV10_2 + (1.329 * prevWave0_1) - (0.644 * prevWave0_2);
-            wave0List.Add(wave0);
-
-            var v11 = (EhlersChebyshevGains.One * (currentValue + (1.192 * prevValue1) + prevValue2)) + (1.281 * prevV11_1) - (0.426 * prevV11_2);
-            v11List.Add(v11);
-
-            var wave1 = v11 - (0.384 * prevV11_1) + prevV11_2 + (1.565 * prevWave1_1) - (0.729 * prevWave1_2);
-            wave1List.Add(wave1);
-
-            var v12 = (EhlersChebyshevGains.Two * (currentValue + (0.681 * prevValue1) + prevValue2)) + (1.46 * prevV12_1) - (0.543 * prevV12_2);
-            v12List.Add(v12);
-
-            var wave2 = v12 - (0.966 * prevV12_1) + prevV12_2 + (1.703 * prevWave2_1) - (0.793 * prevWave2_2);
-            wave2List.Add(wave2);
-
-            var v13 = (EhlersChebyshevGains.Three * (currentValue + (0.012 * prevValue1) + prevValue2)) + (1.606 * prevV13_1) - (0.65 * prevV13_2);
-            v13List.Add(v13);
-
-            var wave3 = v13 - (1.408 * prevV13_1) + prevV13_2 + (1.801 * prevWave3_1) - (0.848 * prevWave3_2);
-            wave3List.Add(wave3);
-
-            var v14 = (EhlersChebyshevGains.Four * (currentValue - (0.669 * prevValue1) + prevValue2)) + (1.716 * prevV14_1) - (0.74 * prevV14_2);
-            v14List.Add(v14);
-
-            var wave4 = v14 - (1.685 * prevV14_1) + prevV14_2 + (1.866 * prevWave4_1) - (0.89 * prevWave4_2);
-            wave4List.Add(wave4);
-
-            var v15 = (EhlersChebyshevGains.Five * (currentValue - (1.226 * prevValue1) + prevValue2)) + (1.8 * prevV15_1) - (0.811 * prevV15_2);
-            v15List.Add(v15);
-
-            var wave5 = v15 - (1.842 * prevV15_1) + prevV15_2 + (1.91 * prevWave5_1) - (0.922 * prevWave5_2);
-            wave5List.Add(wave5);
-
-            var v16 = (EhlersChebyshevGains.Six * (currentValue - (1.659 * prevValue1) + prevValue2)) + (1.873 * prevV16_1) - (0.878 * prevV16_2);
-            v16List.Add(v16);
-
-            var wave6 = v16 - (1.957 * prevV16_1) + prevV16_2 + (1.946 * prevWave6_1) - (0.951 * prevWave6_2);
-            wave6List.Add(wave6);
-
-            var signal = GetCompareSignal(currentValue - waveNeg2, prevValue1 - prevWaveNeg2_1);
-            signalsList?.Add(signal);
+            for (var wave = 0; wave < 9; wave++) output[wave].Add(windows[wave].Next(input[i], true));
+            signals?.Add(GetCompareSignal(input[i] - output[0][i], i == 0 ? 0 : input[i - 1] - output[0][i - 1]));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eclpf-2", waveNeg2List },
-            { "Eclpf-1", waveNeg1List },
-            { "Eclpf0", wave0List },
-            { "Eclpf1", wave1List },
-            { "Eclpf2", wave2List },
-            { "Eclpf3", wave3List },
-            { "Eclpf4", wave4List },
-            { "Eclpf5", wave5List },
-            { "Eclpf6", wave6List }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> {
+            { "Eclpf-2", output[0] }, { "Eclpf-1", output[1] }, { "Eclpf0", output[2] },
+            { "Eclpf1", output[3] }, { "Eclpf2", output[4] }, { "Eclpf3", output[5] },
+            { "Eclpf4", output[6] }, { "Eclpf5", output[7] }, { "Eclpf6", output[8] }
         });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(waveNeg2List);
-        stockData.IndicatorName = IndicatorName.EhlersChebyshevLowPassFilter;
-
+        stockData.SetSignals(signals); stockData.SetCustomValues(output[0]); stockData.IndicatorName = IndicatorName.EhlersChebyshevLowPassFilter;
         return stockData;
     }
+
 
     /// <summary>
     /// Calculates the Ehlers Better Exponential Moving Average

@@ -15112,64 +15112,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(StockData data, ComputeContext context,
         ChebyshevWave wave = ChebyshevWave.Minus2)
     {
-        // CalculateEhlersChebyshevLowPassFilter takes no parameters at all - its spec's Length and Ripple are
-        // both marked as having no effect - and publishes nine independent waves, each a fixed two-pole
-        // section feeding a fixed two-pole resonator. MovingAverageCore.EhlersChebyshevLowPassFilter designed
-        // a filter from a length and a ripple instead, which is a different filter on every bar.
-        //
-        // Each row below is one wave: the input gain, the lead coefficient inside it, the two input poles,
-        // the zero applied to the previous section output, and the two feedback poles of the resonator. Only
-        // the requested wave is run, so the recursion needs four scalars and no per-series buffers.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        Span<double> coefficients = stackalloc double[63]
-        {
-            EhlersChebyshevGains.Minus2, 1.907, 0.293, 0.063, 0.513, 0.451, 0.481,
-            EhlersChebyshevGains.Minus1, 1.777, 0.731, 0.166, 0.977, 1.008, 0.561,
-            EhlersChebyshevGains.Zero, 1.572, 1.026, 0.282, 0.356, 1.329, 0.644,
-            EhlersChebyshevGains.One, 1.192, 1.281, 0.426, -0.384, 1.565, 0.729,
-            EhlersChebyshevGains.Two, 0.681, 1.46, 0.543, -0.966, 1.703, 0.793,
-            EhlersChebyshevGains.Three, 0.012, 1.606, 0.65, -1.408, 1.801, 0.848,
-            EhlersChebyshevGains.Four, -0.669, 1.716, 0.74, -1.685, 1.866, 0.89,
-            EhlersChebyshevGains.Five, -1.226, 1.8, 0.811, -1.842, 1.91, 0.922,
-            EhlersChebyshevGains.Six, -1.659, 1.873, 0.878, -1.957, 1.946, 0.951
-        };
-
-        var row = (int)wave * 7;
-        var gain = coefficients[row];
-        var lead = coefficients[row + 1];
-        var inputPole1 = coefficients[row + 2];
-        var inputPole2 = coefficients[row + 3];
-        var zero = coefficients[row + 4];
-        var feedback1 = coefficients[row + 5];
-        var feedback2 = coefficients[row + 6];
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double prevSection1 = 0, prevSection2 = 0, prevWave1 = 0, prevWave2 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue1 = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-
-            var section = (gain * (currentValue + (lead * prevValue1) + prevValue2)) + (inputPole1 * prevSection1) -
-                (inputPole2 * prevSection2);
-            var filtered = section + (zero * prevSection1) + prevSection2 + (feedback1 * prevWave1) -
-                (feedback2 * prevWave2);
-            output[i] = filtered;
-
-            prevSection2 = prevSection1;
-            prevSection1 = section;
-            prevWave2 = prevWave1;
-            prevWave1 = filtered;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new ChebyshevWaveWindow((int)wave); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
+
 
     /// <summary>
     /// Computes Ehlers Gaussian Filter using zero-allocation fast path.

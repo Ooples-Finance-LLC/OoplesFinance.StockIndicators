@@ -134,7 +134,7 @@ internal static partial class BuiltInFormulaReferences
         return SmoothRocBankStage(SmoothRocBankStage(result, length, kind), length, kind);
     }
 
-    private static IReadOnlyDictionary<string, double[]> ChebyshevTrajectories(double[] prices)
+    internal static IReadOnlyDictionary<string, double[]> ChebyshevTrajectories(double[] prices)
     {
         // Fixed numerator and denominator polynomials of the nine published Chebyshev variants.
         var sections = new[]

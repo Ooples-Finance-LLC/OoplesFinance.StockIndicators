@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersChebyshevLowPassFilter)
+        {
+            var chebyshevKeys = builtIn.BatchOutputKey is { } chebyshevSelected ? new[] { chebyshevSelected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chebyshevKeys.Length; slot++) { var key = chebyshevKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ChebyshevWaveValues(bars, key)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersVossPredictiveFilter)
         {
             var voss = (EhlersVossPredictiveFilterSpecOptions)builtIn.CreateOptions();

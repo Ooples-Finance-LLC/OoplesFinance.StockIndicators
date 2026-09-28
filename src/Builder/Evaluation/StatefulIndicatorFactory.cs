@@ -45,6 +45,7 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            EhlersChebyshevLowPassFilterSpecOptions => new EhlersChebyshevLowPassFilterState(),
             RelativeVolatilityIndexSpecOptions volatility => new RelativeVolatilityIndexV1State(length: volatility.Length),
             RviVolatilitySpecOptions volatility => new RelativeVolatilityIndexV1State(length: volatility.Length),
             RelativeVolatilityIndexV2SpecOptions volatility => new RelativeVolatilityIndexV2State(volatility.MaType, volatility.Length, volatility.SmoothLength),

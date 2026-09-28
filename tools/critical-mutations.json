@@ -36833,5 +36833,95 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~VossPredictiveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "input.Multiply(Coefficients[_wave, 0])",
+    "after": "input.Multiply(Coefficients[_wave, 0] * 2)",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-lead",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "new RocBankValue(_previous).Multiply(Coefficients[_wave, 1])",
+    "after": "new RocBankValue(_older).Multiply(Coefficients[_wave, 1])",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-section-tail",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "_section2.Multiply(Coefficients[_wave, 3]), -1",
+    "after": "_section2.Multiply(Coefficients[_wave, 3]), 1",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-output-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "_output1.Multiply(Coefficients[_wave, 5])",
+    "after": "_output1.Multiply(-Coefficients[_wave, 5])",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-extended",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(RocBankValue.Round(sum).Publish());",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChebyshevWaveWindow.cs",
+    "scope": "internal sealed class ChebyshevWaveWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersChebyshevLowPassFilter(",
+    "before": "windows[wave].Next(input[i], true)",
+    "after": "windows[wave].Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-wave-selection",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersChebyshevLowPassFilterFast(",
+    "before": "new ChebyshevWaveWindow((int)wave)",
+    "after": "new ChebyshevWaveWindow(0)",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
+  },
+  {
+    "id": "chebyshev-wave-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersChebyshevLowPassFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~ChebyshevWaveNumericalTests"
   }
 ]

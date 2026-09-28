@@ -753,221 +753,23 @@ public sealed class EhlersAverageErrorFilterState : IStreamingIndicatorState
 [PrimaryOutput("Eclpf-2")]
 public sealed class EhlersChebyshevLowPassFilterState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevV1Neg2_1;
-    private double _prevV1Neg2_2;
-    private double _prevWaveNeg2_1;
-    private double _prevWaveNeg2_2;
-    private double _prevV1Neg1_1;
-    private double _prevV1Neg1_2;
-    private double _prevWaveNeg1_1;
-    private double _prevWaveNeg1_2;
-    private double _prevV10_1;
-    private double _prevV10_2;
-    private double _prevWave0_1;
-    private double _prevWave0_2;
-    private double _prevV11_1;
-    private double _prevV11_2;
-    private double _prevWave1_1;
-    private double _prevWave1_2;
-    private double _prevV12_1;
-    private double _prevV12_2;
-    private double _prevWave2_1;
-    private double _prevWave2_2;
-    private double _prevV13_1;
-    private double _prevV13_2;
-    private double _prevWave3_1;
-    private double _prevWave3_2;
-    private double _prevV14_1;
-    private double _prevV14_2;
-    private double _prevWave4_1;
-    private double _prevWave4_2;
-    private double _prevV15_1;
-    private double _prevV15_2;
-    private double _prevWave5_1;
-    private double _prevWave5_2;
-    private double _prevV16_1;
-    private double _prevV16_2;
-    private double _prevWave6_1;
-    private double _prevWave6_2;
-    private int _index;
-
-    public EhlersChebyshevLowPassFilterState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ChebyshevWaveWindow[] _windows = Enumerable.Range(0, 9).Select(w => new ChebyshevWaveWindow(w)).ToArray();
+    public EhlersChebyshevLowPassFilterState() { }
     public IndicatorName Name => IndicatorName.EhlersChebyshevLowPassFilter;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevV1Neg2_1 = 0;
-        _prevV1Neg2_2 = 0;
-        _prevWaveNeg2_1 = 0;
-        _prevWaveNeg2_2 = 0;
-        _prevV1Neg1_1 = 0;
-        _prevV1Neg1_2 = 0;
-        _prevWaveNeg1_1 = 0;
-        _prevWaveNeg1_2 = 0;
-        _prevV10_1 = 0;
-        _prevV10_2 = 0;
-        _prevWave0_1 = 0;
-        _prevWave0_2 = 0;
-        _prevV11_1 = 0;
-        _prevV11_2 = 0;
-        _prevWave1_1 = 0;
-        _prevWave1_2 = 0;
-        _prevV12_1 = 0;
-        _prevV12_2 = 0;
-        _prevWave2_1 = 0;
-        _prevWave2_2 = 0;
-        _prevV13_1 = 0;
-        _prevV13_2 = 0;
-        _prevWave3_1 = 0;
-        _prevWave3_2 = 0;
-        _prevV14_1 = 0;
-        _prevV14_2 = 0;
-        _prevWave4_1 = 0;
-        _prevWave4_2 = 0;
-        _prevV15_1 = 0;
-        _prevV15_2 = 0;
-        _prevWave5_1 = 0;
-        _prevWave5_2 = 0;
-        _prevV16_1 = 0;
-        _prevV16_2 = 0;
-        _prevWave6_1 = 0;
-        _prevWave6_2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() { foreach (var window in _windows) window.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-
-        var v1Neg2 = (EhlersChebyshevGains.Minus2 * (value + (1.907 * prevValue1) + prevValue2)) +
-                     (0.293 * _prevV1Neg2_1) - (0.063 * _prevV1Neg2_2);
-        var waveNeg2 = v1Neg2 + (0.513 * _prevV1Neg2_1) + _prevV1Neg2_2 +
-                       (0.451 * _prevWaveNeg2_1) - (0.481 * _prevWaveNeg2_2);
-
-        var v1Neg1 = (EhlersChebyshevGains.Minus1 * (value + (1.777 * prevValue1) + prevValue2)) +
-                     (0.731 * _prevV1Neg1_1) - (0.166 * _prevV1Neg1_2);
-        var waveNeg1 = v1Neg1 + (0.977 * _prevV1Neg1_1) + _prevV1Neg1_2 +
-                       (1.008 * _prevWaveNeg1_1) - (0.561 * _prevWaveNeg1_2);
-
-        var v10 = (EhlersChebyshevGains.Zero * (value + (1.572 * prevValue1) + prevValue2)) +
-                  (1.026 * _prevV10_1) - (0.282 * _prevV10_2);
-        var wave0 = v10 + (0.356 * _prevV10_1) + _prevV10_2 +
-                    (1.329 * _prevWave0_1) - (0.644 * _prevWave0_2);
-
-        var v11 = (EhlersChebyshevGains.One * (value + (1.192 * prevValue1) + prevValue2)) +
-                  (1.281 * _prevV11_1) - (0.426 * _prevV11_2);
-        var wave1 = v11 - (0.384 * _prevV11_1) + _prevV11_2 +
-                    (1.565 * _prevWave1_1) - (0.729 * _prevWave1_2);
-
-        var v12 = (EhlersChebyshevGains.Two * (value + (0.681 * prevValue1) + prevValue2)) +
-                  (1.46 * _prevV12_1) - (0.543 * _prevV12_2);
-        var wave2 = v12 - (0.966 * _prevV12_1) + _prevV12_2 +
-                    (1.703 * _prevWave2_1) - (0.793 * _prevWave2_2);
-
-        var v13 = (EhlersChebyshevGains.Three * (value + (0.012 * prevValue1) + prevValue2)) +
-                  (1.606 * _prevV13_1) - (0.65 * _prevV13_2);
-        var wave3 = v13 - (1.408 * _prevV13_1) + _prevV13_2 +
-                    (1.801 * _prevWave3_1) - (0.848 * _prevWave3_2);
-
-        var v14 = (EhlersChebyshevGains.Four * (value - (0.669 * prevValue1) + prevValue2)) +
-                  (1.716 * _prevV14_1) - (0.74 * _prevV14_2);
-        var wave4 = v14 - (1.685 * _prevV14_1) + _prevV14_2 +
-                    (1.866 * _prevWave4_1) - (0.89 * _prevWave4_2);
-
-        var v15 = (EhlersChebyshevGains.Five * (value - (1.226 * prevValue1) + prevValue2)) +
-                  (1.8 * _prevV15_1) - (0.811 * _prevV15_2);
-        var wave5 = v15 - (1.842 * _prevV15_1) + _prevV15_2 +
-                    (1.91 * _prevWave5_1) - (0.922 * _prevWave5_2);
-
-        var v16 = (EhlersChebyshevGains.Six * (value - (1.659 * prevValue1) + prevValue2)) +
-                  (1.873 * _prevV16_1) - (0.878 * _prevV16_2);
-        var wave6 = v16 - (1.957 * _prevV16_1) + _prevV16_2 +
-                    (1.946 * _prevWave6_1) - (0.951 * _prevWave6_2);
-
-        if (isFinal)
+        StreamingInputValidation.Validate(bar);
+        Dictionary<string, double>? outputs = includeOutputs ? new() : null; double primary = 0;
+        for (var wave = 0; wave < _windows.Length; wave++)
         {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-
-            _prevV1Neg2_2 = _prevV1Neg2_1;
-            _prevV1Neg2_1 = v1Neg2;
-            _prevWaveNeg2_2 = _prevWaveNeg2_1;
-            _prevWaveNeg2_1 = waveNeg2;
-
-            _prevV1Neg1_2 = _prevV1Neg1_1;
-            _prevV1Neg1_1 = v1Neg1;
-            _prevWaveNeg1_2 = _prevWaveNeg1_1;
-            _prevWaveNeg1_1 = waveNeg1;
-
-            _prevV10_2 = _prevV10_1;
-            _prevV10_1 = v10;
-            _prevWave0_2 = _prevWave0_1;
-            _prevWave0_1 = wave0;
-
-            _prevV11_2 = _prevV11_1;
-            _prevV11_1 = v11;
-            _prevWave1_2 = _prevWave1_1;
-            _prevWave1_1 = wave1;
-
-            _prevV12_2 = _prevV12_1;
-            _prevV12_1 = v12;
-            _prevWave2_2 = _prevWave2_1;
-            _prevWave2_1 = wave2;
-
-            _prevV13_2 = _prevV13_1;
-            _prevV13_1 = v13;
-            _prevWave3_2 = _prevWave3_1;
-            _prevWave3_1 = wave3;
-
-            _prevV14_2 = _prevV14_1;
-            _prevV14_1 = v14;
-            _prevWave4_2 = _prevWave4_1;
-            _prevWave4_1 = wave4;
-
-            _prevV15_2 = _prevV15_1;
-            _prevV15_1 = v15;
-            _prevWave5_2 = _prevWave5_1;
-            _prevWave5_1 = wave5;
-
-            _prevV16_2 = _prevV16_1;
-            _prevV16_1 = v16;
-            _prevWave6_2 = _prevWave6_1;
-            _prevWave6_1 = wave6;
-
-            _index++;
+            var value = _windows[wave].Next(bar.Close, isFinal); if (wave == 0) primary = value;
+            if (outputs is not null) outputs["Eclpf" + (wave - 2)] = value;
         }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(9)
-            {
-                { "Eclpf-2", waveNeg2 },
-                { "Eclpf-1", waveNeg1 },
-                { "Eclpf0", wave0 },
-                { "Eclpf1", wave1 },
-                { "Eclpf2", wave2 },
-                { "Eclpf3", wave3 },
-                { "Eclpf4", wave4 },
-                { "Eclpf5", wave5 },
-                { "Eclpf6", wave6 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(waveNeg2, outputs);
+        return new(primary, outputs);
     }
 }
+
 
 [PrimaryOutput("Ebema")]
 public sealed class EhlersBetterExponentialMovingAverageState : IStreamingIndicatorState
