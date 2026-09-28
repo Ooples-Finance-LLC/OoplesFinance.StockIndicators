@@ -331,7 +331,7 @@ public sealed class FormulaContractCoverageTests
         var rules = BuiltInFormulaReferences.For(new PivotPointAverage(2, InputLength.Month)).ToArray();
         Assert.Equal(6, rules.Length);
         foreach (var rule in rules) rule.Check(new IndicatorValidationContext("monthly-pivot-hand", bars,
-            [[0, 0, 10d / 3], [0, 0, 5d / 3], [.5, .5, 4.5], [0, 0, 2.5], [2d / 3, 2d / 3, 14d / 3], [0, 0, 8d / 3]], 0));
+            [[0, 0, 10d / 3], [0, 0, 5d / 3], [.5, .5, 4.5], [0, 0, 2.5], [2d / 3, 2d / 3, 14d / 3], [0, 0, ((2d / 3) + (14d / 3)) / 2]], 0));
     }
 
     [Fact]
@@ -555,8 +555,13 @@ public sealed class FormulaContractCoverageTests
         var bars = new[] { 2d, 4, 2 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
         Assert.Single(BuiltInFormulaReferences.For(new KalmanSmoother(200))).Check(
             new IndicatorValidationContext("kalman-hand", bars, [[2, 2.44, 2.3832]], 0));
+        // The period-two coefficient is binary64 2/3; each product and recurrence stage rounds.
+        var alpha = 2d / 3; var retained = 1 - alpha;
+        var e0 = alpha * 2; var y0 = 4 - e0;
+        var e1 = alpha * y0 + retained * e0; var y1 = (4 + y0) - e1;
+        var e2 = alpha * y1 + retained * e1; var y2 = (2 + y1) - e2;
         Assert.Single(BuiltInFormulaReferences.For(new IIRLeastSquaresEstimate(2))).Check(
-            new IndicatorValidationContext("iir-hand", bars, [[8d / 3, 40d / 9, 74d / 27]], 0));
+            new IndicatorValidationContext("iir-hand", bars, [[y0, y1, y2]], 0));
     }
 
     [Fact]
@@ -1132,11 +1137,14 @@ public sealed class FormulaContractCoverageTests
     {
         var one = new[] { new Bar(DateTime.UnixEpoch, 1, 3, 1, 2, 1) };
         Check(new HighLowMovingAverage(1), one, [3], [2], [1]);
-        Check(new HurstCycleChannel(4, 4), one, [3], [5], [2], [2], [1], [-1], [.5], [.5]);
+        var cycleLevels = new Dictionary<string, double> { ["FastUpperBand"] = 3, ["FastMiddleBand"] = 2, ["FastLowerBand"] = 1,
+            ["SlowUpperBand"] = 5, ["SlowMiddleBand"] = 2, ["SlowLowerBand"] = -1, ["OMed"] = .5, ["OShort"] = .5 };
+        var cycleKeys = OoplesFinance.StockIndicators.Builder.GeneratedIndicatorOutputs.KeysFor(IndicatorName.HurstCycleChannel);
+        Check(new HurstCycleChannel(4, 4), one, cycleKeys.Select(k => new[] { cycleLevels[k] }).ToArray());
         var bars = new[] { 2d, 0, 6, 0, 0 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, v, v, v, 1)).ToArray();
         double[] center = [0, 0, 1, 1, 3];
-        Check(new HurstBands(2, 10, 20, 30), bars, center.Select(v => v * 1.3).ToArray(), center.Select(v => v * 1.2).ToArray(),
-            center.Select(v => v * 1.1).ToArray(), center, center.Select(v => v * .7).ToArray(), center.Select(v => v * .8).ToArray(), center.Select(v => v * .9).ToArray());
+        Check(new HurstBands(2, 10, 20, 30), bars, center.Select(v => v * 130 / 100).ToArray(), center.Select(v => v * 120 / 100).ToArray(),
+            center.Select(v => v * 110 / 100).ToArray(), center, center.Select(v => v * 70 / 100).ToArray(), center.Select(v => v * 80 / 100).ToArray(), center.Select(v => v * 90 / 100).ToArray());
         void Check(IIndicator indicator, Bar[] input, params double[][] expected)
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();
@@ -1195,7 +1203,8 @@ public sealed class FormulaContractCoverageTests
         var bars = prices.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), v, 1, 0, v, 1)).ToArray();
         Check(new TurboStochasticsFast(2, 2, 0), [0, 100, 0], [0, 50, 50]);
         Check(new TurboStochasticsSlow(2, 2, 0), [0, 50, 50], [0, 25, 50]);
-        Check(new StochasticCustomOscillator(2), [0, 0, 100d / 3], [0, 0, 0]);
+        // The three-bar distance average rounds before normalization against the unit range.
+        Check(new StochasticCustomOscillator(2), [0, 0, 100 * (1d / 3)], [0, 0, 0]);
         void Check(IIndicator indicator, params double[][] expected)
         {
             var rules = BuiltInFormulaReferences.For(indicator).ToArray();
@@ -1630,7 +1639,11 @@ public sealed class FormulaContractCoverageTests
         Check(new ParametricCorrectiveLinearMovingAverage(2), new[] { 0d, 0, 23d / 36 });
         Check(new OvershootReductionMovingAverage(2), new[] { 0d, 2, 4 });
         Check(new EdgePreservingFilter(1), new[] { 1d, 4d / 3, 2 });
-        Check(new EhlersAllPassPhaseShifter(4), new[] { .25, .5, 1.9375 });
+        // cos(pi/2) is a small nonzero binary64 coefficient, not mathematical zero.
+        var cosine = Math.Cos(2 * Math.PI / 4); var a2 = -4 * cosine; var b2 = -cosine;
+        var phase1 = .25 * (2 + a2) - b2 * .25;
+        var phase2 = (.25 * ((4 + a2 * 2) + 4) - b2 * phase1) - .25 * .25;
+        Check(new EhlersAllPassPhaseShifter(4), new[] { .25, phase1, phase2 });
         // Round each recursive affine blend, rather than expanding an unrounded polynomial.
         Check(new EhlersKaufmanAdaptiveMovingAverage(1), new[] { .00416025, .0124634423199375, .02905259128402598 });
         void Check(IIndicator indicator, double[] expected) => Assert.Single(BuiltInFormulaReferences.For(indicator)).Check(
@@ -1740,7 +1753,7 @@ public sealed class FormulaContractCoverageTests
     {
         var waveBars = new[] { 1d, 2, 4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new EmaWaveIndicator(1, 2, 3, 1), waveBars,
-            new[] { 0d, 0, 0 }, new[] { 0d, .5, 5d / 6 }, new[] { 0d, .5, 5d / 3 });
+            new[] { 0d, 0, 0 }, new[] { 0d, .5, 4 - 19d / 6 }, new[] { 0d, .5, 4 - 7d / 3 });
         var candleBars = new[] { 1d, 4, 3 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 100)).ToArray();
         Check(new FunctionToCandles(2), candleBars,
             new[] { 100d, 100, 60 }, new[] { 100d, 100, 60 }, new[] { 100d, 100, 60 }, new[] { 100d, 100, 60 });
@@ -2639,7 +2652,10 @@ public sealed class FormulaContractCoverageTests
             new Bar(new DateTime(2021, 1, 6), 13, 14, 10, 12, 50)
         };
         Check(new Vwap(3), asymmetric, new[] { 32d / 3, 14, 96d / 7 });
-        Check(new Cmf(2), asymmetric, new[] { 1d / 3, 1d / 3, 4d / 15 });
+        // Cash-flow observations (100/3, 200/3, 0) round before window normalization.
+        var cash1 = ReferenceFraction.FromDouble(100d / 3); var cash2 = ReferenceFraction.FromDouble(200d / 3);
+        Check(new Cmf(2), asymmetric, new[] { (cash1 / new ReferenceFraction(100)).ToDouble(),
+            ((cash1 + cash2) / new ReferenceFraction(300)).ToDouble(), (cash2 / new ReferenceFraction(250)).ToDouble() });
         Check(new ForceIndex(2), asymmetric, new[] { 0d, 500, 100d / 3 });
         Check(new EaseOfMovement(2), asymmetric, new[] { 0d, 75000, -280000 });
         Check(new Adx(2), asymmetric, new[] { 0d, 200d / 3, 1000d / 39 },
@@ -2832,15 +2848,22 @@ public sealed class FormulaContractCoverageTests
         Check(new LeoMovingAverage(2), new[] { 1d, 2, 4 }, new[] { 2 * (2d / 3), 2 * (5d / 3) - 1.5, 2 * (10d / 3) - 3 });
         Check(new EndPointMovingAverage(3), new[] { 1d, 2, 4 }, new[] { 1d / 6, 2d / 3, 11d / 6 });
         Check(new EndPointMovingAverage(7), new[] { 1d, 2, 4 }, new[] { 0d, 0, 0 });
+        // The nested EMA consumes the rounded 19/6 first-stage observation.
+        var firstEma = ReferenceFraction.FromDouble(19d / 6);
+        var secondEma = ReferenceFraction.FromDouble(((new ReferenceFraction(2) * firstEma + ReferenceFraction.FromDouble(1.25)) / new ReferenceFraction(3)).ToDouble());
+        var generalized = (firstEma + (firstEma - secondEma) / new ReferenceFraction(2)).ToDouble();
         Check(new GeneralizedDoubleExponentialMovingAverage(length: 2, volumeFactor: .5),
-            new[] { 1d, 2, 4 }, new[] { 1d, 13d / 8, 251d / 72 });
+            new[] { 1d, 2, 4 }, new[] { 1d, 13d / 8, generalized });
         Check(new SimplifiedWeightedMovingAverage(2), new[] { 1d, 2, 4 }, new[] { 2d / 3, 5d / 3, 10d / 3 });
         Check(new SimplifiedLeastSquaresMovingAverage(2), new[] { 1d, 2, 4 }, new[] { 1d, 2, 4 });
         Check(new RegularizedEma(3), new[] { 1d, 2, 4 }, new[] { 1d / 3, 1, 20d / 9 });
-        Check(new ZeroLowLagMovingAverage(2), new[] { 1d, 2, 4 }, new[] { .5, 1.8, 3.74 });
+        // The lag coefficient 1.4 and its complement round each product before accumulation.
+        var accumulated1 = 1 + (1.4 * 2 + (1 - 1.4) * .5); var lowLag1 = accumulated1 / 2;
+        var accumulated2 = accumulated1 + (1.4 * 4 + (1 - 1.4) * lowLag1);
+        Check(new ZeroLowLagMovingAverage(2), new[] { 1d, 2, 4 }, new[] { .5, lowLag1, (accumulated2 - 1) / 2 });
         Check(new Spencer15PointMovingAverage(15), new[] { 1d, 0, 0 }, new[] { -3d / 320, -6d / 320, -5d / 320 });
         Check(new Spencer21PointMovingAverage(21), new[] { 1d, 0, 0 }, new[] { -1d / 350, -3d / 350, -5d / 350 });
-        Check(new AlphaDecreasingEma(14), new[] { 1d, 2, 4 }, new[] { 2d, 2, 10d / 3 });
+        Check(new AlphaDecreasingEma(14), new[] { 1d, 2, 4 }, new[] { 2d, 2, (2d / 3) * 4 + (1 - 2d / 3) * 2 });
         Check(new AhrensMovingAverage(2), new[] { 1d, 2, 4 }, new[] { .25, .6875, 2.453125 });
         Check(new SharpModifiedMovingAverage(2), new[] { 1d, 2, 4 }, new[] { .5, 2, 4 });
         Check(new SlowSmoothedMovingAverage(3), new[] { 1d, 2, 4 }, new[] { 1d, 2, 4 });
@@ -2995,11 +3018,15 @@ public sealed class FormulaContractCoverageTests
             new Bar(day.AddDays(1).AddHours(9), 14, 16, 13, 15, 1),
             new Bar(day.AddDays(1).AddHours(10), 15, 30, 2, 20, 1)
         };
+        // Supports and resistances consume the published pivot, then midpoints consume those levels.
+        var pivot = 37d / 3; var support1 = 2 * pivot - 15; var support2 = pivot - 7; var support3 = support1 - 7;
+        var resistance1 = 2 * pivot - 8; var resistance2 = pivot + 7; var resistance3 = resistance1 + 7;
         var levels = new Dictionary<string, double>
         {
-            ["Pivot"] = 37d / 3, ["S1"] = 29d / 3, ["S2"] = 16d / 3, ["S3"] = 8d / 3,
-            ["R1"] = 50d / 3, ["R2"] = 58d / 3, ["R3"] = 71d / 3,
-            ["M1"] = 4, ["M2"] = 7.5, ["M3"] = 11, ["M4"] = 14.5, ["M5"] = 18, ["M6"] = 21.5
+            ["Pivot"] = pivot, ["S1"] = support1, ["S2"] = support2, ["S3"] = support3,
+            ["R1"] = resistance1, ["R2"] = resistance2, ["R3"] = resistance3,
+            ["M1"] = (support3 + support2) / 2, ["M2"] = (support2 + support1) / 2, ["M3"] = (support1 + pivot) / 2,
+            ["M4"] = (resistance1 + pivot) / 2, ["M5"] = (resistance2 + resistance1) / 2, ["M6"] = (resistance3 + resistance2) / 2
         };
         var keys = OoplesFinance.StockIndicators.Builder.GeneratedIndicatorOutputs.KeysFor(IndicatorName.FloorPivotPoints);
         var expected = keys.Select(k => new[] { 0d, 0, levels[k], levels[k] }).ToArray();
@@ -3008,7 +3035,7 @@ public sealed class FormulaContractCoverageTests
 
         var camarillaKeys = OoplesFinance.StockIndicators.Builder.GeneratedIndicatorOutputs.KeysFor(IndicatorName.CamarillaPivotPoints);
         var supportSlot = Array.IndexOf(camarillaKeys.ToArray(), "S1");
-        var camarillaExpected = camarillaKeys.Select(_ => new[] { 0d, 0, 1603d / 120, 1603d / 120 }).ToArray();
+        var camarillaExpected = camarillaKeys.Select(_ => new[] { 0d, 0, 14 - 7 * (1.1 / 12), 14 - 7 * (1.1 / 12) }).ToArray();
         BuiltInFormulaReferences.For(new CamarillaPivotPoint()).Single(r => r.ReferenceOutputSlot == supportSlot)
             .Check(new IndicatorValidationContext("two-sessions", bars, camarillaExpected, 0));
     }
@@ -3098,11 +3125,13 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { 1d, 2, 1, 2 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
         var keys = OoplesFinance.StockIndicators.Builder.GeneratedIndicatorOutputs.KeysFor(IndicatorName.CCTStochRelativeStrengthIndex);
+        // RSI rounds 200/3 before stochastic normalization over the [50,100] range.
+        var reversal = 2 * (200d / 3 - 50);
         var expected = keys.Select(key => new[] { 0d, 0, 0, key switch
         {
-            "Type1" or "Type2" or "Type3" => 100d / 3,
-            "Type4" or "Signal" => 25d / 3,
-            _ => 50d / 3
+            "Type1" or "Type2" or "Type3" => reversal,
+            "Type4" or "Signal" => reversal / 4,
+            _ => reversal / 2
         } }).ToArray();
         var rules = BuiltInFormulaReferences.For(new CCTStochRelativeStrengthIndex(14)).ToArray();
         Assert.Equal(8, rules.Length);
