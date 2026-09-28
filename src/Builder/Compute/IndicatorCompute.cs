@@ -10899,8 +10899,7 @@ internal static partial class IndicatorCompute
             }
         }
 
-        using var quadratic = context.Rent(count);
-        QuadraticRegression(data, context, input, length, maType, quadratic.WritableSpan);
+        using var quadratic = ComputeQuadraticRegressionFast(data, context, length, maType);
         var quadreg = quadratic.Span;
 
         using var convergence = context.Rent(count);
@@ -25190,7 +25189,13 @@ internal static partial class IndicatorCompute
         }
 
         using var indexSignal = context.Rent(count);
-        MovingAverage(data, maType, length2, rsi, indexSignal.WritableSpan);
+        if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)
+        {
+            // Match the RSI component's signal-stage rounding, including warmup.
+            using var signalWindow = new StrengthAverage(maType, length2, Math.Max(1, count));
+            for (var i = 0; i < count; i++) indexSignal.WritableSpan[i] = signalWindow.Next(new StrengthValue(rsi[i]), true).Mantissa;
+        }
+        else MovingAverage(data, maType, length2, rsi, indexSignal.WritableSpan);
 
         using var deviation = context.Rent(count);
         VolatilityCore.StandardDeviation(rsi, deviation.WritableSpan, length2);

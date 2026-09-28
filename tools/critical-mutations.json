@@ -35852,5 +35852,23 @@
     "before": "Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(vpnList), smoothLength)?.ToList() ?? ",
     "after": "",
     "filter": "FullyQualifiedName~VolumePressureUsesSeparateVolumeRangeAndSignalComponents"
+  },
+  {
+    "id": "composite-stage-quadratic",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeLinearQuadraticConvergenceDivergenceOscillatorFast(",
+    "before": "using var quadratic = ComputeQuadraticRegressionFast(data, context, length, maType);",
+    "after": "using var quadratic = context.Rent(count); QuadraticRegression(data, context, input, length, maType, quadratic.WritableSpan);",
+    "filter": "FullyQualifiedName~CompositeStageParityTests"
+  },
+  {
+    "id": "composite-stage-rsi-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTradersDynamicIndexFast(",
+    "before": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides)",
+    "after": "if (StrengthWindow.Supports(maType) && !ComponentAverage.HasOverrides && length2 < 0)",
+    "filter": "FullyQualifiedName~CompositeStageParityTests"
   }
 ]
