@@ -38138,5 +38138,131 @@
     "before": "_c1 = gain.Mean(1);",
     "after": "_c1 = 1 - _c2 - _c3;",
     "filter": "FullyQualifiedName~ReflexNumericalTests|FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "roofing-pair-drive",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "numerator.Add(_price3);",
+    "after": "numerator.Add(_price3, -1);",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-half",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "RocBankValue.Round(numerator, count: 2)",
+    "after": "RocBankValue.Round(numerator, count: 1)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-gain-mode",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "_gain = original ?",
+    "after": "_gain = original && upper == 0 ?",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-stable-gain",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "_c1 = gain.Mean(1)",
+    "after": "_c1 = 1 - _c2 - _c3",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-first-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "Product(ref firstSum, _first, _pole)",
+    "after": "Product(ref firstSum, _second, _pole)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-second-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "Product(ref secondSum, _second, _pole)",
+    "after": "Product(ref secondSum, _first, _pole)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-low-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "Product(ref outputSum, _output2, _c3)",
+    "after": "Product(ref outputSum, _output1, _c3)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-preview",
+    "module": "numerical",
+    "file": "src/Streaming/EhlersRoofingFilterV2Kernel.cs",
+    "scope": "internal sealed class EhlersRoofingFilterV2Kernel",
+    "before": "if (isFinal)",
+    "after": "if (isFinal || value != 0)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-v2-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersRoofingFilterV2(",
+    "before": "filter.Next(inputList[i], true)",
+    "after": "filter.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-original-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersRoofingFilterIndicator(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-v2-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersRoofingFilterV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-original-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeOriginalRoofingFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-original-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersRoofingFilterIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
+  },
+  {
+    "id": "roofing-pair-v2-periods",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersRoofingFilterV2State(roofV2.UpperLength, roofV2.LowerLength)",
+    "after": "new EhlersRoofingFilterV2State(roofV2.LowerLength, roofV2.UpperLength)",
+    "filter": "FullyQualifiedName~ValidationTests.RoofingNumericalTests"
   }
 ]

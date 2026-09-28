@@ -240,6 +240,7 @@ internal static partial class StatefulIndicatorFactory
             KlingerSignalSpecOptions ksig => new KlingerVolumeOscillatorState(fastLength: ksig.FastLength, slowLength: ksig.SlowLength, signalLength: ksig.SignalLength),
             EhlersUniversalOscillatorSpecOptions universal => new EhlersUniversalOscillatorState(universal.MaType, universal.Length),
             EhlersSuperPassbandFilterSpecOptions passband => new EhlersSuperPassbandFilterState(passband.FastLength, passband.SlowLength, passband.Length1, passband.Length2),
+            EhlersRoofingFilterV2SpecOptions roofV2 => new EhlersRoofingFilterV2State(roofV2.UpperLength, roofV2.LowerLength),
             EhlersReflexSpecOptions reflex => new EhlersReflexIndicatorState(reflex.Length),
             EhlersReflexIndicatorSpecOptions reflexIndicator => new EhlersReflexIndicatorState(reflexIndicator.Length),
             EhlersTrendflexSpecOptions flex => new EhlersTrendflexIndicatorState(flex.Length),

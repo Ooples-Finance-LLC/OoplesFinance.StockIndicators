@@ -71,8 +71,8 @@ internal static partial class BuiltInFormulaReferences
         var lower = Integer(options, roofingOnly ? "LowerLength" : "Length2", 20);
         return new(roofingOnly ? "Erf" : "Real", roofingOnly ? new[] { "Erf" } : new[] { "Real", "Imag" }, bars =>
         {
+            if (roofingOnly) return Outputs(("Erf", RoofingValues(bars, upper, lower, false)));
             var roof = HilbertRoofingTrajectory(Closes(bars), upper, lower);
-            if (roofingOnly) return Outputs(("Erf", roof));
             double[] Normalize(double[] values) => values.Select((value, i) =>
             {
                 var peak = Enumerable.Range(0, i + 1).Max(j => Math.Pow(.991, i - j) * Math.Abs(values[j]));

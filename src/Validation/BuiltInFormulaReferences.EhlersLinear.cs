@@ -499,18 +499,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Escc", line), ("Signal", trigger));
                 });
             case IndicatorName.EhlersRoofingFilterIndicator:
-                return new("Erfi", new[] { "Erfi" }, bars =>
-                {
-                    var angle = Math.Min(Math.Sqrt(2) * Math.PI / Integer(options, "Length1", 80), .99);
-                    var pole = Math.Cos(angle) / (1 + Math.Sin(angle));
-                    var prices = Closes(bars);
-                    var forcing = prices.Select((v, i) => v - 2 * (i == 0 ? 0 : prices[i - 1]) + (i < 2 ? 0 : prices[i - 2])).ToArray();
-                    // Repeated real pole: lag n has impulse coefficient (n + 1) * pole^n.
-                    var high = prices.Select((_, i) => Math.Pow((1 + pole) / 2, 2) * Enumerable.Range(0, i + 1)
-                        .Sum(j => forcing[j] * (i - j + 1) * Math.Pow(pole, i - j))).ToArray();
-                    var lowAngle = Math.Sqrt(2) * Math.PI / Integer(options, "Length2", 40);
-                    return Outputs(("Erfi", HilbertLowPass(high, Math.Exp(-lowAngle), Math.Min(lowAngle, .99))));
-                });
+                return new("Erfi", new[] { "Erfi" }, bars => Outputs(("Erfi", RoofingValues(bars, Integer(options, "Length1", 80), Integer(options, "Length2", 40), true))));
             case IndicatorName.EhlersEarlyOnsetTrendIndicator:
                 return new("Eoti", new[] { "Eoti" }, bars =>
                 {

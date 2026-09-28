@@ -360,50 +360,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersRoofingFilterIndicator(this StockData stockData, int length1 = 80, int length2 = 40)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> highPassList = new(stockData.Count);
-        List<double> roofingFilterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alphaArg = Math.Min(MathHelper.Sqrt2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var a1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a2 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
-        var b1 = 2 * a2 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a2 * a2;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-            var prevHp1 = i >= 1 ? highPassList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? highPassList[i - 2] : 0;
-
-            var hp = (Pow(1 - (a1 / 2), 2) * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - a1) * prevHp1) - (Pow(1 - a1, 2) * prevHp2);
-            highPassList.Add(hp);
-
-            var filter = (c1 * ((hp + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            roofingFilterList.Add(filter);
-
-            var signal = GetCompareSignal(filter - prevFilter1, prevFilter1 - prevFilter2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Erfi", roofingFilterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(roofingFilterList);
-        stockData.IndicatorName = IndicatorName.EhlersRoofingFilterIndicator;
-
-        return stockData;
+        var window = new Streaming.EhlersRoofingFilterV2Kernel(length1, length2, original: true); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData); double previous = 0, older = 0;
+        for (var i = 0; i < input.Count; i++)
+        { var value = window.Next(input[i], true); values.Add(value); signals?.Add(GetCompareSignal(value - previous, previous - older)); older = previous; previous = value; }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Erfi", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersRoofingFilterIndicator; return stockData;
     }
 
 

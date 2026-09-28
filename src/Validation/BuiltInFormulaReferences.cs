@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersRoofingFilterV2 or IndicatorName.EhlersRoofingFilterIndicator)
+        {
+            var roofOriginal = builtIn.BatchName == IndicatorName.EhlersRoofingFilterIndicator; var roofOptions = builtIn.CreateOptions();
+            var roofUpper = Integer(roofOptions, roofOriginal ? "Length1" : "UpperLength", 80); var roofLower = Integer(roofOptions, roofOriginal ? "Length2" : "LowerLength", 40);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofingValues(bars, roofUpper, roofLower, roofOriginal), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersReflexIndicator)
         {
             var reflexLength = Integer(builtIn.CreateOptions(), "Length", 20);

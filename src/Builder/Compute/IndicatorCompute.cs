@@ -16633,22 +16633,8 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer ComputeOriginalRoofingFast(StockData data, ComputeContext context, int highPeriod, int lowPeriod)
     {
         var prices = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var angle = Math.Min(Math.Sqrt(2) * Math.PI / highPeriod, .99);
-        var alpha = (Math.Cos(angle) + Math.Sin(angle) - 1) / Math.Cos(angle);
-        var radius = Math.Exp(-Math.Sqrt(2) * Math.PI / lowPeriod);
-        var second = 2 * radius * Math.Cos(Math.Min(Math.Sqrt(2) * Math.PI / lowPeriod, .99));
-        var third = -radius * radius;
-        var first = 1 - second - third;
-        double hp1 = 0, hp2 = 0, output1 = 0, output2 = 0;
-        var result = context.Rent(prices.Count);
-        for (var i = 0; i < prices.Count; i++)
-        {
-            var change = prices[i] - 2 * (i == 0 ? 0 : prices[i - 1]) + (i < 2 ? 0 : prices[i - 2]);
-            var high = Math.Pow(1 - alpha / 2, 2) * change + 2 * (1 - alpha) * hp1 - Math.Pow(1 - alpha, 2) * hp2;
-            var value = first * (high + hp1) / 2 + second * output1 + third * output2;
-            result.WritableSpan[i] = value;
-            hp2 = hp1; hp1 = high; output2 = output1; output1 = value;
-        }
+        var window = new EhlersRoofingFilterV2Kernel(highPeriod, lowPeriod, original: true); var result = context.Rent(prices.Count);
+        for (var i = 0; i < prices.Count; i++) result.WritableSpan[i] = window.Next(prices[i], true);
         return result;
     }
 

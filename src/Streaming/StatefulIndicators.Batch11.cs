@@ -339,79 +339,17 @@ public sealed class EhlersRocketRelativeStrengthIndexState : IStreamingIndicator
 [PrimaryOutput("Erfi")]
 public sealed class EhlersRoofingFilterIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _a1;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevHp1;
-    private double _prevHp2;
-    private double _prevFilter1;
-    private double _prevFilter2;
-
-    public EhlersRoofingFilterIndicatorState(int length1 = 80, int length2 = 40)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var alphaArg = Math.Min(MathHelper.Sqrt2 * Math.PI / resolved1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _a1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a2 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved2);
-        var b1 = 2 * a2 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / resolved2, 0.99));
-        _c2 = b1;
-        _c3 = -a2 * a2;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly EhlersRoofingFilterV2Kernel _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersRoofingFilterIndicatorState(int length1 = 80, int length2 = 40) { _window = new(length1, length2, original: true); }
     public IndicatorName Name => IndicatorName.EhlersRoofingFilterIndicator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = EhlersStreamingWindow.GetOffsetValue(_values, value, 1);
-        var prevValue2 = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-
-        var hp = (MathHelper.Pow(1 - (_a1 / 2), 2) * (value - (2 * prevValue1) + prevValue2)) +
-            (2 * (1 - _a1) * _prevHp1) - (MathHelper.Pow(1 - _a1, 2) * _prevHp2);
-        var filter = (_c1 * ((hp + _prevHp1) / 2)) + (_c2 * _prevFilter1) + (_c3 * _prevFilter2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevHp2 = _prevHp1;
-            _prevHp1 = hp;
-            _prevFilter2 = _prevFilter1;
-            _prevFilter1 = filter;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Erfi", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Erfi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Erf")]
