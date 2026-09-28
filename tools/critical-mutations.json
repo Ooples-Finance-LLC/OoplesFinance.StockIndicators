@@ -33288,5 +33288,119 @@
     "before": "bars[j - 1].Close",
     "after": "bars[j].Close",
     "filter": "FullyQualifiedName~ValidationTests.SurfaceRoughnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-lag-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "change.Add(_prices.Peek(), -1)",
+    "after": "change.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-extended-difference",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "ExactVarianceWindow.Units(difference.Mantissa) << difference.UpperShift",
+    "after": "ExactVarianceWindow.Units(difference.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-energy-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units + expired * expired",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "4 * units * units * _length",
+    "after": "units * units * _length",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-rms-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "4 * units * units * _length",
+    "after": "4 * units * units",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-clipped-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "numerator >= squares ? units.Sign",
+    "after": "numerator >= squares ? 1",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-fourth-term",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "((clip + _last) + _older) + _oldest",
+    "after": "((clip + _last) + _older) - _oldest",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "if (commit)\n        {",
+    "after": "if (commit || price != 0)\n        {",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "_last = _older = _oldest = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast("
+  },
+  {
+    "id": "ehlers-clip-signal-source",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersClipWindow.cs",
+    "before": "_signal.Next(new RocBankValue(line), commit)",
+    "after": "_signal.Next(new RocBankValue(price), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersSimpleClipIndicatorState"
+  },
+  {
+    "id": "ehlers-clip-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersSimpleClipIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "ehlers-clip-reference-energy",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.EhlersClip.cs",
+    "before": "new ReferenceFraction(4) * v * v / energy",
+    "after": "new ReferenceFraction(4) * v * v * energy",
+    "filter": "FullyQualifiedName~ValidationTests.EhlersClipNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

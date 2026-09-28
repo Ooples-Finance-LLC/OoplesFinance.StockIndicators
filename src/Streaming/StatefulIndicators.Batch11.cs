@@ -1786,83 +1786,18 @@ public sealed class EhlersRecursiveMedianOscillatorState : IStreamingIndicatorSt
 [PrimaryOutput("Esci")]
 public sealed class EhlersSimpleClipIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
+    private readonly EhlersClipWindow _window;
     private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _derivValues;
-    private readonly PooledRingBuffer<double> _clipValues;
-
-    public EhlersSimpleClipIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22)
-    {
-        _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _values = new PooledRingBuffer<double>(_length1);
-        _derivValues = new PooledRingBuffer<double>(_length3);
-        _clipValues = new PooledRingBuffer<double>(3);
-    }
-
+    public EhlersSimpleClipIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22)
+    { _ = length2; _window = new(maType, length1, length3, signalLength); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.EhlersSimpleClipIndicator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _derivValues.Clear();
-        _clipValues.Clear();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var deriv = _values.Count >= _length1 ? value - prevValue : 0;
-
-        double rms = 0;
-        for (var j = 0; j < _length3; j++)
-        {
-            var prevDeriv = EhlersStreamingWindow.GetOffsetValue(_derivValues, deriv, j);
-            rms += MathHelper.Pow(prevDeriv, 2);
-        }
-
-        var clip = rms != 0 ? MathHelper.MinOrMax(2 * deriv / MathHelper.Sqrt(rms / _length3), 1, -1) : 0;
-        var prevClip1 = EhlersStreamingWindow.GetOffsetValue(_clipValues, 1);
-        var prevClip2 = EhlersStreamingWindow.GetOffsetValue(_clipValues, 2);
-        var prevClip3 = EhlersStreamingWindow.GetOffsetValue(_clipValues, 3);
-        var z3 = clip + prevClip1 + prevClip2 + prevClip3;
-        var z3Ema = _signalSmoother.Next(z3, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _derivValues.TryAdd(deriv, out _);
-            _clipValues.TryAdd(clip, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Esci", z3 },
-                { "Signal", z3Ema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(z3, outputs);
+        var price = _input.GetValue(bar); var point = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Esci", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _derivValues.Dispose();
-        _clipValues.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Esci")]

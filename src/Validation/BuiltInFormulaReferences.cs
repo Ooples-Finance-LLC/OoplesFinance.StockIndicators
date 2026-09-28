@@ -90,6 +90,14 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SurfaceRoughnessOutputs(bars, surfaceLength), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersSimpleClipIndicator)
+        {
+            var clipOptions = builtIn.CreateOptions(); var clipKind = AverageKind(clipOptions, 3); if (clipKind == 0) yield break;
+            var clipKeys = builtIn.BatchOutputKey is { } selectedClip ? new[] { selectedClip } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < clipKeys.Length; slot++)
+            { var key = clipKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EhlersClipOutputs(bars, Integer(clipOptions, "Length1", 2), Integer(clipOptions, "Length3", 50), Integer(clipOptions, "SignalLength", 22), clipKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

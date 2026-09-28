@@ -631,42 +631,15 @@ public static partial class Calculations
     public static StockData CalculateEhlersSimpleClipIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 2, int length2 = 10, int length3 = 50, int signalLength = 22)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        signalLength = Math.Max(signalLength, 1);
-        List<double> derivList = new(stockData.Count);
-        List<double> clipList = new(stockData.Count);
-        List<double> z3List = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        signalLength = Math.Max(1, signalLength); _ = length2; // Retained public parameter; the published variant does not use it.
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new EhlersClipWindow(maType, length1, length3, signalLength);
+        List<double> z3List = new(stockData.Count), z3EmaList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-            var prevClip1 = i >= 1 ? clipList[i - 1] : 0;
-            var prevClip2 = i >= 2 ? clipList[i - 2] : 0;
-            var prevClip3 = i >= 3 ? clipList[i - 3] : 0;
-
-            var deriv = MinPastValues(i, length1, currentValue - prevValue);
-            derivList.Add(deriv);
-
-            double rms = 0;
-            for (var j = 0; j < length3; j++)
-            {
-                var prevDeriv = i >= j ? derivList[i - j] : 0;
-                rms += Pow(prevDeriv, 2);
-            }
-
-            var clip = rms != 0 ? MinOrMax(2 * deriv / Sqrt(rms / length3), 1, -1) : 0;
-            clipList.Add(clip);
-
-            var z3 = clip + prevClip1 + prevClip2 + prevClip3;
-            z3List.Add(z3);
+            for (var i = 0; i < stockData.Count; i++) z3List.Add(window.Line(inputList[i], true));
+            z3EmaList = Builder.Compute.ComponentAverage.Take(z3List.ToArray(), signalLength)?.ToList() ?? GetMovingAverageList(stockData, maType, signalLength, z3List);
         }
-
-        var z3EmaList = GetMovingAverageList(stockData, maType, signalLength, z3List);
+        else for (var i = 0; i < stockData.Count; i++) { var point = window.Next(inputList[i], true); z3List.Add(point.Line); z3EmaList.Add(point.Signal); }
         for (var i = 0; i < stockData.Count; i++)
         {
             var z3Ema = z3EmaList[i];

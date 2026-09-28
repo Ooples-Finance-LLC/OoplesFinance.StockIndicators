@@ -19489,40 +19489,18 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers Simple Clip Indicator using zero-allocation fast path.
     /// Returns the raw z3 oscillator, which is the series the batch publishes.
     /// </summary>
-    internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50, int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
+    internal static ComputeBuffer ComputeEhlersSimpleClipIndicatorFast(StockData data, ComputeContext context, int length1 = 2, int length3 = 50,
+        int signalLength = 22, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // The batch publishes the raw z3 sum of the last four clipped derivatives; its moving average
-        // of that series only ever reaches the Signal line.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length3 = Math.Max(length3, 1);
-
-        using var derivatives = context.Rent(count);
-        using var clips = context.Rent(count);
-        var deriv = derivatives.WritableSpan;
-        var clip = clips.WritableSpan;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        signalLength = Math.Max(1, signalLength); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new EhlersClipWindow(maType, length1, length3, signalLength); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var previousValue = i >= length1 ? input[i - length1] : 0;
-            deriv[i] = CalculationsHelper.MinPastValues(i, length1, input[i] - previousValue);
-
-            double rms = 0;
-            for (var j = 0; j < length3; j++)
-            {
-                var previousDeriv = i >= j ? deriv[i - j] : 0;
-                rms += MathHelper.Pow(previousDeriv, 2);
-            }
-
-            clip[i] = rms != 0 ? MathHelper.MinOrMax(2 * deriv[i] / MathHelper.Sqrt(rms / length3), 1, -1) : 0;
-            output[i] = clip[i] + (i >= 1 ? clip[i - 1] : 0) + (i >= 2 ? clip[i - 2] : 0) + (i >= 3 ? clip[i - 3] : 0);
+            using var line = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = window.Line(input[i], true);
+            MovingAverage(data, maType, signalLength, line.Span, result.WritableSpan); if (outputKey != "Signal") line.Span.CopyTo(result.WritableSpan);
         }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, signalLength, maType) : buffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.Signal : point.Line; }
+        return result;
     }
 
     /// <summary>
