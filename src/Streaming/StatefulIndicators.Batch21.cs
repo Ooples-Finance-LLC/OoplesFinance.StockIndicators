@@ -45,51 +45,18 @@ public sealed class RatioOCHLAveragerState : IStreamingIndicatorState
 [PrimaryOutput("Rsi")]
 public sealed class ReallySimpleIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ma;
-    private readonly IMovingAverageSmoother _signal;
+    private readonly ReallySimpleWindow _window;
     private readonly StreamingInputResolver _input;
-
-    public ReallySimpleIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 21, int smoothLength = 10)
-    {
-        _ma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    public ReallySimpleIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 21, int smoothLength = 10)
+    { _window = new(maType, length, smoothLength); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.ReallySimpleIndicator;
-
-    public void Reset()
-    {
-        _ma.Reset();
-        _signal.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var ma = _ma.Next(value, isFinal);
-        var rsi = value != 0 ? (bar.Low - ma) / value * 100 : 0;
-        var signal = _signal.Next(rsi, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Rsi", rsi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(rsi, outputs);
+        var price = _input.GetValue(bar); var point = _window.Next(price, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Rsi", point.Line }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _ma.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Rd")]

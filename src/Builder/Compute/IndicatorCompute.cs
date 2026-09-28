@@ -2169,9 +2169,7 @@ internal static partial class IndicatorCompute
             RapidRelativeStrengthIndexSpecOptions rrsi => spec.OutputKey == "Signal"
                 ? SmoothStrength(data, context, ComputeRapidRsiFast(data, context, rrsi.Length), rrsi.Length, rrsi.MaType)
                 : ComputeRapidRsiFast(data, context, rrsi.Length),
-            ReallySimpleIndicatorSpecOptions rsi2 => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType), rsi2.SmoothLength, rsi2.MaType)
-                : ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType),
+            ReallySimpleIndicatorSpecOptions rsi2 => ComputeReallySimpleIndicatorFast(data, context, rsi2.Length, rsi2.MaType, rsi2.SmoothLength, spec.OutputKey ?? "Rsi"),
 
             // Batch 24 - Complex Oscillators and Ehlers Indicators
             AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context,
@@ -23073,29 +23071,22 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeReallySimpleIndicatorFast(StockData data, ComputeContext context, int length = 21,
-        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+        MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int smoothLength = 10, string? outputKey = null)
     {
-        // CalculateReallySimpleIndicator measures how far the low sits below the moving average of the chained
-        // series, as a percentage of that series. The smoothing length belongs to the separate signal series
-        // and never reaches this one.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var ma = average.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new ReallySimpleWindow(maType, length, smoothLength); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            output[i] = input[i] != 0 ? (lows[i] - ma[i]) / input[i] * 100 : 0;
+            using var average = context.Rent(input.Count); using var values = context.Rent(input.Count);
+            MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), average.WritableSpan);
+            for (var i = 0; i < input.Count; i++) values.WritableSpan[i] = window.Line(input[i], data.LowPrices[i], true, average.Span[i]).Publish();
+            if (outputKey is null) { values.Span.CopyTo(result.WritableSpan); return result; }
+            MovingAverage(data, maType, smoothLength, values.Span, result.WritableSpan);
+            if (outputKey != "Signal") values.Span.CopyTo(result.WritableSpan);
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], data.LowPrices[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.Signal : point.Line; }
+        return result;
     }
 
     // Batch 24 - Complex Oscillators and Ehlers Indicators

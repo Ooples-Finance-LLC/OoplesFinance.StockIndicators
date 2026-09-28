@@ -2194,23 +2194,18 @@ public static partial class Calculations
     public static StockData CalculateReallySimpleIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 21, int smoothLength = 10)
     {
-        List<double> rsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, lowList, _, _) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); smoothLength = Math.Max(1, smoothLength);
+        List<double> rsiList = new(stockData.Count), rsiMaList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        using var window = new ReallySimpleWindow(maType, length, smoothLength);
+        var custom = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        if (custom)
         {
-            var currentValue = inputList[i];
-            var currentLow = lowList[i];
-            var currentMa = maList[i];
-
-            var rsi = currentValue != 0 ? (currentLow - currentMa) / currentValue * 100 : 0;
-            rsiList.Add(rsi);
+            var maList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
+            for (var i = 0; i < stockData.Count; i++) rsiList.Add(window.Line(inputList[i], stockData.LowPrices[i], true, maList[i]).Publish());
+            rsiMaList = Builder.Compute.ComponentAverage.Take(rsiList.ToArray(), smoothLength)?.ToList() ?? GetMovingAverageList(stockData, maType, smoothLength, rsiList);
         }
-
-        var rsiMaList = GetMovingAverageList(stockData, maType, smoothLength, rsiList);
+        else for (var i = 0; i < stockData.Count; i++) { var point = window.Next(inputList[i], stockData.LowPrices[i], true); rsiList.Add(point.Line); rsiMaList.Add(point.Signal); }
         for (var i = 0; i < stockData.Count; i++)
         {
             var rsi = rsiList[i];

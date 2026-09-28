@@ -73,6 +73,17 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => FiniteVolumeOutputs(bars, Integer(finiteVolumeOptions, "Length", 22), Number(finiteVolumeOptions, .3, "Factor"), finiteVolumeKind), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.ReallySimpleIndicator)
+        {
+            var simpleOptions = builtIn.CreateOptions(); var simpleKind = AverageKind(simpleOptions, 3); if (simpleKind == 0) yield break;
+            var simpleKeys = builtIn.BatchOutputKey is { } selectedSimple ? new[] { selectedSimple } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var simpleSlot = 0; simpleSlot < simpleKeys.Length; simpleSlot++)
+            {
+                var simpleKey = simpleKeys[simpleSlot];
+                yield return IndicatorValidationRule.ReferenceWithOverflowRejection(simpleSlot, bars => ReallySimpleOutputs(bars, Integer(simpleOptions, "Length", 21), Integer(simpleOptions, "SmoothLength", 10), simpleKind)[simpleKey], IndicatorErrorBudget.Exact);
+            }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

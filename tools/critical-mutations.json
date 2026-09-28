@@ -33058,5 +33058,120 @@
     "before": ") - previousTypical)",
     "after": ") + previousTypical)",
     "filter": "FullyQualifiedName~ValidationTests.FiniteVolumeNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "average.AddTo(ref difference, -1)",
+    "after": "average.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-difference-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "delta.AddTo(ref quotient)",
+    "after": "quotient.Add(delta.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "RocBankValue.Round(quotient, close)",
+    "after": "RocBankValue.Round(quotient, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-percentage",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": ".Multiply(100);",
+    "after": ".Multiply(1);",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-zero-close",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "if (close == 0) return default;",
+    "after": "if (close == 0) return new RocBankValue(100);",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-signal-source",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "_signal.Next(line, commit)",
+    "after": "_signal.Next(new RocBankValue(close), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "_signal = new(kind, Math.Max(1, smoothLength))",
+    "after": "_signal = new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (commit || value.Publish() != 0) { _sum = sum;",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ReallySimpleWindow.cs",
+    "before": "_signal.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeReallySimpleIndicatorFast("
+  },
+  {
+    "id": "really-simple-raw-low",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "window.Next(input[i], data.LowPrices[i], true)",
+    "after": "window.Next(input[i], input[i], true)",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeReallySimpleIndicatorFast("
+  },
+  {
+    "id": "really-simple-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class ReallySimpleIndicatorState"
+  },
+  {
+    "id": "really-simple-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " ReallySimpleIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "really-simple-reference-sign",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.ReallySimple.cs",
+    "before": "FromDouble(b.Low) - averages[i]",
+    "after": "FromDouble(b.Low) + averages[i]",
+    "filter": "FullyQualifiedName~ValidationTests.ReallySimpleNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]
