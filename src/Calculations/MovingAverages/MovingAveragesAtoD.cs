@@ -936,49 +936,15 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDynamicallyAdjustableFilter(this StockData stockData, int length = 14)
     {
-        List<double> outList = new(stockData.Count);
-        List<double> kList = new(stockData.Count);
-        List<double> srcList = new(stockData.Count);
-        List<double> srcDevList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum srcSumWindow = new();
-        RollingSum srcDevSumWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var window = new DynamicFilterWindow(length); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevOut = i >= 1 ? outList[i - 1] : currentValue;
-            var prevK = i >= 1 ? kList[i - 1] : 0;
-
-            var src = currentValue + (currentValue - prevOut);
-            srcList.Add(src);
-            srcSumWindow.Add(src);
-
-            var outVal = prevOut + (prevK * (src - prevOut));
-            outList.Add(outVal);
-
-            var srcSma = srcSumWindow.Average(length);
-            var srcDev = Pow(src - srcSma, 2);
-            srcDevList.Add(srcDev);
-            srcDevSumWindow.Add(srcDev);
-
-            var srcStdDev = Sqrt(srcDevSumWindow.Average(length));
-            var k = src - outVal != 0 ? Math.Abs(src - outVal) / (Math.Abs(src - outVal) + (srcStdDev * length)) : 0;
-            kList.Add(k);
-
-            var signal = GetCompareSignal(currentValue - outVal, prevValue - prevOut);
-            signalsList?.Add(signal);
+            var result = window.Next(input[i], true); var previous = i == 0 ? input[i] : line[i - 1];
+            signals?.Add(GetCompareSignal(input[i] - result, (i == 0 ? 0 : input[i - 1]) - previous)); line.Add(result);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Daf", outList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(outList);
-        stockData.IndicatorName = IndicatorName.DynamicallyAdjustableFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Daf", line } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DynamicallyAdjustableFilter;
         return stockData;
     }
 

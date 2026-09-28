@@ -598,75 +598,16 @@ public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Daf")]
 public sealed class DynamicallyAdjustableFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _srcWindow;
-    private readonly RollingWindowSum _srcDevWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevOut;
-    private double _prevK;
-    private bool _hasPrev;
-
-    public DynamicallyAdjustableFilterState(int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _srcWindow = new RollingWindowSum(_length);
-        _srcDevWindow = new RollingWindowSum(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DynamicFilterWindow _window;
+    public DynamicallyAdjustableFilterState(int length = 14) => _window = new(length);
     public IndicatorName Name => IndicatorName.DynamicallyAdjustableFilter;
-
-    public void Reset()
-    {
-        _srcWindow.Reset();
-        _srcDevWindow.Reset();
-        _prevOut = 0;
-        _prevK = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevOut = _hasPrev ? _prevOut : value;
-        var prevK = _hasPrev ? _prevK : 0;
-
-        var src = value + (value - prevOut);
-        var outVal = prevOut + (prevK * (src - prevOut));
-
-        var srcSum = isFinal ? _srcWindow.Add(src, out var srcCount) : _srcWindow.Preview(src, out srcCount);
-        var srcSma = srcCount > 0 ? srcSum / srcCount : 0;
-        var srcDev = (src - srcSma) * (src - srcSma);
-        var srcDevSum = isFinal ? _srcDevWindow.Add(srcDev, out var devCount) : _srcDevWindow.Preview(srcDev, out devCount);
-        var srcStdDev = devCount > 0 ? Math.Sqrt(srcDevSum / devCount) : 0;
-
-        var diff = Math.Abs(src - outVal);
-        var k = diff != 0 ? diff / (diff + (srcStdDev * _length)) : 0;
-
-        if (isFinal)
-        {
-            _prevOut = outVal;
-            _prevK = k;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Daf", outVal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(outVal, outputs);
+        StreamingInputValidation.Validate(bar); var line = _window.Next(bar.Close, isFinal);
+        return new(line, includeOutputs ? new Dictionary<string, double> { { "Daf", line } } : null);
     }
-
-    public void Dispose()
-    {
-        _srcWindow.Dispose();
-        _srcDevWindow.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Dama")]

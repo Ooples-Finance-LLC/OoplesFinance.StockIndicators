@@ -13031,42 +13031,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(StockData data, ComputeContext context, int length = 14)
     {
-        // CalculateDynamicallyAdjustableFilter tracks a doubled source - the value plus its distance from the
-        // previous output - and steps towards it by a factor that grows with how far the filter has fallen
-        // behind relative to the standard deviation of that source scaled by the length. Both averages are
-        // taken over the partial window while it fills, which is what RollingSum.Average does.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var srcSumWindow = new RollingSum();
-        var srcDevSumWindow = new RollingSum();
-        double prevOut = 0;
-        double prevK = 0;
-        for (var i = 0; i < count; i++)
-        {
-            if (i == 0)
-            {
-                prevOut = input[i];
-            }
-
-            var src = input[i] + (input[i] - prevOut);
-            srcSumWindow.Add(src);
-
-            var outVal = prevOut + (prevK * (src - prevOut));
-            output[i] = outVal;
-
-            srcDevSumWindow.Add(MathHelper.Pow(src - srcSumWindow.Average(length), 2));
-            var srcStdDev = MathHelper.Sqrt(srcDevSumWindow.Average(length));
-            var gap = Math.Abs(src - outVal);
-            prevK = src - outVal != 0 ? gap / (gap + (srcStdDev * length)) : 0;
-            prevOut = outVal;
-        }
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new DynamicFilterWindow(length); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
     }
 

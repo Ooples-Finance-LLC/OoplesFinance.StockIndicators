@@ -36545,5 +36545,86 @@
     "before": "length = Math.Max(1, length);",
     "after": "_ = length;",
     "filter": "FullyQualifiedName~PercentageTrendNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-source",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "var source = Add(current, Difference(current, previous));",
+    "after": "var source = Add(current, Difference(previous, current));",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-gain",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "Difference(source, previous).Multiply(_gain)",
+    "after": "Difference(source, previous).Multiply(1)",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-noise",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "root.Multiply(_length)",
+    "after": "root.Multiply(1)",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-square-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "_squares.Peek().AddTo(ref energy, -1)",
+    "after": "_squares.Peek().AddTo(ref energy, 1)",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-extended-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "_previous = line;",
+    "after": "_previous = new RocBankValue(line.Publish());",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicFilterWindow.cs",
+    "scope": "internal sealed class DynamicFilterWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "scope": "public static StockData CalculateDynamicallyAdjustableFilter(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDynamicallyAdjustableFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
+  },
+  {
+    "id": "dynamic-filter-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DynamicallyAdjustableFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DynamicFilterNumericalTests"
   }
 ]
