@@ -40091,5 +40091,122 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation removed\n",
     "filter": "FullyQualifiedName~CycleTunedRsiNumericalTests.InvalidFieldsLeavePeriodAndAveragesUnchanged"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "(int)Math.Ceiling(Math.Abs(period - 1))",
+    "after": "1",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.ThreePoleStartsAtZeroAndMeasuresTheAdaptiveLag"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-gain",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "- _feedback1 - _feedback2 - _feedback3",
+    "after": "- _feedback1 - _feedback2",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.ExtremePeriodsUseConsumedHistoryAndPreserveSmallGain"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "_third.Add(ref filtered, _feedback3)",
+    "after": "_third.Add(ref filtered, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(divisor);",
+    "after": "var shift = 0; var value = sum.Mean(divisor); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.SignalAveragesRetainSubnormalIntermediateValues"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-ema",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "_length - 1d",
+    "after": "_length - 2d",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-wma",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "// weighted history shift removed\n",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "Math.Max(2, length2)",
+    "after": "Math.Max(1, length2)",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.ExtremePeriodsUseConsumedHistoryAndPreserveSmallGain"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "_period.Next(price, commit)",
+    "after": "_period.Next(price, true)",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "_period.Reset();",
+    "after": "// period reset removed\n",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSmoothedAdaptiveMomentum(",
+    "before": "foreach (var price in inputList)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSmoothedAdaptiveMomentumFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.SelectedPricesReachBothBatchAndFastPaths"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.InvalidFieldsLeavePeriodFilterAndSignalUnchanged"
+  },
+  {
+    "id": "smoothed-adaptive-momentum-sma",
+    "module": "numerical",
+    "file": "src/Helpers/SmoothedAdaptiveMomentumWindow.cs",
+    "scope": "internal sealed class SmoothedAdaptiveMomentumWindow",
+    "before": "Scaled.Round(sum, _length)",
+    "after": "Scaled.Round(sum, _length + 1L)",
+    "filter": "FullyQualifiedName~SmoothedAdaptiveMomentumNumericalTests.WideAndTinyMomentumRetainsFilterAndSignalFeedback"
   }
 ]

@@ -49,33 +49,9 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / length2);
-        var c1 = Pow(a1, 2);
-        var coef2 = b1 + c1;
-        var coef3 = -1 * (c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = 1 - coef2 - coef3 - coef4;
-
-        var pList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersAdaptiveCyberCycle(data, length1))["Period"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var p = pList[i];
-            var prevF3_1 = i >= 1 ? f3List[i - 1] : 0;
-            var prevF3_2 = i >= 2 ? f3List[i - 2] : 0;
-            var prevF3_3 = i >= 3 ? f3List[i - 3] : 0;
-            var pr = (int)Math.Ceiling(Math.Abs(p - 1));
-            var prevValue = i >= pr ? inputList[i - pr] : 0;
-            var v1 = MinPastValues(i, pr, currentValue - prevValue);
-
-            var f3 = (coef1 * v1) + (coef2 * prevF3_1) + (coef3 * prevF3_2) + (coef4 * prevF3_3);
-            f3List.Add(f3);
-        }
-
-        var f3EmaList = GetMovingAverageList(stockData, maType, length2, f3List);
+        var window = new SmoothedAdaptiveMomentumWindow(length1, length2, maType); var f3EmaList = new List<double>(stockData.Count);
+        foreach (var price in inputList) { var point = window.Next(price, true); f3List.Add(point.Line); f3EmaList.Add(point.Signal); }
+        if (Builder.Compute.ComponentAverage.HasOverrides || !SmoothedAdaptiveMomentumWindow.Supports(maType)) f3EmaList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(f3List), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, f3List);
         for (var i = 0; i < stockData.Count; i++)
         {
             var f3 = f3List[i];

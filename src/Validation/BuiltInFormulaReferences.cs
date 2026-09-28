@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator && builtIn.CreateOptions() is EhlersSmoothedAdaptiveMomentumSpecOptions momentum && momentum.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Esam" : "Signal"; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SmoothedAdaptiveMomentumValues(bars, momentum.Length1, momentum.Length2, momentum.MaType)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DominantCycleTunedRelativeStrengthIndex)
         {
             var cycleTunedRsiOptions = (DominantCycleTunedRelativeStrengthIndexSpecOptions)builtIn.CreateOptions();

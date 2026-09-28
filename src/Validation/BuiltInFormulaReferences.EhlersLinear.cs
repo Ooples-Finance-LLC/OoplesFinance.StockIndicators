@@ -1,4 +1,5 @@
-﻿using System.Numerics;
+﻿using OoplesFinance.StockIndicators.Builder.Specs;
+using System.Numerics;
 using OoplesFinance.StockIndicators.Indicators;
 
 namespace OoplesFinance.StockIndicators.Validation;
@@ -140,6 +141,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ssf", filtered), ("Predict", prediction), ("Extrap", extrapolation));
                 });
             case IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator:
+                if (options is EhlersSmoothedAdaptiveMomentumSpecOptions adaptive && adaptive.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.ExponentialMovingAverage or MovingAvgType.WeightedMovingAverage)
+                    return new("Esam", new[] { "Esam", "Signal" }, bars => SmoothedAdaptiveMomentumValues(bars, adaptive.Length1, adaptive.Length2, adaptive.MaType));
                 var adaptiveMomentumKind = AverageKind(options, 3);
                 if (adaptiveMomentumKind == 0) return null;
                 return new("Esam", new[] { "Esam", "Signal" }, bars =>

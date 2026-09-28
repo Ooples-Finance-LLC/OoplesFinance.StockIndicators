@@ -22648,50 +22648,12 @@ internal static partial class IndicatorCompute
         int length1 = 5, int length2 = 8, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         MacdSeries series = MacdSeries.Line)
     {
-        // CalculateEhlersSmoothedAdaptiveMomentum differences the chained series over the dominant cycle
-        // period measured by the adaptive cyber cycle - not over a fixed length - and runs that difference
-        // through a four-tap recursive filter tuned by length2. OscillatorCore.EhlersSmoothedAdaptiveMomentum
-        // took the close and never measured a period, so the lag was wrong on every bar. The period comes
-        // from the same EhlersAdaptiveCyberCycle helper the batch reaches through its "Period" output.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 2);
-
-        var a1 = MathHelper.Exp(-Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / length2);
-        var c1 = MathHelper.Pow(a1, 2);
-        var coef2 = b1 + c1;
-        var coef3 = -1 * (c1 + (b1 * c1));
-        var coef4 = c1 * c1;
-        var coef1 = 1 - coef2 - coef3 - coef4;
-
-        using var adaptiveCycle = context.Rent(count);
-        using var periods = context.Rent(count);
-        EhlersAdaptiveCyberCycle(context, input, length1, 0.07, adaptiveCycle.WritableSpan, periods.WritableSpan);
-        var period = periods.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var prevF3One = i >= 1 ? output[i - 1] : 0;
-            var prevF3Two = i >= 2 ? output[i - 2] : 0;
-            var prevF3Three = i >= 3 ? output[i - 3] : 0;
-
-            var pr = (int)Math.Ceiling(Math.Abs(period[i] - 1));
-            var prevValue = i >= pr ? input[i - pr] : 0;
-            var v1 = i >= pr ? input[i] - prevValue : 0;
-
-            output[i] = (coef1 * v1) + (coef2 * prevF3One) + (coef3 * prevF3Two) + (coef4 * prevF3Three);
-        }
-
-        var smoothed = context.Rent(count);
-        MovingAverage(data, maType, length2, buffer.Span, smoothed.WritableSpan);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new SmoothedAdaptiveMomentumWindow(length1, length2, maType);
+        var buffer = context.Rent(input.Count); var smoothed = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); buffer.WritableSpan[i] = point.Line; smoothed.WritableSpan[i] = point.Signal; }
+        if (ComponentAverage.HasOverrides || !SmoothedAdaptiveMomentumWindow.Supports(maType)) MovingAverage(data, maType, Math.Max(2, length2), buffer.Span, smoothed.WritableSpan);
         if (series == MacdSeries.Signal) { buffer.Dispose(); return smoothed; }
-        smoothed.Dispose();
-        return buffer;
+        smoothed.Dispose(); return buffer;
     }
 
     /// <summary>

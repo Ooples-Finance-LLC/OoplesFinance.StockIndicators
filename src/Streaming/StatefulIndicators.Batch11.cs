@@ -1673,84 +1673,21 @@ public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, I
 [PrimaryOutput("Esam")]
 public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _coef1;
-    private readonly double _coef2;
-    private readonly double _coef3;
-    private readonly double _coef4;
-    private readonly AdaptiveCyberCyclePeriodState _periodState;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _f3Values;
-
-    public EhlersSmoothedAdaptiveMomentumIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 5, int length2 = 8)
+    private readonly SmoothedAdaptiveMomentumWindow _window;
+    private readonly IMovingAverageSmoother? _fallback;
+    public EhlersSmoothedAdaptiveMomentumIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 5, int length2 = 8)
     {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        var a1 = MathHelper.Exp(-Math.PI / resolved2);
-        var b1 = 2 * a1 * Math.Cos(1.738 * Math.PI / resolved2);
-        var c1 = MathHelper.Pow(a1, 2);
-        _coef2 = b1 + c1;
-        _coef3 = -1 * (c1 + (b1 * c1));
-        _coef4 = c1 * c1;
-        _coef1 = 1 - _coef2 - _coef3 - _coef4;
-        _periodState = new AdaptiveCyberCyclePeriodState(resolved1, 0.07);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _values = new PooledRingBuffer<double>(Math.Max(64, resolved1 * 2));
-        _f3Values = new PooledRingBuffer<double>(3);
+        _window = new(length1, length2, maType);
+        if (!SmoothedAdaptiveMomentumWindow.Supports(maType)) _fallback = MovingAverageSmootherFactory.Create(maType, Math.Max(2, length2));
     }
-
     public IndicatorName Name => IndicatorName.EhlersSmoothedAdaptiveMomentumIndicator;
-
-    public void Reset()
-    {
-        _periodState.Reset();
-        _values.Clear();
-        _f3Values.Clear();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() { _window.Reset(); _fallback?.Reset(); }
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var period = _periodState.Next(value, isFinal);
-        var pr = (int)Math.Ceiling(Math.Abs(period - 1));
-        var prevValue = pr == 0 ? value : EhlersStreamingWindow.GetOffsetValue(_values, value, pr);
-        var v1 = _values.Count >= pr ? value - prevValue : 0;
-        var prevF3_1 = EhlersStreamingWindow.GetOffsetValue(_f3Values, 1);
-        var prevF3_2 = EhlersStreamingWindow.GetOffsetValue(_f3Values, 2);
-        var prevF3_3 = EhlersStreamingWindow.GetOffsetValue(_f3Values, 3);
-        var f3 = (_coef1 * v1) + (_coef2 * prevF3_1) + (_coef3 * prevF3_2) + (_coef4 * prevF3_3);
-        var f3Ema = _signalSmoother.Next(f3, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _f3Values.TryAdd(f3, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Esam", f3 },
-                { "Signal", f3Ema }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(f3, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); var signal = _fallback?.Next(point.Line, isFinal) ?? point.Signal;
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Esam", point.Line }, { "Signal", signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodState.Dispose();
-        _values.Dispose();
-        _f3Values.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _fallback?.Dispose();
 }
 
 [PrimaryOutput("Erf")]
