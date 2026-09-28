@@ -24545,29 +24545,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast(StockData data, ComputeContext context, int length = 14,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
     {
-        // CalculateVolatilitySwitchIndicator takes the standard deviation of the bar-to-bar change expressed
-        // against the midpoint of the two bars, then smooths that. It is not the deviation of the close, which
-        // is what this arm used to return and why it was three orders of magnitude too large.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var dailyReturns = context.Rent(count);
-        var dr = dailyReturns.WritableSpan;
-        for (var i = 0; i < count; i++)
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new VolatilitySwitchWindow(maType, length); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var rocSma = (input[i] + prevValue) / 2;
-            dr[i] = rocSma != 0 ? CalculationsHelper.MinPastValues(i, 1, input[i] - prevValue) / rocSma : 0;
+            using var deviation = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) deviation.WritableSpan[i] = window.Deviation(input[i], true).Publish();
+            MovingAverage(data, maType, length, deviation.Span, result.WritableSpan);
+            if (ComponentAverage.HasOverrides) { using var unused = context.Rent(input.Count); MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(input), unused.WritableSpan); }
         }
-
-        using var volatility = context.Rent(count);
-        VolatilityCore.StandardDeviation(dailyReturns.Span, volatility.WritableSpan, length);
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, volatility.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Value(input[i], true);
+        return result;
     }
 
     internal static ComputeBuffer ComputeVortexBandsFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.McNichollMovingAverage, string? outputKey = null)

@@ -530,29 +530,15 @@ public static partial class Calculations
     public static StockData CalculateVolatilitySwitchIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 14)
     {
-        List<double> drList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        length = Math.Max(1, length); var (inputList, _, _, _, _) = GetInputValuesList(stockData); using var window = new VolatilitySwitchWindow(maType, length);
+        List<double> vswitchList = new(stockData.Count), wmaList = new(stockData.Count); List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var rocSma = (currentValue + prevValue) / 2;
-            var dr = rocSma != 0 ? MinPastValues(i, 1, currentValue - prevValue) / rocSma : 0;
-            drList.Add(dr);
+            var volaList = inputList.Select(price => window.Deviation(price, true).Publish()).ToList();
+            vswitchList = Builder.Compute.ComponentAverage.Take(volaList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, volaList);
+            wmaList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, inputList);
         }
-
-        stockData.SetCustomValues(drList);
-
-        // The deviation of the window about its own mean, not the mean squared residual from a moving average
-        // of it. Like the trend analysis index, this publishes its deviation rather than banding with it: Vsi
-        // is a moving average of the deviation of the returns, so the change lands in the output itself.
-        // Taken over drList by name, which is the return series it measures. See #190.
-        var volaList = GetStandardDeviationList(drList, length);
-        var vswitchList = GetMovingAverageList(stockData, maType, length, volaList);
-        var wmaList = GetMovingAverageList(stockData, maType, length, inputList);
+        else foreach (var price in inputList) { vswitchList.Add(window.Value(price, true)); wmaList.Add(window.PriceAverage(price, true)); }
         for (var i = 0; i < stockData.Count; i++)
         {
             var currentValue = inputList[i];

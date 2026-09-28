@@ -129,6 +129,12 @@ internal static partial class BuiltInFormulaReferences
             { var key = sigmaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SigmaSpikesOutputs(bars, Integer(sigmaOptions, "Length", 20), sigmaKind)[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.VolatilitySwitchIndicator)
+        {
+            var volatilitySwitchOptions = builtIn.CreateOptions(); var volatilitySwitchKind = AverageKind(volatilitySwitchOptions, 2); if (volatilitySwitchKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilitySwitchOutputs(bars, Integer(volatilitySwitchOptions, "Length", 14), volatilitySwitchKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

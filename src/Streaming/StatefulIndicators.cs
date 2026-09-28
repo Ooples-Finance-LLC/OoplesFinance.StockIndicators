@@ -1094,71 +1094,18 @@ public sealed class StatisticalVolatilityState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Vsi")]
 public sealed class VolatilitySwitchIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    // The deviation of the window about its own mean, matching the batch calculation; see #190. This state
-    // used to write the other quantity out by hand - a moving average of the returns, each return's distance
-    // from it, a moving average of those squared, and a root - which is the mean squared residual from a
-    // moving-average line rather than a deviation, and is why a grep for the old state's type did not find it.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _signalSmoother;
+    private readonly VolatilitySwitchWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
     public VolatilitySwitchIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        // No moving-average type for the deviation: it is taken about the window's own mean. maType still
-        // selects the average that smooths it into Vsi, below.
-        _stdDev = new RollingStandardDeviation(resolved);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(maType, length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.VolatilitySwitchIndicator;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var rocSma = (value + prevValue) / 2;
-        var dr = _hasPrev && rocSma != 0 ? (value - prevValue) / rocSma : 0;
-
-        // Fed the return series, which is what this measures, and taken about the window's own mean rather
-        // than about a moving average of it - matching the batch calculation.
-        var stdDev = _stdDev.Next(dr, isFinal);
-        var vswitch = _signalSmoother.Next(stdDev, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Vsi", vswitch }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vswitch, outputs);
+        var price = _input.GetValue(bar); var value = _window.Value(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Vsi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

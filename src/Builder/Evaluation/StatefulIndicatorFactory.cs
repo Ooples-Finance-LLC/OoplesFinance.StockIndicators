@@ -419,6 +419,7 @@ internal static partial class StatefulIndicatorFactory
             SurfaceRoughnessEstimatorSpecOptions surface => new SurfaceRoughnessEstimatorState(surface.MaType, surface.Length),
             EhlersSimpleClipIndicatorSpecOptions clip => new EhlersSimpleClipIndicatorState(clip.MaType, clip.Length1, clip.Length2, clip.Length3, clip.SignalLength),
             SigmaSpikesSpecOptions sigma => new SigmaSpikesState(sigma.MaType, sigma.Length),
+            VolatilitySwitchIndicatorSpecOptions volatilitySwitch => new VolatilitySwitchIndicatorState(volatilitySwitch.MaType, volatilitySwitch.Length),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

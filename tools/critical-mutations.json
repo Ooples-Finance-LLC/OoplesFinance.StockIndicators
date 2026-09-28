@@ -33973,5 +33973,120 @@
     "before": "RoundRocBankStage(returns[i] / deviation[i - 1])",
     "after": "RoundRocBankStage(returns[i] / deviation[i])",
     "filter": "FullyQualifiedName~ValidationTests.SigmaSpikesNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-midpoint-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "PriceMean.Of(price, _previous)",
+    "after": "(price + _previous) / 2",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-difference-publication",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "delta.AddTo(ref numerator)",
+    "after": "numerator.Add(delta.Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-zero-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "midpoint != 0",
+    "after": "midpoint > 0",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "_returns.Count > 0 && midpoint != 0",
+    "after": "midpoint != 0",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-deviation-startup",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "_returns.Count + 1L < _length",
+    "after": "_returns.Count + 1L <= _length",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units + expired * expired",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "if (commit) { _previous",
+    "after": "if (commit || price != 0) { _previous",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "_returns.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast("
+  },
+  {
+    "id": "volatility-switch-raw-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (data.Count < 0)",
+    "filter": "FullyQualifiedName~VolatilitySwitchNumericalTests.CustomerCallbacksConsumeDeviationThenPrices",
+    "scope": "internal static ComputeBuffer ComputeVolatilitySwitchIndicatorFast("
+  },
+  {
+    "id": "volatility-switch-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class VolatilitySwitchIndicatorState"
+  },
+  {
+    "id": "volatility-switch-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " VolatilitySwitchIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-reference-midpoint",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.VolatilitySwitch.cs",
+    "before": "(current + previous) / new ReferenceFraction(2)",
+    "after": "(current + previous) / new ReferenceFraction(3)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "volatility-switch-average-weight",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilitySwitchWindow.cs",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]
