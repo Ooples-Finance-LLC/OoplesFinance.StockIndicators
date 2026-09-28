@@ -1845,7 +1845,7 @@ internal static partial class IndicatorCompute
                 {
                     "MiddleBand" => MovingAverageBandSeries.MiddleBand,
                     "LowerBand" => MovingAverageBandSeries.LowerBand,
-                    "FastMa" => MovingAverageBandSeries.FastMa,
+                    null or "FastMa" => MovingAverageBandSeries.FastMa,
                     _ => MovingAverageBandSeries.UpperBand
                 }),
             MovingAverageBandWidthSpecOptions mabw => MovingAverageBandLevels(data, context, mabw.FastLength,

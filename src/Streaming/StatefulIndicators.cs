@@ -512,7 +512,7 @@ public sealed class MidpriceState : IStreamingIndicatorState, IDisposable
     }
 }
 
-[PrimaryOutput("Sma")]
+[PrimaryOutput("UpperBand")]
 public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDisposable
 {
     private readonly KeltnerWindow _window;
@@ -525,7 +525,7 @@ public sealed class AverageTrueRangeChannelState : IStreamingIndicatorState, IDi
     {
         StreamingInputValidation.Validate(bar); var stages = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
         var point = RangeChannelWindow.Output(bar.Close, stages.Middle, stages.Atr, _multiplier, true);
-        return new(point.Average, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } , { "Sma", point.Average } } : null);
+        return new(point.Upper, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "MiddleBand", point.Middle }, { "LowerBand", point.Lower } , { "Sma", point.Average } } : null);
     }
     public void Dispose() => _window.Dispose();
 }

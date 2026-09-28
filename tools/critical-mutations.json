@@ -35817,5 +35817,22 @@
     "before": "ReferenceFraction.FromDouble(bars[i].Volume)",
     "after": "ReferenceFraction.FromDouble(bars[i].Close)",
     "filter": "FullyQualifiedName~ValidationTests.ModifiedObvNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "band-primary-atr-value",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageTrueRangeChannelState",
+    "before": "return new(point.Upper,",
+    "after": "return new(point.Average,",
+    "filter": "FullyQualifiedName~BandPrimaryOutputTests"
+  },
+  {
+    "id": "band-primary-moving-default",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "null or \"FastMa\" => MovingAverageBandSeries.FastMa,",
+    "after": "\"FastMa\" => MovingAverageBandSeries.FastMa,",
+    "filter": "FullyQualifiedName~BandPrimaryOutputTests"
   }
 ]
