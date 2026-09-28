@@ -2396,6 +2396,7 @@ internal static partial class IndicatorCompute
             RunningEquitySpecOptions re => ComputeRunningEquityFast(data, context, re.Length, re.MaType),
 
             // Batch 33 - Remaining Indicators (Part 2)
+            MotionSmoothnessIndexSpecOptions motionSmooth => ComputeMotionSmoothnessIndexFast(data, context, motionSmooth.Length),
             SigmaSpikesSpecOptions ss => ComputeSigmaSpikesFast(data, context, ss.Length, ss.MaType, spec.OutputKey ?? "Ss"),
             StandardDevationSpecOptions sd => spec.OutputKey switch
             {
@@ -25733,6 +25734,15 @@ internal static partial class IndicatorCompute
     }
 
     // Batch 33 - Remaining Indicators (Part 2)
+
+    internal static ComputeBuffer ComputeMotionSmoothnessIndexFast(StockData data, ComputeContext context, int length = 50)
+    {
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var window = new MotionSmoothnessWindow(length); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true);
+        if (ComponentAverage.HasOverrides) { using var signal = context.Rent(input.Count); MovingAverage(data, MovingAvgType.ExponentialMovingAverage, length, SpanCompat.AsReadOnlySpan(input), signal.WritableSpan); }
+        return result;
+    }
 
     internal static ComputeBuffer ComputeSigmaSpikesFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)

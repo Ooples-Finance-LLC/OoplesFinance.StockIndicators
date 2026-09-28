@@ -34203,5 +34203,120 @@
     "before": "RoundRocBankStage(difference - signal)",
     "after": "RoundRocBankStage(difference + signal)",
     "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "sum.Add(_previous, -1)",
+    "after": "sum.Add(_previous, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-change-publication",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "_changes.Next(change, commit)",
+    "after": "_changes.Next(new RocBankValue(change.Publish()), commit)",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-seed",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "if (_seeded) { sum.Add(price); sum.Add(_previous, -1); }",
+    "after": "sum.Add(price); if (_seeded) sum.Add(_previous, -1);",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-ratio-inverted",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "return numerator.Ratio(denominator)",
+    "after": "return denominator.Ratio(numerator)",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-root-extension",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "result = new(root, shift)",
+    "after": "result = new(root)",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-deviation-startup",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "_history.Count + 1L >= _length",
+    "after": "_history.Count + 1L > _length",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units + expired * expired",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "if (commit) { _sum",
+    "after": "if (commit || units != 0) { _sum",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MotionSmoothnessWindow.cs",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeMotionSmoothnessIndexFast("
+  },
+  {
+    "id": "motion-smoothness-raw-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (ComponentAverage.HasOverrides)",
+    "after": "if (data.Count < 0)",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeMotionSmoothnessIndexFast("
+  },
+  {
+    "id": "motion-smoothness-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch17.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class MotionSmoothnessIndexState"
+  },
+  {
+    "id": "motion-smoothness-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " MotionSmoothnessIndexSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "motion-smoothness-reference-difference",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.MotionSmoothness.cs",
+    "before": "RoundRocBankStage(v - prices[i - 1])",
+    "after": "RoundRocBankStage(v + prices[i - 1])",
+    "filter": "FullyQualifiedName~ValidationTests.MotionSmoothnessNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

@@ -142,6 +142,12 @@ internal static partial class BuiltInFormulaReferences
             { var key = leadingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DetrendedLeadingOutputs(bars, Integer(leadingOptions, "Length", 14))[key], IndicatorErrorBudget.Exact); }
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.MotionSmoothnessIndex)
+        {
+            var motionOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => MotionSmoothnessOutputs(bars, Integer(motionOptions, "Length", 50)), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

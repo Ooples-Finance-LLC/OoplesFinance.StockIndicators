@@ -518,6 +518,7 @@ internal static class BuilderVerifiedArms
         typeof(ShapeshiftingMovingAverageSpecOptions),
         typeof(SharpModifiedMovingAverageSpecOptions),
         typeof(SharpeRatioSpecOptions),
+        typeof(MotionSmoothnessIndexSpecOptions),
         typeof(SigmaSpikesSpecOptions),
         typeof(SimpleCycleSpecOptions),
         typeof(SimpleLinesSpecOptions),

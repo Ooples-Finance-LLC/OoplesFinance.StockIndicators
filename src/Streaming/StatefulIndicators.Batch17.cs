@@ -1161,65 +1161,16 @@ public sealed class MorphedSineWaveState : IStreamingIndicatorState
 [PrimaryOutput("Msi")]
 public sealed class MotionSmoothnessIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingStandardDeviation _chgStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _chgValue;
-    private bool _hasPrev;
-
-    public MotionSmoothnessIndexState(int length = 50)
-    {
-        var resolved = Math.Max(1, length);
-        _stdDev = new RollingStandardDeviation(resolved);
-        _chgStdDev = new RollingStandardDeviation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MotionSmoothnessWindow _window; private readonly StreamingInputResolver _input;
+    public MotionSmoothnessIndexState(int length = 50) { _window = new(length); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.MotionSmoothnessIndex;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _chgStdDev.Reset();
-        _prevValue = 0;
-        _chgValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var stdDev = _stdDev.Next(value, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var chg = _hasPrev ? value - prevValue : 0;
-        _chgValue = chg;
-        var chgStdDev = _chgStdDev.Next(_chgValue, isFinal);
-        var msi = stdDev != 0 ? chgStdDev / stdDev : 0;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Msi", msi }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(msi, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Msi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _chgStdDev.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Ts")]

@@ -441,39 +441,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateMotionSmoothnessIndex(this StockData stockData, int length = 50)
     {
-        List<double> bList = new(stockData.Count);
-        List<double> chgList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var stdDevList = GetStandardDeviationList(inputList, length);
-        var emaList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
-
+        length = Math.Max(1, length); List<double> bList = new(stockData.Count);
+        List<Signal>? signalsList = CreateSignalsList(stockData); var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var emaList = Builder.Compute.ComponentAverage.Take(inputList.ToArray(), length)?.ToList() ?? GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, length, inputList);
+        var window = new MotionSmoothnessWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var chg = MinPastValues(i, 1, currentValue - prevValue);
-            chgList.Add(chg);
-        }
-
-        stockData.SetCustomValues(chgList);
-        var aChgStdDevList = GetStandardDeviationList(chgList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentEma = emaList[i];
-            var aChgStdDev = aChgStdDevList[i];
-            var stdDev = stdDevList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var b = stdDev != 0 ? aChgStdDev / stdDev : 0;
-            bList.Add(b);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, b, 0.5);
-            signalsList?.Add(signal);
+            var value = window.Next(inputList[i], true); bList.Add(value);
+            signalsList?.Add(GetVolatilitySignal(inputList[i] - emaList[i], i == 0 ? 0 : inputList[i - 1] - emaList[i - 1], value, .5));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
