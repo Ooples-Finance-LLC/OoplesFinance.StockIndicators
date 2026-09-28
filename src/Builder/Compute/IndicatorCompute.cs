@@ -857,9 +857,7 @@ internal static partial class IndicatorCompute
             TFSMboPercentagePriceOscillatorSpecOptions tfsppo => ComputeTfsOscillatorFast(data, context, 25, 200, 18, tfsppo.MaType, true, spec.OutputKey ?? "Ppo"),
 
             // Batch 6 - Kurtosis/Degree oscillators
-            FastSlowKurtosisOscillatorSpecOptions fsko => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFastSlowKurtosisOscillatorFast(data, context, fsko.Length), fsko.Length, MovingAvgType.WeightedMovingAverage)
-                : ComputeFastSlowKurtosisOscillatorFast(data, context, fsko.Length),
+            FastSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, outputKey: spec.OutputKey ?? "Fsk"),
             FastSlowDegreeOscillatorSpecOptions fsdo => spec.OutputKey switch
             {
                 null or "Fsdo" => ComputeFastSlowDegreeOscillatorFast(data, context, fsdo.Length, maType: fsdo.MaType),
@@ -2003,9 +2001,7 @@ internal static partial class IndicatorCompute
                 ? SmoothPublished(data, context, ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType),
                     ei.SignalLength, ei.MaType)
                 : ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType),
-            FastandSlowKurtosisOscillatorSpecOptions fsko => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio), fsko.Length, fsko.MaType)
-                : ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio),
+            FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio, fsko.MaType, spec.OutputKey ?? "Fsk"),
             FearAndGreedIndicatorSpecOptions fgi => spec.OutputKey == "Signal"
                 ? SmoothPublished(data, context, ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.MaType),
                     fgi.SmoothLength, fgi.MaType)
@@ -21153,30 +21149,21 @@ internal static partial class IndicatorCompute
     /// Computes Fast and Slow Kurtosis Oscillator using zero-allocation fast path.
     /// Returns the smoothed kurtosis value.
     /// </summary>
-    internal static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03)
+    internal static ComputeBuffer ComputeFastAndSlowKurtosisFast(StockData data, ComputeContext context, int length = 3, double ratio = 0.03,
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, string? outputKey = null)
     {
-        // CalculateFastandSlowKurtosisOscillator takes the change in momentum - the second difference of the
-        // chained series over the length - and runs it through an exponential step of the given ratio. Its
-        // maType reaches nothing in the published series.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double prevMomentum = 0;
-        double prevFsk = 0;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new FastSlowKurtosisWindow(length, ratio, maType); var result = context.Rent(input.Count);
+        // A missing key is the main-line component contract used by the RSI/Stochastic composites.
+        if (outputKey is null) { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Line(input[i], true).Publish(); }
+        else if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var prevValue = i >= length ? input[i - length] : 0;
-            var momentum = CalculationsHelper.MinPastValues(i, length, input[i] - prevValue);
-
-            prevFsk = (ratio * (momentum - prevMomentum)) + ((1 - ratio) * prevFsk);
-            prevMomentum = momentum;
-            output[i] = prevFsk;
+            using var line = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) line.WritableSpan[i] = window.Line(input[i], true).Publish();
+            using var signal = context.Rent(input.Count); MovingAverage(data, maType, Math.Max(1, length), line.Span, signal.WritableSpan);
+            (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(result.WritableSpan);
         }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line; }
+        return result;
     }
 
     /// <summary>

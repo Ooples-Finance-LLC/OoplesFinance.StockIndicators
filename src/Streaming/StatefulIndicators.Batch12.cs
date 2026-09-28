@@ -1088,66 +1088,19 @@ public sealed class FareySequenceWeightedMovingAverageState : IStreamingIndicato
 [PrimaryOutput("Fsk")]
 public sealed class FastandSlowKurtosisOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _ratio;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly IMovingAverageSmoother _signalSmoother;
+    private readonly FastSlowKurtosisWindow _window;
     private readonly StreamingInputResolver _input;
-    private double _prevMomentum;
-    private double _prevFsk;
-
     public FastandSlowKurtosisOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 3, double ratio = 0.03)
-    {
-        _length = Math.Max(1, length);
-        _ratio = ratio;
-        _values = new PooledRingBuffer<double>(_length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    { _window = new(length, ratio, maType); _input = new StreamingInputResolver(InputName.Close, null); }
     public IndicatorName Name => IndicatorName.FastandSlowKurtosisOscillator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _signalSmoother.Reset();
-        _prevMomentum = 0;
-        _prevFsk = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var hasMomentum = _values.Count >= _length;
-        var prevValue = hasMomentum ? EhlersStreamingWindow.GetOffsetValue(_values, value, _length) : 0;
-        var momentum = hasMomentum ? value - prevValue : 0;
-        var fsk = (_ratio * (momentum - _prevMomentum)) + ((1 - _ratio) * _prevFsk);
-        var signal = _signalSmoother.Next(fsk, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevMomentum = momentum;
-            _prevFsk = fsk;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fsk", fsk },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fsk, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        IReadOnlyDictionary<string, double>? outputs = includeOutputs
+            ? new Dictionary<string, double>(2) { { "Fsk", value.Line }, { "Signal", value.Signal } } : null;
+        return new StreamingIndicatorStateResult(value.Line, outputs);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }

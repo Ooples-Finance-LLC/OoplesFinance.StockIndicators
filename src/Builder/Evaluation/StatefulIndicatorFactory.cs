@@ -408,6 +408,8 @@ internal static partial class StatefulIndicatorFactory
             AlligatorLipsSpecOptions lips => new AlligatorIndexState(lipsLength: lips.Length),
             TillsonIE2SpecOptions tillson => new TillsonIE2State(tillson.MaType, tillson.Length),
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
+            FastSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(length: fsk.Length),
+            FastandSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(fsk.MaType, fsk.Length, fsk.Ratio),
             KurtosisIndicatorSpecOptions => new KurtosisIndicatorState(),
             ChopZoneSpecOptions chop => new ChopZoneState(chop.MaType, chop.Length),
             GopalakrishnanRangeIndexSpecOptions gapo => new GopalakrishnanRangeIndexState(gapo.MaType, gapo.Length),

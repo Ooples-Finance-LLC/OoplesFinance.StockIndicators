@@ -1258,26 +1258,21 @@ public static partial class Calculations
     public static StockData CalculateFastandSlowKurtosisOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length = 3, double ratio = 0.03)
     {
-        List<double> fskList = new(stockData.Count);
-        List<double> momentumList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
+        length = Math.Max(1, length);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        using var window = new FastSlowKurtosisWindow(length, ratio, maType);
+        List<double> fskList = new(stockData.Count), fskSignalList;
+        List<Signal>? signalsList = CreateSignalsList(stockData);
+        if (Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-
-            var prevMomentum = GetLastOrDefault(momentumList);
-            var momentum = MinPastValues(i, length, currentValue - prevValue);
-            momentumList.Add(momentum);
-
-            var prevFsk = GetLastOrDefault(fskList);
-            var fsk = (ratio * (momentum - prevMomentum)) + ((1 - ratio) * prevFsk);
-            fskList.Add(fsk);
+            foreach (var price in inputList) fskList.Add(window.Line(price, true).Publish());
+            fskSignalList = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(fskList), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, fskList);
         }
-
-        var fskSignalList = GetMovingAverageList(stockData, maType, length, fskList);
+        else
+        {
+            fskSignalList = new(stockData.Count);
+            foreach (var price in inputList) { var value = window.Next(price, true); fskList.Add(value.Line); fskSignalList.Add(value.Signal); }
+        }
         for (var i = 0; i < fskSignalList.Count; i++)
         {
             var fsk = fskList[i];

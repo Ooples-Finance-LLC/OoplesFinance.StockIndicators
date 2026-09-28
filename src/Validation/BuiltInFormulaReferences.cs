@@ -17,6 +17,14 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.FastandSlowKurtosisOscillator)
+        {
+            var fskOptions = builtIn.CreateOptions(); var fskKind = AverageKind(fskOptions, 2); if (fskKind == 0) yield break;
+            var fskKeys = builtIn.BatchOutputKey is { } selectedKey ? new[] { selectedKey } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < fskKeys.Length; slot++)
+            { var key = fskKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowKurtosisOutputs(bars, Integer(fskOptions, "Length", 3), Number(fskOptions, .03, "Ratio"), fskKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

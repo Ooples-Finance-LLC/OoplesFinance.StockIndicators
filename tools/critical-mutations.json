@@ -32109,5 +32109,137 @@
     "before": "v - differences[i - second]",
     "after": "v + differences[i - second]",
     "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-lag",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "new KurtosisWindow(_length, 1, 1, 1)",
+    "after": "new KurtosisWindow(1, 1, 1, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "_ratio = ratio;",
+    "after": "_ratio = Math.Max(0, Math.Min(1, ratio));",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-difference-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": ".Multiply(_ratio);",
+    "after": ".Multiply(1 - _ratio);",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-retained-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "_previous.Multiply(1 - _ratio)",
+    "after": "_previous.Multiply(_ratio)",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-subtract-retained",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "retained.AddTo(ref sum);",
+    "after": "retained.AddTo(ref sum, -1);",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-published-history",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "if (commit) _previous = line;",
+    "after": "if (commit) _previous = new RocBankValue(line.Publish());",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "Line(price, commit)",
+    "after": "Line(price, true)",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-signal-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "line.AddTo(ref weighted, _length)",
+    "after": "line.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-signal-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * _length",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowKurtosisWindow.cs",
+    "before": "_previous = default; _sum = _weighted = default;",
+    "after": "_previous = default;",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeFastAndSlowKurtosisFast("
+  },
+  {
+    "id": "fastslow-kurtosis-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? value.Signal : value.Line",
+    "after": "value.Line",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeFastAndSlowKurtosisFast("
+  },
+  {
+    "id": "fastslow-kurtosis-component-callback",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "if (outputKey is null)",
+    "after": "if (outputKey is null && !ComponentAverage.HasOverrides)",
+    "filter": "FullyQualifiedName~FastSlowKurtosisNumericalTests.DirectIndicatorConsumesSignalCallbackButComponentDoesNot",
+    "scope": "internal static ComputeBuffer ComputeFastAndSlowKurtosisFast("
+  },
+  {
+    "id": "fastslow-kurtosis-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "before": "var value = _window.Next(_input.GetValue(bar), isFinal);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; } var value = _window.Next(price, isFinal);",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class FastandSlowKurtosisOscillatorState"
+  },
+  {
+    "id": "fastslow-kurtosis-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " FastSlowKurtosisOscillatorSpecOptions or FastandSlowKurtosisOscillatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "fastslow-kurtosis-reference-ratio",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.FastSlowKurtosis.cs",
+    "before": "ReferenceFraction.FromDouble(1 - ratio)",
+    "after": "ReferenceFraction.FromDouble(ratio)",
+    "filter": "FullyQualifiedName~ValidationTests.FastSlowKurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]
