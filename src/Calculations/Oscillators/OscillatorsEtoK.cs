@@ -2238,44 +2238,21 @@ public static partial class Calculations
     public static StockData CalculateKurtosisIndicator(this StockData stockData, int length1 = 3, int length2 = 1, int fastLength = 3,
         int slowLength = 65)
     {
-        List<double> diffList = new(stockData.Count);
-        List<double> kList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); using var window = new KurtosisWindow(length1, length2, fastLength, slowLength, input.Count);
+        List<double> line, signal;
+        if (Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-            var prevDiff = i >= length2 ? diffList[i - length2] : 0;
-
-            var diff = MinPastValues(i, length1, currentValue - prevValue);
-            diffList.Add(diff);
-
-            var k = MinPastValues(i, length2, diff - prevDiff);
-            kList.Add(k);
+            var kList = input.Select(price => window.Difference(price, true).Publish()).ToList();
+            line = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(kList), Math.Max(1, slowLength))?.ToList() ?? GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, slowLength, kList);
+            signal = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(line), Math.Max(1, fastLength))?.ToList() ?? GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, fastLength, line);
         }
-
-        var fkList = GetMovingAverageList(stockData, MovingAvgType.ExponentialMovingAverage, slowLength, kList);
-        var fskList = GetMovingAverageList(stockData, MovingAvgType.WeightedMovingAverage, fastLength, fkList);
-        for (var i = 0; i < stockData.Count; i++)
+        else
         {
-            var fsk = fskList[i];
-            var prevFsk = i >= 1 ? fskList[i - 1] : 0;
-
-            var signal = GetCompareSignal(fsk, prevFsk);
-            signalsList?.Add(signal);
+            line = new(input.Count); signal = new(input.Count);
+            foreach (var price in input) { var value = window.Next(price, true); line.Add(value.Line); signal.Add(value.Signal); }
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fk", fkList },
-            { "Signal", fskList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fkList);
-        stockData.IndicatorName = IndicatorName.KurtosisIndicator;
-
-        return stockData;
+        var signals = CreateSignalsList(stockData); for (var i = 0; i < input.Count; i++) signals?.Add(GetCompareSignal(signal[i], i > 0 ? signal[i - 1] : 0));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fk", line }, { "Signal", signal } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.KurtosisIndicator; return stockData;
     }
 
 

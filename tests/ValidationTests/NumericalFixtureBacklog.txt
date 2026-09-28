@@ -1199,10 +1199,6 @@ OoplesFinance.StockIndicators.Indicators.KlingerVolumeOscillator/minimum-signalL
 OoplesFinance.StockIndicators.Indicators.KlingerVolumeOscillator/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.KlingerVolumeOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.KlingerVolumeOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.KurtosisIndicator/default
-OoplesFinance.StockIndicators.Indicators.KurtosisIndicator/longer-periods
-OoplesFinance.StockIndicators.Indicators.KurtosisIndicator/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KurtosisIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.Kvo/default
 OoplesFinance.StockIndicators.Indicators.Kvo/longer-periods
 OoplesFinance.StockIndicators.Indicators.Kvo/minimum-periods

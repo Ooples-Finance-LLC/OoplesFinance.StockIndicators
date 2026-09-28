@@ -1121,9 +1121,7 @@ internal static partial class IndicatorCompute
             InternalBarStrengthIndicatorSpecOptions ibs => ComputeInternalBarStrengthIndicatorFast(data, context, ibs.Length, spec.OutputKey),
             ZScoreSpecOptions zscore => ComputeZScoreFast(data, context, zscore.Length, zscore.MaType),
             FastZScoreSpecOptions fzscore => ComputeFastZScoreFast(data, context, fzscore.Length, fzscore.MaType),
-            KurtosisIndicatorSpecOptions => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeKurtosisIndicatorFast(data, context), 3, MovingAvgType.WeightedMovingAverage)
-                : ComputeKurtosisIndicatorFast(data, context),
+            KurtosisIndicatorSpecOptions => ComputeKurtosisIndicatorFast(data, context, spec.OutputKey),
 
             // Batch 7 - Demark indicators
             DemarkRangeExpansionIndexSpecOptions dmkrei => ComputeDemarkRangeExpansionIndexFast(data, context, dmkrei.Length),
@@ -13072,39 +13070,18 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Kurtosis Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context)
+    internal static ComputeBuffer ComputeKurtosisIndicatorFast(StockData data, ComputeContext context, string? outputKey = null)
     {
-        // CalculateKurtosisIndicator publishes "Fk": the exponential average, over its fixed slow length, of the
-        // second difference of the chained series. Its four lengths are fixed by the batch call and the moving
-        // average type is hardcoded, so the arm takes no parameters - the spec's only option has no effect and
-        // the weighted pass over the result is the separate "Signal" series.
-        const int length1 = 3;
-        const int length2 = 1;
-        const int slowLength = 65;
-
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var firstDifference = context.Rent(count);
-        var diff = firstDifference.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new KurtosisWindow(capacity: input.Count); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides)
         {
-            var priorValue = i >= length1 ? input[i - length1] : 0;
-            diff[i] = CalculationsHelper.MinPastValues(i, length1, input[i] - priorValue);
+            using var differences = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) differences.WritableSpan[i] = window.Difference(input[i], true).Publish();
+            using var line = context.Rent(input.Count); MovingAverage(data, MovingAvgType.ExponentialMovingAverage, 65, differences.Span, line.WritableSpan);
+            using var signal = context.Rent(input.Count); MovingAverage(data, MovingAvgType.WeightedMovingAverage, 3, line.Span, signal.WritableSpan);
+            (outputKey == "Signal" ? signal.Span : line.Span).CopyTo(result.WritableSpan);
         }
-
-        using var secondDifference = context.Rent(count);
-        var k = secondDifference.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var priorDiff = i >= length2 ? diff[i - length2] : 0;
-            k[i] = CalculationsHelper.MinPastValues(i, length2, diff[i] - priorDiff);
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, MovingAvgType.ExponentialMovingAverage, slowLength, secondDifference.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var value = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? value.Signal : value.Line; }
+        return result;
     }
 
     #endregion

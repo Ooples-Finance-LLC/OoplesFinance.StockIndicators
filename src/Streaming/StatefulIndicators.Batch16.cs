@@ -569,74 +569,14 @@ public sealed class KnowSureThingState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Fk")]
 public sealed class KurtosisIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly IMovingAverageSmoother _slowSmoother;
-    private readonly IMovingAverageSmoother _fastSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _diffs;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public KurtosisIndicatorState(int length1 = 3, int length2 = 1, int fastLength = 3, int slowLength = 65)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _slowSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.ExponentialMovingAverage, Math.Max(1, slowLength));
-        _fastSmoother = MovingAverageSmootherFactory.Create(MovingAvgType.WeightedMovingAverage, Math.Max(1, fastLength));
-        _values = new PooledRingBuffer<double>(_length1);
-        _diffs = new PooledRingBuffer<double>(_length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly KurtosisWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public KurtosisIndicatorState(int length1 = 3, int length2 = 1, int fastLength = 3, int slowLength = 65) => _window = new(length1, length2, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.KurtosisIndicator;
-
-    public void Reset()
-    {
-        _slowSmoother.Reset();
-        _fastSmoother.Reset();
-        _values.Clear();
-        _diffs.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var diff = _index >= _length1 ? value - priorValue : 0;
-        var priorDiff = EhlersStreamingWindow.GetOffsetValue(_diffs, diff, _length2);
-        var k = _index >= _length2 ? diff - priorDiff : 0;
-        var fk = _slowSmoother.Next(k, isFinal);
-        var signal = _fastSmoother.Next(fk, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _diffs.TryAdd(diff, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fk", fk },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fk, outputs);
-    }
-
-    public void Dispose()
-    {
-        _slowSmoother.Dispose();
-        _fastSmoother.Dispose();
-        _values.Dispose();
-        _diffs.Dispose();
-    }
+    { var price = _input.GetValue(bar); var value = _window.Next(price, isFinal); return new(value.Line, includeOutputs ? new Dictionary<string, double> { { "Fk", value.Line }, { "Signal", value.Signal } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ki")]

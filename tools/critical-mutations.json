@@ -31994,5 +31994,120 @@
     "before": "i > 0 ? outputs[i - 1] : 0",
     "after": "i > 1 ? outputs[i - 2] : 0",
     "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-first-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_count >= _first",
+    "after": "_count > _first",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-second-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_count >= _second",
+    "after": "_count > _second",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-first-difference",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "change.Add(_prices.Peek(), -1)",
+    "after": "change.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-second-difference",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_differences.Peek().AddTo(ref second, -1)",
+    "after": "_differences.Peek().AddTo(ref second, 1)",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-history-publication",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_differences.Enqueue(difference)",
+    "after": "_differences.Enqueue(new RocBankValue(difference.Publish()))",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-signal-publication",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_fast.Next(line, commit)",
+    "after": "_fast.Next(new RocBankValue(line.Publish()), commit)",
+    "filter": "FullyQualifiedName~KurtosisNumericalTests.ExtremeDifferencesAndPublishedOverflowDoNotPoisonSmoothing"
+  },
+  {
+    "id": "kurtosis-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "Math.Max(1, fast), capacity",
+    "after": "Math.Max(1, slow), capacity",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KurtosisWindow.cs",
+    "before": "_slow.Reset(); _fast.Reset();",
+    "after": "/* retain smoothing history */",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "outputKey == \"Signal\" ? value.Signal : value.Line",
+    "after": "outputKey == \"Signal\" ? value.Line : value.Signal",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeKurtosisIndicatorFast("
+  },
+  {
+    "id": "kurtosis-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~KurtosisNumericalTests.SelectedPricesDriveBothOutputsAndCompatibilityLengthIsUnused",
+    "scope": "internal static ComputeBuffer ComputeKurtosisIndicatorFast("
+  },
+  {
+    "id": "kurtosis-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch16.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class KurtosisIndicatorState"
+  },
+  {
+    "id": "kurtosis-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " KurtosisIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "kurtosis-reference-second",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.Kurtosis.cs",
+    "before": "v - differences[i - second]",
+    "after": "v + differences[i - second]",
+    "filter": "FullyQualifiedName~ValidationTests.KurtosisNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]
