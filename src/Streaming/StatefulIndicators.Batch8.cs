@@ -1025,68 +1025,9 @@ internal sealed class HighPassFilterV1Engine
 
 internal sealed class HighPassFilterV2Engine : IDisposable
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly IMovingAverageSmoother _ma1;
-    private readonly IMovingAverageSmoother _ma2;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevHp1;
-    private double _prevHp2;
-    private int _index;
-
-    public HighPassFilterV2Engine(MovingAvgType maType, int length)
-    {
-        var resolved = Math.Max(1, length);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolved);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / resolved);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = (1 + _c2 - _c3) / 4;
-        _ma1 = MovingAverageSmootherFactory.Create(maType, resolved);
-        _ma2 = MovingAverageSmootherFactory.Create(maType, resolved);
-    }
-
-    public void Reset()
-    {
-        _ma1.Reset();
-        _ma2.Reset();
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _index = 0;
-    }
-
-    public double Next(double value, bool isFinal)
-    {
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevHp2 = _index >= 2 ? _prevHp2 : 0;
-        var hp = _index < 4
-            ? 0
-            : (_c1 * (value - (2 * prevValue1) + prevValue2)) + (_c2 * prevHp1) + (_c3 * prevHp2);
-
-        var hpMa1 = _ma1.Next(hp, isFinal);
-        var hpMa2 = _ma2.Next(hpMa1, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevHp2 = _prevHp1;
-            _prevHp1 = hp;
-            _index++;
-        }
-
-        return hpMa2;
-    }
-
-    public void Dispose()
-    {
-        _ma1.Dispose();
-        _ma2.Dispose();
-    }
+    private readonly HighPassV2Window _window;
+    public HighPassFilterV2Engine(MovingAvgType maType, int length) => _window = new(maType, length);
+    public void Reset() => _window.Reset();
+    public double Next(double value, bool isFinal) => _window.Next(value, isFinal).Publish();
+    public void Dispose() => _window.Dispose();
 }

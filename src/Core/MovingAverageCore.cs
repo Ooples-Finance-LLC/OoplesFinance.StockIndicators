@@ -1910,28 +1910,8 @@ internal static class MovingAverageCore
     {
         if (output.Length < input.Length)
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        length = Math.Max(length, 1);
-        var angle = Math.Sqrt(2) * Math.PI / length;
-        var decay = Math.Exp(-angle);
-        var c2 = 2 * decay * Math.Cos(angle);
-        var c3 = -decay * decay;
-        var c1 = (1 + c2 - c3) / 4;
-        var filtered = ArrayPool<double>.Shared.Rent(input.Length);
-        var smoothed = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var hp = filtered.AsSpan(0, input.Length);
-            for (var i = 0; i < input.Length; i++)
-                hp[i] = i < 4 ? 0 : c1 * (input[i] - 2 * input[i - 1] + input[i - 2])
-                    + c2 * hp[i - 1] + c3 * hp[i - 2];
-            WeightedMovingAverage(hp, smoothed.AsSpan(0, input.Length), length);
-            WeightedMovingAverage(smoothed.AsSpan(0, input.Length), output, length);
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(filtered);
-            ArrayPool<double>.Shared.Return(smoothed);
-        }
+        using var window = new HighPassV2Window(MovingAvgType.WeightedMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Publish();
     }
 
     /// <summary>

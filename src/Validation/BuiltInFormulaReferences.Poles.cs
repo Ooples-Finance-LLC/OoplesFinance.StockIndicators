@@ -106,23 +106,26 @@ internal static partial class BuiltInFormulaReferences
         return result;
     }
 
-    private static double[] HighPassV2Trajectory(double[] prices, int length, int kind)
+    internal static double[] HighPassV2Trajectory(double[] prices, int length, int kind)
     {
         length = Math.Max(1, length);
         var angle = Math.Sqrt(2) * Math.PI / length;
-        var pole = Complex.FromPolarCoordinates(Math.Exp(-angle), angle);
-        var gain = ((1 + pole) * (1 + Complex.Conjugate(pole))).Real / 4;
-        // Factor the denominator into conjugate complex first-order sections. The numerator is
-        // the second difference; the published startup suppresses its first four samples.
-        Complex first = 0, second = 0;
-        var result = new double[prices.Length];
+        var decay = Math.Exp(-angle);
+        var c2 = 2 * decay * Math.Cos(angle); var c3 = -decay * decay;
+        var c1 = (1 + c2 - c3) / 4;
+        var result = Enumerable.Repeat(new ReferenceFraction(0), prices.Length).ToArray();
+        var coefficients = new[] { c1, c2, c3 }.Select(ReferenceFraction.FromDouble).ToArray();
         for (var i = 4; i < prices.Length; i++)
         {
-            first = gain * (prices[i] - 2 * prices[i - 1] + prices[i - 2]) + pole * first;
-            second = first + Complex.Conjugate(pole) * second;
-            result[i] = second.Real;
+            var twicePrevious = RoundRocBankStage(ReferenceFraction.FromDouble(prices[i - 1]) * new ReferenceFraction(2));
+            var difference = RoundRocBankStage(ReferenceFraction.FromDouble(prices[i]) - twicePrevious);
+            difference = RoundRocBankStage(difference + ReferenceFraction.FromDouble(prices[i - 2]));
+            var inputTerm = RoundRocBankStage(difference * coefficients[0]);
+            var previousTerm = RoundRocBankStage(result[i - 1] * coefficients[1]);
+            var olderTerm = RoundRocBankStage(result[i - 2] * coefficients[2]);
+            result[i] = RoundRocBankStage(RoundRocBankStage(inputTerm + previousTerm) + olderTerm);
         }
-        return Average(Average(result, length, kind), length, kind);
+        return SmoothRocBankStage(SmoothRocBankStage(result, length, kind), length, kind).Select(v => v.ToDouble()).ToArray();
     }
 
     private static IReadOnlyDictionary<string, double[]> ChebyshevTrajectories(double[] prices)

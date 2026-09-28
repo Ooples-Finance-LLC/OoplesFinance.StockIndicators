@@ -35996,5 +35996,77 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~StatisticalRangeNumericalTests"
+  },
+  {
+    "id": "high-pass-v2-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassV2Window.cs",
+    "scope": "internal sealed class HighPassV2Window",
+    "before": "_count < 4",
+    "after": "_count < 3",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-extended",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassV2Window.cs",
+    "scope": "internal sealed class HighPassV2Window",
+    "before": "new RocBankValue(_price1).Multiply(2)",
+    "after": "new RocBankValue(_price1 * 2)",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassV2Window.cs",
+    "scope": "internal sealed class HighPassV2Window",
+    "before": "_high2.Multiply(_c3)",
+    "after": "_high2.Multiply(-_c3)",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-second-average",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassV2Window.cs",
+    "scope": "internal sealed class HighPassV2Window",
+    "before": "return _second.Next(first, commit);",
+    "after": "return first;",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HighPassV2Window.cs",
+    "scope": "internal sealed class HighPassV2Window",
+    "before": "if (commit) { _price2",
+    "after": "if (true) { _price2",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-core-average",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void EhlersHighPassFilterV2(",
+    "before": "new HighPassV2Window(MovingAvgType.WeightedMovingAverage, length)",
+    "after": "new HighPassV2Window(MovingAvgType.SimpleMovingAverage, length)",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer EhlersHighPassFilterV2(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
+  },
+  {
+    "id": "high-pass-v2-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHighPassFilterV2State",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal));",
+    "filter": "FullyQualifiedName~HighPassV2NumericalTests"
   }
 ]

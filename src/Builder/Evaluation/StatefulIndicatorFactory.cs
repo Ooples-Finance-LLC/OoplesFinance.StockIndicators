@@ -413,6 +413,7 @@ internal static partial class StatefulIndicatorFactory
             TheRangeIndicatorSpecOptions range => new TheRangeIndicatorState(range.MaType, range.Length, range.SmoothLength),
             FastSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(length: fsk.Length),
             FastandSlowKurtosisOscillatorSpecOptions fsk => new FastandSlowKurtosisOscillatorState(fsk.MaType, fsk.Length, fsk.Ratio),
+            EhlersHighPassFilterV2SpecOptions highPassV2 => new EhlersHighPassFilterV2State(highPassV2.MaType, highPassV2.Length),
             StatisticalVolatilitySpecOptions statistical => new StatisticalVolatilityState(statistical.MaType, statistical.Length1, statistical.Length2),
             OnBalanceVolumeModifiedSpecOptions modifiedObv => new OnBalanceVolumeModifiedState(modifiedObv.MaType, modifiedObv.Length1, modifiedObv.Length2),
             RepulseSpecOptions repulse => new RepulseState(repulse.MaType, repulse.Length),

@@ -12600,34 +12600,9 @@ internal static partial class IndicatorCompute
     private static ComputeBuffer EhlersHighPassFilterV2(StockData data, ComputeContext context, int length,
         MovingAvgType maType)
     {
-        length = Math.Max(length, 1);
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var angle = MathHelper.Sqrt2 * Math.PI / length;
-        var a1 = MathHelper.Exp(-angle);
-        var c2 = 2 * a1 * Math.Cos(angle);
-        var c3 = -a1 * a1;
-        var c1 = (1 + c2 - c3) / 4;
-
-        using var highPassBuffer = context.Rent(count);
-        using var smoothedBuffer = context.Rent(count);
-        var highPass = highPassBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            highPass[i] = i < 4
-                ? 0
-                : (c1 * (input[i] - (2 * input[i - 1]) + input[i - 2]))
-                    + (c2 * highPass[i - 1]) + (c3 * highPass[i - 2]);
-        }
-
-        MovingAverage(data, maType, length, highPass, smoothedBuffer.WritableSpan);
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length, smoothedBuffer.Span, buffer.WritableSpan);
-
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        var buffer = context.Rent(input.Count); using var window = new HighPassV2Window(maType, length);
+        for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true).Publish();
         return buffer;
     }
 

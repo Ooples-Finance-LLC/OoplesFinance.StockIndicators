@@ -1,3 +1,4 @@
+using OoplesFinance.StockIndicators.Compatibility;
 
 namespace OoplesFinance.StockIndicators;
 
@@ -42,26 +43,19 @@ public static partial class Calculations
         List<Signal>? signalsList = CreateSignalsList(stockData);
         var (inputList, _, _, _, _) = GetInputValuesList(stockData);
 
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = (1 + c2 - c3) / 4;
-
+        using var window = new HighPassV2Window(maType, length);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
         for (var i = 0; i < stockData.Count; i++)
+            hpList.Add((external ? window.Raw(inputList[i], true) : window.Next(inputList[i], true)).Publish());
+        List<double> hpMa2List;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevHp1 = i >= 1 ? hpList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
-
-            var hp = i < 4 ? 0 : (c1 * (currentValue - (2 * prevValue1) + prevValue2)) + (c2 * prevHp1) + (c3 * prevHp2);
-            hpList.Add(hp);
+            var hpMa1List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(hpList), length)?.ToList()
+                ?? GetMovingAverageList(stockData, maType, length, hpList);
+            hpMa2List = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(hpMa1List), length)?.ToList()
+                ?? GetMovingAverageList(stockData, maType, length, hpMa1List);
         }
-
-        var hpMa1List = GetMovingAverageList(stockData, maType, length, hpList);
-        var hpMa2List = GetMovingAverageList(stockData, maType, length, hpMa1List);
+        else hpMa2List = hpList;
         for (var i = 0; i < stockData.Count; i++)
         {
             var hp = hpMa2List[i];

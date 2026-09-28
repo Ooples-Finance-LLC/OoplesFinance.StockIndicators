@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersHighPassFilterV2)
+        {
+            var highPassOptions = builtIn.CreateOptions(); var highPassKind = AverageKind(highPassOptions, 2); if (highPassKind == 0) yield break;
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HighPassV2Trajectory(Closes(bars), Integer(highPassOptions, "Length", 20), highPassKind), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.FastandSlowKurtosisOscillator)
         {
             var fskOptions = builtIn.CreateOptions(); var fskKind = AverageKind(fskOptions, 2); if (fskKind == 0) yield break;
