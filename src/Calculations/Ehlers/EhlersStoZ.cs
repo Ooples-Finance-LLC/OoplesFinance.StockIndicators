@@ -177,42 +177,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersZeroMeanRoofingFilter(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> zmrFilterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersHpLpRoofingFilter(data, length1, length2));
-
+        List<double> output = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HpLpRoofingWindow(length1, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentRf = roofingFilterList[i];
-            var prevRf = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevZmrFilt1 = i >= 1 ? zmrFilterList[i - 1] : 0;
-            var prevZmrFilt2 = i >= 2 ? zmrFilterList[i - 2] : 0;
-
-            var zmrFilt = ((1 - (alpha1 / 2)) * (currentRf - prevRf)) + ((1 - alpha1) * prevZmrFilt1);
-            zmrFilterList.Add(zmrFilt);
-
-            var signal = GetCompareSignal(zmrFilt - prevZmrFilt1, prevZmrFilt1 - prevZmrFilt2);
-            signalsList?.Add(signal);
+            var previous1 = i > 0 ? output[i - 1] : 0; var previous2 = i > 1 ? output[i - 2] : 0;
+            var value = window.Next(input[i], true).Zero; output.Add(value); signals?.Add(GetCompareSignal(value - previous1, previous1 - previous2));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ezmrf", zmrFilterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(zmrFilterList);
-        stockData.IndicatorName = IndicatorName.EhlersZeroMeanRoofingFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ezmrf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersZeroMeanRoofingFilter;
         return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Spectrum Derived Filter Bank

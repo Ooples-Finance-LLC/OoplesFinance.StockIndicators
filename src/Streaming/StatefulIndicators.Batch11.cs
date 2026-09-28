@@ -2470,57 +2470,14 @@ public sealed class EhlersStochasticCenterOfGravityOscillatorState : IStreamingI
 [PrimaryOutput("Ezmrf")]
 public sealed class EhlersZeroMeanRoofingFilterState : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly EhlersHpLpRoofingFilterState _roofingFilter;
-    private double _prevRoof;
-    private double _prevZmr;
-    private bool _hasPrev;
-
-    public EhlersZeroMeanRoofingFilterState(int length1 = 48, int length2 = 10)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var alphaArg = Math.Min(2 * Math.PI / resolvedLength1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        _roofingFilter = new EhlersHpLpRoofingFilterState(resolvedLength1, resolvedLength2);
-    }
-
+    private readonly HpLpRoofingWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersZeroMeanRoofingFilterState(int length1 = 48, int length2 = 10) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersZeroMeanRoofingFilter;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _prevRoof = 0;
-        _prevZmr = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roof = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevRoof = _hasPrev ? _prevRoof : 0;
-        var prevZmr = _hasPrev ? _prevZmr : 0;
-        var zmr = ((1 - (_alpha1 / 2)) * (roof - prevRoof)) + ((1 - _alpha1) * prevZmr);
-
-        if (isFinal)
-        {
-            _prevRoof = roof;
-            _prevZmr = zmr;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ezmrf", zmr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(zmr, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal).Zero;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ezmrf", value } } : null);
     }
 }
 

@@ -658,74 +658,14 @@ public sealed class EhlersHomodyneDominantCycleState : IStreamingIndicatorState,
 [PrimaryOutput("Ehplprf")]
 public sealed class EhlersHpLpRoofingFilterState : IStreamingIndicatorState
 {
-    private readonly double _alpha1;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevHp1;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
-    public EhlersHpLpRoofingFilterState(int length1 = 48, int length2 = 10)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var alphaArg = Math.Min(2 * Math.PI / resolvedLength1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        _alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolvedLength2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / resolvedLength2, 0.99));
-        _c2 = b1;
-        _c3 = -1 * a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HpLpRoofingWindow _window; private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersHpLpRoofingFilterState(int length1 = 48, int length2 = 10) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersHpLpRoofingFilter;
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevHp1 = 0;
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevFilter1 = _index >= 1 ? _prevFilter1 : 0;
-        var prevFilter2 = _index >= 2 ? _prevFilter2 : 0;
-
-        var diff = _index >= 1 ? value - prevValue : 0;
-        var hp = ((1 - (_alpha1 / 2)) * diff) + ((1 - _alpha1) * prevHp1);
-        var filter = (_c1 * ((hp + prevHp1) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevHp1 = hp;
-            _prevFilter2 = prevFilter1;
-            _prevFilter1 = filter;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ehplprf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        var price = _input.GetValue(bar); var value = _window.Next(price, isFinal).Roof;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Ehplprf", value } } : null);
     }
 }
 

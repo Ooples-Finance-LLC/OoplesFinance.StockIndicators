@@ -7935,45 +7935,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.", nameof(output));
         }
 
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var sqrt2 = Math.Sqrt(2);
-        var a1 = Math.Exp(-sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentValue = close[i];
-                var prevValue = i >= 1 ? close[i - 1] : 0;
-                var prevFilter1 = i >= 1 ? output[i - 1] : 0;
-                var prevFilter2 = i >= 2 ? output[i - 2] : 0;
-                var prevHp = i >= 1 ? hp[i - 1] : 0;
-
-                var diff = currentValue - prevValue;
-                var minPastDiff = i >= 1 ? diff : 0;
-                hp[i] = ((1 - (alpha1 / 2)) * minPastDiff) + ((1 - alpha1) * prevHp);
-
-                output[i] = (c1 * ((hp[i] + prevHp) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-        }
+        var window = new HpLpRoofingWindow(length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Roof;
     }
 
     /// <summary>
@@ -8153,36 +8116,8 @@ internal static class OscillatorCore
             throw new ArgumentException("Output span must be at least input length.");
         }
 
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-
-        var pool = ArrayPool<double>.Shared;
-        var rfArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rf = rfArray.AsSpan(0, close.Length);
-
-            // Apply HP-LP roofing filter first
-            EhlersHpLpRoofingFilter(close, rf, length1, length2);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var currentRf = rf[i];
-                var prevRf = i >= 1 ? rf[i - 1] : 0;
-                var prevZmr1 = i >= 1 ? output[i - 1] : 0;
-
-                output[i] = ((1 - (alpha1 / 2)) * (currentRf - prevRf)) + ((1 - alpha1) * prevZmr1);
-            }
-        }
-        finally
-        {
-            pool.Return(rfArray);
-        }
+        var window = new HpLpRoofingWindow(length1, length2);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Zero;
     }
 
     /// <summary>

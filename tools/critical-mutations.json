@@ -35351,5 +35351,137 @@
     "after": "_cycleEngine.Next(trend, isFinal)",
     "filter": "FullyQualifiedName~ValidationTests.ReverseEmaNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
     "scope": "public sealed class EhlersReverseExponentialMovingAverageIndicatorV2State"
+  },
+  {
+    "id": "hplp-roofing-startup",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "_seeded ? Add(new RocBankValue(price), new RocBankValue(_price), -1) : default",
+    "after": "_seeded || price != 0 ? Add(new RocBankValue(price), new RocBankValue(_price), -1) : default",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "new RocBankValue(_price), -1",
+    "after": "new RocBankValue(_price), 1",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-high-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "change.Multiply(_gain)",
+    "after": "change.Multiply(_retention)",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-roof-lag",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "_roof2.Multiply(_c3)",
+    "after": "_roof1.Multiply(_c3)",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-zero-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "_zero.Multiply(_retention)",
+    "after": "_high.Multiply(_retention)",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-stage-publication",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "a.AddTo(ref sum); b.AddTo(ref sum, sign);",
+    "after": "sum.Add(a.Publish()); sum.Add(b.Publish(), sign);",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "if (commit) { _price",
+    "after": "if (commit || price != 0) { _price",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "_seeded = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-cosine-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/HpLpRoofingWindow.cs",
+    "before": "Math.Cos(Math.Min(angle, .99))",
+    "after": "Math.Cos(angle)",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-raw-selected-roof",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersHpLpRoofingFilterFast("
+  },
+  {
+    "id": "hplp-roofing-native-invalid-roof",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersHpLpRoofingFilterState"
+  },
+  {
+    "id": "hplp-roofing-live-registration-roof",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersHpLpRoofingFilterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-raw-selected-zero",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.InputValues",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersZeroMeanRoofingFilterFast("
+  },
+  {
+    "id": "hplp-roofing-native-invalid-zero",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersZeroMeanRoofingFilterState"
+  },
+  {
+    "id": "hplp-roofing-live-registration-zero",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersZeroMeanRoofingFilterSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "hplp-roofing-reference-zero",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.HpLpRoofing.cs",
+    "before": "Round(roof[i] - Previous(roof, i - 1))",
+    "after": "roof[i]",
+    "filter": "FullyQualifiedName~ValidationTests.HpLpRoofingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

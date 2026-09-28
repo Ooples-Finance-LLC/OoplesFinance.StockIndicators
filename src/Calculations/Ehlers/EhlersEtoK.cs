@@ -93,50 +93,17 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHpLpRoofingFilter(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> highPassList = new(stockData.Count);
-        List<double> roofingFilterList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var alphaArg = Math.Min(2 * Math.PI / length1, 0.99);
-        var alphaCos = Math.Cos(alphaArg);
-        var alpha1 = alphaCos != 0 ? (alphaCos + Math.Sin(alphaArg) - 1) / alphaCos : 0;
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -1 * a1 * a1;
-        var c1 = 1 - c2 - c3;
-
+        List<double> output = new(stockData.Count); List<Signal>? signals = CreateSignalsList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HpLpRoofingWindow(length1, length2);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-            var prevHp1 = i >= 1 ? highPassList[i - 1] : 0;
-
-            var hp = ((1 - (alpha1 / 2)) * MinPastValues(i, 1, currentValue - prevValue)) + ((1 - alpha1) * prevHp1);
-            highPassList.Add(hp);
-
-            var filter = (c1 * ((hp + prevHp1) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            roofingFilterList.Add(filter);
-
-            var signal = GetCompareSignal(filter - prevFilter1, prevFilter1 - prevFilter2);
-            signalsList?.Add(signal);
+            var previous1 = i > 0 ? output[i - 1] : 0; var previous2 = i > 1 ? output[i - 2] : 0;
+            var value = window.Next(input[i], true).Roof; output.Add(value); signals?.Add(GetCompareSignal(value - previous1, previous1 - previous2));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ehplprf", roofingFilterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(roofingFilterList);
-        stockData.IndicatorName = IndicatorName.EhlersHpLpRoofingFilter;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ehplprf", output } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(output); stockData.IndicatorName = IndicatorName.EhlersHpLpRoofingFilter;
         return stockData;
     }
-
 
     /// <summary>
     /// Calculates the Ehlers Hurst Coefficient
