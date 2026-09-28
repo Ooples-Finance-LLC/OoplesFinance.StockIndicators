@@ -234,8 +234,10 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersInstantaneousTrendlineV2:
                 var trendAlpha = Number(options, .07, "Alpha");
                 return new("Eit", new[] { "Eit", "Signal" }, bars => InstantaneousTrendOutputs(bars, trendAlpha));
-            case IndicatorName.EhlersReflexIndicator:
             case IndicatorName.EhlersTrendflexIndicator:
+                var trendflexLength = Integer(options, "Length", 20);
+                return new("Eti", new[] { "Eti" }, bars => Outputs(("Eti", TrendflexValues(bars, trendflexLength))));
+            case IndicatorName.EhlersReflexIndicator:
                 var flexLength = Integer(options, "Length", 20);
                 var reflex = indicator.BatchName == IndicatorName.EhlersReflexIndicator;
                 var flexKey = reflex ? "Eri" : "Eti";

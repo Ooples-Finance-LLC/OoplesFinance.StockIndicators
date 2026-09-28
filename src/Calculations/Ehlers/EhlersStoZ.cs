@@ -202,58 +202,12 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersTrendflexIndicator(this StockData stockData, int length = 20)
     {
-        length = Math.Max(length, 1);
-        List<double> filterList = new(stockData.Count);
-        List<double> msList = new(stockData.Count);
-        List<double> trendflexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var period = 0.5 * length;
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);  
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filterList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filterList[i - 2] : 0;
-
-            var filter = (c1 * ((currentValue + prevValue) / 2)) + (c2 * prevFilter1) + (c3 * prevFilter2);
-            filterList.Add(filter);
-
-            double sum = 0;
-            for (var j = 1; j <= length; j++)
-            {
-                var prevFilterCount = i >= j ? filterList[i - j] : 0;
-                sum += filter - prevFilterCount;
-            }
-            sum /= length;
-
-            var prevMs = GetLastOrDefault(msList);
-            var ms = (0.04 * Pow(sum, 2)) + (0.96 * prevMs);
-            msList.Add(ms);
-
-            var prevTrendflex = GetLastOrDefault(trendflexList);
-            var trendflex = ms > 0 ? sum / Sqrt(ms) : 0;
-            trendflexList.Add(trendflex);
-
-            var signal = GetCompareSignal(trendflex, prevTrendflex);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eti", trendflexList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trendflexList);
-        stockData.IndicatorName = IndicatorName.EhlersTrendflexIndicator;
-
-        return stockData;
+        var window = new TrendflexWindow(length); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData); double previous = 0, older = 0;
+        for (var i = 0; i < input.Count; i++)
+        { var value = window.Next(input[i], true); values.Add(value); signals?.Add(GetCompareSignal(value - previous, previous - older)); older = previous; previous = value; }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eti", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersTrendflexIndicator; return stockData;
     }
 
 

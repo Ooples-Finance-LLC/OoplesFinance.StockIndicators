@@ -240,6 +240,8 @@ internal static partial class StatefulIndicatorFactory
             KlingerSignalSpecOptions ksig => new KlingerVolumeOscillatorState(fastLength: ksig.FastLength, slowLength: ksig.SlowLength, signalLength: ksig.SignalLength),
             EhlersUniversalOscillatorSpecOptions universal => new EhlersUniversalOscillatorState(universal.MaType, universal.Length),
             EhlersSuperPassbandFilterSpecOptions passband => new EhlersSuperPassbandFilterState(passband.FastLength, passband.SlowLength, passband.Length1, passband.Length2),
+            EhlersTrendflexSpecOptions flex => new EhlersTrendflexIndicatorState(flex.Length),
+            EhlersTrendflexIndicatorSpecOptions flexIndicator => new EhlersTrendflexIndicatorState(flexIndicator.Length),
             EhlersInstantaneousTrendlineV2SpecOptions trend => new EhlersInstantaneousTrendlineV2State(trend.Alpha),
             EhlersTripleDelayLineDetrenderSpecOptions delay => new EhlersTripleDelayLineDetrenderState(delay.MaType, delay.Length),
             EhlersTrendExtractionSpecOptions extraction => new EhlersTrendExtractionState(extraction.MaType, extraction.Length, extraction.Delta),

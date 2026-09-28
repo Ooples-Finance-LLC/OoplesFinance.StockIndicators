@@ -2326,83 +2326,17 @@ public sealed class EhlersZeroMeanRoofingFilterState : IStreamingIndicatorState
 [PrimaryOutput("Eti")]
 public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _filterValues;
-    private double _prevValue;
-    private double _prevMs;
-    private bool _hasPrev;
-
-    public EhlersTrendflexIndicatorState(int length = 20)
-    {
-        _length = Math.Max(1, length);
-        var period = 0.5 * _length;
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / period);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / period);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _filterValues = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly TrendflexWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersTrendflexIndicatorState(int length = 20) { _window = new(length); }
     public IndicatorName Name => IndicatorName.EhlersTrendflexIndicator;
-
-    public void Reset()
-    {
-        _filterValues.Clear();
-        _prevValue = 0;
-        _prevMs = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var prevFilter1 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 1);
-        var prevFilter2 = EhlersStreamingWindow.GetOffsetValue(_filterValues, 2);
-
-        var filter = (_c1 * ((value + prevValue) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        double sum = 0;
-        for (var j = 1; j <= _length; j++)
-        {
-            var prevFilterCount = EhlersStreamingWindow.GetOffsetValue(_filterValues, filter, j);
-            sum += filter - prevFilterCount;
-        }
-        sum /= _length;
-
-        var ms = (0.04 * sum * sum) + (0.96 * _prevMs);
-        var trendflex = ms > 0 ? sum / MathHelper.Sqrt(ms) : 0;
-
-        if (isFinal)
-        {
-            _filterValues.TryAdd(filter, out _);
-            _prevValue = value;
-            _prevMs = ms;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eti", trendflex }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trendflex, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eti", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _filterValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Trend")]

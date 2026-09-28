@@ -37913,5 +37913,113 @@
     "before": "new EhlersInstantaneousTrendlineV2State(trend.Alpha)",
     "after": "new EhlersInstantaneousTrendlineV2State()",
     "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "trendflex-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "Product(ref total, _second, _c3)",
+    "after": "Product(ref total, _first, _c3)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-mean",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "RocBankValue.Round(mean, count: 2)",
+    "after": "RocBankValue.Round(mean, count: 1)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-window",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "deviationSum.Subtract(_historySum);",
+    "after": "_ = _historySum;",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-energy",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "energySum.Add(.04, units * units)",
+    "after": "energySum.Add(.4, units * units)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-retention",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "retained.AddProduct(-.96, _energy)",
+    "after": "retained.AddProduct(-.6, _energy)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-scale",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "denominator.ScaleByPowerOfTwo(shift / 2)",
+    "after": "denominator.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-eviction",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "if (_history.Count == _length)",
+    "after": "if (_history.Count == _length + 1L)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendflexWindow.cs",
+    "scope": "internal sealed class TrendflexWindow",
+    "before": "if (commit)",
+    "after": "if (commit || price != 0)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersTrendflexIndicator(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTrendflexFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-indicator-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTrendflexIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
+  },
+  {
+    "id": "trendflex-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersTrendflexIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~TrendflexNumericalTests"
   }
 ]
