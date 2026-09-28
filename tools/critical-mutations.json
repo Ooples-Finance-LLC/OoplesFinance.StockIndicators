@@ -34088,5 +34088,120 @@
     "before": "value.AddTo(ref weighted, _length)",
     "after": "value.AddTo(ref weighted, 1)",
     "filter": "FullyQualifiedName~ValidationTests.VolatilitySwitchNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "length + 1d",
+    "after": "length + 1",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-midpoint-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "PriceMean.Of(Math.Max(_high, high), Math.Min(_low, low))",
+    "after": "(Math.Max(_high, high) + Math.Min(_low, low)) / 2",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-slow-rate",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "_half = _alpha / 2",
+    "after": "_half = _alpha",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-high-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "Math.Max(_high, high)",
+    "after": "high",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-low-lag",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "Math.Min(_low, low)",
+    "after": "low",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-seed",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "_seeded ? _fast : price",
+    "after": "_fast",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-signal-rate",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "Blend(dsp, _signal, _alpha)",
+    "after": "Blend(dsp, _signal, _half)",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "if (commit) { _high",
+    "after": "if (commit || high != 0) { _high",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-reset",
+    "module": "numerical",
+    "file": "src/Helpers/DetrendedLeadingWindow.cs",
+    "before": "_fast = _slow = _signal = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-raw-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "detrendedPrice ? point.Dsp : point.Deli",
+    "after": "point.Deli",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast("
+  },
+  {
+    "id": "detrended-leading-raw-extrema",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.HighPrices[i], data.LowPrices[i]",
+    "after": "data.InputValues[i], data.InputValues[i]",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "internal static ComputeBuffer ComputeEhlersDetrendedLeadingIndicatorFast("
+  },
+  {
+    "id": "detrended-leading-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences",
+    "scope": "public sealed class EhlersDetrendedLeadingIndicatorState"
+  },
+  {
+    "id": "detrended-leading-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " EhlersDetrendedLeadingIndicatorSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
+  },
+  {
+    "id": "detrended-leading-reference-signal",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.DetrendedLeading.cs",
+    "before": "RoundRocBankStage(difference - signal)",
+    "after": "RoundRocBankStage(difference + signal)",
+    "filter": "FullyQualifiedName~ValidationTests.DetrendedLeadingNumericalTests&FullyQualifiedName!~NumericalClassesAreEnrolled&FullyQualifiedName!~EveryRouteMatchesIndependentLagDifferences"
   }
 ]

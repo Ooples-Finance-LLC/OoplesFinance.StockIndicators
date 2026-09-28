@@ -1468,47 +1468,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDetrendedLeadingIndicator(this StockData stockData, int length = 14)
     {
-        length = Math.Max(length, 1);
-        List<double> deliList = new(stockData.Count);
-        List<double> ema1List = new(stockData.Count);
-        List<double> ema2List = new(stockData.Count);
-        List<double> dspList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
+        List<double> dspList = new(stockData.Count), deliList = new(stockData.Count);
         List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (_, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var alpha = length > 2 ? (double)2 / (length + 1) : 0.67;
-        var alpha2 = alpha / 2;
-
+        var highList = stockData.HighPrices; var lowList = stockData.LowPrices; var window = new DetrendedLeadingWindow(length);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var currentHigh = Math.Max(prevHigh, highList[i]);
-            var currentLow = Math.Min(prevLow, lowList[i]);
-            var currentPrice = (currentHigh + currentLow) / 2;
-            var prevEma1 = i >= 1 ? GetLastOrDefault(ema1List) : currentPrice;
-            var prevEma2 = i >= 1 ? GetLastOrDefault(ema2List) : currentPrice;
-
-            var ema1 = (alpha * currentPrice) + ((1 - alpha) * prevEma1);
-            ema1List.Add(ema1);
-
-            var ema2 = (alpha2 * currentPrice) + ((1 - alpha2) * prevEma2);
-            ema2List.Add(ema2);
-
-            var dsp = ema1 - ema2;
-            dspList.Add(dsp);
-
-            var prevTemp = GetLastOrDefault(tempList);
-            var temp = (alpha * dsp) + ((1 - alpha) * prevTemp);
-            tempList.Add(temp);
-
-            var prevDeli = GetLastOrDefault(deliList);
-            var deli = dsp - temp;
-            deliList.Add(deli);
-
-            var signal = GetCompareSignal(deli, prevDeli);
-            signalsList?.Add(signal);
+            var previous = GetLastOrDefault(deliList); var point = window.Next(highList[i], lowList[i], true);
+            dspList.Add(point.Dsp); deliList.Add(point.Deli); signalsList?.Add(GetCompareSignal(point.Deli, previous));
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

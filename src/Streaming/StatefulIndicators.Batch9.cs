@@ -8,78 +8,14 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Deli")]
 public sealed class EhlersDetrendedLeadingIndicatorState : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly double _alpha2;
-    private double _ema1;
-    private double _ema2;
-    private double _temp;
-    private double _prevHigh;
-    private double _prevLow;
-    private bool _hasPrev;
-    private bool _hasEma;
-    private bool _hasTemp;
-
-    public EhlersDetrendedLeadingIndicatorState(int length = 14)
-    {
-        var resolved = Math.Max(1, length);
-        _alpha = length > 2 ? 2.0 / (resolved + 1) : 0.67;
-        _alpha2 = _alpha / 2;
-    }
-
+    private readonly DetrendedLeadingWindow _window;
+    public EhlersDetrendedLeadingIndicatorState(int length = 14) { _window = new(length); }
     public IndicatorName Name => IndicatorName.EhlersDetrendedLeadingIndicator;
-
-    public void Reset()
-    {
-        _ema1 = 0;
-        _ema2 = 0;
-        _temp = 0;
-        _prevHigh = 0;
-        _prevLow = 0;
-        _hasPrev = false;
-        _hasEma = false;
-        _hasTemp = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-        var currentHigh = Math.Max(prevHigh, bar.High);
-        var currentLow = Math.Min(prevLow, bar.Low);
-        var currentPrice = (currentHigh + currentLow) / 2;
-        var prevEma1 = _hasEma ? _ema1 : currentPrice;
-        var prevEma2 = _hasEma ? _ema2 : currentPrice;
-        var ema1 = (_alpha * currentPrice) + ((1 - _alpha) * prevEma1);
-        var ema2 = (_alpha2 * currentPrice) + ((1 - _alpha2) * prevEma2);
-        var dsp = ema1 - ema2;
-        var prevTemp = _hasTemp ? _temp : 0;
-        var temp = (_alpha * dsp) + ((1 - _alpha) * prevTemp);
-        var deli = dsp - temp;
-
-        if (isFinal)
-        {
-            _ema1 = ema1;
-            _ema2 = ema2;
-            _temp = temp;
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _hasPrev = true;
-            _hasEma = true;
-            _hasTemp = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Dsp", dsp },
-                { "Deli", deli }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(deli, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Deli, includeOutputs ? new Dictionary<string, double> { { "Dsp", point.Dsp }, { "Deli", point.Deli } } : null);
     }
 }
 

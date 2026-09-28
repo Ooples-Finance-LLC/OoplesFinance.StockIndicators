@@ -135,6 +135,13 @@ internal static partial class BuiltInFormulaReferences
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => VolatilitySwitchOutputs(bars, Integer(volatilitySwitchOptions, "Length", 14), volatilitySwitchKind), IndicatorErrorBudget.Exact);
             yield break;
         }
+        if (builtIn.BatchName == IndicatorName.EhlersDetrendedLeadingIndicator)
+        {
+            var leadingOptions = builtIn.CreateOptions(); var leadingKeys = builtIn.BatchOutputKey is { } selectedLeading ? new[] { selectedLeading } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < leadingKeys.Length; slot++)
+            { var key = leadingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => DetrendedLeadingOutputs(bars, Integer(leadingOptions, "Length", 14))[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.KurtosisIndicator)
         {
             var kurtosisKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
