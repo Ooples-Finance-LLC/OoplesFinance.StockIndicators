@@ -38651,5 +38651,140 @@
     "before": "new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, length)",
     "after": "new UniversalOscillatorWindow(MovingAvgType.ExponentialMovingAverage, 20)",
     "filter": "FullyQualifiedName~UniversalOscillatorNumericalTests.TwoBarStartupAndFirstTinyImpulseReachUnitPeak"
+  },
+  {
+    "id": "early-onset-high-drive",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "new Scaled(_price1, 0).Add(ref hpSum, -2 * _hpGain)",
+    "after": "new Scaled(_price1, 0).Add(ref hpSum, -_hpGain)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-high-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "_hpOlder.Add(ref hpSum, _hpFeedback2)",
+    "after": "_hpPrevious.Add(ref hpSum, _hpFeedback2)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-low-drive",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "_hpPrevious.Add(ref mean)",
+    "after": "_hpOlder.Add(ref mean)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-low-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "_second.Add(ref filterSum, _c3)",
+    "after": "_first.Add(ref filterSum, _c3)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-decay",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "_peak.Add(ref retained, .991)",
+    "after": "_peak.Add(ref retained, .99)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.FirstImpulseZeroHighPassAndQuotientPolesRetainTheirContracts"
+  },
+  {
+    "id": "early-onset-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "numerator.Add(_k)",
+    "after": "numerator.Add(_k, -1)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "denominator.AddProduct(_k, ratio)",
+    "after": "denominator.AddProduct(-_k, ratio)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-zero-pole",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "denominator.IsExactlyZero ? 0",
+    "after": "denominator.IsExactlyZero ? 1",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.FirstImpulseZeroHighPassAndQuotientPolesRetainTheirContracts"
+  },
+  {
+    "id": "early-onset-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "if (commit) { _price2",
+    "after": "if (commit || price != 0) { _price2",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
+  },
+  {
+    "id": "early-onset-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersEarlyOnsetTrendIndicator(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.SelectedPricesReachBatchCoreAndTypedArm"
+  },
+  {
+    "id": "early-onset-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersEarlyOnsetTrendIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.SelectedPricesReachBatchCoreAndTypedArm"
+  },
+  {
+    "id": "early-onset-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersEarlyOnsetTrendIndicatorState",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.InvalidFieldsLeaveHighPassLowPassAndPeakUnchanged"
+  },
+  {
+    "id": "early-onset-finite-k",
+    "module": "numerical",
+    "file": "src/Helpers/EarlyOnsetWindow.cs",
+    "scope": "internal sealed class EarlyOnsetWindow",
+    "before": "if (double.IsNaN(k) || double.IsInfinity(k))",
+    "after": "if ((double.IsNaN(k) || double.IsInfinity(k)) && low == 0)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.InvalidKIsRejectedEvenForEmptyInputs"
+  },
+  {
+    "id": "early-onset-native-periods",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersEarlyOnsetTrendIndicatorState(onset.Length1, onset.Length2, onset.K)",
+    "after": "new EhlersEarlyOnsetTrendIndicatorState(onset.Length2, onset.Length1, onset.K)",
+    "filter": "FullyQualifiedName~EarlyOnsetNumericalTests.WideAndTinyValuesPreserveFilterPeakAndQuotient"
   }
 ]

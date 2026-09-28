@@ -267,41 +267,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersEarlyOnsetTrendIndicator(this StockData stockData, int length1 = 30, int length2 = 100, double k = 0.85)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> peakList = new(stockData.Count);
-        List<double> quotientList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var hpList = CalculateEhlersHighPassFilterV1(stockData, length2, 1).ChainedValues;
-        stockData.SetCustomValues(hpList);
-        var superSmoothList = CalculateEhlersSuperSmootherFilter(stockData, length1).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var filter = superSmoothList[i];
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
-            peakList.Add(peak);
-
-            var ratio = peak != 0 ? filter / peak : 0;
-            var prevQuotient = GetLastOrDefault(quotientList);
-            var quotient = (k * ratio) + 1 != 0 ? (ratio + k) / ((k * ratio) + 1) : 0;
-            quotientList.Add(quotient);
-
-            var signal = GetCompareSignal(quotient, prevQuotient);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eoti", quotientList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(quotientList);
-        stockData.IndicatorName = IndicatorName.EhlersEarlyOnsetTrendIndicator;
-
-        return stockData;
+        var window = new EarlyOnsetWindow(length1, length2, k); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData); double previous = 0;
+        foreach (var price in input) { var value = window.Next(price, true); values.Add(value); signals?.Add(GetCompareSignal(value, previous)); previous = value; }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eoti", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersEarlyOnsetTrendIndicator; return stockData;
     }
 
 

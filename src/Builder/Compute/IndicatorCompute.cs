@@ -16622,12 +16622,12 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersEarlyOnsetTrendIndicatorFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 100, double k = 0.85)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersEarlyOnsetTrendIndicator(inputSpan, buffer.WritableSpan, length1, length2, k);
+        var window = new EarlyOnsetWindow(length1, length2, k);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(inputList.Count);
+        for (var i = 0; i < inputList.Count; i++) buffer.WritableSpan[i] = window.Next(inputList[i], true);
         return buffer;
     }
+
 
     /// <summary>
     /// Computes Ehlers Detrended Leading Indicator using zero-allocation fast path.

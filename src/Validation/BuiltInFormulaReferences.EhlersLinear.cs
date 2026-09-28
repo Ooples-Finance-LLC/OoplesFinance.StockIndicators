@@ -501,19 +501,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersRoofingFilterIndicator:
                 return new("Erfi", new[] { "Erfi" }, bars => Outputs(("Erfi", RoofingValues(bars, Integer(options, "Length1", 80), Integer(options, "Length2", 40), true))));
             case IndicatorName.EhlersEarlyOnsetTrendIndicator:
-                return new("Eoti", new[] { "Eoti" }, bars =>
-                {
-                    var high = HighPassV1Trajectory(Closes(bars), Integer(options, "Length2", 100), 1);
-                    var angle = Clamp(Math.Sqrt(2) * Math.PI / Integer(options, "Length1", 30), .01, .99);
-                    var filtered = HilbertLowPass(high, Math.Exp(-angle), angle);
-                    var k = Number(options, .85, "K");
-                    return Outputs(("Eoti", filtered.Select((v, i) =>
-                    {
-                        var peak = Enumerable.Range(0, i + 1).Max(j => Math.Abs(filtered[j]) * Math.Pow(.991, i - j));
-                        var ratio = peak == 0 ? 0 : v / peak;
-                        return 1 + k * ratio == 0 ? 0 : (ratio + k) / (1 + k * ratio);
-                    }).ToArray()));
-                });
+                return new("Eoti", new[] { "Eoti" }, bars => Outputs(("Eoti", EarlyOnsetValues(bars, Integer(options, "Length1", 30), Integer(options, "Length2", 100), Number(options, .85, "K")))));
             case IndicatorName.EhlersRoofingFilterV1:
                 var v1Options = RoofingV1Options(options);
                 if (v1Options.Kind == 0) return null;

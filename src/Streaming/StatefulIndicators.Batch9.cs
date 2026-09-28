@@ -495,59 +495,15 @@ public sealed class EhlersDualDifferentiatorDominantCycleState : IStreamingIndic
 [PrimaryOutput("Eoti")]
 public sealed class EhlersEarlyOnsetTrendIndicatorState : IStreamingIndicatorState
 {
-    private readonly double _k;
-    private readonly StreamingInputResolver _input;
-    private readonly HighPassFilterV1Engine _hp;
-    private readonly EhlersSuperSmootherFilterEngine _smoother;
-    private double _peak;
-    private bool _hasPeak;
-
-    public EhlersEarlyOnsetTrendIndicatorState(int length1 = 30, int length2 = 100, double k = 0.85)
-    {
-        _k = k;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _hp = new HighPassFilterV1Engine(Math.Max(1, length2), 1);
-        _smoother = new EhlersSuperSmootherFilterEngine(Math.Max(1, length1));
-    }
-
+    private readonly EarlyOnsetWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersEarlyOnsetTrendIndicatorState(int length1 = 30, int length2 = 100, double k = 0.85) { _window = new(length1, length2, k); }
     public IndicatorName Name => IndicatorName.EhlersEarlyOnsetTrendIndicator;
-
-    public void Reset()
-    {
-        _hp.Reset();
-        _smoother.Reset();
-        _peak = 0;
-        _hasPeak = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var hp = _hp.Next(value, isFinal);
-        var filter = _smoother.Next(hp, isFinal);
-
-        var prevPeak = _hasPeak ? _peak : 0;
-        var peak = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
-        var ratio = peak != 0 ? filter / peak : 0;
-        var denom = (_k * ratio) + 1;
-        var quotient = denom != 0 ? (ratio + _k) / denom : 0;
-
-        if (isFinal)
-        {
-            _peak = peak;
-            _hasPeak = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eoti", quotient }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(quotient, outputs);
+        var value = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Eoti", value } } : null);
     }
 }
 

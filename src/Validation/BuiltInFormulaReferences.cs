@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersEarlyOnsetTrendIndicator)
+        {
+            var onset = (EhlersEarlyOnsetTrendIndicatorSpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => EarlyOnsetValues(bars, onset.Length1, onset.Length2, onset.K), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersUniversalOscillator)
         {
             var universal = (EhlersUniversalOscillatorSpecOptions)builtIn.CreateOptions(); var universalKind = AverageKind(universal, 3);

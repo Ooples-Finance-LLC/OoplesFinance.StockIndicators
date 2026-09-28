@@ -7624,50 +7624,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersEarlyOnsetTrendIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 30, int length2 = 100, double k = 0.85)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var pool = ArrayPool<double>.Shared;
-        var hpArray = pool.Rent(close.Length);
-        var ssfArray = pool.Rent(close.Length);
-        var peakArray = pool.Rent(close.Length);
-
-        try
-        {
-            var hp = hpArray.AsSpan(0, close.Length);
-            var ssf = ssfArray.AsSpan(0, close.Length);
-            var peak = peakArray.AsSpan(0, close.Length);
-
-            // Apply high-pass filter
-            MovingAverageCore.EhlersHighPassFilterV1(close, hp, length2, 1);
-
-            // Apply super smoother to HP output
-            var smoother = new Streaming.EhlersSuperSmootherFilterEngine(length1);
-            for (var i = 0; i < hp.Length; i++) ssf[i] = smoother.Next(hp[i], true);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var filter = ssf[i];
-
-                var prevPeak = i >= 1 ? peak[i - 1] : 0;
-                peak[i] = Math.Abs(filter) > 0.991 * prevPeak ? Math.Abs(filter) : 0.991 * prevPeak;
-
-                var ratio = peak[i] != 0 ? filter / peak[i] : 0;
-                output[i] = (k * ratio) + 1 != 0 ? (ratio + k) / ((k * ratio) + 1) : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(hpArray);
-            pool.Return(ssfArray);
-            pool.Return(peakArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new EarlyOnsetWindow(length1, length2, k);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true);
     }
+
 
     /// <summary>
     /// Computes Ehlers Detrended Leading Indicator using high and low prices.
