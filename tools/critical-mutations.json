@@ -39776,5 +39776,140 @@
     "before": "if (magnitude == 0) magnitude = 1;",
     "after": "// zero ratio is left unnormalized",
     "filter": "FullyQualifiedName~DeviationSuperNumericalTests.WideAndTinyMomentumRetainsRmsAndAdaptiveFeedback"
+  },
+  {
+    "id": "adaptive-cyber-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "sum.Add(_prices[1], 2)",
+    "after": "sum.Add(_prices[1], 1)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "startup.Add(_prices[0], -2)",
+    "after": "startup.Add(_prices[0], -1)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.StartupUsesTheSecondDifferenceAndZeroPhaseHasABoundedPeriod"
+  },
+  {
+    "id": "adaptive-cyber-cycle-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "_cycle[0], _cycle[1], _alpha",
+    "after": "_cycle[0], _cycle[1], .07",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.FiniteAlphaChangesAreHonoredAndNonfiniteAlphaIsRejected"
+  },
+  {
+    "id": "adaptive-cyber-in-phase",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "var inPhase = _cycle[2]",
+    "after": "var inPhase = _cycle[1]",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-quadrature",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "_cycle[3].Add(ref dot, -.5769)",
+    "after": "_cycle[3].Add(ref dot, .5769)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-determinant",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "Product(ref numerator, _inPhase, quadrature, -1)",
+    "after": "Product(ref numerator, _inPhase, quadrature, 1)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-median-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "_phases.Skip(_phases.Count == _length ? 1 : 0)",
+    "after": "_phases.Skip(0)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-instant",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "instantSum.AddProduct(.67, _instant)",
+    "after": "instantSum.AddProduct(.6, _instant)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-adaptive-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "2 / (period + 1)",
+    "after": "2 / (_period + 1)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-subnormal",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "private readonly struct Scaled",
+    "before": "var shift = 0; var value = sum.Mean(1);",
+    "after": "var shift = 0; var value = sum.Mean(1); if (value == 0) return default;",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.PowerOfTwoScalingPreservesThePeriodTrajectory"
+  },
+  {
+    "id": "adaptive-cyber-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveCyberWindow.cs",
+    "scope": "internal sealed class AdaptiveCyberWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (commit || price != 0)\n        {",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.WideAndTinyPricesPreserveQuadratureAndAdaptiveCycle"
+  },
+  {
+    "id": "adaptive-cyber-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersAdaptiveCyberCycle(",
+    "before": "window.Next(selected[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.SelectedPricesReachBothPublishedFastOutputs"
+  },
+  {
+    "id": "adaptive-cyber-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveCyberCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.SelectedPricesReachBothPublishedFastOutputs"
+  },
+  {
+    "id": "adaptive-cyber-output-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveCyberCycleFast(",
+    "before": "periodOutput ? point.Period : point.Cycle",
+    "after": "point.Cycle",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.SelectedPricesReachBothPublishedFastOutputs"
+  },
+  {
+    "id": "adaptive-cyber-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveCyberCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation removed\n",
+    "filter": "FullyQualifiedName~AdaptiveCyberNumericalTests.InvalidFieldsLeavePhasesMedianAndFeedbackUnchanged"
   }
 ]

@@ -13,83 +13,14 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveCyberCycle(this StockData stockData, int length = 5, double alpha = 0.07)
     {
-        length = Math.Max(length, 1);
-        List<double> ipList = new(stockData.Count);
-        List<double> q1List = new(stockData.Count);
-        List<double> i1List = new(stockData.Count);
-        List<double> dpList = new(stockData.Count);
-        List<double> pList = new(stockData.Count);
-        List<double> acList = new(stockData.Count);
-        using var dpMedian = new RollingMedian(length);
-        List<double> cycleList = new(stockData.Count);
-        List<double> smoothList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
+        var (selected, _, _, _, _) = GetInputValuesList(stockData); var window = new AdaptiveCyberWindow(length, alpha);
+        var cycles = new List<double>(stockData.Count); var periods = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
         for (var i = 0; i < stockData.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevCycle = i >= 1 ? cycleList[i - 1] : 0;
-            var prevSmooth = i >= 1 ? smoothList[i - 1] : 0;
-            var prevIp = i >= 1 ? ipList[i - 1] : 0;
-            var prevAc1 = i >= 1 ? acList[i - 1] : 0;
-            var prevI1 = i >= 1 ? i1List[i - 1] : 0;
-            var prevQ1 = i >= 1 ? q1List[i - 1] : 0;
-            var prevP = i >= 1 ? pList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevSmooth2 = i >= 2 ? smoothList[i - 2] : 0;
-            var prevCycle2 = i >= 2 ? cycleList[i - 2] : 0;
-            var prevAc2 = i >= 2 ? acList[i - 2] : 0;
-            var prevValue3 = i >= 3 ? inputList[i - 3] : 0;
-            var prevCycle3 = i >= 3 ? cycleList[i - 3] : 0;
-            var prevCycle4 = i >= 4 ? cycleList[i - 4] : 0;
-            var prevCycle6 = i >= 6 ? cycleList[i - 6] : 0;
-
-            var smooth = (currentValue + (2 * prevValue) + (2 * prevValue2) + prevValue3) / 6;
-            smoothList.Add(smooth);
-
-            var cycle = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 : (Pow(1 - (0.5 * alpha), 2) * (smooth - (2 * prevSmooth) + prevSmooth2)) +
-            (2 * (1 - alpha) * prevCycle) - (Pow(1 - alpha, 2) * prevCycle2);
-            cycleList.Add(cycle);
-
-            var q1 = ((0.0962 * cycle) + (0.5769 * prevCycle2) - (0.5769 * prevCycle4) - (0.0962 * prevCycle6)) * (0.5 + (0.08 * prevIp));
-            q1List.Add(q1);
-
-            var i1 = prevCycle3;
-            i1List.Add(i1);
-
-            var dp = MinOrMax(q1 != 0 && prevQ1 != 0 ? ((i1 / q1) - (prevI1 / prevQ1)) / (1 + (i1 * prevI1 / (q1 * prevQ1))) : 0, 1.1, 0.1);
-            dpList.Add(dp);
-            dpMedian.Add(dp);
-
-            var medianDelta = dpMedian.Median;
-            var dc = medianDelta != 0 ? (6.28318 / medianDelta) + 0.5 : 15;
-
-            var ip = (0.33 * dc) + (0.67 * prevIp);
-            ipList.Add(ip);
-
-            var p = (0.15 * ip) + (0.85 * prevP);
-            pList.Add(p);
-
-            var a1 = 2 / (p + 1);
-            var ac = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
-                (Pow(1 - (0.5 * a1), 2) * (smooth - (2 * prevSmooth) + prevSmooth2)) + (2 * (1 - a1) * prevAc1) - (Pow(1 - a1, 2) * prevAc2);
-            acList.Add(ac);
-
-            var signal = GetCompareSignal(ac - prevAc1, prevAc1 - prevAc2);
-            signalsList?.Add(signal);
+            var point = window.Next(selected[i], true); cycles.Add(point.Cycle); periods.Add(point.Period);
+            var previous = i == 0 ? 0 : cycles[i - 1]; var older = i < 2 ? 0 : cycles[i - 2]; signals?.Add(GetCompareSignal(point.Cycle - previous, previous - older));
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacc", acList },
-            { "Period", pList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(acList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveCyberCycle;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacc", cycles }, { "Period", periods } }); stockData.SetSignals(signals); stockData.SetCustomValues(cycles); stockData.IndicatorName = IndicatorName.EhlersAdaptiveCyberCycle; return stockData;
     }
 
 

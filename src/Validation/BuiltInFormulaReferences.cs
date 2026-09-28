@@ -17,6 +17,14 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveCyberCycle)
+        {
+            var adaptiveCyberOptions = (EhlersAdaptiveCyberCycleSpecOptions)builtIn.CreateOptions();
+            var adaptiveCyberKeys = builtIn.BatchOutputKey is { } cyberKey ? new[] { cyberKey } : new[] { "Eacc", "Period" };
+            for (var slot = 0; slot < adaptiveCyberKeys.Length; slot++)
+            { var key = adaptiveCyberKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveCyberValues(bars, adaptiveCyberOptions.Length, adaptiveCyberOptions.Alpha)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersDeviationScaledSuperSmoother)
         {
             var superDeviationOptions = (EhlersDeviationScaledSuperSmootherSpecOptions)builtIn.CreateOptions();

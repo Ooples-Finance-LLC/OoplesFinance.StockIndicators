@@ -57,78 +57,16 @@ public sealed class Ehlers3PoleButterworthFilterV2State : IStreamingIndicatorSta
 [PrimaryOutput("Eacc")]
 public sealed class EhlersAdaptiveCyberCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveCyberCyclePeriodState _periodState;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _smooth;
-    private double _prevAc1;
-    private double _prevAc2;
-    private int _index;
-
-    public EhlersAdaptiveCyberCycleState(int length = 5, double alpha = 0.07)
-    {
-        _periodState = new AdaptiveCyberCyclePeriodState(length, alpha);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(4);
-        _smooth = new PooledRingBuffer<double>(3);
-    }
-
+    private readonly AdaptiveCyberWindow _window;
+    public EhlersAdaptiveCyberCycleState(int length = 5, double alpha = .07) => _window = new(length, alpha);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveCyberCycle;
-
-    public void Reset()
-    {
-        _periodState.Reset();
-        _values.Clear();
-        _smooth.Clear();
-        _prevAc1 = 0;
-        _prevAc2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var period = _periodState.Next(value, isFinal);
-        var prevValue1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
-        var prevValue2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
-        var prevValue3 = _values.Count >= 3 ? _values[_values.Count - 3] : 0;
-        var prevSmooth1 = _smooth.Count >= 1 ? _smooth[_smooth.Count - 1] : 0;
-        var prevSmooth2 = _smooth.Count >= 2 ? _smooth[_smooth.Count - 2] : 0;
-        var smooth = (value + (2 * prevValue1) + (2 * prevValue2) + prevValue3) / 6;
-        var a1 = 2 / (period + 1);
-        var ac = _index < 7
-            ? (value - (2 * prevValue1) + prevValue2) / 4
-            : (MathHelper.Pow(1 - (0.5 * a1), 2) * (smooth - (2 * prevSmooth1) + prevSmooth2))
-              + (2 * (1 - a1) * _prevAc1) - (MathHelper.Pow(1 - a1, 2) * _prevAc2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _smooth.TryAdd(smooth, out _);
-            _prevAc2 = _prevAc1;
-            _prevAc1 = ac;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eacc", ac },
-                { "Period", period }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ac, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Cycle, includeOutputs ? new Dictionary<string, double> { { "Eacc", point.Cycle }, { "Period", point.Period } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodState.Dispose();
-        _values.Dispose();
-        _smooth.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Eacog")]

@@ -1059,6 +1059,12 @@ internal static partial class IndicatorCompute
             // so it does reach the bound series and is forwarded. Length2 is fixed by the batch.
             EhlersInverseFisherTransformSpecOptions eift => ComputeEhlersInverseFisherTransformFast(data, context, eift.Length,
                 maType: eift.MaType),
+            EhlersAdaptiveCyberCycleSpecOptions adaptiveCyber => spec.OutputKey switch
+            {
+                null or "Eacc" => ComputeEhlersAdaptiveCyberCycleFast(data, context, adaptiveCyber.Length, adaptiveCyber.Alpha),
+                "Period" => ComputeEhlersAdaptiveCyberCycleFast(data, context, adaptiveCyber.Length, adaptiveCyber.Alpha, true),
+                _ => null
+            },
             EhlersCyberCycleSpecOptions ecc => ComputeEhlersCyberCycleFast(data, context, ecc.Length),
             EhlersStochasticSpecOptions esto => ComputeEhlersStochasticFast(data, context, length2: esto.Length,
                 maType: esto.MaType),
@@ -10589,66 +10595,17 @@ internal static partial class IndicatorCompute
     /// Computes Ehlers' adaptive cyber cycle and the dominant cycle period it measures, so that indicators
     /// built on either series can reach it without materialising a second indicator's output dictionary.
     /// </summary>
+    internal static ComputeBuffer ComputeEhlersAdaptiveCyberCycleFast(StockData data, ComputeContext context, int length = 5, double alpha = .07, bool periodOutput = false)
+    {
+        var selected = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new AdaptiveCyberWindow(length, alpha); var result = context.Rent(selected.Count);
+        for (var i = 0; i < selected.Count; i++) { var point = window.Next(selected[i], true); result.WritableSpan[i] = periodOutput ? point.Period : point.Cycle; }
+        return result;
+    }
     private static void EhlersAdaptiveCyberCycle(ComputeContext context, ReadOnlySpan<double> input, int length,
         double alpha, Span<double> adaptiveCycle, Span<double> period)
     {
-        var count = input.Length;
-        length = Math.Max(length, 1);
-
-        using var smoothed = context.Rent(count);
-        using var cycles = context.Rent(count);
-        var smooth = smoothed.WritableSpan;
-        var cycle = cycles.WritableSpan;
-        using var deltaPhaseMedian = new RollingMedian(length);
-
-        double prevIp = 0, prevP = 0, prevQ1 = 0, prevI1 = 0, prevAc1 = 0, prevAc2 = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var prevValue2 = i >= 2 ? input[i - 2] : 0;
-            var prevValue3 = i >= 3 ? input[i - 3] : 0;
-            var prevSmooth = i >= 1 ? smooth[i - 1] : 0;
-            var prevSmooth2 = i >= 2 ? smooth[i - 2] : 0;
-            var prevCycle = i >= 1 ? cycle[i - 1] : 0;
-            var prevCycle2 = i >= 2 ? cycle[i - 2] : 0;
-            var prevCycle3 = i >= 3 ? cycle[i - 3] : 0;
-            var prevCycle4 = i >= 4 ? cycle[i - 4] : 0;
-            var prevCycle6 = i >= 6 ? cycle[i - 6] : 0;
-
-            smooth[i] = (currentValue + (2 * prevValue) + (2 * prevValue2) + prevValue3) / 6;
-            cycle[i] = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
-                (MathHelper.Pow(1 - (0.5 * alpha), 2) * (smooth[i] - (2 * prevSmooth) + prevSmooth2)) +
-                (2 * (1 - alpha) * prevCycle) - (MathHelper.Pow(1 - alpha, 2) * prevCycle2);
-
-            var q1 = ((0.0962 * cycle[i]) + (0.5769 * prevCycle2) - (0.5769 * prevCycle4) - (0.0962 * prevCycle6)) *
-                (0.5 + (0.08 * prevIp));
-            var i1 = prevCycle3;
-
-            var deltaPhase = MathHelper.MinOrMax(q1 != 0 && prevQ1 != 0 ?
-                ((i1 / q1) - (prevI1 / prevQ1)) / (1 + (i1 * prevI1 / (q1 * prevQ1))) : 0, 1.1, 0.1);
-            deltaPhaseMedian.Add(deltaPhase);
-
-            var medianDelta = deltaPhaseMedian.Median;
-            var dominantCycle = medianDelta != 0 ? (6.28318 / medianDelta) + 0.5 : 15;
-
-            var ip = (0.33 * dominantCycle) + (0.67 * prevIp);
-            var p = (0.15 * ip) + (0.85 * prevP);
-            period[i] = p;
-
-            var a1 = 2 / (p + 1);
-            var ac = i < 7 ? (currentValue - (2 * prevValue) + prevValue2) / 4 :
-                (MathHelper.Pow(1 - (0.5 * a1), 2) * (smooth[i] - (2 * prevSmooth) + prevSmooth2)) +
-                (2 * (1 - a1) * prevAc1) - (MathHelper.Pow(1 - a1, 2) * prevAc2);
-            adaptiveCycle[i] = ac;
-
-            prevIp = ip;
-            prevP = p;
-            prevQ1 = q1;
-            prevI1 = i1;
-            prevAc2 = prevAc1;
-            prevAc1 = ac;
-        }
+        var window = new AdaptiveCyberWindow(length, alpha);
+        for (var i = 0; i < input.Length; i++) { var point = window.Next(input[i], true); adaptiveCycle[i] = point.Cycle; period[i] = point.Period; }
     }
 
     #endregion

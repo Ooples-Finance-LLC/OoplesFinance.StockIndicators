@@ -32,6 +32,8 @@ internal static partial class BuiltInFormulaReferences
                 }).ToArray()));
             });
         if (indicator.BatchName is not (IndicatorName.EhlersAdaptiveCyberCycle or IndicatorName.EhlersAdaptiveCenterOfGravityOscillator)) return null;
+        if (indicator.BatchName == IndicatorName.EhlersAdaptiveCyberCycle)
+            return new("Eacc", new[] { "Eacc", "Period" }, bars => AdaptiveCyberValues(bars, Integer(indicator.CreateOptions(), "Length", 5), Number(indicator.CreateOptions(), .07, "Alpha")));
         var options = indicator.CreateOptions();
         var gravity = indicator.BatchName == IndicatorName.EhlersAdaptiveCenterOfGravityOscillator;
         return new(gravity ? "Eacog" : "Eacc", gravity ? new[] { "Eacog" } : new[] { "Eacc", "Period" }, bars =>
@@ -64,30 +66,5 @@ internal static partial class BuiltInFormulaReferences
         });
     }
 
-    private static double[] AdaptiveCyberPeriods(double[] prices, int length, double alpha)
-    {
-        var cycle = CyberCycleReference(prices, alpha);
-        double Cycle(int i) => i < 0 ? 0 : cycle[i];
-        var phaseAdvances = new double[prices.Length];
-        var dominant = new double[prices.Length];
-        var instant = new double[prices.Length];
-        double previousQuadrature = 0;
-        for (var i = 0; i < prices.Length; i++)
-        {
-            var inPhase = Cycle(i - 3);
-            var quadrature = (.0962 * (Cycle(i) - Cycle(i - 6)) + .5769 * (Cycle(i - 2) - Cycle(i - 4)))
-                * (.5 + .08 * (i == 0 ? 0 : instant[i - 1]));
-            // Tangent of the angular difference, written as determinant divided by dot product.
-            var advance = quadrature == 0 || previousQuadrature == 0 ? 0
-                : (inPhase * previousQuadrature - Cycle(i - 4) * quadrature)
-                    / (quadrature * previousQuadrature + inPhase * Cycle(i - 4));
-            phaseAdvances[i] = Clamp(advance, .1, 1.1);
-            var sorted = Window(phaseAdvances, i, length).OrderBy(v => v).ToArray();
-            var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2;
-            dominant[i] = 6.28318 / median + .5;
-            instant[i] = Enumerable.Range(0, i + 1).Sum(j => .33 * Math.Pow(.67, i - j) * dominant[j]);
-            previousQuadrature = quadrature;
-        }
-        return instant.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => .15 * Math.Pow(.85, i - j) * instant[j])).ToArray();
-    }
+    private static double[] AdaptiveCyberPeriods(double[] prices, int length, double alpha) => AdaptiveCyberReference(prices, length, alpha)["Period"];
 }
