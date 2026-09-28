@@ -16614,40 +16614,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeRecursiveStochasticFast(StockData data, ComputeContext context, int length = 200,
         double alpha = 0.1)
     {
-        // CalculateRecursiveStochastic feeds its own output back in: the raw stochastic of the chained series
-        // is blended with the previous published value, and the published value is where that blend sits in its
-        // own running range. The range is of the blend, not of the price.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var priceWindow = new RollingMinMax(length);
-        var blendWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            priceWindow.Add(currentValue);
-
-            var highest = priceWindow.Max;
-            var lowest = priceWindow.Min;
-            var stoch = highest - lowest != 0 ? (currentValue - lowest) / (highest - lowest) * 100 : 0;
-            var prevK = i >= 1 ? output[i - 1] : 0;
-
-            var ma = (alpha * stoch) + ((1 - alpha) * prevK);
-            blendWindow.Add(ma);
-
-            var highestMa = blendWindow.Max;
-            var lowestMa = blendWindow.Min;
-            output[i] = highestMa - lowestMa != 0
-                ? MathHelper.MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0)
-                : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new RecursiveStochasticWindow(length, alpha); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true);
+        return output;
     }
 
     /// <summary>

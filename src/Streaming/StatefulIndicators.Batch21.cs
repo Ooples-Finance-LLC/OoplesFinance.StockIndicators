@@ -339,78 +339,14 @@ public sealed class RecursiveRelativeStrengthIndexState : IStreamingIndicatorSta
 [PrimaryOutput("Rsto")]
 public sealed class RecursiveStochasticState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly RollingWindowMax _maHighWindow;
-    private readonly RollingWindowMin _maLowWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevK;
-    private bool _hasPrevK;
-
-    public RecursiveStochasticState(int length = 200, double alpha = 0.1)
-    {
-        _length = Math.Max(1, length);
-        _alpha = alpha;
-        _highWindow = new RollingWindowMax(_length);
-        _lowWindow = new RollingWindowMin(_length);
-        _maHighWindow = new RollingWindowMax(_length);
-        _maLowWindow = new RollingWindowMin(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly RecursiveStochasticWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public RecursiveStochasticState(int length = 200, double alpha = .1) => _window = new(length, alpha);
     public IndicatorName Name => IndicatorName.RecursiveStochastic;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _maHighWindow.Reset();
-        _maLowWindow.Reset();
-        _prevK = 0;
-        _hasPrevK = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var highest = isFinal ? _highWindow.Add(value, out _) : _highWindow.Preview(value, out _);
-        var lowest = isFinal ? _lowWindow.Add(value, out _) : _lowWindow.Preview(value, out _);
-        var stoch = highest - lowest != 0 ? (value - lowest) / (highest - lowest) * 100 : 0;
-        var prevK = _hasPrevK ? _prevK : 0;
-        var ma = (_alpha * stoch) + ((1 - _alpha) * prevK);
-        var highestMa = isFinal ? _maHighWindow.Add(ma, out _) : _maHighWindow.Preview(ma, out _);
-        var lowestMa = isFinal ? _maLowWindow.Add(ma, out _) : _maLowWindow.Preview(ma, out _);
-        var k = highestMa - lowestMa != 0
-            ? MathHelper.MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevK = k;
-            _hasPrevK = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Rsto", k }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(k, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _maHighWindow.Dispose();
-        _maLowWindow.Dispose();
-    }
+    { var price = _input.GetValue(bar); var value = _window.Next(price, isFinal); return new(value, includeOutputs ? new Dictionary<string, double> { { "Rsto", value } } : null); }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Rosc")]

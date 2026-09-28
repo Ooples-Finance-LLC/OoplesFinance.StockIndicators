@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.RecursiveStochastic)
+        {
+            var recursiveOptions = builtIn.CreateOptions();
+            yield return IndicatorValidationRule.Reference(0, bars => RecursiveStochasticOutputs(bars, Integer(recursiveOptions, "Length", 200), Number(recursiveOptions, .1, "Alpha")), IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ChopZone)
         {
             var chopOptions = builtIn.CreateOptions();

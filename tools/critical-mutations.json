@@ -31880,5 +31880,119 @@
     "after": "MovingAverage(data, maType, length1,",
     "filter": "FullyQualifiedName~ValidationTests.ChopZoneNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
     "scope": "internal static ComputeBuffer ComputeChopZoneFast("
+  },
+  {
+    "id": "recursive-stochastic-percent-scale",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "numerator.Ratio(denominator) * 100",
+    "after": "numerator.Ratio(denominator) * 50",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-published-span",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "RocBankValue.Round(span).AddTo(ref denominator)",
+    "after": "denominator.Add(RocBankValue.Round(span).Publish())",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-blend-weight",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "_alpha * stoch + (1 - _alpha) * _previous",
+    "after": "(1 - _alpha) * stoch + _alpha * _previous",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-feedback-source",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "_previous = result;",
+    "after": "_previous = blend;",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-second-range",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "Percent(blend, Extreme(_blendHigh, blend, true), Extreme(_blendLow, blend, false))",
+    "after": "stoch",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "node.Value.Index <= _count - _length",
+    "after": "node.Value.Index <= _count - _length + 1",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-flat-window",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "return numerator.Ratio(denominator) * 100;",
+    "after": "return denominator.IsExactlyZero ? 50 : numerator.Ratio(denominator) * 100;",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "_previous = 0;",
+    "after": "_previous = 50;",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-alpha-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/RecursiveStochasticWindow.cs",
+    "before": "_alpha = Math.Max(0, Math.Min(1, alpha))",
+    "after": "_alpha = alpha",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-raw-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "internal static ComputeBuffer ComputeRecursiveStochasticFast("
+  },
+  {
+    "id": "recursive-stochastic-native-invalid",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch21.cs",
+    "before": "var price = _input.GetValue(bar);",
+    "after": "double price; try { price = _input.GetValue(bar); } catch (ArgumentOutOfRangeException) { price = 0; }",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples",
+    "scope": "public sealed class RecursiveStochasticState"
+  },
+  {
+    "id": "recursive-stochastic-live-registration",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "before": " RecursiveStochasticSpecOptions or ",
+    "after": " ",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
+  },
+  {
+    "id": "recursive-stochastic-reference-feedback",
+    "module": "numerical",
+    "file": "src/Validation/BuiltInFormulaReferences.RecursiveStochastic.cs",
+    "before": "i > 0 ? outputs[i - 1] : 0",
+    "after": "i > 1 ? outputs[i - 2] : 0",
+    "filter": "FullyQualifiedName~ValidationTests.RecursiveStochasticNumericalTests|FullyQualifiedName~NumericalEnrollmentCoverageTests|FullyQualifiedName~FoundationReferencesMatchIndependentSmallExamples"
   }
 ]

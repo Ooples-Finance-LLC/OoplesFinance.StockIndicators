@@ -125,44 +125,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateRecursiveStochastic(this StockData stockData, int length = 200, double alpha = 0.1)
     {
-        List<double> kList = new(stockData.Count);
-        List<double> maList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax maWindow = new(length);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RecursiveStochasticWindow(length, alpha); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input)
         {
-            var currentValue = inputList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var stoch = highest - lowest != 0 ? (currentValue - lowest) / (highest - lowest) * 100 : 0;
-            var prevK1 = i >= 1 ? kList[i - 1] : 0;
-            var prevK2 = i >= 2 ? kList[i - 2] : 0;
-
-            var ma = (alpha * stoch) + ((1 - alpha) * prevK1);
-            maList.Add(ma);
-            maWindow.Add(ma);
-
-            var highestMa = maWindow.Max;
-            var lowestMa = maWindow.Min;
-
-            var k = highestMa - lowestMa != 0 ? MinOrMax((ma - lowestMa) / (highestMa - lowestMa) * 100, 100, 0) : 0;
-            kList.Add(k);
-
-            var signal = GetRsiSignal(k - prevK1, prevK1 - prevK2, k, prevK1, 80, 20);
-            signalsList?.Add(signal);
+            var value = window.Next(price, true); var previous = line.Count > 0 ? line[line.Count - 1] : 0; var prior = line.Count > 1 ? line[line.Count - 2] : 0;
+            signals?.Add(GetRsiSignal(value - previous, previous - prior, value, previous, 80, 20)); line.Add(value);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Rsto", kList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(kList);
-        stockData.IndicatorName = IndicatorName.RecursiveStochastic;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Rsto", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.RecursiveStochastic; return stockData;
     }
 
 }
