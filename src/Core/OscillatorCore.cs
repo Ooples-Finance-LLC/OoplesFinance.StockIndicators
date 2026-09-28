@@ -7713,27 +7713,8 @@ internal static class OscillatorCore
     /// </summary>
     internal static void EhlersInstantaneousTrendlineV2(ReadOnlySpan<double> close, Span<double> output, double alpha = 0.07)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            var currentValue = close[i];
-            var prevValue1 = i >= 1 ? close[i - 1] : 0;
-            var prevValue2 = i >= 2 ? close[i - 2] : 0;
-            var prevIt1 = i >= 1 ? output[i - 1] : 0;
-            var prevIt2 = i >= 2 ? output[i - 2] : 0;
-
-            var it = i < 7
-                ? (currentValue + (2 * prevValue1) + prevValue2) / 4
-                : (((alpha - ((alpha * alpha) / 4)) * currentValue) + ((0.5 * alpha * alpha) * prevValue1) -
-                   (((alpha - ((3 * alpha * alpha) / 4)) * prevValue2)) + ((2 * (1 - alpha)) * prevIt1) -
-                   (((1 - alpha) * (1 - alpha)) * prevIt2));
-
-            output[i] = it;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new InstantaneousTrendWindow(alpha); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>

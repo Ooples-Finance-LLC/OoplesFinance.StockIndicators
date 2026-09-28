@@ -904,67 +904,15 @@ public sealed class EhlersInstantaneousTrendlineV1State : IStreamingIndicatorSta
 [PrimaryOutput("Eit")]
 public sealed class EhlersInstantaneousTrendlineV2State : IStreamingIndicatorState
 {
-    private readonly double _alpha;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevIt1;
-    private double _prevIt2;
-    private int _index;
-
-    public EhlersInstantaneousTrendlineV2State(double alpha = 0.07)
-    {
-        _alpha = alpha;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly InstantaneousTrendWindow _window;
+    private readonly StreamingInputResolver _input = new(InputName.Close, null);
+    public EhlersInstantaneousTrendlineV2State(double alpha = 0.07) { _window = new(alpha); }
     public IndicatorName Name => IndicatorName.EhlersInstantaneousTrendlineV2;
-
-    public void Reset()
-    {
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevIt1 = 0;
-        _prevIt2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevIt1 = _index >= 1 ? _prevIt1 : 0;
-        var prevIt2 = _index >= 2 ? _prevIt2 : 0;
-
-        var alpha2 = MathHelper.Pow(_alpha, 2);
-        var it = _index < 7
-            ? (value + (2 * prevValue1) + prevValue2) / 4
-            : ((_alpha - (alpha2 / 4)) * value) + (0.5 * alpha2 * prevValue1) - ((_alpha - (0.75 * alpha2)) * prevValue2) +
-              (2 * (1 - _alpha) * prevIt1) - (MathHelper.Pow(1 - _alpha, 2) * prevIt2);
-
-        var lag = (2 * it) - prevIt2;
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevIt2 = _prevIt1;
-            _prevIt1 = it;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eit", it },
-                { "Signal", lag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(it, outputs);
+        var p = _window.Next(_input.GetValue(bar), isFinal);
+        return new StreamingIndicatorStateResult(p.Line, includeOutputs ? new Dictionary<string, double> { { "Eit", p.Line }, { "Signal", p.Signal } } : null);
     }
 }
 

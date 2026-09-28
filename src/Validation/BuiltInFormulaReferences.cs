@@ -17,6 +17,13 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersInstantaneousTrendlineV2)
+        {
+            var trendOptions = (EhlersInstantaneousTrendlineV2SpecOptions)builtIn.CreateOptions();
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => InstantaneousTrendOutputs(bars, trendOptions.Alpha)["Eit"], IndicatorErrorBudget.Exact);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(1, bars => InstantaneousTrendOutputs(bars, trendOptions.Alpha)["Signal"], IndicatorErrorBudget.Exact);
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersTripleDelayLineDetrender)
         {
             var delayOptions = (EhlersTripleDelayLineDetrenderSpecOptions)builtIn.CreateOptions();

@@ -1221,40 +1221,16 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersInstantaneousTrendlineV2(this StockData stockData, double alpha = 0.07)
     {
-        List<double> itList = new(stockData.Count);
-        List<double> lagList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var window = new InstantaneousTrendWindow(alpha); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        double previousLine = 0, previousSignal = 0;
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevIt1 = i >= 1 ? itList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevIt2 = i >= 2 ? itList[i - 2] : 0;
-
-            var it = i < 7 ? (currentValue + (2 * prevValue1) + prevValue2) / 4 : ((alpha - (Pow(alpha, 2) / 4)) * currentValue) + 
-                (0.5 * Pow(alpha, 2) * prevValue1) - ((alpha - (0.75 * Pow(alpha, 2))) * prevValue2) + (2 * (1 - alpha) * prevIt1) - (Pow(1 - alpha, 2) * prevIt2);
-            itList.Add(it);
-
-            var prevLag = GetLastOrDefault(lagList);
-            var lag = (2 * it) - prevIt2;
-            lagList.Add(lag);
-
-            var signal = GetCompareSignal(lag - it, prevLag - prevIt1);
-            signalsList?.Add(signal);
+            var p = window.Next(input[i], true); line.Add(p.Line); signal.Add(p.Signal);
+            signals?.Add(GetCompareSignal(p.Signal - p.Line, previousSignal - previousLine)); previousLine = p.Line; previousSignal = p.Signal;
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eit", itList },
-            { "Signal", lagList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(itList);
-        stockData.IndicatorName = IndicatorName.EhlersInstantaneousTrendlineV2;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eit", line }, { "Signal", signal } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersInstantaneousTrendlineV2; return stockData;
     }
 
 

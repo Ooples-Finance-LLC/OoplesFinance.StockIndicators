@@ -233,24 +233,7 @@ internal static partial class BuiltInFormulaReferences
                 }).ToArray())));
             case IndicatorName.EhlersInstantaneousTrendlineV2:
                 var trendAlpha = Number(options, .07, "Alpha");
-                return new("Eit", new[] { "Eit", "Signal" }, bars =>
-                {
-                    double Price(int i) => i < 0 ? 0 : bars[i].Close;
-                    double Seed(int i) => (Price(i) + 2 * Price(i - 1) + Price(i - 2)) / 4;
-                    var pole = 1 - trendAlpha;
-                    var a2 = trendAlpha * trendAlpha;
-                    var line = bars.Select((_, i) =>
-                    {
-                        if (i < 7) return Seed(i);
-                        var age = i - 6;
-                        // Solve the repeated-pole recurrence from its two warmup conditions.
-                        var homogeneous = ((age + 1) * Seed(6) - age * pole * Seed(5)) * Math.Pow(pole, age);
-                        var driven = Enumerable.Range(7, i - 6).Sum(j => (i - j + 1) * Math.Pow(pole, i - j) *
-                            ((trendAlpha - a2 / 4) * Price(j) + a2 / 2 * Price(j - 1) - (trendAlpha - .75 * a2) * Price(j - 2)));
-                        return homogeneous + driven;
-                    }).ToArray();
-                    return Outputs(("Eit", line), ("Signal", line.Select((v, i) => 2 * v - (i < 2 ? 0 : line[i - 2])).ToArray()));
-                });
+                return new("Eit", new[] { "Eit", "Signal" }, bars => InstantaneousTrendOutputs(bars, trendAlpha));
             case IndicatorName.EhlersReflexIndicator:
             case IndicatorName.EhlersTrendflexIndicator:
                 var flexLength = Integer(options, "Length", 20);

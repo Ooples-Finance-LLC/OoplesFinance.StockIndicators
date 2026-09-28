@@ -16564,16 +16564,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersInstantaneousTrendlineV2Fast(StockData data, ComputeContext context, double alpha = 0.07, string? outputKey = null)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var inputSpan = SpanCompat.AsReadOnlySpan(inputList);
-        var buffer = context.Rent(inputList.Count);
-        OscillatorCore.EhlersInstantaneousTrendlineV2(inputSpan, buffer.WritableSpan, alpha);
-        if (outputKey == "Signal")
-        {
-            var output = buffer.WritableSpan;
-            for (var i = output.Length - 1; i >= 0; i--)
-                output[i] = 2 * output[i] - (i < 2 ? 0 : output[i - 2]);
-        }
+        var window = new InstantaneousTrendWindow(alpha); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var p = window.Next(input[i], true); buffer.WritableSpan[i] = outputKey == "Signal" ? p.Signal : p.Line; }
         return buffer;
     }
 

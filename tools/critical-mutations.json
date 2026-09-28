@@ -37805,5 +37805,113 @@
     "before": "MovingAverage(data, maType, length, line.Span, smooth.WritableSpan)",
     "after": "MovingAverage(data, maType, length, raw.Span, smooth.WritableSpan)",
     "filter": "FullyQualifiedName~TripleDelayNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-startup",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "if (_startup < 7)\n",
+    "after": "if (_startup < 6)\n",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-weights",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "_price1.AddTo(ref sum, 2)",
+    "after": "_price1.AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "square.Multiply(.25)",
+    "after": "square.Multiply(.5)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "retention.Multiply(2)",
+    "after": "retention.Multiply(1)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-decay",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "Product(ref sum, _line2, _decay, -1)",
+    "after": "Product(ref sum, _line2, _decay, 1)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-signal",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "_line2.AddTo(ref signal, -1)",
+    "after": "_line1.AddTo(ref signal, -1)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-extended",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "_line1 = line;",
+    "after": "_line1 = new RocBankValue(line.Publish());",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-preview",
+    "module": "numerical",
+    "file": "src/Helpers/InstantaneousTrendWindow.cs",
+    "scope": "internal sealed class InstantaneousTrendWindow",
+    "before": "if (commit) {",
+    "after": "if (commit || price != 0) {",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersInstantaneousTrendlineV2(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersInstantaneousTrendlineV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersInstantaneousTrendlineV2State",
+    "before": "_input.GetValue(bar)",
+    "after": "_input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, 0, 0, 0, bar.Close, 0, bar.IsFinal))",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
+  },
+  {
+    "id": "instantaneous-trend-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StatefulIndicatorFactory.cs",
+    "scope": null,
+    "before": "new EhlersInstantaneousTrendlineV2State(trend.Alpha)",
+    "after": "new EhlersInstantaneousTrendlineV2State()",
+    "filter": "FullyQualifiedName~InstantaneousTrendNumericalTests"
   }
 ]
