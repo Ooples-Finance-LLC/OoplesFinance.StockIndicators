@@ -798,46 +798,31 @@ public static partial class Calculations
     public static StockData CalculateEhlersHammingWindowIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHammingMovingAverage,
         int length = 20, double pedestal = 10)
     {
-        length = Math.Max(length, 1);
-        List<double> rocList = new(stockData.Count);
-        List<double> derivList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, openList, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        // Preserve the existing fixed-pedestal moving-average contract.
+        _ = pedestal;
+        length = Math.Max(1, length);
+        var (input, _, _, open, _) = GetInputValuesList(stockData);
+        using var window = new HammingIndicatorWindow(maType, length);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !HammingIndicatorWindow.Supports(maType);
+        List<double>? averaged = null;
+        if (external)
         {
-            var currentOpen = openList[i];
-            var currentValue = inputList[i];
-            
-
-            var deriv = currentValue - currentOpen;
-            derivList.Add(deriv);
+            var differences = input.Select((v, i) => TriangleIndicatorWindow.Difference(v, open[i]).Publish()).ToList();
+            averaged = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(differences), length)?.ToList()
+                ?? GetMovingAverageList(stockData, maType, length, differences);
         }
-
-        var filtList = GetMovingAverageList(stockData, maType, length, derivList);
-        for (var i = 0; i < stockData.Count; i++)
+        var line = new List<double>(input.Count); var roc = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++)
         {
-            var filt = filtList[i];
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var roc = length / 2.0 * Math.PI * (filt - prevFilt1);
-            rocList.Add(roc);
-
-            var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
-            signalsList?.Add(signal);
+            var point = external ? window.Finish(new RocBankValue(averaged![i]), true) : window.Next(open[i], input[i], true);
+            var previous = i > 0 ? line[i - 1] : 0; var older = i > 1 ? line[i - 2] : 0;
+            signals?.Add(GetCompareSignal(point.Line - previous, previous - older)); line.Add(point.Line); roc.Add(point.Roc);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ehwi", filtList },
-            { "Roc", rocList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersHammingWindowIndicator;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ehwi", line }, { "Roc", roc } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.EhlersHammingWindowIndicator;
         return stockData;
     }
+
 
 
     /// <summary>

@@ -36401,5 +36401,77 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~HannIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-mass",
+    "module": "numerical",
+    "file": "src/Helpers/HammingIndicatorWindow.cs",
+    "scope": "internal sealed class HammingIndicatorWindow",
+    "before": "_mass = mass;",
+    "after": "mass.Add(1); _mass = mass;",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-weights",
+    "module": "numerical",
+    "file": "src/Helpers/HammingIndicatorWindow.cs",
+    "scope": "internal sealed class HammingIndicatorWindow",
+    "before": "_weights[lag] = length == 1 ? 1 : Math.Sin(3 * (1 - 2 * position) + Math.PI * position)",
+    "after": "_weights[lag] = 1",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-extended-product",
+    "module": "numerical",
+    "file": "src/Helpers/HammingIndicatorWindow.cs",
+    "scope": "internal sealed class HammingIndicatorWindow",
+    "before": "product.ScaleByPowerOfTwo(value.UpperShift);",
+    "after": "product.ScaleByPowerOfTwo(0);",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-extended-roc",
+    "module": "numerical",
+    "file": "src/Helpers/HammingIndicatorWindow.cs",
+    "scope": "internal sealed class HammingIndicatorWindow",
+    "before": "return Finish(line, commit);",
+    "after": "return Finish(new RocBankValue(line.Publish()), commit);",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HammingIndicatorWindow.cs",
+    "scope": "internal sealed class HammingIndicatorWindow",
+    "before": "if (commit) { if (_values.Count",
+    "after": "if (true) { if (_values.Count",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersHammingWindowIndicator(",
+    "before": "window.Next(open[i], input[i], true)",
+    "after": "window.Next(open[i], stockData.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersHammingWindowFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
+  },
+  {
+    "id": "hamming-indicator-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHammingWindowIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~HammingIndicatorNumericalTests"
   }
 ]

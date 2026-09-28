@@ -294,6 +294,7 @@ internal static partial class StatefulIndicatorFactory
             LinearRegressionLineSpecOptions line => new LinearRegressionLineState(line.MaType, line.Length),
             RegressionOscillatorSpecOptions regression => new RegressionOscillatorState(regression.Length),
             RunningEquitySpecOptions equity => new RunningEquityState(equity.MaType, equity.Length),
+            EhlersHammingWindowIndicatorSpecOptions hammingIndicator => new EhlersHammingWindowIndicatorState(hammingIndicator.MaType, hammingIndicator.Length, hammingIndicator.Pedestal),
             EhlersHannWindowIndicatorSpecOptions hannIndicator => new EhlersHannWindowIndicatorState(hannIndicator.MaType, hannIndicator.Length),
             EhlersTriangleWindowIndicatorSpecOptions triangleIndicator => new EhlersTriangleWindowIndicatorState(triangleIndicator.MaType, triangleIndicator.Length),
             RecursiveDifferenciatorSpecOptions recursive => new RecursiveDifferenciatorState(recursive.MaType, recursive.Length, recursive.Alpha),

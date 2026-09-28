@@ -17,6 +17,15 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersHammingWindowIndicator)
+        {
+            var hammingOptions = (EhlersHammingWindowIndicatorSpecOptions)builtIn.CreateOptions();
+            var hammingKind = hammingOptions.MaType == MovingAvgType.EhlersHammingMovingAverage ? 7 : AverageKind(hammingOptions, 1); if (hammingKind == 0) yield break;
+            var hammingKeys = builtIn.BatchOutputKey is { } selectedHamming ? new[] { selectedHamming } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < hammingKeys.Length; slot++)
+            { var key = hammingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HammingIndicatorOutputs(bars, hammingOptions.Length, hammingKind)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersHannWindowIndicator)
         {
             var hannOptions = (EhlersHannWindowIndicatorSpecOptions)builtIn.CreateOptions();

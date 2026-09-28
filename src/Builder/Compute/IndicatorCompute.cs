@@ -18998,7 +18998,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersHammingWindowFast(StockData data, ComputeContext context, int length = 20,
         MovingAvgType maType = MovingAvgType.EhlersHammingMovingAverage, string? outputKey = null)
     {
-        return EhlersWindowFilter(data, context, length, maType, outputKey, false);
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new HammingIndicatorWindow(maType, length); var buffer = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(data.OpenPrices[i], input[i], true); buffer.WritableSpan[i] = outputKey == "Roc" ? point.Roc : point.Line; }
+        return buffer;
     }
 
     /// <summary>
