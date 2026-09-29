@@ -3219,62 +3219,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateSuperTrendFilter(this StockData stockData, int length = 200, double factor = 0.9)
     {
-        List<double> tList = new(stockData.Count);
-        List<double> srcList = new(stockData.Count);
-        List<double> trendUpList = new(stockData.Count);
-        List<double> trendDnList = new(stockData.Count);
-        List<double> trendList = new(stockData.Count);
-        List<double> tslList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        double p = Pow(length, 2), a = 2 / (p + 1);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevTsl1 = i >= 1 ? tslList[i - 1] : currentValue;
-            var prevTsl2 = i >= 2 ? tslList[i - 2] : 0;
-            var d = Math.Abs(currentValue - prevTsl1);
-
-            var prevT = i >= 1 ? tList[i - 1] : d;
-            var t = (a * d) + ((1 - a) * prevT);
-            tList.Add(t);
-
-            var prevSrc = GetLastOrDefault(srcList);
-            var src = (factor * prevTsl1) + ((1 - factor) * currentValue);
-            srcList.Add(src);
-
-            var up = prevTsl1 - t;
-            var dn = prevTsl1 + t;
-
-            var prevTrendUp = GetLastOrDefault(trendUpList);
-            var trendUp = prevSrc > prevTrendUp ? Math.Max(up, prevTrendUp) : up;
-            trendUpList.Add(trendUp);
-
-            var prevTrendDn = GetLastOrDefault(trendDnList);
-            var trendDn = prevSrc < prevTrendDn ? Math.Min(dn, prevTrendDn) : dn;
-            trendDnList.Add(trendDn);
-
-            var prevTrend = i >= 1 ? trendList[i - 1] : 1;
-            var trend = src > prevTrendDn ? 1 : src < prevTrendUp ? -1 : prevTrend;
-            trendList.Add(trend);
-
-            var tsl = trend == 1 ? trendDn : trendUp;
-            tslList.Add(tsl);
-
-            var signal = GetCompareSignal(tsl - prevTsl1, prevTsl1 - prevTsl2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Stf", tslList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(tslList);
-        stockData.IndicatorName = IndicatorName.SuperTrendFilter;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new SuperTrendFilterWindow(length, factor); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Stf", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.SuperTrendFilter; return stockData;
     }
 
 

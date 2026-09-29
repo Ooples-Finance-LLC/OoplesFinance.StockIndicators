@@ -950,29 +950,7 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", low.Select((_, i) => Window(low, i, Math.Max(2, length)).Min()).ToArray()));
                 });
             case IndicatorName.SuperTrendFilter:
-                return new("Stf", new[] { "Stf" }, bars =>
-                {
-                    var gain = 2 / ((double)length * length + 1);
-                    var factor = Number(options, .9, "Factor");
-                    var deviations = new double[bars.Count];
-                    var line = new double[bars.Count];
-                    double previousSource = 0, lower = 0, upper = 0;
-                    var direction = 1;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var previous = i == 0 ? bars[i].Close : line[i - 1];
-                        deviations[i] = Math.Abs(bars[i].Close - previous);
-                        var width = Enumerable.Range(0, i + 1).Sum(j => gain * Math.Pow(1 - gain, i - j) * deviations[j]);
-                        var source = factor * previous + (1 - factor) * bars[i].Close;
-                        var nextLower = previousSource > lower ? Math.Max(previous - width, lower) : previous - width;
-                        var nextUpper = previousSource < upper ? Math.Min(previous + width, upper) : previous + width;
-                        if (source > upper) direction = 1;
-                        else if (source < lower) direction = -1;
-                        line[i] = direction > 0 ? nextUpper : nextLower;
-                        lower = nextLower; upper = nextUpper; previousSource = source;
-                    }
-                    return Outputs(("Stf", line));
-                });
+                return new("Stf", new[] { "Stf" }, bars => Outputs(("Stf", SuperTrendFilterOutputs(bars, indicator))));
             case IndicatorName.VolatilityStop:
                 var stopFactor = Number(options, 2, "Multiplier");
                 return new("Vs", new[] { "Vs" }, bars => VolatilityStopValues(bars, length, stopFactor).Outputs);

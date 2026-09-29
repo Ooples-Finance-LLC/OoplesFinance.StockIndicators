@@ -829,85 +829,14 @@ public sealed class SuperTrendState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Stf")]
 public sealed class SuperTrendFilterState : IStreamingIndicatorState
 {
-    private readonly double _a;
-    private readonly double _factor;
-    private readonly StreamingInputResolver _input;
-    private double _prevTsl;
-    private double _prevT;
-    private double _prevSrc;
-    private double _prevTrendUp;
-    private double _prevTrendDn;
-    private double _prevTrend;
-    private bool _hasPrev;
-
-    public SuperTrendFilterState(int length = 200, double factor = 0.9)
-    {
-        var resolved = Math.Max(1, length);
-        var p = MathHelper.Pow(resolved, 2);
-        _a = 2 / (p + 1);
-        _factor = factor;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SuperTrendFilterWindow _window;
+    public SuperTrendFilterState(int length = 200, double factor = .9) => _window = new(length, factor);
     public IndicatorName Name => IndicatorName.SuperTrendFilter;
-
-    public void Reset()
-    {
-        _prevTsl = 0;
-        _prevT = 0;
-        _prevSrc = 0;
-        _prevTrendUp = 0;
-        _prevTrendDn = 0;
-        _prevTrend = 1;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevTsl1 = _hasPrev ? _prevTsl : value;
-        var d = Math.Abs(value - prevTsl1);
-
-        var prevT = _hasPrev ? _prevT : d;
-        var t = (_a * d) + ((1 - _a) * prevT);
-
-        var prevSrc = _hasPrev ? _prevSrc : 0;
-        var src = (_factor * prevTsl1) + ((1 - _factor) * value);
-
-        var up = prevTsl1 - t;
-        var dn = prevTsl1 + t;
-
-        var prevTrendUp = _hasPrev ? _prevTrendUp : 0;
-        var trendUp = prevSrc > prevTrendUp ? Math.Max(up, prevTrendUp) : up;
-
-        var prevTrendDn = _hasPrev ? _prevTrendDn : 0;
-        var trendDn = prevSrc < prevTrendDn ? Math.Min(dn, prevTrendDn) : dn;
-
-        var prevTrend = _hasPrev ? _prevTrend : 1;
-        var trend = src > prevTrendDn ? 1 : src < prevTrendUp ? -1 : prevTrend;
-        var tsl = trend == 1 ? trendDn : trendUp;
-
-        if (isFinal)
-        {
-            _prevTsl = tsl;
-            _prevT = t;
-            _prevSrc = src;
-            _prevTrendUp = trendUp;
-            _prevTrendDn = trendDn;
-            _prevTrend = trend;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Stf", tsl }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(tsl, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Stf", point.Value } } : null);
     }
 }
 

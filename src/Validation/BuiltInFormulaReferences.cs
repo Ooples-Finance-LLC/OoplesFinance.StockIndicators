@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SuperTrendFilter)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperTrendFilterOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SuperTrend)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperTrendOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;

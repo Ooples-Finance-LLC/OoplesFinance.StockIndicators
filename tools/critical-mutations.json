@@ -46517,5 +46517,221 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~SuperTrendNumericalTests.InvalidCandlesCannotAdvanceAveragesStopsOrDirection"
+  },
+  {
+    "id": "supertrend-filter-wide-distance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Math.Abs(signed.Mantissa)",
+    "after": "signed.Mantissa",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-line-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "_seeded ? _line : current",
+    "after": "_seeded ? _line : default",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.HandFeedbackUsesPreviousBandsAndRetainsEqualityDirection"
+  },
+  {
+    "id": "supertrend-filter-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "_gain = 2 /",
+    "after": "_gain = 1 /",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-width-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "_seeded ? _width : distance",
+    "after": "_seeded ? distance : _width",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-source-factor",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Blend(previous, _factor, current, 1 - _factor)",
+    "after": "Blend(previous, _factor / 2, current, 1 - _factor)",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-source-complement",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "current, 1 - _factor",
+    "after": "current, _factor",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-extended-sum",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "private static RocBankValue Sum(",
+    "before": "right.AddTo(ref sum, sign); return RocBankValue.Round(sum);",
+    "after": "right.AddTo(ref sum, sign); return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.UnpublishedOverflowAndInfiniteOutputDoNotPoisonLaterFeedback"
+  },
+  {
+    "id": "supertrend-filter-wide-extended-blend",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "private static RocBankValue Blend(",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.UnpublishedOverflowAndInfiniteOutputDoNotPoisonLaterFeedback"
+  },
+  {
+    "id": "supertrend-filter-wide-left-shift",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "sum.ScaleByPowerOfTwo(left.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.UnpublishedOverflowAndInfiniteOutputDoNotPoisonLaterFeedback"
+  },
+  {
+    "id": "supertrend-filter-wide-right-shift",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "other.ScaleByPowerOfTwo(right.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.UnpublishedOverflowAndInfiniteOutputDoNotPoisonLaterFeedback"
+  },
+  {
+    "id": "supertrend-filter-wide-lower-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(lower, _lower) < 0",
+    "after": "Compare(lower, _lower) > 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-upper-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(upper, _upper) > 0",
+    "after": "Compare(upper, _upper) < 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-lower-guard",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(_source, _lower) > 0",
+    "after": "Compare(_source, _lower) < 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-upper-guard",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(_source, _upper) < 0",
+    "after": "Compare(_source, _upper) > 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-upper-direction-band",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(source, _upper) > 0",
+    "after": "Compare(source, upper) > 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.HandFeedbackUsesPreviousBandsAndRetainsEqualityDirection"
+  },
+  {
+    "id": "supertrend-filter-wide-lower-direction-band",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "Compare(source, _lower) < 0",
+    "after": "Compare(source, lower) < 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.HandFeedbackUsesPreviousBandsAndRetainsEqualityDirection"
+  },
+  {
+    "id": "supertrend-filter-wide-output-side",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "var line = up ? upper : lower;",
+    "after": "var line = up ? lower : upper;",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "_seeded = false; _up = true;",
+    "after": "_seeded = true; _up = true;",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "_older.AddTo(ref change);",
+    "after": "_older.AddTo(ref change, 2);",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.WideFeedbackKeepsBandsBlendsDirectionsAndSignalsExact"
+  },
+  {
+    "id": "supertrend-filter-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendFilterWindow.cs",
+    "scope": "internal sealed class SuperTrendFilterWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "supertrend-filter-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSuperTrendFilterFast(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.SelectedPricesDriveFeedbackAndSignalsWithoutCandleSubstitution"
+  },
+  {
+    "id": "supertrend-filter-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SuperTrendFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.InvalidCandlesCannotAdvanceFeedbackBandsOrDirection"
   }
 ]

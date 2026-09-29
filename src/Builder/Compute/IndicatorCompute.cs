@@ -390,6 +390,7 @@ internal static partial class IndicatorCompute
 
             // Batch 3 - Trend indicators
             ParabolicSarSpecOptions sar => ComputeParabolicSarFast(data, context, sar.Start, sar.Increment, sar.Maximum),
+            SuperTrendFilterSpecOptions stf => ComputeSuperTrendFilterFast(data, context, stf.Length, stf.Factor),
             SuperTrendSpecOptions st => ComputeSuperTrendFast(data, context, st.Length, st.MaType),
             ChandelierExitLongSpecOptions cel => ComputeChandelierExitLongFast(data, context, cel.Length, cel.MaType),
             ChandelierExitShortSpecOptions ces => ComputeChandelierExitShortFast(data, context, ces.Length, ces.MaType),
@@ -3630,8 +3631,16 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes SuperTrend using zero-allocation fast path.
+    /// Computes SuperTrend Filter using the selected input series.
     /// </summary>
+    internal static ComputeBuffer ComputeSuperTrendFilterFast(StockData data, ComputeContext context, int length = 200, double factor = .9)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new SuperTrendFilterWindow(length, factor); var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value; return result; }
+        catch { result.Dispose(); throw; }
+    }
+
+    /// <summary>Computes SuperTrend with extended intermediate stops.</summary>
     internal static ComputeBuffer ComputeSuperTrendFast(StockData data, ComputeContext context, int length = 22,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double atrMult = 3)
     {

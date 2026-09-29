@@ -574,6 +574,7 @@ internal static class BuilderVerifiedArms
         typeof(StrengthOfMovementSpecOptions),
         typeof(EhlersSwissArmyKnifeSpecOptions),
         typeof(SuperSmootherSpecOptions),
+        typeof(SuperTrendFilterSpecOptions),
         typeof(SuperTrendSpecOptions),
         typeof(SupportAndResistanceOscillatorSpecOptions),
         typeof(SurfaceRoughnessEstimatorSpecOptions),
