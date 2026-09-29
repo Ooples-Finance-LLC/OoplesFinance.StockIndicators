@@ -44465,5 +44465,221 @@
     "before": "var value = _input.GetValue(bar);",
     "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, bar.Close, bar.Close, bar.Close, bar.Close, 1, bar.IsFinal));",
     "filter": "FullyQualifiedName~SuperSmootherNumericalTests.InvalidCandlesCannotAdvanceRecursiveHistory"
+  },
+  {
+    "id": "swiss-army-ema-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "_ema * x +",
+    "after": "_ema * _input1 +",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-sma-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "_previous[1] * _length + x - lag",
+    "after": "_previous[1] * _length + x + lag",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-gauss-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "_gauss * _gauss * x +",
+    "after": "_gauss * _gauss * _input1 +",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-butter-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "_gauss * _gauss * (x + 2 * _input1 + _input2)",
+    "after": "_gauss * _gauss * (x + _input1 + _input2)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-smooth-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "RocBankValue.RoundUnits(x + 2 * _input1 + _input2, 4)",
+    "after": "RocBankValue.RoundUnits(x + 2 * _input1 + _input2, 2)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-hp-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(x - _input1)",
+    "after": "(x + _input1)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-php-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(x - 2 * _input1 + _input2)",
+    "after": "(x + 2 * _input1 + _input2)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-bp-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(x - _input2)",
+    "after": "(x + _input2)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-bs-drive",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "Unit * (x + _input2) - 2 * _cosine * _input1",
+    "after": "Unit * (x + _input2) + 2 * _cosine * _input1",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-startup",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "if (_count <= _length)\n        {",
+    "after": "if (_count < _length)\n        {",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.StartupSeedsEachFilterAndSmoothingStartsImmediately"
+  },
+  {
+    "id": "swiss-army-gaussian-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "gaussianFeedback = 2 * pole * Unit",
+    "after": "gaussianFeedback = pole * Unit",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-gaussian-decay",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "gaussianDecay = -pole * pole",
+    "after": "gaussianDecay = pole * pole",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-band-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(Unit + _band) * _previous[7]",
+    "after": "(Unit + _band) * _older[7]",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-band-decay",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "- 2 * _band * Unit * _older[8]",
+    "after": "+ 2 * _band * Unit * _older[8]",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-ema-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(Unit - _ema) * _previous[0]",
+    "after": "(Unit + _ema) * _previous[0]",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-hp-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "(Unit - _ema) * _previous[5]",
+    "after": "(Unit + _ema) * _previous[5]",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-sma-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "x - lag, _length)",
+    "after": "x - lag, _length + 1L)",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "_count = 0;",
+    "after": "",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.AllFiltersRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "swiss-army-signals",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "difference > before",
+    "after": "difference < before",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.SelectedPricesReachEveryOutputAndSignals"
+  },
+  {
+    "id": "swiss-army-bandwidth-domain",
+    "module": "numerical",
+    "file": "src/Helpers/SwissArmyWindow.cs",
+    "scope": "internal sealed class SwissArmyWindow",
+    "before": "|| delta < 0",
+    "after": "|| false",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.InvalidBandwidthPreservesCallerValues"
+  },
+  {
+    "id": "swiss-army-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSwissArmyFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.SelectedPricesReachEveryOutputAndSignals"
+  },
+  {
+    "id": "swiss-army-fast-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSwissArmyFast(",
+    "before": ".Values[slot]",
+    "after": ".Values[1]",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.SelectedPricesReachEveryOutputAndSignals"
+  },
+  {
+    "id": "swiss-army-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSwissArmyKnifeIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~SwissArmyNumericalTests.InvalidCandlesCannotAdvanceFilterHistory"
   }
 ]

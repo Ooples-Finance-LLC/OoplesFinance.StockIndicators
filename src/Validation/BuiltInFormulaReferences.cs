@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSwissArmyKnifeIndicator)
+        {
+            var swissOptions = builtIn.CreateOptions(); var swissLength = Integer(swissOptions, "Length", 20); var swissDelta = Number(swissOptions, .1, "Delta"); var swissKeys = new[] { "EmaFilter", "SmaFilter", "GaussFilter", "ButterFilter", "SmoothFilter", "HpFilter", "PhpFilter", "BpFilter", "BsFilter" };
+            for (var slot = 0; slot < swissKeys.Length; slot++) { var key = swissKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SwissArmyValues(bars, swissLength, swissDelta).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSuperSmootherFilter)
         {
             var superLength = Integer(builtIn.CreateOptions(), "Length", 10);

@@ -570,6 +570,7 @@ internal static class BuilderVerifiedArms
         typeof(StochasticRsiOscillatorSpecOptions),
         typeof(StochasticSpecOptions),
         typeof(StrengthOfMovementSpecOptions),
+        typeof(EhlersSwissArmyKnifeSpecOptions),
         typeof(SuperSmootherSpecOptions),
         typeof(SuperTrendSpecOptions),
         typeof(SupportAndResistanceOscillatorSpecOptions),

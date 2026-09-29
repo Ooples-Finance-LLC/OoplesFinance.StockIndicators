@@ -373,6 +373,7 @@ internal static partial class IndicatorCompute
             FramaSpecOptions frama => ComputeFramaFast(data, context, frama.Length),
             AmaSpecOptions ama => ComputeAmaFast(data, context, length: ama.Length),
             JmaSpecOptions jma => ComputeJmaFast(data, context, jma.Length),
+            EhlersSwissArmyKnifeSpecOptions swiss => ComputeSwissArmyFast(data, context, swiss.Length, swiss.Delta, spec.OutputKey),
             SuperSmootherSpecOptions ss => ComputeSuperSmootherFast(data, context, ss.Length),
             ButterworthFilterSpecOptions bw => ComputeButterworthFilterFast(data, context, bw.Length),
 
@@ -5717,6 +5718,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes SuperSmoother Filter using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeSwissArmyFast(StockData data, ComputeContext context, int length = 20, double delta = .1, string? outputKey = null)
+    {
+        using var window = new SwissArmyWindow(length, delta); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); var slot = Array.IndexOf(SwissArmyWindow.Keys, outputKey ?? "SmaFilter"); if (slot < 0) slot = 1;
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Values[slot]; return result;
+    }
+
     internal static ComputeBuffer ComputeSuperSmootherFast(StockData data, ComputeContext context, int length = 10)
     {
         // CalculateEhlersSuperSmootherFilter runs its two-pole recursion from the very first bar with no

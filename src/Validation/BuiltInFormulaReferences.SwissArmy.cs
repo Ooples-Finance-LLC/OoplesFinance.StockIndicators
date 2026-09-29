@@ -1,55 +1,46 @@
-using System.Numerics;
+using OoplesFinance.StockIndicators.Enums;
 using OoplesFinance.StockIndicators.Indicators;
-
 namespace OoplesFinance.StockIndicators.Validation;
-
 internal static partial class BuiltInFormulaReferences
 {
     private static FormulaDefinition? SwissArmy(IBuiltInIndicator indicator)
     {
         if (indicator.BatchName != IndicatorName.EhlersSwissArmyKnifeIndicator) return null;
-        var options = indicator.CreateOptions();
-        var length = Integer(options, "Length", 20);
-        var angle = Clamp(2 * Math.PI / length, .01, .99);
-        var bandwidth = Clamp(4 * Math.PI * Number(options, .1, "Delta") / length, .01, .99);
-        var alpha = (Math.Cos(angle) + Math.Sin(angle) - 1) / Math.Cos(angle);
-        var beta = 2.415 * (1 - Math.Cos(angle));
-        var gaussian = Math.Sqrt(beta * (beta + 2)) - beta;
-        var pole = 1 - gaussian;
-        var band = 1 / Math.Cos(bandwidth) - Math.Sqrt(1 / Math.Pow(Math.Cos(bandwidth), 2) - 1);
-        var bandA = Math.Cos(angle) * (1 + band);
-        var keys = new[] { "EmaFilter", "SmaFilter", "GaussFilter", "ButterFilter", "SmoothFilter", "HpFilter", "PhpFilter", "BpFilter", "BsFilter" };
-        return new("SmaFilter", keys, bars =>
+        var options = indicator.CreateOptions(); return new("SmaFilter", new[] { "EmaFilter", "SmaFilter", "GaussFilter", "ButterFilter", "SmoothFilter", "HpFilter", "PhpFilter", "BpFilter", "BsFilter" }, bars => SwissArmyValues(bars, Integer(options, "Length", 20), Number(options, .1, "Delta")).Outputs);
+    }
+    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) SwissArmyValues(IReadOnlyList<Bar> bars, int length, double delta)
+    {
+        if (double.IsNaN(delta) || double.IsInfinity(delta) || delta < 0) throw new ArgumentOutOfRangeException(nameof(delta));
+        length = Math.Max(1, length); ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
+        var angle = Math.Max(.01, Math.Min(.99, 2 * Math.PI / length)); var bandwidth = Math.Max(.01, Math.Min(.99, 4 * Math.PI * (delta / length))); var cosine = Math.Cos(angle); var beta = 2.415 * (1 - cosine);
+        var alpha = R(1 - cosine / (1 + Math.Sin(angle))); var gaussian = R(2 * beta / (Math.Sqrt(beta * beta + 2 * beta) + beta)); var pole = R(1) - gaussian; var band = R(Math.Cos(bandwidth) / (1 + Math.Sin(bandwidth))); var cos = R(cosine);
+        var keys = new[] { "EmaFilter", "SmaFilter", "GaussFilter", "ButterFilter", "SmoothFilter", "HpFilter", "PhpFilter", "BpFilter", "BsFilter" }; var lines = keys.Select(_ => new ReferenceFraction[bars.Count]).ToArray(); var signals = new Signal[bars.Count];
+        ReferenceFraction Price(int index) => index < 0 ? R(0) : R(bars[index].Close);
+        ReferenceFraction Output(int slot, int index) => index < 0 ? R(0) : lines[slot][index];
+        for (var i = 0; i < bars.Count; i++)
         {
-            var values = Closes(bars);
-            double Price(int index) => index < 0 ? 0 : values[index];
-            double[] Filter(double a1, double a2, Func<int, double> forcing, bool zeroSeed = false)
+            var x = Price(i); var p1 = Price(i - 1); var p2 = Price(i - 2); var binomial = (x + R(2) * p1 + p2) / R(4);
+            lines[4][i] = RoundRocBankStage(binomial);
+            if (i <= length)
             {
-                // Invert 1-a1*z^-1-a2*z^-2 analytically, then convolve its impulse response.
-                var gap = Complex.Sqrt(a1 * a1 + 4 * a2);
-                var first = (a1 + gap) / 2;
-                var second = (a1 - gap) / 2;
-                var impulse = Enumerable.Range(0, values.Length).Select(j => gap.Magnitude < 1e-12
-                    ? ((j + 1) * Complex.Pow(first, j)).Real
-                    : ((Complex.Pow(first, j + 1) - Complex.Pow(second, j + 1)) / gap).Real).ToArray();
-                var drive = values.Select((v, i) => i <= length
-                    ? zeroSeed ? 0 : v - a1 * Price(i - 1) - a2 * Price(i - 2)
-                    : forcing(i)).ToArray();
-                return values.Select((_, i) => i <= length ? zeroSeed ? 0 : values[i]
-                    : Enumerable.Range(0, i + 1).Sum(j => impulse[i - j] * drive[j])).ToArray();
+                foreach (var slot in new[] { 0, 1, 2, 3, 7, 8 }) lines[slot][i] = x; lines[5][i] = lines[6][i] = R(0);
             }
-            var smooth = values.Select((v, i) => (v + 2 * Price(i - 1) + Price(i - 2)) / 4).ToArray();
-            return Outputs(
-                (keys[0], Filter(1 - alpha, 0, i => alpha * values[i])),
-                (keys[1], values.Select((v, i) => i <= length ? v : values[length]
-                    + Enumerable.Range(length + 1, i - length).Sum(j => (values[j] - values[j - length]) / length)).ToArray()),
-                (keys[2], Filter(2 * pole, -pole * pole, i => gaussian * gaussian * values[i])),
-                (keys[3], Filter(2 * pole, -pole * pole, i => gaussian * gaussian * smooth[i])),
-                (keys[4], smooth),
-                (keys[5], Filter(1 - alpha, 0, i => (1 - alpha / 2) * (values[i] - Price(i - 1)), true)),
-                (keys[6], Filter(2 * pole, -pole * pole, i => Math.Pow(1 - gaussian / 2, 2) * (values[i] - 2 * Price(i - 1) + Price(i - 2)), true)),
-                (keys[7], Filter(bandA, -band, i => (1 - band) / 2 * (values[i] - Price(i - 2)))),
-                (keys[8], Filter(bandA, -band, i => (1 + band) / 2 * (values[i] - 2 * Math.Cos(angle) * Price(i - 1) + Price(i - 2)))));
-        });
+            else
+            {
+                ReferenceFraction Feedback(int slot) => R(2) * pole * Output(slot, i - 1) - pole * pole * Output(slot, i - 2);
+                ReferenceFraction BandFeedback(int slot) => cos * (R(1) + band) * Output(slot, i - 1) - band * Output(slot, i - 2);
+                lines[0][i] = RoundRocBankStage(alpha * x + (R(1) - alpha) * Output(0, i - 1));
+                lines[1][i] = RoundRocBankStage(Output(1, i - 1) + (x - Price(i - length)) / R(length));
+                lines[2][i] = RoundRocBankStage(gaussian * gaussian * x + Feedback(2));
+                lines[3][i] = RoundRocBankStage(gaussian * gaussian * binomial + Feedback(3));
+                lines[5][i] = RoundRocBankStage((R(1) - alpha / R(2)) * (x - p1) + (R(1) - alpha) * Output(5, i - 1));
+                var highGain = R(1) - gaussian / R(2); lines[6][i] = RoundRocBankStage(highGain * highGain * (x - R(2) * p1 + p2) + Feedback(6));
+                lines[7][i] = RoundRocBankStage((R(1) - band) / R(2) * (x - p2) + BandFeedback(7));
+                lines[8][i] = RoundRocBankStage((R(1) + band) / R(2) * (x - R(2) * cos * p1 + p2) + BandFeedback(8));
+            }
+            var difference = lines[1][i] - Output(1, i - 1); var before = Output(1, i - 1) - Output(1, i - 2); var direction = difference.CompareTo(before);
+            signals[i] = difference.Sign > 0 && direction > 0 ? Signal.StrongBuy : difference.Sign < 0 && direction < 0 ? Signal.StrongSell : difference.Sign > 0 ? Signal.Buy : difference.Sign < 0 ? Signal.Sell : Signal.None;
+        }
+        return (keys.Select((key, slot) => new { key, slot }).ToDictionary(x => x.key, x => lines[x.slot].Select(v => v.ToDouble()).ToArray()), signals);
     }
 }
