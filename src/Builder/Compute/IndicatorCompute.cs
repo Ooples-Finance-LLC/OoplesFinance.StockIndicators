@@ -953,12 +953,9 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
-            EhlersHilbertOscillatorSpecOptions eho => spec.OutputKey switch
-            {
-                null or "IQ" => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length),
-                "I3" => ComputeEhlersHilbertOscillatorFast(data, context, eho.Length, EhlersHilbertOutput.InPhase),
-                _ => null
-            },
+            EhlersHilbertOscillatorSpecOptions => ComputeMamaDerivedFast(data, context, 1, spec.OutputKey),
+            EhlersSineWaveIndicatorV1SpecOptions => ComputeMamaDerivedFast(data, context, 0, spec.OutputKey),
+            EhlersInstantaneousTrendlineV1SpecOptions => ComputeMamaDerivedFast(data, context, 2, spec.OutputKey),
             EhlersUniversalOscillatorSpecOptions euo => spec.OutputKey switch
             {
                 null or "Euo" => ComputeEhlersUniversalOscillatorFast(data, context, euo.Length),
@@ -10441,55 +10438,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersHilbertOscillatorFast(StockData data, ComputeContext context, int length = 7,
         EhlersHilbertOutput output = EhlersHilbertOutput.Quadrature)
     {
-        // CalculateEhlersHilbertOscillator measures the dominant cycle with the mother of adaptive moving
-        // averages, takes the quadrature component of its smoothed series, and sums that component back over
-        // half a cycle for I3 and a quarter of one for IQ. The length reaches only the signals, which is why
-        // neither series moves with it. OscillatorCore computed something else entirely from the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        _ = length;
-
-        using var smoothed = context.Rent(count);
-        using var periods = context.Rent(count);
-        using var quadratures = context.Rent(count);
-        var smooth = smoothed.WritableSpan;
-        var smoothPeriod = periods.WritableSpan;
-        var q3 = quadratures.WritableSpan;
-
-        using (var engine = new Streaming.EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                var snapshot = engine.Next(input[i], isFinal: true);
-                smooth[i] = snapshot.Smooth;
-                smoothPeriod[i] = snapshot.SmoothPeriod;
-            }
-        }
-
-        for (var i = 0; i < count; i++)
-        {
-            var previousSmooth = i >= 2 ? smooth[i - 2] : 0;
-            q3[i] = 0.5 * (smooth[i] - previousSmooth) * ((0.1759 * smoothPeriod[i]) + 0.4607);
-        }
-
-        var buffer = context.Rent(count);
-        var values = buffer.WritableSpan;
-        var divisor = output == EhlersHilbertOutput.InPhase ? 2 : 4;
-        var scale = output == EhlersHilbertOutput.InPhase ? 1.57 : 1.25;
-        for (var i = 0; i < count; i++)
-        {
-            var window = (int)Math.Ceiling(smoothPeriod[i] / divisor);
-            double sum = 0;
-            for (var j = 0; j <= window - 1; j++)
-            {
-                sum += i >= j ? q3[i - j] : 0;
-            }
-
-            values[i] = window != 0 ? scale * sum / window : sum;
-        }
-
-        return buffer;
+        return ComputeMamaDerivedFast(data, context, 1, output == EhlersHilbertOutput.InPhase ? "I3" : "IQ");
     }
 
     /// <summary>
@@ -16574,6 +16523,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeMamaDerivedFast(StockData data, ComputeContext context, int mode, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new MamaDerivedWindow(mode); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = mode == 1 ? outputKey == "I3" ? point.First : point.Second : outputKey == "LeadSine" || outputKey == "Signal" ? point.Second : point.First; }
+        return result;
+    }
+
     internal static ComputeBuffer ComputeCyberSineFast(StockData data, ComputeContext context, int length, double alpha, string? outputKey)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new CyberSineWindow(length, alpha); var result = context.Rent(input.Count);

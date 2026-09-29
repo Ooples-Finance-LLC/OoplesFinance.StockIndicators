@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersSineWaveIndicatorV1 or IndicatorName.EhlersHilbertOscillator or IndicatorName.EhlersInstantaneousTrendlineV1)
+        {
+            var derivedMode = builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV1 ? 0 : builtIn.BatchName == IndicatorName.EhlersHilbertOscillator ? 1 : 2; var derivedKeys = derivedMode == 0 ? new[] { "Sine", "LeadSine" } : derivedMode == 1 ? new[] { "I3", "IQ" } : new[] { "Eit", "Signal" };
+            for (var slot = 0; slot < derivedKeys.Length; slot++) { var key = derivedKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaDerivedValues(bars, derivedMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersMotherOfAdaptiveMovingAverages)
         {
             var mamaOptions = builtIn.CreateOptions(); var mamaFast = Number(mamaOptions, .5, "FastLimit"); var mamaSlow = Number(mamaOptions, .05, "SlowLimit"); var mamaKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Mama" } : new[] { "Fama", "Mama", "I1", "Q1", "SmoothPeriod", "Smooth", "Real", "Imag" };

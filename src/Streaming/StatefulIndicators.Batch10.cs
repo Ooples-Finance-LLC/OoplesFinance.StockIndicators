@@ -156,83 +156,16 @@ public sealed class EhlersHighPassFilterV2State : IStreamingIndicatorState, IDis
 [PrimaryOutput("IQ")]
 public sealed class EhlersHilbertOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private const int MaxSmoothPeriod = 52;
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly PooledRingBuffer<double> _smoothValues;
-    private readonly PooledRingBuffer<double> _q3Values;
-
-    public EhlersHilbertOscillatorState(int length = 7)
-    {
-        _ = length;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _smoothValues = new PooledRingBuffer<double>(2);
-        _q3Values = new PooledRingBuffer<double>(MaxSmoothPeriod);
-    }
-
+    private readonly MamaDerivedWindow _window = new(1);
+    public EhlersHilbertOscillatorState(int length = 7) { }
     public IndicatorName Name => IndicatorName.EhlersHilbertOscillator;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _smoothValues.Clear();
-        _q3Values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mama = _mama.Next(value, isFinal);
-        var smooth = mama.Smooth;
-        var smoothPeriod = mama.SmoothPeriod;
-        var prevSmooth2 = EhlersStreamingWindow.GetOffsetValue(_smoothValues, smooth, 2);
-
-        var q3 = 0.5 * (smooth - prevSmooth2) * ((0.1759 * smoothPeriod) + 0.4607);
-
-        var sp = (int)Math.Ceiling(smoothPeriod / 2);
-        double i3 = 0;
-        for (var j = 0; j <= sp - 1; j++)
-        {
-            var prevQ3 = EhlersStreamingWindow.GetOffsetValue(_q3Values, q3, j);
-            i3 += prevQ3;
-        }
-        i3 = sp != 0 ? 1.57 * i3 / sp : i3;
-
-        var maxCount = (int)Math.Ceiling(smoothPeriod / 4);
-        double iq = 0;
-        for (var j = 0; j <= maxCount - 1; j++)
-        {
-            var prevQ3 = EhlersStreamingWindow.GetOffsetValue(_q3Values, q3, j);
-            iq += prevQ3;
-        }
-        iq = maxCount != 0 ? 1.25 * iq / maxCount : iq;
-
-        if (isFinal)
-        {
-            _smoothValues.TryAdd(smooth, out _);
-            _q3Values.TryAdd(q3, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "I3", i3 },
-                { "IQ", iq }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(iq, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Second, includeOutputs ? new Dictionary<string, double> { { "I3", point.First }, { "IQ", point.Second } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _smoothValues.Dispose();
-        _q3Values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Quad")]
@@ -474,73 +407,16 @@ public sealed class EhlersInstantaneousPhaseIndicatorState : IStreamingIndicator
 [PrimaryOutput("Eit")]
 public sealed class EhlersInstantaneousTrendlineV1State : IStreamingIndicatorState, IDisposable
 {
-    private const int MaxTrendPeriod = 52;
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevIt1;
-    private double _prevIt2;
-    private double _prevIt3;
-
-    public EhlersInstantaneousTrendlineV1State()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _values = new PooledRingBuffer<double>(MaxTrendPeriod);
-    }
-
+    private readonly MamaDerivedWindow _window = new(2);
+    public EhlersInstantaneousTrendlineV1State() { }
     public IndicatorName Name => IndicatorName.EhlersInstantaneousTrendlineV1;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _values.Clear();
-        _prevIt1 = 0;
-        _prevIt2 = 0;
-        _prevIt3 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mama = _mama.Next(value, isFinal);
-        var dcPeriod = (int)Math.Ceiling(mama.SmoothPeriod + 0.5);
-        double iTrend = 0;
-        for (var j = 0; j <= dcPeriod - 1; j++)
-        {
-            var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            iTrend += prevValue;
-        }
-        iTrend = dcPeriod != 0 ? iTrend / dcPeriod : iTrend;
-
-        var trendLine = ((4 * iTrend) + (3 * _prevIt1) + (2 * _prevIt2) + _prevIt3) / 10;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevIt3 = _prevIt2;
-            _prevIt2 = _prevIt1;
-            _prevIt1 = iTrend;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eit", iTrend },
-                { "Signal", trendLine }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(iTrend, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.First, includeOutputs ? new Dictionary<string, double> { { "Eit", point.First }, { "Signal", point.Second } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eit")]

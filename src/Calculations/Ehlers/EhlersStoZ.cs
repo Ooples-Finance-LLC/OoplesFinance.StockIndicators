@@ -974,61 +974,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSineWaveIndicatorV1(this StockData stockData)
     {
-        List<double> sineList = new(stockData.Count);
-        List<double> leadSineList = new(stockData.Count);
-        List<double> dcPhaseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var ehlersMamaOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data));
-        var spList = ehlersMamaOutputs["SmoothPeriod"];
-        var smoothList = ehlersMamaOutputs["Smooth"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sp = spList[i];
-            var dcPeriod = (int)Math.Ceiling(sp + 0.5);
-
-            double realPart = 0, imagPart = 0, projectionScale = 0;
-            for (var j = 0; j <= dcPeriod - 1; j++)
-            {
-                var prevSmooth = i >= j ? smoothList[i - j] : 0;
-                projectionScale += Math.Abs(prevSmooth);
-                realPart += Math.Sin(2 * Math.PI * ((double)j / dcPeriod)) * prevSmooth;
-                imagPart += Math.Cos(2 * Math.PI * ((double)j / dcPeriod)) * prevSmooth;
-            }
-
-            var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
-            if (Math.Abs(realPart) <= resolution) realPart = 0;
-            if (Math.Abs(imagPart) <= resolution) imagPart = 0;
-            var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
-            dcPhase += 90;
-            dcPhase += sp != 0 ? 360 / sp : 0;
-            dcPhase += imagPart < 0 ? 180 : 0;
-            dcPhase -= dcPhase > 315 ? 360 : 0;
-            dcPhaseList.Add(dcPhase);
-
-            var prevSine = GetLastOrDefault(sineList);
-            var sine = Math.Sin(dcPhase.ToRadians());
-            sineList.Add(sine);
-
-            var prevLeadSine = GetLastOrDefault(leadSineList);
-            var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-            leadSineList.Add(leadSine);
-
-            var signal = GetCompareSignal(sine - leadSine, prevSine - prevLeadSine);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sine", sineList },
-            { "LeadSine", leadSineList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sineList);
-        stockData.IndicatorName = IndicatorName.EhlersSineWaveIndicatorV1;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MamaDerivedWindow(0); var first = new List<double>(input.Count); var second = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); first.Add(point.First); second.Add(point.Second); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sine", first }, { "LeadSine", second } }); stockData.SetSignals(signals); stockData.SetCustomValues(first); stockData.IndicatorName = IndicatorName.EhlersSineWaveIndicatorV1; return stockData;
     }
 
 

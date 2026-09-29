@@ -574,45 +574,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHilbertOscillator(this StockData stockData, int length = 7)
     {
-        length = Math.Max(length, 1);
-        List<double> iqList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var snrv2List = CalculateEhlersEnhancedSignalToNoiseRatio(stockData, length);
-        var smoothPeriodList = snrv2List.ChainedOutputs["SmoothPeriod"];
-        var q3List = snrv2List.ChainedOutputs["Q3"];
-        var i3List = snrv2List.ChainedOutputs["I3"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var smoothPeriod = smoothPeriodList[i];
-            var i3 = i3List[i];
-            var prevI3 = i >= 1 ? i3List[i - 1] : 0;
-            var prevIq = i >= 1 ? iqList[i - 1] : 0;
-
-            var maxCount = (int)Math.Ceiling(smoothPeriod / 4);
-            double iq = 0;
-            for (var j = 0; j <= maxCount - 1; j++)
-            {
-                var prevQ3 = i >= j ? q3List[i - j] : 0;
-                iq += prevQ3;
-            }
-            iq = maxCount != 0 ? 1.25 * iq / maxCount : iq;
-            iqList.Add(iq);
-
-            var signal = GetCompareSignal(iq - i3, prevIq - prevI3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "I3", i3List },
-            { "IQ", iqList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersHilbertOscillator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MamaDerivedWindow(1); var first = new List<double>(input.Count); var second = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); first.Add(point.First); second.Add(point.Second); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "I3", first }, { "IQ", second } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersHilbertOscillator; return stockData;
     }
 
 
@@ -932,50 +896,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersInstantaneousTrendlineV1(this StockData stockData)
     {
-        List<double> itList = new(stockData.Count);
-        List<double> trendLineList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var spList = CalculateEhlersMotherOfAdaptiveMovingAverages(stockData).ChainedOutputs["SmoothPeriod"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sp = spList[i];
-            var currentValue = inputList[i];
-            var prevIt1 = i >= 1 ? itList[i - 1] : 0;
-            var prevIt2 = i >= 2 ? itList[i - 2] : 0;
-            var prevIt3 = i >= 3 ? itList[i - 3] : 0;
-            var prevVal = i >= 1 ? inputList[i - 1] : 0;
-
-            var dcPeriod = (int)Math.Ceiling(sp + 0.5);
-            double iTrend = 0;
-            for (var j = 0; j <= dcPeriod - 1; j++)
-            {
-                var prevValue = i >= j ? inputList[i - j] : 0;
-
-                iTrend += prevValue;
-            }
-            iTrend = dcPeriod != 0 ? iTrend / dcPeriod : iTrend;
-            itList.Add(iTrend);
-
-            var prevTrendLine = GetLastOrDefault(trendLineList);
-            var trendLine = ((4 * iTrend) + (3 * prevIt1) + (2 * prevIt2) + prevIt3) / 10;
-            trendLineList.Add(trendLine);
-
-            var signal = GetCompareSignal(currentValue - trendLine, prevVal - prevTrendLine);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eit", itList },
-            { "Signal", trendLineList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(itList);
-        stockData.IndicatorName = IndicatorName.EhlersInstantaneousTrendlineV1;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new MamaDerivedWindow(2); var first = new List<double>(input.Count); var second = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); first.Add(point.First); second.Add(point.Second); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eit", first }, { "Signal", second } }); stockData.SetSignals(signals); stockData.SetCustomValues(first); stockData.IndicatorName = IndicatorName.EhlersInstantaneousTrendlineV1; return stockData;
     }
 
 }

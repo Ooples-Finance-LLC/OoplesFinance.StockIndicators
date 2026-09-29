@@ -42080,5 +42080,194 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~MamaNumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "mama-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersMotherOfAdaptiveMovingAveragesState",
+    "before": "StreamingInputValidation.Validate(bar);\n        var value = _input.GetValue(bar);\n        var snapshot = _engine.Next(value, isFinal);",
+    "after": "var snapshot = _engine.Next(bar.Close, isFinal);\n        var value = _input.GetValue(bar);",
+    "filter": "FullyQualifiedName~MamaNumericalTests.InvalidFieldsCannotAdvanceHilbertOrAdaptiveHistory"
+  },
+  {
+    "id": "mama-derived-fourier-angle",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "((double)lag / count)",
+    "after": "((double)lag / (count + 1))",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-phase-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "magnitude.Add(-.001)",
+    "after": "magnitude.Add(-1)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.SineRetainsAbsolutePhaseThresholdAndFullFourierHistory"
+  },
+  {
+    "id": "mama-derived-phase-period",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "360 / period",
+    "after": "180 / period",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-lead-phase",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "phase + 45",
+    "after": "phase + 30",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "_smooth[_smooth.Count - 2]",
+    "after": "_smooth[_smooth.Count - 1]",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": ".1759 * period",
+    "after": ".1259 * period",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-real-window",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "Math.Ceiling(period / 2)",
+    "after": "Math.Ceiling(period / 3)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-iq-window",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "Math.Ceiling(period / 4)",
+    "after": "Math.Ceiling(period / 5)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-real-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "value.Add(ref re, 1.57)",
+    "after": "value.Add(ref re, 1.25)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-hilbert-iq-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "value.Add(ref im, 1.25)",
+    "after": "value.Add(ref im, 1.57)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-trend-padding",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "Scaled.Round(sum, count)",
+    "after": "Scaled.Round(sum, Math.Min(count, _prices.Count + 1))",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-trend-weight",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "_mean1.Add(ref weighted, 3d)",
+    "after": "_mean1.Add(ref weighted, 2d)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "_mama.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-signals",
+    "module": "numerical",
+    "file": "src/Helpers/MamaDerivedWindow.cs",
+    "scope": "internal sealed class MamaDerivedWindow",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMamaDerivedFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.SelectedPricesReachBatchAndBothFastEntryPoints"
+  },
+  {
+    "id": "mama-derived-hilbert-primary",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHilbertOscillatorState",
+    "before": "point.Second, includeOutputs",
+    "after": "point.First, includeOutputs",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.WideAndSubnormalPricesPreserveAllOutputsAndSignals"
+  },
+  {
+    "id": "mama-derived-validation-EhlersSineWaveIndicatorV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSineWaveIndicatorV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.InvalidCandlesCannotAdvanceCycleOrProjectionHistory"
+  },
+  {
+    "id": "mama-derived-validation-EhlersHilbertOscillator",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHilbertOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.InvalidCandlesCannotAdvanceCycleOrProjectionHistory"
+  },
+  {
+    "id": "mama-derived-validation-EhlersInstantaneousTrendlineV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersInstantaneousTrendlineV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaDerivedNumericalTests.InvalidCandlesCannotAdvanceCycleOrProjectionHistory"
   }
 ]

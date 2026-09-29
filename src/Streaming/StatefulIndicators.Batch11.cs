@@ -1199,80 +1199,16 @@ public sealed class EhlersSimpleWindowIndicatorState : IStreamingIndicatorState,
 [PrimaryOutput("Sine")]
 public sealed class EhlersSineWaveIndicatorV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _smoothValues;
-
-    public EhlersSineWaveIndicatorV1State()
-    {
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _smoothValues = new PooledRingBuffer<double>(64);
-    }
-
+    private readonly MamaDerivedWindow _window = new(0);
+    public EhlersSineWaveIndicatorV1State() { }
     public IndicatorName Name => IndicatorName.EhlersSineWaveIndicatorV1;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _smoothValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var snapshot = _mama.Next(value, isFinal);
-        var sp = snapshot.SmoothPeriod;
-        var smooth = snapshot.Smooth;
-        var dcPeriod = Math.Max(1, (int)Math.Ceiling(sp + 0.5));
-
-        double projectionScale = 0;
-        double realPart = 0;
-        double imagPart = 0;
-        for (var j = 0; j <= dcPeriod - 1; j++)
-        {
-            var prevSmooth = EhlersStreamingWindow.GetOffsetValue(_smoothValues, smooth, j);
-            var angle = 2 * Math.PI * ((double)j / dcPeriod);
-            projectionScale += Math.Abs(prevSmooth);
-            realPart += Math.Sin(angle) * prevSmooth;
-            imagPart += Math.Cos(angle) * prevSmooth;
-        }
-
-        var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
-        if (Math.Abs(realPart) <= resolution) realPart = 0;
-        if (Math.Abs(imagPart) <= resolution) imagPart = 0;
-        var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
-        dcPhase += 90;
-        dcPhase += sp != 0 ? 360 / sp : 0;
-        dcPhase += imagPart < 0 ? 180 : 0;
-        dcPhase -= dcPhase > 315 ? 360 : 0;
-
-        var sine = Math.Sin(dcPhase.ToRadians());
-        var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-
-        if (isFinal)
-        {
-            _smoothValues.TryAdd(smooth, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Sine", sine },
-                { "LeadSine", leadSine }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sine, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.First, includeOutputs ? new Dictionary<string, double> { { "Sine", point.First }, { "LeadSine", point.Second } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _smoothValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Sine")]

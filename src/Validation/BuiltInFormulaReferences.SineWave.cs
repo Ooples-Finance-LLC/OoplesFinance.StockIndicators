@@ -8,6 +8,7 @@ internal static partial class BuiltInFormulaReferences
     private static FormulaDefinition? SineWaveFormula(IBuiltInIndicator indicator)
     {
         if (indicator.BatchName is not (IndicatorName.EhlersSineWaveIndicatorV1 or IndicatorName.EhlersSineWaveIndicatorV2)) return null;
+        if (indicator.BatchName == IndicatorName.EhlersSineWaveIndicatorV1) return new("Sine", new[] { "Sine", "LeadSine" }, bars => MamaDerivedValues(bars, 0).Outputs);
         if (indicator.BatchName == IndicatorName.EhlersSineWaveIndicatorV2)
         { var cyberOptions = indicator.CreateOptions(); return new("Sine", new[] { "Sine", "LeadSine" }, bars => CyberSineValues(bars, Integer(cyberOptions, "Length", 5), Number(cyberOptions, .07, "Alpha")).Outputs); }
         var first = indicator.BatchName == IndicatorName.EhlersSineWaveIndicatorV1;

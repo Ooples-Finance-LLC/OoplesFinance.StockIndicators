@@ -7,17 +7,8 @@ internal static partial class BuiltInFormulaReferences
     private static FormulaDefinition? CycleNoise(IBuiltInIndicator indicator)
     {
         var name = indicator.BatchName;
-        if (name == IndicatorName.EhlersHilbertOscillator)
-            return new("IQ", new[] { "I3", "IQ" }, bars =>
-            {
-                var enhancedLines = CycleNoise(new EhlersEnhancedSignalToNoiseRatio(7))!.Compute(bars);
-                var q = enhancedLines["Q3"]; var period = enhancedLines["SmoothPeriod"];
-                return Outputs(("I3", enhancedLines["I3"]), ("IQ", q.Select((_, i) =>
-                {
-                    var window = (int)Math.Ceiling(period[i] / 4);
-                    return window == 0 ? 0 : 1.25 * Window(q, i, window).Sum() / window;
-                }).ToArray()));
-            });
+        if (name == IndicatorName.EhlersHilbertOscillator) return new("IQ", new[] { "I3", "IQ" }, bars => MamaDerivedValues(bars, 1).Outputs);
+        if (name == IndicatorName.EhlersInstantaneousTrendlineV1) return new("Eit", new[] { "Eit", "Signal" }, bars => MamaDerivedValues(bars, 2).Outputs);
         if (name is not (IndicatorName.EhlersAlternateSignalToNoiseRatio or IndicatorName.EhlersEnhancedSignalToNoiseRatio
             or IndicatorName.EhlersSignalToNoiseRatioV1 or IndicatorName.EhlersSignalToNoiseRatioV2 or IndicatorName.EhlersInstantaneousTrendlineV1)) return null;
         var options = indicator.CreateOptions();
