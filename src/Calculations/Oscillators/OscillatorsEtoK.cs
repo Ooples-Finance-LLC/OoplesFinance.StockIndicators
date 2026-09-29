@@ -1310,46 +1310,11 @@ public static partial class Calculations
     public static StockData CalculateFastandSlowRelativeStrengthIndexOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 6)
     {
-        List<double> fsrsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        // Both components read the caller's series; the kurtosis used to read the RSI just published.
-        var callerSeries = stockData.CaptureInputSeries();
-        var rsiList = CalculateRelativeStrengthIndex(stockData, maType, length: length3).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var fskList = CalculateFastandSlowKurtosisOscillator(stockData, maType, length: length1).ChainedValues;
-        var v4List = GetMovingAverageList(stockData, maType, length2, fskList);
-
-        for (var i = 0; i < v4List.Count; i++)
-        {
-            var rsi = rsiList[i];
-            var v4 = v4List[i];
-
-            var fsrsi = (10000 * v4) + rsi;
-            fsrsiList.Add(fsrsi);
-        }
-
-        var fsrsiSignalList = GetMovingAverageList(stockData, maType, length4, fsrsiList);
-        for (var i = 0; i < fsrsiSignalList.Count; i++)
-        {
-            var fsrsi = fsrsiList[i];
-            var fsrsiSignal = fsrsiSignalList[i];
-            var prevFsrsi = i >= 1 ? fsrsiList[i - 1] : 0;
-            var prevFsrsiSignal = i >= 1 ? fsrsiSignalList[i - 1] : 0;
-
-            var signal = GetCompareSignal(fsrsi - fsrsiSignal, prevFsrsi - prevFsrsiSignal);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fsrsi", fsrsiList },
-            { "Signal", fsrsiSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fsrsiList);
-        stockData.IndicatorName = IndicatorName.FastandSlowRelativeStrengthIndexOscillator;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? FastSlowCompositeWindow.Components(stockData, input, high, low, true, maType, length1, length2, length3, length4) : null; using var window = new FastSlowCompositeWindow(true, maType, length1, length2, length3, length4, external);
+        var line = new List<double>(input.Count); var signalLine = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components?[0][i], components?[1][i], components?[2][i]); line.Add(point.Line); signalLine.Add(point.SignalLine); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fsrsi", line }, { "Signal", signalLine } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.FastandSlowRelativeStrengthIndexOscillator; return stockData;
     }
 
 

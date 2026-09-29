@@ -73,34 +73,8 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.FastandSlowRelativeStrengthIndexOscillator:
             case IndicatorName.FastandSlowStochasticOscillator:
-                var fastSlowRsi = indicator.BatchName == IndicatorName.FastandSlowRelativeStrengthIndexOscillator;
-                var fastSlowKey = fastSlowRsi ? "Fsrsi" : "Fsst";
-                return new(fastSlowKey, new[] { fastSlowKey, "Signal" }, bars =>
-                {
-                    // Both aliases have an obsolete Length option; the underlying periods are 3, 6 and 9.
-                    var velocity = Average(MomentumVelocity(Closes(bars), 3, .03), 6, 2);
-                    double[] level;
-                    if (fastSlowRsi)
-                    {
-                        var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                        var gains = Average(changes.Select(v => Math.Max(v, 0)).ToArray(), 9, 2);
-                        var losses = Average(changes.Select(v => Math.Max(-v, 0)).ToArray(), 9, 2);
-                        level = gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
-                    }
-                    else
-                    {
-                        var raw = bars.Select((b, i) =>
-                        {
-                            var window = Window(bars, i, 9).ToArray();
-                            var low = window.Min(v => v.Low);
-                            var high = window.Max(v => v.High);
-                            return high == low ? 0 : 100 * (b.Close - low) / (high - low); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                        }).ToArray();
-                        level = Average(raw, 9, 2);
-                    }
-                    var line = level.Select((v, i) => v + (fastSlowRsi ? 10000 : 500) * velocity[i]).ToArray();
-                    return Outputs((fastSlowKey, line), ("Signal", Average(line, fastSlowRsi ? 6 : 9, 2)));
-                });
+                var fastSlowKey = indicator.BatchName == IndicatorName.FastandSlowRelativeStrengthIndexOscillator ? "Fsrsi" : "Fsst";
+                return new(fastSlowKey, new[] { fastSlowKey, "Signal" }, bars => FastSlowCompositeOutputs(bars, indicator));
             case IndicatorName.GOscillator:
                 return new("GOsc", new[] { "GOsc" }, bars =>
                 {

@@ -767,10 +767,7 @@ internal static partial class IndicatorCompute
                 bso.MaType, spec.OutputKey),
             FisherTransformStochasticOscillatorSpecOptions ftso => ComputeFisherTransformStochasticOscillatorFast(data, context, ftso.Length),
             StochasticCustomOscillatorSpecOptions sco => ComputeStochasticCustomOscillatorFast(data, context, sco.Length, maType: sco.MaType, outputKey: spec.OutputKey),
-            FastSlowStochasticOscillatorSpecOptions => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFastSlowStochasticOscillatorFast(data, context),
-                    9, MovingAvgType.WeightedMovingAverage)
-                : ComputeFastSlowStochasticOscillatorFast(data, context),
+            FastSlowStochasticOscillatorSpecOptions => ComputeFastSlowStochasticOscillatorFast(data, context, outputKey: spec.OutputKey),
             DiNapoliPreferredStochasticOscillatorSpecOptions dnpso => ComputeDiNapoliPreferredStochasticOscillatorFast(data, context, dnpso.Length, outputKey: spec.OutputKey),
             DMIStochasticSpecOptions dmis => ComputeDMIStochasticFast(data, context, dmis.Length, dmis.MaType),
             // Length is declared obsolete because CCTStochRelativeStrengthIndex has no parameter it could
@@ -813,10 +810,7 @@ internal static partial class IndicatorCompute
             DoubleSmoothedRelativeStrengthIndexSpecOptions => ComputeDoubleSmoothedRelativeStrengthIndexFast(data, context, outputKey: spec.OutputKey ?? "Dsrsi"),
             MomentaRelativeStrengthIndexSpecOptions rangeRsi => ComputeMomentaRelativeStrengthIndexFast(data, context,
                 rangeRsi.Length1, rangeRsi.Length2, rangeRsi.MaType, spec.OutputKey ?? "Mrsi"),
-            FastSlowRsiOscillatorSpecOptions => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFastSlowRsiOscillatorFast(data, context),
-                    6, MovingAvgType.WeightedMovingAverage)
-                : ComputeFastSlowRsiOscillatorFast(data, context),
+            FastSlowRsiOscillatorSpecOptions => ComputeFastSlowRsiOscillatorFast(data, context, outputKey: spec.OutputKey),
 
             // Batch 6 - DiNapoli/Ergodic oscillators
             DiNapoliMovingAverageConvergenceDivergenceSpecOptions diNapoliMacd => ComputeDiNapoliOscillatorFast(data, context,
@@ -8285,32 +8279,16 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow RSI Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length1 = 3, int length2 = 6,
-        int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+    internal static ComputeBuffer ComputeFastSlowCompositeFast(StockData data, ComputeContext context, bool rsi, MovingAvgType kind, int length1, int length2, int length3, int length4, string? outputKey)
     {
-        // CalculateFastandSlowRelativeStrengthIndexOscillator adds the relative strength index of the chained
-        // series to a smoothed kurtosis oscillator scaled up by ten thousand, so the kurtosis - which moves in
-        // ten-thousandths - carries the shape and the index carries the level. Its length4 reaches nothing.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var count = inputList.Count;
-
-        using var relativeStrength = ComputeRsiFast(data, context, length3, maType);
-        var rsi = relativeStrength.Span;
-
-        using var kurtosis = ComputeFastAndSlowKurtosisFast(data, context, length1);
-        using var smoothedKurtosis = context.Rent(count);
-        MovingAverage(data, maType, length2, kurtosis.Span, smoothedKurtosis.WritableSpan);
-        var v4 = smoothedKurtosis.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = (10000 * v4[i]) + rsi[i];
-        }
-
-        return buffer;
+        if (outputKey is not null && outputKey != "Signal" && outputKey != (rsi ? "Fsrsi" : "Fsst")) throw new ArgumentOutOfRangeException(nameof(outputKey));
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind);
+        var components = external ? FastSlowCompositeWindow.Components(data, input, high, low, rsi, kind, length1, length2, length3, length4, outputKey == "Signal") : null; using var window = new FastSlowCompositeWindow(rsi, kind, length1, length2, length3, length4, external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components?[0][i], components?[1][i], components?[2][i]); output.WritableSpan[i] = outputKey == "Signal" ? point.SignalLine : point.Line; } return output; } catch { output.Dispose(); throw; }
     }
+
+    internal static ComputeBuffer ComputeFastSlowRsiOscillatorFast(StockData data, ComputeContext context, int length1 = 3, int length2 = 6, int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length4 = 6, string? outputKey = null)
+        => ComputeFastSlowCompositeFast(data, context, true, maType, length1, length2, length3, length4, outputKey);
 
     #endregion
 
@@ -8319,39 +8297,8 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Fast and Slow Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length1 = 3,
-        int length2 = 6, int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
-    {
-        // CalculateFastandSlowStochasticOscillator adds five hundred times the smoothed fast and slow
-        // kurtosis oscillator to the smoothed raw stochastic, both taken over the caller's series - that is
-        // what the batch's CaptureInputSeries and RestoreInputSeries guard. The arm this replaced delegated
-        // to OscillatorCore.FastSlowStochasticOscillator. The spec's only option is [Obsolete] and sets
-        // nothing, and length4 only feeds the Signal key.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var kurtosis = ComputeFastAndSlowKurtosisFast(data, context, length1);
-        using var smoothedKurtosis = context.Rent(count);
-        MovingAverage(data, maType, length2, kurtosis.Span, smoothedKurtosis.WritableSpan);
-        var v4 = smoothedKurtosis.Span;
-
-        using var fastK = context.Rent(count);
-        StochasticFastK(data, context, input, length3, fastK.WritableSpan);
-
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, length3, fastK.Span, slow.WritableSpan);
-        var slowK = slow.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = (500 * v4[i]) + slowK[i];
-        }
-
-        return buffer;
-    }
+    internal static ComputeBuffer ComputeFastSlowStochasticOscillatorFast(StockData data, ComputeContext context, int length1 = 3, int length2 = 6, int length3 = 9, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length4 = 9, string? outputKey = null)
+        => ComputeFastSlowCompositeFast(data, context, false, maType, length1, length2, length3, length4, outputKey);
 
     /// <summary>
     /// Computes G-Oscillator using zero-allocation fast path.

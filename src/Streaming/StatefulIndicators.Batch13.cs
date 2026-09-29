@@ -9,153 +9,25 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Fsrsi")]
 public sealed class FastandSlowRelativeStrengthIndexOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    // RSI state (computes RSI on close prices)
-    private readonly RsiState _rsi;
-    // FSK inline state (operates on RSI values, not close prices - matching batch chaining behavior)
-    private readonly int _fskLength;
-    private const double FskRatio = 0.03;
-    private readonly PooledRingBuffer<double> _fskValues;
-    private double _fskPrevMomentum;
-    private double _fskPrevFsk;
-    // Smoothers
-    private readonly IMovingAverageSmoother _fskSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-
-    public FastandSlowRelativeStrengthIndexOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 6)
-    {
-        _fskLength = Math.Max(1, length1);
-        _fskValues = new PooledRingBuffer<double>(_fskLength);
-        _rsi = new RsiState(maType, Math.Max(1, length3));
-        _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FastSlowCompositeWindow _window;
+    public FastandSlowRelativeStrengthIndexOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 6) => _window = new(true, maType, length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.FastandSlowRelativeStrengthIndexOscillator;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _fskValues.Clear();
-        _fskPrevMomentum = 0;
-        _fskPrevFsk = 0;
-        _fskSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var rsi = _rsi.Next(value, isFinal);
-
-        // The fast-and-slow kurtosis of the source, beside the RSI of the source. It used to be taken of the RSI,
-        // copying a batch that read the RSI it had just published back as the kurtosis input.
-        var hasMomentum = _fskValues.Count >= _fskLength;
-        var prevValue = hasMomentum ? EhlersStreamingWindow.GetOffsetValue(_fskValues, value, _fskLength) : 0;
-        var momentum = hasMomentum ? value - prevValue : 0;
-        var fsk = (FskRatio * (momentum - _fskPrevMomentum)) + ((1 - FskRatio) * _fskPrevFsk);
-
-        if (isFinal)
-        {
-            _fskValues.TryAdd(value, out _);
-            _fskPrevMomentum = momentum;
-            _fskPrevFsk = fsk;
-        }
-
-        var v4 = _fskSmoother.Next(fsk, isFinal);
-        var fsrsi = (10000 * v4) + rsi;
-        var signal = _signalSmoother.Next(fsrsi, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fsrsi", fsrsi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fsrsi, outputs);
-    }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _fskValues.Dispose();
-        _fskSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal); return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Fsrsi", point.Line }, { "Signal", point.SignalLine } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fsst")]
 public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly FastandSlowKurtosisOscillatorState _fsk;
-    private readonly IMovingAverageSmoother _fskSmoother;
-    // Stochastic operates on stockData (close prices) in batch, NOT on FSK values
-    private readonly StochasticOscillatorState _stoch;
-    private readonly IMovingAverageSmoother _slowKSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-
-    public FastandSlowStochasticOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 9)
-    {
-        _fsk = new FastandSlowKurtosisOscillatorState(maType, Math.Max(1, length1), 0.03);
-        _fskSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        // StochasticOscillator operates on stockData (close) in batch, not on FSK values
-        // Use length3 for stochastic length, smoothLength1=1 and smoothLength2=1 (no smoothing for raw fastK)
-        _stoch = new StochasticOscillatorState(maType, Math.Max(1, length3), 1, 1);
-        _slowKSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-    }
-
+    private readonly FastSlowCompositeWindow _window;
+    public FastandSlowStochasticOscillatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 9) => _window = new(false, maType, length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.FastandSlowStochasticOscillator;
-
-    public void Reset()
-    {
-        _fsk.Reset();
-        _fskSmoother.Reset();
-        _stoch.Reset();
-        _slowKSmoother.Reset();
-        _signalSmoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        StreamingInputValidation.Validate(bar);
-        var fsk = _fsk.Update(bar, isFinal, includeOutputs: false).Value;
-        var v4 = _fskSmoother.Next(fsk, isFinal);
-
-        // Get FastK from StochasticOscillator (operates on close prices, not FSK)
-        var fastK = _stoch.Update(bar, isFinal, includeOutputs: false).Value;
-        var slowK = _slowKSmoother.Next(fastK, isFinal);
-        var fsst = (500 * v4) + slowK;
-        var signal = _signalSmoother.Next(fsst, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fsst", fsst },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fsst, outputs);
-    }
-
-    public void Dispose()
-    {
-        _fsk.Dispose();
-        _fskSmoother.Dispose();
-        _stoch.Dispose();
-        _slowKSmoother.Dispose();
-        _signalSmoother.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal); return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Fsst", point.Line }, { "Signal", point.SignalLine } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fsdo")]

@@ -107,48 +107,11 @@ public static partial class Calculations
     public static StockData CalculateFastandSlowStochasticOscillator(this StockData stockData,
         MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 3, int length2 = 6, int length3 = 9, int length4 = 9)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> fsstList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var fskList = CalculateFastandSlowKurtosisOscillator(stockData, maType, length1).ChainedValues;
-        var v4List = GetMovingAverageList(stockData, maType, length2, fskList);
-        // Reset CustomValuesList and SignalsList so stochastic uses original close prices, not v4List
-        // Use SetCustomValues to create a new empty list (don't clear, which would affect v4List reference)
-        stockData.RestoreInputSeries(callerSeries);
-        var fastKList = CalculateStochasticOscillator(stockData, maType, length: length3).ChainedValues;
-        var slowKList = GetMovingAverageList(stockData, maType, length3, fastKList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var v4 = v4List[i];
-            var slowK = slowKList[i];
-
-            var fsst = (500 * v4) + slowK;
-            fsstList.Add(fsst);
-        }
-
-        var wfsstList = GetMovingAverageList(stockData, maType, length4, fsstList);
-        for (var i = 0; i < wfsstList.Count; i++)
-        {
-            var fsst = fsstList[i];
-            var wfsst = wfsstList[i];
-            var prevFsst = i >= 1 ? fsstList[i - 1] : 0;
-            var prevWfsst = i >= 1 ? wfsstList[i - 1] : 0;
-
-            var signal = GetCompareSignal(fsst - wfsst, prevFsst - prevWfsst);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fsst", fsstList },
-            { "Signal", wfsstList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fsstList);
-        stockData.IndicatorName = IndicatorName.FastandSlowStochasticOscillator;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? FastSlowCompositeWindow.Components(stockData, input, high, low, false, maType, length1, length2, length3, length4) : null; using var window = new FastSlowCompositeWindow(false, maType, length1, length2, length3, length4, external);
+        var line = new List<double>(input.Count); var signalLine = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components?[0][i], components?[1][i], components?[2][i]); line.Add(point.Line); signalLine.Add(point.SignalLine); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fsst", line }, { "Signal", signalLine } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.FastandSlowStochasticOscillator; return stockData;
     }
 
 }

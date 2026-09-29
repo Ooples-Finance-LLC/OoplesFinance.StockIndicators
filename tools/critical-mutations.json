@@ -49523,5 +49523,311 @@
     "before": "{ \"Signal\", point.SignalLine }",
     "after": "{ \"Signal\", point.Dss }",
     "filter": "FullyQualifiedName~DoubleSmoothedStochasticNumericalTests.WideOffsetsRangesAndBothAveragePassesMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-momentum-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_momentum = new(Math.Max(1, length1), .03, kind)",
+    "after": "_momentum = new(Math.Max(1, length2), .03, kind)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-velocity-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_velocity = new(kind, Math.Max(1, length2))",
+    "after": "_velocity = new(kind, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-level-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_level = new(kind, _levelLength)",
+    "after": "_level = new(kind, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_signal = new(kind, Math.Max(1, length4))",
+    "after": "_signal = new(kind, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-gains-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_gains = new(kind, _levelLength)",
+    "after": "_gains = new(kind, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-losses-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_losses = new(kind, _levelLength)",
+    "after": "_losses = new(kind, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_count - _levelLength + 1L",
+    "after": "_count - _levelLength",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.FlatRsiCarryAndStochasticExtremaExpiryKeepTheirOwnInputs"
+  },
+  {
+    "id": "fast-slow-composite-wide-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, high, false, final)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "Extreme(_lows, low, false, final)",
+    "after": "Extreme(_lows, low, true, final)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-rsi-first",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "if (_count > 0) { difference.Add(price);",
+    "after": "if (_count >= 0) { difference.Add(price);",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-loss-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "new(-change.Mantissa, change.UpperShift)",
+    "after": "new(change.Mantissa, change.UpperShift)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-rsi-flat",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_preserveFlat && _count > 0 && price == _previousPrice",
+    "after": "false && _count > 0 && price == _previousPrice",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.FlatRsiCarryAndStochasticExtremaExpiryKeepTheirOwnInputs"
+  },
+  {
+    "id": "fast-slow-composite-wide-rsi-zero",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "total.IsExactlyZero ? 100",
+    "after": "total.IsExactlyZero ? 0",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.HandSeedsMomentumAndCompositeScalesArePreserved"
+  },
+  {
+    "id": "fast-slow-composite-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "gain.AddTo(ref numerator, 100)",
+    "after": "gain.AddTo(ref numerator, 50)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-rsi-factor",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "rsi ? 10000 : 500",
+    "after": "rsi ? 1000 : 500",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.HandSeedsMomentumAndCompositeScalesArePreserved"
+  },
+  {
+    "id": "fast-slow-composite-wide-stochastic-factor",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "rsi ? 10000 : 500",
+    "after": "rsi ? 10000 : 50",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.HandSeedsMomentumAndCompositeScalesArePreserved"
+  },
+  {
+    "id": "fast-slow-composite-wide-product-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "var scaled = velocity.Multiply(rsi ? 10000 : 500)",
+    "after": "var scaled = new RocBankValue(velocity.Multiply(rsi ? 10000 : 500).Publish())",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.ExtendedCompositesAndSignalHistoryRecoverFromOverflow"
+  },
+  {
+    "id": "fast-slow-composite-wide-line-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "var line = Combine(_rsi, velocity, level)",
+    "after": "var line = new RocBankValue(Combine(_rsi, velocity, level).Publish())",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.ExtendedCompositesAndSignalHistoryRecoverFromOverflow"
+  },
+  {
+    "id": "fast-slow-composite-wide-signal-spread",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "signalLine.AddTo(ref spread, -1)",
+    "after": "signalLine.AddTo(ref spread, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-signal-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "spread.Sign > 0 && changeOfSpread.Sign > 0",
+    "after": "spread.Sign < 0 && changeOfSpread.Sign > 0",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "changeOfSpread.Subtract(_spread)",
+    "after": "changeOfSpread.Subtract(default)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-custom-gain-order",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "var up = Average(gains, length3)",
+    "after": "var up = Average(losses, length3)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.CustomCallbacksKeepPrimaryArityAndSignalOutputOrder"
+  },
+  {
+    "id": "fast-slow-composite-wide-custom-level",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "level = Average(rawLevel, length3)",
+    "after": "level = Average(rawVelocity, length3)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.CustomCallbacksKeepPrimaryArityAndSignalOutputOrder"
+  },
+  {
+    "id": "fast-slow-composite-wide-custom-primary-arity",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "includeSignal ? Average(composite, length4)",
+    "after": "true ? Average(composite, length4)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.CustomCallbacksKeepPrimaryArityAndSignalOutputOrder"
+  },
+  {
+    "id": "fast-slow-composite-wide-momentum-input",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_momentum!.Line(price, final)",
+    "after": "_momentum!.Line(_previousPrice, final)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-count-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "if (final) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-extrema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "Extreme(_highs, high, true, final)",
+    "after": "Extreme(_highs, high, true, true)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_highs.Clear();",
+    "after": "_lows.Clear();",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowCompositeWindow.cs",
+    "scope": "internal sealed class FastSlowCompositeWindow",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFastSlowCompositeFast",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.SelectedRangesAndLegacyAveragesAgreeAcrossOutputs"
+  },
+  {
+    "id": "fast-slow-composite-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFastSlowCompositeFast",
+    "before": "outputKey == \"Signal\" ? point.SignalLine",
+    "after": "outputKey == \"Signal\" ? point.Line",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.WideMomentumBothLevelsAndSignalMeansMatchRationalStages"
+  },
+  {
+    "id": "fast-slow-composite-wide-native-rsi-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FastandSlowRelativeStrengthIndexOscillatorState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "fast-slow-composite-wide-native-stochastic-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FastandSlowStochasticOscillatorState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, bar.Low, bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.SelectedSourcePreservesOriginalCandles"
   }
 ]
