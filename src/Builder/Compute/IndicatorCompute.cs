@@ -7238,23 +7238,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(StockData data, ComputeContext context,
         int length = 500, double smooth = 1.5)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        using var highs = context.Rent(input.Length);
-        using var lows = context.Rent(input.Length);
-        CustomRange(data, input, highs.WritableSpan, lows.WritableSpan);
-        var buffer = context.Rent(input.Length);
-        var output = buffer.WritableSpan;
-        var ranges = new RollingMinMax(Math.Max(1, length));
-        var regression = new AdaptiveLeastSquaresMoments();
-        for (var i = 0; i < input.Length; i++)
-        {
-            var tr = CalculationsHelper.CalculateTrueRange(highs.Span[i], lows.Span[i], i == 0 ? input[i] : input[i - 1]);
-            ranges.Add(tr);
-            var gain = ranges.Max == 0 ? .01 : MathHelper.MinOrMax(MathHelper.Pow(tr / ranges.Max, smooth), .99, .01);
-            output[i] = regression.Next(input[i], gain);
-        }
-        return buffer;
+        using var window = new AdaptiveFitWindow(length, smooth); var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var input = SpanCompat.AsReadOnlySpan(inputList);
+        using var highs = context.Rent(input.Length); using var lows = context.Rent(input.Length);
+        if (inputList.SequenceEqual(data.ClosePrices)) { for (var i = 0; i < input.Length; i++) { highs.WritableSpan[i] = data.HighPrices[i]; lows.WritableSpan[i] = data.LowPrices[i]; } }
+        else CustomRange(data, input, highs.WritableSpan, lows.WritableSpan); var result = context.Rent(input.Length);
+        for (var i = 0; i < input.Length; i++) result.WritableSpan[i] = window.Next(input[i], highs.Span[i], lows.Span[i], true).Value; return result;
     }
 
 

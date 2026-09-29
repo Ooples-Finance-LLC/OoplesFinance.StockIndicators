@@ -860,17 +860,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AdaptiveLeastSquares(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        var ranges = new RollingMinMax(Math.Max(1, length));
-        var regression = new AdaptiveLeastSquaresMoments();
-        for (var i = 0; i < input.Length; i++)
-        {
-            var range = i == 0 ? 0 : Math.Abs(input[i] - input[i - 1]);
-            ranges.Add(range);
-            var gain = ranges.Max == 0 ? .01 : MathHelper.MinOrMax(Math.Pow(range / ranges.Max, 1.5), .99, .01);
-            output[i] = regression.Next(input[i], gain);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new AdaptiveFitWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], input[i], input[i], true).Value;
     }
 
     /// <summary>

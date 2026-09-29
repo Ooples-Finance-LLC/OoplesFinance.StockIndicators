@@ -5995,46 +5995,15 @@ public sealed class AdaptiveAutonomousRecursiveMovingAverageState : IStreamingIn
 [PrimaryOutput("Als")]
 public sealed class AdaptiveLeastSquaresState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _smooth;
-    private readonly RollingWindowMax _trWindow;
-    private readonly StreamingInputResolver _input;
-    private AdaptiveLeastSquaresMoments _regression;
-    private double _previousPrice;
-    private bool _hasPrevious;
-
-    public AdaptiveLeastSquaresState(int length = 500, double smooth = 1.5)
-    {
-        _smooth = smooth;
-        _trWindow = new RollingWindowMax(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
+    private readonly AdaptiveFitWindow _window;
+    public AdaptiveLeastSquaresState(int length = 500, double smooth = 1.5) => _window = new(length, smooth);
     public IndicatorName Name => IndicatorName.AdaptiveLeastSquares;
-    public void Reset()
-    {
-        _trWindow.Reset();
-        _regression = default;
-        _previousPrice = 0;
-        _hasPrevious = false;
-    }
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var price = _input.GetValue(bar);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, _hasPrevious ? _previousPrice : price);
-        var highest = isFinal ? _trWindow.Add(tr, out _) : _trWindow.Preview(tr, out _);
-        var gain = highest == 0 ? .01 : MathHelper.MinOrMax(MathHelper.Pow(tr / highest, _smooth), .99, .01);
-        var regression = _regression;
-        var estimate = regression.Next(price, gain);
-        if (isFinal)
-        {
-            _regression = regression;
-            _previousPrice = price;
-            _hasPrevious = true;
-        }
-        IReadOnlyDictionary<string, double>? outputs = includeOutputs
-            ? new Dictionary<string, double>(1) { { "Als", estimate } } : null;
-        return new StreamingIndicatorStateResult(estimate, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal); return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Als", point.Value } } : null);
     }
-    public void Dispose() => _trWindow.Dispose();
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ema")]

@@ -346,35 +346,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.EhlersFractalAdaptiveMovingAverage:
                 return new("Fama", new[] { "Fama" }, bars => Outputs(("Fama", FramaValues(bars, length))));
             case IndicatorName.AdaptiveLeastSquares:
-                return new("Als", new[] { "Als" }, bars =>
-                {
-                    var ranges = TrueRanges(bars);
-                    var gains = ranges.Select((r, i) =>
-                    {
-                        var maximum = Window(ranges, i, length).Max();
-                        return maximum == 0 ? .01 : Math.Max(.01, Math.Min(.99, Math.Pow(r / maximum, 1.5)));
-                    }).ToArray();
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        // Explicit observation weights and normal equations, independent of the recursive moments.
-                        var weights = new double[i + 1];
-                        double retained = 1;
-                        for (var j = i; j >= 0; j--)
-                        {
-                            weights[j] = retained * (j == 0 ? 1 : gains[j]);
-                            retained *= 1 - gains[j];
-                        }
-                        var mass = weights.Sum();
-                        var anchor = bars[i].Close;
-                        var ageMean = Enumerable.Range(0, i + 1).Sum(j => weights[j] * (j - i)) / mass;
-                        var priceMean = Enumerable.Range(0, i + 1).Sum(j => weights[j] * (bars[j].Close - anchor)) / mass;
-                        var variance = Enumerable.Range(0, i + 1).Sum(j => weights[j] * Math.Pow(j - i - ageMean, 2));
-                        var covariance = Enumerable.Range(0, i + 1).Sum(j => weights[j] * (j - i - ageMean) * (bars[j].Close - anchor - priceMean));
-                        result[i] = anchor + priceMean - (variance == 0 ? 0 : ageMean * covariance / variance);
-                    }
-                    return Outputs(("Als", result));
-                });
+                return new("Als", new[] { "Als" }, bars => AdaptiveFitValues(bars, length).Outputs);
             case IndicatorName.AutonomousRecursiveMovingAverage:
                 return new("Arma", new[] { "Arma" }, bars =>
                 {

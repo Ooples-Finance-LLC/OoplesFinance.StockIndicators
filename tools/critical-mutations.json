@@ -44681,5 +44681,185 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~SwissArmyNumericalTests.InvalidCandlesCannotAdvanceFilterHistory"
+  },
+  {
+    "id": "adaptive-fit-age-difference",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "Unit - _meanAge",
+    "after": "Unit + _meanAge",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-price-difference",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "input - _meanPrice",
+    "after": "input + _meanPrice",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-variance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "weight * ageDifference * ageDifference",
+    "after": "weight * ageDifference * Unit",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "weight * ageDifference * priceDifference",
+    "after": "weight * Unit * priceDifference",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-age-shift",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "retention * (_meanAge - Unit)",
+    "after": "retention * _meanAge",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-price-weight",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "weight * priceDifference, Unit",
+    "after": "retention * priceDifference, Unit",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveLeastSquaresMoments.cs",
+    "scope": "internal struct AdaptiveLeastSquaresMoments",
+    "before": "_meanPrice * _ageVariance - _meanAge * _covariance",
+    "after": "_meanPrice * _ageVariance + _meanAge * _covariance",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-range-high",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "BigInteger.Abs(h - previous)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.UnpublishedTrueRangesCanExceedDoubleMaximum"
+  },
+  {
+    "id": "adaptive-fit-range-low",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "BigInteger.Abs(l - previous)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.UnpublishedTrueRangesCanExceedDoubleMaximum"
+  },
+  {
+    "id": "adaptive-fit-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "if (skip) { skip = false; continue; }",
+    "after": "if (skip) { skip = false; }",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-range-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "BigInteger.Max(maximum, retained)",
+    "after": "range",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-gain-power",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "Math.Pow(ratio, _smooth)",
+    "after": "ratio",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.UnpublishedTrueRangesCanExceedDoubleMaximum"
+  },
+  {
+    "id": "adaptive-fit-gain-cap",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "Math.Min(.99, Math.Pow",
+    "after": "Math.Min(.8, Math.Pow",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "_moments = default;",
+    "after": "",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "adaptive-fit-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveFitWindow.cs",
+    "scope": "internal sealed class AdaptiveFitWindow",
+    "before": "difference > _difference",
+    "after": "difference < _difference",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.SelectedPricesPreservePerBarRangePolicyAndSignals"
+  },
+  {
+    "id": "adaptive-fit-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.SelectedPricesPreservePerBarRangePolicyAndSignals"
+  },
+  {
+    "id": "adaptive-fit-fast-ranges",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveLeastSquaresFast(",
+    "before": "highs.Span[i], lows.Span[i]",
+    "after": "input[i], input[i]",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.SelectedPricesPreservePerBarRangePolicyAndSignals"
+  },
+  {
+    "id": "adaptive-fit-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AdaptiveLeastSquaresState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.InvalidCandlesCannotAdvanceRangesOrMoments"
+  },
+  {
+    "id": "adaptive-fit-core",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void AdaptiveLeastSquares(",
+    "before": "input[i], input[i], input[i]",
+    "after": "input[i], 0, 0",
+    "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
   }
 ]

@@ -386,6 +386,7 @@ internal static partial class StatefulIndicatorFactory
             FollowingAdaptiveMovingAverageSpecOptions => new EhlersMotherOfAdaptiveMovingAveragesState(),
             EhlersVossPredictiveFilterSpecOptions voss => new EhlersVossPredictiveFilterState(voss.Length, voss.Predict, voss.Bandwidth),
             EhlersTruncatedBandPassFilterSpecOptions truncated => new EhlersTruncatedBandPassFilterState(truncated.Length1, truncated.Length2, truncated.Bandwidth),
+            AdaptiveLeastSquaresSpecOptions adaptiveFit => new AdaptiveLeastSquaresState(adaptiveFit.Length),
             EhlersSwissArmyKnifeSpecOptions swiss => new EhlersSwissArmyKnifeIndicatorState(swiss.Length, swiss.Delta),
             EhlersSimpleCycleIndicatorSpecOptions simpleCycle => new EhlersSimpleCycleIndicatorState(simpleCycle.Alpha),
             EhlersAllPassPhaseShifterSpecOptions allPass => new EhlersAllPassPhaseShifterState(allPass.Length),
