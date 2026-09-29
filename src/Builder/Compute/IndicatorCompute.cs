@@ -3624,10 +3624,10 @@ internal static partial class IndicatorCompute
         using var highs = context.Rent(count);
         using var lows = context.Rent(count);
         CustomRange(data, input, highs.WritableSpan, lows.WritableSpan);
-        var output = context.Rent(count);
         var kernel = new Streaming.ParabolicSarKernel(start, increment, maximum);
-        for (var i = 0; i < count; i++) output.WritableSpan[i] = kernel.Next(highs.Span[i], lows.Span[i], true);
-        return output;
+        var output = context.Rent(count);
+        try { for (var i = 0; i < count; i++) output.WritableSpan[i] = kernel.Next(highs.Span[i], lows.Span[i], true); return output; }
+        catch { output.Dispose(); throw; }
     }
 
     /// <summary>

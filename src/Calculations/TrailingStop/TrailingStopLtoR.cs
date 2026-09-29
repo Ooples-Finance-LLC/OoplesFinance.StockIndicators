@@ -21,9 +21,8 @@ public static partial class Calculations
         for (var i = 0; i < stockData.Count; i++)
         {
             var sar = kernel.Next(highList[i], lowList[i], true);
-            var previous = i == 0 ? 0 : sarList[i - 1];
             sarList.Add(sar);
-            signalsList?.Add(GetCompareSignal(highList[i] - sar, i == 0 ? 0 : highList[i - 1] - previous));
+            signalsList?.Add(kernel.Signal);
         }
         stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sar", sarList } });
         stockData.SetSignals(signalsList);

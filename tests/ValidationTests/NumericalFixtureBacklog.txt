@@ -661,10 +661,6 @@ OoplesFinance.StockIndicators.Indicators.OscarIndicator/default
 OoplesFinance.StockIndicators.Indicators.OscarIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.OscarIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.OscarIndicator/shorter-periods
-OoplesFinance.StockIndicators.Indicators.ParabolicSar/default
-OoplesFinance.StockIndicators.Indicators.ParabolicSar/longer-periods
-OoplesFinance.StockIndicators.Indicators.ParabolicSar/minimum-periods
-OoplesFinance.StockIndicators.Indicators.ParabolicSar/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/default
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.ParametricKalmanFilter/minimum-periods

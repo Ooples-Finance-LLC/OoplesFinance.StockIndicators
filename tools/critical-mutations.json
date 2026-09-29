@@ -47471,5 +47471,221 @@
     "before": "return new(point.Dev1,",
     "after": "return new(point.WarningLine,",
     "filter": "FullyQualifiedName~KaseStopV1NumericalTests.WideTypicalPricesRangesAndEveryLevelStayExact"
+  },
+  {
+    "id": "parabolic-sar-wide-seed",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "new RocBankValue(low)",
+    "after": "new RocBankValue(high)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.HandStopsKeepSeedEqualityTwoBarClampAndReversalExtremes"
+  },
+  {
+    "id": "parabolic-sar-wide-direction",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "var rising = _long;",
+    "after": "var rising = !_long;",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-step-subtraction",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "sum.AddProduct(stop.Mantissa, acceleration, -1)",
+    "after": "sum.AddProduct(stop.Mantissa, acceleration, 1)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-step-projection",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "sum.AddProduct(acceleration, extreme)",
+    "after": "sum.Add(acceleration * extreme)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-step-prior",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "stop.AddTo(ref sum);",
+    "after": "stop.AddTo(ref sum, -1);",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-increment",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "increase.Add(_increment)",
+    "after": "increase.Add(0)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-cap",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Math.Min(_maximum, increase.Mean(1))",
+    "after": "Math.Max(_maximum, increase.Mean(1))",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-low-clamp",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Math.Min(_low1, _low2)",
+    "after": "_low1",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-high-clamp",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Math.Max(_high1, _high2)",
+    "after": "_high1",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-long-equality",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Compare(stop, low) > 0",
+    "after": "Compare(stop, low) >= 0",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.HandStopsKeepSeedEqualityTwoBarClampAndReversalExtremes"
+  },
+  {
+    "id": "parabolic-sar-wide-short-equality",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Compare(stop, high) < 0",
+    "after": "Compare(stop, high) <= 0",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.HandStopsKeepSeedEqualityTwoBarClampAndReversalExtremes"
+  },
+  {
+    "id": "parabolic-sar-wide-reversal-extreme",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "Math.Max(extreme, high) : Math.Min(extreme, low)",
+    "after": "Math.Min(extreme, high) : Math.Max(extreme, low)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-reversal-direction",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "rising = !rising;",
+    "after": "rising = true;",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-reversal-reset",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "acceleration = _start;",
+    "after": "acceleration = _maximum;",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-record-high",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "high > extreme : low < extreme",
+    "after": "high >= extreme : low < extreme",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-record-low",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "high > extreme : low < extreme",
+    "after": "high > extreme : low <= extreme",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-preview",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-reset",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "_initialized = false; _long = true; _count = 0;",
+    "after": "_initialized = true; _long = true; _count = 0;",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-signal",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "spread.Sign > 0 && change.Sign > 0",
+    "after": "spread.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeParabolicSarFast(",
+    "before": "kernel.Next(highs.Span[i], lows.Span[i], true)",
+    "after": "kernel.Next(data.HighPrices[i], data.LowPrices[i], true)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.SelectedPricesPreserveEffectiveHighLowRangesAndSignals"
+  },
+  {
+    "id": "parabolic-sar-wide-native-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class ParabolicSARState",
+    "before": "_kernel.Next(bar.High, bar.Low, isFinal)",
+    "after": "_kernel.Next(bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.WideStepsPreserveClampsReversalsAndAcceleration"
+  },
+  {
+    "id": "parabolic-sar-wide-start-domain",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "if (double.IsNaN(start) || double.IsInfinity(start) || start < 0)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.InvalidParametersRejectBeforeMutatingSelectedInput"
+  },
+  {
+    "id": "parabolic-sar-wide-increment-domain",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "if (double.IsNaN(increment) || double.IsInfinity(increment) || increment < 0)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.InvalidParametersRejectBeforeMutatingSelectedInput"
+  },
+  {
+    "id": "parabolic-sar-wide-maximum-domain",
+    "module": "numerical",
+    "file": "src/Streaming/ParabolicSarKernel.cs",
+    "scope": "internal sealed class ParabolicSarKernel",
+    "before": "if (double.IsNaN(maximum) || double.IsInfinity(maximum) || maximum < start)",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~ParabolicSarNumericalTests.InvalidParametersRejectBeforeMutatingSelectedInput"
   }
 ]

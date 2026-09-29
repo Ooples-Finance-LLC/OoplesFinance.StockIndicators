@@ -11,37 +11,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.ParabolicSAR:
-                return new("Sar", new[] { "Sar" }, bars =>
-                {
-                    var result = new double[bars.Count];
-                    var initial = (decimal)Number(options, .02, "Start");
-                    var increment = (decimal)Number(options, .02, "Increment");
-                    var maximum = (decimal)Number(options, .2, "Maximum");
-                    var rising = true; var segment = 0;
-                    decimal stop = 0;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        if (i == 0) { stop = (decimal)bars[i].Low; result[i] = (double)stop; continue; }
-                        // Reconstruct the extreme and count record-setting bars in the current trend.
-                        var extreme = (decimal)(rising ? bars[segment].High : bars[segment].Low);
-                        var records = 0;
-                        for (var j = segment + 1; j < i; j++)
-                        {
-                            var candidate = (decimal)(rising ? bars[j].High : bars[j].Low);
-                            if (rising ? candidate > extreme : candidate < extreme) { extreme = candidate; records++; }
-                        }
-                        stop += Math.Min(maximum, initial + records * increment) * (extreme - stop);
-                        var prior = bars.Skip(Math.Max(0, i - 2)).Take(Math.Min(2, i));
-                        stop = rising ? Math.Min(stop, (decimal)prior.Min(b => b.Low)) : Math.Max(stop, (decimal)prior.Max(b => b.High));
-                        if (rising ? (decimal)bars[i].Low < stop : (decimal)bars[i].High > stop)
-                        {
-                            stop = rising ? Math.Max(extreme, (decimal)bars[i].High) : Math.Min(extreme, (decimal)bars[i].Low);
-                            rising = !rising; segment = i;
-                        }
-                        result[i] = (double)stop;
-                    }
-                    return Outputs(("Sar", result));
-                });
+                return new("Sar", new[] { "Sar" }, bars => ParabolicSarOutputs(bars, indicator));
             case IndicatorName.TimePriceIndicator:
                 return new("UpperBand", new[] { "UpperBand", "LowerBand" }, bars =>
                 {
