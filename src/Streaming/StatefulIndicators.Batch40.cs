@@ -225,90 +225,16 @@ public sealed class SwingIndexState : IStreamingIndicatorState
 [PrimaryOutput("Vs")]
 public sealed class VolatilityStopState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _multiplier;
-    private readonly AverageTrueRangeState _averageTrueRange;
-    private readonly StreamingInputResolver _input;
-    private double _prevStop;
-    private bool _trendIsUp = true;
-    private int _barIndex;
-
-    public VolatilityStopState(int length = 14, double multiplier = 2)
-    {
-        _multiplier = multiplier;
-        _averageTrueRange = new AverageTrueRangeState(Math.Max(1, length));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly VolatilityStopWindow _window;
+    public VolatilityStopState(int length = 14, double multiplier = 2) => _window = new(length, multiplier);
     public IndicatorName Name => IndicatorName.VolatilityStop;
-
-    public void Reset()
-    {
-        _averageTrueRange.Reset();
-        _prevStop = 0;
-        _trendIsUp = true;
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var atr = _averageTrueRange.Update(bar, isFinal, includeOutputs: false).Value;
-
-        double stop;
-        var trendIsUp = _trendIsUp;
-        if (_barIndex == 0)
-        {
-            stop = value;
-        }
-        else
-        {
-            var band = atr * _multiplier;
-            if (trendIsUp)
-            {
-                if (value < _prevStop)
-                {
-                    trendIsUp = false;
-                    stop = value + band;
-                }
-                else
-                {
-                    stop = Math.Max(_prevStop, value - band);
-                }
-            }
-            else
-            {
-                if (value > _prevStop)
-                {
-                    trendIsUp = true;
-                    stop = value - band;
-                }
-                else
-                {
-                    stop = Math.Min(_prevStop, value + band);
-                }
-            }
-        }
-
-        if (isFinal)
-        {
-            _prevStop = stop;
-            _trendIsUp = trendIsUp;
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Vs", stop } };
-        }
-
-        return new StreamingIndicatorStateResult(stop, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Vs", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _averageTrueRange.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 /// <summary>

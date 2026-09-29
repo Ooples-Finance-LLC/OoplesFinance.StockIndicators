@@ -993,22 +993,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Stf", line));
                 });
             case IndicatorName.VolatilityStop:
-                return new("Vs", new[] { "Vs" }, bars =>
-                {
-                    var widths = Average(TrueRanges(bars), length, 6).Select(v => v * Number(options, 2, "Multiplier")).ToArray();
-                    var line = new double[bars.Count];
-                    var candidates = new List<double>();
-                    var direction = 1;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        if (i == 0) { line[i] = bars[i].Close; candidates.Add(line[i]); continue; }
-                        if (direction * (bars[i].Close - line[i - 1]) < 0)
-                        { direction = -direction; candidates.Clear(); }
-                        candidates.Add(bars[i].Close - direction * widths[i]);
-                        line[i] = direction > 0 ? candidates.Max() : candidates.Min();
-                    }
-                    return Outputs(("Vs", line));
-                });
+                var stopFactor = Number(options, 2, "Multiplier");
+                return new("Vs", new[] { "Vs" }, bars => VolatilityStopValues(bars, length, stopFactor).Outputs);
             case IndicatorName.VixTradingSystem:
                 return new("Vix", new[] { "Vix" }, bars =>
                 {

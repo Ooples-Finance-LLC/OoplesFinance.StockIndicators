@@ -7445,67 +7445,9 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeVolatilityStopFast(StockData data, ComputeContext context, int length = 14, double multiplier = 2)
     {
-        // CalculateVolatilityStop trails a stop a fixed number of average true ranges away from the series,
-        // ratcheting it in the direction of the trend and flipping sides the bar the series crosses it. The
-        // average is Welles Wilder's, and the first bar seeds the stop at the series itself.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var trueRanges = context.Rent(count);
-        var trueRange = trueRanges.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            // The opening bar has no previous close, so its true range is simply its own span.
-            var previousClose = i >= 1 ? closes[i - 1] : closes[i];
-            trueRange[i] = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], previousClose);
-        }
-
-        using var averageRange = context.Rent(count);
-        MovingAverageCore.WellesWilderMovingAverage(trueRanges.Span, averageRange.WritableSpan, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var trendIsUp = true;
-        for (var i = 0; i < count; i++)
-        {
-            if (i == 0)
-            {
-                output[i] = input[i];
-                continue;
-            }
-
-            var previousStop = output[i - 1];
-            var band = averageRange.Span[i] * multiplier;
-            if (trendIsUp)
-            {
-                if (input[i] < previousStop)
-                {
-                    trendIsUp = false;
-                    output[i] = input[i] + band;
-                }
-                else
-                {
-                    output[i] = Math.Max(previousStop, input[i] - band);
-                }
-            }
-            else if (input[i] > previousStop)
-            {
-                trendIsUp = true;
-                output[i] = input[i] - band;
-            }
-            else
-            {
-                output[i] = Math.Min(previousStop, input[i] + band);
-            }
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); using var window = new VolatilityStopWindow(length, multiplier); var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

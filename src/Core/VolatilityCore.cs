@@ -841,58 +841,9 @@ internal static class VolatilityCore
     /// </summary>
     internal static void VolatilityStop(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 14, double multiplier = 2)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var atrArray = pool.Rent(close.Length);
-
-        try
-        {
-            var atr = atrArray.AsSpan(0, close.Length);
-            AverageTrueRange(high, low, close, atr, length);
-
-            var trend = 1; // 1 = up, -1 = down
-            output[0] = close[0];
-
-            for (var i = 1; i < close.Length; i++)
-            {
-                var atrValue = atr[i] * multiplier;
-
-                if (trend == 1)
-                {
-                    var stop = Math.Max(output[i - 1], close[i] - atrValue);
-                    if (close[i] < output[i - 1])
-                    {
-                        trend = -1;
-                        output[i] = close[i] + atrValue;
-                    }
-                    else
-                    {
-                        output[i] = stop;
-                    }
-                }
-                else
-                {
-                    var stop = Math.Min(output[i - 1], close[i] + atrValue);
-                    if (close[i] > output[i - 1])
-                    {
-                        trend = 1;
-                        output[i] = close[i] - atrValue;
-                    }
-                    else
-                    {
-                        output[i] = stop;
-                    }
-                }
-            }
-        }
-        finally
-        {
-            pool.Return(atrArray);
-        }
+        if (output.Length < close.Length || high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("OHLC and output spans must cover the close series.");
+        using var window = new VolatilityStopWindow(length, multiplier);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Value;
     }
 
     #endregion

@@ -45869,5 +45869,221 @@
     "before": "{ \"Wwvs\", point.Value }",
     "after": "{ \"wrong\", point.Value }",
     "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
+  },
+  {
+    "id": "volatility-stop-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p))",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
+  },
+  {
+    "id": "volatility-stop-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? (_previous + close) / 2 : close",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.ExtendedAtrCancelsBeforePublicationAndNeverPoisonsZeroFactors"
+  },
+  {
+    "id": "volatility-stop-wide-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "sum.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.ExtendedAtrCancelsBeforePublicationAndNeverPoisonsZeroFactors"
+  },
+  {
+    "id": "volatility-stop-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "sum.AddProduct(atr.Mantissa, _factor, up ? -1 : 1);",
+    "after": "sum.Add(atr.Mantissa, up ? -1 : 1);",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "MovingAvgType.WildersSmoothingMethod",
+    "after": "MovingAvgType.ExponentialMovingAverage",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-up-crossing-equality",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "up ? crossing.Sign < 0 : crossing.Sign > 0",
+    "after": "up ? crossing.Sign <= 0 : crossing.Sign > 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
+  },
+  {
+    "id": "volatility-stop-wide-down-crossing-equality",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "up ? crossing.Sign < 0 : crossing.Sign > 0",
+    "after": "up ? crossing.Sign < 0 : crossing.Sign >= 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
+  },
+  {
+    "id": "volatility-stop-wide-flip-direction",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "if (flipped) up = !up;",
+    "after": "if (flipped) up = _up;",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-up-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "up ? movement.Sign > 0 : movement.Sign < 0",
+    "after": "up ? movement.Sign < 0 : movement.Sign < 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-down-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "up ? movement.Sign > 0 : movement.Sign < 0",
+    "after": "up ? movement.Sign > 0 : movement.Sign > 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "var stop = new RocBankValue(close);",
+    "after": "var stop = new RocBankValue(0);",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
+  },
+  {
+    "id": "volatility-stop-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "_range.Next(TrueRange(high, low, _seeded ? _previous : close), commit)",
+    "after": "_range.Next(TrueRange(high, low, _seeded ? _previous : close), true)",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "_seeded = false; _up = true;",
+    "after": "_up = true;",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityStopWindow.cs",
+    "scope": "internal sealed class VolatilityStopWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPricesOrCoreOutput"
+  },
+  {
+    "id": "volatility-stop-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolatilityStopFast(",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.SelectedPricesDriveTrueRangeCrossingsAndSignals"
+  },
+  {
+    "id": "volatility-stop-wide-fast-ranges",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolatilityStopFast(",
+    "before": "window.Next(high[i], low[i], input[i], true)",
+    "after": "window.Next(input[i], input[i], input[i], true)",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-core-range",
+    "module": "numerical",
+    "file": "src/Core/VolatilityCore.cs",
+    "scope": "internal static void VolatilityStop(",
+    "before": "window.Next(high[i], low[i], close[i], true)",
+    "after": "window.Next(close[i], close[i], close[i], true)",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.WideRangesPreserveStrictCrossingAndBothRatchets"
+  },
+  {
+    "id": "volatility-stop-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class VolatilityStopState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.InvalidCandlesCannotAdvanceRangeStopOrTrend"
+  },
+  {
+    "id": "volatility-stop-wide-output-slot",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class VolatilityStopState",
+    "before": "{ \"Vs\", point.Value }",
+    "after": "{ \"wrong\", point.Value }",
+    "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
   }
 ]
