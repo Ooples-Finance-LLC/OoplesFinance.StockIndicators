@@ -372,27 +372,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Eabpf", line), ("Signal", line.Select((_, i) => i == 0 ? 0 : .9 * line[i - 1]).ToArray()));
                 });
             case IndicatorName.EhlersZeroCrossingsDominantCycle:
-                return new("Ezcdc", new[] { "Ezcdc" }, bars =>
-                {
-                    // Compose the independent analytic bandpass reference; no production engine is used.
-                    var band = EhlersLinear(new EhlersBandPassFilterV1(length, Number(options, .7, "Bw")))!.Compute(bars)["Ebpf"];
-                    var crossings = Enumerable.Range(0, band.Length).Where(i => band[i] != 0 &&
-                        (i == 0 || Math.Sign(band[i]) != Math.Sign(band[i - 1]))).ToHashSet();
-                    var result = new double[bars.Count]; var previousCrossing = -1;
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var prior = i == 0 ? 0 : result[i - 1];
-                        if (!crossings.Contains(i))
-                        {
-                            result[i] = Math.Max(6, prior);
-                            continue;
-                        }
-                        var measured = 2d * (i - previousCrossing);
-                        result[i] = Math.Min(1.25 * prior, Math.Max(.8 * prior, measured));
-                        previousCrossing = i;
-                    }
-                    return Outputs(("Ezcdc", result));
-                });
+                return new("Ezcdc", new[] { "Ezcdc" }, bars => ZeroCrossingCycleValues(bars, length, Number(options, .7, "Bw")).Outputs);
             case IndicatorName.EhlersBandPassFilterV1:
                 return new("Ebpf", new[] { "Ebpf", "Signal" }, bars =>
                 {

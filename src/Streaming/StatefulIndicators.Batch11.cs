@@ -1439,61 +1439,14 @@ public sealed class EhlersUniversalOscillatorState : IStreamingIndicatorState, I
 [PrimaryOutput("Ezcdc")]
 public sealed class EhlersZeroCrossingsDominantCycleState : IStreamingIndicatorState
 {
-    private readonly EhlersBandPassFilterV1State _bandPass;
-    private double _prevReal;
-    private double _prevDc;
-    private int _counter;
-    private int _index;
-
-    public EhlersZeroCrossingsDominantCycleState(int length = 20, double bw = 0.7)
-    {
-        _bandPass = new EhlersBandPassFilterV1State(length, bw);
-    }
-
+    private readonly ZeroCrossingCycleWindow _window;
+    public EhlersZeroCrossingsDominantCycleState(int length = 20, double bw = .7) => _window = new(length, bw);
     public IndicatorName Name => IndicatorName.EhlersZeroCrossingsDominantCycle;
-
-    public void Reset()
-    {
-        _bandPass.Reset();
-        _prevReal = 0;
-        _prevDc = 0;
-        _counter = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var real = _bandPass.Update(bar, isFinal, includeOutputs: false).Value;
-        var prevReal = _index >= 1 ? _prevReal : 0;
-        var prevDc = _prevDc;
-        var dc = Math.Max(prevDc, 6);
-        var counter = _counter + 1;
-
-        if ((real > 0 && prevReal <= 0) || (real < 0 && prevReal >= 0))
-        {
-            dc = MathHelper.MinOrMax(2 * counter, 1.25 * prevDc, 0.8 * prevDc);
-            counter = 0;
-        }
-
-        if (isFinal)
-        {
-            _prevReal = real;
-            _prevDc = dc;
-            _counter = counter;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ezcdc", dc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Ezcdc", point.Value } } : null);
     }
 }
 

@@ -217,6 +217,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersModifiedOptimumEllipticFilterSpecOptions),
         typeof(EhlersModifiedStochasticIndicatorSpecOptions),
         typeof(EhlersOptimumEllipticFilterSpecOptions),
+        typeof(EhlersZeroCrossingsDominantCycleSpecOptions),
         typeof(EhlersPhaseCalculationSpecOptions),
         typeof(EhlersRecursiveMedianFilterSpecOptions),
         typeof(EhlersRecursiveMedianOscillatorSpecOptions),

@@ -761,46 +761,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersZeroCrossingsDominantCycle(this StockData stockData, int length = 20, double bw = 0.7)
     {
-        length = Math.Max(length, 1);
-        List<double> dcList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var counter = 0;
-
-        var ebpfOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersBandPassFilterV1(data, length, bw));
-        var realList = ebpfOutputs["Ebpf"];
-        var triggerList = ebpfOutputs["Signal"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var real = realList[i];
-            var trigger = triggerList[i];
-            var prevReal = i >= 1 ? realList[i - 1] : 0;
-            var prevTrigger = i >= 1 ? triggerList[i - 1] : 0;
-
-            var prevDc = GetLastOrDefault(dcList);
-            var dc = Math.Max(prevDc, 6);
-            counter += 1;
-            if ((real > 0 && prevReal <= 0) || (real < 0 && prevReal >= 0))
-            {
-                dc = MinOrMax(2 * counter, 1.25 * prevDc, 0.8 * prevDc);
-                counter = 0;
-            }
-            dcList.Add(dc);
-
-            var signal = GetCompareSignal(real - trigger, prevReal - prevTrigger);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ezcdc", dcList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dcList);
-        stockData.IndicatorName = IndicatorName.EhlersZeroCrossingsDominantCycle;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ZeroCrossingCycleWindow(length, bw); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ezcdc", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersZeroCrossingsDominantCycle; return stockData;
     }
 
 

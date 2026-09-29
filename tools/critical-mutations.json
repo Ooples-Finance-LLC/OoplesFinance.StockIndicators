@@ -43061,5 +43061,131 @@
     "before": "ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
     "after": "!StrengthWindow.Supports(maType)",
     "filter": "FullyQualifiedName~FourierPhaseNumericalTests.CustomerAverageReceivesPhasesOnceAndControlsSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-bandwidth",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "new(length, bandwidth, 0)",
+    "after": "new(length, bandwidth * .5, 0)",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-variant",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "new(length, bandwidth, 0)",
+    "after": "new(length, bandwidth, 1)",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-floor",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "Math.Max(_cycle, 6)",
+    "after": "Math.Max(_cycle, 8)",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.StartupFlatStreamsAndExtremePeriodsKeepTheSixBarFloor"
+  },
+  {
+    "id": "zero-crossing-cycle-upper-cap",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "1.25 * _cycle",
+    "after": "1.5 * _cycle",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-lower-cap",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": ".8 * _cycle",
+    "after": ".5 * _cycle",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-measurement",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "2d * counter",
+    "after": "1d * counter",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-elapsed-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "2d * counter",
+    "after": "2 * (int)counter",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.LongIntervalsCannotWrapBeforeCycleClamping"
+  },
+  {
+    "id": "zero-crossing-cycle-negative-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "point.Value < 0 && _previousReal >= 0",
+    "after": "point.Value < 0 && _previousReal < 0",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-interval-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "counter = 0; }",
+    "after": "counter = 1; }",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "_band.Reset();",
+    "after": "_cycle = 0;",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroCrossingCycleWindow.cs",
+    "scope": "internal sealed class ZeroCrossingCycleWindow",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.WideAndSubnormalPricesRetainCyclesAndDirectionalSignals"
+  },
+  {
+    "id": "zero-crossing-cycle-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersZeroCrossingsDominantCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.SelectedPricesReachBatchAndFast"
+  },
+  {
+    "id": "zero-crossing-cycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersZeroCrossingsDominantCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.InvalidCandlesCannotAdvanceCrossingsOrBandPass"
   }
 ]

@@ -2206,6 +2206,7 @@ internal static partial class IndicatorCompute
 
             // Batch 25 - More Ehlers Indicators
             // MaType smooths the phase into the Signal line only; the bound series is the raw phase.
+            EhlersZeroCrossingsDominantCycleSpecOptions ezcdc => ComputeEhlersZeroCrossingsDominantCycleFast(data, context, ezcdc.Length, ezcdc.Bw),
             EhlersPhaseCalculationSpecOptions epc => spec.OutputKey switch
             {
                 null or "Phase" => ComputeEhlersPhaseCalculationFast(data, context, epc.Length),
@@ -22432,6 +22433,12 @@ internal static partial class IndicatorCompute
     }
 
     // Batch 25 - More Ehlers Indicators
+
+    internal static ComputeBuffer ComputeEhlersZeroCrossingsDominantCycleFast(StockData data, ComputeContext context, int length = 20, double bw = .7)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new ZeroCrossingCycleWindow(length, bw); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value; return result;
+    }
 
     internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {

@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersZeroCrossingsDominantCycle)
+        {
+            var crossingOptions = builtIn.CreateOptions(); var crossingLength = Integer(crossingOptions, "Length", 20); var bandwidth = Number(crossingOptions, .7, "Bw");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ZeroCrossingCycleValues(bars, crossingLength, bandwidth).Outputs["Ezcdc"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersPhaseCalculation)
         {
             var settings = builtIn.CreateOptions(); var period = Integer(settings, "Length", 15); var fourierKind = AverageKind(settings, 3);
