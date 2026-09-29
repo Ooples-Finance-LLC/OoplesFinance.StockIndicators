@@ -338,46 +338,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHilbertTransformIndicator(this StockData stockData, int length = 7, double iMult = 0.635, double qMult = 0.338)
     {
-        length = Math.Max(length, 1);
-        List<double> v1List = new(stockData.Count);
-        List<double> inPhaseList = new(stockData.Count);
-        List<double> quadList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= length ? inputList[i - length] : 0;
-            var v2 = i >= 2 ? v1List[i - 2] : 0;
-            var v4 = i >= 4 ? v1List[i - 4] : 0;
-            var inPhase3 = i >= 3 ? inPhaseList[i - 3] : 0;
-            var quad2 = i >= 2 ? quadList[i - 2] : 0;
-
-            var v1 = MinPastValues(i, length, currentValue - prevValue);
-            v1List.Add(v1);
-
-            var prevInPhase = GetLastOrDefault(inPhaseList);
-            var inPhase = (1.25 * (v4 - (iMult * v2))) + (iMult * inPhase3);
-            inPhaseList.Add(inPhase);
-
-            var prevQuad = GetLastOrDefault(quadList);
-            var quad = v2 - (qMult * v1) + (qMult * quad2);
-            quadList.Add(quad);
-
-            var signal = GetCompareSignal(quad - (-1 * inPhase), prevQuad - (-1 * prevInPhase));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Quad", quadList },
-            { "Inphase", inPhaseList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersHilbertTransformIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertPhaseWindow(length, iMult, qMult, 1, false); var real = new List<double>(input.Count); var imaginary = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); real.Add(point.Real); imaginary.Add(point.Imaginary); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Quad", imaginary }, { "Inphase", real } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersHilbertTransformIndicator; return stockData;
     }
 
 
@@ -391,60 +354,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersInstantaneousPhaseIndicator(this StockData stockData, int length1 = 7, int length2 = 50)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> phaseList = new(stockData.Count);
-        List<double> dPhaseList = new(stockData.Count);
-        List<double> dcPeriodList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var ehtList = CalculateEhlersHilbertTransformIndicator(stockData, length: length1);
-        var ipList = ehtList.ChainedOutputs["Inphase"];
-        var quList = ehtList.ChainedOutputs["Quad"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ip = ipList[i];
-            var qu = quList[i];
-            var prevIp = i >= 1 ? ipList[i - 1] : 0;
-            var prevQu = i >= 1 ? quList[i - 1] : 0;
-
-            var prevPhase = GetLastOrDefault(phaseList);
-            var phase = Math.Abs(ip + prevIp) > 0 ? Math.Atan(Math.Abs((qu + prevQu) / (ip + prevIp))).ToDegrees() : 0;
-            phase = ip < 0 && qu > 0 ? 180 - phase : phase;
-            phase = ip < 0 && qu < 0 ? 180 + phase : phase;
-            phase = ip > 0 && qu < 0 ? 360 - phase : phase;
-            phaseList.Add(phase);
-
-            var dPhase = prevPhase - phase;
-            dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
-            dPhase = MinOrMax(dPhase, 60, 1);
-            dPhaseList.Add(dPhase);
-
-            double instPeriod = 0, v4 = 0;
-            for (var j = 0; j <= length2; j++)
-            {
-                var prevDPhase = i >= j ? dPhaseList[i - j] : 0;
-                v4 += prevDPhase;
-                instPeriod = v4 > 360 && instPeriod == 0 ? j : instPeriod;
-            }
-
-            var prevDcPeriod = GetLastOrDefault(dcPeriodList);
-            var dcPeriod = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
-            dcPeriodList.Add(dcPeriod);
-
-            var signal = GetCompareSignal(qu - (-1 * ip), prevQu - (-1 * prevIp));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eipi", dcPeriodList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dcPeriodList);
-        stockData.IndicatorName = IndicatorName.EhlersInstantaneousPhaseIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertPhaseWindow(length1, .635, .338, length2, true); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Cycle); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eipi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersInstantaneousPhaseIndicator; return stockData;
     }
 
 

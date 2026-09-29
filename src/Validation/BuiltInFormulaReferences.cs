@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformIndicator or IndicatorName.EhlersInstantaneousPhaseIndicator)
+        {
+            var phaseOptions = builtIn.CreateOptions(); var measureCycle = phaseOptions is EhlersInstantaneousPhaseIndicatorSpecOptions; var phaseLag = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length1 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).Length; var phaseHorizon = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length2 : 1; var realGain = measureCycle ? .635 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).IMult; var imaginaryGain = measureCycle ? .338 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).QMult;
+            var phaseKeys = measureCycle ? new[] { "Eipi" } : new[] { "Quad", "Inphase" }; for (var slot = 0; slot < phaseKeys.Length; slot++) { var key = phaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HilbertPhaseValues(bars, phaseLag, realGain, imaginaryGain, phaseHorizon, measureCycle).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSquelchIndicator)
         {
             var squelchOptions = (EhlersSquelchIndicatorSpecOptions)builtIn.CreateOptions(); yield return IndicatorValidationRule.Reference(0, bars => SquelchValues(bars, squelchOptions.Length1, squelchOptions.Length2, squelchOptions.Length3).Values, IndicatorErrorBudget.Exact); yield break;

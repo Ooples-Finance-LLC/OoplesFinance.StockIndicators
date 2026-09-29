@@ -41153,5 +41153,149 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation omitted\n",
     "filter": "FullyQualifiedName~SquelchNumericalTests.InvalidFieldsDoNotAdvancePhaseOrCycleHistory"
+  },
+  {
+    "id": "hilbert-phase-lag",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "differenceSum.Add(_prices.Peek(), -1)",
+    "after": "differenceSum.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-real-lag",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "_lag4.Add(ref realSum, _realFirst)",
+    "after": "_lag3.Add(ref realSum, _realFirst)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-real-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "_real3.Add(ref realSum, _realFeedback)",
+    "after": "_real2.Add(ref realSum, _realFeedback)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-imaginary-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "_quad2.Add(ref imaginarySum, _quadFeedback)",
+    "after": "_quad1.Add(ref imaginarySum, _quadFeedback)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-imaginary-forcing",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "difference.Add(ref imaginarySum, -_quadFeedback)",
+    "after": "difference.Add(ref imaginarySum, _quadFeedback)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-quadrant",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "phase = 360 - phase",
+    "after": "phase = 180 - phase",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-horizon",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal HilbertPhaseWindow(",
+    "before": "Math.Min(360, Math.Max(1, horizon))",
+    "after": "Math.Min(359, Math.Max(1, horizon))",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.ExtremePeriodsAndStrictCycleBoundaryUseBoundedHistory"
+  },
+  {
+    "id": "hilbert-phase-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "if (accumulated > 360)",
+    "after": "if (accumulated >= 360)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.ExtremePeriodsAndStrictCycleBoundaryUseBoundedHistory"
+  },
+  {
+    "id": "hilbert-phase-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal sealed class HilbertPhaseWindow",
+    "before": "_phase = _cycle = 0",
+    "after": "_phase = 0",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-signal",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "private static Signal SignalFor(",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.WideAndSubnormalPricesRetainHilbertComponentsAndCycles"
+  },
+  {
+    "id": "hilbert-phase-batch-hilbert-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersHilbertTransformIndicator(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.SelectedPricesReachEveryBatchAndDirectFastOutput"
+  },
+  {
+    "id": "hilbert-phase-batch-phase-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersInstantaneousPhaseIndicator(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.SelectedPricesReachEveryBatchAndDirectFastOutput"
+  },
+  {
+    "id": "hilbert-phase-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHilbertPhaseFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.SelectedPricesReachEveryBatchAndDirectFastOutput"
+  },
+  {
+    "id": "hilbert-phase-EhlersHilbertTransformIndicatorState-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHilbertTransformIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.InvalidFieldsDoNotAdvanceHilbertOrPhaseState"
+  },
+  {
+    "id": "hilbert-phase-EhlersInstantaneousPhaseIndicatorState-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersInstantaneousPhaseIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.InvalidFieldsDoNotAdvanceHilbertOrPhaseState"
   }
 ]

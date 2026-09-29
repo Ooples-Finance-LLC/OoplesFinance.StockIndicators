@@ -238,44 +238,16 @@ public sealed class EhlersHilbertOscillatorState : IStreamingIndicatorState, IDi
 [PrimaryOutput("Quad")]
 public sealed class EhlersHilbertTransformIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersHilbertTransformIndicatorEngine _engine;
-
-    public EhlersHilbertTransformIndicatorState(int length = 7, double iMult = 0.635, double qMult = 0.338)
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _engine = new EhlersHilbertTransformIndicatorEngine(length, iMult, qMult);
-    }
-
+    private readonly HilbertPhaseWindow _window;
+    public EhlersHilbertTransformIndicatorState(int length = 7, double iMult = .635, double qMult = .338) => _window = new(length, iMult, qMult, 1, false);
     public IndicatorName Name => IndicatorName.EhlersHilbertTransformIndicator;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _engine.Next(value, isFinal, out var inPhase, out var quad);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Quad", quad },
-                { "Inphase", inPhase }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(quad, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Imaginary, includeOutputs ? new Dictionary<string, double> { { "Quad", point.Imaginary }, { "Inphase", point.Real } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Real")]
@@ -649,99 +621,18 @@ public sealed class EhlersInfiniteImpulseResponseFilterState : IStreamingIndicat
 [PrimaryOutput("Eipi")]
 public sealed class EhlersInstantaneousPhaseIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersHilbertTransformIndicatorEngine _engine;
-    private readonly PooledRingBuffer<double> _dPhaseValues;
-    private double _prevPhase;
-    private double _prevDcPeriod;
-    private double _prevIp;
-    private double _prevQu;
-    private int _index;
-
-    public EhlersInstantaneousPhaseIndicatorState(int length1 = 7, int length2 = 50)
-    {
-        _length2 = Math.Max(1, length2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _engine = new EhlersHilbertTransformIndicatorEngine(Math.Max(1, length1), 0.635, 0.338);
-        _dPhaseValues = new PooledRingBuffer<double>(_length2 + 1);
-    }
-
+    private readonly HilbertPhaseWindow _window;
+    public EhlersInstantaneousPhaseIndicatorState(int length1 = 7, int length2 = 50) => _window = new(length1, .635, .338, length2, true);
     public IndicatorName Name => IndicatorName.EhlersInstantaneousPhaseIndicator;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _dPhaseValues.Clear();
-        _prevPhase = 0;
-        _prevDcPeriod = 0;
-        _prevIp = 0;
-        _prevQu = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _engine.Next(value, isFinal, out var inPhase, out var quad);
-
-        var prevIp = _index >= 1 ? _prevIp : 0;
-        var prevQu = _index >= 1 ? _prevQu : 0;
-        var phase = Math.Abs(inPhase + prevIp) > 0
-            ? Math.Atan(Math.Abs((quad + prevQu) / (inPhase + prevIp))).ToDegrees()
-            : 0;
-        phase = inPhase < 0 && quad > 0 ? 180 - phase : phase;
-        phase = inPhase < 0 && quad < 0 ? 180 + phase : phase;
-        phase = inPhase > 0 && quad < 0 ? 360 - phase : phase;
-
-        var prevPhase = _index >= 1 ? _prevPhase : 0;
-        var dPhase = prevPhase - phase;
-        dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
-        dPhase = MathHelper.MinOrMax(dPhase, 60, 1);
-
-        double instPeriod = 0;
-        double v4 = 0;
-        for (var j = 0; j <= _length2; j++)
-        {
-            var prevDPhase = EhlersStreamingWindow.GetOffsetValue(_dPhaseValues, dPhase, j);
-            v4 += prevDPhase;
-            if (v4 > 360 && instPeriod == 0)
-            {
-                instPeriod = j;
-            }
-        }
-
-        var prevDcPeriod = _index >= 1 ? _prevDcPeriod : 0;
-        var dcPeriod = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
-
-        if (isFinal)
-        {
-            _dPhaseValues.TryAdd(dPhase, out _);
-            _prevPhase = phase;
-            _prevDcPeriod = dcPeriod;
-            _prevIp = inPhase;
-            _prevQu = quad;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eipi", dcPeriod }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dcPeriod, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Cycle, includeOutputs ? new Dictionary<string, double> { { "Eipi", point.Cycle } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-        _dPhaseValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
+
 [PrimaryOutput("Eit")]
 public sealed class EhlersInstantaneousTrendlineV1State : IStreamingIndicatorState, IDisposable
 {
