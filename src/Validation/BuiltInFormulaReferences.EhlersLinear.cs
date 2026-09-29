@@ -504,24 +504,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ehplprf", HilbertLowPass(high, Math.Exp(-lowAngle), Math.Min(lowAngle, .99))));
                 });
             case IndicatorName.EhlersPhaseCalculation:
-                var phaseKind = AverageKind(options, 3);
-                if (phaseKind == 0) return null;
-                return new("Phase", new[] { "Phase", "Signal" }, bars =>
-                {
-                    var period = Math.Max(2, length);
-                    var phase = bars.Select((_, i) =>
-                    {
-                        // Center a complete window on its mean; a nonzero Fourier bin rejects DC.
-                        var baseline = i + 1 < period ? 0 : Window(bars, i, period).Average(b => b.Close);
-                        var observations = Enumerable.Range(0, period).Select(j => (i < j ? 0 : bars[i - j].Close) - baseline).ToArray();
-                        var vector = observations.Select((v, j) => v * Complex.FromPolarCoordinates(1, 2 * Math.PI * j / period))
-                            .Aggregate(Complex.Zero, (sum, v) => sum + v);
-                        if (vector.Magnitude <= 1e-12 * observations.Sum(Math.Abs)) return 90d;
-                        var angle = (vector.Phase * 180 / Math.PI + 450) % 360;
-                        return angle < 1e-10 || angle > 360 - 1e-10 ? 0 : angle;
-                    }).ToArray();
-                    return Outputs(("Phase", phase), ("Signal", Average(phase, period, phaseKind)));
-                });
+                var phaseKind = AverageKind(options, 3); if (phaseKind == 0) return null;
+                return new("Phase", new[] { "Phase", "Signal" }, bars => FourierPhaseValues(bars, length, phaseKind).Outputs);
             case IndicatorName.EhlersEmpiricalModeDecomposition:
             case IndicatorName.EhlersTrendExtraction:
             case IndicatorName.EhlersUniversalTradingFilter:

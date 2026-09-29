@@ -2209,7 +2209,7 @@ internal static partial class IndicatorCompute
             EhlersPhaseCalculationSpecOptions epc => spec.OutputKey switch
             {
                 null or "Phase" => ComputeEhlersPhaseCalculationFast(data, context, epc.Length),
-                "Signal" => SmoothPublished(data, context, ComputeEhlersPhaseCalculationFast(data, context, epc.Length), epc.Length, epc.MaType),
+                "Signal" => ComputeEhlersPhaseCalculationFast(data, context, epc.Length, epc.MaType, true),
                 _ => throw new ArgumentOutOfRangeException(nameof(spec.OutputKey))
             },
             EhlersRestoringPullIndicatorSpecOptions erpi => spec.OutputKey switch
@@ -22433,38 +22433,12 @@ internal static partial class IndicatorCompute
 
     // Batch 25 - More Ehlers Indicators
 
-    internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15)
+    internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(StockData data, ComputeContext context, int length = 15, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, bool signal = false)
     {
-        // The published series is the raw phase angle; the moving average of it only feeds the Signal
-        // line, so smoothing here returned a series the batch never binds.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 2);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double realPart = 0, imagPart = 0, mass = 0;
-            var baseline = i + 1 >= length ? input[i] : 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = (i >= j ? input[i - j] : 0) - baseline;
-                mass += Math.Abs(weight);
-                realPart += Math.Cos(2 * Math.PI * j / length) * weight;
-                imagPart += Math.Sin(2 * Math.PI * j / length) * weight;
-            }
-
-            var negligible = Math.Abs(realPart) + Math.Abs(imagPart) <= 1e-12 * mass;
-            var phase = negligible ? 90 : Math.Atan2(imagPart, realPart) * (180 / Math.PI) + 90;
-            if (phase < 0) phase += 360;
-            if (phase >= 360) phase -= 360;
-            if (phase < 1e-10 || phase > 360 - 1e-10) phase = 0;
-            output[i] = phase;
-        }
-
-        return buffer;
+        length = Math.Max(2, length); var external = signal && (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
+        using var window = new FourierPhaseWindow(length, maType, !signal || external); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = signal && !external ? point.Signal : point.Phase; }
+        return external ? SmoothPublished(data, context, result, length, maType) : result;
     }
 
     internal static ComputeBuffer ComputeEhlersRestoringPullIndicatorFast(StockData data, ComputeContext context,

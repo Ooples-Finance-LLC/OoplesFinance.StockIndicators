@@ -49,52 +49,12 @@ public static partial class Calculations
     public static StockData CalculateEhlersPhaseCalculation(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 15)
     {
-        length = Math.Max(length, 2);
-        List<double> phaseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            double realPart = 0, imagPart = 0, mass = 0;
-            var baseline = i + 1 >= length ? inputList[i] : 0;
-            for (var j = 0; j < length; j++)
-            {
-                var weight = (i >= j ? inputList[i - j] : 0) - baseline;
-                mass += Math.Abs(weight);
-                realPart += Math.Cos(2 * Math.PI * j / length) * weight;
-                imagPart += Math.Sin(2 * Math.PI * j / length) * weight;
-            }
-
-            var negligible = Math.Abs(realPart) + Math.Abs(imagPart) <= 1e-12 * mass;
-            var phase = negligible ? 90 : Math.Atan2(imagPart, realPart) * (180 / Math.PI) + 90;
-            if (phase < 0) phase += 360;
-            if (phase >= 360) phase -= 360;
-            if (phase < 1e-10 || phase > 360 - 1e-10) phase = 0;
-            phaseList.Add(phase);
-        }
-
-        var phaseEmaList = GetMovingAverageList(stockData, maType, length, phaseList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var phase = phaseList[i];
-            var phaseEma = phaseEmaList[i];
-            var prevPhase = i >= 1 ? phaseList[i - 1] : 0;
-            var prevPhaseEma = i >= 1 ? phaseEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(phase - phaseEma, prevPhase - prevPhaseEma, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Phase", phaseList },
-            { "Signal", phaseEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(phaseList);
-        stockData.IndicatorName = IndicatorName.EhlersPhaseCalculation;
-
-        return stockData;
+        length = Math.Max(2, length); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new FourierPhaseWindow(length, maType, external); var phases = new List<double>(input.Count); var averages = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); phases.Add(point.Phase); averages.Add(point.Signal); }
+        if (external) averages = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(phases), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, phases);
+        for (var i = 0; i < phases.Count; i++) signals?.Add(GetCompareSignal(phases[i] - averages[i], i == 0 ? 0 : phases[i - 1] - averages[i - 1], true));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Phase", phases }, { "Signal", averages } }); stockData.SetSignals(signals); stockData.SetCustomValues(phases); stockData.IndicatorName = IndicatorName.EhlersPhaseCalculation; return stockData;
     }
 
 

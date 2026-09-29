@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersPhaseCalculation)
+        {
+            var settings = builtIn.CreateOptions(); var period = Integer(settings, "Length", 15); var fourierKind = AverageKind(settings, 3);
+            var fourierKeys = new[] { "Phase", "Signal" }; for (var slot = 0; slot < fourierKeys.Length; slot++) { var key = fourierKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FourierPhaseValues(bars, period, fourierKind).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV1)
         {
             var noiseOptions = builtIn.CreateOptions(); var noiseLength = Integer(noiseOptions, "Length", 7); var noiseKind = AverageKind(noiseOptions, 3);

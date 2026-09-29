@@ -42917,5 +42917,149 @@
     "before": "value.AddTo(ref weighted, _length)",
     "after": "value.AddTo(ref weighted, 1)",
     "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.ExtremeExponentRatiosPreserveLogarithmsAndDirectionalSignals"
+  },
+  {
+    "id": "fourier-phase-real-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "real.AddProduct(value, cosine)",
+    "after": "real.AddProduct(value, sine)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-imaginary-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "imaginary.AddProduct(value, sine)",
+    "after": "imaginary.AddProduct(value, cosine)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-baseline",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "_history.Count + 1L >= _length ? price : 0",
+    "after": "_history.Count + 1L >= 1 ? price : 0",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.PowerOfTwoScalingAndCompleteWindowOffsetsPreservePhase"
+  },
+  {
+    "id": "fourier-phase-frequency",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "2 * Math.PI * lag / _length",
+    "after": "Math.PI * lag / _length",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-quadrants",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "Math.Atan2(y, x)",
+    "after": "Math.Atan(y / x)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.QuadrantsAndNegligibleVectorsRetainConventions"
+  },
+  {
+    "id": "fourier-phase-offset",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "(180 / Math.PI) + 90",
+    "after": "(180 / Math.PI) + 45",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-negligible",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "<= 1e-12",
+    "after": "<= 0",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.QuadrantsAndNegligibleVectorsRetainConventions"
+  },
+  {
+    "id": "fourier-phase-startup",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "_length = Math.Max(2, length)",
+    "after": "_length = Math.Max(3, length)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.EmptyFlatAndExtremePeriodsPreserveStartup"
+  },
+  {
+    "id": "fourier-phase-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "if (commit) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-reset",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "internal void Reset() { _history.Clear();",
+    "after": "internal void Reset() {",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-signal-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FourierPhaseWindow.cs",
+    "scope": "internal sealed class FourierPhaseWindow",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.WideAndSubnormalPricesPreserveAnglesAndSmoothedSignals"
+  },
+  {
+    "id": "fourier-phase-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.SelectedPricesReachBatchAndBothFastOutputs"
+  },
+  {
+    "id": "fourier-phase-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(",
+    "before": "signal && !external ? point.Signal : point.Phase",
+    "after": "signal && !external ? point.Phase : point.Phase",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.SelectedPricesReachBatchAndBothFastOutputs"
+  },
+  {
+    "id": "fourier-phase-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersPhaseCalculationState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.InvalidCandlesCannotAdvancePhaseOrSmoothing"
+  },
+  {
+    "id": "fourier-phase-batch-customer",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersPhaseCalculation(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.CustomerAverageReceivesPhasesOnceAndControlsSignals"
+  },
+  {
+    "id": "fourier-phase-fast-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersPhaseCalculationFast(",
+    "before": "ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~FourierPhaseNumericalTests.CustomerAverageReceivesPhasesOnceAndControlsSignals"
   }
 ]

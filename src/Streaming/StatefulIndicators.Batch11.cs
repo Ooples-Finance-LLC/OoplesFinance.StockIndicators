@@ -916,73 +916,16 @@ public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndica
 [PrimaryOutput("Phase")]
 public sealed class EhlersPhaseCalculationState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly PooledRingBuffer<double> _values;
-
-    public EhlersPhaseCalculationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 15)
-    {
-        _length = Math.Max(2, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _values = new PooledRingBuffer<double>(_length);
-    }
-
+    private readonly FourierPhaseWindow _window;
+    public EhlersPhaseCalculationState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 15) => _window = new(length, maType);
     public IndicatorName Name => IndicatorName.EhlersPhaseCalculation;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _smoother.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double realPart = 0;
-        double imagPart = 0, mass = 0;
-        var baseline = _values.Count + 1 >= _length ? value : 0;
-        for (var j = 0; j < _length; j++)
-        {
-            var weight = EhlersStreamingWindow.GetOffsetValue(_values, value, j) - baseline;
-            mass += Math.Abs(weight);
-            realPart += Math.Cos(2 * Math.PI * j / _length) * weight;
-            imagPart += Math.Sin(2 * Math.PI * j / _length) * weight;
-        }
-
-        var negligible = Math.Abs(realPart) + Math.Abs(imagPart) <= 1e-12 * mass;
-        var phase = negligible ? 90 : Math.Atan2(imagPart, realPart) * (180 / Math.PI) + 90;
-        if (phase < 0) phase += 360;
-        if (phase >= 360) phase -= 360;
-        if (phase < 1e-10 || phase > 360 - 1e-10) phase = 0;
-
-        var phaseEma = _smoother.Next(phase, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Phase", phase },
-                { "Signal", phaseEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(phase, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Phase, includeOutputs ? new Dictionary<string, double> { { "Phase", point.Phase }, { "Signal", point.Signal } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ermf")]
