@@ -47,7 +47,7 @@ public sealed class AutoFilterNumericalTests
     [Fact]
     public void HandRegressionAndFlatVariancePreserveWarmup()
     {
-        var values = Check(Bars(new[] { 1d, 2, 4, 3.4 }), 3); Assert.Equal(new[] { 0d, 0, 4 }, values.Take(3)); Assert.Equal(3.7, values[3], 14);
+        var values = Check(Bars(new[] { 1d, 2, 4, 3.4 }), 3); Assert.Equal(new[] { 0d, 0, 4 }, values.Take(3)); Assert.Equal(3.6999999999999997, values[3]);
         Assert.Equal(new[] { 0d, 0, 5, 5 }, Check(Bars(Enumerable.Repeat(5d, 4)), 3));
         Assert.Equal(new[] { 10d / 3, 5, 5 }, Check(Bars(Enumerable.Repeat(5d, 3)), 2, MovingAvgType.WeightedMovingAverage));
         Assert.Equal(new[] { 2d, -3, 4 }, Check(Bars(new[] { 2d, -3, 4 }), 1));

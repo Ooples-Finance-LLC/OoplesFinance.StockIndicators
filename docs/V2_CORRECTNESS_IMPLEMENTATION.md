@@ -3578,3 +3578,10 @@ This is evidence for the isolated batch-609 source. Source was already published
 The hand example now accounts for the startup mean rounding `4/3` to binary64 before exact disparity scaling: `100 * (1 - roundedMean)` rounds to `-33.33333333333333`. The existing dedicated hand regression now checks this sequence across batch, fast, native and direct-window paths, including preview/reset. Its periods match the public alias fixed defaults (200/50/20).
 
 Validation: 39/39 Chande Disparity cases passed in the first focused run. The strengthened dedicated regression subsequently passed 1/1 (`chande-disparity-617-rounded-hand-final.trx`), reusing unchanged production binaries. Its first supplemental run used period 2 rather than the alias defaults and was corrected; no production changes were needed. The broad `FoundationReferencesMatchIndependentSmallExamples` test passes the Chande assertion but now fails later on AutoFilter (reference `3.6999999999999997`, hand expectation `3.7`). That separate finding awaits a scope decision and is not reported as passing.
+
+
+### AutoFilter rounded hand expectation follow-up
+
+The authorized follow-up independently derives the final sample of prices `[1, 2, 4, 3.4]`. The last held-step window is `[2, 4, 4]`; its rounded mean is `3.3333333333333335`, and the rounded price mean is `3.1333333333333333`. Exact covariance/variance gives slope `7656119366529843 / 9007199254740992`. Centering with those separately rounded means and rounding once yields `3.6999999999999997`. Using unrounded means would instead give `3.7`. Production and the independent reference already agree with the staged contract.
+
+Corrected the broad hand expectation and strengthened the dedicated AutoFilter assertion from 14-decimal tolerance to exact equality. **49/49 checks passed**, including all 48 AutoFilter cases and `FoundationReferencesMatchIndependentSmallExamples` (`autofilter-608-hand-followup.trx`). This resolves both recorded hand-example failures. Only tests were rebuilt; unchanged production binaries were reused. Existing compiled mutation evidence remains applicable.

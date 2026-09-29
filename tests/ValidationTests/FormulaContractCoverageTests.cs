@@ -2409,7 +2409,8 @@ public sealed class FormulaContractCoverageTests
         Check(new BelkhayateTiming(5), timingBars, new[] { 99.99999999999999, 37.49999999999999, 16.666666666666668, 6.249999999999999, 0 });
         Check(new AutoLine(3), holdPrices, new[] { 1d, 2, 4, 4 });
         Check(new AutoLineWithDrift(3), holdPrices, new[] { 1d, 2, 4, 25d / 6 });
-        Check(new AutoFilter(3), holdPrices, new[] { 0d, 0, 4, 3.7 });
+        // Price and held-step means round separately before centered regression.
+        Check(new AutoFilter(3), holdPrices, new[] { 0d, 0, 4, 3.6999999999999997 });
         Check(new LinearRegressionLine(3), prices, new[] { 0d, 0, 23d / 6 });
         Check(new LinearExtrapolation(1), prices, new[] { 0d, 1, 3 });
         Check(new EhlersLaguerreFilter(1), prices, new[] { 1d, 7d / 6, 11d / 6 });
