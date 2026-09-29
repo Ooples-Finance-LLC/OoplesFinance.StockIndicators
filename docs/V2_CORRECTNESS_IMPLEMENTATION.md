@@ -3594,3 +3594,10 @@ The isolated campaigns `610a` and `610b` passed their baselines and caught **28/
 Source snapshot SHA256: `52c22612487d61a56d5bd24cfc52e5a886998ce70a94596f9b6265b2fa10d364`. Archive SHA256: `818eb476a9dc9e0e50a7ba025921266c3cdae434d88e31a674dcb42fc1475ff4` and `818eb476a9dc9e0e50a7ba025921266c3cdae434d88e31a674dcb42fc1475ff4`.
 
 This is evidence for the isolated batch-610 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 611-623 and the remaining final gates is still incomplete.
+
+
+### Bayesian mutation follow-up: population deviation and tied votes
+
+Original isolated batch-611 campaigns completed with 27 compiled kills and five surviving faults: the population-deviation denominator and four strict vote comparisons. These runs are retained as failed qualification evidence. The strengthened regressions place a rising observation between the population and mutated bands at multiplier 1.1, and retain both positive and negative votes when a tied observation must abstain. Independent hand expectations check the resulting probabilities exactly.
+
+Both strengthened tests passed in `dt-oscillator-624-and-bayesian-followup.trx`; that combined run also contained one separate DTOscillator callback-test failure, later corrected and passed. Bayesian production is unchanged. Corrected campaigns `611ra` and `611rb` are now running against matching frozen source; batch 611 is not yet mutation-qualified.

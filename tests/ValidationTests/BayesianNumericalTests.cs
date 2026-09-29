@@ -42,6 +42,11 @@ public sealed class BayesianNumericalTests
     [Fact]
     public void WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows()
     {
+        // Population sigma is 1 here; dividing by n*(n+1) would move
+        // the upper band below the rising observation at multiplier 1.1.
+        var population = Check(Bars(new[] { 0d, 2, 0, 2 }), 2, multiplier: 1.1);
+        Assert.Equal(new[] { 0d, 0, 0, 0 }, population.Outputs["SigmaProbsDown"]);
+        Assert.Equal(new[] { 0d, 0, 1, 1 }, population.Outputs["SigmaProbsUp"]);
         foreach (var scale in new[] { double.Epsilon, 1d, double.MaxValue / 16 }) foreach (var kind in Kinds) foreach (var length in new[] { 2, 5 }) foreach (var multiplier in new[] { -2.5, 0d, 2.5, double.MaxValue })
         {
             var bars = Bars(Enumerable.Range(0, 15).Select(i => (i % 7 - 3) * scale)); var actual = Check(bars, length, kind, multiplier);
@@ -51,6 +56,11 @@ public sealed class BayesianNumericalTests
     [Fact]
     public void HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds()
     {
+        // A tie must abstain while both positive and negative votes remain.
+        var tie = Check(Bars(new[] { 1d, -1, 0 }), 3, multiplier: 0);
+        Assert.Equal(new[] { 1d, .5, .5 }, tie.Outputs["SigmaProbsDown"]);
+        Assert.Equal(new[] { 0d, .5, .5 }, tie.Outputs["SigmaProbsUp"]);
+        Assert.Equal(new[] { 0d, .5, .5 }, tie.Outputs["ProbPrime"]);
         var bars = Bars(new[] { 2d, 4, 2, 4 }); var normal = Check(bars, 2);
         Assert.Equal(new[] { 1d, 1, 0, 0 }, normal.Outputs["SigmaProbsDown"]); Assert.Equal(new[] { 0d, 0, 1, 1 }, normal.Outputs["SigmaProbsUp"]); Assert.Equal(new[] { 0d, 0, 0, 0 }, normal.Outputs["ProbPrime"]);
         Assert.Equal(new[] { Signal.None, Signal.None, Signal.Sell, Signal.None }, normal.Signals);
