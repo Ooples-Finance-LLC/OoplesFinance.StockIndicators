@@ -199,45 +199,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersTrendExtraction(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, double delta = 0.1)
     {
-        length = Math.Max(length, 1);
-        List<double> bpList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var beta = Math.Cos(MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MinOrMax(4 * Math.PI * delta / length, 0.99, 0.01));
-        var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !TrendExtractionWindow.Supports(maType);
+        using var window = new TrendExtractionWindow(maType, length, delta, external); var bands = new List<double>(stockData.Count); var trends = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var bp = (0.5 * (1 - alpha) * MinPastValues(i, 2, currentValue - prevValue)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2);
-            bpList.Add(bp);
+            foreach (var price in input) bands.Add(window.Prepare(price, true)); var period = TrendExtractionWindow.ExternalPeriod(length);
+            trends = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(bands), period)?.ToList() ?? GetMovingAverageList(stockData, maType, period, bands);
         }
-
-        var trendList = GetMovingAverageList(stockData, maType, length * 2, bpList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var trend = trendList[i];
-            var prevTrend = i >= 1 ? trendList[i - 1] : 0;
-
-            var signal = GetCompareSignal(trend, prevTrend);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Trend", trendList },
-            { "Bp", bpList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trendList);
-        stockData.IndicatorName = IndicatorName.EhlersTrendExtraction;
-
-        return stockData;
+        else foreach (var price in input) { var point = window.Next(price, true); bands.Add(point.Band); trends.Add(point.Trend); }
+        for (var i = 0; i < trends.Count; i++) signals?.Add(GetCompareSignal(trends[i], i == 0 ? 0 : trends[i - 1]));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Trend", trends }, { "Bp", bands } }); stockData.SetSignals(signals); stockData.SetCustomValues(trends); stockData.IndicatorName = IndicatorName.EhlersTrendExtraction; return stockData;
     }
 
 

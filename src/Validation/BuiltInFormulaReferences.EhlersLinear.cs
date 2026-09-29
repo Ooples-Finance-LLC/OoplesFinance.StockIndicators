@@ -10,6 +10,8 @@ internal static partial class BuiltInFormulaReferences
     {
         var options = indicator.CreateOptions();
         var length = Integer(options, "Length", 14);
+        if (indicator.BatchName == IndicatorName.EhlersTrendExtraction && options is EhlersTrendExtractionSpecOptions trendExtraction && trendExtraction.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
+            return new("Trend", new[] { "Trend", "Bp" }, bars => TrendExtractionValues(bars, trendExtraction.Length, trendExtraction.Delta, trendExtraction.MaType));
         switch (indicator.BatchName)
         {
             case IndicatorName.EhlersConvolutionIndicator:

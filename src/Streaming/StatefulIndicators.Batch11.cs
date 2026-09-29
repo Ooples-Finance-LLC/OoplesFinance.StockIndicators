@@ -1801,75 +1801,16 @@ public sealed class EhlersTrendflexIndicatorState : IStreamingIndicatorState, ID
 [PrimaryOutput("Trend")]
 public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _alpha;
-    private readonly double _beta;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _trendSmoother;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _bpValues;
-    private int _index;
-
-    public EhlersTrendExtractionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 20, double delta = 0.1)
-    {
-        _length = Math.Max(1, length);
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / _length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / _length, 0.99, 0.01));
-        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-        _trendSmoother = MovingAverageSmootherFactory.Create(maType, _length * 2);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-        _bpValues = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly TrendExtractionWindow _window;
+    public EhlersTrendExtractionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 20, double delta = .1) => _window = new(maType, length, delta);
     public IndicatorName Name => IndicatorName.EhlersTrendExtraction;
-
-    public void Reset()
-    {
-        _trendSmoother.Reset();
-        _values.Clear();
-        _bpValues.Clear();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevBp1 = EhlersStreamingWindow.GetOffsetValue(_bpValues, 1);
-        var prevBp2 = EhlersStreamingWindow.GetOffsetValue(_bpValues, 2);
-        var diff = _index >= 2 ? value - prevValue : 0;
-
-        var bp = (0.5 * (1 - _alpha) * diff) + (_beta * (1 + _alpha) * prevBp1) - (_alpha * prevBp2);
-        var trend = _trendSmoother.Next(bp, isFinal);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _bpValues.TryAdd(bp, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Trend", trend },
-                { "Bp", bp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trend, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Trend, includeOutputs ? new Dictionary<string, double> { { "Trend", point.Trend }, { "Bp", point.Band } } : null);
     }
-
-    public void Dispose()
-    {
-        _trendSmoother.Dispose();
-        _values.Dispose();
-        _bpValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eutf")]

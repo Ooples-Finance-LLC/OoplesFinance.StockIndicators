@@ -40613,5 +40613,131 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation removed\n",
     "filter": "FullyQualifiedName~RoofingStochasticNumericalTests.InvalidFieldsLeaveRoofingRangeAndOutputUnchanged"
+  },
+  {
+    "id": "trend-extraction-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "private Scaled Band(",
+    "before": "sum.AddProduct(_price2, -_drive)",
+    "after": "sum.AddProduct(_price1, -_drive)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "private Scaled Band(",
+    "before": "_band2.Add(ref sum, -_decay)",
+    "after": "_band2.Add(ref sum, 0d)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "private Scaled Band(",
+    "before": "if (_count >= 2)",
+    "after": "if (_count >= 1)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.BandStartsAfterTwoSamplesAndSimpleTrendWaitsForFullWindow"
+  },
+  {
+    "id": "trend-extraction-period-overflow",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal TrendExtractionWindow(",
+    "before": "_period = 2L * length",
+    "after": "_period = (long)(2 * length)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.DoubledPeriodsUseLongArithmeticAndConsumedHistory"
+  },
+  {
+    "id": "trend-extraction-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal (double Trend, double Band) Next(",
+    "before": "weighted.Subtract(sum);",
+    "after": "// shift omitted\n",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-simple-startup",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal (double Trend, double Band) Next(",
+    "before": "_history.Count + 1L < _period",
+    "after": "_history.Count + 2L < _period",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.BandStartsAfterTwoSamplesAndSimpleTrendWaitsForFullWindow"
+  },
+  {
+    "id": "trend-extraction-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal (double Trend, double Band) Next(",
+    "before": "if (_history.Count == _period) _history.Peek().Add(ref sum, -1d);",
+    "after": "// expired value retained\n",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "private Scaled Band(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal sealed class TrendExtractionWindow",
+    "before": "_count = 0; _fallback?.Reset();",
+    "after": "_count = 2; _fallback?.Reset();",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.WideAndSubnormalPricesRetainBandAndTrend"
+  },
+  {
+    "id": "trend-extraction-width",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal TrendExtractionWindow(",
+    "before": "HighLowBandsWindow.ValidateShift(delta);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.NonfiniteWidthsAreRejectedBeforeHistoryChanges"
+  },
+  {
+    "id": "trend-extraction-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrendExtractionWindow.cs",
+    "scope": "internal sealed class TrendExtractionWindow",
+    "before": "2L * Math.Max(1, length)",
+    "after": "1L * Math.Max(1, length)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.ComponentAverageReceivesBandAtTwiceThePeriod"
+  },
+  {
+    "id": "trend-extraction-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersTrendExtraction(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.SelectedPricesReachBothPublishedOutputs"
+  },
+  {
+    "id": "trend-extraction-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersTrendExtractionFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.SelectedPricesReachBothPublishedOutputs"
+  },
+  {
+    "id": "trend-extraction-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersTrendExtractionState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~TrendExtractionNumericalTests.InvalidCandlesDoNotAdvanceBandOrMean"
   }
 ]

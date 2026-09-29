@@ -22642,31 +22642,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool bandPassOnly = false)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / length, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / length, 0.99, 0.01));
-        var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-
-        using var bandPass = context.Rent(count);
-        var bp = bandPass.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !TrendExtractionWindow.Supports(maType);
+        using var window = new TrendExtractionWindow(maType, length, delta, external); var result = context.Rent(input.Count);
+        if (bandPassOnly) for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Prepare(input[i], true);
+        else if (external)
         {
-            var previousValue = i >= 2 ? input[i - 2] : 0;
-            var previousBp1 = i >= 1 ? bp[i - 1] : 0;
-            var previousBp2 = i >= 2 ? bp[i - 2] : 0;
-
-            bp[i] = (0.5 * (1 - alpha) * CalculationsHelper.MinPastValues(i, 2, input[i] - previousValue)) +
-                (beta * (1 + alpha) * previousBp1) - (alpha * previousBp2);
+            using var bands = context.Rent(input.Count); for (var i = 0; i < input.Count; i++) bands.WritableSpan[i] = window.Prepare(input[i], true);
+            MovingAverage(data, maType, TrendExtractionWindow.ExternalPeriod(length), bands.Span, result.WritableSpan);
         }
-
-        var buffer = context.Rent(count);
-        if (bandPassOnly) bandPass.Span.CopyTo(buffer.WritableSpan);
-        else MovingAverage(data, maType, length * 2, bandPass.Span, buffer.WritableSpan);
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Trend;
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersTripleDelaySignalFast(StockData data, ComputeContext context, int length, MovingAvgType maType)
