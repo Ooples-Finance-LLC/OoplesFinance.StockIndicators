@@ -824,6 +824,7 @@ internal static partial class StatefulIndicatorFactory
             BullPowerSpecOptions bp => new BullPowerIndicatorState(length: bp.Length),
             BearPowerSpecOptions bear => new BearPowerIndicatorState(length: bear.Length),
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
+            BilateralStochasticOscillatorSpecOptions bilateral => new BilateralStochasticOscillatorState(bilateral.MaType, bilateral.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),
             SchaffTrendCycleSpecOptions schaff => new SchaffTrendCycleState(schaff.MaType, schaff.FastLength, schaff.SlowLength, schaff.CycleLength),
             HullEstimateSpecOptions hullEstimate => new HullEstimateState(length: hullEstimate.Length),

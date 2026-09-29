@@ -8134,52 +8134,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bilateral Stochastic Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeBilateralStochasticOscillatorFast(StockData data, ComputeContext context,
-        int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
+    internal static ComputeBuffer ComputeBilateralStochasticOscillatorFast(StockData data, ComputeContext context, int length = 100, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null, int signalLength = 20)
     {
-        // CalculateBilateralStochasticOscillator stochasticises an average of the price against its own range
-        // in both directions and publishes the stronger of the two, and both of its averages take the given
-        // type. The high and low here are of that average, not of the bar.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var averageBuffer = context.Rent(count);
-        var average = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, average);
-
-        using var highestBuffer = context.Rent(count);
-        using var lowestBuffer = context.Rent(count);
-        using var rangeBuffer = context.Rent(count);
-        var highest = highestBuffer.WritableSpan;
-        var lowest = lowestBuffer.WritableSpan;
-        var range = rangeBuffer.WritableSpan;
-        var window = new RollingMinMax(Math.Max(length, 2));
-
-        for (var i = 0; i < count; i++)
-        {
-            window.Add(average[i]);
-            highest[i] = window.Max;
-            lowest[i] = window.Min;
-            range[i] = highest[i] - lowest[i];
-        }
-
-        using var rangeAverageBuffer = context.Rent(count);
-        var rangeAverage = rangeAverageBuffer.WritableSpan;
-        MovingAverage(data, maType, length, range, rangeAverage);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var scale = rangeAverage[i];
-            var bull = scale != 0 ? (average[i] / scale) - (lowest[i] / scale) : 0;
-            var bear = scale != 0 ? Math.Abs((average[i] / scale) - (highest[i] / scale)) : 0;
-            output[i] = outputKey == "Bull" ? bull : outputKey == "Bear" ? bear : Math.Max(bull, bear);
-        }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, 20, maType) : buffer;
+        if (outputKey is not (null or "Bso" or "Bull" or "Bear" or "Signal")) throw new ArgumentOutOfRangeException(nameof(outputKey));
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? BilateralStochasticWindow.Components(data, input, maType, length, signalLength) : null; using var window = new BilateralStochasticWindow(maType, length, signalLength, external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]); output.WritableSpan[i] = outputKey == "Bull" ? point.Bull : outputKey == "Bear" ? point.Bear : outputKey == "Signal" ? point.SignalLine : point.Bso; } return output; } catch { output.Dispose(); throw; }
     }
 
     #region Batch 5 - Additional Oscillators

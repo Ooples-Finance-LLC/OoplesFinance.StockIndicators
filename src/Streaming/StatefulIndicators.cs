@@ -6883,72 +6883,13 @@ public sealed class BetterVolumeIndicatorState : IStreamingIndicatorState
 [PrimaryOutput("Bso")]
 public sealed class BilateralStochasticOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _sma;
-    private readonly IMovingAverageSmoother _rangeSmoother;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly StreamingInputResolver _input;
-
-    public BilateralStochasticOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100,
-        int signalLength = 20)
-    {
-        var resolved = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, resolved);
-        _rangeSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly BilateralStochasticWindow _window;
+    public BilateralStochasticOscillatorState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 100, int signalLength = 20) => _window = new(maType, length, signalLength);
     public IndicatorName Name => IndicatorName.BilateralStochasticOscillator;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _rangeSmoother.Reset();
-        _signal.Reset();
-        _highWindow.Reset();
-        _lowWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var sma = _sma.Next(value, isFinal);
-        var highest = isFinal ? _highWindow.Add(sma, out _) : _highWindow.Preview(sma, out _);
-        var lowest = isFinal ? _lowWindow.Add(sma, out _) : _lowWindow.Preview(sma, out _);
-        var range = highest - lowest;
-        var rangeSma = _rangeSmoother.Next(range, isFinal);
-        var bull = rangeSma != 0 ? (sma / rangeSma) - (lowest / rangeSma) : 0;
-        var bear = rangeSma != 0 ? Math.Abs((sma / rangeSma) - (highest / rangeSma)) : 0;
-        var max = Math.Max(bull, bear);
-        var signal = _signal.Next(max, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Bull", bull },
-                { "Bear", bear },
-                { "Bso", max },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(max, outputs);
-    }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _rangeSmoother.Dispose();
-        _signal.Dispose();
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Bso, includeOutputs ? new Dictionary<string, double> { { "Bull", point.Bull }, { "Bear", point.Bear }, { "Bso", point.Bso }, { "Signal", point.SignalLine } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("AtrDev")]

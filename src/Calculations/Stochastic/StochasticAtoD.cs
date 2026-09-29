@@ -70,65 +70,11 @@ public static partial class Calculations
     public static StockData CalculateBilateralStochasticOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 100, int signalLength = 20)
     {
-        List<double> bullList = new(stockData.Count);
-        List<double> bearList = new(stockData.Count);
-        List<double> rangeList = new(stockData.Count);
-        List<double> maxList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(smaList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-
-            var range = highest - lowest;
-            rangeList.Add(range);
-        }
-
-        var rangeSmaList = GetMovingAverageList(stockData, maType, length, rangeList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sma = smaList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var rangeSma = rangeSmaList[i];
-
-            var bull = rangeSma != 0 ? (sma / rangeSma) - (lowest / rangeSma) : 0;
-            bullList.Add(bull);
-
-            var bear = rangeSma != 0 ? Math.Abs((sma / rangeSma) - (highest / rangeSma)) : 0;
-            bearList.Add(bear);
-
-            var max = Math.Max(bull, bear);
-            maxList.Add(max);
-        }
-
-        var signalList = GetMovingAverageList(stockData, maType, signalLength, maxList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var bull = bullList[i];
-            var bear = bearList[i];
-            var sig = signalList[i];
-
-            var signal = GetConditionSignal(bull > bear || bull > sig, bear > bull || bull < sig);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Bull", bullList },
-            { "Bear", bearList },
-            { "Bso", maxList },
-            { "Signal", signalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(maxList);
-        stockData.IndicatorName = IndicatorName.BilateralStochasticOscillator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? BilateralStochasticWindow.Components(stockData, input, maType, length, signalLength) : null; using var window = new BilateralStochasticWindow(maType, length, signalLength, external);
+        var bull = new List<double>(input.Count); var bear = new List<double>(input.Count); var line = new List<double>(input.Count); var signalLine = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]); bull.Add(point.Bull); bear.Add(point.Bear); line.Add(point.Bso); signalLine.Add(point.SignalLine); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Bull", bull }, { "Bear", bear }, { "Bso", line }, { "Signal", signalLine } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.BilateralStochasticOscillator; return stockData;
     }
 
 

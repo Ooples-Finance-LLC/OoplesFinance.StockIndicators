@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.BilateralStochasticOscillator)
+        {
+            var bilateralKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < bilateralKeys.Length; slot++) { var key = bilateralKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BilateralOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SchaffTrendCycleShk)
         {
             var shkKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

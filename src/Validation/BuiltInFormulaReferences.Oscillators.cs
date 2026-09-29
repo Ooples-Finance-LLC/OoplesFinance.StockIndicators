@@ -610,17 +610,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.BilateralStochasticOscillator:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
-                return new("Bso", new[] { "Bull", "Bear", "Bso", "Signal" }, bars =>
-                {
-                    var average = Average(Closes(bars), length, kind);
-                    var highs = average.Select((_, i) => Window(average, i, Math.Max(2, length)).Max()).ToArray();
-                    var lows = average.Select((_, i) => Window(average, i, Math.Max(2, length)).Min()).ToArray();
-                    var scale = Average(highs.Select((v, i) => v - lows[i]).ToArray(), length, kind);
-                    var bull = average.Select((v, i) => scale[i] == 0 ? 0 : (v - lows[i]) / scale[i]).ToArray();
-                    var bear = average.Select((v, i) => scale[i] == 0 ? 0 : (highs[i] - v) / scale[i]).ToArray();
-                    var line = bull.Select((v, i) => Math.Max(v, bear[i])).ToArray();
-                    return Outputs(("Bull", bull), ("Bear", bear), ("Bso", line), ("Signal", Average(line, 20, kind)));
-                });
+                return new("Bso", new[] { "Bull", "Bear", "Bso", "Signal" }, bars => BilateralOutputs(bars, indicator));
             case IndicatorName.BreakoutRelativeStrengthIndex:
                 var breakoutVolumeLength = Integer(options, "LbLength", 2);
                 return new("Brsi", new[] { "Brsi" }, bars =>

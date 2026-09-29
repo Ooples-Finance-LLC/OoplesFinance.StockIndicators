@@ -48947,5 +48947,275 @@
     "before": "sum.Add(_history.Peek(), -1)",
     "after": "sum.Add(_history.Peek(), 1)",
     "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "bilateral-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_mean = new(kind, _length)",
+    "after": "_mean = new(kind, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_rangeMean = new(kind, _length)",
+    "after": "_rangeMean = new(kind, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_signal = new(kind, Math.Max(1, signalLength))",
+    "after": "_signal = new(kind, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-one-bar-range",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.HandOutputsPreserveWarmupAndSignalSmoothing"
+  },
+  {
+    "id": "bilateral-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_count - _length + 1L",
+    "after": "_count - _length",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ExtremaExpireAndPowerOfTwoScalingPreservesRatios"
+  },
+  {
+    "id": "bilateral-wide-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Extreme(_highs, mean, true, final)",
+    "after": "Extreme(_highs, mean, false, final)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Extreme(_lows, mean, false, final)",
+    "after": "Extreme(_lows, mean, true, final)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "low.AddTo(ref difference, -1)",
+    "after": "low.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-range-projection",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var range = RocBankValue.Round(difference)",
+    "after": "var range = new RocBankValue(difference.Mean(1))",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ExtendedRangesAndExactNumeratorsAvoidOverflowAndCancellation"
+  },
+  {
+    "id": "bilateral-wide-zero-scale",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "if (denominator.Mantissa == 0) return default",
+    "after": "if (denominator.Mantissa == 0) return new(1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ZeroScaleEqualityAndBuyPriorityKeepConditionSemantics"
+  },
+  {
+    "id": "bilateral-wide-ratio-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "b.AddTo(ref numerator, -1)",
+    "after": "b.AddTo(ref numerator, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-ratio-shift",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "numerator.ScaleByPowerOfTwo(-denominator.UpperShift)",
+    "after": "numerator.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ExtendedRangesAndExactNumeratorsAvoidOverflowAndCancellation"
+  },
+  {
+    "id": "bilateral-wide-ratio-cancellation",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var result = RocBankValue.Round(numerator, denominator.Mantissa)",
+    "after": "var result = new RocBankValue(a.Publish() / denominator.Publish() - b.Publish() / denominator.Publish())",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ExtendedRangesAndExactNumeratorsAvoidOverflowAndCancellation"
+  },
+  {
+    "id": "bilateral-wide-bear-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Ratio(mean, high, scale, true)",
+    "after": "Ratio(mean, high, scale, false)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Compare(bull, bear) > 0 ? bull : bear",
+    "after": "Compare(bull, bear) < 0 ? bull : bear",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-signal-input",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(bull, final)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-buy-priority",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var signal = bullish ? Signal.Buy",
+    "after": "var signal = bullish && !bearish ? Signal.Buy",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ZeroScaleEqualityAndBuyPriorityKeepConditionSemantics"
+  },
+  {
+    "id": "bilateral-wide-signal-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var bullish = Compare(bull, bear) > 0",
+    "after": "var bullish = Compare(bull, bear) >= 0",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ZeroScaleEqualityAndBuyPriorityKeepConditionSemantics"
+  },
+  {
+    "id": "bilateral-wide-signal-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Compare(bull, signalLine) < 0",
+    "after": "Compare(bull, signalLine) > 0",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.ZeroScaleEqualityAndBuyPriorityKeepConditionSemantics"
+  },
+  {
+    "id": "bilateral-wide-extrema-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "Extreme(_highs, mean, true, final)",
+    "after": "Extreme(_highs, mean, true, true)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-count-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "if (final) _count++",
+    "after": "if (true) _count++",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_highs.Clear();",
+    "after": "_lows.Clear();",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-custom-range",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var scale = Average(ranges, length)",
+    "after": "var scale = Average(input, length)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.CustomAndLegacyComponentsKeepInputRangeMaximumOrder"
+  },
+  {
+    "id": "bilateral-wide-custom-signal",
+    "module": "numerical",
+    "file": "src/Helpers/BilateralStochasticWindow.cs",
+    "scope": "internal sealed class BilateralStochasticWindow",
+    "before": "var signal = Average(maxima, signalLength)",
+    "after": "var signal = Average(ranges, signalLength)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.CustomAndLegacyComponentsKeepInputRangeMaximumOrder"
+  },
+  {
+    "id": "bilateral-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBilateralStochasticOscillatorFast",
+    "before": "window.Next(input[i], true,",
+    "after": "window.Next(data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.CustomAndLegacyComponentsKeepInputRangeMaximumOrder"
+  },
+  {
+    "id": "bilateral-wide-fast-bear",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBilateralStochasticOscillatorFast",
+    "before": "outputKey == \"Bear\" ? point.Bear",
+    "after": "outputKey == \"Bear\" ? point.Bull",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
+  },
+  {
+    "id": "bilateral-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BilateralStochasticOscillatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "bilateral-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BilateralStochasticOscillatorState",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", point.Bso }",
+    "filter": "FullyQualifiedName~BilateralStochasticNumericalTests.WideMeansRangesAndSignalStagesMatchRationalArithmetic"
   }
 ]
