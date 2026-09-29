@@ -1189,52 +1189,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAlternateSignalToNoiseRatio(this StockData stockData, int length = 6)
     {
-        length = Math.Max(length, 1);
-        List<double> snrList = new(stockData.Count);
-        List<double> rangeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var ehlersMamaOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data));
-        var reList = ehlersMamaOutputs["Real"];
-        var imList = ehlersMamaOutputs["Imag"];
-        var mamaList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var mama = mamaList[i];
-            var re = reList[i];
-            var im = imList[i];
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevMama = i >= 1 ? mamaList[i - 1] : 0;
-
-            var prevRange = GetLastOrDefault(rangeList);
-            var range = (0.1 * (currentHigh - currentLow)) + (0.9 * prevRange);
-            rangeList.Add(range);
-
-            var temp = range != 0 ? (re + im) / (range * range) : 0;
-            var logTemp = temp > 0 ? Math.Log10(temp) : 0;
-            var prevSnr = GetLastOrDefault(snrList);
-            var snr = (0.25 * ((10 * logTemp) + length)) + (0.75 * prevSnr);
-            snrList.Add(snr);
-
-            var signal = GetVolatilitySignal(currentValue - mama, prevValue - prevMama, snr, length);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Esnr", snrList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(snrList);
-        stockData.IndicatorName = IndicatorName.EhlersAlternateSignalToNoiseRatio;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var window = new MamaNoiseWindow(length, 0); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], high[i], low[i], true); values.Add(point.Snr); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Esnr", values } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersAlternateSignalToNoiseRatio; return stockData;
     }
 
 

@@ -3,7 +3,7 @@ using OoplesFinance.StockIndicators.Enums;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
 {
-    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) MamaValues(double[] prices, double fast = .5, double slow = .05)
+    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) MamaValues(double[] prices, double fast = .5, double slow = .05, Dictionary<string, ReferenceFraction[]>? exact = null)
     {
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
         var chunk = new ReferenceFraction(BigInteger.One << 512); var upper = new ReferenceFraction(BigInteger.One << 256); var lower = new ReferenceFraction(1) / upper;
@@ -28,6 +28,7 @@ internal static partial class BuiltInFormulaReferences
             phases[i] = inphase[i].Sign == 0 ? 0 : Math.Atan((quadrature[i] / inphase[i]).ToDouble()) * (180 / Math.PI); var alpha = Math.Max(slow, fast / Math.Max(1, Previous(phases, i - 1) - phases[i])); mama[i] = Round(R(alpha) * R(prices[i]) + (R(1) - R(alpha)) * At(mama, i - 1)); fama[i] = Round(R(alpha) / R(2) * mama[i] + (R(1) - R(alpha) / R(2)) * At(fama, i - 1));
             var current = mama[i] - fama[i]; var previous = At(mama, i - 1) - At(fama, i - 1); signals[i] = current.Sign > 0 ? current.CompareTo(previous) > 0 ? Signal.StrongBuy : Signal.Buy : current.Sign < 0 ? current.CompareTo(previous) < 0 ? Signal.StrongSell : Signal.Sell : Signal.None;
         }
+        if (exact is not null) { exact["Mama"] = mama; exact["I1"] = inphase; exact["Q1"] = quadrature; exact["Real"] = real; exact["Imag"] = imaginary; }
         double[] Values(ReferenceFraction[] values) => values.Select(v => v.ToDouble()).ToArray();
         return (new Dictionary<string, double[]> { { "Fama", Values(fama) }, { "Mama", Values(mama) }, { "I1", Values(inphase) }, { "Q1", Values(quadrature) }, { "SmoothPeriod", smoothedPeriods }, { "Smooth", Values(smooth) }, { "Real", Values(real) }, { "Imag", Values(imaginary) } }, signals);
     }

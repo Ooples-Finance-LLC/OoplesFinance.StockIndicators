@@ -227,7 +227,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersRocketRelativeStrengthIndexSpecOptions),
         typeof(EhlersRoofingFilterSpecOptions),
         typeof(EhlersRoofingFilterV1SpecOptions),
-        typeof(EhlersSignalToNoiseRatioV2SpecOptions),
+        typeof(EhlersAlternateSignalToNoiseRatioSpecOptions), typeof(EhlersEnhancedSignalToNoiseRatioSpecOptions), typeof(EhlersSignalToNoiseRatioV2SpecOptions),
         typeof(EhlersSimpleClipIndicatorSpecOptions),
         typeof(EhlersSimpleDerivIndicatorSpecOptions),
         typeof(EhlersSimpleWindowIndicatorSpecOptions),

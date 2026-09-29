@@ -440,93 +440,16 @@ public sealed class EhlersEarlyOnsetTrendIndicatorState : IStreamingIndicatorSta
 [PrimaryOutput("Esnr")]
 public sealed class EhlersEnhancedSignalToNoiseRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly StreamingInputResolver _input;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly PooledRingBuffer<double> _smoothValues;
-    private readonly PooledRingBuffer<double> _q3Values;
-    private double _prevNoise;
-    private double _prevSnr;
-
-    public EhlersEnhancedSignalToNoiseRatioState(int length = 6)
-    {
-        _length = Math.Max(1, length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _smoothValues = new PooledRingBuffer<double>(2);
-        _q3Values = new PooledRingBuffer<double>(50);
-    }
-
+    private readonly MamaNoiseWindow _window;
+    public EhlersEnhancedSignalToNoiseRatioState(int length = 6) => _window = new MamaNoiseWindow(length, 2);
     public IndicatorName Name => IndicatorName.EhlersEnhancedSignalToNoiseRatio;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _smoothValues.Clear();
-        _q3Values.Clear();
-        _prevNoise = 0;
-        _prevSnr = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var mama = _mama.Next(value, isFinal);
-        var smooth = mama.Smooth;
-        var smoothPeriod = mama.SmoothPeriod;
-        var prevSmooth2 = EhlersStreamingWindow.GetOffsetValue(_smoothValues, 2);
-
-        var q3 = 0.5 * (smooth - prevSmooth2) * ((0.1759 * smoothPeriod) + 0.4607);
-        var sp = (int)Math.Ceiling(smoothPeriod / 2);
-        double i3 = 0;
-        for (var j = 0; j <= sp - 1; j++)
-        {
-            var prevQ3 = EhlersStreamingWindow.GetOffsetValue(_q3Values, q3, j);
-            i3 += prevQ3;
-        }
-        i3 = sp != 0 ? 1.57 * i3 / sp : i3;
-
-        var signalValue = (i3 * i3) + (q3 * q3);
-        var diff = bar.High - bar.Low;
-        var noise = (0.1 * diff * diff * 0.25) + (0.9 * _prevNoise);
-        var temp = noise != 0 ? signalValue / noise : 0;
-
-        // A ratio in decibels is only defined for a positive ratio; see the batch calculation for the
-        // full reasoning. On a market with no range at all the noise estimate decays to zero and takes
-        // the signal with it, so temp is zero and the unguarded logarithm publishes negative infinity
-        // for every bar of the series.
-        var logTemp = temp > 0 ? 10 * Math.Log(temp) / Math.Log(10) : 0;
-        var snr = (0.33 * logTemp) + (0.67 * _prevSnr);
-
-        if (isFinal)
-        {
-            _smoothValues.TryAdd(smooth, out _);
-            _q3Values.TryAdd(q3, out _);
-            _prevNoise = noise;
-            _prevSnr = snr;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Esnr", snr },
-                { "I3", i3 },
-                { "Q3", q3 },
-                { "SmoothPeriod", smoothPeriod }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(snr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Snr, includeOutputs ? new Dictionary<string, double> { { "Esnr", point.Snr }, { "I3", point.InPhase }, { "Q3", point.Quadrature }, { "SmoothPeriod", point.Period } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _smoothValues.Dispose();
-        _q3Values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Ebsi")]

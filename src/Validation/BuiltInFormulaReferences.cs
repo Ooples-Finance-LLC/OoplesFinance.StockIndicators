@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersAlternateSignalToNoiseRatio or IndicatorName.EhlersEnhancedSignalToNoiseRatio or IndicatorName.EhlersSignalToNoiseRatioV2)
+        {
+            var noiseMode = builtIn.BatchName == IndicatorName.EhlersAlternateSignalToNoiseRatio ? 0 : builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV2 ? 1 : 2; var noiseLength = Integer(builtIn.CreateOptions(), "Length", 6); var noiseKeys = noiseMode == 2 ? new[] { "Esnr", "I3", "Q3", "SmoothPeriod" } : new[] { "Esnr" };
+            for (var slot = 0; slot < noiseKeys.Length; slot++) { var key = noiseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaNoiseValues(bars, noiseLength, noiseMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV1 or IndicatorName.EhlersAdaptiveCommodityChannelIndexV1)
         {
             var commodity = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV1; var rangeOptions = builtIn.CreateOptions(); var fraction = Number(rangeOptions, commodity ? 1 : .5, "CycPart"); var constant = Number(rangeOptions, .015, "Constant"); var rangeKeys = new[] { commodity ? "Eacci" : "Easi", "Signal" };

@@ -392,60 +392,16 @@ public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, 
 [PrimaryOutput("Esnr")]
 public sealed class EhlersSignalToNoiseRatioV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly StreamingInputResolver _input;
-    private double _prevRange;
-    private double _prevSnr;
-
-    public EhlersSignalToNoiseRatioV2State(int length = 6)
-    {
-        _length = Math.Max(1, length);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly MamaNoiseWindow _window;
+    public EhlersSignalToNoiseRatioV2State(int length = 6) => _window = new MamaNoiseWindow(length, 1);
     public IndicatorName Name => IndicatorName.EhlersSignalToNoiseRatioV2;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _prevRange = 0;
-        _prevSnr = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var snapshot = _mama.Next(value, isFinal);
-        var range = (0.1 * (bar.High - bar.Low)) + (0.9 * _prevRange);
-        var temp = range != 0 ? ((snapshot.I1 * snapshot.I1) + (snapshot.Q1 * snapshot.Q1)) / (range * range) : 0;
-        var snr = range > 0
-            ? (0.25 * ((10 * Math.Log(temp) / Math.Log(10)) + _length)) + (0.75 * _prevSnr)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevRange = range;
-            _prevSnr = snr;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Esnr", snr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(snr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Snr, includeOutputs ? new Dictionary<string, double> { { "Esnr", point.Snr } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Elrsi")]

@@ -953,6 +953,8 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
+            EhlersAlternateSignalToNoiseRatioSpecOptions alternateNoise => ComputeMamaNoiseFast(data, context, alternateNoise.Length, 0, spec.OutputKey),
+            EhlersEnhancedSignalToNoiseRatioSpecOptions enhancedNoise => ComputeMamaNoiseFast(data, context, enhancedNoise.Length, 2, spec.OutputKey),
             EhlersAdaptiveStochasticIndicatorV1SpecOptions astoch => ComputeAdaptiveRangeV1Fast(data, context, astoch.CycPart, false, .015, spec.OutputKey),
             EhlersAdaptiveCommodityChannelIndexV1SpecOptions acci => ComputeAdaptiveRangeV1Fast(data, context, acci.CycPart, true, acci.Constant, spec.OutputKey),
             EhlersAdaptiveRelativeStrengthIndexV1SpecOptions arsi => ComputeAdaptiveRsiV1Fast(data, context, arsi.CycPart, false, spec.OutputKey),
@@ -2267,7 +2269,7 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             EhlersSignalToNoiseRatioV1SpecOptions esnrv1 => ComputeEhlersSignalToNoiseRatioV1Fast(data, context, esnrv1.Length, esnrv1.MaType),
-            EhlersSignalToNoiseRatioV2SpecOptions esnrv2 => ComputeEhlersSignalToNoiseRatioV2Fast(data, context, esnrv2.Length, esnrv2.MaType),
+            EhlersSignalToNoiseRatioV2SpecOptions esnrv2 => ComputeMamaNoiseFast(data, context, esnrv2.Length, 1, spec.OutputKey),
 
             // Batch 27 - Trend and Volatility Indicators
             TrendExhaustionIndicatorSpecOptions tei => spec.OutputKey == "Signal"
@@ -16527,6 +16529,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeMamaNoiseFast(StockData data, ComputeContext context, int length, int mode, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new MamaNoiseWindow(length, mode); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true); result.WritableSpan[i] = mode == 2 ? outputKey == "I3" ? point.InPhase : outputKey == "Q3" ? point.Quadrature : outputKey == "SmoothPeriod" ? point.Period : point.Snr : point.Snr; } return result;
+    }
+
     internal static ComputeBuffer ComputeAdaptiveRangeV1Fast(StockData data, ComputeContext context, double fraction, bool commodity, double constant, string? outputKey)
     {
         var cycle = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var input = commodity ? CommodityIndexWindow.Prices(data) : cycle; var window = new AdaptiveRangeV1Window(fraction, commodity, constant); var result = context.Rent(input.Count);
@@ -23038,12 +23046,7 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersSignalToNoiseRatioV2(close, high, low, buffer.WritableSpan, length);
-        return buffer;
+        return ComputeMamaNoiseFast(data, context, length, 1, "Esnr");
     }
 
     // Batch 27 - Trend and Volatility Indicators

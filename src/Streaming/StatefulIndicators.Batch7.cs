@@ -231,57 +231,16 @@ public sealed class EhlersAdaptiveCommodityChannelIndexV1State : IStreamingIndic
 [PrimaryOutput("Esnr")]
 public sealed class EhlersAlternateSignalToNoiseRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private double _prevRange;
-    private double _prevSnr;
-
-    public EhlersAlternateSignalToNoiseRatioState(int length = 6)
-    {
-        _length = Math.Max(1, length);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-    }
-
+    private readonly MamaNoiseWindow _window;
+    public EhlersAlternateSignalToNoiseRatioState(int length = 6) => _window = new MamaNoiseWindow(length, 0);
     public IndicatorName Name => IndicatorName.EhlersAlternateSignalToNoiseRatio;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _prevRange = 0;
-        _prevSnr = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var snapshot = _mama.Next(bar.Close, isFinal);
-        var range = (0.1 * (bar.High - bar.Low)) + (0.9 * _prevRange);
-        var temp = range != 0 ? (snapshot.Real + snapshot.Imag) / (range * range) : 0;
-        var logTemp = temp > 0 ? Math.Log10(temp) : 0;
-        var snr = (0.25 * ((10 * logTemp) + _length)) + (0.75 * _prevSnr);
-
-        if (isFinal)
-        {
-            _prevRange = range;
-            _prevSnr = snr;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Esnr", snr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(snr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Snr, includeOutputs ? new Dictionary<string, double> { { "Esnr", point.Snr } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eamd")]

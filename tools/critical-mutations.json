@@ -42575,5 +42575,185 @@
     "before": "_selected ? bar.Close :",
     "after": "!_selected ? bar.Close :",
     "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.SelectedPricesPreserveHighLowAndOverrideTypicalPrice"
+  },
+  {
+    "id": "mama-noise-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "imaginary.Add(ref covariance);",
+    "after": "imaginary.Add(ref covariance, -1d);",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-quadrature-energy",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Product(ref energy, quadrature, quadrature, 1)",
+    "after": "Product(ref energy, quadrature, quadrature, .5)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-log-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "Math.Log10(ratio) + shift * Math.Log10(2)",
+    "after": "Math.Log10(ratio)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.ExtremeEnergyToNoiseExponentsNeverFormIntermediateInfinity"
+  },
+  {
+    "id": "mama-noise-log-silence",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "if (numerator.Sign <= 0 || denominator.Sign <= 0) return 0",
+    "after": "if (numerator.Sign <= 0 || denominator.Sign <= 0) return 1",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.StartupZeroRangeAndSignedRangesRetainTheirDistinctConventions"
+  },
+  {
+    "id": "mama-noise-q3-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "change.Add(_smooth2, -1)",
+    "after": "change.Add(_smooth1, -1)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-q3-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": ".1759 * mama.SmoothPeriod",
+    "after": ".1259 * mama.SmoothPeriod",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-i3-window",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "Math.Ceiling(mama.SmoothPeriod / 2)",
+    "after": "Math.Ceiling(mama.SmoothPeriod / 3)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-i3-energy",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "Square(ref numerator, i3);",
+    "after": "Square(ref numerator, i3, .5);",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-noise-forcing",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "Square(ref rangeSum, difference, .025)",
+    "after": "Square(ref rangeSum, difference, .05)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-range-forcing",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "difference.Add(ref rangeSum, .1)",
+    "after": "difference.Add(ref rangeSum, .2)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-snr-gain",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "snrSum.AddProduct(level, _mode == 2 ? .33 : .25)",
+    "after": "snrSum.AddProduct(level, _mode == 2 ? .25 : .33)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-snr-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "snrSum.AddProduct(_snr, _mode == 2 ? .67 : .75)",
+    "after": "snrSum.AddProduct(_snr, _mode == 2 ? .5 : .5)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-range-gate",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "_mode == 1 && range.Mantissa <= 0",
+    "after": "false",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.StartupZeroRangeAndSignedRangesRetainTheirDistinctConventions"
+  },
+  {
+    "id": "mama-noise-signal",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.ExtremeEnergyToNoiseExponentsNeverFormIntermediateInfinity"
+  },
+  {
+    "id": "mama-noise-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MamaNoiseWindow.cs",
+    "scope": "internal sealed class MamaNoiseWindow",
+    "before": "_mama.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.WideAndSubnormalEnergyProducesFiniteDecibelRatios"
+  },
+  {
+    "id": "mama-noise-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeMamaNoiseFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.SelectedPricesPreserveOriginalNoiseRanges"
+  },
+  {
+    "id": "mama-noise-validation-EhlersAlternateSignalToNoiseRatio",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAlternateSignalToNoiseRatioState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.InvalidCandlesCannotAdvanceEnergyOrNoiseHistory"
+  },
+  {
+    "id": "mama-noise-validation-EhlersSignalToNoiseRatioV2",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSignalToNoiseRatioV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.InvalidCandlesCannotAdvanceEnergyOrNoiseHistory"
+  },
+  {
+    "id": "mama-noise-validation-EhlersEnhancedSignalToNoiseRatio",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersEnhancedSignalToNoiseRatioState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~MamaNoiseNumericalTests.InvalidCandlesCannotAdvanceEnergyOrNoiseHistory"
   }
 ]

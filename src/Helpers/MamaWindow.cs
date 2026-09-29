@@ -9,6 +9,7 @@ internal sealed class MamaWindow
     private readonly Scaled[] _smooth = new Scaled[6], _detrended = new Scaled[6], _quadrature = new Scaled[6], _inphase = new Scaled[6];
     private Scaled _i2, _q2, _real, _imaginary, _mama, _fama;
     private double _period, _smoothPeriod, _phase;
+    internal (ExactMeanAccumulator Covariance, ExactMeanAccumulator Energy, ExactMeanAccumulator Distance) NoiseInputs { get; private set; }
     internal MamaWindow(double fast, double slow)
     { HighLowBandsWindow.ValidateShift(fast); HighLowBandsWindow.ValidateShift(slow); _fast = fast; _slow = slow; }
     private readonly struct Scaled
@@ -41,7 +42,7 @@ internal sealed class MamaWindow
     { var sum = new ExactMeanAccumulator(); sum.AddProduct(value, gain); sum.AddProduct(previous, retention); return sum.Mean(1); }
     private static Scaled Adaptive(Scaled current, Scaled previous, double alpha, bool half)
     { var shift = half ? 1075 : 1074; var weight = ExactVarianceWindow.Units(alpha); var sum = new ExactMeanAccumulator(); current.Add(ref sum, weight); previous.Add(ref sum, (BigInteger.One << shift) - weight); sum.ScaleByPowerOfTwo(-shift); return Scaled.Round(sum); }
-    internal (EhlersMamaSnapshot Values, Signal Signal) Next(double price, bool commit)
+    internal (EhlersMamaSnapshot Values, Signal Signal) Next(double price, bool commit, bool includeNoiseInputs = false)
     {
         var mean = new ExactMeanAccumulator(); mean.Add(price, 4); mean.Add(_prices[0], 3); mean.Add(_prices[1], 2); mean.Add(_prices[2]); var smooth = Scaled.Round(mean, 10); var correction = .075 * _period + .54;
         var detrended = Fir(smooth, _smooth, correction); var quadrature = Fir(detrended, _detrended, correction); var inphase = At(_detrended, 3); var ji = Fir(inphase, _inphase, correction); var jq = Fir(quadrature, _quadrature, correction);
@@ -54,8 +55,12 @@ internal sealed class MamaWindow
         numerator = default; denominator = default; quadrature.Add(ref numerator); inphase.Add(ref denominator); var phase = denominator.IsExactlyZero ? 0 : Math.Atan(numerator.Ratio(denominator)) * (180 / Math.PI); var delta = Math.Max(1, _phase - phase); var alpha = Math.Max(_slow, _fast / delta);
         var mama = Adaptive(new Scaled(price, 0), _mama, alpha, false); var fama = Adaptive(mama, _fama, alpha, true);
         var current = new ExactMeanAccumulator(); mama.Add(ref current); fama.Add(ref current, -1d); var previous = new ExactMeanAccumulator(); _mama.Add(ref previous); _fama.Add(ref previous, -1d); var change = current; change.Subtract(previous); var signal = current.Sign > 0 ? change.Sign > 0 ? Signal.StrongBuy : Signal.Buy : current.Sign < 0 ? change.Sign < 0 ? Signal.StrongSell : Signal.Sell : Signal.None;
+        if (includeNoiseInputs)
+        {
+            var covariance = new ExactMeanAccumulator(); real.Add(ref covariance); imaginary.Add(ref covariance); var energy = new ExactMeanAccumulator(); Product(ref energy, inphase, inphase, 1); Product(ref energy, quadrature, quadrature, 1); var distance = new ExactMeanAccumulator(); distance.Add(price); mama.Add(ref distance, -1d); NoiseInputs = (covariance, energy, distance);
+        }
         if (commit) { _prices[2] = _prices[1]; _prices[1] = _prices[0]; _prices[0] = price; Shift(_smooth, smooth); Shift(_detrended, detrended); Shift(_quadrature, quadrature); Shift(_inphase, inphase); _i2 = i2; _q2 = q2; _real = real; _imaginary = imaginary; _period = period; _smoothPeriod = smoothPeriod; _phase = phase; _mama = mama; _fama = fama; }
         return (new EhlersMamaSnapshot(Publish(fama), Publish(mama), Publish(inphase), Publish(quadrature), smoothPeriod, Publish(smooth), Publish(real), Publish(imaginary)), signal);
     }
-    internal void Reset() { Array.Clear(_prices, 0, _prices.Length); foreach (var history in new[] { _smooth, _detrended, _quadrature, _inphase }) Array.Clear(history, 0, history.Length); _i2 = _q2 = _real = _imaginary = _mama = _fama = default; _period = _smoothPeriod = _phase = 0; }
+    internal void Reset() { NoiseInputs = default; Array.Clear(_prices, 0, _prices.Length); foreach (var history in new[] { _smooth, _detrended, _quadrature, _inphase }) Array.Clear(history, 0, history.Length); _i2 = _q2 = _real = _imaginary = _mama = _fama = default; _period = _smoothPeriod = _phase = 0; }
 }
