@@ -23036,12 +23036,8 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(StockData data, ComputeContext context, int length = 7, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var buffer = context.Rent(data.Count);
-        OscillatorCore.EhlersSignalToNoiseRatioV1(close, high, low, buffer.WritableSpan, length);
-        return buffer;
+        length = Math.Max(1, length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var average = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length); using var window = new HilbertNoiseWindow(maType, length, true); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], true, average?[i] ?? 0).Value; return result;
     }
 
     internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV2Fast(StockData data, ComputeContext context, int length = 6, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)

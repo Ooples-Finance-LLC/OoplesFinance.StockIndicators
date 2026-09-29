@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV1)
+        {
+            var noiseOptions = builtIn.CreateOptions(); var noiseLength = Integer(noiseOptions, "Length", 7); var noiseKind = AverageKind(noiseOptions, 3);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HilbertNoiseValues(bars, noiseLength, noiseKind).Outputs["Esnr"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersAlternateSignalToNoiseRatio or IndicatorName.EhlersEnhancedSignalToNoiseRatio or IndicatorName.EhlersSignalToNoiseRatioV2)
         {
             var noiseMode = builtIn.BatchName == IndicatorName.EhlersAlternateSignalToNoiseRatio ? 0 : builtIn.BatchName == IndicatorName.EhlersSignalToNoiseRatioV2 ? 1 : 2; var noiseLength = Integer(builtIn.CreateOptions(), "Length", 6); var noiseKeys = noiseMode == 2 ? new[] { "Esnr", "I3", "Q3", "SmoothPeriod" } : new[] { "Esnr" };

@@ -324,69 +324,16 @@ public sealed class EhlersRoofingFilterV1State : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Esnr")]
 public sealed class EhlersSignalToNoiseRatioV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersHilbertTransformIndicatorEngine _engine;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly StreamingInputResolver _input;
-    private double _prevV2;
-    private double _prevRange;
-    private double _prevAmp;
-
-    public EhlersSignalToNoiseRatioV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 7)
-    {
-        var resolved = Math.Max(1, length);
-        _engine = new EhlersHilbertTransformIndicatorEngine(resolved, 0.635, 0.338);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly HilbertNoiseWindow _window;
+    public EhlersSignalToNoiseRatioV1State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 7) => _window = new HilbertNoiseWindow(maType, length);
     public IndicatorName Name => IndicatorName.EhlersSignalToNoiseRatioV1;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _ema.Reset();
-        _prevV2 = 0;
-        _prevRange = 0;
-        _prevAmp = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _engine.Next(value, isFinal, out var inPhase, out var quad);
-        var ema = _ema.Next(value, isFinal);
-        var range = (0.2 * (bar.High - bar.Low)) + (0.8 * _prevRange);
-        var v2 = (0.2 * ((inPhase * inPhase) + (quad * quad))) + (0.8 * _prevV2);
-        var temp = range != 0 ? v2 / (range * range) : 0;
-        var logTemp = temp > 0 ? Math.Log10(temp) : 0;
-        var amp = range != 0
-            ? (0.25 * ((10 * logTemp) + 1.9)) + (0.75 * _prevAmp)
-            : 0;
-
-        if (isFinal)
-        {
-            _prevV2 = v2;
-            _prevRange = range;
-            _prevAmp = amp;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Esnr", amp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(amp, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Esnr", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-        _ema.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Esnr")]

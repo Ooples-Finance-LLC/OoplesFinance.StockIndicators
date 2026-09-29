@@ -10,6 +10,7 @@ internal sealed class HilbertPhaseWindow
     private readonly List<double> _advances = new();
     private Scaled _lag1, _lag2, _lag3, _lag4, _real1, _real2, _real3, _quad1, _quad2;
     private double _phase, _cycle;
+    internal ExactMeanAccumulator NoiseEnergy { get; private set; }
     internal HilbertPhaseWindow(int lag, double realGain, double imaginaryGain, int horizon, bool measureCycle)
     {
         HighLowBandsWindow.ValidateShift(realGain); HighLowBandsWindow.ValidateShift(imaginaryGain); _lag = Math.Max(1, lag); _horizon = Math.Min(360, Math.Max(1, horizon)); _measureCycle = measureCycle;
@@ -32,6 +33,8 @@ internal sealed class HilbertPhaseWindow
             return new(value, shift);
         }
     }
+    private static void AddSquare(ref ExactMeanAccumulator sum, Scaled component)
+    { var opposite = new ExactMeanAccumulator(); opposite.AddProduct(component.Mantissa, -component.Mantissa); opposite.ScaleByPowerOfTwo(2 * component.Shift); sum.Subtract(opposite); }
     private static double Publish(Scaled value) { var sum = new ExactMeanAccumulator(); value.Add(ref sum); return sum.Mean(1); }
     private static Signal SignalFor(Scaled real, Scaled imaginary, Scaled previousReal, Scaled previousImaginary)
     {
@@ -40,7 +43,7 @@ internal sealed class HilbertPhaseWindow
         var change = current; change.Subtract(previous);
         return current.Sign > 0 ? change.Sign > 0 ? Signal.StrongBuy : Signal.Buy : current.Sign < 0 ? change.Sign < 0 ? Signal.StrongSell : Signal.Sell : Signal.None;
     }
-    internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(double price, bool commit)
+    internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(double price, bool commit, bool includeNoiseEnergy = false)
     {
         var differenceSum = new ExactMeanAccumulator(); if (_prices.Count == _lag) { differenceSum.Add(price); differenceSum.Add(_prices.Peek(), -1); } var difference = Scaled.Round(differenceSum);
         var realSum = new ExactMeanAccumulator(); _lag4.Add(ref realSum, _realFirst); _lag2.Add(ref realSum, _realSecond); _real3.Add(ref realSum, _realFeedback); realSum.ScaleByPowerOfTwo(-2148); var real = Scaled.Round(realSum);
@@ -58,6 +61,10 @@ internal sealed class HilbertPhaseWindow
             var accumulated = advance; var period = 0; for (var lag = 1; lag <= _horizon && lag <= _advances.Count; lag++) { accumulated += _advances[_advances.Count - lag]; if (accumulated > 360) { period = lag; break; } }
             cycle = .25 * period + .75 * _cycle;
         }
+        if (includeNoiseEnergy)
+        {
+            var energy = new ExactMeanAccumulator(); AddSquare(ref energy, real); AddSquare(ref energy, imaginary); NoiseEnergy = energy;
+        }
         var signal = SignalFor(real, imaginary, _real1, _quad1);
         if (commit)
         {
@@ -67,5 +74,5 @@ internal sealed class HilbertPhaseWindow
         }
         return (Publish(real), Publish(imaginary), cycle, signal);
     }
-    internal void Reset() { _prices.Clear(); _advances.Clear(); _lag1 = _lag2 = _lag3 = _lag4 = _real1 = _real2 = _real3 = _quad1 = _quad2 = default; _phase = _cycle = 0; }
+    internal void Reset() { NoiseEnergy = default; _prices.Clear(); _advances.Clear(); _lag1 = _lag2 = _lag3 = _lag4 = _real1 = _real2 = _real3 = _quad1 = _quad2 = default; _phase = _cycle = 0; }
 }

@@ -4,7 +4,7 @@ using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
 {
-    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) HilbertPhaseValues(IReadOnlyList<Bar> bars, int length, double realGain, double imaginaryGain, int horizon, bool measureCycle)
+    internal static (Dictionary<string, double[]> Outputs, Signal[] Signals) HilbertPhaseValues(IReadOnlyList<Bar> bars, int length, double realGain, double imaginaryGain, int horizon, bool measureCycle, ReferenceFraction[]? energy = null)
     {
         ReferenceFraction R(double value) => ReferenceFraction.FromDouble(value);
         var chunk = new ReferenceFraction(BigInteger.One << 512); var upper = new ReferenceFraction(BigInteger.One << 256); var lower = new ReferenceFraction(1) / upper;
@@ -23,6 +23,7 @@ internal static partial class BuiltInFormulaReferences
             differences[i] = i < length ? zero : Round(R(bars[i].Close) - R(bars[i - length].Close));
             real[i] = Round(R(1.25) * (Prior(differences, i - 4) - R(realGain) * Prior(differences, i - 2)) + R(realGain) * Prior(real, i - 3));
             imaginary[i] = Round(Prior(differences, i - 2) - R(imaginaryGain) * differences[i] + R(imaginaryGain) * Prior(imaginary, i - 2));
+            if (energy is not null) energy[i] = real[i] * real[i] + imaginary[i] * imaginary[i];
             if (measureCycle)
             {
                 var numerator = imaginary[i] + Prior(imaginary, i - 1); var denominator = real[i] + Prior(real, i - 1); var phase = denominator.Sign == 0 ? 0 : (180 / Math.PI) * Math.Atan(Math.Abs((numerator / denominator).ToDouble()));

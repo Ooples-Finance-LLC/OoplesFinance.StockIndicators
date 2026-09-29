@@ -473,56 +473,11 @@ public static partial class Calculations
     public static StockData CalculateEhlersSignalToNoiseRatioV1(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length = 7)
     {
-        length = Math.Max(length, 1);
-        List<double> ampList = new(stockData.Count);
-        List<double> v2List = new(stockData.Count);
-        List<double> rangeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var hilbertOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersHilbertTransformIndicator(data, length: length));
-        var inPhaseList = hilbertOutputs["Inphase"];
-        var quadList = hilbertOutputs["Quad"];
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentEma = emaList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var inPhase = inPhaseList[i];
-            var quad = quadList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var prevV2 = GetLastOrDefault(v2List);
-            var v2 = (0.2 * ((inPhase * inPhase) + (quad * quad))) + (0.8 * prevV2);
-            v2List.Add(v2);
-
-            var prevRange = GetLastOrDefault(rangeList);
-            var range = (0.2 * (currentHigh - currentLow)) + (0.8 * prevRange);
-            rangeList.Add(range);
-
-            var prevAmp = GetLastOrDefault(ampList);
-            var temp = range != 0 ? v2 / (range * range) : 0;
-            var logTemp = temp > 0 ? Math.Log10(temp) : 0;
-            var amp = range != 0 ? (0.25 * ((10 * logTemp) + 1.9)) + (0.75 * prevAmp) : 0;
-            ampList.Add(amp);
-
-            var signal = GetVolatilitySignal(currentValue - currentEma, prevValue - prevEma, amp, 1.9);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Esnr", ampList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ampList);
-        stockData.IndicatorName = IndicatorName.EhlersSignalToNoiseRatioV1;
-
-        return stockData;
+        length = Math.Max(1, length); var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); List<double>? average = null;
+        if (external) average = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length)?.ToList() ?? GetMovingAverageList(stockData, maType, length, input);
+        using var window = new HilbertNoiseWindow(maType, length, external); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], high[i], low[i], true, average?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Esnr", values } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersSignalToNoiseRatioV1; return stockData;
     }
 
 

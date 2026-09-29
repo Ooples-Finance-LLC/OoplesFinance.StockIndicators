@@ -42755,5 +42755,167 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~MamaNoiseNumericalTests.InvalidCandlesCannotAdvanceEnergyOrNoiseHistory"
+  },
+  {
+    "id": "hilbert-noise-quadrature-energy",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertPhaseWindow.cs",
+    "scope": "internal (double Real, double Imaginary, double Cycle, Signal Signal) Next(",
+    "before": "AddSquare(ref energy, imaginary)",
+    "after": "AddSquare(ref energy, real)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-energy-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "energyInput.Add(ref energySum, .2)",
+    "after": "energyInput.Add(ref energySum, .1)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-energy-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "_energy.Add(ref energySum, .8)",
+    "after": "_energy.Add(ref energySum, .5)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-range-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "difference.Add(ref rangeSum, .2)",
+    "after": "difference.Add(ref rangeSum, .1)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-range-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "_range.Add(ref rangeSum, .8)",
+    "after": "_range.Add(ref rangeSum, .5)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-log-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "Math.Log10(ratio) + shift * Math.Log10(2)",
+    "after": "Math.Log10(ratio)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.ExtremeExponentRatiosPreserveLogarithmsAndDirectionalSignals"
+  },
+  {
+    "id": "hilbert-noise-offset",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "LogRatio(numerator, denominator) + 1.9",
+    "after": "LogRatio(numerator, denominator) + 2.9",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-snr-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "smoothed.AddProduct(_snr, .75)",
+    "after": "smoothed.AddProduct(_snr, .5)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-range-gate",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "range.Mantissa != 0 ?",
+    "after": "range.Mantissa > 0 ?",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.EmptyZeroAndSignedRangesPreserveStartupConventions"
+  },
+  {
+    "id": "hilbert-noise-lag",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "_hilbert = new(length, .635",
+    "after": "_hilbert = new(Math.Max(1, length - 1), .635",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "internal void Reset() { _hilbert.Reset();",
+    "after": "internal void Reset() {",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.WideAndSubnormalEnergyRetainsFiniteNoiseRatios"
+  },
+  {
+    "id": "hilbert-noise-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.SelectedPricesReachBatchAndFastWithoutReplacingRanges"
+  },
+  {
+    "id": "hilbert-noise-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSignalToNoiseRatioV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.InvalidCandlesCannotAdvanceHilbertEnergyOrAverages"
+  },
+  {
+    "id": "hilbert-noise-batch-customer",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSignalToNoiseRatioV1(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlyDirection"
+  },
+  {
+    "id": "hilbert-noise-fast-customer",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSignalToNoiseRatioV1Fast(",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length)",
+    "after": "(IReadOnlyList<double>?)null",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlyDirection"
+  },
+  {
+    "id": "hilbert-noise-signal",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.ExtremeExponentRatiosPreserveLogarithmsAndDirectionalSignals"
+  },
+  {
+    "id": "hilbert-noise-weighted-signal",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertNoiseWindow.cs",
+    "scope": "internal sealed class HilbertNoiseWindow",
+    "before": "value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, 1)",
+    "filter": "FullyQualifiedName~HilbertNoiseNumericalTests.ExtremeExponentRatiosPreserveLogarithmsAndDirectionalSignals"
   }
 ]

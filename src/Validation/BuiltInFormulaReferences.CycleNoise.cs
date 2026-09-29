@@ -7,6 +7,7 @@ internal static partial class BuiltInFormulaReferences
     private static FormulaDefinition? CycleNoise(IBuiltInIndicator indicator)
     {
         var name = indicator.BatchName;
+        if (name == IndicatorName.EhlersSignalToNoiseRatioV1) { var noiseSettings = indicator.CreateOptions(); return new("Esnr", new[] { "Esnr" }, bars => HilbertNoiseValues(bars, Integer(noiseSettings, "Length", 7), AverageKind(noiseSettings, 3)).Outputs); }
         if (name is IndicatorName.EhlersAlternateSignalToNoiseRatio or IndicatorName.EhlersEnhancedSignalToNoiseRatio or IndicatorName.EhlersSignalToNoiseRatioV2)
         {
             var noiseMode = name == IndicatorName.EhlersAlternateSignalToNoiseRatio ? 0 : name == IndicatorName.EhlersSignalToNoiseRatioV2 ? 1 : 2; var noiseLength = Integer(indicator.CreateOptions(), "Length", 6); return new("Esnr", noiseMode == 2 ? new[] { "Esnr", "I3", "Q3", "SmoothPeriod" } : new[] { "Esnr" }, bars => MamaNoiseValues(bars, noiseLength, noiseMode).Outputs);
