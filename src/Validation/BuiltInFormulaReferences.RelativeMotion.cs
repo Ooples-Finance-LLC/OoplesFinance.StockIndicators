@@ -1277,39 +1277,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.KaseDevStopV2:
                 return new("Dev1", new[] { "Dev1", "Dev2", "Dev3", "Dev4" }, bars => KaseStopV2Outputs(bars, indicator));
             case IndicatorName.KaseDevStopV1:
-                var firstVariant = name == IndicatorName.KaseDevStopV1;
-                var keys = firstVariant ? new[] { "Dev1", "Dev2", "Dev3", "WarningLine" } : new[] { "Dev1", "Dev2", "Dev3", "Dev4" };
-                return new("Dev1", keys, bars =>
-                {
-                    var prices = firstVariant ? bars.Select(b => (b.High + b.Low + b.Close) / 3).ToArray() : Closes(bars);
-                    var fast = Average(prices, Integer(options, "FastLength", 10), kind);
-                    var slow = Average(prices, Integer(options, "SlowLength", 21), kind);
-                    if (firstVariant)
-                    {
-                        // Independent scanned decimal windows; round only the final means.
-                        var exactPrices = prices.Select(BinaryDecimal).ToArray();
-                        fast = MotionDecimalAverage(exactPrices, Integer(options, "FastLength", 5), kind).Select(v => (double)v).ToArray();
-                        slow = MotionDecimalAverage(exactPrices, Integer(options, "SlowLength", 21), kind).Select(v => (double)v).ToArray();
-                    }
-                    var ranges = bars.Select((b, i) => firstVariant ?
-                        Math.Max(b.High - (i < 2 ? 0 : bars[i - 2].Low), Math.Max(Math.Abs(b.High - (i < 2 ? 0 : bars[i - 2].Close)),
-                            Math.Abs(b.Low - (i < 2 ? 0 : bars[i - 2].Close)))) :
-                        Math.Max(Math.Max(b.High, i == 0 ? 0 : bars[i - 1].High), i < 2 ? 0 : bars[i - 2].Close) -
-                        Math.Min(Math.Min(b.Low, i == 0 ? 0 : bars[i - 1].Low), i < 2 ? 0 : bars[i - 2].Close)).ToArray();
-                    var mean = Average(ranges, length, kind);
-                    var deviation = PopulationVariance(ranges, length).Select(Math.Sqrt).ToArray();
-                    var multiples = new[] { Number(options, 0, "StdDev1"), Number(options, 1, "StdDev2"),
-                        Number(options, 2.2, "StdDev3"), Number(options, 3.6, "StdDev4") };
-                    return Enumerable.Range(0, 4).ToDictionary(j => keys[j], j =>
-                        bars.Select((b, i) =>
-                        {
-                            var multiple = multiples[firstVariant ? (j + 1) % 4 : j];
-                            if (firstVariant) return fast[i] < slow[i] ? prices[i] + mean[i] + multiple * deviation[i] :
-                                prices[i] - mean[i] - multiple * deviation[i];
-                            return fast[i] > slow[i] ? b.High - mean[i] - multiple * deviation[i] :
-                                b.Low + mean[i] + multiple * deviation[i];
-                        }).ToArray());
-                });
+                return new("Dev1", new[] { "Dev1", "Dev2", "Dev3", "WarningLine" }, bars => KaseStopV1Outputs(bars, indicator));
             case IndicatorName.MultiLevelIndicator:
                 return new("Mli", new[] { "Mli" }, bars => Outputs(("Mli", bars.Select((b, i) =>
                     ((i < length ? 0 : bars[i - length].Open) - b.Open) * Number(options, 10000, "Factor")).ToArray())));

@@ -20761,45 +20761,14 @@ internal static partial class IndicatorCompute
         return result;
     }
 
-    private static ComputeBuffer ComputeKaseDevStopV1Fast(StockData data, ComputeContext context,
+    internal static ComputeBuffer ComputeKaseDevStopV1Fast(StockData data, ComputeContext context,
         KaseDevStopV1SpecOptions options, string? outputKey)
     {
-        var (prices, highs, lows, _, closes, _) = CalculationsHelper.GetInputValuesList(InputName.TypicalPrice, data);
-        var input = SpanCompat.AsReadOnlySpan(prices);
-        using var ranges = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++)
-        {
-            var previous = i < 2 ? 0 : closes[i - 2];
-            ranges.WritableSpan[i] = Math.Max(highs[i] - (i < 2 ? 0 : lows[i - 2]),
-                Math.Max(Math.Abs(highs[i] - previous), Math.Abs(lows[i] - previous)));
-        }
-        using var mean = context.Rent(data.Count);
-        using var slow = context.Rent(data.Count);
-        using var fast = context.Rent(data.Count);
-        using var deviation = context.Rent(data.Count);
-        MovingAverage(data, options.MaType, options.Length, ranges.Span, mean.WritableSpan);
-        if (ComponentAverage.HasOverrides)
-        {
-            MovingAverage(data, options.MaType, options.SlowLength, input, slow.WritableSpan);
-            MovingAverage(data, options.MaType, options.FastLength, input, fast.WritableSpan);
-        }
-        else
-        {
-            using var preciseFast = new Streaming.SpreadAverage(options.MaType, options.FastLength);
-            using var preciseSlow = new Streaming.SpreadAverage(options.MaType, options.SlowLength);
-            for (var i = 0; i < data.Count; i++)
-            {
-                fast.WritableSpan[i] = preciseFast.Next(new(prices[i]), true).Value;
-                slow.WritableSpan[i] = preciseSlow.Next(new(prices[i]), true).Value;
-            }
-        }
-        VolatilityCore.StandardDeviation(ranges.Span, deviation.WritableSpan, options.Length);
-        var multiple = outputKey switch { "WarningLine" => options.StdDev1, "Dev2" => options.StdDev3,
-            "Dev3" => options.StdDev4, _ => options.StdDev2 };
-        var result = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++)
-            result.WritableSpan[i] = prices[i] + (fast.Span[i] < slow.Span[i] ? 1 : -1) * (mean.Span[i] + multiple * deviation.Span[i]);
-        return result;
+        var (input, high, low, close) = KaseStopV1Window.Inputs(data); var external = ComponentAverage.HasOverrides; var legacy = !StrengthWindow.Supports(options.MaType); using var window = new KaseStopV1Window(options.MaType, options.FastLength, options.SlowLength, options.Length, options.StdDev1, options.StdDev2, options.StdDev3, options.StdDev4, external);
+        using ComputeBuffer? mean = external || legacy ? context.Rent(input.Count) : null; using ComputeBuffer? slow = external ? context.Rent(input.Count) : null; using ComputeBuffer? fast = external ? context.Rent(input.Count) : null;
+        if (external || legacy) { MovingAverage(data, options.MaType, options.Length, KaseStopV1Window.PublishedRanges(high, low, close), mean!.Value.WritableSpan); if (external) { MovingAverage(data, options.MaType, options.SlowLength, SpanCompat.AsReadOnlySpan(input), slow!.Value.WritableSpan); MovingAverage(data, options.MaType, options.FastLength, SpanCompat.AsReadOnlySpan(input), fast!.Value.WritableSpan); } }
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], close[i], input[i], true, external || legacy ? mean!.Value.Span[i] : null, external ? slow!.Value.Span[i] : null, external ? fast!.Value.Span[i] : null); result.WritableSpan[i] = outputKey switch { "WarningLine" => point.WarningLine, "Dev2" => point.Dev2, "Dev3" => point.Dev3, _ => point.Dev1 }; } return result; }
+        catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeKaseDevStopV2Fast(StockData data, ComputeContext context, int fastLength = 10,

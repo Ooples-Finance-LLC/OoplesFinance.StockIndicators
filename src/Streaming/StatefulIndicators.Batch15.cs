@@ -1088,108 +1088,18 @@ public sealed class KaseConvergenceDivergenceState : IStreamingIndicatorState, I
 [PrimaryOutput("Dev1")]
 public sealed class KaseDevStopV1State : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly SpreadAverage _fastSmoother;
-    private readonly SpreadAverage _slowSmoother;
-    private readonly IMovingAverageSmoother _dtrAvg;
-
-    // The deviation of the true-range window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _dtrStd;
-    private readonly PooledRingBuffer<double> _lowValues;
-    private readonly PooledRingBuffer<double> _closeValues;
-    private StreamingInputResolver _input;
-    private readonly double _stdDev1;
-    private readonly double _stdDev2;
-    private readonly double _stdDev3;
-    private readonly double _stdDev4;
-
-    public KaseDevStopV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20,
-        double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6)
-    {
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var resolved = Math.Max(1, length);
-        _fastSmoother = new SpreadAverage(maType, resolvedFast);
-        _slowSmoother = new SpreadAverage(maType, resolvedSlow);
-        _dtrAvg = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dtrStd = new RollingStandardDeviation(resolved);
-        _lowValues = new PooledRingBuffer<double>(2);
-        _closeValues = new PooledRingBuffer<double>(2);
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
-        _stdDev1 = stdDev1;
-        _stdDev2 = stdDev2;
-        _stdDev3 = stdDev3;
-        _stdDev4 = stdDev4;
-    }
-
+    private readonly KaseStopV1Window _window;
+    private bool _selectedInput;
+    public KaseDevStopV1State(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 5, int slowLength = 21, int length = 20, double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2, double stdDev4 = 3.6) => _window = new(maType, fastLength, slowLength, length, stdDev1, stdDev2, stdDev3, stdDev4);
+    void ICustomInputConsumer.ReadCloseAsInput() => _selectedInput = true;
     public IndicatorName Name => IndicatorName.KaseDevStopV1;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _fastSmoother.Reset();
-        _slowSmoother.Reset();
-        _dtrAvg.Reset();
-        _dtrStd.Reset();
-        _lowValues.Clear();
-        _closeValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevClose = EhlersStreamingWindow.GetOffsetValue(_closeValues, 2);
-        var prevLow = EhlersStreamingWindow.GetOffsetValue(_lowValues, 2);
-        var dtr = Math.Max(Math.Max(bar.High - prevLow, Math.Abs(bar.High - prevClose)), Math.Abs(bar.Low - prevClose));
-        var dtrAvg = _dtrAvg.Next(dtr, isFinal);
-        var dtrStd = _dtrStd.Next(dtr, isFinal);
-        var maFast = _fastSmoother.Next(new(value), isFinal).Value;
-        var maSlow = _slowSmoother.Next(new(value), isFinal).Value;
-
-        var warningLine = maFast < maSlow
-            ? value + dtrAvg + (_stdDev1 * dtrStd)
-            : value - dtrAvg - (_stdDev1 * dtrStd);
-        var dev1 = maFast < maSlow
-            ? value + dtrAvg + (_stdDev2 * dtrStd)
-            : value - dtrAvg - (_stdDev2 * dtrStd);
-        var dev2 = maFast < maSlow
-            ? value + dtrAvg + (_stdDev3 * dtrStd)
-            : value - dtrAvg - (_stdDev3 * dtrStd);
-        var dev3 = maFast < maSlow
-            ? value + dtrAvg + (_stdDev4 * dtrStd)
-            : value - dtrAvg - (_stdDev4 * dtrStd);
-
-        if (isFinal)
-        {
-            _lowValues.TryAdd(bar.Low, out _);
-            _closeValues.TryAdd(bar.Close, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(4)
-            {
-                { "Dev1", dev1 },
-                { "Dev2", dev2 },
-                { "Dev3", dev3 },
-                { "WarningLine", warningLine }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dev1, outputs);
+        StreamingInputValidation.Validate(bar); var input = _selectedInput ? bar.Close : KaseStopV1Window.Typical(bar.High, bar.Low, bar.Close); var point = _window.Next(bar.High, bar.Low, bar.Close, input, isFinal);
+        return new(point.Dev1, includeOutputs ? new Dictionary<string, double> { { "Dev1", point.Dev1 }, { "Dev2", point.Dev2 }, { "Dev3", point.Dev3 }, { "WarningLine", point.WarningLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastSmoother.Dispose();
-        _slowSmoother.Dispose();
-        _dtrAvg.Dispose();
-        _dtrStd.Dispose();
-        _lowValues.Dispose();
-        _closeValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dev1")]
