@@ -3585,3 +3585,12 @@ Validation: 39/39 Chande Disparity cases passed in the first focused run. The st
 The authorized follow-up independently derives the final sample of prices `[1, 2, 4, 3.4]`. The last held-step window is `[2, 4, 4]`; its rounded mean is `3.3333333333333335`, and the rounded price mean is `3.1333333333333333`. Exact covariance/variance gives slope `7656119366529843 / 9007199254740992`. Centering with those separately rounded means and rounding once yields `3.6999999999999997`. Using unrounded means would instead give `3.7`. Production and the independent reference already agree with the staged contract.
 
 Corrected the broad hand expectation and strengthened the dedicated AutoFilter assertion from 14-decimal tolerance to exact equality. **49/49 checks passed**, including all 48 AutoFilter cases and `FoundationReferencesMatchIndependentSmallExamples` (`autofilter-608-hand-followup.trx`). This resolves both recorded hand-example failures. Only tests were rebuilt; unchanged production binaries were reused. Existing compiled mutation evidence remains applicable.
+
+
+### Batch 610: Average Money Flow mutation qualification
+
+The isolated campaigns `610a` and `610b` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **49/49 focused tests**. Both archives were compared byte-for-byte with the retained batch-610 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `52c22612487d61a56d5bd24cfc52e5a886998ce70a94596f9b6265b2fa10d364`. Archive SHA256: `818eb476a9dc9e0e50a7ba025921266c3cdae434d88e31a674dcb42fc1475ff4` and `818eb476a9dc9e0e50a7ba025921266c3cdae434d88e31a674dcb42fc1475ff4`.
+
+This is evidence for the isolated batch-610 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 611-623 and the remaining final gates is still incomplete.
