@@ -84,6 +84,7 @@ internal static class BuilderVerifiedArms
         typeof(ButterworthFilterSpecOptions),
         typeof(CCTStochRSISpecOptions),
         typeof(CCTStochRelativeStrengthIndexSpecOptions),
+        typeof(WellesWilderVolatilitySystemSpecOptions),
         typeof(CalmarRatioSpecOptions),
         typeof(LogisticCorrelationSpecOptions),
         typeof(EfficientPriceSpecOptions),

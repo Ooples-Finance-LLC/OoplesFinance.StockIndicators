@@ -57,17 +57,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.WellesWilderVolatilitySystem:
                 if (kind == 0) return null;
-                return new("Wwvs", new[] { "Wwvs" }, bars =>
-                {
-                    var period = Integer(options, "Length2", 21);
-                    var prices = Closes(bars);
-                    var baseline = Average(prices, Integer(options, "Length1", 63), kind);
-                    var atr = Average(TrueRanges(bars), period, kind);
-                    var factor = Number(options, 3, "Factor");
-                    return Outputs(("Wwvs", prices.Select((p, i) => p > baseline[i]
-                        ? Window(prices, i, Math.Max(2, period)).Max() - factor * atr[i]
-                        : Window(prices, i, Math.Max(2, period)).Min() + factor * atr[i]).ToArray()));
-                });
+                return new("Wwvs", new[] { "Wwvs" }, bars => WilderVolatilityOutputs(bars, indicator));
             case IndicatorName.UtBotAlerts:
                 if (kind == 0) return null;
                 return new("TrailingStop", new[] { "TrailingStop", "Position", "Buy", "Sell" }, bars =>

@@ -680,6 +680,7 @@ internal static partial class IndicatorCompute
             LogisticCorrelationSpecOptions lc => ComputeLogisticCorrelation(data, context, lc.Length, lc.K),
             EfficientPriceSpecOptions ep => ComputeEfficientPrice(data, context, ep.Length),
             EfficientAutoLineSpecOptions eal => ComputeEfficientAutoLine(data, context, eal.Length, eal.FastAlpha, eal.SlowAlpha),
+            WellesWilderVolatilitySystemSpecOptions wilder => ComputeWellesWilderVolatilitySystemFast(data, context, wilder.MaType, wilder.Length1, wilder.Length2, wilder.Factor),
             CalmarRatioSpecOptions cr => ComputeCalmarRatioFast(data, context, cr.Length),
             CommoditySelectionIndexSpecOptions csi => ComputeCommoditySelectionIndexFast(data, context, csi.Length,
                 csi.MaType, signal: spec.OutputKey == "Signal"),
@@ -7040,6 +7041,18 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(data.Count);
         VolatilityCore.YangZhangVolatility(open, high, low, close, buffer.WritableSpan, length);
         return buffer;
+    }
+
+    internal static ComputeBuffer ComputeWellesWilderVolatilitySystemFast(StockData data, ComputeContext context, MovingAvgType kind = MovingAvgType.ExponentialMovingAverage, int trendLength = 63, int rangeLength = 21, double factor = 3)
+    {
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind);
+        using var window = new WilderVolatilityWindow(kind, trendLength, rangeLength, factor, external);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, rangeLength, kind) : null;
+        using ComputeBuffer? trend = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, kind, trendLength, SpanCompat.AsReadOnlySpan(input), trend!.Value.WritableSpan);
+        var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? atr!.Value.Span[i] : null, external ? trend!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

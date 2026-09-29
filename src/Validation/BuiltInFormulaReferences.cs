@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.WellesWilderVolatilitySystem)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => WilderVolatilityOutputs(bars, builtIn)["Wwvs"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ChandelierExit)
         {
             var chandelierKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

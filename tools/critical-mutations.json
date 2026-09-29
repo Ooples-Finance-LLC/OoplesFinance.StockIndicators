@@ -45653,5 +45653,221 @@
     "before": "{ \"ExitShort\", point.Short }",
     "after": "{ \"ExitShort\", point.Long }",
     "filter": "FullyQualifiedName~ChandelierNumericalTests.HandRangesUseCurrentFirstCloseAndExpireBothExtrema"
+  },
+  {
+    "id": "wilder-volatility-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p))",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
+  },
+  {
+    "id": "wilder-volatility-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? (_previous + close) / 2 : close",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.UnpublishedRangesCancelAgainstBothExtremaBeforePublication"
+  },
+  {
+    "id": "wilder-volatility-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "sum.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.UnpublishedRangesCancelAgainstBothExtremaBeforePublication"
+  },
+  {
+    "id": "wilder-volatility-factor",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "sum.AddProduct(atr.Mantissa, _factor, up ? -1 : 1);",
+    "after": "sum.Add(atr.Mantissa, up ? -1 : 1);",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-side-equality",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "var up = direction.Sign > 0;",
+    "after": "var up = direction.Sign >= 0;",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
+  },
+  {
+    "id": "wilder-volatility-minimum-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_extremaLength = Math.Max(2, rangeLength);",
+    "after": "_extremaLength = Math.Max(1, rangeLength);",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
+  },
+  {
+    "id": "wilder-volatility-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "var skip = _prices.Count == _extremaLength;",
+    "after": "var skip = false;",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
+  },
+  {
+    "id": "wilder-volatility-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "Math.Max(highest, price)",
+    "after": "Math.Min(highest, price)",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "Math.Min(lowest, price)",
+    "after": "Math.Max(lowest, price)",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_range = new(kind, Math.Max(1, rangeLength))",
+    "after": "_range = new(kind, Math.Max(1, trendLength))",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-trend-period",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_trend = new(kind, Math.Max(1, trendLength))",
+    "after": "_trend = new(kind, Math.Max(1, rangeLength))",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-preview",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_trend!.Next(new RocBankValue(close), commit)",
+    "after": "_trend!.Next(new RocBankValue(close), true)",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-reset",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "_range?.Reset(); _trend?.Reset();",
+    "after": "_range?.Reset();",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-weighted-window",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-signal",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.WideRangesPreserveTrendDirectionExtremaAndStopProjection"
+  },
+  {
+    "id": "wilder-volatility-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "wilder-volatility-custom-trend",
+    "module": "numerical",
+    "file": "src/Helpers/WilderVolatilityWindow.cs",
+    "scope": "internal sealed class WilderVolatilityWindow",
+    "before": "externalTrend.HasValue ? new RocBankValue(externalTrend.Value)",
+    "after": "externalTrend.HasValue ? new RocBankValue(0)",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.CustomRangeThenTrendAndLegacyAveragesKeepTheirOrder"
+  },
+  {
+    "id": "wilder-volatility-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeWellesWilderVolatilitySystemFast(",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.SelectedPricesPreserveEffectiveRangesTrendAndSignals"
+  },
+  {
+    "id": "wilder-volatility-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WellesWilderVolatilitySystemState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.InvalidCandlesCannotAdvanceEitherAverageOrPriceExtrema"
+  },
+  {
+    "id": "wilder-volatility-output-slot",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class WellesWilderVolatilitySystemState",
+    "before": "{ \"Wwvs\", point.Value }",
+    "after": "{ \"wrong\", point.Value }",
+    "filter": "FullyQualifiedName~WilderVolatilityNumericalTests.EqualityUsesLowerSideAndExtremaKeepTwoBarMinimum"
   }
 ]

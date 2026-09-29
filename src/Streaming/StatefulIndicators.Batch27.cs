@@ -826,78 +826,16 @@ public sealed class WellesWilderSummationState : IStreamingIndicatorState
 [PrimaryOutput("Wwvs")]
 public sealed class WellesWilderVolatilitySystemState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _factor;
-    private readonly IMovingAverageSmoother _atrMa;
-    private readonly IMovingAverageSmoother _ema;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly StreamingInputResolver _input;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public WellesWilderVolatilitySystemState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63,
-        int length2 = 21, double factor = 3)
-    {
-        var resolved1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _factor = factor;
-        _atrMa = MovingAverageSmootherFactory.Create(maType, resolved2);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved1);
-        _maxWindow = new RollingWindowMax(Math.Max(2, resolved2));
-        _minWindow = new RollingWindowMin(Math.Max(2, resolved2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly WilderVolatilityWindow _window;
+    public WellesWilderVolatilitySystemState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63, int length2 = 21, double factor = 3) => _window = new(maType, length1, length2, factor);
     public IndicatorName Name => IndicatorName.WellesWilderVolatilitySystem;
-
-    public void Reset()
-    {
-        _atrMa.Reset();
-        _ema.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrMa.Next(tr, isFinal);
-        var ema = _ema.Next(value, isFinal);
-        var highest = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
-        var lowest = isFinal ? _minWindow.Add(value, out _) : _minWindow.Preview(value, out _);
-        var sic = value > ema ? highest : lowest;
-        var vstop = value > ema ? sic - (_factor * atr) : sic + (_factor * atr);
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Wwvs", vstop }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vstop, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Wwvs", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrMa.Dispose();
-        _ema.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Wrma")]
