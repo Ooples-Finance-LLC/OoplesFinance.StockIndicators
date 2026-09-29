@@ -733,52 +733,12 @@ public static partial class Calculations
     public static StockData CalculateSuperTrend(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 22, double atrMult = 3)
     {
-        List<double> longStopList = new(stockData.Count);
-        List<double> shortStopList = new(stockData.Count);
-        List<double> dirList = new(stockData.Count);
-        List<double> trendList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentAtr = atrList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var atrValue = atrMult * currentAtr;
-            var tempLongStop = currentValue - atrValue;
-            var tempShortStop = currentValue + atrValue;
-
-            var prevLongStop = i >= 1 ? longStopList[i - 1] : tempLongStop;
-            var longStop = prevValue > prevLongStop ? Math.Max(tempLongStop, prevLongStop) : tempLongStop;
-            longStopList.Add(longStop);
-
-            var prevShortStop = i >= 1 ? shortStopList[i - 1] : tempShortStop;
-            var shortStop = prevValue < prevShortStop ? Math.Min(tempShortStop, prevShortStop) : tempShortStop;
-            shortStopList.Add(shortStop);
-
-            var prevDir = i >= 1 ? dirList[i - 1] : 1;
-            var dir = prevDir == -1 && currentValue > prevShortStop ? 1 : prevDir == 1 && currentValue < prevLongStop ? -1 : prevDir;
-            dirList.Add(dir);
-
-            var prevTrend = i >= 1 ? trendList[i - 1] : 0;
-            var trend = dir > 0 ? longStop : shortStop;
-            trendList.Add(trend);
-
-            var signal = GetCompareSignal(currentValue - trend, prevValue - prevTrend);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Trend", trendList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trendList);
-        stockData.IndicatorName = IndicatorName.SuperTrend;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new SuperTrendWindow(maType, length, atrMult, external); List<double>? atr = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); var ranges = GetTrueRangeList(stockData); atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, ranges); stockData.RestoreInputSeries(caller); }
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr![i] : null); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Trend", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.SuperTrend; return stockData;
     }
 
 

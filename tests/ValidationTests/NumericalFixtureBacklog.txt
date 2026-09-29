@@ -894,11 +894,6 @@ OoplesFinance.StockIndicators.Indicators.Stc/default
 OoplesFinance.StockIndicators.Indicators.Stc/longer-periods
 OoplesFinance.StockIndicators.Indicators.Stc/minimum-periods
 OoplesFinance.StockIndicators.Indicators.Stc/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SuperTrend/default
-OoplesFinance.StockIndicators.Indicators.SuperTrend/longer-periods
-OoplesFinance.StockIndicators.Indicators.SuperTrend/minimum-periods
-OoplesFinance.StockIndicators.Indicators.SuperTrend/shorter-periods
-OoplesFinance.StockIndicators.Indicators.SuperTrend/weighted-average
 OoplesFinance.StockIndicators.Indicators.SuperTrendFilter/default
 OoplesFinance.StockIndicators.Indicators.SuperTrendFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.SuperTrendFilter/minimum-periods

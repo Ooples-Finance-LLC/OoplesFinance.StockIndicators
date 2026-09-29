@@ -814,80 +814,16 @@ public sealed class StrengthOfMovementState : IStreamingIndicatorState, IDisposa
 [PrimaryOutput("Trend")]
 public sealed class SuperTrendState : IStreamingIndicatorState, IDisposable
 {
-    private readonly AverageTrueRangeSmoother _atrSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _atrMult;
-    private double _prevValue;
-    private double _prevLongStop;
-    private double _prevShortStop;
-    private int _prevDir;
-    private bool _hasPrev;
-
-    public SuperTrendState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22,
-        double atrMult = 3)
-    {
-        _atrSmoother = new AverageTrueRangeSmoother(maType, Math.Max(1, length), InputName.Close);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _atrMult = atrMult;
-    }
-
+    private readonly SuperTrendWindow _window;
+    public SuperTrendState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22, double atrMult = 3) => _window = new(maType, length, atrMult);
     public IndicatorName Name => IndicatorName.SuperTrend;
-
-    public void Reset()
-    {
-        _atrSmoother.Reset();
-        _prevValue = 0;
-        _prevLongStop = 0;
-        _prevShortStop = 0;
-        _prevDir = 1;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var atr = _atrSmoother.Next(bar, isFinal);
-        var prevValue = _hasPrev ? _prevValue : 0;
-
-        var atrValue = _atrMult * atr;
-        var tempLongStop = value - atrValue;
-        var tempShortStop = value + atrValue;
-
-        var prevLongStop = _hasPrev ? _prevLongStop : tempLongStop;
-        var longStop = prevValue > prevLongStop ? Math.Max(tempLongStop, prevLongStop) : tempLongStop;
-
-        var prevShortStop = _hasPrev ? _prevShortStop : tempShortStop;
-        var shortStop = prevValue < prevShortStop ? Math.Min(tempShortStop, prevShortStop) : tempShortStop;
-
-        var prevDir = _hasPrev ? _prevDir : 1;
-        var dir = prevDir == -1 && value > prevShortStop ? 1 : prevDir == 1 && value < prevLongStop ? -1 : prevDir;
-        var trend = dir > 0 ? longStop : shortStop;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevLongStop = longStop;
-            _prevShortStop = shortStop;
-            _prevDir = dir;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Trend", trend }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trend, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Trend", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Stf")]

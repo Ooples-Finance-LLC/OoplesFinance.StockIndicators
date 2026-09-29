@@ -46301,5 +46301,221 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~UtBotNumericalTests.InvalidCandlesCannotAdvanceAverageStopOrPosition"
+  },
+  {
+    "id": "supertrend-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p))",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? (_previous + close) / 2 : close",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "private static RocBankValue TrueRange(",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.ExtendedStopsCancelBeforePublicationAndZeroFactorsRemainFinite"
+  },
+  {
+    "id": "supertrend-wide-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "sum.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.ExtendedStopsCancelBeforePublicationAndZeroFactorsRemainFinite"
+  },
+  {
+    "id": "supertrend-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "sum.AddProduct(atr.Mantissa, _factor, sign);",
+    "after": "sum.AddProduct(atr.Mantissa, _factor / 2, sign);",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-up-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Extreme(lower, priorLower, true)",
+    "after": "Extreme(lower, priorLower, false)",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-down-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Extreme(upper, priorUpper, false)",
+    "after": "Extreme(upper, priorUpper, true)",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-up-reset-equality",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Compare(previous, priorLower) > 0",
+    "after": "Compare(previous, priorLower) >= 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-down-reset-equality",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Compare(previous, priorUpper) < 0",
+    "after": "Compare(previous, priorUpper) <= 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-down-flip-equality",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Compare(close, priorLower) >= 0",
+    "after": "Compare(close, priorLower) > 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-up-flip-equality",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "Compare(close, priorUpper) > 0",
+    "after": "Compare(close, priorUpper) >= 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-long-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_seeded ? _long : lower",
+    "after": "_seeded ? _long : default",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-short-history",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_seeded ? _short : upper",
+    "after": "_seeded ? default : upper",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_range!.Next(TrueRange(high, low, _seeded ? _previous : close), commit)",
+    "after": "_range!.Next(TrueRange(high, low, _seeded ? _previous : close), true)",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "_seeded = false; _up = true;",
+    "after": "_seeded = false; _up = false;",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-signal-seed",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "var previous = _seeded ? _previous : 0;",
+    "after": "var previous = _seeded ? _previous : close;",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndFirstDirection"
+  },
+  {
+    "id": "supertrend-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/SuperTrendWindow.cs",
+    "scope": "internal sealed class SuperTrendWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "supertrend-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSuperTrendFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.SelectedPricesPreserveEffectiveRangesAndSignals"
+  },
+  {
+    "id": "supertrend-wide-fast-ranges",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSuperTrendFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(input[i], input[i], input[i], true,",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.WideRangesBothGapDirectionsAndRatchetsStayExact"
+  },
+  {
+    "id": "supertrend-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch23.cs",
+    "scope": "public sealed class SuperTrendState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~SuperTrendNumericalTests.InvalidCandlesCannotAdvanceAveragesStopsOrDirection"
   }
 ]

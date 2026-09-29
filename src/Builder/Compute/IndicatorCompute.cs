@@ -3635,45 +3635,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSuperTrendFast(StockData data, ComputeContext context, int length = 22,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double atrMult = 3)
     {
-        // CalculateSuperTrend trails two stops a multiple of the average true range either side of the
-        // chained series, each ratcheting only in its own direction while the previous bar stayed on its side
-        // of it, and publishes whichever the direction is currently on. The direction starts long. The core
-        // this replaced rebuilt the price spans from the ticker list and trailed something else.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double longStop = 0;
-        double shortStop = 0;
-        double direction = 1;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var atrValue = atrMult * atr[i];
-            var tempLongStop = currentValue - atrValue;
-            var tempShortStop = currentValue + atrValue;
-
-            var prevLongStop = i >= 1 ? longStop : tempLongStop;
-            var prevShortStop = i >= 1 ? shortStop : tempShortStop;
-
-            longStop = prevValue > prevLongStop ? Math.Max(tempLongStop, prevLongStop) : tempLongStop;
-            shortStop = prevValue < prevShortStop ? Math.Min(tempShortStop, prevShortStop) : tempShortStop;
-
-            var prevDirection = i >= 1 ? direction : 1;
-            direction = prevDirection == -1 && currentValue > prevShortStop ? 1
-                : prevDirection == 1 && currentValue < prevLongStop ? -1 : prevDirection;
-
-            output[i] = direction > 0 ? longStop : shortStop;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new SuperTrendWindow(maType, length, atrMult, external);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, length, maType) : null; var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? atr!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

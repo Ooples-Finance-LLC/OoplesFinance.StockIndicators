@@ -478,26 +478,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Flsma", estimates));
                 });
             case IndicatorName.SuperTrend:
-                return new("Trend", new[] { "Trend" }, bars =>
-                {
-                    var width = Average(TrueRanges(bars), length, kind).Select(v => 3 * v).ToArray();
-                    var lower = bars.Select((b, i) => b.Close - width[i]).ToArray();
-                    var upper = bars.Select((b, i) => b.Close + width[i]).ToArray();
-                    var result = new double[bars.Count];
-                    int lowerStart = 0, upperStart = 0; bool bullish = true;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var previousLower = i == 0 ? lower[i] : lower.Skip(lowerStart).Take(i - lowerStart).Max();
-                        var previousUpper = i == 0 ? upper[i] : upper.Skip(upperStart).Take(i - upperStart).Min();
-                        if (bullish && bars[i].Close < previousLower) bullish = false;
-                        else if (!bullish && bars[i].Close > previousUpper) bullish = true;
-                        if (i > 0 && bars[i - 1].Close <= previousLower) lowerStart = i;
-                        if (i > 0 && bars[i - 1].Close >= previousUpper) upperStart = i;
-                        result[i] = bullish ? lower.Skip(lowerStart).Take(i - lowerStart + 1).Max()
-                            : upper.Skip(upperStart).Take(i - upperStart + 1).Min();
-                    }
-                    return Outputs(("Trend", result));
-                });
+                return new("Trend", new[] { "Trend" }, bars => Outputs(("Trend", SuperTrendOutputs(bars, indicator))));
             case IndicatorName.FXSniperIndicator:
                 return new("FXSniper", new[] { "FXSniper" }, bars =>
                 {
