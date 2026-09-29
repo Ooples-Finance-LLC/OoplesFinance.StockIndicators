@@ -5309,51 +5309,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Double Smoothed Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context,
-        int length1 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 3,
-        int length3 = 15, string? outputKey = null)
+    internal static ComputeBuffer ComputeDoubleSmoothedStochasticFast(StockData data, ComputeContext context, int length1 = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length2 = 3, int length3 = 15, string? outputKey = null, int length4 = 3)
     {
-        // CalculateDoubleSmoothedStochastic smooths the stochastic's numerator and denominator separately -
-        // twice each - and divides only then, so it is not a smoothed stochastic of a smoothed stochastic.
-        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var high = SpanCompat.AsReadOnlySpan(highList);
-        var low = SpanCompat.AsReadOnlySpan(lowList);
-        var count = inputList.Count;
-
-        using var numeratorBuffer = context.Rent(count);
-        using var denominatorBuffer = context.Rent(count);
-        using var smoothedNumeratorBuffer = context.Rent(count);
-        using var smoothedDenominatorBuffer = context.Rent(count);
-        var numerator = numeratorBuffer.WritableSpan;
-        var denominator = denominatorBuffer.WritableSpan;
-        var highWindow = new RollingMinMax(length1);
-        var lowWindow = new RollingMinMax(length1);
-
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(high[i]);
-            lowWindow.Add(low[i]);
-            numerator[i] = input[i] - lowWindow.Min;
-            denominator[i] = highWindow.Max - lowWindow.Min;
-        }
-
-        MovingAverage(data, maType, length2, numerator, smoothedNumeratorBuffer.WritableSpan);
-        MovingAverage(data, maType, length2, denominator, smoothedDenominatorBuffer.WritableSpan);
-        MovingAverage(data, maType, length3, smoothedNumeratorBuffer.Span, numerator);
-        MovingAverage(data, maType, length3, smoothedDenominatorBuffer.Span, denominator);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = denominator[i] != 0
-                ? MathHelper.MinOrMax(100 * numerator[i] / denominator[i], 100, 0)
-                : 0;
-        }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, 3, maType) : buffer;
+        if (outputKey is not (null or "Dss" or "Signal")) throw new ArgumentOutOfRangeException(nameof(outputKey));
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? DoubleSmoothedStochasticWindow.Components(data, input, high, low, maType, length1, length2, length3, length4) : null; using var window = new DoubleSmoothedStochasticWindow(maType, length1, length2, length3, length4, external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components?[0][i], components?[1][i], components?[2][i]); output.WritableSpan[i] = outputKey == "Signal" ? point.SignalLine : point.Dss; } return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>

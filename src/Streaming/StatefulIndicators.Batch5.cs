@@ -902,80 +902,13 @@ public sealed class DoubleSmoothedRelativeStrengthIndexState : IStreamingIndicat
 [PrimaryOutput("Dss")]
 public sealed class DoubleSmoothedStochasticState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _ssNum;
-    private readonly IMovingAverageSmoother _ssDenom;
-    private readonly IMovingAverageSmoother _dsNum;
-    private readonly IMovingAverageSmoother _dsDenom;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-
-    public DoubleSmoothedStochasticState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2,
-        int length2 = 3, int length3 = 15, int length4 = 3)
-    {
-        var resolved1 = Math.Max(1, length1);
-        _highWindow = new RollingWindowMax(resolved1);
-        _lowWindow = new RollingWindowMin(resolved1);
-        _ssNum = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _ssDenom = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _dsNum = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _dsDenom = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length4));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DoubleSmoothedStochasticWindow _window;
+    public DoubleSmoothedStochasticState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 2, int length2 = 3, int length3 = 15, int length4 = 3) => _window = new(maType, length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.DoubleSmoothedStochastic;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _ssNum.Reset();
-        _ssDenom.Reset();
-        _dsNum.Reset();
-        _dsDenom.Reset();
-        _signal.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var num = value - lowestLow;
-        var denom = highestHigh - lowestLow;
-
-        var ssNum = _ssNum.Next(num, isFinal);
-        var ssDenom = _ssDenom.Next(denom, isFinal);
-        var dsNum = _dsNum.Next(ssNum, isFinal);
-        var dsDenom = _dsDenom.Next(ssDenom, isFinal);
-        var dss = dsDenom != 0 ? MathHelper.MinOrMax(100 * dsNum / dsDenom, 100, 0) : 0;
-        var signal = _signal.Next(dss, isFinal);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Dss", dss },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dss, outputs);
-    }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _ssNum.Dispose();
-        _ssDenom.Dispose();
-        _dsNum.Dispose();
-        _dsDenom.Dispose();
-        _signal.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal); return new(point.Dss, includeOutputs ? new Dictionary<string, double> { { "Dss", point.Dss }, { "Signal", point.SignalLine } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dso")]

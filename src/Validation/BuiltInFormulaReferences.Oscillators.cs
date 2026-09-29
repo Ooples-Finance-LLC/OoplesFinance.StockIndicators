@@ -292,17 +292,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.DoubleSmoothedStochastic:
                 if (kind == 0) return null;
-                return new("Dss", new[] { "Dss", "Signal" }, bars =>
-                {
-                    var lows = bars.Select((_, i) => Window(bars, i, length).Min(b => b.Low)).ToArray();
-                    var widths = bars.Select((_, i) => Window(bars, i, length).Max(b => b.High) - lows[i]).ToArray();
-                    var offsets = bars.Select((b, i) => b.Close - lows[i]).ToArray();
-                    double[] Smooth(double[] values) => Average(Average(values, 3, kind), 15, kind);
-                    var numerator = Smooth(offsets);
-                    var denominator = Smooth(widths);
-                    var line = numerator.Select((v, i) => denominator[i] == 0 ? 0 : Math.Max(0, Math.Min(100, 100 * v / denominator[i]))).ToArray();
-                    return Outputs(("Dss", line), ("Signal", Average(line, 3, kind)));
-                });
+                return new("Dss", new[] { "Dss", "Signal" }, bars => DoubleStochasticOutputs(bars, indicator));
             case IndicatorName.DoubleStochasticOscillator:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
