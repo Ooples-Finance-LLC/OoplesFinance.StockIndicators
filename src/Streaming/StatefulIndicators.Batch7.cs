@@ -168,132 +168,31 @@ public sealed class EhlersMotherOfAdaptiveMovingAveragesState : IStreamingIndica
 [PrimaryOutput("Earsi")]
 public sealed class EhlersAdaptiveRelativeStrengthIndexV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _cycPart;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevArsiEma1;
-
-    public EhlersAdaptiveRelativeStrengthIndexV1State(double cycPart = 0.5)
-    {
-        _cycPart = cycPart;
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(Math.Max(64, checked((int)Math.Ceiling(50 * Math.Max(0, cycPart)) + 1)));
-    }
-
+    private readonly AdaptiveRsiV1Window _window;
+    public EhlersAdaptiveRelativeStrengthIndexV1State(double cycPart = .5) => _window = new AdaptiveRsiV1Window(cycPart, false);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _values.Clear();
-        _prevArsiEma1 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var sp = _mama.Next(bar.Close, isFinal).SmoothPeriod;
-        var length = (int)Math.Ceiling(_cycPart * sp);
-
-        double cu = 0;
-        double cd = 0;
-        for (var j = 0; j < length; j++)
-        {
-            var price = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            var pPrice = EhlersStreamingWindow.GetOffsetValue(_values, value, j + 1);
-            if (price > pPrice)
-            {
-                cu += price - pPrice;
-            }
-            else if (price < pPrice)
-            {
-                cd += pPrice - price;
-            }
-        }
-
-        var arsi = cu + cd != 0 ? 100 * cu / (cu + cd) : 0;
-        var emaLength = (int)Math.Ceiling(sp);
-        var arsiEma = CalculationsHelper.CalculateEMA(arsi, _prevArsiEma1, emaLength);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevArsiEma1 = arsiEma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Earsi", arsi },
-                { "Signal", arsiEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(arsi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Earsi", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Earsift")]
 public sealed class EhlersAdaptiveRsiFisherTransformV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersAdaptiveRelativeStrengthIndexV1State _arsiState;
-    private double _prevFish1;
-    private double _prevFish2;
-
-    public EhlersAdaptiveRsiFisherTransformV1State()
-    {
-        _arsiState = new EhlersAdaptiveRelativeStrengthIndexV1State();
-    }
-
+    private readonly AdaptiveRsiV1Window _window;
+    public EhlersAdaptiveRsiFisherTransformV1State() => _window = new AdaptiveRsiV1Window(.5, true);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveRsiFisherTransformV1;
-
-    public void Reset()
-    {
-        _arsiState.Reset();
-        _prevFish1 = 0;
-        _prevFish2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var arsi = _arsiState.Update(bar, isFinal, includeOutputs: false).Value / 100;
-        var tranRsi = 2 * (arsi - 0.5);
-        var ampRsi = MathHelper.MinOrMax(1.5 * tranRsi, 0.999, -0.999);
-        var fish = 0.5 * Math.Log((1 + ampRsi) / (1 - ampRsi));
-
-        if (isFinal)
-        {
-            _prevFish2 = _prevFish1;
-            _prevFish1 = fish;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Earsift", fish }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fish, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Earsift", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _arsiState.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Easi")]

@@ -1604,49 +1604,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveRelativeStrengthIndexV1(this StockData stockData, double cycPart = 0.5)
     {
-        List<double> arsiList = new(stockData.Count);
-        List<double> arsiEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var spList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sp = spList[i];
-            var prevArsi1 = i >= 1 ? arsiEmaList[i - 1] : 0;
-            var prevArsi2 = i >= 2 ? arsiEmaList[i - 2] : 0;
-
-            double cu = 0, cd = 0;
-            for (var j = 0; j < (int)Math.Ceiling(cycPart * sp); j++)
-            {
-                var price = i >= j ? inputList[i - j] : 0;
-                var pPrice = i >= j + 1 ? inputList[i - (j + 1)] : 0;
-
-                cu += price - pPrice > 0 ? price - pPrice : 0;
-                cd += price - pPrice < 0 ? pPrice - price : 0;
-            }
-
-            var arsi = cu + cd != 0 ? 100 * cu / (cu + cd) : 0;
-            arsiList.Add(arsi);
-
-            var arsiEma = CalculateEMA(arsi, prevArsi1, (int)Math.Ceiling(sp));
-            arsiEmaList.Add(arsiEma);
-
-            var signal = GetRsiSignal(arsiEma - prevArsi1, prevArsi1 - prevArsi2, arsiEma, prevArsi1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Earsi", arsiList },
-            { "Signal", arsiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(arsiList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new AdaptiveRsiV1Window(cycPart, false); var values = new List<double>(input.Count); var average = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); average.Add(point.Average); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Earsi", values }, { "Signal", average } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1; return stockData;
     }
 
 
@@ -1658,35 +1618,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveRsiFisherTransformV1(this StockData stockData)
     {
-        List<double> fishList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var arsiList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAdaptiveRelativeStrengthIndexV1(data));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var arsi = arsiList[i] / 100;
-            var prevFish1 = i >= 1 ? fishList[i - 1] : 0;
-            var prevFish2 = i >= 2 ? fishList[i - 2] : 0;
-            var tranRsi = 2 * (arsi - 0.5);
-            var ampRsi = MinOrMax(1.5 * tranRsi, 0.999, -0.999);
-
-            var fish = 0.5 * Math.Log((1 + ampRsi) / (1 - ampRsi));
-            fishList.Add(fish);
-
-            var signal = GetCompareSignal(fish - prevFish1, prevFish1 - prevFish2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Earsift", fishList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fishList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveRsiFisherTransformV1;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new AdaptiveRsiV1Window(.5, true); var values = new List<double>(input.Count); var average = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); average.Add(point.Average); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Earsift", values } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersAdaptiveRsiFisherTransformV1; return stockData;
     }
 
 

@@ -42269,5 +42269,149 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~MamaDerivedNumericalTests.InvalidCandlesCannotAdvanceCycleOrProjectionHistory"
+  },
+  {
+    "id": "adaptive-rsi-v1-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "numerator.Add(current, 100)",
+    "after": "numerator.Add(current, 90)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-loss",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "denominator.Add(previous);",
+    "after": "denominator.Add(previous, 2);",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "var previous = At(lag + 1)",
+    "after": "var previous = At(lag + 2)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "Length(_fraction * period)",
+    "after": "Length(_fraction * period / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-ema-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "2d / (Math.Ceiling(period) + 1)",
+    "after": "1d / (Math.Ceiling(period) + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-ema-retention",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "sum.AddProduct(_ema, 1 - alpha)",
+    "after": "sum.AddProduct(_ema, 1 - alpha / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-fisher-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "1.5 * (2 * (rsi / 100 - .5))",
+    "after": "1.0 * (2 * (rsi / 100 - .5))",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-fisher-cap",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "Math.Min(.999, 1.5",
+    "after": "Math.Min(.9, 1.5",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV1Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV1Window",
+    "before": "_mama.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveRsiV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-rsi-v1-primary",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveRelativeStrengthIndexV1State",
+    "before": "new StreamingIndicatorStateResult(point.Value,",
+    "after": "new StreamingIndicatorStateResult(point.Average,",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.WideAndSubnormalTravelPreservesRatiosSignalsAndPreview"
+  },
+  {
+    "id": "adaptive-rsi-v1-validation-EhlersAdaptiveRelativeStrengthIndexV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveRelativeStrengthIndexV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.InvalidCandlesCannotAdvanceAdaptiveOrTravelHistory"
+  },
+  {
+    "id": "adaptive-rsi-v1-selected-EhlersAdaptiveRelativeStrengthIndexV1",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersAdaptiveRelativeStrengthIndexV1(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-rsi-v1-validation-EhlersAdaptiveRsiFisherTransformV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveRsiFisherTransformV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.InvalidCandlesCannotAdvanceAdaptiveOrTravelHistory"
+  },
+  {
+    "id": "adaptive-rsi-v1-selected-EhlersAdaptiveRsiFisherTransformV1",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersAdaptiveRsiFisherTransformV1(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
   }
 ]

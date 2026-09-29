@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1 or IndicatorName.EhlersAdaptiveRsiFisherTransformV1)
+        {
+            var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV1; var fraction = Number(builtIn.CreateOptions(), .5, "CycPart"); var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++) { var key = rsiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRsiV1Values(bars, fraction, rsiFisher).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersSineWaveIndicatorV1 or IndicatorName.EhlersHilbertOscillator or IndicatorName.EhlersInstantaneousTrendlineV1)
         {
             var derivedMode = builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV1 ? 0 : builtIn.BatchName == IndicatorName.EhlersHilbertOscillator ? 1 : 2; var derivedKeys = derivedMode == 0 ? new[] { "Sine", "LeadSine" } : derivedMode == 1 ? new[] { "I3", "IQ" } : new[] { "Eit", "Signal" };

@@ -953,6 +953,8 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
+            EhlersAdaptiveRelativeStrengthIndexV1SpecOptions arsi => ComputeAdaptiveRsiV1Fast(data, context, arsi.CycPart, false, spec.OutputKey),
+            EhlersAdaptiveRsiFisherTransformV1SpecOptions => ComputeAdaptiveRsiV1Fast(data, context, .5, true, spec.OutputKey),
             EhlersHilbertOscillatorSpecOptions => ComputeMamaDerivedFast(data, context, 1, spec.OutputKey),
             EhlersSineWaveIndicatorV1SpecOptions => ComputeMamaDerivedFast(data, context, 0, spec.OutputKey),
             EhlersInstantaneousTrendlineV1SpecOptions => ComputeMamaDerivedFast(data, context, 2, spec.OutputKey),
@@ -16523,6 +16525,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeAdaptiveRsiV1Fast(StockData data, ComputeContext context, double fraction, bool fisher, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new AdaptiveRsiV1Window(fraction, fisher); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = !fisher && outputKey == "Signal" ? point.Average : point.Value; } return result;
+    }
+
     internal static ComputeBuffer ComputeMamaDerivedFast(StockData data, ComputeContext context, int mode, string? outputKey)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new MamaDerivedWindow(mode); var result = context.Rent(input.Count);
