@@ -2206,6 +2206,7 @@ internal static partial class IndicatorCompute
 
             // Batch 25 - More Ehlers Indicators
             // MaType smooths the phase into the Signal line only; the bound series is the raw phase.
+            ZeroLagSmoothedCycleSpecOptions zeroCycle => ComputeZeroLagSmoothedCycleFast(data, context, zeroCycle.Length, spec.OutputKey),
             EhlersAdaptiveBandPassFilterSpecOptions band => ComputeEhlersAdaptiveBandPassFilterFast(data, context, band.Length1, band.Length2, band.Length3, band.Bw, spec.OutputKey),
             EhlersAutoCorrelationPeriodogramSpecOptions eacp => ComputeEhlersAutoCorrelationPeriodogramFast(data, context, eacp.Length1, eacp.Length2, eacp.Length3),
             EhlersAutoCorrelationIndicatorSpecOptions eaci => ComputeEhlersAutoCorrelationIndicatorFast(data, context, eaci.Length1, eaci.Length2),
@@ -22420,6 +22421,12 @@ internal static partial class IndicatorCompute
     }
 
     // Batch 25 - More Ehlers Indicators
+
+    internal static ComputeBuffer ComputeZeroLagSmoothedCycleFast(StockData data, ComputeContext context, int length = 100, string? outputKey = null)
+    {
+        using var window = new ZeroLagCycleWindow(length); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Lco" ? point.Line : point.Filter; } return result;
+    }
 
     internal static ComputeBuffer ComputeEhlersAdaptiveBandPassFilterFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, double bw = .3, string? outputKey = null)
     {

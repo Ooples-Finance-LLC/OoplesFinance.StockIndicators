@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.ZeroLagSmoothedCycle)
+        {
+            var zeroCycleLength = Integer(builtIn.CreateOptions(), "Length", 100); var zeroCycleKeys = new[] { "Lco", "Filter" };
+            for (var slot = 0; slot < zeroCycleKeys.Length; slot++) { var key = zeroCycleKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ZeroLagCycleValues(bars, zeroCycleLength).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAdaptiveBandPassFilter)
         {
             var bandOptions = builtIn.CreateOptions(); var bandUpper = Integer(bandOptions, "Length1", 48); var bandLower = Integer(bandOptions, "Length2", 10); var bandLag = Integer(bandOptions, "Length3", 3); var bandWidth = Number(bandOptions, .3, "Bw"); var bandKeys = new[] { "Eabpf", "Signal" };

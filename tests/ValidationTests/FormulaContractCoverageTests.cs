@@ -1554,7 +1554,9 @@ public sealed class FormulaContractCoverageTests
         Check(new FlaggingBands(2), bars, new[] { 1d, 2, 4 }, new[] { 1d, 1.25, 3.375 }, new[] { 1d, 1, 1.5 }, new[] { 1d, 2, 1.5 });
         Check(new ExtendedRecursiveBands(3), bars, new[] { 1d, 1.5, 2.75 }, new[] { 1d, 1.5, 2.75 }, new[] { 1d, 1.5, 2.75 });
         Check(new ExtendedRecursiveBands(5), bars, new[] { 1d, 5d / 3, 29d / 9 }, new[] { 1d, 1.5, 49d / 18 }, new[] { 1d, 4d / 3, 20d / 9 });
-        var cycle = 343d / 46656;
+        // Exact rational hand calculation with binary64 stage rounding: first residual
+        // is 4-round(23/6); subsequent endpoints are round(5*x/6).
+        var cycle = BitConverter.Int64BitsToDouble(0x3f7e1ccbad1ff4bd);
         Check(new ZeroLagSmoothedCycle(3), bars, new[] { 0d, 0, cycle }, new[] { 0d, 0, -cycle / 2 });
         var fractal = new[] { 1d, 2, 5, 2, 1, 2, 3 }.Select(v => new Bar(date, 0, v, -v, 0, 100)).ToArray();
         Check(new FractalChaosBands(), fractal, new[] { 0d, 0, 0, 0, 5, 5, 5 }, new double[7], new[] { 0d, 0, 0, 0, -5, -5, -5 });

@@ -44195,5 +44195,167 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.InvalidCandlesCannotAdvanceCycleBandOrPeak"
+  },
+  {
+    "id": "zero-cycle-stages",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "leg < 6",
+    "after": "leg < 4",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-residual-gain",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "leg % 2 == 0 ? value : 2 * value",
+    "after": "leg % 2 == 0 ? 2 * value : value",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-residual-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "- fit, BigInteger.One",
+    "after": "+ fit, BigInteger.One",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-fit-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "_regressions[leg].Next(value, commit, true)",
+    "after": "_regressions[leg].Next(value, commit, false)",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-endpoint",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "3 * (2 * weighted - (n - 1) * sum) * (n - 1)",
+    "after": "3 * (2 * weighted - (n - 1) * sum) * (n + 1)",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "var sum = _sum + value - expired",
+    "after": "var sum = _sum + value",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted + expired",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-mean-count",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "RocBankValue.RoundUnits(sum, n)",
+    "after": "RocBankValue.RoundUnits(sum, n + 1)",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "(int)Math.Ceiling(length / 2d)",
+    "after": "length",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-second-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "_second.Next(first, commit, false)",
+    "after": "_second.Next(value, commit, false)",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-filter-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "var filter = -2 * second",
+    "after": "var filter = 2 * second",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "if (commit) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "_history.Clear(); _sum = _weighted = default;",
+    "after": "_history.Clear(); _sum = default;",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.RoundedStagesRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "zero-cycle-signals",
+    "module": "numerical",
+    "file": "src/Helpers/ZeroLagCycleWindow.cs",
+    "scope": "internal sealed class ZeroLagCycleWindow",
+    "before": "difference > _previous",
+    "after": "difference < _previous",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.SelectedPricesReachBothOutputsAndSignals"
+  },
+  {
+    "id": "zero-cycle-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeZeroLagSmoothedCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.SelectedPricesReachBothOutputsAndSignals"
+  },
+  {
+    "id": "zero-cycle-fast-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeZeroLagSmoothedCycleFast(",
+    "before": "outputKey == \"Lco\" ? point.Line : point.Filter",
+    "after": "outputKey == \"Lco\" ? point.Filter : point.Line",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.SelectedPricesReachBothOutputsAndSignals"
+  },
+  {
+    "id": "zero-cycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch27.cs",
+    "scope": "public sealed class ZeroLagSmoothedCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.InvalidCandlesCannotAdvanceAnyRegressionStage"
   }
 ]

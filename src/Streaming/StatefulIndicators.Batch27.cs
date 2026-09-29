@@ -1334,102 +1334,15 @@ public sealed class ZeroLagExponentialMovingAverageState : IStreamingIndicatorSt
 [PrimaryOutput("Filter")]
 public sealed class ZeroLagSmoothedCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly int _length1;
-    private readonly LinearRegressionState _linreg;
-    private readonly LinearRegressionState _linregAx1;
-    private readonly LinearRegressionState _linregLx1;
-    private readonly LinearRegressionState _linregAx2;
-    private readonly LinearRegressionState _linregLx2;
-    private readonly LinearRegressionState _linregAx3;
-    private readonly RollingWindowSum _lcoSum;
-    private readonly RollingWindowSum _lcoSmaSum;
-    private readonly StreamingInputResolver _input;
-    private double _ax1Value;
-    private double _lx1Value;
-    private double _ax2Value;
-    private double _lx2Value;
-    private double _ax3Value;
-
-    public ZeroLagSmoothedCycleState(int length = 100)
-    {
-        _length = Math.Max(1, length);
-        _length1 = MathHelper.MinOrMax((int)Math.Ceiling((double)_length / 2));
-        _linreg = new LinearRegressionState(_length);
-        _linregAx1 = new LinearRegressionState(_length, _ => _ax1Value);
-        _linregLx1 = new LinearRegressionState(_length, _ => _lx1Value);
-        _linregAx2 = new LinearRegressionState(_length, _ => _ax2Value);
-        _linregLx2 = new LinearRegressionState(_length, _ => _lx2Value);
-        _linregAx3 = new LinearRegressionState(_length, _ => _ax3Value);
-        _lcoSum = new RollingWindowSum(_length1);
-        _lcoSmaSum = new RollingWindowSum(_length1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ZeroLagCycleWindow _window;
+    public ZeroLagSmoothedCycleState(int length = 100) => _window = new(length);
     public IndicatorName Name => IndicatorName.ZeroLagSmoothedCycle;
-
-    public void Reset()
-    {
-        _linreg.Reset();
-        _linregAx1.Reset();
-        _linregLx1.Reset();
-        _linregAx2.Reset();
-        _linregLx2.Reset();
-        _linregAx3.Reset();
-        _lcoSum.Reset();
-        _lcoSmaSum.Reset();
-        _ax1Value = 0;
-        _lx1Value = 0;
-        _ax2Value = 0;
-        _lx2Value = 0;
-        _ax3Value = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var linreg = _linreg.Update(bar, isFinal, includeOutputs: false).Value;
-        _ax1Value = value - linreg;
-        var ax1Linreg = _linregAx1.Update(bar, isFinal, includeOutputs: false).Value;
-        _lx1Value = _ax1Value + (_ax1Value - ax1Linreg);
-        var lx1Linreg = _linregLx1.Update(bar, isFinal, includeOutputs: false).Value;
-        _ax2Value = _lx1Value - lx1Linreg;
-        var ax2Linreg = _linregAx2.Update(bar, isFinal, includeOutputs: false).Value;
-        _lx2Value = _ax2Value + (_ax2Value - ax2Linreg);
-        var lx2Linreg = _linregLx2.Update(bar, isFinal, includeOutputs: false).Value;
-        _ax3Value = _lx2Value - lx2Linreg;
-        var ax3Linreg = _linregAx3.Update(bar, isFinal, includeOutputs: false).Value;
-        var lco = _ax3Value + (_ax3Value - ax3Linreg);
-        var lcoSum = isFinal ? _lcoSum.Add(lco, out var count1) : _lcoSum.Preview(lco, out count1);
-        var lcoSma1 = count1 > 0 ? lcoSum / count1 : 0;
-        var lcoSmaSum = isFinal ? _lcoSmaSum.Add(lcoSma1, out var count2) : _lcoSmaSum.Preview(lcoSma1, out count2);
-        var lcoSma2 = count2 > 0 ? lcoSmaSum / count2 : 0;
-        var filter = -lcoSma2 * 2;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Lco", lco },
-                { "Filter", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Filter, includeOutputs ? new Dictionary<string, double> { { "Lco", point.Line }, { "Filter", point.Filter } } : null);
     }
-
-    public void Dispose()
-    {
-        _linreg.Dispose();
-        _linregAx1.Dispose();
-        _linregLx1.Dispose();
-        _linregAx2.Dispose();
-        _linregLx2.Dispose();
-        _linregAx3.Dispose();
-        _lcoSum.Dispose();
-        _lcoSmaSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ztema")]

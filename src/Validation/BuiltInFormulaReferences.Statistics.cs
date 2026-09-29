@@ -22,22 +22,7 @@ internal static partial class BuiltInFormulaReferences
         switch (name)
         {
             case IndicatorName.ZeroLagSmoothedCycle:
-                return new("Filter", new[] { "Lco", "Filter" }, bars =>
-                {
-                    // Expand [(I-R)(2I-R)]³ as a polynomial in the linear endpoint-regression operator R.
-                    var coefficients = new[] { 8d, -36, 66, -63, 33, -9, 1 };
-                    var power = Closes(bars);
-                    var line = power.Select(v => coefficients[0] * v).ToArray();
-                    for (var degree = 1; degree < coefficients.Length; degree++)
-                    {
-                        power = RegressionEndpoints(power, length);
-                        for (var i = 0; i < line.Length; i++) line[i] += coefficients[degree] * power[i];
-                    }
-                    var smoothLength = Math.Max(2, Math.Min(530, (int)Math.Ceiling(length / 2d)));
-                    var first = line.Select((_, i) => Window(line, i, smoothLength).Average()).ToArray();
-                    var filter = first.Select((_, i) => -2 * Window(first, i, smoothLength).Average()).ToArray();
-                    return Outputs(("Lco", line), ("Filter", filter));
-                });
+                return new("Filter", new[] { "Lco", "Filter" }, bars => ZeroLagCycleValues(bars, length).Outputs);
             case IndicatorName.JrcFractalDimension:
                 if (kind == 0) return null;
                 return new("Jrcfd", new[] { "Jrcfd", "Signal" }, bars =>
