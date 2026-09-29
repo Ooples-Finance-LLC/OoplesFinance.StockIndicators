@@ -456,79 +456,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSquelchIndicator(this StockData stockData, int length1 = 6, int length2 = 20, int length3 = 40)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> phaseList = new(stockData.Count);
-        List<double> dPhaseList = new(stockData.Count);
-        List<double> dcPeriodList = new(stockData.Count);
-        List<double> v1List = new(stockData.Count);
-        List<double> ipList = new(stockData.Count);
-        List<double> quList = new(stockData.Count);
-        List<double> siList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= length1 ? inputList[i - length1] : 0;
-            var priorV1 = i >= length1 ? v1List[i - length1] : 0;
-            var prevV12 = i >= 2 ? v1List[i - 2] : 0;
-            var prevV14 = i >= 4 ? v1List[i - 4] : 0;
-
-            var v1 = MinPastValues(i, length1, currentValue - prevValue);
-            v1List.Add(v1);
-
-            var v2 = i >= 3 ? v1List[i - 3] : 0;
-            var v3 = (0.75 * (v1 - priorV1)) + (0.25 * (prevV12 - prevV14));
-            var prevIp = GetLastOrDefault(ipList);
-            var ip = (0.33 * v2) + (0.67 * prevIp);
-            ipList.Add(ip);
-
-            var prevQu = GetLastOrDefault(quList);
-            var qu = (0.2 * v3) + (0.8 * prevQu);
-            quList.Add(qu);
-
-            var prevPhase = GetLastOrDefault(phaseList);
-            var phase = Math.Abs(ip + prevIp) > 0 ? Math.Atan(Math.Abs((qu + prevQu) / (ip + prevIp))).ToDegrees() : 0;
-            phase = ip < 0 && qu > 0 ? 180 - phase : phase;
-            phase = ip < 0 && qu < 0 ? 180 + phase : phase;
-            phase = ip > 0 && qu < 0 ? 360 - phase : phase;
-            phaseList.Add(phase);
-
-            var dPhase = prevPhase - phase;
-            dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
-            dPhase = MinOrMax(dPhase, 60, 1);
-            dPhaseList.Add(dPhase);
-
-            double instPeriod = 0, v4 = 0;
-            for (var j = 0; j <= length3; j++)
-            {
-                var prevDPhase = i >= j ? dPhaseList[i - j] : 0;
-                v4 += prevDPhase;
-                instPeriod = v4 > 360 && instPeriod == 0 ? j : instPeriod;
-            }
-
-            var prevDcPeriod = GetLastOrDefault(dcPeriodList);
-            var dcPeriod = (0.25 * instPeriod) + (0.75 * prevDcPeriod);
-            dcPeriodList.Add(dcPeriod);
-
-            double si = dcPeriod < length2 ? 0 : 1;
-            siList.Add(si);
-
-            var signal = GetCompareSignal(qu - (-1 * ip), prevQu - (-1 * prevIp));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Esi", siList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(siList);
-        stockData.IndicatorName = IndicatorName.EhlersSquelchIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new SquelchWindow(length1, length2, length3); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Esi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersSquelchIndicator; return stockData;
     }
 
 

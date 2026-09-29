@@ -9,6 +9,11 @@ internal static partial class BuiltInFormulaReferences
     {
         var name = indicator.BatchName;
         var options = indicator.CreateOptions();
+        if (name == IndicatorName.EhlersSquelchIndicator)
+        {
+            var squelchLag = Integer(options, "Length1", 6); var squelchThreshold = Integer(options, "Length2", 20); var squelchHorizon = Integer(options, "Length3", 40);
+            return new("Esi", new[] { "Esi" }, bars => Outputs(("Esi", SquelchValues(bars, squelchLag, squelchThreshold, squelchHorizon).Values)));
+        }
         if (name is IndicatorName.EhlersHilbertTransformIndicator or IndicatorName.EhlersInstantaneousPhaseIndicator or IndicatorName.EhlersSquelchIndicator)
         {
             var squelch = name == IndicatorName.EhlersSquelchIndicator;

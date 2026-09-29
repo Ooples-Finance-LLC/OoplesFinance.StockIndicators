@@ -1583,107 +1583,16 @@ public sealed class EhlersSpectrumDerivedFilterBankState : IStreamingIndicatorSt
 [PrimaryOutput("Esi")]
 public sealed class EhlersSquelchIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly int _length3;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _v1Values;
-    private readonly PooledRingBuffer<double> _dPhaseValues;
-    private double _prevIp;
-    private double _prevQu;
-    private double _prevPhase;
-    private double _prevDcPeriod;
-
-    public EhlersSquelchIndicatorState(int length1 = 6, int length2 = 20, int length3 = 40)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_length1);
-        _v1Values = new PooledRingBuffer<double>(Math.Max(_length1, 4));
-        _dPhaseValues = new PooledRingBuffer<double>(_length3);
-    }
-
+    private readonly SquelchWindow _window;
+    public EhlersSquelchIndicatorState(int length1 = 6, int length2 = 20, int length3 = 40) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.EhlersSquelchIndicator;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _v1Values.Clear();
-        _dPhaseValues.Clear();
-        _prevIp = 0;
-        _prevQu = 0;
-        _prevPhase = 0;
-        _prevDcPeriod = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _length1);
-        var v1 = _values.Count >= _length1 ? value - prevValue : 0;
-        var priorV1 = EhlersStreamingWindow.GetOffsetValue(_v1Values, v1, _length1);
-        var prevV12 = EhlersStreamingWindow.GetOffsetValue(_v1Values, v1, 2);
-        var prevV14 = EhlersStreamingWindow.GetOffsetValue(_v1Values, v1, 4);
-        var v2 = EhlersStreamingWindow.GetOffsetValue(_v1Values, v1, 3);
-        var v3 = (0.75 * (v1 - priorV1)) + (0.25 * (prevV12 - prevV14));
-        var ip = (0.33 * v2) + (0.67 * _prevIp);
-        var qu = (0.2 * v3) + (0.8 * _prevQu);
-
-        var phase = Math.Abs(ip + _prevIp) > 0
-            ? Math.Atan(Math.Abs((qu + _prevQu) / (ip + _prevIp))).ToDegrees()
-            : 0;
-        phase = ip < 0 && qu > 0 ? 180 - phase : phase;
-        phase = ip < 0 && qu < 0 ? 180 + phase : phase;
-        phase = ip > 0 && qu < 0 ? 360 - phase : phase;
-
-        var dPhase = _prevPhase - phase;
-        dPhase = _prevPhase < 90 && phase > 270 ? 360 + _prevPhase - phase : dPhase;
-        dPhase = MathHelper.MinOrMax(dPhase, 60, 1);
-
-        double instPeriod = 0;
-        double v4 = 0;
-        for (var j = 0; j <= _length3; j++)
-        {
-            var prevDPhase = EhlersStreamingWindow.GetOffsetValue(_dPhaseValues, dPhase, j);
-            v4 += prevDPhase;
-            instPeriod = v4 > 360 && instPeriod == 0 ? j : instPeriod;
-        }
-
-        var dcPeriod = (0.25 * instPeriod) + (0.75 * _prevDcPeriod);
-        var si = dcPeriod < _length2 ? 0 : 1;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _v1Values.TryAdd(v1, out _);
-            _dPhaseValues.TryAdd(dPhase, out _);
-            _prevIp = ip;
-            _prevQu = qu;
-            _prevPhase = phase;
-            _prevDcPeriod = dcPeriod;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Esi", si }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(si, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value;
+        return new StreamingIndicatorStateResult(value, includeOutputs ? new Dictionary<string, double> { { "Esi", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _v1Values.Dispose();
-        _dPhaseValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Escog")]

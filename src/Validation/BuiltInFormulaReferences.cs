@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSquelchIndicator)
+        {
+            var squelchOptions = (EhlersSquelchIndicatorSpecOptions)builtIn.CreateOptions(); yield return IndicatorValidationRule.Reference(0, bars => SquelchValues(bars, squelchOptions.Length1, squelchOptions.Length2, squelchOptions.Length3).Values, IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersUniversalTradingFilter or IndicatorName.EhlersSnakeUniversalTradingFilter)
         {
             var tradingOptions = builtIn.CreateOptions(); var tradingSnake = tradingOptions is EhlersSnakeUniversalTradingFilterSpecOptions;

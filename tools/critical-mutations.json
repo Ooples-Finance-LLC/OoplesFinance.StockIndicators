@@ -41027,5 +41027,131 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation omitted\n",
     "filter": "FullyQualifiedName~UniversalTradingNumericalTests.InvalidFieldsDoNotAdvanceFilterOrEnergy"
+  },
+  {
+    "id": "squelch-lag",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "differenceSum.Add(_prices.Peek(), -1)",
+    "after": "differenceSum.Add(_prices.Peek(), 1)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-forcing",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "difference.Add(ref forcing, .75)",
+    "after": "difference.Add(ref forcing, .5)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-real-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "_inphase.Add(ref realSum, .67)",
+    "after": "_inphase.Add(ref realSum, 0d)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-imaginary-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "_quadrature.Add(ref imaginarySum, .8)",
+    "after": "_quadrature.Add(ref imaginarySum, 0d)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-quadrant",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "phase = 360 - phase",
+    "after": "phase = 180 - phase",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-horizon",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal SquelchWindow(",
+    "before": "Math.Min(360, Math.Max(1, horizon))",
+    "after": "Math.Min(359, Math.Max(1, horizon))",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.StrictFullCycleCrossingIncludesLagThreeHundredSixty"
+  },
+  {
+    "id": "squelch-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (accumulated > 360)",
+    "after": "if (accumulated >= 360)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.StrictFullCycleCrossingIncludesLagThreeHundredSixty"
+  },
+  {
+    "id": "squelch-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "cycle < _threshold ? 0d : 1d",
+    "after": "cycle > _threshold ? 0d : 1d",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "internal sealed class SquelchWindow",
+    "before": "_phase = _cycle = 0",
+    "after": "_phase = 0",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.WideAndSubnormalPricesPreservePhaseCyclesAndSignals"
+  },
+  {
+    "id": "squelch-signal",
+    "module": "numerical",
+    "file": "src/Helpers/SquelchWindow.cs",
+    "scope": "private static Signal SignalFor(",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.SignalsRetainOrderingBeyondThePublishedPriceRange"
+  },
+  {
+    "id": "squelch-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSquelchIndicator(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.SelectedPricesReachFastAndBatchPhaseCalculations"
+  },
+  {
+    "id": "squelch-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSquelchIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.SelectedPricesReachFastAndBatchPhaseCalculations"
+  },
+  {
+    "id": "squelch-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSquelchIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~SquelchNumericalTests.InvalidFieldsDoNotAdvancePhaseOrCycleHistory"
   }
 ]
