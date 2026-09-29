@@ -45437,5 +45437,221 @@
     "before": "{ \"Cr\", point.Value }",
     "after": "{ \"wrong\", point.Value }",
     "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "chandelier-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p))",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.HandRangesUseCurrentFirstCloseAndExpireBothExtrema"
+  },
+  {
+    "id": "chandelier-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? (_previous + close) / 2 : close",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.UnpublishedRangeAndProductOverflowCanCancelToFiniteStops"
+  },
+  {
+    "id": "chandelier-wide-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "distance.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.UnpublishedRangeAndProductOverflowCanCancelToFiniteStops"
+  },
+  {
+    "id": "chandelier-wide-distance-factor",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "distance.AddProduct(atr.Mantissa, _multiplier);",
+    "after": "distance.Add(atr.Mantissa);",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-long-side",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "longSum.Subtract(distance);",
+    "after": "longSum.Add(distance.Mean(1));",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-short-side",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "shortSum.Add(lowest);",
+    "after": "shortSum.Add(highest);",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "var skip = _history.Count == _length;",
+    "after": "var skip = false;",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.HandRangesUseCurrentFirstCloseAndExpireBothExtrema"
+  },
+  {
+    "id": "chandelier-wide-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "Math.Max(highest, retained.High)",
+    "after": "Math.Min(highest, retained.High)",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "Math.Min(lowest, retained.Low)",
+    "after": "Math.Max(lowest, retained.Low)",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "_range!.Next(TrueRange(high, low, _seeded ? _previous : close), commit)",
+    "after": "_range!.Next(TrueRange(high, low, _seeded ? _previous : close), true)",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "_history.Clear(); _range?.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-weighted-window",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "bullish.Sign > 0 && bullChange.Sign > 0",
+    "after": "bullish.Sign < 0 && bullChange.Sign > 0",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.WideRangesAndDistancesKeepBothProjectedStopsAndSignals"
+  },
+  {
+    "id": "chandelier-wide-cap-domain",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "if (double.IsNaN(multiplier) || double.IsInfinity(multiplier))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.NonfiniteMultipliersRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "chandelier-wide-custom-atr",
+    "module": "numerical",
+    "file": "src/Helpers/ChandelierWindow.cs",
+    "scope": "internal sealed class ChandelierWindow",
+    "before": "externalAtr.HasValue ? new RocBankValue(externalAtr.Value)",
+    "after": "externalAtr.HasValue ? new RocBankValue(0)",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.CustomAtrAndLegacyAverageRemainConsumedByEachRoute"
+  },
+  {
+    "id": "chandelier-wide-fast-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeChandelierExitValues(",
+    "before": "shortSide ? point.Short : point.Long",
+    "after": "point.Long",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.SelectedPricesKeepOriginalRangesAndBothOutputSlots"
+  },
+  {
+    "id": "chandelier-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeChandelierExitValues(",
+    "before": "window.Next(high[i], low[i], input[i], true",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.SelectedPricesKeepOriginalRangesAndBothOutputSlots"
+  },
+  {
+    "id": "chandelier-wide-native-short",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandelierExitState",
+    "before": "ShortOnly ? point.Short : point.Long",
+    "after": "point.Long",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.SelectedPricesKeepOriginalRangesAndBothOutputSlots"
+  },
+  {
+    "id": "chandelier-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandelierExitState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.InvalidCandlesCannotAdvanceExtremaOrAverage"
+  },
+  {
+    "id": "chandelier-wide-short-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandelierExitState",
+    "before": "{ \"ExitShort\", point.Short }",
+    "after": "{ \"ExitShort\", point.Long }",
+    "filter": "FullyQualifiedName~ChandelierNumericalTests.HandRangesUseCurrentFirstCloseAndExpireBothExtrema"
   }
 ]

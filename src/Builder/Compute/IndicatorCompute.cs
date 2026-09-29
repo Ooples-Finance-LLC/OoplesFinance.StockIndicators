@@ -4953,31 +4953,22 @@ internal static partial class IndicatorCompute
         return buffer;
     }
 
+    private static ComputeBuffer ComputeChandelierExitValues(StockData data, ComputeContext context, int length, MovingAvgType kind, double multiplier, bool shortSide)
+    {
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind);
+        using var window = new ChandelierWindow(kind, length, multiplier, external);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, length, kind) : null; var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr!.Value.Span[i] : null); result.WritableSpan[i] = shortSide ? point.Short : point.Long; } return result; }
+        catch { result.Dispose(); throw; }
+    }
+
     /// <summary>
     /// Computes Chandelier Exit Long using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeChandelierExitLongFast(StockData data, ComputeContext context, int length = 22,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double mult = 3)
     {
-        // CalculateChandelierExit hangs its long stop a multiple of the average true range below the
-        // highest high of the window, with whichever average it was given.
-        var (_, highList, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = highList.Count;
-
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        using var highestBuffer = context.Rent(count);
-        using var lowestBuffer = context.Rent(count);
-        var highest = highestBuffer.WritableSpan;
-        HighestAndLowest(data, highest, lowestBuffer.WritableSpan, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = highest[i] - (atr.Span[i] * mult);
-        }
-
-        return buffer;
+        return ComputeChandelierExitValues(data, context, length, maType, mult, false);
     }
 
     /// <summary>
@@ -4986,24 +4977,7 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChandelierExitShortFast(StockData data, ComputeContext context, int length = 22,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double mult = 3)
     {
-        // The short stop is the same distance above the lowest low.
-        var (_, _, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = lowList.Count;
-
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        using var highestBuffer = context.Rent(count);
-        using var lowestBuffer = context.Rent(count);
-        var lowest = lowestBuffer.WritableSpan;
-        HighestAndLowest(data, highestBuffer.WritableSpan, lowest, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = lowest[i] + (atr.Span[i] * mult);
-        }
-
-        return buffer;
+        return ComputeChandelierExitValues(data, context, length, maType, mult, true);
     }
 
     /// <summary>

@@ -652,14 +652,7 @@ internal static partial class BuiltInFormulaReferences
                         ("LowerBand", center.Select((v, i) => v - multiplier * width[i]).ToArray()));
                 });
             case IndicatorName.ChandelierExit:
-                kind = AverageKind(options, 6);
-                var chandelierMultiplier = Number(options, 3, "Mult");
-                return new("ExitLong", new[] { "ExitLong", "ExitShort" }, bars =>
-                {
-                    var distance = Average(TrueRanges(bars), length, kind).Select(v => v * chandelierMultiplier).ToArray();
-                    return Outputs(("ExitLong", bars.Select((_, i) => Window(bars, i, length).Max(b => b.High) - distance[i]).ToArray()),
-                        ("ExitShort", bars.Select((_, i) => Window(bars, i, length).Min(b => b.Low) + distance[i]).ToArray()));
-                });
+                return new("ExitLong", new[] { "ExitLong", "ExitShort" }, bars => ChandelierOutputs(bars, indicator));
             case IndicatorName.TFSTetherLineIndicator:
                 return new("Tether", new[] { "Tether" }, bars => Outputs(("Tether", bars.Select((_, i) =>
                     ExactPriceMean(Window(bars, i, length).Max(b => b.High), Window(bars, i, length).Min(b => b.Low))).ToArray())));

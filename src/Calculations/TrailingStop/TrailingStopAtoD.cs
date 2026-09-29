@@ -63,43 +63,13 @@ public static partial class Calculations
     public static StockData CalculateChandelierExit(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22, 
         double mult = 3)
     {
-        List<double> chandelierExitLongList = new(stockData.Count);
-        List<double> chandelierExitShortList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentAvgTrueRange = atrList[i];
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var prevExitLong = GetLastOrDefault(chandelierExitLongList);
-            var chandelierExitLong = highestHigh - (currentAvgTrueRange * mult);
-            chandelierExitLongList.Add(chandelierExitLong);
-
-            var prevExitShort = GetLastOrDefault(chandelierExitShortList);
-            var chandelierExitShort = lowestLow + (currentAvgTrueRange * mult);
-            chandelierExitShortList.Add(chandelierExitShort);
-
-            var signal = GetBullishBearishSignal(currentValue - chandelierExitLong, prevValue - prevExitLong, currentValue - chandelierExitShort, prevValue - prevExitShort);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "ExitLong", chandelierExitLongList },
-            { "ExitShort", chandelierExitShortList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.ChandelierExit;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new ChandelierWindow(maType, length, mult, external);
+        List<double>? atr = null;
+        if (external) { var ranges = GetTrueRangeList(stockData); atr = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(ranges), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, length, ranges); }
+        var longs = new List<double>(input.Count); var shorts = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr![i] : null); longs.Add(point.Long); shorts.Add(point.Short); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "ExitLong", longs }, { "ExitShort", shorts } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.ChandelierExit; return stockData;
     }
 
 

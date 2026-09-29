@@ -7763,71 +7763,17 @@ public sealed class ChandeKrollRSquaredIndexState : IStreamingIndicatorState, ID
 [PrimaryOutput("ExitLong")]
 public sealed class ChandelierExitState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly double _mult;
-    private double _prevClose;
-    private bool _hasPrev;
-
-    public ChandelierExitState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22,
-        double mult = 3)
-    {
-        var resolved = Math.Max(1, length);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _atrSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _mult = mult;
-    }
-
+    private readonly ChandelierWindow _window;
+    internal bool ShortOnly { get; set; }
+    public ChandelierExitState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 22, double mult = 3) => _window = new(maType, length, mult);
     public IndicatorName Name => IndicatorName.ChandelierExit;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _atrSmoother.Reset();
-        _prevClose = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        // For TrueRange on first bar, use current close
-        var prevClose = _hasPrev ? _prevClose : bar.Close;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevClose);
-        var atr = _atrSmoother.Next(tr, isFinal);
-        var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var exitLong = highestHigh - (atr * _mult);
-        var exitShort = lowestLow + (atr * _mult);
-
-        if (isFinal)
-        {
-            _prevClose = bar.Close;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "ExitLong", exitLong },
-                { "ExitShort", exitShort }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(exitLong, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(ShortOnly ? point.Short : point.Long, includeOutputs ? new Dictionary<string, double> { { "ExitLong", point.Long }, { "ExitShort", point.Short } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _atrSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Cmoa")]
