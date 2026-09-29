@@ -542,80 +542,13 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveStochasticIndicatorV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> stocList = new(stockData.Count);
-        List<double> astocList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var domCycList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var domCyc = MinOrMax(domCycList[i], length1, length2);
-            var roofingFilter = roofingFilterList[i];
-            var prevAstoc1 = i >= 1 ? astocList[i - 1] : 0;
-            var prevAstoc2 = i >= 2 ? astocList[i - 2] : 0;
-
-            var window = MathHelper.CeilingCycle(domCyc);
-            var highest = roofingFilter;
-            var lowest = roofingFilter;
-            for (var j = 1; j < window && i >= j; j++)
-            {
-                var filt = roofingFilterList[i - j];
-                if (filt > highest)
-                {
-                    highest = filt;
-                }
-
-                if (filt < lowest)
-                {
-                    lowest = filt;
-                }
-            }
-
-            var prevStoc = GetLastOrDefault(stocList);
-            var stoc = highest != lowest ? (roofingFilter - lowest) / (highest - lowest) : 0;
-            stocList.Add(stoc);
-
-            var astoc = (c1 * ((stoc + prevStoc) / 2)) + (c2 * prevAstoc1) + (c3 * prevAstoc2);
-            astocList.Add(astoc);
-        }
-
-        var astocEmaList = GetMovingAverageList(stockData, maType, length2, astocList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var astoc = astocList[i];
-            var astocEma = astocEmaList[i];
-            var prevAstoc = i >= 1 ? astocList[i - 1] : 0;
-            var prevAstocEma = i >= 1 ? astocEmaList[i - 1] : 0;
-
-            var signal = GetRsiSignal(astoc - astocEma, prevAstoc - prevAstocEma, astoc, prevAstoc, 0.7, 0.3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Easi", astocList },
-            { "Signal", astocEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(astocList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveStochasticIndicatorV2;
-
-        return stockData;
+        length2 = Math.Max(1, length2); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new AdaptiveRangeV2Window(length1, length2, length3, maType, false, external); var values = new List<double>(input.Count); var averages = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); averages.Add(point.Average); }
+        if (external) averages = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, values);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++) signals?.Add(GetRsiSignal(values[i] - averages[i], i == 0 ? 0 : values[i - 1] - averages[i - 1], values[i], i == 0 ? 0 : values[i - 1], .7, .3));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Easi", values }, { "Signal", averages } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAdaptiveStochasticIndicatorV2; return stockData;
     }
 
 
@@ -648,7 +581,7 @@ public static partial class Calculations
             var v1 = 2 * (astoc - 0.5);
 
             var prevFish = GetLastOrDefault(fishList);
-            var fish = (Exp(6 * v1) - 1) / (Exp(6 * v1) + 1);
+            var fish = Math.Tanh(3 * v1);
             fishList.Add(fish);
 
             var prevTrigger = GetLastOrDefault(triggerList);
@@ -684,81 +617,13 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> acciList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> mdList = new(stockData.Count);
-        List<double> ratioList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var tempMean = new Streaming.AdaptiveWindowMean(length1);
-        var mdMean = new Streaming.AdaptiveWindowMean(length1);
-
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var domCycList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var domCyc = MinOrMax(domCycList[i], length1, length2);
-            var prevAcci1 = i >= 1 ? acciList[i - 1] : 0;
-            var prevAcci2 = i >= 2 ? acciList[i - 2] : 0;
-            var cycLength = MathHelper.CeilingCycle(domCyc);
-
-            var roofingFilter = roofingFilterList[i];
-            tempList.Add(roofingFilter);
-
-
-            var avg = tempMean.Next(roofingFilter, cycLength, true);
-            var md = Pow(roofingFilter - avg, 2);
-            mdList.Add(md);
-
-
-            var mdAvg = mdMean.Next(md, cycLength, true);
-            var rms = cycLength >= 0 ? Sqrt(mdAvg) : 0;
-            var num = roofingFilter - avg;
-            var denom = 0.015 * rms;
-
-            var prevRatio = GetLastOrDefault(ratioList);
-            var ratio = denom != 0 ? num / denom : 0;
-            ratioList.Add(ratio);
-
-            var acci = (c1 * ((ratio + prevRatio) / 2)) + (c2 * prevAcci1) + (c3 * prevAcci2);
-            acciList.Add(acci);
-        }
-
-        var acciEmaList = GetMovingAverageList(stockData, maType, length2, acciList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var acci = acciList[i];
-            var acciEma = acciEmaList[i];
-            var prevAcci = i >= 1 ? acciList[i - 1] : 0;
-            var prevAcciEma = i >= 1 ? acciEmaList[i - 1] : 0;
-
-            var signal = GetRsiSignal(acci - acciEma, prevAcci - prevAcciEma, acci, prevAcci, 100, -100);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacci", acciList },
-            { "Signal", acciEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(acciList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveCommodityChannelIndexV2;
-
-        return stockData;
+        length2 = Math.Max(1, length2); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new AdaptiveRangeV2Window(length1, length2, length3, maType, true, external); var values = new List<double>(input.Count); var averages = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); averages.Add(point.Average); }
+        if (external) averages = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, values);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++) signals?.Add(GetRsiSignal(values[i] - averages[i], i == 0 ? 0 : values[i - 1] - averages[i - 1], values[i], i == 0 ? 0 : values[i - 1], 100, -100));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacci", values }, { "Signal", averages } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAdaptiveCommodityChannelIndexV2; return stockData;
     }
 
 

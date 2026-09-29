@@ -22594,52 +22594,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context,
         int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateEhlersAdaptiveCommodityChannelIndexV2 measures the roofing filter against its own mean and
-        // root mean square over the dominant cycle, then passes that ratio through the same two pole filter
-        // the cycle was measured with. The published Eacci is that filtered series, not a moving average.
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
-        var filter = roofing.Span;
-
-        using var cycles = context.Rent(count);
-        EhlersDominantCycle(context, filter, length1, length2, length3, cycles.WritableSpan);
-        var domCycles = cycles.Span;
-
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var filterMean = new Streaming.AdaptiveWindowMean(length1);
-        var deviationMean = new Streaming.AdaptiveWindowMean(length1);
-        double previousRatio = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var domCyc = MathHelper.MinOrMax(domCycles[i], length1, length2);
-            var cycleLength = MathHelper.CeilingCycle(domCyc);
-
-            var average = filterMean.Next(filter[i], cycleLength, true);
-            var deviation = MathHelper.Pow(filter[i] - average, 2);
-
-            var rms = MathHelper.Sqrt(deviationMean.Next(deviation, cycleLength, true));
-            var denominator = 0.015 * rms;
-            var ratio = denominator != 0 ? (filter[i] - average) / denominator : 0;
-
-            var previous1 = i >= 1 ? output[i - 1] : 0;
-            var previous2 = i >= 2 ? output[i - 2] : 0;
-            output[i] = (c1 * ((ratio + previousRatio) / 2)) + (c2 * previous1) + (c3 * previous2);
-            previousRatio = ratio;
-        }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, length2, maType) : buffer;
+        length2 = Math.Max(1, length2); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AdaptiveRangeV2Window(length1, length2, length3, maType, true, external); var result = context.Rent(input.Count); var raw = external ? new double[input.Count] : Array.Empty<double>();
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); if (external) raw[i] = point.Value; result.WritableSpan[i] = outputKey == "Signal" ? point.Average : point.Value; }
+        if (external) { var average = ComponentAverage.Take(raw, length2) ?? CalculationsHelper.GetMovingAverageList(data, maType, length2, raw.ToList()).ToArray(); if (outputKey == "Signal") for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = average[i]; } return result;
     }
 
     internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(StockData data, ComputeContext context,
@@ -22720,53 +22677,9 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(StockData data, ComputeContext context,
         int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateEhlersAdaptiveStochasticIndicatorV2 scales the roofing filter within its own range over the
-        // dominant cycle and passes that through the same two pole filter. The published Astoc is that
-        // filtered series; maType only reaches the signal line, which is a separate key.
-        var count = data.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
-        var filter = roofing.Span;
-
-        using var cycles = context.Rent(count);
-        EhlersDominantCycle(context, filter, length1, length2, length3, cycles.WritableSpan);
-        var domCycles = cycles.Span;
-
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        double previousStochastic = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var domCyc = MathHelper.MinOrMax(domCycles[i], length1, length2);
-            var window = MathHelper.CeilingCycle(domCyc);
-
-            var highest = filter[i];
-            var lowest = filter[i];
-            for (var j = 1; j < window && i >= j; j++)
-            {
-                var value = filter[i - j];
-                highest = Math.Max(highest, value);
-                lowest = Math.Min(lowest, value);
-            }
-
-            var stochastic = highest != lowest ? (filter[i] - lowest) / (highest - lowest) : 0;
-            var previous1 = i >= 1 ? output[i - 1] : 0;
-            var previous2 = i >= 2 ? output[i - 2] : 0;
-            output[i] = (c1 * ((stochastic + previousStochastic) / 2)) + (c2 * previous1) + (c3 * previous2);
-            previousStochastic = stochastic;
-        }
-
-        return outputKey == "Signal" ? SmoothPublished(data, context, buffer, length2, maType) : buffer;
+        length2 = Math.Max(1, length2); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AdaptiveRangeV2Window(length1, length2, length3, maType, false, external); var result = context.Rent(input.Count); var raw = external ? new double[input.Count] : Array.Empty<double>();
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); if (external) raw[i] = point.Value; result.WritableSpan[i] = outputKey == "Signal" ? point.Average : point.Value; }
+        if (external) { var average = ComponentAverage.Take(raw, length2) ?? CalculationsHelper.GetMovingAverageList(data, maType, length2, raw.ToList()).ToArray(); if (outputKey == "Signal") for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = average[i]; } return result;
     }
 
     /// <summary>

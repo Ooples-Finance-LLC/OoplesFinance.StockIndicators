@@ -505,105 +505,15 @@ public sealed class EhlersAdaptiveRsiFisherTransformV2State : IStreamingIndicato
 [PrimaryOutput("Easi")]
 public sealed class EhlersAdaptiveStochasticIndicatorV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersAutoCorrelationPeriodogramState _periodogram;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _roofingValues;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private double _prevStoc;
-    private double _prevAstoc1;
-    private double _prevAstoc2;
-
-    public EhlersAdaptiveStochasticIndicatorV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 48, int length2 = 10, int length3 = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / _length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / _length2, 0.99));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _periodogram = new EhlersAutoCorrelationPeriodogramState(_length1, _length2, resolved3);
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _roofingValues = new PooledRingBuffer<double>(_length1);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
-    }
-
+    private readonly AdaptiveRangeV2Window _window;
+    public EhlersAdaptiveStochasticIndicatorV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 48, int length2 = 10, int length3 = 3) => _window = new(length1, length2, length3, maType, false);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveStochasticIndicatorV2;
-
-    public void Reset()
-    {
-        _periodogram.Reset();
-        _roofingFilter.Reset();
-        _roofingValues.Clear();
-        _signalSmoother.Reset();
-        _prevStoc = 0;
-        _prevAstoc1 = 0;
-        _prevAstoc2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
-        domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-
-        var length = MathHelper.CeilingCycle(domCyc);
-        var highest = roofingFilter;
-        var lowest = roofingFilter;
-        // Match batch: only look back at values that exist (j <= count of stored values)
-        for (var j = 1; j < length && j <= _roofingValues.Count; j++)
-        {
-            var filt = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, j);
-            if (filt > highest)
-            {
-                highest = filt;
-            }
-            if (filt < lowest)
-            {
-                lowest = filt;
-            }
-        }
-
-        var stoc = highest != lowest ? (roofingFilter - lowest) / (highest - lowest) : 0;
-        var astoc = (_c1 * ((stoc + _prevStoc) / 2)) + (_c2 * _prevAstoc1) + (_c3 * _prevAstoc2);
-        var signal = _signalSmoother.Next(astoc, isFinal);
-
-        if (isFinal)
-        {
-            _roofingValues.TryAdd(roofingFilter, out _);
-            _prevStoc = stoc;
-            _prevAstoc2 = _prevAstoc1;
-            _prevAstoc1 = astoc;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Easi", astoc },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(astoc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Easi", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodogram.Dispose();
-        _roofingFilter.Dispose();
-        _roofingValues.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Easift")]
@@ -631,7 +541,7 @@ public sealed class EhlersAdaptiveStochasticInverseFisherTransformState : IStrea
         StreamingInputValidation.Validate(bar);
         var astoc = _astocState.Update(bar, isFinal, includeOutputs: false).Value;
         var v1 = 2 * (astoc - 0.5);
-        var fish = (Math.Exp(6 * v1) - 1) / (Math.Exp(6 * v1) + 1);
+        var fish = Math.Tanh(3 * v1);
         var trigger = 0.9 * _prevFish;
 
         if (isFinal)
@@ -661,96 +571,15 @@ public sealed class EhlersAdaptiveStochasticInverseFisherTransformState : IStrea
 [PrimaryOutput("Eacci")]
 public sealed class EhlersAdaptiveCommodityChannelIndexV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersAutoCorrelationPeriodogramState _periodogram;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly AdaptiveWindowMean _tempSum;
-    private readonly AdaptiveWindowMean _mdSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private double _prevRatio;
-    private double _prevAcci1;
-    private double _prevAcci2;
-
-    public EhlersAdaptiveCommodityChannelIndexV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 48, int length2 = 10, int length3 = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / _length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / _length2, 0.99));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _periodogram = new EhlersAutoCorrelationPeriodogramState(_length1, _length2, resolved3);
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _tempSum = new AdaptiveWindowMean(_length1);
-        _mdSum = new AdaptiveWindowMean(_length1);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
-    }
-
+    private readonly AdaptiveRangeV2Window _window;
+    public EhlersAdaptiveCommodityChannelIndexV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 48, int length2 = 10, int length3 = 3) => _window = new(length1, length2, length3, maType, true);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveCommodityChannelIndexV2;
-
-    public void Reset()
-    {
-        _periodogram.Reset();
-        _roofingFilter.Reset();
-        _tempSum.Reset();
-        _mdSum.Reset();
-        _signalSmoother.Reset();
-        _prevRatio = 0;
-        _prevAcci1 = 0;
-        _prevAcci2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
-        domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var cycLength = MathHelper.CeilingCycle(domCyc);
-
-        var avg = _tempSum.Next(roofingFilter, cycLength, isFinal);
-        var md = MathHelper.Pow(roofingFilter - avg, 2);
-        var mdAvg = _mdSum.Next(md, cycLength, isFinal);
-        var rms = cycLength >= 0 ? MathHelper.Sqrt(mdAvg) : 0;
-        var num = roofingFilter - avg;
-        var denom = 0.015 * rms;
-        var ratio = denom != 0 ? num / denom : 0;
-        var acci = (_c1 * ((ratio + _prevRatio) / 2)) + (_c2 * _prevAcci1) + (_c3 * _prevAcci2);
-        var signal = _signalSmoother.Next(acci, isFinal);
-
-        if (isFinal)
-        {
-            _prevRatio = ratio;
-            _prevAcci2 = _prevAcci1;
-            _prevAcci1 = acci;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eacci", acci },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(acci, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eacci", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodogram.Dispose();
-        _roofingFilter.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eabpf")]

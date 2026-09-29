@@ -43799,5 +43799,221 @@
     "before": "1.5 * transformed",
     "after": "1.25 * transformed",
     "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-range-v2-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "var cycle = _spectrum.Next(price, commit).Value",
+    "after": "_spectrum.Next(price, commit); var cycle = 0d",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-window",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "MathHelper.CeilingCycle(MathHelper.MinOrMax(cycle, _upper, _lower))",
+    "after": "MathHelper.CeilingCycle(MathHelper.MinOrMax(cycle, _upper, _lower) / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-highest",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "BigInteger.Max(highest, value)",
+    "after": "BigInteger.Min(highest, value)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-lowest",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "BigInteger.Min(lowest, value)",
+    "after": "BigInteger.Max(lowest, value)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-cci-mean",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "RocBankValue.Round(sum, count: count)",
+    "after": "RocBankValue.Round(sum, count: 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-cci-residual-window",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "squares += olderResidual * olderResidual",
+    "after": "squares += residual * residual",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-cci-rms-count",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "(residual * residual * count) << 4296",
+    "after": "(residual * residual) << 4296",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-cci-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "residual.Sign * ExactPopulationDeviation.RootRatio",
+    "after": "1 * ExactPopulationDeviation.RootRatio",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-cci-constant",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "ExactVarianceWindow.Units(.015)",
+    "after": "ExactVarianceWindow.Units(.03)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-dc-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "_gain = gain.Mean(1)",
+    "after": "_gain = 1 - _feedback - _decay",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.LongSmoothingRetainsNonzeroDcDrive"
+  },
+  {
+    "id": "adaptive-range-v2-prior-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "filtered.AddProduct(_ratio, _gain / 2)",
+    "after": "filtered.AddProduct(ratio, _gain / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "filtered.AddProduct(_previous, _feedback)",
+    "after": "filtered.AddProduct(_older, _feedback)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-decay",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "filtered.AddProduct(_older, _decay)",
+    "after": "filtered.AddProduct(_older, -_decay)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "if (commit) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-residual-history",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "_residuals.Add(residual);",
+    "after": "_residuals.Add(BigInteger.Zero);",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CciSquaredResidualsSurviveBothExponentExtremes"
+  },
+  {
+    "id": "adaptive-range-v2-reset-spectrum",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "_spectrum.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-reset-roof",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "_roof.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV2Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV2Window",
+    "before": "_average?.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.WideAndSubnormalRoofingPreservesRangesAndInverseFisher"
+  },
+  {
+    "id": "adaptive-range-v2-fast-selected-stochasticindicator",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveStochasticIndicatorV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-range-v2-fast-selected-commoditychannelindex",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-range-v2-custom-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(",
+    "before": "ComponentAverage.Take(raw, length2)",
+    "after": "ComponentAverage.Take(raw, length2 + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.CustomerAverageIsConsumedOnceAndPreservesInverseTrigger"
+  },
+  {
+    "id": "adaptive-range-v2-validation-stochasticindicator",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveStochasticIndicatorV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.InvalidCandlesCannotAdvanceCyclesRoofingOrAverages"
+  },
+  {
+    "id": "adaptive-range-v2-validation-commoditychannelindex",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveCommodityChannelIndexV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.InvalidCandlesCannotAdvanceCyclesRoofingOrAverages"
+  },
+  {
+    "id": "adaptive-range-v2-inverse-trigger",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "private static ComputeBuffer ComputeAdaptiveStochasticInverseFisherFast(",
+    "before": "(outputKey == \"Signal\" ? .9 : 1)",
+    "after": "(outputKey == \"Signal\" ? .8 : 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
   }
 ]

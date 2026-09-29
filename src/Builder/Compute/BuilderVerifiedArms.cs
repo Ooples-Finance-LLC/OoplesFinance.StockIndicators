@@ -171,6 +171,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersAdaptiveRelativeStrengthIndexV2SpecOptions),
         typeof(EhlersAdaptiveRsiFisherTransformV2SpecOptions),
         typeof(EhlersAdaptiveStochasticIndicatorV2SpecOptions),
+        typeof(EhlersAdaptiveStochasticInverseFisherTransformSpecOptions),
         typeof(EhlersAllPassPhaseShifterSpecOptions),
         typeof(EhlersAverageErrorFilterSpecOptions),
         typeof(EhlersBandPassFilterV1SpecOptions),

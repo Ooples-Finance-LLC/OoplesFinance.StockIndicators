@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV2 or IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform or IndicatorName.EhlersAdaptiveCommodityChannelIndexV2)
+        {
+            var rangeOptions = builtIn.CreateOptions(); var rangeUpper = Integer(rangeOptions, "Length1", 48); var rangeLower = Integer(rangeOptions, "Length2", 10); var rangeLag = Integer(rangeOptions, "Length3", 3); var rangeKind = AverageKind(rangeOptions, 3); var rangeMode = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV2 ? 2 : builtIn.BatchName == IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform ? 1 : 0; var rangeKeys = new[] { rangeMode == 2 ? "Eacci" : rangeMode == 1 ? "Easift" : "Easi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++) { var key = rangeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRangeV2Values(bars, rangeUpper, rangeLower, rangeLag, rangeKind, rangeMode).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2 or IndicatorName.EhlersAdaptiveRsiFisherTransformV2)
         {
             var rsiOptions = builtIn.CreateOptions(); var rsiUpper = Integer(rsiOptions, "Length1", 48); var rsiLower = Integer(rsiOptions, "Length2", 10); var rsiLag = Integer(rsiOptions, "Length3", 3); var rsiKind = AverageKind(rsiOptions, 3); var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV2; var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };
