@@ -19933,60 +19933,10 @@ internal static partial class IndicatorCompute
         int length2 = 22, int length3 = 3, double factor = 2.5,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateElderSafeZoneStops averages only the bars that actually moved against the trend - the
-        // count in the denominator is of those bars, not of the window - and stops the trade a multiple of
-        // that average beyond the previous bar's extreme. The side is chosen by the long moving average.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-
-        using var highBuffer = context.Rent(count);
-        using var lowBuffer = context.Rent(count);
-        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
-        var highs = highBuffer.Span;
-        var lows = lowBuffer.Span;
-
-        using var averages = context.Rent(count);
-        MovingAverage(data, maType, length1, input, averages.WritableSpan);
-        var average = averages.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var downMoveTotal = new RollingSum();
-        var downMoveCount = new RollingSum();
-        var upMoveTotal = new RollingSum();
-        var upMoveCount = new RollingSum();
-        var supportWindow = new RollingMinMax(length3);
-        var resistanceWindow = new RollingMinMax(length3);
-        for (var i = 0; i < count; i++)
-        {
-            var previousHigh = i >= 1 ? highs[i - 1] : 0;
-            var previousLow = i >= 1 ? lows[i - 1] : 0;
-
-            var downMove = previousLow > lows[i] ? previousLow - lows[i] : 0;
-            downMoveTotal.Add(downMove);
-            downMoveCount.Add(previousLow > lows[i] ? 1 : 0);
-
-            var upMove = highs[i] > previousHigh ? highs[i] - previousHigh : 0;
-            upMoveTotal.Add(upMove);
-            upMoveCount.Add(highs[i] > previousHigh ? 1 : 0);
-
-            var downCount = downMoveCount.Sum(length2);
-            var upCount = upMoveCount.Sum(length2);
-            var averageDownMove = downCount != 0 ? downMoveTotal.Sum(length2) / downCount : 0;
-            var averageUpMove = upCount != 0 ? upMoveTotal.Sum(length2) / upCount : 0;
-
-            supportWindow.Add(previousLow - (factor * averageDownMove));
-            resistanceWindow.Add(previousHigh + (factor * averageUpMove));
-
-            output[i] = input[i] >= average[i] ? supportWindow.Max : resistanceWindow.Min;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new ElderSafeZoneWindow(maType, length1, length2, length3, factor, external); using ComputeBuffer? trend = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, Math.Max(1, length1), SpanCompat.AsReadOnlySpan(input), trend!.Value.WritableSpan); var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? trend!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

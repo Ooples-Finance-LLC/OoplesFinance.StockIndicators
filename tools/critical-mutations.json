@@ -46733,5 +46733,221 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~SuperTrendFilterNumericalTests.InvalidCandlesCannotAdvanceFeedbackBandsOrDirection"
+  },
+  {
+    "id": "elder-safe-wide-minus-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Move(_previousLow, low)",
+    "after": "Move(low, _previousLow)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-plus-direction",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Move(high, _previousHigh)",
+    "after": "Move(_previousHigh, high)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-minus-event-count",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "if (minus.Mantissa > 0) minusCount++;",
+    "after": "minusCount++;",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.HandExamplesCountOnlyDirectionalEventsAndExpireStops"
+  },
+  {
+    "id": "elder-safe-wide-plus-event-count",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "if (plus.Mantissa > 0) plusCount++;",
+    "after": "plusCount++;",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-minus-average",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "count: minusCount",
+    "after": "count: _noiseLength",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.HandExamplesCountOnlyDirectionalEventsAndExpireStops"
+  },
+  {
+    "id": "elder-safe-wide-plus-average",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "count: plusCount",
+    "after": "count: _noiseLength",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-noise-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "old.Minus.AddTo(ref minusSum, -1);",
+    "after": "old.Minus.AddTo(ref minusSum, 1);",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-noise-period",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "_noiseLength = Math.Max(1, noiseLength);",
+    "after": "_noiseLength = 1;",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-stop-period",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "_stopLength = Math.Max(1, stopLength);",
+    "after": "_stopLength = 1;",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.HandExamplesCountOnlyDirectionalEventsAndExpireStops"
+  },
+  {
+    "id": "elder-safe-wide-extended-move",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "sum.Sign > 0 ? RocBankValue.Round(sum) : default",
+    "after": "sum.Sign > 0 ? new RocBankValue(sum.Mean(1)) : default",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.ExtendedDirectionalMovesAndZeroFactorsDoNotPoisonProjection"
+  },
+  {
+    "id": "elder-safe-wide-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "sum.ScaleByPowerOfTwo(mean.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.ExtendedDirectionalMovesAndZeroFactorsDoNotPoisonProjection"
+  },
+  {
+    "id": "elder-safe-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "sum.AddProduct(mean.Mantissa, _factor, sign);",
+    "after": "sum.AddProduct(mean.Mantissa, _factor / 2, sign);",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-floor-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Candidate(_previousLow, minusMean, -1)",
+    "after": "Candidate(low, minusMean, -1)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.HandExamplesCountOnlyDirectionalEventsAndExpireStops"
+  },
+  {
+    "id": "elder-safe-wide-ceiling-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Candidate(_previousHigh, plusMean, 1)",
+    "after": "Candidate(high, plusMean, 1)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-floor-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Compare(retained.Floor, highest) > 0",
+    "after": "Compare(retained.Floor, highest) < 0",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-ceiling-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Compare(retained.Ceiling, lowest) < 0",
+    "after": "Compare(retained.Ceiling, lowest) > 0",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-side-equality",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "Compare(new(close), average) >= 0",
+    "after": "Compare(new(close), average) > 0",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.HandExamplesCountOnlyDirectionalEventsAndExpireStops"
+  },
+  {
+    "id": "elder-safe-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "_trend!.Next(new(close), commit)",
+    "after": "_trend!.Next(new(close), true)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "_previousHigh = _previousLow = 0;",
+    "after": "_previousHigh = _previousLow = 1;",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "bullish.Sign > 0 && bullChange.Sign > 0",
+    "after": "bullish.Sign < 0 && bullChange.Sign > 0",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.WideEventMeansExtremaTrendAndSignalsStayExact"
+  },
+  {
+    "id": "elder-safe-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "elder-safe-wide-custom-trend",
+    "module": "numerical",
+    "file": "src/Helpers/ElderSafeZoneWindow.cs",
+    "scope": "internal sealed class ElderSafeZoneWindow",
+    "before": "externalTrend.HasValue ? new RocBankValue(externalTrend.Value)",
+    "after": "externalTrend.HasValue ? new RocBankValue(close)",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.CustomTrendAndLegacyAveragesSelectTheCorrectNoiseSide"
+  },
+  {
+    "id": "elder-safe-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeElderSafeZoneStopsFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.SelectedPricesPreserveEffectiveRangesAndBothSignalComparisons"
+  },
+  {
+    "id": "elder-safe-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ElderSafeZoneStopsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.InvalidCandlesCannotAdvanceMovesExtremaOrTrend"
   }
 ]

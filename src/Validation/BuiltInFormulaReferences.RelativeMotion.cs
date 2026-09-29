@@ -434,20 +434,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.ElderSafeZoneStops:
-                return new("Eszs", new[] { "Eszs" }, bars =>
-                {
-                    var trend = Average(Closes(bars), 63, kind); var factor = Number(options, 2.5, "Mult");
-                    var upward = bars.Select((b, i) => Math.Max(0, b.High - (i == 0 ? 0 : bars[i - 1].High))).ToArray();
-                    var downward = bars.Select((b, i) => Math.Max(0, (i == 0 ? 0 : bars[i - 1].Low) - b.Low)).ToArray();
-                    double Noise(double[] values, int i)
-                    {
-                        var events = Window(values, i, length).Where(v => v > 0).ToArray();
-                        return events.Length == 0 ? 0 : events.Average();
-                    }
-                    var ceiling = bars.Select((_, i) => (i == 0 ? 0 : bars[i - 1].High) + factor * Noise(upward, i)).ToArray();
-                    var floor = bars.Select((_, i) => (i == 0 ? 0 : bars[i - 1].Low) - factor * Noise(downward, i)).ToArray();
-                    return Outputs(("Eszs", bars.Select((b, i) => b.Close >= trend[i] ? Window(floor, i, 3).Max() : Window(ceiling, i, 3).Min()).ToArray()));
-                });
+                return new("Eszs", new[] { "Eszs" }, bars => Outputs(("Eszs", ElderSafeZoneOutputs(bars, indicator))));
             case IndicatorName.LiquidRelativeStrengthIndex:
                 return new("Lrsi", new[] { "Lrsi" }, bars =>
                 {

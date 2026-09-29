@@ -313,86 +313,10 @@ public static partial class Calculations
     public static StockData CalculateElderSafeZoneStops(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 63, int length2 = 22, int length3 = 3, double factor = 2.5)
     {
-        List<double> safeZPlusList = new(stockData.Count);
-        List<double> safeZMinusList = new(stockData.Count);
-        List<double> dmPlusCountList = new(stockData.Count);
-        List<double> dmMinusCountList = new(stockData.Count);
-        List<double> dmMinusList = new(stockData.Count);
-        List<double> dmPlusList = new(stockData.Count);
-        List<double> stopList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum dmMinusCountSum = new();
-        RollingSum dmMinusSum = new();
-        RollingSum dmPlusCountSum = new();
-        RollingSum dmPlusSum = new();
-        RollingMinMax safeZMinusWindow = new(length3);
-        RollingMinMax safeZPlusWindow = new(length3);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentLow = lowList[i];
-            var currentHigh = highList[i];
-            var currentEma = emaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var dmMinus = prevLow > currentLow ? prevLow - currentLow : 0;
-            dmMinusList.Add(dmMinus);
-            dmMinusSum.Add(dmMinus);
-
-            double dmMinusCount = prevLow > currentLow ? 1 : 0;
-            dmMinusCountList.Add(dmMinusCount);
-            dmMinusCountSum.Add(dmMinusCount);
-
-            var dmPlus = currentHigh > prevHigh ? currentHigh - prevHigh : 0;
-            dmPlusList.Add(dmPlus);
-            dmPlusSum.Add(dmPlus);
-
-            double dmPlusCount = currentHigh > prevHigh ? 1 : 0;
-            dmPlusCountList.Add(dmPlusCount);
-            dmPlusCountSum.Add(dmPlusCount);
-
-            var countM = dmMinusCountSum.Sum(length2);
-            var dmMinusSumValue = dmMinusSum.Sum(length2);
-            var dmAvgMinus = countM != 0 ? dmMinusSumValue / countM : 0;
-            var countP = dmPlusCountSum.Sum(length2);
-            var dmPlusSumValue = dmPlusSum.Sum(length2);
-            var dmAvgPlus = countP != 0 ? dmPlusSumValue / countP : 0;
-
-            var safeZMinus = prevLow - (factor * dmAvgMinus);
-            safeZMinusList.Add(safeZMinus);
-            safeZMinusWindow.Add(safeZMinus);
-
-            var safeZPlus = prevHigh + (factor * dmAvgPlus);
-            safeZPlusList.Add(safeZPlus);
-            safeZPlusWindow.Add(safeZPlus);
-
-            var highest = safeZMinusWindow.Max;
-            var lowest = safeZPlusWindow.Min;
-
-            var prevStop = GetLastOrDefault(stopList);
-            var stop = currentValue >= currentEma ? highest : lowest;
-            stopList.Add(stop);
-
-            var signal = GetBullishBearishSignal(currentValue - Math.Max(currentEma, stop), prevValue - Math.Max(prevEma, prevStop),
-                currentValue - Math.Min(currentEma, stop), prevValue - Math.Min(prevEma, prevStop));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eszs", stopList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stopList);
-        stockData.IndicatorName = IndicatorName.ElderSafeZoneStops;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new ElderSafeZoneWindow(maType, length1, length2, length3, factor, external); List<double>? trend = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); trend = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length1), input); stockData.RestoreInputSeries(caller); }
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData); for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? trend![i] : null); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eszs", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.ElderSafeZoneStops; return stockData;
     }
 }
 

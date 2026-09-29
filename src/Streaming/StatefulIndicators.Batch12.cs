@@ -59,105 +59,16 @@ public sealed class ElderMarketThermometerState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Eszs")]
 public sealed class ElderSafeZoneStopsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-    private readonly RollingWindowSum _dmMinusCountSum;
-    private readonly RollingWindowSum _dmPlusCountSum;
-    private readonly RollingWindowSum _dmMinusSum;
-    private readonly RollingWindowSum _dmPlusSum;
-    private readonly RollingWindowMax _safeZMinusMax;
-    private readonly RollingWindowMin _safeZPlusMin;
-    private readonly double _factor;
-    private readonly StreamingInputResolver _input;
-    private double _prevLow;
-    private double _prevHigh;
-    private bool _hasPrev;
-
-    public ElderSafeZoneStopsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63,
-        int length2 = 22, int length3 = 3, double factor = 2.5)
-    {
-        _ema = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _dmMinusSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmMinusCountSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmPlusSum = new RollingWindowSum(Math.Max(1, length2));
-        _dmPlusCountSum = new RollingWindowSum(Math.Max(1, length2));
-        _safeZMinusMax = new RollingWindowMax(Math.Max(1, length3));
-        _safeZPlusMin = new RollingWindowMin(Math.Max(1, length3));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _factor = factor;
-    }
-
+    private readonly ElderSafeZoneWindow _window;
+    public ElderSafeZoneStopsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 63, int length2 = 22, int length3 = 3, double factor = 2.5) => _window = new(maType, length1, length2, length3, factor);
     public IndicatorName Name => IndicatorName.ElderSafeZoneStops;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _dmMinusSum.Reset();
-        _dmMinusCountSum.Reset();
-        _dmPlusSum.Reset();
-        _dmPlusCountSum.Reset();
-        _safeZMinusMax.Reset();
-        _safeZPlusMin.Reset();
-        _prevLow = 0;
-        _prevHigh = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevHigh = _hasPrev ? _prevHigh : 0;
-        var prevLow = _hasPrev ? _prevLow : 0;
-
-        var dmMinus = prevLow > bar.Low ? prevLow - bar.Low : 0;
-        var dmMinusCount = prevLow > bar.Low ? 1d : 0d;
-        var dmPlus = bar.High > prevHigh ? bar.High - prevHigh : 0;
-        var dmPlusCount = bar.High > prevHigh ? 1d : 0d;
-
-        var dmMinusSum = isFinal ? _dmMinusSum.Add(dmMinus, out _) : _dmMinusSum.Preview(dmMinus, out _);
-        var dmMinusCountSum = isFinal ? _dmMinusCountSum.Add(dmMinusCount, out _) : _dmMinusCountSum.Preview(dmMinusCount, out _);
-        var dmPlusSum = isFinal ? _dmPlusSum.Add(dmPlus, out _) : _dmPlusSum.Preview(dmPlus, out _);
-        var dmPlusCountSum = isFinal ? _dmPlusCountSum.Add(dmPlusCount, out _) : _dmPlusCountSum.Preview(dmPlusCount, out _);
-
-        var dmAvgMinus = dmMinusCountSum != 0 ? dmMinusSum / dmMinusCountSum : 0;
-        var dmAvgPlus = dmPlusCountSum != 0 ? dmPlusSum / dmPlusCountSum : 0;
-
-        var safeZMinus = prevLow - (_factor * dmAvgMinus);
-        var safeZPlus = prevHigh + (_factor * dmAvgPlus);
-
-        var highest = isFinal ? _safeZMinusMax.Add(safeZMinus, out _) : _safeZMinusMax.Preview(safeZMinus, out _);
-        var lowest = isFinal ? _safeZPlusMin.Add(safeZPlus, out _) : _safeZPlusMin.Preview(safeZPlus, out _);
-        var ema = _ema.Next(value, isFinal);
-        var stop = value >= ema ? highest : lowest;
-
-        if (isFinal)
-        {
-            _prevLow = bar.Low;
-            _prevHigh = bar.High;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eszs", stop }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stop, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eszs", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _dmMinusSum.Dispose();
-        _dmMinusCountSum.Dispose();
-        _dmPlusSum.Dispose();
-        _dmPlusCountSum.Dispose();
-        _safeZMinusMax.Dispose();
-        _safeZPlusMin.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ewo")]
