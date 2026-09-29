@@ -331,69 +331,13 @@ public sealed class RunningEquityState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Stc")]
 public sealed class SchaffTrendCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _cycleLength;
-    private readonly IMovingAverageSmoother _fastEma;
-    private readonly IMovingAverageSmoother _slowEma;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly RollingWindowMax _scaleWindow;
-    private readonly StreamingInputResolver _input;
-
-    public SchaffTrendCycleState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int fastLength = 23, int slowLength = 50, int cycleLength = 10)
-    {
-        _cycleLength = Math.Max(1, cycleLength);
-        _fastEma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowEma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _maxWindow = new RollingWindowMax(_cycleLength);
-        _minWindow = new RollingWindowMin(_cycleLength);
-        _scaleWindow = new RollingWindowMax(_cycleLength);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly SchaffFirstPassWindow _window;
+    public SchaffTrendCycleState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 23, int slowLength = 50, int cycleLength = 10) => _window = new(maType, fastLength, slowLength, cycleLength);
     public IndicatorName Name => IndicatorName.SchaffTrendCycle;
-
-    public void Reset()
-    {
-        _fastEma.Reset();
-        _slowEma.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _scaleWindow.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var fast = _fastEma.Next(value, isFinal);
-        var slow = _slowEma.Next(value, isFinal);
-        var macd = fast - slow;
-        var highest = isFinal ? _maxWindow.Add(macd, out _) : _maxWindow.Preview(macd, out _);
-        var lowest = isFinal ? _minWindow.Add(macd, out _) : _minWindow.Preview(macd, out _);
-        var magnitude = Math.Abs(fast) + Math.Abs(slow);
-        var scale = isFinal ? _scaleWindow.Add(magnitude, out _) : _scaleWindow.Preview(magnitude, out _);
-        var stc = SchaffRange.Normalize(macd, lowest, highest, scale);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Stc", stc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stc, outputs);
-    }
-
-    public void Dispose()
-    {
-        _fastEma.Dispose();
-        _slowEma.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _scaleWindow.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value; return new(value, includeOutputs ? new Dictionary<string, double> { { "Stc", value } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 public sealed class SectorRotationModelState : IMultiSeriesIndicatorState, IDisposable

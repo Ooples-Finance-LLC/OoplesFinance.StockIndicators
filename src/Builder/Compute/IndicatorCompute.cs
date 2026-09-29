@@ -16565,38 +16565,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength = 10,
         int fastLength = 23, int slowLength = 50, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateSchaffTrendCycle takes the stochastic of a macd over the MACD'S OWN range, not the bars'
-        // highs and lows: the cycle length sizes that range, while the two moving average lengths are fixed
-        // at the batch defaults because no spec property reaches them.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var fastAverage = context.Rent(count);
-        using var slowAverage = context.Rent(count);
-        MovingAverage(data, maType, Math.Max(fastLength, 1), input, fastAverage.WritableSpan);
-        MovingAverage(data, maType, Math.Max(slowLength, 1), input, slowAverage.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using var convergence = context.Rent(count);
-        var macd = convergence.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            macd[i] = fastAverage.Span[i] - slowAverage.Span[i];
-        }
-
-        var macdWindow = new RollingMinMax(Math.Max(cycleLength, 1));
-        var scaleWindow = new RollingMinMax(Math.Max(cycleLength, 1));
-        for (var i = 0; i < count; i++)
-        {
-            macdWindow.Add(macd[i]);
-            scaleWindow.Add(Math.Abs(fastAverage.Span[i]) + Math.Abs(slowAverage.Span[i]));
-            output[i] = SchaffRange.Normalize(macd[i], macdWindow.Min, macdWindow.Max, scaleWindow.Max);
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new SchaffFirstPassWindow(maType, fastLength, slowLength, cycleLength, external); using ComputeBuffer? fast = external ? context.Rent(input.Count) : null; using ComputeBuffer? slow = external ? context.Rent(input.Count) : null;
+        if (external) { MovingAverage(data, maType, Math.Max(1, fastLength), SpanCompat.AsReadOnlySpan(input), fast!.Value.WritableSpan); MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), slow!.Value.WritableSpan); }
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, external ? fast!.Value.Span[i] : null, external ? slow!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

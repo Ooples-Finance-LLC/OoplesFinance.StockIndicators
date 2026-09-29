@@ -48407,5 +48407,257 @@
     "before": "return new(value,",
     "after": "return new(value + 1,",
     "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "schaff-first-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "_fast = new(kind, Math.Max(1, fast))",
+    "after": "_fast = new(kind, Math.Max(1, slow))",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "_slow = new(kind, Math.Max(1, slow))",
+    "after": "_slow = new(kind, Math.Max(1, fast))",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-cycle-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "_count - _cycle + 1L",
+    "after": "_count - _cycle",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-macd-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "slow.AddTo(ref difference, -1)",
+    "after": "slow.AddTo(ref difference, 1)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-macd-extended",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "var macd = RocBankValue.Round(difference)",
+    "after": "var macd = new RocBankValue(difference.Mean(1))",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.ExtendedMeanDifferencesAndRangesNormalizeBeforeProjection"
+  },
+  {
+    "id": "schaff-first-wide-scale-fast-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Math.Abs(fast.Mantissa)",
+    "after": "fast.Mantissa",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.SixtyFourEpsilonFlatnessBoundaryIsInclusive"
+  },
+  {
+    "id": "schaff-first-wide-scale-slow-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Math.Abs(slow.Mantissa)",
+    "after": "slow.Mantissa",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.SixtyFourEpsilonFlatnessBoundaryIsInclusive"
+  },
+  {
+    "id": "schaff-first-wide-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Extreme(_highs, macd, true, commit)",
+    "after": "Extreme(_highs, macd, false, commit)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Extreme(_lows, macd, false, commit)",
+    "after": "Extreme(_lows, macd, true, commit)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-scale-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Extreme(_scales, RocBankValue.Round(scaleSum), true, commit)",
+    "after": "Extreme(_scales, RocBankValue.Round(scaleSum), false, commit)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.ExtendedMeanDifferencesAndRangesNormalizeBeforeProjection"
+  },
+  {
+    "id": "schaff-first-wide-scale-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Extreme(_scales, RocBankValue.Round(scaleSum), true, commit)",
+    "after": "RocBankValue.Round(scaleSum)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.ExtendedMeanDifferencesAndRangesNormalizeBeforeProjection"
+  },
+  {
+    "id": "schaff-first-wide-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "lowest.AddTo(ref rangeSum, -1)",
+    "after": "lowest.AddTo(ref rangeSum, 1)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-flatness-factor",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "scale.Multiply(1.4210854715202004e-14)",
+    "after": "scale.Multiply(0)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.SixtyFourEpsilonFlatnessBoundaryIsInclusive"
+  },
+  {
+    "id": "schaff-first-wide-flatness-equality",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Compare(range, threshold) > 0",
+    "after": "Compare(range, threshold) >= 0",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.SixtyFourEpsilonFlatnessBoundaryIsInclusive"
+  },
+  {
+    "id": "schaff-first-wide-numerator-scale",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "macd.AddTo(ref numerator, 100)",
+    "after": "macd.AddTo(ref numerator, 50)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "range.AddTo(ref denominator)",
+    "after": "threshold.AddTo(ref denominator)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-high-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "Extreme(_highs, macd, true, commit)",
+    "after": "Extreme(_highs, macd, true, true)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-count-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "if (commit) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-high-reset",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "_highs.Clear();",
+    "after": "_lows.Clear();",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "slope.Sign > 0 && change.Sign > 0",
+    "after": "slope.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "change.Subtract(_slope)",
+    "after": "change.Subtract(default)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-custom-fast",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "new RocBankValue(externalFast.Value)",
+    "after": "new RocBankValue(externalSlow!.Value)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.CustomAndLegacyAveragesKeepFastSlowOrderAndPeriods"
+  },
+  {
+    "id": "schaff-first-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int cycleLength",
+    "before": "window.Next(input[i], true,",
+    "after": "window.Next(data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.AliasFastRouteUsesCycleLengthAndSelectedInput"
+  },
+  {
+    "id": "schaff-first-wide-alias-cycle",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length",
+    "before": "cycleLength: length)",
+    "after": "cycleLength: length + 1)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.AliasFastRouteUsesCycleLengthAndSelectedInput"
+  },
+  {
+    "id": "schaff-first-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class SchaffTrendCycleState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "schaff-first-wide-native-primary",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch22.cs",
+    "scope": "public sealed class SchaffTrendCycleState",
+    "before": "return new(value,",
+    "after": "return new(value + 1,",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-first-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/SchaffFirstPassWindow.cs",
+    "scope": "internal sealed class SchaffFirstPassWindow",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
   }
 ]

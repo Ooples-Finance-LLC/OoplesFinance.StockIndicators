@@ -701,51 +701,16 @@ public static partial class Calculations
     public static StockData CalculateSchaffTrendCycle(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int fastLength = 23, int slowLength = 50, int cycleLength = 10)
     {
-        List<double> macdList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var ema23List = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var ema50List = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new SchaffFirstPassWindow(maType, fastLength, slowLength, cycleLength, external); List<double>? fast = null, slow = null;
+        if (external)
         {
-            var currentEma23 = ema23List[i];
-            var currentEma50 = ema50List[i];
-
-            var macd = currentEma23 - currentEma50;
-            macdList.Add(macd);
+            var caller = stockData.CaptureInputSeries(); List<double> Average(int period) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, period))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, period), input);
+            fast = Average(fastLength); slow = Average(slowLength); stockData.RestoreInputSeries(caller);
         }
-
-        // The stochastic of the MACD over the MACD's own range. Chained into the stochastic indicator, the MACD
-        // was measured against the bars' highs and lows - an oscillator set against a price range.
-        var (macdHighestList, macdLowestList) = cycleLength == 1 ? (macdList, macdList) : GetMaxAndMinValuesList(macdList, cycleLength);
-        var scaleWindow = new RollingMinMax(Math.Max(1, cycleLength));
-        var stcList = new List<double>(stockData.Count);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            scaleWindow.Add(Math.Abs(ema23List[i]) + Math.Abs(ema50List[i]));
-            stcList.Add(SchaffRange.Normalize(macdList[i], macdLowestList[i], macdHighestList[i], scaleWindow.Max));
-        }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stc = stcList[i];
-            var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
-            var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
-
-            var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Stc", stcList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stcList);
-        stockData.IndicatorName = IndicatorName.SchaffTrendCycle;
-
-        return stockData;
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, fast?[i], slow?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Stc", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.SchaffTrendCycle; return stockData;
     }
 
     /// <summary>

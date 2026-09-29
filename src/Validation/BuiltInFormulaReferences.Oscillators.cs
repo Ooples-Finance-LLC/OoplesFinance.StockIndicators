@@ -132,27 +132,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.SchaffTrendCycle:
                 if (kind == 0) return null;
-                return new("Stc", new[] { "Stc" }, bars =>
-                {
-                    // This legacy variant publishes the first stochastic pass. The separate SHK variant
-                    // implements the double stochastic/smoothing construction.
-                    var prices = Closes(bars);
-                    var fast = Average(prices, Integer(options, "FastLength", 23), kind);
-                    var slow = Average(prices, Integer(options, "SlowLength", 50), kind);
-                    var macd = fast.Zip(slow, (f, s) => f - s).ToArray();
-                    var period = Math.Max(1, Integer(options, "CycleLength", length));
-                    var line = macd.Select((v, i) =>
-                    {
-                        var window = Window(macd, i, period).ToArray();
-                        var lower = window.Min();
-                        var upper = window.Max();
-                        var scale = Enumerable.Range(Math.Max(0, i - period + 1), Math.Min(period, i + 1))
-                            .Max(j => Math.Abs(fast[j]) + Math.Abs(slow[j]));
-                        // Numerical contract: unresolved MACD ranges (64 machine epsilons of the averages) are flat.
-                        return upper - lower <= 64 * Math.Pow(2, -52) * scale ? 0 : 100 * (v - lower) / (upper - lower);
-                    }).ToArray();
-                    return Outputs(("Stc", line));
-                });
+                return new("Stc", new[] { "Stc" }, bars => SchaffFirstPassOutputs(bars, indicator));
             case IndicatorName.BearPowerIndicator:
             case IndicatorName.BullPowerIndicator:
                 if (kind == 0) return null;
