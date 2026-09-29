@@ -22369,24 +22369,8 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, int length3 = 3, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        length1 = Math.Max(1, length1);
-        length3 = Math.Max(1, length3);
-        using var roof = ComputeEhlersRoofingFilterV2Fast(data, context, length1, Math.Max(1, length2));
-        using var correlations = context.Rent(data.Count);
-        EhlersAutocorrelation.Compute(roof.Span, correlations.WritableSpan, length1);
-        var result = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++)
-        {
-            var crossings = 0;
-            for (var lag = length3; lag <= length1; lag++)
-            {
-                var older = i < lag ? 0 : correlations.Span[i - lag];
-                var newer = i < lag - 1 ? 0 : correlations.Span[i - lag + 1];
-                if ((older > .5 && newer < .5) || (older < .5 && newer > .5)) crossings++;
-            }
-            result.WritableSpan[i] = crossings > length1 / 2d ? 1 : 0;
-        }
-        return result;
+        length2 = Math.Max(1, length2); var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var average = ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length2); using var window = new AutocorrelationReversalWindow(maType, length1, length2, length3, true); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, average?[i] ?? 0).Value; return result;
     }
 
     internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 50,

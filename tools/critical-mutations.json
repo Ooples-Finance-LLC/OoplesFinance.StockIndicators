@@ -43475,5 +43475,149 @@
     "before": "output.Length < close.Length",
     "after": "output.Length + 1 < close.Length",
     "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.CoreRejectsShortOutputBeforeChangingIt"
+  },
+  {
+    "id": "autocorrelation-reversal-rising",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "(correlation > .5 && _previous < .5)",
+    "after": "(false)",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-falling",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "(correlation < .5 && _previous > .5)",
+    "after": "(false)",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "count > _length / 2d",
+    "after": "count >= _length / 2d",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "var lag = _firstLag - 1",
+    "after": "var lag = _firstLag",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-last-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "lag < _length",
+    "after": "lag < _length - 1",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "if (commit) { if (_crossings.Count",
+    "after": "if (true) { if (_crossings.Count",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-previous",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "_previous = correlation;",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-history",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "_crossings.Add(crossing);",
+    "after": "_crossings.Add(0);",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-signal-price",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "distance.Add(price);",
+    "after": "distance.Add(0);",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-reset-correlation",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "internal void Reset() { _correlation.Reset();",
+    "after": "internal void Reset() {",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "distance.Sign < 0 ? Signal.Buy : distance.Sign > 0 ? Signal.Sell",
+    "after": "distance.Sign < 0 ? Signal.Sell : distance.Sign > 0 ? Signal.Buy",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlyDirection"
+  },
+  {
+    "id": "autocorrelation-reversal-gate",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "reversal == 0 ? Signal.None",
+    "after": "reversal == 1 ? Signal.None",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlyDirection"
+  },
+  {
+    "id": "autocorrelation-reversal-mean",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationReversalWindow.cs",
+    "scope": "internal sealed class AutocorrelationReversalWindow",
+    "before": "_average!.Next(new RocBankValue(price), commit)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.NonzeroCrossingsRetainWideAndSubnormalSignals"
+  },
+  {
+    "id": "autocorrelation-reversal-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.SelectedPricesReachBatchAndFast"
+  },
+  {
+    "id": "autocorrelation-reversal-fast-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAutoCorrelationReversalsFast(",
+    "before": "ComponentAverage.Take(SpanCompat.AsReadOnlySpan(input), length2)",
+    "after": "(double[]?)null",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlyDirection"
+  },
+  {
+    "id": "autocorrelation-reversal-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersAutoCorrelationReversalsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.InvalidCandlesCannotAdvanceCrossingsOrCorrelation"
   }
 ]

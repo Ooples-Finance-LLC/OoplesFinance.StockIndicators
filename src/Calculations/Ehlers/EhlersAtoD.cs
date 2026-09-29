@@ -1015,45 +1015,11 @@ public static partial class Calculations
     public static StockData CalculateEhlersAutoCorrelationReversals(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> reversalList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var corrList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
-        var emaList = GetMovingAverageList(stockData, maType, length2, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ema = emaList[i];
-            var currentValue = inputList[i];
-
-            double delta = 0;
-            for (var j = length3; j <= length1; j++)
-            {
-                var corr = i >= j ? corrList[i - j] : 0;
-                var prevCorr = i >= j - 1 ? corrList[i - (j - 1)] : 0;
-                delta += (corr > 0.5 && prevCorr < 0.5) || (corr < 0.5 && prevCorr > 0.5) ? 1 : 0;
-            }
-
-            double reversal = delta > (double)length1 / 2 ? 1 : 0;
-            reversalList.Add(reversal);
-
-            var signal = GetConditionSignal(currentValue < ema && reversal == 1, currentValue > ema && reversal == 1);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacr", reversalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(reversalList);
-        stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationReversals;
-
-        return stockData;
+        length2 = Math.Max(1, length2); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); List<double>? averages = null;
+        if (external) averages = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, input);
+        using var window = new AutocorrelationReversalWindow(maType, length1, length2, length3, external); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, averages?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacr", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationReversals; return stockData;
     }
 
 

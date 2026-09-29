@@ -290,69 +290,16 @@ public sealed class EhlersCombFilterSpectralEstimateState : IStreamingIndicatorS
 [PrimaryOutput("Eacr")]
 public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
-    private readonly EhlersAutoCorrelationIndicatorState _autoCorrelation;
-    private readonly PooledRingBuffer<double> _corrValues;
-
-    public EhlersAutoCorrelationReversalsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 48, int length2 = 10, int length3 = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(length3, 1);
-        _autoCorrelation = new EhlersAutoCorrelationIndicatorState(_length1, Math.Max(1, length2));
-        _corrValues = new PooledRingBuffer<double>(_length1);
-    }
-
+    private readonly AutocorrelationReversalWindow _window;
+    public EhlersAutoCorrelationReversalsState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 48, int length2 = 10, int length3 = 3) => _window = new(maType, length1, length2, length3, true);
     public IndicatorName Name => IndicatorName.EhlersAutoCorrelationReversals;
-
-    public void Reset()
-    {
-        _autoCorrelation.Reset();
-        _corrValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var corr = _autoCorrelation.Update(bar, isFinal, includeOutputs: false).Value;
-        var start = _length3;
-
-        double delta = 0;
-        for (var j = start; j <= _length1; j++)
-        {
-            var corrValue = EhlersStreamingWindow.GetOffsetValue(_corrValues, corr, j);
-            var prevCorr = EhlersStreamingWindow.GetOffsetValue(_corrValues, corr, j - 1);
-            if ((corrValue > 0.5 && prevCorr < 0.5) || (corrValue < 0.5 && prevCorr > 0.5))
-            {
-                delta += 1;
-            }
-        }
-
-        var reversal = delta > _length1 / 2.0 ? 1 : 0;
-
-        if (isFinal)
-        {
-            _corrValues.TryAdd(corr, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eacr", reversal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(reversal, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal, 0);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eacr", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _autoCorrelation.Dispose();
-        _corrValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Real")]
