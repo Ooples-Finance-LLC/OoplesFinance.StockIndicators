@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersMotherOfAdaptiveMovingAverages)
+        {
+            var mamaOptions = builtIn.CreateOptions(); var mamaFast = Number(mamaOptions, .5, "FastLimit"); var mamaSlow = Number(mamaOptions, .05, "SlowLimit"); var mamaKeys = indicator.Outputs.Count == 1 ? new[] { builtIn.BatchOutputKey ?? "Mama" } : new[] { "Fama", "Mama", "I1", "Q1", "SmoothPeriod", "Smooth", "Real", "Imag" };
+            for (var slot = 0; slot < mamaKeys.Length; slot++) { var key = mamaKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => MamaValues(bars.Select(b => b.Close).ToArray(), mamaFast, mamaSlow).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV2)
         {
             var sineOptions = (EhlersSineWaveIndicatorV2SpecOptions)builtIn.CreateOptions(); var sineKeys = new[] { "Sine", "LeadSine" };

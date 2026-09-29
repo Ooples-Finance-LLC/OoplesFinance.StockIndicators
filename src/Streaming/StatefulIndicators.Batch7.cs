@@ -136,6 +136,7 @@ public sealed class EhlersMotherOfAdaptiveMovingAveragesState : IStreamingIndica
 
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
+        StreamingInputValidation.Validate(bar);
         var value = _input.GetValue(bar);
         var snapshot = _engine.Next(value, isFinal);
 
@@ -1379,159 +1380,11 @@ internal readonly struct EhlersMamaSnapshot
 
 internal sealed class EhlersMotherOfAdaptiveMovingAveragesEngine : IDisposable
 {
-    private const double HilbertTransformCoeff1 = 0.0962;
-    private const double HilbertTransformCoeff2 = 0.5769;
-    private const double PeriodCorrectionFactor = 0.075;
-    private const double PeriodCorrectionOffset = 0.54;
-
-    private readonly double _fastAlpha;
-    private readonly double _slowAlpha;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _smooth;
-    private readonly PooledRingBuffer<double> _det;
-    private readonly PooledRingBuffer<double> _q1;
-    private readonly PooledRingBuffer<double> _i1;
-    private double _prevI2;
-    private double _prevQ2;
-    private double _prevRe;
-    private double _prevIm;
-    private double _prevPeriod;
-    private double _prevSprd;
-    private double _prevPhase;
-    private double _prevMama;
-    private double _prevFama;
-
-    public EhlersMotherOfAdaptiveMovingAveragesEngine(double fastAlpha, double slowAlpha)
-    {
-        _fastAlpha = fastAlpha;
-        _slowAlpha = slowAlpha;
-        _values = new PooledRingBuffer<double>(4);
-        _smooth = new PooledRingBuffer<double>(7);
-        _det = new PooledRingBuffer<double>(7);
-        _q1 = new PooledRingBuffer<double>(7);
-        _i1 = new PooledRingBuffer<double>(7);
-    }
-
-    public EhlersMamaSnapshot Next(double value, bool isFinal)
-    {
-        var prevPrice1 = EhlersStreamingWindow.GetOffsetValue(_values, 1);
-        var prevPrice2 = EhlersStreamingWindow.GetOffsetValue(_values, 2);
-        var prevPrice3 = EhlersStreamingWindow.GetOffsetValue(_values, 3);
-
-        var prevs2 = EhlersStreamingWindow.GetOffsetValue(_smooth, 2);
-        var prevs4 = EhlersStreamingWindow.GetOffsetValue(_smooth, 4);
-        var prevs6 = EhlersStreamingWindow.GetOffsetValue(_smooth, 6);
-
-        var prevd2 = EhlersStreamingWindow.GetOffsetValue(_det, 2);
-        var prevd3 = EhlersStreamingWindow.GetOffsetValue(_det, 3);
-        var prevd4 = EhlersStreamingWindow.GetOffsetValue(_det, 4);
-        var prevd6 = EhlersStreamingWindow.GetOffsetValue(_det, 6);
-
-        var prevq1x2 = EhlersStreamingWindow.GetOffsetValue(_q1, 2);
-        var prevq1x4 = EhlersStreamingWindow.GetOffsetValue(_q1, 4);
-        var prevq1x6 = EhlersStreamingWindow.GetOffsetValue(_q1, 6);
-
-        var previ1x2 = EhlersStreamingWindow.GetOffsetValue(_i1, 2);
-        var previ1x4 = EhlersStreamingWindow.GetOffsetValue(_i1, 4);
-        var previ1x6 = EhlersStreamingWindow.GetOffsetValue(_i1, 6);
-
-        var smooth = ((4 * value) + (3 * prevPrice1) + (2 * prevPrice2) + prevPrice3) / 10;
-        var det = ((HilbertTransformCoeff1 * smooth) + (HilbertTransformCoeff2 * prevs2) -
-                   (HilbertTransformCoeff2 * prevs4) - (HilbertTransformCoeff1 * prevs6))
-                  * ((PeriodCorrectionFactor * _prevPeriod) + PeriodCorrectionOffset);
-        var q1 = ((HilbertTransformCoeff1 * det) + (HilbertTransformCoeff2 * prevd2) -
-                  (HilbertTransformCoeff2 * prevd4) - (HilbertTransformCoeff1 * prevd6))
-                 * ((PeriodCorrectionFactor * _prevPeriod) + PeriodCorrectionOffset);
-        var i1 = prevd3;
-        var j1 = ((HilbertTransformCoeff1 * i1) + (HilbertTransformCoeff2 * previ1x2) -
-                  (HilbertTransformCoeff2 * previ1x4) - (HilbertTransformCoeff1 * previ1x6))
-                 * ((PeriodCorrectionFactor * _prevPeriod) + PeriodCorrectionOffset);
-        var jq = ((HilbertTransformCoeff1 * q1) + (HilbertTransformCoeff2 * prevq1x2) -
-                  (HilbertTransformCoeff2 * prevq1x4) - (HilbertTransformCoeff1 * prevq1x6))
-                 * ((PeriodCorrectionFactor * _prevPeriod) + PeriodCorrectionOffset);
-
-        var i2 = i1 - jq;
-        i2 = (0.2 * i2) + (0.8 * _prevI2);
-
-        var q2 = q1 + j1;
-        q2 = (0.2 * q2) + (0.8 * _prevQ2);
-
-        var re = (i2 * _prevI2) + (q2 * _prevQ2);
-        re = (0.2 * re) + (0.8 * _prevRe);
-
-        var im = (i2 * _prevQ2) - (q2 * _prevI2);
-        im = (0.2 * im) + (0.8 * _prevIm);
-
-        var atan = re != 0 ? Math.Atan(im / re) : 0;
-        var period = atan != 0 ? 2 * Math.PI / atan : 0;
-
-        if (_prevPeriod != 0)
-        {
-            period = MathHelper.MinOrMax(period, 1.5 * _prevPeriod, 0.67 * _prevPeriod);
-        }
-
-        period = MathHelper.MinOrMax(period, 50, 6);
-        period = (0.2 * period) + (0.8 * _prevPeriod);
-
-        var sPrd = (0.33 * period) + (0.67 * _prevSprd);
-        var phase = i1 != 0 ? Math.Atan(q1 / i1).ToDegrees() : 0;
-        var deltaPhase = _prevPhase - phase < 1 ? 1 : _prevPhase - phase;
-        var alpha = deltaPhase != 0 ? _fastAlpha / deltaPhase : 0;
-        if (alpha < _slowAlpha)
-        {
-            alpha = _slowAlpha;
-        }
-
-        var mama = (alpha * value) + ((1 - alpha) * _prevMama);
-        var fama = (0.5 * alpha * mama) + ((1 - (0.5 * alpha)) * _prevFama);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _smooth.TryAdd(smooth, out _);
-            _det.TryAdd(det, out _);
-            _q1.TryAdd(q1, out _);
-            _i1.TryAdd(i1, out _);
-            _prevI2 = i2;
-            _prevQ2 = q2;
-            _prevRe = re;
-            _prevIm = im;
-            _prevPeriod = period;
-            _prevSprd = sPrd;
-            _prevPhase = phase;
-            _prevMama = mama;
-            _prevFama = fama;
-        }
-
-        return new EhlersMamaSnapshot(fama, mama, i1, q1, sPrd, smooth, re, im);
-    }
-
-    public void Reset()
-    {
-        _values.Clear();
-        _smooth.Clear();
-        _det.Clear();
-        _q1.Clear();
-        _i1.Clear();
-        _prevI2 = 0;
-        _prevQ2 = 0;
-        _prevRe = 0;
-        _prevIm = 0;
-        _prevPeriod = 0;
-        _prevSprd = 0;
-        _prevPhase = 0;
-        _prevMama = 0;
-        _prevFama = 0;
-    }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smooth.Dispose();
-        _det.Dispose();
-        _q1.Dispose();
-        _i1.Dispose();
-    }
+    private readonly MamaWindow _window;
+    public EhlersMotherOfAdaptiveMovingAveragesEngine(double fastAlpha, double slowAlpha) => _window = new(fastAlpha, slowAlpha);
+    public EhlersMamaSnapshot Next(double value, bool isFinal) => _window.Next(value, isFinal).Values;
+    public void Reset() => _window.Reset();
+    public void Dispose() => _window.Reset();
 }
 
 internal sealed class EhlersImpulseResponseEngine : IDisposable

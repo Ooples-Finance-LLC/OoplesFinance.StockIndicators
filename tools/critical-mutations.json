@@ -41927,5 +41927,158 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~CyberSineNumericalTests.InvalidFieldsCannotAdvancePeriodOrProjectionHistory"
+  },
+  {
+    "id": "mama-fir-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "private static Scaled Fir(",
+    "before": "current.Add(ref sum, .0962)",
+    "after": "current.Add(ref sum, .0862)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-fir-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "private static Scaled Fir(",
+    "before": "At(history, 2).Add(ref sum, .5769)",
+    "after": "At(history, 1).Add(ref sum, .5769)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "mean.Add(_prices[0], 3)",
+    "after": "mean.Add(_prices[0], 2)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-correction",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": ".075 * _period + .54",
+    "after": ".05 * _period + .54",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-inphase-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "At(_detrended, 3)",
+    "after": "At(_detrended, 2)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Product(ref imaginarySum, q2, _i2, -.2)",
+    "after": "Product(ref imaginarySum, q2, _i2, .2)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-quadrature-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "_q2.Add(ref quadSum, .8)",
+    "after": "_q2.Add(ref quadSum, .6)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-period-cap",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Math.Min(50, Math.Max(6, measured))",
+    "after": "Math.Min(25, Math.Max(6, measured))",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Blend(period, _smoothPeriod, .33, .67)",
+    "after": "Blend(period, _smoothPeriod, .5, .5)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-phase",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "quadrature.Add(ref numerator); inphase.Add(ref denominator)",
+    "after": "inphase.Add(ref numerator); quadrature.Add(ref denominator)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-adaptive-retention",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal sealed class MamaWindow",
+    "before": "(BigInteger.One << shift) - weight",
+    "after": "(BigInteger.One << shift) + weight",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-fama-half",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Adaptive(mama, _fama, alpha, true)",
+    "after": "Adaptive(mama, _fama, alpha, false)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal sealed class MamaWindow",
+    "before": "_mama = _fama = default",
+    "after": "_fama = default",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-signal",
+    "module": "numerical",
+    "file": "src/Helpers/MamaWindow.cs",
+    "scope": "internal (EhlersMamaSnapshot Values, Signal Signal) Next(",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~MamaNumericalTests.WideAndSubnormalPricesPreserveEveryMamaTrajectory"
+  },
+  {
+    "id": "mama-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersMotherOfAdaptiveMovingAverages(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~MamaNumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "mama-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersMotherOfAdaptiveMovingAveragesFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~MamaNumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
   }
 ]
