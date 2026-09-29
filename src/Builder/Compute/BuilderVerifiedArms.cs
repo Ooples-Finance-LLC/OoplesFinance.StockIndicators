@@ -746,7 +746,7 @@ internal static class BuilderVerifiedArms
         typeof(EhlersSimpleDecyclerSpecOptions),
         typeof(EhlersSnakeUniversalTradingFilterSpecOptions),
         typeof(EhlersSpearmanRankIndicatorSpecOptions),
-        typeof(EhlersHilbertTransformIndicatorSpecOptions),
+        typeof(EhlersHilbertTransformerSpecOptions), typeof(EhlersHilbertTransformerIndicatorSpecOptions), typeof(EhlersHilbertTransformIndicatorSpecOptions),
         typeof(EhlersInstantaneousPhaseIndicatorSpecOptions),
         typeof(EhlersSquelchIndicatorSpecOptions),
         typeof(EhlersStochasticCyberCycleSpecOptions),

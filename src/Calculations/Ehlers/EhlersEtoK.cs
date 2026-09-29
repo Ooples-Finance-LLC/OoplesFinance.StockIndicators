@@ -370,51 +370,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHilbertTransformer(this StockData stockData, int length1 = 48, int length2 = 20)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> peakList = new(stockData.Count);
-        List<double> realList = new(stockData.Count);
-        List<double> imagList = new(stockData.Count);
-        List<double> qPeakList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var prevReal1 = i >= 1 ? realList[i - 1] : 0;
-            var prevReal2 = i >= 2 ? realList[i - 2] : 0;
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.Add(peak);
-
-            var prevReal = GetLastOrDefault(realList);
-            var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.Add(real);
-
-            var qFilt = real - prevReal;
-            var prevQPeak = GetLastOrDefault(qPeakList);
-            var qPeak = Math.Max(0.991 * prevQPeak, Math.Abs(qFilt));
-            qPeakList.Add(qPeak);
-
-            var imag = qPeak != 0 ? qFilt / qPeak : 0;
-            imagList.Add(imag);
-
-            var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Real", realList },
-            { "Imag", imagList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersHilbertTransformer;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertTransformerWindow(length1, length2, 1, false); var real = new List<double>(input.Count); var imaginary = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); real.Add(point.Real); imaginary.Add(point.Imaginary); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Real", real }, { "Imag", imaginary } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersHilbertTransformer; return stockData;
     }
 
 
@@ -429,63 +387,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHilbertTransformerIndicator(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> peakList = new(stockData.Count);
-        List<double> realList = new(stockData.Count);
-        List<double> imagList = new(stockData.Count);
-        List<double> qFiltList = new(stockData.Count);
-        List<double> qPeakList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-1.414 * Math.PI / length3);
-        var b2 = 2 * a1 * Math.Cos(1.414 * Math.PI / length3);
-        var c2 = b2;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var roofingFilterList = CalculateEhlersRoofingFilterV2(stockData, length1, length2).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var prevQFilt = i >= 1 ? qFiltList[i - 1] : 0;
-            var prevImag1 = i >= 1 ? imagList[i - 1] : 0;
-            var prevImag2 = i >= 2 ? imagList[i - 2] : 0;
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.Add(peak);
-
-            var prevReal = GetLastOrDefault(realList);
-            var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.Add(real);
-
-            var qFilt = real - prevReal;
-            var prevQPeak = GetLastOrDefault(qPeakList);
-            var qPeak = Math.Max(0.991 * prevQPeak, Math.Abs(qFilt));
-            qPeakList.Add(qPeak);
-
-            qFilt = qPeak != 0 ? qFilt / qPeak : 0;
-            qFiltList.Add(qFilt);
-
-            var imag = (c1 * ((qFilt + prevQFilt) / 2)) + (c2 * prevImag1) + (c3 * prevImag2);
-            imagList.Add(imag);
-
-            var signal = GetCompareSignal(imag - qFilt, prevImag1 - prevQFilt);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Real", realList },
-            { "Imag", imagList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersHilbertTransformerIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertTransformerWindow(length1, length2, length3, true); var real = new List<double>(input.Count); var imaginary = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); real.Add(point.Real); imaginary.Add(point.Imaginary); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Real", real }, { "Imag", imaginary } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersHilbertTransformerIndicator; return stockData;
     }
 
 

@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformer or IndicatorName.EhlersHilbertTransformerIndicator)
+        {
+            var transformOptions = builtIn.CreateOptions(); var transformSmooth = transformOptions is EhlersHilbertTransformerIndicatorSpecOptions; var transformUpper = Integer(transformOptions, "Length1", 48); var transformLower = Integer(transformOptions, "Length2", 20); var transformSmoothing = Integer(transformOptions, "Length3", 10);
+            var transformKeys = new[] { "Real", "Imag" }; for (var slot = 0; slot < transformKeys.Length; slot++) { var key = transformKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => HilbertTransformerValues(bars, transformUpper, transformLower, transformSmoothing, transformSmooth).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformIndicator or IndicatorName.EhlersInstantaneousPhaseIndicator)
         {
             var phaseOptions = builtIn.CreateOptions(); var measureCycle = phaseOptions is EhlersInstantaneousPhaseIndicatorSpecOptions; var phaseLag = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length1 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).Length; var phaseHorizon = measureCycle ? ((EhlersInstantaneousPhaseIndicatorSpecOptions)phaseOptions).Length2 : 1; var realGain = measureCycle ? .635 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).IMult; var imaginaryGain = measureCycle ? .338 : ((EhlersHilbertTransformIndicatorSpecOptions)phaseOptions).QMult;

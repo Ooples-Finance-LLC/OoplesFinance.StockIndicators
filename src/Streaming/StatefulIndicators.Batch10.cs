@@ -253,124 +253,31 @@ public sealed class EhlersHilbertTransformIndicatorState : IStreamingIndicatorSt
 [PrimaryOutput("Real")]
 public sealed class EhlersHilbertTransformerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersHilbertTransformerEngine _engine;
-
-    public EhlersHilbertTransformerState(int length1 = 48, int length2 = 20)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _engine = new EhlersHilbertTransformerEngine(resolvedLength1, resolvedLength2, InputName.Close);
-    }
-
+    private readonly HilbertTransformerWindow _window;
+    public EhlersHilbertTransformerState(int length1 = 48, int length2 = 20) => _window = new(length1, length2, 1, false);
     public IndicatorName Name => IndicatorName.EhlersHilbertTransformer;
-
-    public void Reset()
-    {
-        _engine.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        _engine.Next(bar, isFinal, out var real, out var imag);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Real", real },
-                { "Imag", imag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(real, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Real, includeOutputs ? new Dictionary<string, double> { { "Real", point.Real }, { "Imag", point.Imaginary } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Real")]
 public sealed class EhlersHilbertTransformerIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private double _prevPeak;
-    private double _prevReal;
-    private double _prevQPeak;
-    private double _prevQFilt;
-    private double _prevImag1;
-    private double _prevImag2;
-
-    public EhlersHilbertTransformerIndicatorState(int length1 = 48, int length2 = 20, int length3 = 10)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        var resolvedLength3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / resolvedLength3);
-        var b2 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolvedLength3);
-        _c2 = b2;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _roofingFilter = new EhlersRoofingFilterV2State(resolvedLength1, resolvedLength2);
-    }
-
+    private readonly HilbertTransformerWindow _window;
+    public EhlersHilbertTransformerIndicatorState(int length1 = 48, int length2 = 20, int length3 = 10) => _window = new(length1, length2, length3, true);
     public IndicatorName Name => IndicatorName.EhlersHilbertTransformerIndicator;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _prevPeak = 0;
-        _prevReal = 0;
-        _prevQPeak = 0;
-        _prevQFilt = 0;
-        _prevImag1 = 0;
-        _prevImag2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
-        var real = peak != 0 ? roofingFilter / peak : 0;
-        var qFilt = real - _prevReal;
-        var qPeak = Math.Max(0.991 * _prevQPeak, Math.Abs(qFilt));
-        var normalizedQ = qPeak != 0 ? qFilt / qPeak : 0;
-        var imag = (_c1 * ((normalizedQ + _prevQFilt) / 2)) + (_c2 * _prevImag1) + (_c3 * _prevImag2);
-
-        if (isFinal)
-        {
-            _prevPeak = peak;
-            _prevReal = real;
-            _prevQPeak = qPeak;
-            _prevQFilt = normalizedQ;
-            _prevImag2 = _prevImag1;
-            _prevImag1 = imag;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Real", real },
-                { "Imag", imag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(real, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Real, includeOutputs ? new Dictionary<string, double> { { "Real", point.Real }, { "Imag", point.Imaginary } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Ehdc")]

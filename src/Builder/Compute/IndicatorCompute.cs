@@ -1465,6 +1465,8 @@ internal static partial class IndicatorCompute
             EhlersRoofingFilterV2SpecOptions erfv2 => ComputeEhlersRoofingFilterV2Fast(data, context, erfv2.UpperLength, erfv2.LowerLength),
             EhlersImpulseReactionSpecOptions eir => ComputeEhlersImpulseReactionFast(data, context, eir.Length1, eir.Length2, eir.Q),
             EhlersReverseEmaIndicatorV1SpecOptions erema => ComputeEhlersReverseEmaIndicatorV1Fast(data, context, erema.Alpha),
+            EhlersHilbertTransformerSpecOptions transformer => ComputeHilbertTransformerFast(data, context, transformer.Length1, transformer.Length2, 1, false, spec.OutputKey),
+            EhlersHilbertTransformerIndicatorSpecOptions smoothTransformer => ComputeHilbertTransformerFast(data, context, smoothTransformer.Length1, smoothTransformer.Length2, smoothTransformer.Length3, true, spec.OutputKey),
             EhlersHilbertTransformIndicatorSpecOptions hilbertPhase => ComputeHilbertPhaseFast(data, context, hilbertPhase.Length, hilbertPhase.IMult, hilbertPhase.QMult, 1, false, spec.OutputKey),
             EhlersInstantaneousPhaseIndicatorSpecOptions instantPhase => ComputeHilbertPhaseFast(data, context, instantPhase.Length1, .635, .338, instantPhase.Length2, true, spec.OutputKey),
             EhlersSquelchIndicatorSpecOptions esqe => ComputeEhlersSquelchIndicatorFast(data, context, esqe.Length1, esqe.Length2, esqe.Length3),
@@ -16593,6 +16595,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeHilbertTransformerFast(StockData data, ComputeContext context, int upper, int lower, int smoothing, bool smooth, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new HilbertTransformerWindow(upper, lower, smoothing, smooth); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Imag" ? point.Imaginary : point.Real; }
+        return result;
+    }
+
     internal static ComputeBuffer ComputeHilbertPhaseFast(StockData data, ComputeContext context, int length, double realGain, double imaginaryGain, int horizon, bool phase, string? outputKey)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new HilbertPhaseWindow(length, realGain, imaginaryGain, horizon, phase); var result = context.Rent(input.Count);

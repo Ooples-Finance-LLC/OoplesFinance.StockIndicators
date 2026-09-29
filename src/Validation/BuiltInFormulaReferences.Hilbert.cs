@@ -9,6 +9,8 @@ internal static partial class BuiltInFormulaReferences
     {
         var name = indicator.BatchName;
         var options = indicator.CreateOptions();
+        if (name is IndicatorName.EhlersHilbertTransformer or IndicatorName.EhlersHilbertTransformerIndicator)
+            return new("Real", new[] { "Real", "Imag" }, bars => HilbertTransformerValues(bars, Integer(options, "Length1", 48), Integer(options, "Length2", 20), Integer(options, "Length3", 10), name == IndicatorName.EhlersHilbertTransformerIndicator).Outputs);
         if (name is IndicatorName.EhlersHilbertTransformIndicator or IndicatorName.EhlersInstantaneousPhaseIndicator)
         {
             var hilbertCycle = name == IndicatorName.EhlersInstantaneousPhaseIndicator; var hilbertLag = Integer(options, hilbertCycle ? "Length1" : "Length", 7); var hilbertHorizon = hilbertCycle ? Integer(options, "Length2", 50) : 1;

@@ -41297,5 +41297,167 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~HilbertPhaseNumericalTests.InvalidFieldsDoNotAdvanceHilbertOrPhaseState"
+  },
+  {
+    "id": "hilbert-transformer-drive",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "numerator.Add(_price2, -1)",
+    "after": "numerator.Add(_price2, 1)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-pole",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "_first.Add(ref firstSum, _pole)",
+    "after": "_first.Add(ref firstSum, .5)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-roof-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "_output2.Add(ref outputSum, _c3)",
+    "after": "_output1.Add(ref outputSum, _c3)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-decay",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "private static Scaled Peak(",
+    "before": "previous.Add(ref decayed, .991)",
+    "after": "previous.Add(ref decayed, .5)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-peak-choice",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "private static Scaled Peak(",
+    "before": "Compare(peak, magnitude) > 0",
+    "after": "Compare(peak, magnitude) < 0",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "private static double Ratio(",
+    "before": "return numerator.Ratio(denominator)",
+    "after": "return numerator.Mean(1)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-quadrature",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "difference.Add(_real1, -1)",
+    "after": "difference.Add(_real1, 1)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-smooth-input",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "smoothSum.Add(_quad1, _smoothGain)",
+    "after": "smoothSum.Add(_quad1, -_smoothGain)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-smooth-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "_imag2.Add(ref smoothSum, 2 * _smoothSecond)",
+    "after": "_imag1.Add(ref smoothSum, 2 * _smoothSecond)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal sealed class HilbertTransformerWindow",
+    "before": "_peak = _quadPeak = _imag1 = _imag2 = default",
+    "after": "_quadPeak = _imag1 = _imag2 = default",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-signal",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertTransformerWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.WideAndSubnormalPricesRetainBothNormalizedTrajectories"
+  },
+  {
+    "id": "hilbert-transformer-EhlersHilbertTransformer-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersHilbertTransformer(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "hilbert-transformer-EhlersHilbertTransformer-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHilbertTransformerState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.InvalidFieldsCannotAdvanceRoofingOrPeakHistory"
+  },
+  {
+    "id": "hilbert-transformer-EhlersHilbertTransformerIndicator-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersHilbertTransformerIndicator(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "hilbert-transformer-EhlersHilbertTransformerIndicator-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHilbertTransformerIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.InvalidFieldsCannotAdvanceRoofingOrPeakHistory"
+  },
+  {
+    "id": "hilbert-transformer-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHilbertTransformerFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "hilbert-transformer-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHilbertTransformerFast(",
+    "before": "outputKey == \"Imag\" ? point.Imaginary : point.Real",
+    "after": "outputKey == \"Imag\" ? point.Real : point.Imaginary",
+    "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
   }
 ]
