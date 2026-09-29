@@ -1453,6 +1453,7 @@ internal static partial class IndicatorCompute
                 "Dsp" => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length, detrendedPrice: true),
                 _ => null
             },
+            EhlersSineWaveIndicatorV2SpecOptions cyberSine => ComputeCyberSineFast(data, context, cyberSine.Length, cyberSine.Alpha, spec.OutputKey),
             EhlersDualDifferentiatorDominantCycleSpecOptions hilbertCycle0 => ComputeHilbertCycleFast(data, context, hilbertCycle0.Length1, hilbertCycle0.Length2, hilbertCycle0.Length3, 1, 0),
             EhlersHomodyneDominantCycleSpecOptions hilbertCycle1 => ComputeHilbertCycleFast(data, context, hilbertCycle1.Length1, hilbertCycle1.Length2, hilbertCycle1.Length3, 1, 1),
             EhlersPhaseAccumulationDominantCycleSpecOptions hilbertCycle2 => ComputeHilbertCycleFast(data, context, hilbertCycle2.Length1, hilbertCycle2.Length2, hilbertCycle2.Length3, hilbertCycle2.Length4, 2),
@@ -16573,6 +16574,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeCyberSineFast(StockData data, ComputeContext context, int length, double alpha, string? outputKey)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new CyberSineWindow(length, alpha); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "LeadSine" ? point.Lead : point.Sine; }
+        return result;
+    }
+
     internal static ComputeBuffer ComputeHilbertCycleFast(StockData data, ComputeContext context, int upper, int lower, int minimum, int horizon, int mode)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new HilbertCycleWindow(upper, lower, minimum, horizon, mode); var result = context.Rent(input.Count);

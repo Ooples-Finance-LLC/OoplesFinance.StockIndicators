@@ -1278,82 +1278,16 @@ public sealed class EhlersSineWaveIndicatorV1State : IStreamingIndicatorState, I
 [PrimaryOutput("Sine")]
 public sealed class EhlersSineWaveIndicatorV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly AdaptiveCyberCyclePeriodState _periodState;
-    private readonly EhlersCyberCycleState _cycleState;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _cycleValues;
-
-    public EhlersSineWaveIndicatorV2State(int length = 5, double alpha = 0.07)
-    {
-        var resolved = Math.Max(1, length);
-        _periodState = new AdaptiveCyberCyclePeriodState(resolved, alpha);
-        _cycleState = new EhlersCyberCycleState(0.07);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _cycleValues = new PooledRingBuffer<double>(64);
-    }
-
+    private readonly CyberSineWindow _window;
+    public EhlersSineWaveIndicatorV2State(int length = 5, double alpha = .07) => _window = new(length, alpha);
     public IndicatorName Name => IndicatorName.EhlersSineWaveIndicatorV2;
-
-    public void Reset()
-    {
-        _periodState.Reset();
-        _cycleState.Reset();
-        _cycleValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var period = _periodState.Next(value, isFinal);
-        var cycle = _cycleState.Update(bar, isFinal, includeOutputs: false).Value;
-        var dcPeriod = Math.Max(1, MathHelper.CeilingCycle(period));
-
-        double projectionScale = 0;
-        double realPart = 0;
-        double imagPart = 0;
-        for (var j = 0; j <= dcPeriod - 1; j++)
-        {
-            var prevCycle = EhlersStreamingWindow.GetOffsetValue(_cycleValues, cycle, j);
-            var angle = 2 * Math.PI * ((double)j / dcPeriod);
-            projectionScale += Math.Abs(prevCycle);
-            realPart += Math.Sin(angle) * prevCycle;
-            imagPart += Math.Cos(angle) * prevCycle;
-        }
-
-        var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
-        if (Math.Abs(realPart) <= resolution) realPart = 0;
-        if (Math.Abs(imagPart) <= resolution) imagPart = 0;
-        var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
-        dcPhase += 90;
-        dcPhase += imagPart < 0 ? 180 : 0;
-        dcPhase -= dcPhase > 315 ? 360 : 0;
-
-        var sine = Math.Sin(dcPhase.ToRadians());
-        var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-
-        if (isFinal)
-        {
-            _cycleValues.TryAdd(cycle, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Sine", sine },
-                { "LeadSine", leadSine }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sine, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Sine, includeOutputs ? new Dictionary<string, double> { { "Sine", point.Sine }, { "LeadSine", point.Lead } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodState.Dispose();
-        _cycleValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Esam")]

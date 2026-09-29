@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSineWaveIndicatorV2)
+        {
+            var sineOptions = (EhlersSineWaveIndicatorV2SpecOptions)builtIn.CreateOptions(); var sineKeys = new[] { "Sine", "LeadSine" };
+            for (var slot = 0; slot < sineKeys.Length; slot++) { var key = sineKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CyberSineValues(bars, sineOptions.Length, sineOptions.Alpha).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersDualDifferentiatorDominantCycle or IndicatorName.EhlersHomodyneDominantCycle or IndicatorName.EhlersPhaseAccumulationDominantCycle)
         {
             var cycleOptions = builtIn.CreateOptions(); var cycleMode = builtIn.BatchName == IndicatorName.EhlersDualDifferentiatorDominantCycle ? 0 : builtIn.BatchName == IndicatorName.EhlersHomodyneDominantCycle ? 1 : 2;

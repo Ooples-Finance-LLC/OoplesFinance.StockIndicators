@@ -41765,5 +41765,167 @@
     "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
     "after": "data.ClosePrices",
     "filter": "FullyQualifiedName~HilbertCycleNumericalTests.SelectedPricesReachEachBatchAndFastRoute"
+  },
+  {
+    "id": "cyber-sine-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "sum.Add(_price1, 2)",
+    "after": "sum.Add(_price1, 1)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-startup",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "_startup < 7 ? Scaled.Round(initial)",
+    "after": "_startup < 1 ? Scaled.Round(initial)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-filter",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "_cycle1, _cycle2, .07)",
+    "after": "_cycle1, _cycle2, .14)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-real-projection",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "value.Add(ref real, Math.Sin(angle))",
+    "after": "value.Add(ref real, Math.Cos(angle))",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-imaginary-projection",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "value.Add(ref imaginary, Math.Cos(angle))",
+    "after": "value.Add(ref imaginary, Math.Sin(angle))",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "magnitude.Add(-.001)",
+    "after": "magnitude.Add(0d)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.AbsoluteProjectionThresholdStillChangesSmallSignalPhase"
+  },
+  {
+    "id": "cyber-sine-quadrant",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "if (imaginary.Sign < 0) phase += 180",
+    "after": "if (imaginary.Sign < 0) phase += 90",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-history",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "_history.Count == 64",
+    "after": "_history.Count == 8",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-preview-period",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "_period.Next(price, commit)",
+    "after": "_period.Next(price, true)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-reset",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal sealed class CyberSineWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-lead",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "phase + 45",
+    "after": "phase + 0",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-phase",
+    "module": "numerical",
+    "file": "src/Helpers/CyberSineWindow.cs",
+    "scope": "internal (double Sine, double Lead, Signal Signal) Next(",
+    "before": "phase += 90;",
+    "after": "phase += 45;",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.WideAndSubnormalPricesRetainFourierPhaseAndSignals"
+  },
+  {
+    "id": "cyber-sine-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSineWaveIndicatorV2(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.SelectedPricesReachBatchAndBothFastOutputs"
+  },
+  {
+    "id": "cyber-sine-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCyberSineFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.SelectedPricesReachBatchAndBothFastOutputs"
+  },
+  {
+    "id": "cyber-sine-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCyberSineFast(",
+    "before": "outputKey == \"LeadSine\" ? point.Lead : point.Sine",
+    "after": "outputKey == \"LeadSine\" ? point.Sine : point.Lead",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.SelectedPricesReachBatchAndBothFastOutputs"
+  },
+  {
+    "id": "cyber-sine-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSineWaveIndicatorV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~CyberSineNumericalTests.InvalidFieldsCannotAdvancePeriodOrProjectionHistory"
   }
 ]

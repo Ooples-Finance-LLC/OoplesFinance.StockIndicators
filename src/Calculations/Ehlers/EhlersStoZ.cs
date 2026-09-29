@@ -1042,64 +1042,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSineWaveIndicatorV2(this StockData stockData, int length = 5, double alpha = 0.07)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        length = Math.Max(length, 1);
-        List<double> sineList = new(stockData.Count);
-        List<double> leadSineList = new(stockData.Count);
-        List<double> dcPhaseList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var periodList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersAdaptiveCyberCycle(data, length, alpha))["Period"];
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var cycleList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersCyberCycle(data));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var period = periodList[i];
-            var dcPeriod = MathHelper.CeilingCycle(period);
-
-            double realPart = 0, imagPart = 0, projectionScale = 0;
-            for (var j = 0; j <= dcPeriod - 1; j++)
-            {
-                var prevCycle = i >= j ? cycleList[i - j] : 0;
-                projectionScale += Math.Abs(prevCycle);
-                realPart += Math.Sin(2 * Math.PI * ((double)j / dcPeriod)) * prevCycle;
-                imagPart += Math.Cos(2 * Math.PI * ((double)j / dcPeriod)) * prevCycle;
-            }
-
-            var resolution = 64 * 2.2204460492503131e-16 * projectionScale;
-            if (Math.Abs(realPart) <= resolution) realPart = 0;
-            if (Math.Abs(imagPart) <= resolution) imagPart = 0;
-            var dcPhase = Math.Abs(imagPart) > 0.001 ? Math.Atan(realPart / imagPart).ToDegrees() : 90 * Math.Sign(realPart);
-            dcPhase += 90;
-            dcPhase += imagPart < 0 ? 180 : 0;
-            dcPhase -= dcPhase > 315 ? 360 : 0;
-            dcPhaseList.Add(dcPhase);
-
-            var prevSine = GetLastOrDefault(sineList);
-            var sine = Math.Sin(dcPhase.ToRadians());
-            sineList.Add(sine);
-
-            var prevLeadSine = GetLastOrDefault(leadSineList);
-            var leadSine = Math.Sin((dcPhase + 45).ToRadians());
-            leadSineList.Add(leadSine);
-
-            var signal = GetCompareSignal(sine - leadSine, prevSine - prevLeadSine);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Sine", sineList },
-            { "LeadSine", leadSineList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sineList);
-        stockData.IndicatorName = IndicatorName.EhlersSineWaveIndicatorV2;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new CyberSineWindow(length, alpha); var sine = new List<double>(input.Count); var lead = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); sine.Add(point.Sine); lead.Add(point.Lead); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Sine", sine }, { "LeadSine", lead } }); stockData.SetSignals(signals); stockData.SetCustomValues(sine); stockData.IndicatorName = IndicatorName.EhlersSineWaveIndicatorV2; return stockData;
     }
 
 }
