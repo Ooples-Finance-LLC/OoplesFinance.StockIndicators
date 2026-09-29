@@ -31,7 +31,9 @@ internal sealed class FastSlowCompositeWindow : IDisposable
         {
             var difference = new ExactMeanAccumulator(); if (_count > 0) { difference.Add(price); difference.Add(_previousPrice, -1); } var change = RocBankValue.Round(difference);
             var gain = _gains!.Next(change.Mantissa > 0 ? change : default, final); var loss = _losses!.Next(change.Mantissa < 0 ? new(-change.Mantissa, change.UpperShift) : default, final);
+#pragma warning disable S1244 // The flat-price carry rule applies only to exactly unchanged prices.
             var strength = _preserveFlat && _count > 0 && price == _previousPrice ? _previousRsi : Strength(gain, loss); level = new(strength); if (final) _previousRsi = strength;
+#pragma warning restore S1244
         }
         var line = Combine(_rsi, velocity, level); var signalLine = externalSignal.HasValue ? new RocBankValue(externalSignal.Value) : _signal!.Next(line, final);
         var spread = new ExactMeanAccumulator(); line.AddTo(ref spread); signalLine.AddTo(ref spread, -1); var changeOfSpread = spread; changeOfSpread.Subtract(_spread);
@@ -48,7 +50,9 @@ internal sealed class FastSlowCompositeWindow : IDisposable
             var gains = new List<double>(input.Count); var losses = new List<double>(input.Count);
             for (var i = 0; i < input.Count; i++) { var change = new ExactMeanAccumulator(); if (i > 0) { change.Add(input[i]); change.Add(input[i - 1], -1); } var value = change.Mean(1); gains.Add(Math.Max(0, value)); losses.Add(Math.Max(0, -value)); }
             var up = Average(gains, length3); var down = Average(losses, length3); level = new double[input.Count];
+#pragma warning disable S1244 // The flat-price carry rule applies only to exactly unchanged prices.
             for (var i = 0; i < input.Count; i++) level[i] = Math.Max(1, length3) > 1 && kind is MovingAvgType.ExponentialMovingAverage or MovingAvgType.WildersSmoothingMethod && i > 0 && input[i] == input[i - 1] ? level[i - 1] : StrengthWindow.Supports(kind) ? Strength(new(up[i]), new(down[i])) : down[i] == 0 ? 100 : up[i] == 0 ? 0 : Math.Max(0, Math.Min(100, 100 - 100 / (1 + up[i] / down[i])));
+#pragma warning restore S1244
             velocity = Average(rawVelocity, length2);
         }
         else
