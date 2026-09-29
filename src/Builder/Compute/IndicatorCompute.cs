@@ -464,6 +464,7 @@ internal static partial class IndicatorCompute
 
             // Batch 3 - Additional oscillators (ComputeFast methods exist)
             PfeSpecOptions pfe => ComputePolarizedFractalEfficiencyFast(data, context, pfe.Length),
+            SchaffTrendCycleShkSpecOptions shk => spec.OutputKey is null or "Stc" or "Macd" ? ComputeSchaffShkFast(data, context, shk.MaType, shk.FastLength, shk.SlowLength, shk.CycleLength, shk.D1Length, shk.D2Length, spec.OutputKey == "Macd") : null,
             StcSpecOptions stc => ComputeSchaffTrendCycleFast(data, context, stc.Length),
             PzoSpecOptions pzo => ComputePriceZoneOscillatorFast(data, context, pzo.Length),
             PgoSpecOptions pgo => ComputePrettyGoodOscillatorFast(data, context, pgo.Length),
@@ -4703,6 +4704,14 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Schaff Trend Cycle using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeSchaffShkFast(StockData data, ComputeContext context, MovingAvgType kind, int fastLength, int slowLength, int cycle, int d1, int d2, bool macdOutput = false)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides;
+        using var kernel = new SchaffCycleKernel(kind, fastLength, slowLength, cycle, d1, d2, external); using ComputeBuffer? fast = external ? context.Rent(input.Count) : null; using ComputeBuffer? slow = external ? context.Rent(input.Count) : null;
+        if (external) { MovingAverage(data, kind, Math.Max(1, fastLength), SpanCompat.AsReadOnlySpan(input), fast!.Value.WritableSpan); MovingAverage(data, kind, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), slow!.Value.WritableSpan); }
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = kernel.Next(input[i], true, external ? fast!.Value.Span[i] : null, external ? slow!.Value.Span[i] : null); output.WritableSpan[i] = macdOutput ? point.Macd : point.Stc; } return output; } catch { output.Dispose(); throw; }
+    }
+
     internal static ComputeBuffer ComputeSchaffTrendCycleFast(StockData data, ComputeContext context, int length = 10)
     {
         // The Stc spec binds its only length to the batch call's cycleLength, leaving the two moving average

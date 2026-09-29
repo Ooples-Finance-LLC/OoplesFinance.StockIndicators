@@ -48659,5 +48659,293 @@
     "before": "if (commit) { _sum = sum;",
     "after": "if (true) { _sum = sum;",
     "filter": "FullyQualifiedName~SchaffFirstPassNumericalTests.WideMeansAndMacdRangesPreserveBoundedNormalization"
+  },
+  {
+    "id": "schaff-shk-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "_fast = new(kind, Math.Max(1, fast))",
+    "after": "_fast = new(kind, Math.Max(1, slow))",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "_slow = new(kind, Math.Max(1, slow))",
+    "after": "_slow = new(kind, Math.Max(1, fast))",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-cycle-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "_count - _cycle + 1L",
+    "after": "_count - _cycle",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-macd-sign",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "var macd = Pair.Subtract(fast, slow)",
+    "after": "var macd = Pair.Subtract(slow, fast)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-macd-high",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_macdHigh, macd, true, final)",
+    "after": "Extreme(_macdHigh, macd, false, final)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-macd-low",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_macdLow, macd, false, final)",
+    "after": "Extreme(_macdLow, macd, true, final)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-middle-high",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_middleHigh, middle, true, final)",
+    "after": "Extreme(_middleHigh, middle, false, final)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-middle-low",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_middleLow, middle, false, final)",
+    "after": "Extreme(_middleLow, middle, true, final)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-first-carry",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "scale, _previousFirst)",
+    "after": "scale, default)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.HandTurnsFlatCarryAndSmoothingSeedsArePreserved"
+  },
+  {
+    "id": "schaff-shk-wide-second-carry",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "highMagnitude, _previousSecond)",
+    "after": "highMagnitude, default)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.HandTurnsFlatCarryAndSmoothingSeedsArePreserved"
+  },
+  {
+    "id": "schaff-shk-wide-first-smoothing",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Smooth(first, _previousMiddle, _d1)",
+    "after": "Smooth(first, _previousMiddle, _d2)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-second-smoothing",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Smooth(second, _previousOutput, _d2)",
+    "after": "Smooth(second, _previousOutput, _d1)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-smooth-history",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "previous.AddTo(ref sum, period - 1L)",
+    "after": "previous.AddTo(ref sum, 0)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-pair-residual",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "return new(high, RocBankValue.Round(numerator, count: divisor))",
+    "after": "return new(high)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.ResidualSurvivesShrinkingMiddleRanges"
+  },
+  {
+    "id": "schaff-shk-wide-quotient-residual",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "var lowPart = remainder.Ratio(denominator)",
+    "after": "var lowPart = 0d",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.ResidualSurvivesShrinkingMiddleRanges"
+  },
+  {
+    "id": "schaff-shk-wide-flatness-equality",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Compare(new(range.Rounded()), new(threshold)) <= 0",
+    "after": "Compare(new(range.Rounded()), new(threshold)) < 0",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.InclusiveFlatnessUsesAbsoluteMeanScaleAndExpiry"
+  },
+  {
+    "id": "schaff-shk-wide-flatness-factor",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Multiply(1.4210854715202004e-14)",
+    "after": "Multiply(0)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.InclusiveFlatnessUsesAbsoluteMeanScaleAndExpiry"
+  },
+  {
+    "id": "schaff-shk-wide-absolute-scale",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Math.Abs(rounded.Mantissa)",
+    "after": "rounded.Mantissa",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.InclusiveFlatnessUsesAbsoluteMeanScaleAndExpiry"
+  },
+  {
+    "id": "schaff-shk-wide-scale-memory",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_scales, new(RocBankValue.Round(scaleSum)), true, final)",
+    "after": "new Pair(RocBankValue.Round(scaleSum))",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.InclusiveFlatnessUsesAbsoluteMeanScaleAndExpiry"
+  },
+  {
+    "id": "schaff-shk-wide-scale-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_scales, new(RocBankValue.Round(scaleSum)), true, final)",
+    "after": "Extreme(_scales, new(RocBankValue.Round(scaleSum)), false, final)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.InclusiveFlatnessUsesAbsoluteMeanScaleAndExpiry"
+  },
+  {
+    "id": "schaff-shk-wide-numerator-scale",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "value.AddTo(ref numerator, 100)",
+    "after": "value.AddTo(ref numerator, 50)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-preview-extrema",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "Extreme(_middleHigh, middle, true, final)",
+    "after": "Extreme(_middleHigh, middle, true, true)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-preview-state",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "if (final) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-reset-middle",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "_middleHigh.Clear();",
+    "after": "_middleLow.Clear();",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-signal",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "slope.Sign > 0 && change.Sign > 0",
+    "after": "slope.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "change.Subtract(_slope)",
+    "after": "change.Subtract(default)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-custom-fast",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "new Pair(new(externalFast.Value))",
+    "after": "new Pair(new(externalSlow!.Value))",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.CustomComponentsKeepSelectedInputAndFastSlowOrder"
+  },
+  {
+    "id": "schaff-shk-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSchaffShkFast",
+    "before": "kernel.Next(input[i], true,",
+    "after": "kernel.Next(data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.CustomComponentsKeepSelectedInputAndFastSlowOrder"
+  },
+  {
+    "id": "schaff-shk-wide-fast-macd",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSchaffShkFast",
+    "before": "macdOutput ? point.Macd : point.Stc",
+    "after": "macdOutput ? point.Stc : point.Stc",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch29.cs",
+    "scope": "public sealed class SchaffTrendCycleShkState",
+    "before": "_kernel.Next(bar.Close, isFinal)",
+    "after": "_kernel.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "schaff-shk-wide-native-macd",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch29.cs",
+    "scope": "public sealed class SchaffTrendCycleShkState",
+    "before": "[\"Macd\"] = result.Macd",
+    "after": "[\"Macd\"] = result.Stc",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
+  },
+  {
+    "id": "schaff-shk-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Streaming/SchaffCycleKernel.cs",
+    "scope": "internal sealed class SchaffCycleKernel",
+    "before": "sum.Add(_history.Peek(), -1)",
+    "after": "sum.Add(_history.Peek(), 1)",
+    "filter": "FullyQualifiedName~SchaffShkNumericalTests.WideAveragesAndBothStochasticPassesMatchRationalStages"
   }
 ]

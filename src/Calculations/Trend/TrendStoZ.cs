@@ -743,84 +743,16 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int fastLength = 23, int slowLength = 50,
         int cycleLength = 10, int d1Length = 3, int d2Length = 3)
     {
-        List<double> macdList = new(stockData.Count);
-        List<double> stcList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        if (!Builder.Compute.ComponentAverage.HasOverrides)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides;
+        using var kernel = new Streaming.SchaffCycleKernel(maType, fastLength, slowLength, cycleLength, d1Length, d2Length, external); List<double>? fast = null, slow = null;
+        if (external)
         {
-            using var kernel = new Streaming.SchaffCycleKernel(maType, fastLength, slowLength, cycleLength, d1Length, d2Length);
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                var result = kernel.Next(inputList[i], true);
-                macdList.Add(result.Macd); stcList.Add(result.Stc);
-                var previous = i > 0 ? stcList[i - 1] : 0;
-                var beforePrevious = i > 1 ? stcList[i - 2] : 0;
-                signalsList?.Add(GetRsiSignal(result.Stc - previous, previous - beforePrevious, result.Stc, previous, 75, 25));
-            }
+            var caller = stockData.CaptureInputSeries(); List<double> Average(int period) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, period))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, period), input);
+            fast = Average(fastLength); slow = Average(slowLength); stockData.RestoreInputSeries(caller);
         }
-        else
-        {
-            List<double> slowKList = new(stockData.Count);
-            List<double> fastDList = new(stockData.Count);
-            List<double> fastKList = new(stockData.Count);
-            var fastEmaList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-            var slowEmaList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-    
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                macdList.Add(fastEmaList[i] - slowEmaList[i]);
-            }
-    
-            var scaleList = fastEmaList.Select((v, i) => Math.Abs(v)+Math.Abs(slowEmaList[i])).ToList();
-            var scaleMax = cycleLength == 1 ? scaleList : GetMaxAndMinValuesList(scaleList, cycleLength).Item1;
-            // First stochastic pass, over the MACD line.
-            var (macdHighestList, macdLowestList) = cycleLength == 1 ? (macdList, macdList)
-                : GetMaxAndMinValuesList(macdList, cycleLength);
-            var d1Alpha = (double)2 / (d1Length + 1);
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                var range = macdHighestList[i] - macdLowestList[i];
-                var prevFastK = i >= 1 ? fastKList[i - 1] : 0;
-                var fastK = SchaffRange.Normalize(macdList[i], macdLowestList[i], macdHighestList[i], scaleMax[i], prevFastK);
-                fastKList.Add(fastK);
-    
-                var prevFastD = i >= 1 ? fastDList[i - 1] : fastK;
-                fastDList.Add(prevFastD + (d1Alpha * (fastK - prevFastD)));
-            }
-    
-            // Second stochastic pass, over the smoothed result of the first.
-            var (fastDHighestList, fastDLowestList) = cycleLength == 1 ? (fastDList, fastDList)
-                : GetMaxAndMinValuesList(fastDList, cycleLength);
-            var d2Alpha = (double)2 / (d2Length + 1);
-            for (var i = 0; i < stockData.Count; i++)
-            {
-                var range = fastDHighestList[i] - fastDLowestList[i];
-                var prevSlowK = i >= 1 ? slowKList[i - 1] : 0;
-                var slowK = SchaffRange.Normalize(fastDList[i], fastDLowestList[i], fastDHighestList[i], Math.Max(Math.Abs(fastDLowestList[i]), Math.Abs(fastDHighestList[i])), prevSlowK);
-                slowKList.Add(slowK);
-    
-                var prevStc = i >= 1 ? stcList[i - 1] : slowK;
-                var stc = MinOrMax(prevStc + (d2Alpha * (slowK - prevStc)), 100, 0);
-                stcList.Add(stc);
-    
-                var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
-                var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
-                var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 75, 25);
-                signalsList?.Add(signal);
-            }
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Stc", stcList },
-            { "Macd", macdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stcList);
-        stockData.IndicatorName = IndicatorName.SchaffTrendCycleShk;
-
-        return stockData;
+        var stc = new List<double>(input.Count); var macd = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = kernel.Next(input[i], true, fast?[i], slow?[i]); stc.Add(point.Stc); macd.Add(point.Macd); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Stc", stc }, { "Macd", macd } }); stockData.SetSignals(signals); stockData.SetCustomValues(stc); stockData.IndicatorName = IndicatorName.SchaffTrendCycleShk; return stockData;
     }
 
 

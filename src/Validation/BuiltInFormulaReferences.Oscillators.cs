@@ -97,39 +97,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.SchaffTrendCycleShk:
                 if (kind == 0) return null;
-                return new("Stc", new[] { "Stc", "Macd" }, bars =>
-                {
-                    var prices = Closes(bars).Select(BinaryDecimal).ToArray();
-                    var fast = MotionDecimalAverage(prices, Integer(options, "FastLength"), kind);
-                    var slow = MotionDecimalAverage(prices, Integer(options, "SlowLength"), kind);
-                    var macd = fast.Select((v, i) => v-slow[i]).ToArray();
-                    var period = Integer(options, "CycleLength");
-                    decimal[] Normalize(decimal[] source, decimal[] scale)
-                    {
-                        var readings = new List<(int Index, decimal Value)> { (-1, 0) };
-                        return source.Select((v, i) =>
-                        {
-                            var window = Window(source, i, period).ToArray();
-                            var low = window.Min(); var high = window.Max();
-                            if (high-low > 0.000000000000014210854715202004m*Window(scale, i, period).Max())
-                                readings.Add((i, Clamp(100*(v-low)/(high-low), 0, 100)));
-                            return readings[readings.Count-1].Value;
-                        }).ToArray();
-                    }
-                    decimal[] Smooth(decimal[] values, int smoothing)
-                    {
-                        var gain = 2m / (smoothing + 1);
-                        var powers = new decimal[values.Length + 1]; powers[0] = 1;
-                        for (var i = 1; i < powers.Length; i++) powers[i] = powers[i - 1] * (1 - gain);
-                        return values.Select((_, i) => Enumerable.Range(0, i + 1)
-                            .Sum(j => values[j] * gain * powers[i - j])).ToArray();
-                    }
-                    var first = Normalize(macd, fast.Select((v, i) => Math.Abs(v)+Math.Abs(slow[i])).ToArray());
-                    var middle = Smooth(first, Integer(options, "D1Length"));
-                    var second = Normalize(middle, middle.Select(Math.Abs).ToArray());
-                    return Outputs(("Stc", Smooth(second, Integer(options, "D2Length")).Select(v => (double)v).ToArray()),
-                        ("Macd", macd.Select(v => (double)v).ToArray()));
-                });
+                return new("Stc", new[] { "Stc", "Macd" }, bars => SchaffShkOutputs(bars, indicator));
             case IndicatorName.SchaffTrendCycle:
                 if (kind == 0) return null;
                 return new("Stc", new[] { "Stc" }, bars => SchaffFirstPassOutputs(bars, indicator));

@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.SchaffTrendCycleShk)
+        {
+            var shkKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < shkKeys.Length; slot++) { var key = shkKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => SchaffShkOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.SchaffTrendCycle)
         {
             yield return IndicatorValidationRule.Reference(0, bars => SchaffFirstPassOutputs(bars, builtIn)["Stc"], IndicatorErrorBudget.Exact); yield break;
