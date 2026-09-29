@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.CalmarRatio)
+        {
+            var calmarLength = Integer(builtIn.CreateOptions(), "Length", 30);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CalmarValues(bars, calmarLength).Outputs["Cr"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AtrFilteredExponentialMovingAverage)
         {
             var atrOptions = builtIn.CreateOptions(); var atrPriceLength = Integer(atrOptions, "Length", 45); var atrRangeLength = Integer(atrOptions, "AtrLength", 20); var atrDeviationLength = Integer(atrOptions, "StdDevLength", 10); var atrFloorLength = Integer(atrOptions, "LbLength", 20); var atrGainCap = Number(atrOptions, 5, "Min");

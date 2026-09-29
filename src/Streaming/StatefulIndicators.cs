@@ -7254,79 +7254,16 @@ public sealed class BuffAverageState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Cr")]
 public sealed class CalmarRatioState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _power;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _drawdownMin;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly StreamingInputResolver _input;
-
-    public CalmarRatioState(int length = 30)
-    {
-        _length = Math.Max(1, length);
-        var windowLength = Math.Max(_length, 2);
-        _maxWindow = new RollingWindowMax(windowLength);
-        _drawdownMin = new RollingWindowMin(_length);
-        _values = new PooledRingBuffer<double>(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _power = CalculatePower(_length);
-    }
-
+    private readonly CalmarWindow _window;
+    public CalmarRatioState(int length = 30) => _window = new(length);
     public IndicatorName Name => IndicatorName.CalmarRatio;
-
-    public void Reset()
-    {
-        _maxWindow.Reset();
-        _drawdownMin.Reset();
-        _values.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _values.Count >= _length ? _values[0] : 0;
-
-        var maxValue = isFinal ? _maxWindow.Add(value, out _) : _maxWindow.Preview(value, out _);
-        var drawdown = maxValue != 0 ? (value - maxValue) / maxValue : 0;
-        var maxDrawdown = isFinal
-            ? _drawdownMin.Add(drawdown, out _)
-            : _drawdownMin.Preview(drawdown, out _);
-
-        var ret = prevValue != 0 ? (value / prevValue) - 1 : 0;
-        var annualReturn = 1 + ret >= 0 ? MathHelper.Pow(1 + ret, _power) - 1 : 0;
-        var calmar = maxDrawdown != 0 ? annualReturn / Math.Abs(maxDrawdown) : 0;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cr", calmar }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(calmar, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Cr", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow.Dispose();
-        _drawdownMin.Dispose();
-        _values.Dispose();
-    }
-
-    private static double CalculatePower(int length)
-    {
-        double barMin = 60 * 24;
-        double minPerYr = 60 * 24 * 30 * 12;
-        var barsPerYr = minPerYr / barMin;
-        return barsPerYr / (length * 15d);
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pivot")]

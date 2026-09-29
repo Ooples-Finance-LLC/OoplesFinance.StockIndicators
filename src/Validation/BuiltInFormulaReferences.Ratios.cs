@@ -9,25 +9,8 @@ internal static partial class BuiltInFormulaReferences
         var name = indicator.BatchName;
         if (name == IndicatorName.CalmarRatio)
         {
-            var length = Integer(indicator.CreateOptions(), "Length", 30);
-            return new("Cr", new[] { "Cr" }, bars =>
-            {
-                var drawdowns = bars.Select((b, i) =>
-                {
-                    var peak = Window(bars, i, Math.Max(2, length)).Max(v => v.Close);
-                    return peak == 0 ? 0 : (b.Close - peak) / peak;
-                }).ToArray();
-                var values = bars.Select((b, i) =>
-                {
-                    if (i < length || bars[i - length].Close == 0) return 0d;
-                    var ratio = b.Close / bars[i - length].Close;
-                    // Existing contract annualizes on 24 periods per year, independently of timestamps.
-                    var annual = ratio < 0 ? 0 : Math.Pow(ratio, 24d / length) - 1;
-                    var depth = Math.Abs(Window(drawdowns, i, length).Min());
-                    return depth == 0 ? 0 : annual / depth;
-                }).ToArray();
-                return Outputs(("Cr", values));
-            });
+            var calmarLength = Integer(indicator.CreateOptions(), "Length", 30);
+            return new("Cr", new[] { "Cr" }, bars => CalmarValues(bars, calmarLength).Outputs);
         }
         if (name == IndicatorName.OmegaRatio || name == IndicatorName.UpsidePotentialRatio || name == IndicatorName.TreynorRatio)
             return TargetReturnRatios(indicator);

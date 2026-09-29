@@ -7073,38 +7073,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeCalmarRatioFast(StockData data, ComputeContext context, int length = 30)
     {
-        // CalculateCalmarRatio divides the annualised return over the window by the deepest drawdown seen in
-        // it, where the drawdown is measured against the rolling highest value of the chained series. The
-        // VolatilityCore routine this replaced read the close and computed a different ratio entirely.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        const double barMin = 60 * 24;
-        const double minPerYr = 60 * 24 * 30 * 12;
-        const double barsPerYr = minPerYr / barMin;
-        var power = barsPerYr / (length * 15);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(Math.Max(length, 2));
-        var drawdownWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(input[i]);
-            var maxDn = highWindow.Max;
-            drawdownWindow.Add(maxDn != 0 ? (input[i] - maxDn) / maxDn : 0);
-
-            var prevValue = i >= length ? input[i - length] : 0;
-            var ret = prevValue != 0 ? (input[i] / prevValue) - 1 : 0;
-            var annualReturn = 1 + ret >= 0 ? MathHelper.Pow(1 + ret, power) - 1 : 0;
-            var maxDd = drawdownWindow.Min;
-            output[i] = maxDd != 0 ? annualReturn / Math.Abs(maxDd) : 0;
-        }
-
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; using var window = new CalmarWindow(length); var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

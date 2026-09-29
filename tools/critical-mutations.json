@@ -45257,5 +45257,185 @@
     "before": "var powered = averages.Select",
     "after": "var powered = normalized.Select",
     "filter": "FullyQualifiedName~AtrFilterNumericalTests.BothCustomAveragesAreConsumedInOrderIncludingSecondMoment"
+  },
+  {
+    "id": "calmar-minimum-peak-window",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "_peakLength = Math.Max(2, _length);",
+    "after": "_peakLength = _length;",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.RollingPeaksAndDrawdownsExpireAtTheirOwnHorizons"
+  },
+  {
+    "id": "calmar-peak-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "var skip = _prices.Count == _peakLength;",
+    "after": "var skip = false;",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.RollingPeaksAndDrawdownsExpireAtTheirOwnHorizons"
+  },
+  {
+    "id": "calmar-return-lag",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "_prices.Count >= _length ? _prices.Peek() : 0",
+    "after": "_prices.Count >= _length ? _lastPrice : 0",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-drawdown-sign",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "ExactVarianceWindow.Units(price) - high",
+    "after": "high - ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-drawdown-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "retained.CompareTo(minimum) < 0",
+    "after": "retained.CompareTo(minimum) > 0",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-drawdown-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "skip = _drawdowns.Count == _length;",
+    "after": "skip = false;",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.RollingPeaksAndDrawdownsExpireAtTheirOwnHorizons"
+  },
+  {
+    "id": "calmar-annualization",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "BigInteger.Pow(numerator, 24 / divisor)",
+    "after": "BigInteger.Pow(numerator, 12 / divisor)",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-root-degree",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "var degree = length / divisor;",
+    "after": "var degree = length / divisor + 1;",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-price-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "var numerator = BigInteger.Abs(ExactVarianceWindow.Units(current));",
+    "after": "var numerator = BigInteger.Abs(ExactVarianceWindow.Units(previous));",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-midpoint",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "Compare(lower + upper, 2)",
+    "after": "Compare(lower, 1)",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-negative-root-side",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "sign * units * depth",
+    "after": "units * depth",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-negative-ratio-policy",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": " || current != 0 && Math.Sign(current) != Math.Sign(previous)",
+    "after": "",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-zero-lag-policy",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "previous == 0 || ",
+    "after": "",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-zero-depth-policy",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "minimum.Numerator.IsZero || ",
+    "after": "",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
+  },
+  {
+    "id": "calmar-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-reset",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "_prices.Clear(); _drawdowns.Clear();",
+    "after": "_drawdowns.Clear();",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.WideSignedAndSubnormalPricesPreserveReturnNormalization"
+  },
+  {
+    "id": "calmar-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CalmarWindow.cs",
+    "scope": "internal sealed class CalmarWindow",
+    "before": "value > 2 && value > _previousResult",
+    "after": "value > 0 && value > _previousResult",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.SelectedPricesReachAnnualReturnDrawdownAndSignals"
+  },
+  {
+    "id": "calmar-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCalmarRatioFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.SelectedPricesReachAnnualReturnDrawdownAndSignals"
+  },
+  {
+    "id": "calmar-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CalmarRatioState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.InvalidCandlesCannotAdvancePriceOrDrawdownWindows"
+  },
+  {
+    "id": "calmar-output-slot",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CalmarRatioState",
+    "before": "{ \"Cr\", point.Value }",
+    "after": "{ \"wrong\", point.Value }",
+    "filter": "FullyQualifiedName~CalmarNumericalTests.HandExamplesRetainAnnualizationAndZeroPolicies"
   }
 ]
