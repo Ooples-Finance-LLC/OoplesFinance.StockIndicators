@@ -1031,70 +1031,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveBandPassFilter(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 3, double bw = 0.3)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> bpList = new(stockData.Count);
-        List<double> peakList = new(stockData.Count);
-        List<double> signalList = new(stockData.Count);
-        List<double> triggerList = new(stockData.Count);
-        List<double> leadPeakList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var domCycList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var domCyc = MinOrMax(domCycList[i], length1, length3);
-            var beta = Math.Cos(2 * Math.PI / (0.9 * domCyc));
-            var gamma = 1 / Math.Cos(2 * Math.PI * bw / (0.9 * domCyc));
-            var alpha = MinOrMax(gamma - Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-            var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-            var prevSignal1 = i >= 1 ? signalList[i - 1] : 0;
-            var prevSignal2 = i >= 2 ? signalList[i - 2] : 0;
-            var prevSignal3 = i >= 3 ? signalList[i - 3] : 0;
-
-            var bp = i > 2 ? (0.5 * (1 - alpha) * (roofingFilter - prevRoofingFilter2)) + (beta * (1 + alpha) * prevBp1) - (alpha * prevBp2) : 0;
-            bpList.Add(bp);
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Max(0.991 * prevPeak, Math.Abs(bp));
-            peakList.Add(peak);
-
-            var sig = peak != 0 ? bp / peak : 0;
-            signalList.Add(sig);
-
-            var lead = 1.3 * (sig + prevSignal1 - prevSignal2 - prevSignal3) / 4;
-            var prevLeadPeak = GetLastOrDefault(leadPeakList);
-            var leadPeak = Math.Max(0.93 * prevLeadPeak, Math.Abs(lead));
-            leadPeakList.Add(leadPeak);
-
-            var prevTrigger = GetLastOrDefault(triggerList);
-            var trigger = 0.9 * prevSignal1;
-            triggerList.Add(trigger);
-
-            var signal = GetRsiSignal(sig - trigger, prevSignal1 - prevTrigger, sig, prevSignal1, MathHelper.InverseSqrt2, -MathHelper.InverseSqrt2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eabpf", signalList },
-            { "Signal", triggerList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(signalList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveBandPassFilter;
-
-        return stockData;
+        using var window = new AdaptiveBandPassWindow(length1, length2, length3, bw); var (input, _, _, _, _) = GetInputValuesList(stockData); var values = new List<double>(input.Count); var triggers = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); triggers.Add(point.Trigger); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eabpf", values }, { "Signal", triggers } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAdaptiveBandPassFilter; return stockData;
     }
 
 

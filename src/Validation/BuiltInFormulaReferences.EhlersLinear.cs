@@ -340,37 +340,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Eir", result));
                 });
             case IndicatorName.EhlersAdaptiveBandPassFilter:
-                return new("Eabpf", new[] { "Eabpf", "Signal" }, bars =>
-                {
-                    var upper = Integer(options, "Length1", 48); var lower = Integer(options, "Length2", 10);
-                    var firstLag = Integer(options, "Length3", 3); var width = Number(options, .3, "Bw");
-                    var roof = HilbertRoofingTrajectory(Closes(bars), upper, lower);
-                    var cycles = AutocorrelationSpectrum(AutocorrelationTrajectory(roof, upper), upper, lower, firstLag);
-                    var periods = cycles.Select(v => Math.Min(upper, Math.Max(firstLag, v))).ToArray();
-                    var decay = periods.Select(p =>
-                    {
-                        var angle = 2 * Math.PI * width / (.9 * p);
-                        var cosine = Math.Cos(angle);
-                        return cosine <= 0 ? .01 : Clamp(cosine / (1 + Math.Abs(Math.Sin(angle))), .01, .99);
-                    }).ToArray();
-                    var feedback = periods.Select((p, i) => Math.Cos(2 * Math.PI / (.9 * p)) * (1 + decay[i])).ToArray();
-                    var contributions = Enumerable.Range(0, bars.Count).Select(_ => new double[bars.Count]).ToArray();
-                    // Propagate each forcing impulse independently through the time-varying denominator.
-                    for (var source = 3; source < bars.Count; source++)
-                    {
-                        contributions[source][source] = (1 - decay[source]) * (roof[source] - roof[source - 2]) / 2;
-                        for (var target = source + 1; target < bars.Count; target++)
-                            contributions[source][target] = feedback[target] * contributions[source][target - 1]
-                                - (target > source + 1 ? decay[target] * contributions[source][target - 2] : 0);
-                    }
-                    var band = bars.Select((_, i) => contributions.Sum(c => c[i])).ToArray();
-                    var line = band.Select((v, i) =>
-                    {
-                        var peak = Enumerable.Range(0, i + 1).Max(j => Math.Abs(band[j]) * Math.Pow(.991, i - j));
-                        return peak == 0 ? 0 : v / peak;
-                    }).ToArray();
-                    return Outputs(("Eabpf", line), ("Signal", line.Select((_, i) => i == 0 ? 0 : .9 * line[i - 1]).ToArray()));
-                });
+                return new("Eabpf", new[] { "Eabpf", "Signal" }, bars => AdaptiveBandPassValues(bars, Integer(options, "Length1", 48), Integer(options, "Length2", 10), Integer(options, "Length3", 3), Number(options, .3, "Bw")).Outputs);
             case IndicatorName.EhlersZeroCrossingsDominantCycle:
                 return new("Ezcdc", new[] { "Ezcdc" }, bars => ZeroCrossingCycleValues(bars, length, Number(options, .7, "Bw")).Outputs);
             case IndicatorName.EhlersBandPassFilterV1:

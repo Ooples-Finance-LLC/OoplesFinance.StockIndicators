@@ -585,102 +585,15 @@ public sealed class EhlersAdaptiveCommodityChannelIndexV2State : IStreamingIndic
 [PrimaryOutput("Eabpf")]
 public sealed class EhlersAdaptiveBandPassFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
-    private readonly double _bw;
-    private readonly EhlersAutoCorrelationPeriodogramState _periodogram;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private double _prevRoofingFilter1;
-    private double _prevRoofingFilter2;
-    private double _prevBp1;
-    private double _prevBp2;
-    private double _prevPeak;
-    private double _prevSignal1;
-    private double _prevSignal2;
-    private double _prevSignal3;
-    private double _prevLeadPeak;
-    private int _index;
-
-    public EhlersAdaptiveBandPassFilterState(int length1 = 48, int length2 = 10, int length3 = 3, double bw = 0.3)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _bw = bw;
-        _periodogram = new EhlersAutoCorrelationPeriodogramState(_length1, resolved2, _length3);
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, resolved2);
-    }
-
+    private readonly AdaptiveBandPassWindow _window;
+    public EhlersAdaptiveBandPassFilterState(int length1 = 48, int length2 = 10, int length3 = 3, double bw = .3) => _window = new(length1, length2, length3, bw);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveBandPassFilter;
-
-    public void Reset()
-    {
-        _periodogram.Reset();
-        _roofingFilter.Reset();
-        _prevRoofingFilter1 = 0;
-        _prevRoofingFilter2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _prevPeak = 0;
-        _prevSignal1 = 0;
-        _prevSignal2 = 0;
-        _prevSignal3 = 0;
-        _prevLeadPeak = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
-        domCyc = MathHelper.MinOrMax(domCyc, _length1, _length3);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var beta = Math.Cos(2 * Math.PI / (0.9 * domCyc));
-        var gamma = 1 / Math.Cos(2 * Math.PI * _bw / (0.9 * domCyc));
-        var alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-
-        var bp = _index > 2
-            ? (0.5 * (1 - alpha) * (roofingFilter - _prevRoofingFilter2)) + (beta * (1 + alpha) * _prevBp1) -
-              (alpha * _prevBp2)
-            : 0;
-        var peak = Math.Max(0.991 * _prevPeak, Math.Abs(bp));
-        var sig = peak != 0 ? bp / peak : 0;
-        var lead = 1.3 * (sig + _prevSignal1 - _prevSignal2 - _prevSignal3) / 4;
-        var leadPeak = Math.Max(0.93 * _prevLeadPeak, Math.Abs(lead));
-        var trigger = 0.9 * _prevSignal1;
-
-        if (isFinal)
-        {
-            _prevRoofingFilter2 = _prevRoofingFilter1;
-            _prevRoofingFilter1 = roofingFilter;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _prevPeak = peak;
-            _prevSignal3 = _prevSignal2;
-            _prevSignal2 = _prevSignal1;
-            _prevSignal1 = sig;
-            _prevLeadPeak = leadPeak;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eabpf", sig },
-                { "Signal", trigger }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sig, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eabpf", point.Value }, { "Signal", point.Trigger } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodogram.Dispose();
-        _roofingFilter.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 internal readonly struct EhlersMamaSnapshot

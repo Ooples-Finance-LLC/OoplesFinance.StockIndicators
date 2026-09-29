@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersAdaptiveBandPassFilter)
+        {
+            var bandOptions = builtIn.CreateOptions(); var bandUpper = Integer(bandOptions, "Length1", 48); var bandLower = Integer(bandOptions, "Length2", 10); var bandLag = Integer(bandOptions, "Length3", 3); var bandWidth = Number(bandOptions, .3, "Bw"); var bandKeys = new[] { "Eabpf", "Signal" };
+            for (var slot = 0; slot < bandKeys.Length; slot++) { var key = bandKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveBandPassValues(bars, bandUpper, bandLower, bandLag, bandWidth).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV2 or IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform or IndicatorName.EhlersAdaptiveCommodityChannelIndexV2)
         {
             var rangeOptions = builtIn.CreateOptions(); var rangeUpper = Integer(rangeOptions, "Length1", 48); var rangeLower = Integer(rangeOptions, "Length2", 10); var rangeLag = Integer(rangeOptions, "Length3", 3); var rangeKind = AverageKind(rangeOptions, 3); var rangeMode = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV2 ? 2 : builtIn.BatchName == IndicatorName.EhlersAdaptiveStochasticInverseFisherTransform ? 1 : 0; var rangeKeys = new[] { rangeMode == 2 ? "Eacci" : rangeMode == 1 ? "Easift" : "Easi", "Signal" };

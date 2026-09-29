@@ -44015,5 +44015,185 @@
     "before": "(outputKey == \"Signal\" ? .9 : 1)",
     "after": "(outputKey == \"Signal\" ? .8 : 1)",
     "filter": "FullyQualifiedName~AdaptiveRangeV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-bandpass-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "MathHelper.MinOrMax(_spectrum.Next(price, commit).Value, _upper, _firstLag)",
+    "after": "MathHelper.MinOrMax(_spectrum.Next(price, commit).Value, _upper, _upper)",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-angle-reduction",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "Math.IEEERemainder(_width, period)",
+    "after": "_width",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.FiniteHugeWidthsStayPeriodicAndBounded"
+  },
+  {
+    "id": "adaptive-bandpass-width-domain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "|| bw < 0",
+    "after": "|| false",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.InvalidWidthsFailBeforeChangingCallerValues"
+  },
+  {
+    "id": "adaptive-bandpass-negative-cosine",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "cosine <= 0 ? .01",
+    "after": "cosine <= 0 ? .99",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-alpha-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "Math.Min(.99, cosine",
+    "after": "Math.Min(.8, cosine",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-alpha-floor",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "Math.Max(.01, Math.Min(.99,",
+    "after": "Math.Max(.2, Math.Min(.99,",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.FiniteHugeWidthsStayPeriodicAndBounded"
+  },
+  {
+    "id": "adaptive-bandpass-frequency",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "Math.Cos(2 * Math.PI / period)",
+    "after": "Math.Cos(Math.PI / period)",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-roof-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "(roof - _roof2)",
+    "after": "(roof - _roof1)",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "(Unit + decay) * _band1",
+    "after": "(Unit + decay) * _band2",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-decay",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "- 2 * decay * Unit * _band2",
+    "after": "+ 2 * decay * Unit * _band2",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "_count < 3 ? BigInteger.Zero",
+    "after": "_count < 2 ? BigInteger.Zero",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-peak-retention",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "ExactVarianceWindow.Units(.991)",
+    "after": "ExactVarianceWindow.Units(.9)",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-trigger",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "var trigger = .9 * _signal",
+    "after": "var trigger = .9 * value",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-reset-spectrum",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "internal void Reset() { _spectrum.Reset();",
+    "after": "internal void Reset() {",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-reset-roof",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "_roof.Reset(); _roof1",
+    "after": "_roof1",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-reset-peak",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveBandPassWindow.cs",
+    "scope": "internal sealed class AdaptiveBandPassWindow",
+    "before": "_roof1 = _roof2 = _band1 = _band2 = _peak = default;",
+    "after": "_roof1 = _roof2 = _band1 = _band2 = default;",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.WideAndSubnormalPricesPreserveBandAndEnvelope"
+  },
+  {
+    "id": "adaptive-bandpass-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveBandPassFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-bandpass-fast-slot",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveBandPassFilterFast(",
+    "before": "outputKey == \"Signal\" ? point.Trigger : point.Value",
+    "after": "outputKey == \"Signal\" ? point.Value : point.Trigger",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-bandpass-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveBandPassFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveBandPassNumericalTests.InvalidCandlesCannotAdvanceCycleBandOrPeak"
   }
 ]
