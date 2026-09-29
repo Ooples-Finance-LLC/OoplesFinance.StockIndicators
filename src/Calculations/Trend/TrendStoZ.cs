@@ -421,71 +421,17 @@ public static partial class Calculations
     public static StockData CalculateTrender(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
         double atrMult = 2)
     {
-        List<double> adList = new(stockData.Count);
-        List<double> trndDnList = new(stockData.Count);
-        List<double> trndUpList = new(stockData.Count);
-        List<double> trndrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        stockData.SetCustomValues(atrList);
-        var stdDevList = GetStandardDeviationList(atrList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new TrenderWindow(maType, length, atrMult, external); List<double>? mean = null, atr = null, adaptive = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var mpEma = emaList[i];
-            var trEma = atrList[i];
-
-            var ad = currentValue > prevValue ? mpEma + (trEma / 2) : currentValue < prevValue ? mpEma - (trEma / 2) : mpEma;
-            adList.Add(ad);
+            var caller = stockData.CaptureInputSeries(); List<double> Average(List<double> values) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), values);
+            mean = Average(input); stockData.RestoreInputSeries(caller); atr = CalculateAverageTrueRange(stockData, maType, Math.Max(1, length)).CustomValuesList.ToList(); stockData.RestoreInputSeries(caller);
+            adaptive = Average(TrenderWindow.PublishedAdaptive(input, mean, atr).ToList()); stockData.RestoreInputSeries(caller);
         }
-
-        // A residual left by rolling weighted sums can fabricate a crossing after a spike expires.
-        var admList = maType == MovingAvgType.WeightedMovingAverage
-            ? Streaming.SpreadAverage.Calculate(adList, maType, length)
-            : GetMovingAverageList(stockData, maType, length, adList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var adm = admList[i];
-            var prevAdm = i >= 1 ? admList[i - 1] : 0;
-            var mpEma = emaList[i];
-            var prevMpEma = i >= 1 ? emaList[i - 1] : 0;
-            var prevHigh = i >= 2 ? highList[i - 2] : 0;
-            var prevLow = i >= 2 ? lowList[i - 2] : 0;
-            var stdDev = stdDevList[i];
-
-            var prevTrndDn = i >= 1 ? trndDnList[i - 1] : 0;
-            var trndDn = adm < mpEma && prevAdm > prevMpEma ? prevHigh : currentValue < prevValue ? currentValue + (stdDev * atrMult) : prevTrndDn;
-            trndDnList.Add(trndDn);
-
-            var prevTrndUp = i >= 1 ? trndUpList[i - 1] : 0;
-            var trndUp = adm > mpEma && prevAdm < prevMpEma ? prevLow : currentValue > prevValue ? currentValue - (stdDev * atrMult) : prevTrndUp;
-            trndUpList.Add(trndUp);
-
-            var prevTrndr = i >= 1 ? trndrList[i - 1] : 0;
-            var trndr = adm < mpEma ? trndDn : adm > mpEma ? trndUp : prevTrndr;
-            trndrList.Add(trndr);
-
-            var signal = GetCompareSignal(currentValue - trndr, prevValue - prevTrndr);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "TrendUp", trndUpList },
-            { "TrendDn", trndDnList },
-            { "Trender", trndrList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(trndrList);
-        stockData.IndicatorName = IndicatorName.Trender;
-
-        return stockData;
+        var up = new List<double>(input.Count); var down = new List<double>(input.Count); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, mean?[i], atr?[i], adaptive?[i]); up.Add(point.TrendUp); down.Add(point.TrendDn); line.Add(point.Trender); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "TrendUp", up }, { "TrendDn", down }, { "Trender", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.Trender; return stockData;
     }
 
 

@@ -47903,5 +47903,257 @@
     "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
     "after": "_window.Next(bar.Close, bar.Close, bar.Close, isFinal)",
     "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "trender-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "h - l",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-adaptive-half",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "atr.Multiply(.5)",
+    "after": "atr.Multiply(1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-adaptive-direction",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "half.AddTo(ref sum, direction)",
+    "after": "half.AddTo(ref sum, -direction)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-population",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "(n * n) << (2 * shift)",
+    "after": "(n * (n + 1)) << (2 * shift)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "if (_ranges.Count + 1L >= _length)",
+    "after": "if (_ranges.Count + 1L > _length)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-price-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_priceMean = new(kind, _length)",
+    "after": "_priceMean = new(kind, _length + 1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_rangeMean = new(kind, _length)",
+    "after": "_rangeMean = new(kind, _length + 1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-adaptive-period",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_adaptiveMean = new(kind, _length)",
+    "after": "_adaptiveMean = new(kind, _length + 1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-fall-cross-equality",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "side < 0 && _side > 0",
+    "after": "side < 0 && _side >= 0",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.HandStopsKeepTwoBarResetsAndEqualityCarry"
+  },
+  {
+    "id": "trender-wide-rise-cross-equality",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "side > 0 && _side < 0",
+    "after": "side > 0 && _side <= 0",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.HandStopsKeepTwoBarResetsAndEqualityCarry"
+  },
+  {
+    "id": "trender-wide-high-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "new RocBankValue(_high2)",
+    "after": "new RocBankValue(_high1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.HandStopsKeepTwoBarResetsAndEqualityCarry"
+  },
+  {
+    "id": "trender-wide-low-lag",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "new RocBankValue(_low2)",
+    "after": "new RocBankValue(_low1)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.HandStopsKeepTwoBarResetsAndEqualityCarry"
+  },
+  {
+    "id": "trender-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "deviation.Mantissa, _factor, sign",
+    "after": "deviation.Mantissa, _factor / 2, sign",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-down-carry",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "direction < 0 ? Stop(1) : _down",
+    "after": "direction < 0 ? Stop(1) : default",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-up-carry",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "direction > 0 ? Stop(-1) : _up",
+    "after": "direction > 0 ? Stop(-1) : default",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-line-equality",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "side < 0 ? down : side > 0 ? up : _line",
+    "after": "side < 0 ? down : side > 0 ? up : default",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.HandStopsKeepTwoBarResetsAndEqualityCarry"
+  },
+  {
+    "id": "trender-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "Deviation(atr, commit)",
+    "after": "Deviation(atr, true)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "_previous = _high1 = _high2 = _low1 = _low2 = 0",
+    "after": "_previous = _high1 = _high2 = _low1 = _low2 = 1",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-custom-price",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "new RocBankValue(externalPrice.Value)",
+    "after": "new RocBankValue(externalAtr!.Value)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.CustomAndLegacyAveragesKeepPriceAtrAdaptiveOrder"
+  },
+  {
+    "id": "trender-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/TrenderWindow.cs",
+    "scope": "internal sealed class TrenderWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedInput"
+  },
+  {
+    "id": "trender-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrenderFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true,",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.SelectedPricesPreserveEffectiveRangesAndLaggedExtremes"
+  },
+  {
+    "id": "trender-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeTrenderFast(",
+    "before": "series == TrenderSeries.TrendUp ? point.TrendUp",
+    "after": "series == TrenderSeries.TrendUp ? point.Trender",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "trender-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch24.cs",
+    "scope": "public sealed class TrenderState",
+    "before": "return new(point.Trender,",
+    "after": "return new(point.TrendUp,",
+    "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
   }
 ]

@@ -89,30 +89,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.HalfTrend:
                 return new("Ht", new[] { "Ht" }, bars => HalfTrendOutputs(bars, indicator));
             case IndicatorName.Trender:
-                return new("Trender", new[] { "TrendUp", "TrendDn", "Trender" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var baseline = Average(prices, length, kind);
-                    var ranges = Average(TrueRanges(bars), length, kind);
-                    var direction = prices.Select((price, i) => Math.Sign(price - (i == 0 ? 0 : prices[i - 1]))).ToArray();
-                    var adaptive = Average(baseline.Select((mean, i) => mean + direction[i] * ranges[i] / 2).ToArray(), length, kind);
-                    var side = adaptive.Select((value, i) => Math.Sign(value - baseline[i])).ToArray();
-                    var widths = PopulationVariance(ranges, length).Select(v => Math.Sqrt(v) * Number(options, 2, "AtrMult")).ToArray();
-                    var up = new double[bars.Count]; var down = new double[bars.Count]; var selected = new double[bars.Count];
-                    // Stops are carried until a directional update or a strict crossing event replaces them.
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var previousSide = i == 0 ? 0 : side[i - 1];
-                        up[i] = i == 0 ? 0 : up[i - 1];
-                        down[i] = i == 0 ? 0 : down[i - 1];
-                        if (direction[i] > 0) up[i] = prices[i] - widths[i];
-                        if (direction[i] < 0) down[i] = prices[i] + widths[i];
-                        if (side[i] > 0 && previousSide < 0) up[i] = i < 2 ? 0 : bars[i - 2].Low;
-                        if (side[i] < 0 && previousSide > 0) down[i] = i < 2 ? 0 : bars[i - 2].High;
-                        selected[i] = side[i] > 0 ? up[i] : side[i] < 0 ? down[i] : i == 0 ? 0 : selected[i - 1];
-                    }
-                    return Outputs(("TrendUp", up), ("TrendDn", down), ("Trender", selected));
-                });
+                return new("Trender", new[] { "TrendUp", "TrendDn", "Trender" }, bars => TrenderOutputs(bars, indicator));
             case IndicatorName.SqueezeMomentumIndicator:
                 return new("Smi", new[] { "Smi" }, bars =>
                 {

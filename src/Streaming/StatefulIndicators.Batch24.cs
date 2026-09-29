@@ -1463,131 +1463,13 @@ public sealed class TrendDirectionForceIndexState : IStreamingIndicatorState, ID
 [PrimaryOutput("Trender")]
 public sealed class TrenderState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ema;
-    private readonly IMovingAverageSmoother _atr;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _adSmoother;
-    private readonly SpreadAverage? _preciseAd;
-    private readonly StreamingInputResolver _input;
-    private readonly double _atrMult;
-    private double _prevValue;
-    private double _atrValue;
-    private double _prevEma;
-    private double _prevAdm;
-    private double _prevTrndDn;
-    private double _prevTrndUp;
-    private double _prevTrndr;
-    private double _prevHigh1;
-    private double _prevHigh2;
-    private double _prevLow1;
-    private double _prevLow2;
-    private int _index;
-    private bool _hasPrev;
-
-    public TrenderState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14,
-        double atrMult = 2)
-    {
-        var resolved = Math.Max(1, length);
-        _ema = MovingAverageSmootherFactory.Create(maType, resolved);
-        _atr = MovingAverageSmootherFactory.Create(maType, resolved);
-        _stdDev = new RollingStandardDeviation(resolved);
-        _adSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _preciseAd = maType == MovingAvgType.WeightedMovingAverage ? new SpreadAverage(maType, resolved) : null;
-        _atrMult = atrMult;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly TrenderWindow _window;
+    public TrenderState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14, double atrMult = 2) => _window = new(maType, length, atrMult);
     public IndicatorName Name => IndicatorName.Trender;
-
-    public void Reset()
-    {
-        _ema.Reset();
-        _atr.Reset();
-        _stdDev.Reset();
-        _adSmoother.Reset();
-        _preciseAd?.Reset();
-        _prevValue = 0;
-        _atrValue = 0;
-        _prevEma = 0;
-        _prevAdm = 0;
-        _prevTrndDn = 0;
-        _prevTrndUp = 0;
-        _prevTrndr = 0;
-        _prevHigh1 = 0;
-        _prevHigh2 = 0;
-        _prevLow1 = 0;
-        _prevLow2 = 0;
-        _index = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var ema = _ema.Next(value, isFinal);
-        // The first bar has no previous close, so its true range is its own high - low, as the batch ATR
-        // measures it. A previous close of 0 made it the whole high and inflated the first window's ATR.
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, _hasPrev ? _prevValue : value);
-        var atr = _atr.Next(tr, isFinal);
-        // The batch takes the band's standard deviation of the ATR, not of the price: it chains the ATR
-        // into StandardDeviationVolatility on purpose.
-        _atrValue = atr;
-        var ad = value > prevValue ? ema + (atr / 2) : value < prevValue ? ema - (atr / 2) : ema;
-        var adm = _preciseAd is null ? _adSmoother.Next(ad, isFinal) : _preciseAd.Next(new(ad), isFinal).Value;
-        var prevAdm = _hasPrev ? _prevAdm : 0;
-        var prevEma = _hasPrev ? _prevEma : 0;
-        var prevHigh = _index >= 2 ? _prevHigh2 : 0;
-        var prevLow = _index >= 2 ? _prevLow2 : 0;
-        var stdDev = _stdDev.Next(_atrValue, isFinal);
-
-        var prevTrndDn = _hasPrev ? _prevTrndDn : 0;
-        var trndDn = adm < ema && prevAdm > prevEma ? prevHigh
-            : value < prevValue ? value + (stdDev * _atrMult) : prevTrndDn;
-        var prevTrndUp = _hasPrev ? _prevTrndUp : 0;
-        var trndUp = adm > ema && prevAdm < prevEma ? prevLow
-            : value > prevValue ? value - (stdDev * _atrMult) : prevTrndUp;
-        var prevTrndr = _hasPrev ? _prevTrndr : 0;
-        var trndr = adm < ema ? trndDn : adm > ema ? trndUp : prevTrndr;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevEma = ema;
-            _prevAdm = adm;
-            _prevTrndDn = trndDn;
-            _prevTrndUp = trndUp;
-            _prevTrndr = trndr;
-            _prevHigh2 = _prevHigh1;
-            _prevHigh1 = bar.High;
-            _prevLow2 = _prevLow1;
-            _prevLow1 = bar.Low;
-            _index++;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "TrendUp", trndUp },
-                { "TrendDn", trndDn },
-                { "Trender", trndr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trndr, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ema.Dispose();
-        _atr.Dispose();
-        _stdDev.Dispose();
-        _adSmoother.Dispose();
-        _preciseAd?.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal); return new(point.Trender, includeOutputs ? new Dictionary<string, double> { { "TrendUp", point.TrendUp }, { "TrendDn", point.TrendDn }, { "Trender", point.Trender } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Tei")]

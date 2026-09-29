@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.Trender)
+        {
+            var trenderKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < trenderKeys.Length; slot++) { var key = trenderKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrenderOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.HalfTrend)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HalfTrendOutputs(bars, builtIn)["Ht"], IndicatorErrorBudget.Exact); yield break;

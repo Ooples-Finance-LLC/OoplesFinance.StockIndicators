@@ -22698,86 +22698,13 @@ internal static partial class IndicatorCompute
         double atrMult = 2, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         TrenderSeries series = TrenderSeries.Trender)
     {
-        // CalculateTrender publishes the trend line itself: the down stop while the smoothed adaptive line
-        // sits below the average of the chained series, the up stop while it sits above, and the previous
-        // reading where the two are equal. The adaptive line is the average stepped by half the average true
-        // range in the direction of the bar, and the stops are offset by the deviation of the true range
-        // itself. This arm returned the average true range, which is only one of those inputs.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        length = Math.Max(length, 1);
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var ema = average.Span;
-
-        using var averageTrueRange = ComputeAtrFast(data, context, length, maType);
-        var atr = averageTrueRange.Span;
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(atr, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        using var adaptive = context.Rent(count);
-        var ad = adaptive.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            ad[i] = currentValue > previousValue ? ema[i] + (atr[i] / 2) :
-                currentValue < previousValue ? ema[i] - (atr[i] / 2) : ema[i];
-        }
-
-        using var smoothedAdaptive = context.Rent(count);
-        if (maType != MovingAvgType.WeightedMovingAverage || ComponentAverage.HasOverrides)
-            MovingAverage(data, maType, length, adaptive.Span, smoothedAdaptive.WritableSpan);
-        else
-        {
-            using var precise = new Streaming.SpreadAverage(maType, length);
-            for (var i = 0; i < count; i++) smoothedAdaptive.WritableSpan[i] = precise.Next(new(ad[i]), true).Value;
-        }
-        var adm = smoothedAdaptive.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double previousTrendDown = 0, previousTrendUp = 0, previousTrender = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var previousAdaptive = i >= 1 ? adm[i - 1] : 0;
-            var previousAverage = i >= 1 ? ema[i - 1] : 0;
-            var previousHigh = i >= 2 ? highs[i - 2] : 0;
-            var previousLow = i >= 2 ? lows[i - 2] : 0;
-            var offset = stdDev[i] * atrMult;
-
-            var trendDown = adm[i] < ema[i] && previousAdaptive > previousAverage ? previousHigh :
-                currentValue < previousValue ? currentValue + offset : previousTrendDown;
-            var trendUp = adm[i] > ema[i] && previousAdaptive < previousAverage ? previousLow :
-                currentValue > previousValue ? currentValue - offset : previousTrendUp;
-
-            // Both stops were already being carried here and only the line they alternate between was kept,
-            // which is why the TrendUp and TrendDn keys answered with the line. The trender's own recursion
-            // reads its previous value from a local rather than from the buffer, so the buffer is free to
-            // hold whichever series was asked for.
-            var trender = adm[i] < ema[i] ? trendDown : adm[i] > ema[i] ? trendUp : (i >= 1 ? previousTrender : 0);
-
-            output[i] = series switch
-            {
-                TrenderSeries.TrendUp => trendUp,
-                TrenderSeries.TrendDown => trendDown,
-                _ => trender
-            };
-
-            previousTrendDown = trendDown;
-            previousTrendUp = trendUp;
-            previousTrender = trender;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new TrenderWindow(maType, length, atrMult, external); using ComputeBuffer? mean = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(input), mean!.Value.WritableSpan);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, Math.Max(1, length), maType) : null; using ComputeBuffer? adaptive = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, Math.Max(1, length), TrenderWindow.PublishedAdaptive(input, mean!.Value.ToArray(), atr!.Value.ToArray()), adaptive!.Value.WritableSpan);
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? mean!.Value.Span[i] : null, external ? atr!.Value.Span[i] : null, external ? adaptive!.Value.Span[i] : null); result.WritableSpan[i] = series == TrenderSeries.TrendUp ? point.TrendUp : series == TrenderSeries.TrendDown ? point.TrendDn : point.Trender; } return result; }
+        catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeTurboStochasticsFastFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 10,
