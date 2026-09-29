@@ -49829,5 +49829,239 @@
     "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
     "after": "_window.Next(bar.High, bar.Low, bar.Open, isFinal)",
     "filter": "FullyQualifiedName~FastSlowCompositeNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "adaptive-stochastic-wide-fit-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_fitLength = Math.Max(1, Math.Abs(_slowLength - _fastLength))",
+    "after": "_fitLength = _slowLength",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-fit-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_sum + units - expired",
+    "after": "_sum + units + expired",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_weighted - _sum + expired",
+    "after": "_weighted + _sum + expired",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "weighted - (n - 1) * sum",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-endpoint-position",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "* (n - 1), n * spread)",
+    "after": "* (n + 1), n * spread)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-endpoint-projection",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "var change = _count == 0",
+    "after": "endpoint = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(endpoint, BigInteger.One));\n        var change = _count == 0",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.OverflowingFittedEndpointsRecoverAfterRangeExpiry"
+  },
+  {
+    "id": "adaptive-stochastic-wide-efficiency-period",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(1, fastLength)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_travel + change - (_changes.Count",
+    "after": "_travel + change + (_changes.Count",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-efficiency-distance",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "BigInteger.Abs(units - _prices.Peek())",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-efficiency-zero",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "travel.IsZero ? 0",
+    "after": "travel.IsZero ? 1",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.HandSeedsFlatWindowsAndEfficiencyExtremesArePreserved"
+  },
+  {
+    "id": "adaptive-stochastic-wide-blend-weight",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "Units(1 - efficiency)",
+    "after": "Units(efficiency)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-blend-fast",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "fast * ExactVarianceWindow.Units(efficiency)",
+    "after": "slow * ExactVarianceWindow.Units(efficiency)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_count - length + 1L",
+    "after": "_count - length",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-fast-high",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "Extreme(_fastHigh, endpoint, _fastLength, true, commit)",
+    "after": "Extreme(_fastHigh, endpoint, _fastLength, false, commit)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-slow-low",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "Extreme(_slowLow, endpoint, _slowLength, false, commit)",
+    "after": "Extreme(_slowLow, endpoint, _slowLength, true, commit)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-range-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "(endpoint - low) << 1074",
+    "after": "(endpoint - high) << 1074",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-range-flat",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "high == low ? 0",
+    "after": "high == low ? 1",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.HandSeedsFlatWindowsAndEfficiencyExtremesArePreserved"
+  },
+  {
+    "id": "adaptive-stochastic-wide-slope",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "var slope = value - _previous",
+    "after": "var slope = _previous - value",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "slope, _previousSlope, value",
+    "after": "slope, 0, value",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "if (commit)\n        {\n            if (full)",
+    "after": "if (true)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_fastLength, true, commit)",
+    "after": "_fastLength, true, true)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-reset-fit",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_fit.Clear();",
+    "after": "_prices.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-reset-ranges",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveStochasticWindow.cs",
+    "scope": "internal sealed class AdaptiveStochasticWindow",
+    "before": "_slowHigh.Clear();",
+    "after": "_fastHigh.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.WideRegressionEfficiencyAndEveryRangeStayFinite"
+  },
+  {
+    "id": "adaptive-stochastic-wide-selected-input",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveStochasticFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.SelectedPricesFeedBothComponentsWithoutAverageCallbacks"
+  },
+  {
+    "id": "adaptive-stochastic-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AdaptiveStochasticState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "adaptive-stochastic-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AdaptiveStochasticState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.InvalidCandlesCannotAdvanceRegressionOrRanges"
   }
 ]

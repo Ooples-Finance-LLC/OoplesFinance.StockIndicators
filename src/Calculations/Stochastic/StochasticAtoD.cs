@@ -14,47 +14,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAdaptiveStochastic(this StockData stockData, int length = 50, int fastLength = 50, int slowLength = 200)
     {
-        List<double> stcList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        // Every Calculate method leaves its result on the chained series, so the second component read
-        // the first one's output instead of the input both of them measure.
-        var callerSeries = stockData.CaptureInputSeries();
-        var srcList = CalculateLinearRegression(stockData, Math.Abs(slowLength - fastLength)).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-        stockData.RestoreInputSeries(callerSeries);
-        var (highest1List, lowest1List) = fastLength <= 1 ? (srcList, srcList) : GetMaxAndMinValuesList(srcList, fastLength);
-        var (highest2List, lowest2List) = slowLength <= 1 ? (srcList, srcList) : GetMaxAndMinValuesList(srcList, slowLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var er = erList[i];
-            var src = srcList[i];
-            var highest1 = highest1List[i];
-            var lowest1 = lowest1List[i];
-            var highest2 = highest2List[i];
-            var lowest2 = lowest2List[i];
-            var prevStc1 = i >= 1 ? stcList[i - 1] : 0;
-            var prevStc2 = i >= 2 ? stcList[i - 2] : 0;
-            var a = (er * highest1) + ((1 - er) * highest2);
-            var b = (er * lowest1) + ((1 - er) * lowest2);
-
-            var stc = a - b != 0 ? MinOrMax((src - b) / (a - b), 1, 0) : 0;
-            stcList.Add(stc);
-
-            var signal = GetRsiSignal(stc - prevStc1, prevStc1 - prevStc2, stc, prevStc1, 0.8, 0.2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ast", stcList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(stcList);
-        stockData.IndicatorName = IndicatorName.AdaptiveStochastic;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new AdaptiveStochasticWindow(length, fastLength, slowLength);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ast", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AdaptiveStochastic; return stockData;
     }
 
 

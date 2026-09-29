@@ -6543,47 +6543,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Adaptive Stochastic using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int fastLength = 50,
-        int slowLength = 200, int length = 50)
+    internal static ComputeBuffer ComputeAdaptiveStochasticFast(StockData data, ComputeContext context, int fastLength = 50, int slowLength = 200, int length = 50)
     {
-        // CalculateAdaptiveStochastic ranges the linear regression of the chained series - fitted over the
-        // gap between the two lengths - against a blend of a fast and a slow window, weighted by Kaufman's
-        // efficiency ratio so the range tightens when the series trends. OscillatorCore.AdaptiveStochastic
-        // ranged the close against the bars' highs and lows with no regression and no efficiency ratio.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var regressed = context.Rent(count);
-        var src = regressed.WritableSpan;
-        using (var regression = new ExactLinearFitWindow(Math.Max(Math.Abs(slowLength - fastLength), 1)))
-        {
-            for (var i = 0; i < count; i++)
-            {
-                src[i] = regression.Next(input[i], isFinal: true).Last;
-            }
-        }
-
-        using var efficiency = context.Rent(count);
-        EfficiencyRatio(input, length, efficiency.WritableSpan);
-        var er = efficiency.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var fastWindow = new RollingMinMax(Math.Max(fastLength, 1));
-        var slowWindow = new RollingMinMax(Math.Max(slowLength, 1));
-        for (var i = 0; i < count; i++)
-        {
-            fastWindow.Add(src[i]);
-            slowWindow.Add(src[i]);
-
-            var a = (er[i] * fastWindow.Max) + ((1 - er[i]) * slowWindow.Max);
-            var b = (er[i] * fastWindow.Min) + ((1 - er[i]) * slowWindow.Min);
-            output[i] = a - b != 0 ? MathHelper.MinOrMax((src[i] - b) / (a - b), 1, 0) : 0;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new AdaptiveStochasticWindow(length, fastLength, slowLength);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>

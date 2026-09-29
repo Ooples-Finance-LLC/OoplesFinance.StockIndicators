@@ -6042,78 +6042,14 @@ public sealed class AdaptiveRelativeStrengthIndexState : IStreamingIndicatorStat
 [PrimaryOutput("Ast")]
 public sealed class AdaptiveStochasticState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EfficiencyRatioState _er;
-    private readonly LinearRegressionState _regression;
-    private readonly RollingWindowMax _fastMax;
-    private readonly RollingWindowMin _fastMin;
-    private readonly RollingWindowMax _slowMax;
-    private readonly RollingWindowMin _slowMin;
-    private readonly StreamingInputResolver _input;
-    private double _regressionInput;
-
-    public AdaptiveStochasticState(int length = 50, int fastLength = 50, int slowLength = 200)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        var regressionLength = Math.Max(1, Math.Abs(resolvedSlow - resolvedFast));
-        _er = new EfficiencyRatioState(resolvedLength);
-        _regression = new LinearRegressionState(regressionLength, _ => _regressionInput);
-        _fastMax = new RollingWindowMax(resolvedFast);
-        _fastMin = new RollingWindowMin(resolvedFast);
-        _slowMax = new RollingWindowMax(resolvedSlow);
-        _slowMin = new RollingWindowMin(resolvedSlow);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AdaptiveStochasticWindow _window;
+    public AdaptiveStochasticState(int length = 50, int fastLength = 50, int slowLength = 200) => _window = new(length, fastLength, slowLength);
     public IndicatorName Name => IndicatorName.AdaptiveStochastic;
-
-    public void Reset()
-    {
-        _er.Reset();
-        _regression.Reset();
-        _fastMax.Reset();
-        _fastMin.Reset();
-        _slowMax.Reset();
-        _slowMin.Reset();
-        _regressionInput = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        _regressionInput = value;
-        var src = _regression.Update(bar, isFinal, includeOutputs: false).Value;
-        var er = _er.Next(value, isFinal);
-        var highest1 = isFinal ? _fastMax.Add(src, out _) : _fastMax.Preview(src, out _);
-        var lowest1 = isFinal ? _fastMin.Add(src, out _) : _fastMin.Preview(src, out _);
-        var highest2 = isFinal ? _slowMax.Add(src, out _) : _slowMax.Preview(src, out _);
-        var lowest2 = isFinal ? _slowMin.Add(src, out _) : _slowMin.Preview(src, out _);
-        var a = (er * highest1) + ((1 - er) * highest2);
-        var b = (er * lowest1) + ((1 - er) * lowest2);
-        var stc = a - b != 0 ? MathHelper.MinOrMax((src - b) / (a - b), 1, 0) : 0;
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value; return new(value, includeOutputs ? new Dictionary<string, double> { { "Ast", value } } : null); }
+    public void Dispose() { }
 
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ast", stc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(stc, outputs);
-    }
-
-    public void Dispose()
-    {
-        _er.Dispose();
-        _regression.Dispose();
-        _fastMax.Dispose();
-        _fastMin.Dispose();
-        _slowMax.Dispose();
-        _slowMin.Dispose();
-    }
 }
 
 [PrimaryOutput("Ts")]

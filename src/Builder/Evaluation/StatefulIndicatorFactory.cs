@@ -826,6 +826,7 @@ internal static partial class StatefulIndicatorFactory
             PfeSpecOptions pfe => new PolarizedFractalEfficiencyState(length: pfe.Length),
             FastSlowRsiOscillatorSpecOptions => new FastandSlowRelativeStrengthIndexOscillatorState(),
             FastSlowStochasticOscillatorSpecOptions => new FastandSlowStochasticOscillatorState(),
+            AdaptiveStochasticSpecOptions adaptiveStochastic => new AdaptiveStochasticState(50, adaptiveStochastic.MinLength, adaptiveStochastic.MaxLength),
             DoubleSmoothedStochasticSpecOptions doubleStochastic => new DoubleSmoothedStochasticState(doubleStochastic.MaType, doubleStochastic.Length),
             BilateralStochasticOscillatorSpecOptions bilateral => new BilateralStochasticOscillatorState(bilateral.MaType, bilateral.Length),
             StcSpecOptions stc => new SchaffTrendCycleState(cycleLength: stc.Length),

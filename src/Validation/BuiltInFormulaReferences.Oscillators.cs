@@ -667,21 +667,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Asrsi", positive.Select((v, i) => negative[i] == 0 ? 100 : 100 * v / (v + negative[i])).ToArray()));
                 });
             case IndicatorName.AdaptiveStochastic:
-                var fastSpan = Integer(options, "MinLength", 50);
-                var slowSpan = Integer(options, "MaxLength", 200);
-                return new("Ast", new[] { "Ast" }, bars =>
-                {
-                    var source = RegressionEndpoints(Closes(bars), Math.Max(1, Math.Abs(slowSpan - fastSpan)));
-                    var efficiency = EfficiencyRatios(bars, Integer(options, "Length", 50));
-                    return Outputs(("Ast", source.Select((v, i) =>
-                    {
-                        var fast = Window(source, i, fastSpan).ToArray();
-                        var slow = Window(source, i, slowSpan).ToArray();
-                        var low = slow.Min() + efficiency[i] * (fast.Min() - slow.Min());
-                        var high = slow.Max() + efficiency[i] * (fast.Max() - slow.Max());
-                        return high == low ? 0 : Math.Max(0, Math.Min(1, (v - low) / (high - low))); // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray()));
-                });
+                return new("Ast", new[] { "Ast" }, bars => AdaptiveStochasticOutputs(bars, indicator));
             case IndicatorName.AdaptiveRelativeStrengthIndex:
                 kind = AverageKind(options, 6);
                 if (kind is 1 or 2 or 3 or 6) return new("Arsi", new[] { "Arsi" }, bars => AdaptiveRsiOutputs(bars, indicator));
