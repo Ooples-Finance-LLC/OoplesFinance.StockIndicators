@@ -1156,34 +1156,9 @@ internal static class TrendCore
     /// </summary>
     internal static void BryantAdaptiveMovingAverage(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        output[0] = close[0];
-        for (var i = 1; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = close[i];
-                continue;
-            }
-
-            // Calculate volatility factor
-            var sumChange = 0.0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                sumChange += Math.Abs(close[j] - close[j - 1]);
-            }
-            var avgChange = sumChange / length;
-
-            // Adapt smoothing factor based on volatility
-            var k = avgChange > 0 ? Math.Min(1.0, Math.Abs(close[i] - close[i - 1]) / avgChange) : 0.5;
-            var alpha = (2.0 / (length + 1)) + k * (1 - 2.0 / (length + 1));
-
-            output[i] = output[i - 1] + alpha * (close[i] - output[i - 1]);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new BryantWindow(length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>

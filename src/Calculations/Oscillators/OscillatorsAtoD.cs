@@ -242,78 +242,11 @@ public static partial class Calculations
     public static StockData CalculateBayesianOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 20, double stdDevMult = 2.5, double lowerThreshold = 15)
     {
-        List<double> sigmaProbsDownList = new(stockData.Count);
-        List<double> sigmaProbsUpList = new(stockData.Count);
-        List<double> probPrimeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var probBbUpperUpSumWindow = new RollingSum();
-        var probBbUpperDownSumWindow = new RollingSum();
-        var probBbBasisUpSumWindow = new RollingSum();
-        var probBbBasisDownSumWindow = new RollingSum();
-
-        var bbList = CalculateBollingerBands(stockData, maType, length, stdDevMult);
-        var upperBbList = bbList.ChainedOutputs["UpperBand"];
-        var basisList = bbList.ChainedOutputs["MiddleBand"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var upperBb = upperBbList[i];
-            var basis = basisList[i];
-
-            double probBbUpperUpSeq = currentValue > upperBb ? 1 : 0;
-            probBbUpperUpSumWindow.Add(probBbUpperUpSeq);
-            var probBbUpperUp = probBbUpperUpSumWindow.Average(length);
-
-            double probBbUpperDownSeq = currentValue < upperBb ? 1 : 0;
-            probBbUpperDownSumWindow.Add(probBbUpperDownSeq);
-            var probBbUpperDown = probBbUpperDownSumWindow.Average(length);
-            var probUpBbUpper = probBbUpperUp + probBbUpperDown != 0 ? probBbUpperUp / (probBbUpperUp + probBbUpperDown) : 0;
-            var probDownBbUpper = probBbUpperUp + probBbUpperDown != 0 ? probBbUpperDown / (probBbUpperUp + probBbUpperDown) : 0;
-
-            double probBbBasisUpSeq = currentValue > basis ? 1 : 0;
-            probBbBasisUpSumWindow.Add(probBbBasisUpSeq);
-            var probBbBasisUp = probBbBasisUpSumWindow.Average(length);
-
-            double probBbBasisDownSeq = currentValue < basis ? 1 : 0;
-            probBbBasisDownSumWindow.Add(probBbBasisDownSeq);
-            var probBbBasisDown = probBbBasisDownSumWindow.Average(length);
-
-            var probUpBbBasis = probBbBasisUp + probBbBasisDown != 0 ? probBbBasisUp / (probBbBasisUp + probBbBasisDown) : 0;
-            var probDownBbBasis = probBbBasisUp + probBbBasisDown != 0 ? probBbBasisDown / (probBbBasisUp + probBbBasisDown) : 0;
-
-            var prevSigmaProbsDown = GetLastOrDefault(sigmaProbsDownList);
-            var sigmaProbsDown = BayesianProbability.Combine(probUpBbUpper, probUpBbBasis);
-            sigmaProbsDownList.Add(sigmaProbsDown);
-
-            var prevSigmaProbsUp = GetLastOrDefault(sigmaProbsUpList);
-            var sigmaProbsUp = BayesianProbability.Combine(probDownBbUpper, probDownBbBasis);
-            sigmaProbsUpList.Add(sigmaProbsUp);
-
-            var prevProbPrime = GetLastOrDefault(probPrimeList);
-            var probPrime = BayesianProbability.Combine(sigmaProbsDown, sigmaProbsUp);
-            probPrimeList.Add(probPrime);
-
-            var longUsingProbPrime = probPrime > lowerThreshold / 100 && prevProbPrime == 0;
-            var longUsingSigmaProbsUp = sigmaProbsUp < 1 && prevSigmaProbsUp == 1;
-            var shortUsingProbPrime = probPrime == 0 && prevProbPrime > lowerThreshold / 100;
-            var shortUsingSigmaProbsDown = sigmaProbsDown < 1 && prevSigmaProbsDown == 1;
-
-            var signal = GetConditionSignal(longUsingProbPrime || longUsingSigmaProbsUp, shortUsingProbPrime || shortUsingSigmaProbsDown);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "SigmaProbsDown", sigmaProbsDownList },
-            { "SigmaProbsUp", sigmaProbsUpList },
-            { "ProbPrime", probPrimeList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.BayesianOscillator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? BayesianWindow.Components(stockData, input, maType, length) : null; using var window = new BayesianWindow(maType, length, stdDevMult, lowerThreshold, external);
+        var down = new List<double>(input.Count); var up = new List<double>(input.Count); var prime = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); down.Add(point.Down); up.Add(point.Up); prime.Add(point.Prime); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "SigmaProbsDown", down }, { "SigmaProbsUp", up }, { "ProbPrime", prime } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.BayesianOscillator; return stockData;
     }
 
 
@@ -888,59 +821,24 @@ public static partial class Calculations
     public static StockData CalculateConstanceBrownCompositeIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int fastLength = 13, int slowLength = 33, int length1 = 14, int length2 = 9, int smoothLength = 3)
     {
-        List<double> sList = new(stockData.Count);
-        List<double> bullSlopeList = new(stockData.Count);
-        List<double> bearSlopeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        // Every Calculate method leaves its result on the chained series, so the second component read
-        // the first one's output instead of the input both of them measure.
-        var callerSeries = stockData.CaptureInputSeries();
-        var rsi1List = CalculateRelativeStrengthIndex(stockData, length: length1).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var rsi2List = CalculateRelativeStrengthIndex(stockData, length: smoothLength).ChainedValues;
-        stockData.RestoreInputSeries(callerSeries);
-        var rsiSmaList = GetMovingAverageList(stockData, maType, smoothLength, rsi2List);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var caller = stockData.CaptureInputSeries();
+        fastLength = Math.Max(1, fastLength); slowLength = Math.Max(1, slowLength); length1 = Math.Max(1, length1); length2 = Math.Max(1, length2); smoothLength = Math.Max(1, smoothLength);
+        double[][]? components = null;
+        if (Builder.Compute.ComponentAverage.HasOverrides)
         {
-            var rsiSma = rsiSmaList[i];
-            var rsiDelta = i >= length2 ? rsi1List[i] - rsi1List[i - length2] : 0;
-
-            var s = rsiDelta + rsiSma;
-            sList.Add(s);
+            // Wilder RSI's internal stages do not request custom averages on the batch route.
+            using var second = new PriceRsiWindow(MovingAvgType.WildersSmoothingMethod, smoothLength);
+            var rawLevel = input.Select(v => second.Next(v, true)).ToList();
+            double[] Mean(List<double> values, int period) { var result = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), period)?.ToArray() ?? GetMovingAverageList(stockData, maType, period, values).ToArray(); stockData.RestoreInputSeries(caller); return result; }
+            var level = Mean(rawLevel, smoothLength); using var raw = new BrownCompositeWindow(maType, fastLength, slowLength, length1, length2, smoothLength);
+            var lines = input.Select((v, i) => raw.Next(v, true, level[i], 0, 0).Line).ToList();
+            components = new[] { level, Mean(lines, fastLength), Mean(lines, slowLength) };
         }
+        using var window = new BrownCompositeWindow(maType, fastLength, slowLength, length1, length2, smoothLength);
+        var line = new List<double>(input.Count); var fast = new List<double>(input.Count); var slow = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]); line.Add(point.Line); fast.Add(point.Fast); slow.Add(point.Slow); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cbci", line }, { "FastSignal", fast }, { "SlowSignal", slow } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ConstanceBrownCompositeIndex; return stockData;
 
-        var sFastSmaList = GetMovingAverageList(stockData, maType, fastLength, sList);
-        var sSlowSmaList = GetMovingAverageList(stockData, maType, slowLength, sList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var s = sList[i];
-            var sFastSma = sFastSmaList[i];
-            var sSlowSma = sSlowSmaList[i];
-
-            var prevBullSlope = GetLastOrDefault(bullSlopeList);
-            var bullSlope = s - Math.Max(sFastSma, sSlowSma);
-            bullSlopeList.Add(bullSlope);
-
-            var prevBearSlope = GetLastOrDefault(bearSlopeList);
-            var bearSlope = s - Math.Min(sFastSma, sSlowSma);
-            bearSlopeList.Add(bearSlope);
-
-            var signal = GetBullishBearishSignal(bullSlope, prevBullSlope, bearSlope, prevBearSlope);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cbci", sList },
-            { "FastSignal", sFastSmaList },
-            { "SlowSignal", sSlowSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(sList);
-        stockData.IndicatorName = IndicatorName.ConstanceBrownCompositeIndex;
-
-        return stockData;
     }
 
 
@@ -958,47 +856,13 @@ public static partial class Calculations
     public static StockData CalculateCommoditySelectionIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 14, double pointValue = 50, double margin = 3000, double commission = 10)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        List<double> csiList = new(stockData.Count);
-        List<double> csiSmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var csiSumWindow = new RollingSum();
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new CommoditySelectionWindow(maType, length, pointValue, margin, commission, external);
+        var components = external ? CommoditySelectionWindow.Components(stockData, input, high, low, maType, length) : default;
+        var line = new List<double>(input.Count); var mean = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components.Atr?[i], components.Adx?[i]); line.Add(point.Value); mean.Add(point.Signal); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Csi", line }, { "Signal", mean } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.CommoditySelectionIndex; return stockData;
 
-        var k = 100 * (pointValue / Sqrt(margin) / (150 + commission));
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, length).ChainedValues;
-        // Clear state to prevent pollution of CalculateAverageDirectionalIndex inputs
-        stockData.RestoreInputSeries(callerSeries);
-        stockData.SetSignals(null);
-        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var atr = atrList[i];
-            var adxRating = adxList[i];
-
-            var prevCsi = GetLastOrDefault(csiList);
-            var csi = k * atr * adxRating;
-            csiList.Add(csi);
-
-            var prevCsiSma = GetLastOrDefault(csiSmaList);
-            csiSumWindow.Add(csi);
-            var csiSma = csiSumWindow.Average(length);
-            csiSmaList.Add(csiSma);
-
-            var signal = GetCompareSignal(csi - csiSma, prevCsi - prevCsiSma, true);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Csi", csiList },
-            { "Signal", csiSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(csiList);
-        stockData.IndicatorName = IndicatorName.CommoditySelectionIndex;
-
-        return stockData;
     }
 
 

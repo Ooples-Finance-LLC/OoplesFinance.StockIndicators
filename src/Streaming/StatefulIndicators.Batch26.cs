@@ -1352,79 +1352,14 @@ public sealed class VixTradingSystemState : IStreamingIndicatorState, IDisposabl
 [PrimaryOutput("Vida1")]
 public sealed class VolatilityIndexDynamicAverageIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _stdDevSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _alpha1;
-    private readonly double _alpha2;
-    private double _prevVidya1;
-    private double _prevVidya2;
-    private bool _hasPrev;
-
-    public VolatilityIndexDynamicAverageIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 20, double alpha1 = 0.2, double alpha2 = 0.04)
-    {
-        var resolved = Math.Max(1, length);
-
-        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
-        // selects the average it is measured against, below.
-        _stdDev = new RollingStandardDeviation(resolved);
-        _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _alpha1 = alpha1;
-        _alpha2 = alpha2;
-    }
-
+    private readonly VolatilityIndexWindow _window;
+    public VolatilityIndexDynamicAverageIndicatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 20, double alpha1 = 0.2, double alpha2 = 0.04) => _window = new(maType, length, alpha1, alpha2);
     public IndicatorName Name => IndicatorName.VolatilityIndexDynamicAverageIndicator;
-
-    public void Reset()
-    {
-        _stdDev.Reset();
-        _stdDevSmoother.Reset();
-        _prevVidya1 = 0;
-        _prevVidya2 = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.First, includeOutputs ? new Dictionary<string, double> { { "Vida1", point.First }, { "Vida2", point.Second } } : null); }
+    public void Dispose() => _window.Dispose();
 
-        // Fed the resolved input, which is the series this measures, matching the batch calculation.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var stdDevEma = _stdDevSmoother.Next(stdDev, isFinal);
-        var ratio = stdDevEma != 0 ? stdDev / stdDevEma : 0;
-        var prevVidya1 = _hasPrev ? _prevVidya1 : value;
-        var prevVidya2 = _hasPrev ? _prevVidya2 : value;
-        var vidya1 = (_alpha1 * ratio * value) + ((1 - (_alpha1 * ratio)) * prevVidya1);
-        var vidya2 = (_alpha2 * ratio * value) + ((1 - (_alpha2 * ratio)) * prevVidya2);
-
-        if (isFinal)
-        {
-            _prevVidya1 = vidya1;
-            _prevVidya2 = vidya2;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Vida1", vidya1 },
-                { "Vida2", vidya2 }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(vidya1, outputs);
-    }
-
-    public void Dispose()
-    {
-        _stdDev.Dispose();
-        _stdDevSmoother.Dispose();
-    }
 }
 
 [PrimaryOutput("Vma")]

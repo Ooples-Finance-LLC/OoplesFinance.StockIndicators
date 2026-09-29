@@ -2109,31 +2109,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void BayesianOscillator(ReadOnlySpan<double> close, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        for (var i = 0; i < close.Length; i++)
-        {
-            if (i < length)
-            {
-                output[i] = 50;
-                continue;
-            }
-
-            var upCount = 0;
-            for (var j = i - length + 1; j <= i; j++)
-            {
-                if (close[j] > close[j - 1])
-                {
-                    upCount++;
-                }
-            }
-
-            // Bayesian probability of up move given recent history
-            output[i] = 100.0 * upCount / length;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new BayesianWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Down;
     }
 
     /// <summary>
@@ -3229,26 +3207,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void AverageMoneyFlowOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var mfiArray = pool.Rent(close.Length);
-
-        try
-        {
-            var mfi = mfiArray.AsSpan(0, close.Length);
-            VolumeCore.MoneyFlowIndex(high, low, close, volume, mfi, length);
-
-            // Apply SMA smoothing
-            MovingAverageCore.SimpleMovingAverage(mfi, output, length);
-        }
-        finally
-        {
-            pool.Return(mfiArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (volume.Length < close.Length) throw new ArgumentException("Volume span must be at least close length.", nameof(volume));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("High and low spans must be at least close length.");
+        using var window = new AverageMoneyFlowWindow(MovingAvgType.WeightedMovingAverage, length, 3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], volume[i], true).Value;
     }
 
     /// <summary>

@@ -219,40 +219,11 @@ public static partial class Calculations
     public static StockData CalculateChandeMomentumOscillatorAverageDisparityIndex(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 200, int length2 = 50, int length3 = 20)
     {
-        List<double> avgDisparityIndexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var firstEmaList = GetMovingAverageList(stockData, maType, length1, inputList);
-        var secondEmaList = GetMovingAverageList(stockData, maType, length2, inputList);
-        var thirdEmaList = GetMovingAverageList(stockData, maType, length3, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var firstEma = firstEmaList[i];
-            var secondEma = secondEmaList[i];
-            var thirdEma = thirdEmaList[i];
-            var firstDisparityIndex = currentValue != 0 ? (currentValue - firstEma) / currentValue * 100 : 0;
-            var secondDisparityIndex = currentValue != 0 ? (currentValue - secondEma) / currentValue * 100 : 0;
-            var thirdDisparityIndex = currentValue != 0 ? (currentValue - thirdEma) / currentValue * 100 : 0;
-
-            var prevAvgDisparityIndex = GetLastOrDefault(avgDisparityIndexList);
-            var avgDisparityIndex = (firstDisparityIndex + secondDisparityIndex + thirdDisparityIndex) / 3;
-            avgDisparityIndexList.Add(avgDisparityIndex);
-
-            var signal = GetCompareSignal(avgDisparityIndex, prevAvgDisparityIndex);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cmoadi", avgDisparityIndexList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(avgDisparityIndexList);
-        stockData.IndicatorName = IndicatorName.ChandeMomentumOscillatorAverageDisparityIndex;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? ChandeDisparityWindow.Components(stockData, input, maType, length1, length2, length3) : null; using var window = new ChandeDisparityWindow(maType, length1, length2, length3, external);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cmoadi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.ChandeMomentumOscillatorAverageDisparityIndex; return stockData;
     }
 
 

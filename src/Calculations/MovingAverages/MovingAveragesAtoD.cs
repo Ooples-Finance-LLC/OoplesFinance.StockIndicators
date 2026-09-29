@@ -170,51 +170,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAutonomousRecursiveMovingAverage(this StockData stockData, int length = 14, int momLength = 7, double gamma = 3)
     {
-        List<double> madList = new(stockData.Count);
-        List<double> ma1List = new(stockData.Count);
-        List<double> absDiffList = new(stockData.Count);
-        List<double> cList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum cSumWindow = new();
-        RollingSum ma1SumWindow = new();
-        double absDiffSum = 0;
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var priorValue = i >= momLength ? inputList[i - momLength] : 0;
-            var prevMad = i >= 1 ? madList[i - 1] : currentValue;
-
-            var absDiff = Math.Abs(priorValue - prevMad);
-            absDiffList.Add(absDiff);
-
-            absDiffSum += absDiff;
-            var d = i != 0 ? absDiffSum / i * gamma : 0;
-            var c = currentValue > prevMad + d ? currentValue + d : currentValue < prevMad - d ? currentValue - d : prevMad;
-            cList.Add(c);
-            cSumWindow.Add(c);
-
-            var ma1 = cSumWindow.Average(length);
-            ma1List.Add(ma1);
-            ma1SumWindow.Add(ma1);
-
-            var mad = ma1SumWindow.Average(length);
-            madList.Add(mad);
-
-            var signal = GetCompareSignal(currentValue - mad, prevValue - prevMad);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Arma", madList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(madList);
-        stockData.IndicatorName = IndicatorName.AutonomousRecursiveMovingAverage;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new AutonomousRecursiveWindow(length, momLength, gamma);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Arma", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AutonomousRecursiveMovingAverage; return stockData;
     }
 
 
@@ -453,38 +412,10 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateBryantAdaptiveMovingAverage(this StockData stockData, int length = 14, int maxLength = 100, double trend = -1)
     {
-        List<double> bamaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var erList = CalculateKaufmanAdaptiveMovingAverage(stockData, length: length).ChainedOutputs["Er"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var er = erList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ver = Pow(er - (((2 * er) - 1) / 2 * (1 - trend)) + 0.5, 2);
-            var vLength = ver != 0 ? (length - ver + 1) / ver : 0;
-            vLength = Math.Max(1, Math.Min(vLength, maxLength));
-            var vAlpha = 2 / (vLength + 1);
-
-            var prevBama = GetLastOrDefault(bamaList);
-            var bama = (vAlpha * currentValue) + ((1 - vAlpha) * prevBama);
-            bamaList.Add(bama);
-
-            var signal = GetCompareSignal(currentValue - bama, prevValue - prevBama);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Bama", bamaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(bamaList);
-        stockData.IndicatorName = IndicatorName.BryantAdaptiveMovingAverage;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new BryantWindow(length, maxLength, trend);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Bama", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.BryantAdaptiveMovingAverage; return stockData;
     }
 
 

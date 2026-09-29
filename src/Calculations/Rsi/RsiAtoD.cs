@@ -269,65 +269,10 @@ public static partial class Calculations
     public static StockData CalculateBreakoutRelativeStrengthIndex(this StockData stockData,
         int length = 14, int lbLength = 2)
     {
-        List<double> brsiList = new(stockData.Count);
-        List<double> posPowerList = new(stockData.Count);
-        List<double> boPowerList = new(stockData.Count);
-        List<double> negPowerList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum volumeSumWindow = new();
-        RollingSum posPowerSumWindow = new();
-        RollingSum negPowerSumWindow = new();
-        var (inputList, highList, lowList, openList, closeList, volumeList) = GetInputValuesList(InputName.FullTypicalPrice, stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = closeList[i];
-            var currentOpen = openList[i];
-            var prevBrsi1 = i >= 1 ? brsiList[i - 1] : 0;
-            var prevBrsi2 = i >= 2 ? brsiList[i - 2] : 0;
-
-            var currentVolume = volumeList[i];
-            tempList.Add(currentVolume);
-            volumeSumWindow.Add(currentVolume);
-
-            var boVolume = volumeSumWindow.Sum(lbLength);
-            var boStrength = currentHigh - currentLow != 0 ? (currentClose - currentOpen) / (currentHigh - currentLow) : 0;
-
-            var prevBoPower = GetLastOrDefault(boPowerList);
-            var boPower = currentValue * boStrength * boVolume;
-            boPowerList.Add(boPower);
-
-            var posPower = boPower > prevBoPower ? Math.Abs(boPower) : 0;
-            posPowerList.Add(posPower);
-            posPowerSumWindow.Add(posPower);
-
-            var negPower = boPower < prevBoPower ? Math.Abs(boPower) : 0;
-            negPowerList.Add(negPower);
-            negPowerSumWindow.Add(negPower);
-
-            var posPowerSum = posPowerSumWindow.Sum(length);
-            var negPowerSum = negPowerSumWindow.Sum(length);
-            var boRatio = negPowerSum != 0 ? posPowerSum / negPowerSum : 0;
-
-            var brsi = negPowerSum == 0 ? 100 : posPowerSum == 0 ? 0 : MinOrMax(100 - (100 / (1 + boRatio)), 100, 0);
-            brsiList.Add(brsi);
-
-            var signal = GetRsiSignal(brsi - prevBrsi1, prevBrsi1 - prevBrsi2, brsi, prevBrsi1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Brsi", brsiList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(brsiList);
-        stockData.IndicatorName = IndicatorName.BreakoutRelativeStrengthIndex;
-
-        return stockData;
+        var (input, high, low, open, close, volume) = BreakoutRsiWindow.Inputs(stockData); var window = new BreakoutRsiWindow(length, lbLength);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], open[i], high[i], low[i], close[i], volume[i], true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Brsi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.BreakoutRelativeStrengthIndex; return stockData;
     }
 
 

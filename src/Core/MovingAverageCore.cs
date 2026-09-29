@@ -834,24 +834,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void AutonomousRecursiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        length = Math.Max(1, length);
-        var candidates = new RollingSum();
-        var firstMean = new RollingSum();
-        double accumulatedDeviation = 0;
-        for (var i = 0; i < input.Length; i++)
-        {
-            var previous = i == 0 ? input[i] : output[i - 1];
-            var lagged = i < 7 ? 0 : input[i - 7];
-            accumulatedDeviation += Math.Abs(lagged - previous);
-            var radius = i == 0 ? 0 : accumulatedDeviation / i * 3;
-            var candidate = input[i] > previous + radius ? input[i] + radius
-                : input[i] < previous - radius ? input[i] - radius : previous;
-            candidates.Add(candidate);
-            firstMean.Add(candidates.Average(length));
-            output[i] = firstMean.Average(length);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new AutonomousRecursiveWindow(length, 7, 3);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>
@@ -1480,36 +1465,7 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void CoralTrendIndicator(ReadOnlySpan<double> input, Span<double> output, int length = 21, double cd = 0.4)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var di = ((double)(length - 1) / 2) + 1;
-        var c1 = 2 / (di + 1);
-        var c2 = 1 - c1;
-        var c3 = 3 * ((cd * cd) + (cd * cd * cd));
-        var c4 = -3 * ((2 * cd * cd) + cd + (cd * cd * cd));
-        var c5 = (3 * cd) + 1 + (cd * cd * cd) + (3 * cd * cd);
-
-        var i1 = 0.0;
-        var i2 = 0.0;
-        var i3 = 0.0;
-        var i4 = 0.0;
-        var i5 = 0.0;
-        var i6 = 0.0;
-
-        for (var i = 0; i < input.Length; i++)
-        {
-            i1 = (c1 * input[i]) + (c2 * i1);
-            i2 = (c1 * i1) + (c2 * i2);
-            i3 = (c1 * i2) + (c2 * i3);
-            i4 = (c1 * i3) + (c2 * i4);
-            i5 = (c1 * i4) + (c2 * i5);
-            i6 = (c1 * i5) + (c2 * i6);
-
-            output[i] = (-cd * cd * cd * i6) + (c3 * i5) + (c4 * i4) + (c5 * i3);
-        }
+        CoralTrendWindow.Compute(input, output, length, cd);
     }
 
     /// <summary>
@@ -3491,40 +3447,9 @@ internal static class MovingAverageCore
     /// </summary>
     internal static void BryantAdaptiveMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 14)
     {
-        if (output.Length < input.Length)
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-
-        var stdDevBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            ComputeRollingStdDev(input, stdDevBuffer.AsSpan(0, input.Length), length);
-
-            double maxStdDev = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                if (stdDevBuffer[i] > maxStdDev) maxStdDev = stdDevBuffer[i];
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var prevBama = i >= 1 ? output[i - 1] : currentValue;
-
-                // Bryant's adaptive factor
-                var volatilityRatio = maxStdDev > 0 ? stdDevBuffer[i] / maxStdDev : 0;
-                var fastPeriod = Math.Max(2, length / 4);
-                var slowPeriod = length * 2;
-
-                var adaptivePeriod = slowPeriod - (volatilityRatio * (slowPeriod - fastPeriod));
-                var alpha = 2.0 / (adaptivePeriod + 1);
-
-                output[i] = prevBama + (alpha * (currentValue - prevBama));
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(stdDevBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        var window = new BryantWindow(length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

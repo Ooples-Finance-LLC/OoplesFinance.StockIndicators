@@ -334,37 +334,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dsm", line), ("Signal", Average(line, momentaSecond, kind)));
                 });
             case IndicatorName.BayesianOscillator:
-                kind = AverageKind(options, 1);
-                if (kind == 0) return null;
-                return new("SigmaProbsDown", new[] { "SigmaProbsDown", "SigmaProbsUp", "ProbPrime" }, bars =>
-                {
-                    var mean = Average(Closes(bars), length, kind);
-                    var variance = PopulationVariance(Closes(bars), length);
-                    var upperSigns = bars.Select((b, i) => Math.Sign(b.Close - mean[i] - 2.5 * Math.Sqrt(variance[i]))).ToArray();
-                    var meanSigns = bars.Select((b, i) => Math.Sign(b.Close - mean[i])).ToArray();
-                    // Combine rational evidence masses directly. Empty evidence has probability zero.
-                    double[] Evidence(int sign) => bars.Select((_, i) =>
-                    {
-                        var upper = Window(upperSigns, i, length).ToArray();
-                        var basis = Window(meanSigns, i, length).ToArray();
-                        var first = upper.Count(v => v == sign);
-                        var second = basis.Count(v => v == sign);
-                        var firstTotal = Math.Max(1, upper.Count(v => v != 0));
-                        var secondTotal = Math.Max(1, basis.Count(v => v != 0));
-                        var joint = first * second;
-                        var opposite = (firstTotal - first) * (secondTotal - second);
-                        return joint + opposite == 0 ? 0 : (double)joint / (joint + opposite);
-                    }).ToArray();
-                    var down = Evidence(1);
-                    var up = Evidence(-1);
-                    var prime = down.Select((d, i) =>
-                    {
-                        var joint = d * up[i];
-                        var total = joint + (1 - d) * (1 - up[i]);
-                        return total == 0 ? 0 : joint / total;
-                    }).ToArray();
-                    return Outputs(("SigmaProbsDown", down), ("SigmaProbsUp", up), ("ProbPrime", prime));
-                });
+                return new("SigmaProbsDown", new[] { "SigmaProbsDown", "SigmaProbsUp", "ProbPrime" }, bars => BayesianOutputs(bars, indicator));
             case IndicatorName.FractalChaosOscillator:
                 return new("Fco", new[] { "Fco" }, bars =>
                 {
@@ -432,34 +402,10 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dm", up.Select((v, i) => v + down[i] == 0 ? 0 : 100 * v / (v + down[i])).ToArray()));
                 });
             case IndicatorName.ConstanceBrownCompositeIndex:
-                kind = AverageKind(options, 1);
-                if (kind == 0) return null;
-                var brownRsiLength = Integer(options, "Length1", 14);
-                var brownMomentumLength = Integer(options, "Length2", 9);
-                var brownSmooth = Integer(options, "SmoothLength", 3);
-                var brownFast = Integer(options, "FastLength", 13);
-                var brownSlow = Integer(options, "SlowLength", 33);
-                return new("Cbci", new[] { "Cbci", "FastSignal", "SlowSignal" }, bars =>
-                {
-                    double[] WilderRsi(int period)
-                    {
-                        var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                        var gains = Average(changes.Select(v => Math.Max(v, 0)).ToArray(), period, 6);
-                        var losses = Average(changes.Select(v => Math.Max(-v, 0)).ToArray(), period, 6);
-                        return gains.Select((v, i) => losses[i] == 0 ? 100 : 100 * v / (v + losses[i])).ToArray();
-                    }
-                    var rsi = WilderRsi(brownRsiLength);
-                    var level = Average(WilderRsi(brownSmooth), brownSmooth, kind);
-                    var line = rsi.Select((v, i) => level[i] + (i < brownMomentumLength ? 0 : v - rsi[i - brownMomentumLength])).ToArray();
-                    return Outputs(("Cbci", line), ("FastSignal", Average(line, brownFast, kind)), ("SlowSignal", Average(line, brownSlow, kind)));
-                });
+                kind = AverageKind(options, 1); if (kind == 0) return null;
+                return new("Cbci", new[] { "Cbci", "FastSignal", "SlowSignal" }, bars => BrownCompositeOutputs(bars, indicator));
             case IndicatorName.ChandeMomentumOscillatorAverageDisparityIndex:
-                return new("Cmoadi", new[] { "Cmoadi" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var averages = new[] { 200, 50, 20 }.Select(p => Average(prices, p, 3)).ToArray();
-                    return Outputs(("Cmoadi", prices.Select((v, i) => v == 0 ? 0 : 100 * (1 - averages.Average(a => a[i]) / v)).ToArray()));
-                });
+                return new("Cmoadi", new[] { "Cmoadi" }, bars => ChandeDisparityOutputs(bars, indicator));
             case IndicatorName.ConditionalAccumulator:
                 if (kind == 0) return null;
                 return new("Ca", new[] { "Ca", "Signal" }, bars =>
@@ -487,29 +433,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.ChandeCompositeMomentumIndex:
-                return new("Ccmi", new[] { "Ccmi", "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var changes = prices.Select((v, i) => i == 0 ? 0 : v - prices[i - 1]).ToArray();
-                    var components = new[] { 5, 10, 20 }.Select(period =>
-                    {
-                        var momentum = changes.Select((_, i) =>
-                        {
-                            var window = Window(changes, i, period).ToArray();
-                            var travel = window.Sum(Math.Abs);
-                            return travel == 0 ? 0 : 100 * window.Sum() / travel;
-                        }).ToArray();
-                        return (Momentum: Average(momentum, 3, 4), Weight: PopulationVariance(prices, period).Select(Math.Sqrt).ToArray());
-                    }).ToArray();
-                    var composite = prices.Select((_, i) =>
-                    {
-                        var total = components.Sum(c => c.Weight[i]);
-                        return total == 0 ? 0 : Clamp(components.Sum(c => c.Weight[i] * c.Momentum[i]) / total, -100, 100);
-                    }).ToArray();
-                    // Explicit exponential impulse weights for the zero-seeded final EMA(3).
-                    var line = composite.Select((_, i) => Enumerable.Range(0, i + 1).Sum(j => composite[j] * Math.Pow(.5, i - j + 1))).ToArray();
-                    return Outputs(("Ccmi", line), ("Signal", composite.Select((_, i) => Window(composite, i, 5).Average()).ToArray()));
-                });
+                return new("Ccmi", new[] { "Ccmi", "Signal" }, bars => ChandeCompositeOutputs(bars, indicator));
             case IndicatorName.ChartmillValueIndicator:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
@@ -602,21 +526,7 @@ internal static partial class BuiltInFormulaReferences
                 if (kind == 0) return null;
                 return new("Bso", new[] { "Bull", "Bear", "Bso", "Signal" }, bars => BilateralOutputs(bars, indicator));
             case IndicatorName.BreakoutRelativeStrengthIndex:
-                var breakoutVolumeLength = Integer(options, "LbLength", 2);
-                return new("Brsi", new[] { "Brsi" }, bars =>
-                {
-                    var power = bars.Select((b, i) => b.High == b.Low ? 0 : // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                        (b.Open + b.High + b.Low + b.Close) / 4 * (b.Close - b.Open) / (b.High - b.Low)
-                        * Window(bars, i, breakoutVolumeLength).Sum(v => v.Volume)).ToArray();
-                    var positive = power.Select((v, i) => v > (i == 0 ? 0 : power[i - 1]) ? Math.Abs(v) : 0).ToArray();
-                    var negative = power.Select((v, i) => v < (i == 0 ? 0 : power[i - 1]) ? Math.Abs(v) : 0).ToArray();
-                    return Outputs(("Brsi", power.Select((_, i) =>
-                    {
-                        var up = Window(positive, i, length).Sum();
-                        var down = Window(negative, i, length).Sum();
-                        return down == 0 ? 100 : 100 * up / (up + down);
-                    }).ToArray()));
-                });
+                return new("Brsi", new[] { "Brsi" }, bars => BreakoutRsiOutputs(bars, indicator));
             case IndicatorName.BelkhayateTiming:
                 return new("Belkhayate", new[] { "Belkhayate" }, bars => Outputs(("Belkhayate", bars.Select((b, i) =>
                 {

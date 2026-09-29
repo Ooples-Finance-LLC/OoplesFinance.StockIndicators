@@ -602,6 +602,9 @@ internal static partial class IndicatorCompute
                 : ComputeMassThrustFast(data, context, mt.Length),
 
             // Batch 5 - Chande indicators
+            ClosedFormDistanceVolatilitySpecOptions distance => spec.OutputKey is null or "Cfdv" ? ComputeClosedFormDistanceVolatilityFast(data, context, distance.Length, distance.MaType) : null,
+            ChandeVolatilityIndexDynamicAverageIndicatorSpecOptions cvida => spec.OutputKey is null or "Cvida1" or "Cvida2" ? ComputeVolatilityIndexDynamicAverageFast(data, context, cvida.MaType, cvida.Length, cvida.Alpha1, cvida.Alpha2, spec.OutputKey == "Cvida2") : null,
+            VolatilityIndexDynamicAverageIndicatorSpecOptions vida => spec.OutputKey is null or "Vida1" or "Vida2" ? ComputeVolatilityIndexDynamicAverageFast(data, context, vida.MaType, vida.Length, vida.Alpha1, vida.Alpha2, spec.OutputKey == "Vida2") : null,
             // Both lengths are declared obsolete because ChandeCompositeMomentumIndex has no parameter
             // they could set, so this spec asks for the same series the defaults give.
             ChandeCompositeMomentumIndexSpecOptions => ComputeChandeCompositeMomentumIndexFast(data, context, signal: spec.OutputKey == "Signal"),
@@ -612,6 +615,7 @@ internal static partial class IndicatorCompute
 
             // Batch 5 - Oscillators
             ErgodicCandlestickOscillatorSpecOptions eco => ComputeErgodicCandlestickOscillatorFast(data, context, length2: eco.Length, maType: eco.MaType, key: spec.OutputKey),
+            BetterVolumeIndicatorSpecOptions betterVolume => ComputeBetterVolumeFast(data, context, betterVolume.Length, betterVolume.LbLength),
             BayesianOscillatorSpecOptions bayes => ComputeBayesianOscillatorFast(data, context, bayes.Length, bayes.MaType, key: spec.OutputKey),
             AnchoredMomentumSpecOptions amom => ComputeAnchoredMomentumFast(data, context, amom.Length, amom.MaType, signal: spec.OutputKey == "Signal"),
             ChartmillValueIndicatorSpecOptions cmvi => ComputeChartmillValueIndicatorFast(data, context, cmvi.Length,
@@ -2192,11 +2196,7 @@ internal static partial class IndicatorCompute
             AdaptiveErgodicCandlestickOscillatorSpecOptions aeco => ComputeAdaptiveErgodicCandlestickOscillatorFast(data, context,
                 aeco.SmoothLength, aeco.StochLength, aeco.SignalLength, aeco.MaType, spec.OutputKey == "Signal"),
             ConfluenceIndicatorSpecOptions ci2 => ComputeConfluenceIndicatorFast(data, context, ci2.Length, ci2.MaType),
-            ConstanceBrownCompositeIndexSpecOptions cbci => spec.OutputKey is "FastSignal" or "SlowSignal"
-                ? SmoothPublished(data, context, ComputeConstanceBrownCompositeIndexFast(data, context,
-                    cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType),
-                    spec.OutputKey == "FastSignal" ? cbci.FastLength : cbci.SlowLength, cbci.MaType)
-                : ComputeConstanceBrownCompositeIndexFast(data, context, cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType),
+            ConstanceBrownCompositeIndexSpecOptions cbci => ComputeConstanceBrownCompositeIndexFast(data, context, cbci.Length1, cbci.Length2, cbci.SmoothLength, cbci.MaType, cbci.FastLength, cbci.SlowLength, spec.OutputKey),
             EhlersAMDetectorSpecOptions eamd => ComputeEhlersAMDetectorFast(data, context, eamd.Length1, eamd.Length2, eamd.MaType, spec.OutputKey == "Signal"),
             EhlersAnticipateIndicatorSpecOptions eai => ComputeEhlersAnticipateIndicatorFast(data, context, eai.Length, eai.MaType, eai.Bw),
             EhlersAutoCorrelationReversalsSpecOptions eacr => ComputeEhlersAutoCorrelationReversalsFast(data, context, eacr.Length1, eacr.Length2, eacr.Length3, eacr.MaType),
@@ -6259,80 +6259,31 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Chande Composite Momentum Index using zero-allocation fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeClosedFormDistanceVolatilityFast(StockData data, ComputeContext context, int length = 14, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
+    {
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
+        ClosedFormDistanceWindow.ValidateRanges(data.HighPrices, data.LowPrices); ClosedFormDistanceWindow.ValidateRanges(high, low);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToArray() ?? CalculationsHelper.GetMovingAverageList(data, maType, Math.Max(1, length), input).ToArray() : null;
+        using var window = new ClosedFormDistanceWindow(maType, length, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, means?[i]).Value; return output; } catch { output.Dispose(); throw; }
+    }
+
+    internal static ComputeBuffer ComputeVolatilityIndexDynamicAverageFast(StockData data, ComputeContext context, MovingAvgType kind, int length, double alpha1 = .2, double alpha2 = .04, bool second = false)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind);
+        using var window = new VolatilityIndexWindow(kind, length, alpha1, alpha2, external); var component = external ? VolatilityIndexWindow.Component(data, input, kind, length) : null; var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, component?[i]); output.WritableSpan[i] = second ? point.Second : point.First; } return output; } catch { output.Dispose(); throw; }
+    }
+
     internal static ComputeBuffer ComputeChandeCompositeMomentumIndexFast(StockData data, ComputeContext context,
         int length1 = 5, int length2 = 10, int length3 = 20,
         MovingAvgType maType = MovingAvgType.DoubleExponentialMovingAverage, int smoothLength = 3, bool signal = false)
     {
-        // CalculateChandeCompositeMomentumIndex weighs three momentum oscillators of different lengths by how
-        // volatile the price was over the matching window, then publishes an exponential average of that
-        // weighted reading. The three oscillators are smoothed with whichever average it was given.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var deviation1Buffer = context.Rent(count);
-        using var deviation2Buffer = context.Rent(count);
-        using var deviation3Buffer = context.Rent(count);
-        var deviation1 = deviation1Buffer.WritableSpan;
-        var deviation2 = deviation2Buffer.WritableSpan;
-        var deviation3 = deviation3Buffer.WritableSpan;
-        VolatilityCore.StandardDeviation(input, deviation1, Math.Max(1, length1));
-        VolatilityCore.StandardDeviation(input, deviation2, Math.Max(1, length2));
-        VolatilityCore.StandardDeviation(input, deviation3, Math.Max(1, length3));
-
-        using var ratio1Buffer = context.Rent(count);
-        using var ratio2Buffer = context.Rent(count);
-        using var ratio3Buffer = context.Rent(count);
-        var ratio1 = ratio1Buffer.WritableSpan;
-        var ratio2 = ratio2Buffer.WritableSpan;
-        var ratio3 = ratio3Buffer.WritableSpan;
-
-        var gainSum = new RollingSum();
-        var lossSum = new RollingSum();
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-
-            // There is nothing to move from on the first bar.
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            gainSum.Add(currentValue > previousValue ? CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) : 0);
-            lossSum.Add(currentValue < previousValue ? CalculationsHelper.MinPastValues(i, 1, previousValue - currentValue) : 0);
-
-            ratio1[i] = MomentumRatio(gainSum.Sum(length1), lossSum.Sum(length1));
-            ratio2[i] = MomentumRatio(gainSum.Sum(length2), lossSum.Sum(length2));
-            ratio3[i] = MomentumRatio(gainSum.Sum(length3), lossSum.Sum(length3));
-        }
-
-        using var smoothed1Buffer = context.Rent(count);
-        using var smoothed2Buffer = context.Rent(count);
-        using var smoothed3Buffer = context.Rent(count);
-        var smoothed1 = smoothed1Buffer.WritableSpan;
-        var smoothed2 = smoothed2Buffer.WritableSpan;
-        var smoothed3 = smoothed3Buffer.WritableSpan;
-        MovingAverage(data, maType, smoothLength, ratio1, smoothed1);
-        MovingAverage(data, maType, smoothLength, ratio2, smoothed2);
-        MovingAverage(data, maType, smoothLength, ratio3, smoothed3);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var signalWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var weight = deviation1[i] + deviation2[i] + deviation3[i];
-            var index = weight != 0
-                ? MathHelper.MinOrMax(((deviation1[i] * smoothed1[i]) + (deviation2[i] * smoothed2[i])
-                    + (deviation3[i] * smoothed3[i])) / weight, 100, -100)
-                : 0;
-
-            // The exponential average starts from nothing rather than from the first reading.
-            var previous = i >= 1 ? output[i - 1] : 0;
-            signalWindow.Add(index);
-            output[i] = signal ? signalWindow.Average(length1) : CalculationsHelper.CalculateEMA(index, previous, smoothLength);
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !ChandeCompositeWindow.Supports(maType);
+        var components = external ? ChandeCompositeWindow.Components(data, input, maType, length1, length2, length3, smoothLength) : null;
+        using var window = new ChandeCompositeWindow(maType, length1, length2, length3, smoothLength, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]); output.WritableSpan[i] = signal ? point.SignalLine : point.Line; } return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -6349,84 +6300,26 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeChandeKrollRSquaredIndexFast(StockData data, ComputeContext context,
         int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 3)
     {
-        // CalculateChandeKrollRSquaredIndex squares the correlation between the price and the bar number, so
-        // it reads how straight the last length bars have been, and then smooths that with whichever average
-        // it was given.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        using var rawBuffer = context.Rent(count);
-        var raw = rawBuffer.WritableSpan;
-        var correlation = new RollingCorrelation();
-
-        for (var i = 0; i < count; i++)
-        {
-            correlation.Add(i, inputList[i]);
-            var rSquared = correlation.RSquared(length);
-            raw[i] = MathHelper.IsValueNullOrInfinity(rSquared) ? 0 : rSquared;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, raw, buffer.WritableSpan);
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var component = external ? ChandeKrollWindow.Component(data, input, maType, length, smoothLength) : null; using var window = new ChandeKrollWindow(maType, length, smoothLength, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, component?[i]).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
-    /// Computes Bayesian Oscillator using zero-allocation fast path.
+    /// Computes Better Volume from the selected candle ranges and original volume.
     /// </summary>
-    internal static ComputeBuffer ComputeBayesianOscillatorFast(StockData data, ComputeContext context, int length = 20,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double stdDevMult = 2.5, string? key = null)
+    internal static ComputeBuffer ComputeBetterVolumeFast(StockData data, ComputeContext context, int length = 8, int lbLength = 2)
     {
-        // CalculateBayesianOscillator counts how often the price sat above and below its upper Bollinger band
-        // and its basis, turns those counts into probabilities and combines them. The bands take whichever
-        // average they were given, so a hardcoded one could only ever answer for itself. This arm is bound to
-        // the downward sigma probability, which is the series the indicator publishes first.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
+        var (input, high, low, open, volume) = CalculationsHelper.GetInputValuesList(data); var window = new BetterVolumeWindow(length, lbLength); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(open[i], high[i], low[i], input[i], volume[i], true).Value; return output; } catch { output.Dispose(); throw; }
+    }
 
-        using var basisBuffer = context.Rent(count);
-        using var deviationBuffer = context.Rent(count);
-        var basisSeries = basisBuffer.WritableSpan;
-        var deviation = deviationBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, basisSeries);
-        VolatilityCore.StandardDeviation(input, deviation, Math.Max(1, length));
-
-        var upperAbove = new RollingSum();
-        var upperBelow = new RollingSum();
-        var basisAbove = new RollingSum();
-        var basisBelow = new RollingSum();
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var basis = basisSeries[i];
-            var upperBand = basis + (deviation[i] * stdDevMult);
-
-            upperAbove.Add(currentValue > upperBand ? 1 : 0);
-            upperBelow.Add(currentValue < upperBand ? 1 : 0);
-            var aboveUpper = upperAbove.Average(length);
-            var belowUpper = upperBelow.Average(length);
-            var probUpBbUpper = aboveUpper + belowUpper != 0 ? aboveUpper / (aboveUpper + belowUpper) : 0;
-
-            basisAbove.Add(currentValue > basis ? 1 : 0);
-            basisBelow.Add(currentValue < basis ? 1 : 0);
-            var aboveBasis = basisAbove.Average(length);
-            var belowBasis = basisBelow.Average(length);
-            var probUpBbBasis = aboveBasis + belowBasis != 0 ? aboveBasis / (aboveBasis + belowBasis) : 0;
-
-            var down = BayesianProbability.Combine(probUpBbUpper, probUpBbBasis);
-            var probDownUpper = aboveUpper + belowUpper == 0 ? 0 : belowUpper / (aboveUpper + belowUpper);
-            var probDownBasis = aboveBasis + belowBasis == 0 ? 0 : belowBasis / (aboveBasis + belowBasis);
-            var up = BayesianProbability.Combine(probDownUpper, probDownBasis);
-            output[i] = key == "SigmaProbsUp" ? up : key == "ProbPrime" ? BayesianProbability.Combine(down, up) : down;
-        }
-
-        return buffer;
+    /// <summary>Computes Bayesian Oscillator from rounded band evidence.</summary>
+    internal static ComputeBuffer ComputeBayesianOscillatorFast(StockData data, ComputeContext context, int length = 20, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, double stdDevMult = 2.5, string? key = null)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? BayesianWindow.Components(data, input, maType, length) : null; using var window = new BayesianWindow(maType, length, stdDevMult, external: external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); output.WritableSpan[i] = key == "SigmaProbsUp" ? point.Up : key == "ProbPrime" ? point.Prime : point.Down; } return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -6478,44 +6371,8 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeBreakoutRsiFast(StockData data, ComputeContext context, int length = 14, int lbLength = 2)
     {
-        // CalculateBreakoutRelativeStrengthIndex weighs the full typical price by where the bar closed within
-        // its own range and by the volume of the last lbLength bars, then runs the relative strength of that
-        // breakout power against its own previous value. OscillatorCore.BreakoutRsi read only the close, so it
-        // saw neither the range nor the volume the indicator is built from.
-        var count = data.Count;
-        var typical = SpanCompat.AsReadOnlySpan(CalculationsHelper.GetDerivedSeriesList(data, DerivedSeriesKind.Ohlc4));
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var opens = SpanCompat.AsReadOnlySpan(data.OpenPrices);
-        var closes = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var volumeSum = new RollingSum();
-        var positiveSum = new RollingSum();
-        var negativeSum = new RollingSum();
-        double previousPower = 0;
-        for (var i = 0; i < count; i++)
-        {
-            volumeSum.Add(volumes[i]);
-
-            var range = highs[i] - lows[i];
-            var strength = range != 0 ? (closes[i] - opens[i]) / range : 0;
-            var power = typical[i] * strength * volumeSum.Sum(lbLength);
-
-            positiveSum.Add(power > previousPower ? Math.Abs(power) : 0);
-            negativeSum.Add(power < previousPower ? Math.Abs(power) : 0);
-            previousPower = power;
-
-            var positive = positiveSum.Sum(length);
-            var negative = negativeSum.Sum(length);
-            var ratio = negative != 0 ? positive / negative : 0;
-            output[i] = negative == 0 ? 100 : positive == 0 ? 0 : MathHelper.MinOrMax(100 - (100 / (1 + ratio)), 100, 0);
-        }
-
-        return buffer;
+        var (input, high, low, open, close, volume) = BreakoutRsiWindow.Inputs(data); var window = new BreakoutRsiWindow(length, lbLength); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], open[i], high[i], low[i], close[i], volume[i], true).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -6668,43 +6525,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Bryant Adaptive Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14,
-        int maxLength = 100, double trend = -1)
+    internal static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast(StockData data, ComputeContext context, int length = 14, int maxLength = 100, double trend = -1)
     {
-        // CalculateBryantAdaptiveMovingAverage varies its smoothing constant by Kaufman's efficiency ratio
-        // over the same window and then runs one exponential recursion seeded at zero - GetLastOrDefault, not
-        // the first value. TrendCore.BryantAdaptiveMovingAverage read the close and adapted differently.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var volatilityWindow = new RollingSum();
-        double previous = 0;
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var priorValue = i >= length ? input[i - length] : 0;
-            volatilityWindow.Add(Math.Abs(CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue)));
-
-            var volatilitySum = volatilityWindow.Sum(length);
-            var momentum = Math.Abs(CalculationsHelper.MinPastValues(i, length, currentValue - priorValue));
-            var er = volatilitySum != 0 ? momentum / volatilitySum : 0;
-
-            var ver = MathHelper.Pow(er - (((2 * er) - 1) / 2 * (1 - trend)) + 0.5, 2);
-            var vLength = ver != 0 ? (length - ver + 1) / ver : 0;
-            vLength = Math.Max(1, Math.Min(vLength, maxLength));
-            var vAlpha = 2 / (vLength + 1);
-
-            previous = (vAlpha * currentValue) + ((1 - vAlpha) * previous);
-            output[i] = previous;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new BryantWindow(length, maxLength, trend); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -6877,31 +6701,11 @@ internal static partial class IndicatorCompute
         int length = 14, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, double pointValue = 50,
         double margin = 3000, double commission = 10, bool signal = false)
     {
-        // CalculateCommoditySelectionIndex scales the average true range by the trend strength the average
-        // directional index reports and by a constant built from the contract's economics, so the arm reuses
-        // the two arms that already answer for those indicators rather than smoothing anything itself.
-        var k = 100 * (pointValue / MathHelper.Sqrt(margin) / (150 + commission));
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new CommoditySelectionWindow(maType, length, pointValue, margin, commission, external);
+        var components = external ? CommoditySelectionWindow.Components(data, input, high, low, maType, length) : default; var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, components.Atr?[i], components.Adx?[i]); output.WritableSpan[i] = signal ? point.Signal : point.Value; } return output; } catch { output.Dispose(); throw; }
 
-        using var atr = ComputeAtrFast(data, context, length, maType);
-        using var adx = ComputeAdxFast(data, context, length, maType);
-        var atrSpan = atr.Span;
-        var adxSpan = adx.Span;
-        var count = atrSpan.Length;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = k * atrSpan[i] * adxSpan[i];
-        }
-
-        if (signal)
-        {
-            var mean = new Streaming.AdaptiveWindowMean(length);
-            for (var i = 0; i < count; i++) output[i] = mean.Next(output[i], length, true);
-        }
-        return buffer;
     }
 
     #endregion
@@ -6931,44 +6735,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Autonomous Recursive MA using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14,
-        int momLength = 7, double gamma = 3)
+    internal static ComputeBuffer ComputeAutonomousRecursiveMaFast(StockData data, ComputeContext context, int length = 14, int momLength = 7, double gamma = 3)
     {
-        // CalculateAutonomousRecursiveMovingAverage holds its previous output unless the current value has
-        // moved further than gamma times the running mean absolute distance between the momLength-ago value
-        // and that output, and then averages the result twice. The delayed input exists only once
-        // momLength bars have elapsed, independently of the two smoothing windows.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var cSumWindow = new RollingSum();
-        var ma1SumWindow = new RollingSum();
-        double absDiffSum = 0;
-        double prevMad = 0;
-        for (var i = 0; i < count; i++)
-        {
-            if (i == 0)
-            {
-                prevMad = input[i];
-            }
-
-            var priorValue = i >= momLength ? input[i - momLength] : 0;
-            absDiffSum += Math.Abs(priorValue - prevMad);
-
-            var d = i != 0 ? absDiffSum / i * gamma : 0;
-            var c = input[i] > prevMad + d ? input[i] + d : input[i] < prevMad - d ? input[i] - d : prevMad;
-            cSumWindow.Add(c);
-
-            ma1SumWindow.Add(cSumWindow.Average(length));
-            prevMad = ma1SumWindow.Average(length);
-            output[i] = prevMad;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new AutonomousRecursiveWindow(length, momLength, gamma);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -7877,51 +7647,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Average Money Flow Oscillator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAverageMoneyFlowOscillatorFast(StockData data, ComputeContext context,
-        int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int smoothLength = 3)
+    internal static ComputeBuffer ComputeAverageMoneyFlowOscillatorFast(StockData data, ComputeContext context, int length = 5, MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int smoothLength = 3)
     {
-        // CalculateAverageMoneyFlowOscillator scales the log of the averaged volume times the averaged price
-        // change into its own recent range, and every one of its three averages takes the given type.
-        var (inputList, _, _, _, volumeList) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var averageVolumeBuffer = context.Rent(count);
-        var averageVolume = averageVolumeBuffer.WritableSpan;
-        MovingAverage(data, maType, length, SpanCompat.AsReadOnlySpan(volumeList), averageVolume);
-
-        using var changeBuffer = context.Rent(count);
-        var change = changeBuffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            // The first bar has nothing to change from.
-            change[i] = i >= 1 ? input[i] - input[i - 1] : 0;
-        }
-
-        using var averageChangeBuffer = context.Rent(count);
-        var averageChange = averageChangeBuffer.WritableSpan;
-        MovingAverage(data, maType, length, change, averageChange);
-
-        using var scaledBuffer = context.Rent(count);
-        var scaled = scaledBuffer.WritableSpan;
-        var flowWindow = new RollingMinMax(length);
-
-        for (var i = 0; i < count; i++)
-        {
-            var magnitude = Math.Abs(averageVolume[i] * averageChange[i]);
-            var flow = magnitude > 0 ? Math.Log(magnitude) * Math.Sign(averageChange[i]) : 0;
-            flowWindow.Add(flow);
-
-            var highest = flowWindow.Max;
-            var lowest = flowWindow.Min;
-            var position = highest != lowest ? (flow - lowest) / (highest - lowest) * 100 : 0;
-            scaled[i] = (position * 2) - 100;
-        }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, scaled, buffer.WritableSpan);
-
-        return buffer;
+        var (input, _, _, _, volumes) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? AverageMoneyFlowWindow.Components(data, input, volumes, maType, length, smoothLength) : null; using var window = new AverageMoneyFlowWindow(maType, length, smoothLength, external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], volumes[i], true, components?[0][i], components?[1][i], components?[2][i]).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -8017,32 +7747,9 @@ internal static partial class IndicatorCompute
         ComputeContext context, int length1 = 200, int length2 = 50, int length3 = 20,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage)
     {
-        // CalculateChandeMomentumOscillatorAverageDisparityIndex averages how far the price sits above three
-        // averages of it, each as a percentage of the price itself.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var first = context.Rent(count);
-        using var second = context.Rent(count);
-        using var third = context.Rent(count);
-        MovingAverage(data, maType, length1, input, first.WritableSpan);
-        MovingAverage(data, maType, length2, input, second.WritableSpan);
-        MovingAverage(data, maType, length3, input, third.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-            var firstDisparity = currentValue != 0 ? (currentValue - first.Span[i]) / currentValue * 100 : 0;
-            var secondDisparity = currentValue != 0 ? (currentValue - second.Span[i]) / currentValue * 100 : 0;
-            var thirdDisparity = currentValue != 0 ? (currentValue - third.Span[i]) / currentValue * 100 : 0;
-            output[i] = (firstDisparity + secondDisparity + thirdDisparity) / 3;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? ChandeDisparityWindow.Components(data, input, maType, length1, length2, length3) : null; using var window = new ChandeDisparityWindow(maType, length1, length2, length3, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, components?[0][i], components?[1][i], components?[2][i]).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -11695,12 +11402,10 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Coral Trend Indicator using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCoralTrendIndicatorFast(StockData data, ComputeContext context, int length = 21)
+    internal static ComputeBuffer ComputeCoralTrendIndicatorFast(StockData data, ComputeContext context, int length = 21, double cd = .4)
     {
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var buffer = context.Rent(data.Count);
-        MovingAverageCore.CoralTrendIndicator(close, buffer.WritableSpan, length, 0.4);
-        return buffer;
+        var window = new CoralTrendWindow(length, cd); var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -21635,8 +21340,14 @@ internal static partial class IndicatorCompute
     }
 
     internal static ComputeBuffer ComputeConstanceBrownCompositeIndexFast(StockData data, ComputeContext context, int length1 = 14,
-        int length2 = 9, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        int length2 = 9, int smoothLength = 3, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int fastLength = 13, int slowLength = 33, string? outputKey = null)
     {
+        length1 = Math.Max(1, length1); length2 = Math.Max(1, length2); smoothLength = Math.Max(1, smoothLength); fastLength = Math.Max(1, fastLength); slowLength = Math.Max(1, slowLength);
+        if (!ComponentAverage.HasOverrides)
+        {
+            var (prices, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); using var window = new BrownCompositeWindow(maType, fastLength, slowLength, length1, length2, smoothLength); var result = context.Rent(prices.Count);
+            try { for (var i = 0; i < prices.Count; i++) { var point = window.Next(prices[i], true); result.WritableSpan[i] = outputKey == "FastSignal" ? point.Fast : outputKey == "SlowSignal" ? point.Slow : point.Line; } return result; } catch { result.Dispose(); throw; }
+        }
         // CalculateConstanceBrownCompositeIndex adds the length2-bar momentum of RSI(length1) to a smoothed RSI
         // of smoothLength. Both RSIs read the same series - that is what the batch's CaptureInputSeries and
         // RestoreInputSeries are guarding - and both take the RSI's own WildersSmoothingMethod default. The
@@ -21663,7 +21374,7 @@ internal static partial class IndicatorCompute
             output[i] = (i >= length2 ? rsi1[i] - rsi1[i - length2] : 0) + rsiSma[i];
         }
 
-        return buffer;
+        return outputKey is "FastSignal" or "SlowSignal" ? SmoothPublished(data, context, buffer, outputKey == "FastSignal" ? fastLength : slowLength, maType) : buffer;
     }
 
     internal static ComputeBuffer ComputeEhlersAMDetectorFast(StockData data, ComputeContext context, int length1 = 4, int length2 = 8, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, bool signal = false)

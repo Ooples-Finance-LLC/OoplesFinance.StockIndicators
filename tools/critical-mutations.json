@@ -50315,5 +50315,3911 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": ";",
     "filter": "FullyQualifiedName~AutoFilterNumericalTests.InvalidCandlesCannotAdvanceMomentsMeansOrStep"
+  },
+  {
+    "id": "autonomous-recursive-wide-lag-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_momentumLength = Math.Max(1, momentumLength)",
+    "after": "_momentumLength = _length",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(1, momentumLength)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-lag-start",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_prices.Count == _momentumLength ? _prices.Peek()",
+    "after": "_prices.Count > 0 ? _prices.Peek()",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-lag-source",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "BigInteger.Abs(lagged - previous)",
+    "after": "BigInteger.Abs(current - previous)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-initial-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_count == 0 ? current : _previous",
+    "after": "_count == 0 ? BigInteger.Zero : _previous",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.HandLagAndPartialWindowWarmupStayIndependent"
+  },
+  {
+    "id": "autonomous-recursive-wide-sum-projection",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "var deviationSum = Round(_deviationSum + error)",
+    "after": "var deviationSum = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(_deviationSum + error, BigInteger.One))",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.ExtendedDeviationDoesNotPoisonZeroGainOrOverflowedState"
+  },
+  {
+    "id": "autonomous-recursive-wide-radius-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "new BigInteger(_count)) * _gamma",
+    "after": "new BigInteger(_count + 1)) * _gamma",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-gamma-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "* _gamma, BigInteger.One << 1074",
+    "after": "* BigInteger.Abs(_gamma), BigInteger.One << 1074",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.StrictRoundedThresholdsAndSignedGammaKeepBranchOrder"
+  },
+  {
+    "id": "autonomous-recursive-wide-radius-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "BigInteger.One << 1074",
+    "after": "BigInteger.One << 1075",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-upper-equality",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "current > upper ?",
+    "after": "current >= upper ?",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.StrictRoundedThresholdsAndSignedGammaKeepBranchOrder"
+  },
+  {
+    "id": "autonomous-recursive-wide-lower-equality",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "current < lower ?",
+    "after": "current <= lower ?",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.StrictRoundedThresholdsAndSignedGammaKeepBranchOrder"
+  },
+  {
+    "id": "autonomous-recursive-wide-upper-target",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "current > upper ? Round(current + radius)",
+    "after": "current > upper ? Round(current - radius)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-lower-target",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "current < lower ? Round(current - radius)",
+    "after": "current < lower ? Round(current + radius)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-first-partial",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "RoundUnits(targetSum, new BigInteger(count))",
+    "after": "RoundUnits(targetSum, new BigInteger(_length))",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.HandLagAndPartialWindowWarmupStayIndependent"
+  },
+  {
+    "id": "autonomous-recursive-wide-second-partial",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "RoundUnits(firstSum, new BigInteger(count))",
+    "after": "RoundUnits(firstSum, new BigInteger(_length))",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.HandLagAndPartialWindowWarmupStayIndependent"
+  },
+  {
+    "id": "autonomous-recursive-wide-second-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "RoundUnits(firstSum, new BigInteger(count))",
+    "after": "RoundUnits(targetSum, new BigInteger(count))",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-target-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_targetSum + target - (full",
+    "after": "_targetSum + target + (full",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-first-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_firstSum + first - (full",
+    "after": "_firstSum + first + (full",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-recursive-stage",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_previous = second;",
+    "after": "_previous = first;",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "var spread = current - second",
+    "after": "var spread = second - current",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "var change = spread - _spread",
+    "after": "var change = spread",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "_targets.Clear();",
+    "after": "_prices.Clear();",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-lag-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutonomousRecursiveWindow.cs",
+    "scope": "internal sealed class AutonomousRecursiveWindow",
+    "before": "if (_prices.Count == _momentumLength) _prices.Dequeue();",
+    "after": "if (_prices.Count > _momentumLength) _prices.Dequeue();",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.WideLagDeviationAndBothPartialMeansMatchRationalStages"
+  },
+  {
+    "id": "autonomous-recursive-wide-core-lag",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void AutonomousRecursiveMovingAverage(",
+    "before": "new AutonomousRecursiveWindow(length, 7, 3)",
+    "after": "new AutonomousRecursiveWindow(length, length, 3)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.CoreRegistryAndInPlaceSpansUseTheSameDefaultLag"
+  },
+  {
+    "id": "autonomous-recursive-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAutonomousRecursiveMaFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.SelectedCallerPricesNeedNoCustomAverageCallbacks"
+  },
+  {
+    "id": "autonomous-recursive-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AutonomousRecursiveMovingAverageState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "autonomous-recursive-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AutonomousRecursiveMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~AutonomousRecursiveNumericalTests.InvalidCandlesAndGammaCannotAdvanceLagOrMeans"
+  },
+  {
+    "id": "average-money-flow-wide-volume-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "BigInteger.Abs(volumeUnits * movementUnits)",
+    "after": "BigInteger.Abs(volumeUnits * movementUnits) + BigInteger.One",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.ProductLogRetainsTinyHugeAndNearUnityInformation"
+  },
+  {
+    "id": "average-money-flow-wide-movement-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "* movementUnits.Sign",
+    "after": "* volumeUnits.Sign",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-product-round",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "ProductLog.Of(BigInteger.Abs(volumeUnits * movementUnits))",
+    "after": "Math.Log(Math.Abs(volume.Publish() * movement.Publish()))",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.ProductLogRetainsTinyHugeAndNearUnityInformation"
+  },
+  {
+    "id": "average-money-flow-wide-product-shift",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "<< volume.UpperShift",
+    "after": "<< 0",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.ProductLogRetainsTinyHugeAndNearUnityInformation"
+  },
+  {
+    "id": "average-money-flow-wide-log-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "bits - 1 - 2148",
+    "after": "bits - 1 - 2147",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.ProductLogRetainsTinyHugeAndNearUnityInformation"
+  },
+  {
+    "id": "average-money-flow-wide-log-mantissa",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "Bounds(product - power, product + power, precision)",
+    "after": "Bounds(BigInteger.Zero, product + power, precision)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.ProductLogRetainsTinyHugeAndNearUnityInformation"
+  },
+  {
+    "id": "average-money-flow-wide-difference",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "difference.Add(_previousPrice, -1)",
+    "after": "difference.Add(_previousPrice, 1)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "if (_count > 0) { difference.Add(price);",
+    "after": "if (true) { difference.Add(price);",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.HandSeedsFlatRangesAndSmoothingOrderArePreserved"
+  },
+  {
+    "id": "average-money-flow-wide-mean-volume",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_volumeMean!.Next(new(volume), commit)",
+    "after": "_volumeMean!.Next(new(price), commit)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-smooth-period",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "new(kind, Math.Max(1, smoothLength))",
+    "after": "new(kind, _length)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_count - _length + 1L",
+    "after": "_count - _length",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-upper-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "Math.Max(value, first.Value.Value)",
+    "after": "Math.Min(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-lower-extreme",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "Math.Min(value, first.Value.Value)",
+    "after": "Math.Max(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-flat",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "high == low ? 0",
+    "after": "high == low ? 50",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.HandSeedsFlatRangesAndSmoothingOrderArePreserved"
+  },
+  {
+    "id": "average-money-flow-wide-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "position * 2 - 100",
+    "after": "position - 100",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "if (commit) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_previous.AddTo(ref change, -1)",
+    "after": "_previous.AddTo(ref change, 1)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-signal-level",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "current.Sign > 0 && change.Sign > 0",
+    "after": "current.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": ";",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-sma-start",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.WidePricesSignedVolumesAndMeansKeepLogRangesFinite"
+  },
+  {
+    "id": "average-money-flow-wide-callback-volume",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "Mean(volumes, length)",
+    "after": "Mean(input, length)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.CustomCallbacksKeepVolumeChangeScaledOrderAndNearUnityRange"
+  },
+  {
+    "id": "average-money-flow-wide-callback-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/AverageMoneyFlowWindow.cs",
+    "scope": "internal sealed class AverageMoneyFlowWindow",
+    "before": "Mean(scaled, smoothLength)",
+    "after": "Mean(scaled, length)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.CustomCallbacksKeepVolumeChangeScaledOrderAndNearUnityRange"
+  },
+  {
+    "id": "average-money-flow-wide-core-kind",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void AverageMoneyFlowOscillator(",
+    "before": "new AverageMoneyFlowWindow(MovingAvgType.WeightedMovingAverage, length, 3)",
+    "after": "new AverageMoneyFlowWindow(MovingAvgType.SimpleMovingAverage, length, 3)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.CoreAndInPlaceSpansUseLogFlowRatherThanMoneyFlowIndex"
+  },
+  {
+    "id": "average-money-flow-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAverageMoneyFlowOscillatorFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.SelectedPricesRetainOriginalVolumesAndLegacyMeans"
+  },
+  {
+    "id": "average-money-flow-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AverageMoneyFlowOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~AverageMoneyFlowNumericalTests.InvalidCandlesCannotAdvanceVolumeChangeOrLogRange"
+  },
+  {
+    "id": "bayesian-wide-deviation-ready",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-deviation-population",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "(BigInteger)_length * _length",
+    "after": "(BigInteger)_length * (_length + 1)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-deviation-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "- old.Price * old.Price",
+    "after": "+ old.Price * old.Price",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-band-direction",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "band.AddProduct(deviation, _multiplier)",
+    "after": "band.AddProduct(deviation, -_multiplier)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-upper-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "upper > 0 ? 1 : 0",
+    "after": "upper >= 0 ? 1 : 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds"
+  },
+  {
+    "id": "bayesian-wide-lower-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "upper < 0 ? 1 : 0",
+    "after": "upper <= 0 ? 1 : 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds"
+  },
+  {
+    "id": "bayesian-wide-basis-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "basis > 0 ? 1 : 0",
+    "after": "basis >= 0 ? 1 : 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds"
+  },
+  {
+    "id": "bayesian-wide-basis-lower-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "basis < 0 ? 1 : 0",
+    "after": "basis <= 0 ? 1 : 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds"
+  },
+  {
+    "id": "bayesian-wide-upper-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "- (old.Upper > 0 ? 1 : 0)",
+    "after": "+ (old.Upper > 0 ? 1 : 0)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-lower-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "- (old.Upper < 0 ? 1 : 0)",
+    "after": "+ (old.Upper < 0 ? 1 : 0)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-basis-up-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "- (old.Basis > 0 ? 1 : 0)",
+    "after": "+ (old.Basis > 0 ? 1 : 0)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-basis-down-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "- (old.Basis < 0 ? 1 : 0)",
+    "after": "+ (old.Basis < 0 ? 1 : 0)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-evidence-joint",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "(BigInteger)first * second",
+    "after": "(BigInteger)first * otherSecond",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-evidence-complement",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "(secondTotal - second)",
+    "after": "(secondTotal - otherSecond)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-prime-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_previousPrime = prime;",
+    "after": "_previousPrime = down;",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.ThresholdTiesSignedMultipliersAndSignalMemoryStayOrdered"
+  },
+  {
+    "id": "bayesian-wide-prime-source",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "Combine(down, up)",
+    "after": "Combine(down, down)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-buy-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "prime > _threshold",
+    "after": "prime >= _threshold",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.ThresholdTiesSignedMultipliersAndSignalMemoryStayOrdered"
+  },
+  {
+    "id": "bayesian-wide-buy-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_previousPrime == 0",
+    "after": "_previousPrime != 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.ThresholdTiesSignedMultipliersAndSignalMemoryStayOrdered"
+  },
+  {
+    "id": "bayesian-wide-sell-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_previousDown == 1",
+    "after": "_previousDown == 0",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.ThresholdTiesSignedMultipliersAndSignalMemoryStayOrdered"
+  },
+  {
+    "id": "bayesian-wide-priority",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "buy ? Signal.Buy : sell ? Signal.Sell",
+    "after": "sell ? Signal.Sell : buy ? Signal.Buy",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.HandTiesEmptyEvidenceAndBuyPriorityKeepProbabilitySeeds"
+  },
+  {
+    "id": "bayesian-wide-threshold-scale",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "threshold / 100",
+    "after": "threshold",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.ThresholdTiesSignedMultipliersAndSignalMemoryStayOrdered"
+  },
+  {
+    "id": "bayesian-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_history.Clear(); _sum",
+    "after": "_sum",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": ";",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-sma-start",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 2L) / 2",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-core-primary",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void BayesianOscillator(",
+    "before": ".Next(close[i], true).Down",
+    "after": ".Next(close[i], true).Prime",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.CoreAndInPlaceSpansUseBandEvidenceWithDefaultSigmaOutput"
+  },
+  {
+    "id": "bayesian-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBayesianOscillatorFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.SelectedPricesAndSingleMeanCallbackPreserveEveryOutput"
+  },
+  {
+    "id": "bayesian-wide-fast-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBayesianOscillatorFast",
+    "before": "key == \"SigmaProbsUp\" ? point.Up",
+    "after": "key == \"SigmaProbsUp\" ? point.Down",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.WideBandsEvidenceAndAllProbabilityStagesMatchRationalWindows"
+  },
+  {
+    "id": "bayesian-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BayesianOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.InvalidCandlesAndParametersCannotAdvanceEvidence"
+  },
+  {
+    "id": "bayesian-wide-multiplier-domain",
+    "module": "numerical",
+    "file": "src/Helpers/BayesianWindow.cs",
+    "scope": "internal sealed class BayesianWindow",
+    "before": "if (double.IsNaN(multiplier) || double.IsInfinity(multiplier))",
+    "after": "if (double.IsNaN(multiplier))",
+    "filter": "FullyQualifiedName~BayesianNumericalTests.InvalidCandlesAndParametersCannotAdvanceEvidence"
+  },
+  {
+    "id": "better-volume-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_count == 0 ? c",
+    "after": "_count == 0 ? BigInteger.Zero",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.FirstCloseAndBothTrueRangeGapsRetainTheirOwnAllocation"
+  },
+  {
+    "id": "better-volume-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "BigInteger.Max(h - l,",
+    "after": "BigInteger.Max(BigInteger.Zero,",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.FirstCloseAndBothTrueRangeGapsRetainTheirOwnAllocation"
+  },
+  {
+    "id": "better-volume-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "BigInteger.Abs(h - previousClose)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.FirstCloseAndBothTrueRangeGapsRetainTheirOwnAllocation"
+  },
+  {
+    "id": "better-volume-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "BigInteger.Abs(l - previousClose)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.FirstCloseAndBothTrueRangeGapsRetainTheirOwnAllocation"
+  },
+  {
+    "id": "better-volume-wide-bull-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "Ratio(v * range,",
+    "after": "Ratio(v * (range + body),",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-bear-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "v * (range + body)",
+    "after": "v * range",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-bull-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "2 * range - body",
+    "after": "3 * range - body",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-bear-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "2 * range + body",
+    "after": "3 * range + body",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-doji",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "Ratio(v, new BigInteger(2))",
+    "after": "Ratio(v, new BigInteger(3))",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.HandAllocationsDojiTiesAndZeroDenominatorKeepDefinedSeeds"
+  },
+  {
+    "id": "better-volume-wide-volume-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "ExactVarianceWindow.Units(volume)",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(volume))",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-down-allocation",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "R(v - up)",
+    "after": "R(v + up)",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-pair-up",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "up + _previousUp",
+    "after": "up + _previousDown",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-pair-down",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "down + _previousDown",
+    "after": "down + _previousUp",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-metric-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_count - length + 1L",
+    "after": "_count - length",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-lookback",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_lookback = Math.Max(1, lookback)",
+    "after": "_lookback = 1",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-rounded-range",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "var range = BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - previousClose), BigInteger.Abs(l - previousClose)));",
+    "after": "var range = R(BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - previousClose), BigInteger.Abs(l - previousClose))));",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.HandAllocationsDojiTiesAndZeroDenominatorKeepDefinedSeeds"
+  },
+  {
+    "id": "better-volume-wide-metric-direction",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "BigInteger.Max(value, first.Value.Value)",
+    "after": "BigInteger.Min(value, first.Value.Value)",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-lookback-low",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "Extreme(_lows, l, _lookback, false, commit)",
+    "after": "Extreme(_lows, l, _lookback, true, commit)",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-previous-up",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_previousUp = up;",
+    "after": "_previousUp = down;",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-previous-open",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "_previousOpen = open;",
+    "after": "_previousOpen = close;",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-preview-price",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "if (commit) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-preview-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "if (commit) { while",
+    "after": "if (true) { while",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-reset-metrics",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "foreach (var metric in _metrics) metric.Clear();",
+    "after": ";",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-signal-rising",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "var rising = body.Sign > 0",
+    "after": "var rising = body.Sign < 0",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.HandAllocationsDojiTiesAndZeroDenominatorKeepDefinedSeeds"
+  },
+  {
+    "id": "better-volume-wide-signal-falling",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "var falling = body.Sign < 0",
+    "after": "var falling = body.Sign > 0",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.HandAllocationsDojiTiesAndZeroDenominatorKeepDefinedSeeds"
+  },
+  {
+    "id": "better-volume-wide-signal-priority",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "buy ? Signal.Buy : sell ? Signal.Sell",
+    "after": "sell ? Signal.Sell : buy ? Signal.Buy",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SignalHistoryPeriodsChangeSignalsWithoutChangingAllocation"
+  },
+  {
+    "id": "better-volume-wide-signal-empty",
+    "module": "numerical",
+    "file": "src/Helpers/BetterVolumeWindow.cs",
+    "scope": "internal sealed class BetterVolumeWindow",
+    "before": "sell ? Signal.Sell : Signal.None",
+    "after": "sell ? Signal.Sell : Signal.Buy",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.HandAllocationsDojiTiesAndZeroDenominatorKeepDefinedSeeds"
+  },
+  {
+    "id": "better-volume-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBetterVolumeFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.SelectedPricesKeepPerBarRangesOriginalOpensAndSignedVolume"
+  },
+  {
+    "id": "better-volume-wide-fast-volume",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBetterVolumeFast",
+    "before": "input[i], volume[i], true",
+    "after": "input[i], open[i], true",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BetterVolumeIndicatorState",
+    "before": "bar.Low, bar.Close, bar.Volume",
+    "after": "bar.Low, bar.Open, bar.Volume",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "better-volume-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BetterVolumeIndicatorState",
+    "before": "bar.Open, bar.High, bar.Low",
+    "after": "bar.Open, bar.Low, bar.Low",
+    "filter": "FullyQualifiedName~BetterVolumeNumericalTests.WideAllocationRangesAndSignalsMatchIndependentRoundedStages"
+  },
+  {
+    "id": "breakout-rsi-wide-volume-period",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_volumeLength = Math.Max(1, volumeLength)",
+    "after": "_volumeLength = _length",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SignalAccelerationAndBothLookbacksRemainIndependent"
+  },
+  {
+    "id": "breakout-rsi-wide-power-period",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(1, volumeLength)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SignalAccelerationAndBothLookbacksRemainIndependent"
+  },
+  {
+    "id": "breakout-rsi-wide-volume-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_volumes.Peek() : BigInteger.Zero",
+    "after": "BigInteger.Zero : BigInteger.Zero",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-volume-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "ExactVarianceWindow.Units(volume)",
+    "after": "BigInteger.Abs(ExactVarianceWindow.Units(volume))",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-body-direction",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "ExactVarianceWindow.Units(close) - ExactVarianceWindow.Units(open)",
+    "after": "ExactVarianceWindow.Units(open) - ExactVarianceWindow.Units(close)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-range-direction",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "ExactVarianceWindow.Units(high) - ExactVarianceWindow.Units(low)",
+    "after": "ExactVarianceWindow.Units(high) + ExactVarianceWindow.Units(low)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-power-underflow",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "RocBankValue.RoundUnits(numerator * range.Sign, BigInteger.Abs(range) * Unit)",
+    "after": "RocBankValue.RoundUnits(ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(body * Unit, BigInteger.Abs(range))) * ExactVarianceWindow.Units(price) * volumeSum * range.Sign, Unit * Unit)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.TinyStrengthMustSurviveUntilHugeVolumeRescalesItsPower"
+  },
+  {
+    "id": "breakout-rsi-wide-gain-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "power > _previousPower",
+    "after": "power >= _previousPower",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-loss-equality",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "power < _previousPower",
+    "after": "power <= _previousPower",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-gain-delta",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "power > _previousPower ? BigInteger.Abs(power)",
+    "after": "power > _previousPower ? BigInteger.Abs(power - _previousPower)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-loss-delta",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "power < _previousPower ? BigInteger.Abs(power)",
+    "after": "power < _previousPower ? BigInteger.Abs(power - _previousPower)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-gain-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "+ positive - old.Positive",
+    "after": "+ positive + old.Positive",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-loss-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "+ negative - old.Negative",
+    "after": "+ negative + old.Negative",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-empty-loss",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "negativeSum.IsZero ? 100",
+    "after": "negativeSum.IsZero ? 0",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "positiveSum + negativeSum);",
+    "after": "positiveSum + 2 * negativeSum);",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-power-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_previousPower = power;",
+    "after": "_previousPower = positive;",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-reset-volume",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_volumes.Clear();",
+    "after": ";",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-reset-power",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_powers.Clear();",
+    "after": ";",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-signal-slope",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "ExactVarianceWindow.Units(value) - ExactVarianceWindow.Units(_previous)",
+    "after": "ExactVarianceWindow.Units(_previous) - ExactVarianceWindow.Units(value)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SignalAccelerationAndBothLookbacksRemainIndependent"
+  },
+  {
+    "id": "breakout-rsi-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SignalAccelerationAndBothLookbacksRemainIndependent"
+  },
+  {
+    "id": "breakout-rsi-wide-signal-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "slope > _previousSlope",
+    "after": "slope >= _previousSlope",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-signal-fall-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "slope < _previousSlope",
+    "after": "slope <= _previousSlope",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.HandPowerMassesStrictTiesAndZeroLossPriorityKeepSeeds"
+  },
+  {
+    "id": "breakout-rsi-wide-typical-close",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "sum.Add(close);",
+    "after": "sum.Add(open);",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "breakout-rsi-wide-typical-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "return sum.Mean(4);",
+    "after": "return ((open + high) + low + close) / 4;",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.TinyStrengthMustSurviveUntilHugeVolumeRescalesItsPower"
+  },
+  {
+    "id": "breakout-rsi-wide-selected-input",
+    "module": "numerical",
+    "file": "src/Helpers/BreakoutRsiWindow.cs",
+    "scope": "internal sealed class BreakoutRsiWindow",
+    "before": "if (data.ChainedValues.Count > 0)",
+    "after": "if (data.ChainedValues.Count < 0)",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SelectedPricesReplaceTypicalPriceAndCloseWithoutAverageCallbacks"
+  },
+  {
+    "id": "breakout-rsi-wide-native-selection",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BreakoutRelativeStrengthIndexState",
+    "before": "_selected ? bar.Close",
+    "after": "!_selected ? bar.Close",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.SelectedPricesReplaceTypicalPriceAndCloseWithoutAverageCallbacks"
+  },
+  {
+    "id": "breakout-rsi-wide-fast-close",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBreakoutRsiFast",
+    "before": "low[i], close[i], volume[i]",
+    "after": "low[i], open[i], volume[i]",
+    "filter": "FullyQualifiedName~BreakoutRsiNumericalTests.WideSignedPowerAndIndependentVolumeAndEvidenceWindowsStayBounded"
+  },
+  {
+    "id": "bryant-wide-length-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.BothExtremePeriodsNormalizeWithoutPreallocatingHistory"
+  },
+  {
+    "id": "bryant-wide-maximum-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_maximum = Math.Max(1, maximum)",
+    "after": "_maximum = Math.Max(2, maximum)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.HandZeroSeedEfficiencyWarmupAndGainClampsArePreserved"
+  },
+  {
+    "id": "bryant-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_travel + step - old.Step",
+    "after": "_travel + step + old.Step",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-lag-source",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "BigInteger.Abs(current - old.Price)",
+    "after": "BigInteger.Abs(current - _previousPrice)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-efficiency-ready",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "!full || travel.IsZero",
+    "after": "full || travel.IsZero",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-shape-offset",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "2 * ExactVarianceWindow.Units(efficiency) - Unit",
+    "after": "2 * ExactVarianceWindow.Units(efficiency) + Unit",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-trend-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_trend * (2 * ExactVarianceWindow.Units(efficiency)",
+    "after": "BigInteger.Abs(_trend) * (2 * ExactVarianceWindow.Units(efficiency)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-shape-square",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "var numerator = shape * shape",
+    "after": "var numerator = BigInteger.Abs(shape)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-zero-shape",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "if (shape.IsZero) return 1",
+    "after": "if (shape.IsZero) return 0",
+    "filter": "FullyQualifiedName~BryantNumericalTests.HandZeroSeedEfficiencyWarmupAndGainClampsArePreserved"
+  },
+  {
+    "id": "bryant-wide-upper-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "if (numerator >= denominator) return 1",
+    "after": "if (numerator >= denominator) return 0",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-lower-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "UnitRatio(2 * Unit, new BigInteger(_maximum + 1L))",
+    "after": "UnitRatio(Unit, new BigInteger(_maximum + 1L))",
+    "filter": "FullyQualifiedName~BryantNumericalTests.HandZeroSeedEfficiencyWarmupAndGainClampsArePreserved"
+  },
+  {
+    "id": "bryant-wide-gain-period",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "2 * (_length + 1L) * UnitSquared",
+    "after": "2 * (_length + 2L) * UnitSquared",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-recursion-current",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "average.AddProduct(price, alpha)",
+    "after": "average.AddProduct(_previous, alpha)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-recursion-previous",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "average.AddProduct(_previous, alpha, -1)",
+    "after": "average.AddProduct(_previous, alpha, 1)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-recursion-naive",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "var value = average.Mean(1)",
+    "after": "var value = _previous + alpha * (price - _previous)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideResidualSignalsAndExpiredTravelStayFinite"
+  },
+  {
+    "id": "bryant-wide-signal-polarity",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "current - ExactVarianceWindow.Units(value)",
+    "after": "ExactVarianceWindow.Units(value) - current",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideResidualSignalsAndExpiredTravelStayFinite"
+  },
+  {
+    "id": "bryant-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "var change = spread - _spread",
+    "after": "var change = spread + _spread",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideResidualSignalsAndExpiredTravelStayFinite"
+  },
+  {
+    "id": "bryant-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "if (commit) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_history.Clear();",
+    "after": ";",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_previous = 0; _started = false;",
+    "after": "_started = false;",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = old.Price;",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "if (full) _history.Dequeue();",
+    "after": "if (_history.Count > _length) _history.Dequeue();",
+    "filter": "FullyQualifiedName~BryantNumericalTests.WideEfficiencyGainAndConvexRecursionMatchIndependentRationalStages"
+  },
+  {
+    "id": "bryant-wide-core-moving",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void BryantAdaptiveMovingAverage(",
+    "before": "new BryantWindow(length)",
+    "after": "new BryantWindow(length, 1)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.BothCoreRoutesRegistryAndInPlaceSpansUseTheDefaultAdaptiveGain"
+  },
+  {
+    "id": "bryant-wide-core-trend",
+    "module": "numerical",
+    "file": "src/Core/TrendCore.cs",
+    "scope": "internal static void BryantAdaptiveMovingAverage(",
+    "before": "new BryantWindow(length)",
+    "after": "new BryantWindow(length, 1)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.BothCoreRoutesRegistryAndInPlaceSpansUseTheDefaultAdaptiveGain"
+  },
+  {
+    "id": "bryant-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeBryantAdaptiveMovingAverageFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.SelectedCallerPricesNeedNoAverageComponents"
+  },
+  {
+    "id": "bryant-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BryantAdaptiveMovingAverageState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~BryantNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "bryant-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class BryantAdaptiveMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~BryantNumericalTests.InvalidTrendAndCandlesCannotAdvanceEfficiencyOrRecursion"
+  },
+  {
+    "id": "bryant-wide-half-efficiency",
+    "module": "numerical",
+    "file": "src/Helpers/BryantWindow.cs",
+    "scope": "internal sealed class BryantWindow",
+    "before": "if (shape.IsZero) return 1;",
+    "after": "if (efficiency == .5) return 1; if (shape.IsZero) return 1;",
+    "filter": "FullyQualifiedName~BryantNumericalTests.HalfEfficiencyCancelsHugeSignedTrendBeforeGainClamping"
+  },
+  {
+    "id": "chande-composite-wide-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "new[] { length1, length2, length3 }",
+    "after": "new[] { 1, length2, length3 }",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "new[] { length1, length2, length3 }",
+    "after": "new[] { length1, 1, length3 }",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-third-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "new[] { length1, length2, length3 }",
+    "after": "new[] { length1, length2, 1 }",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_started ? current - _previousPrice : BigInteger.Zero",
+    "after": "current - _previousPrice",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-signed-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_change + change - old.Change",
+    "after": "_change + change + old.Change",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-travel-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_travel + BigInteger.Abs(change) - BigInteger.Abs(old.Change)",
+    "after": "_travel + BigInteger.Abs(change) + BigInteger.Abs(old.Change)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-ratio-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "100 * signed * Unit",
+    "after": "10 * signed * Unit",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-ratio-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "100 * signed * Unit",
+    "after": "100 * BigInteger.Abs(signed) * Unit",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_sum + price - old.Price",
+    "after": "_sum + price + old.Price",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_squares + price * price - old.Price * old.Price",
+    "after": "_squares + price * price + old.Price * old.Price",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-weight-startup",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_history.Count < _length - 1 ? 0 : ExactPopulationDeviation",
+    "after": "_history.Count < _length ? 0 : ExactPopulationDeviation",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.HandStartupWeightsAndPartialSignalArePreserved"
+  },
+  {
+    "id": "chande-composite-wide-weight-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "(BigInteger)_length * _length",
+    "after": "(BigInteger)_length",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-weight-momentum",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "weight * ExactVarianceWindow.Units(point.Momentum)",
+    "after": "weight * ExactVarianceWindow.Units(point.Ratio)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-clamp",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "Math.Max(-100, Math.Min(100, ExactMeanAccumulator.UnitRatio(numerator, denominator)))",
+    "after": "Math.Max(-50, Math.Min(50, ExactMeanAccumulator.UnitRatio(numerator, denominator)))",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.HandStartupWeightsAndPartialSignalArePreserved"
+  },
+  {
+    "id": "chande-composite-wide-signal-partial",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "sum.Mean(Math.Min(_length, _signalHistory.Count + 1L))",
+    "after": "sum.Mean(_length)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.AllFourExtremePeriodsGrowOnlyWithObservedBars"
+  },
+  {
+    "id": "chande-composite-wide-signal-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "sum.Add(_signalHistory.Peek(), -1)",
+    "after": "sum.Add(_signalHistory.Peek(), 1)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-ema-old",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "blend.Add(_previousLine, _smoothLength - 1)",
+    "after": "blend.Add(_previousLine, _smoothLength)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-ema-new",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "blend.Add(composite, 2)",
+    "after": "blend.Add(composite, 1)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-dema",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "first.AddTo(ref result, 2)",
+    "after": "first.AddTo(ref result, 1)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "weighted.Subtract(sum); weighted.Add(value, _length)",
+    "after": "weighted.Add(value, _length)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_history.Count < _length - 1 ? 0 : sum.Mean(_length)",
+    "after": "_history.Count < _length ? 0 : sum.Mean(_length)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-preview-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_average!.Next(ratio, final)",
+    "after": "_average!.Next(ratio, true)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-preview-leg",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "if (final) { if (full) _history.Dequeue();",
+    "after": "if (true) { if (full) _history.Dequeue();",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-preview-state",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "if (final)\n        {\n            if (_signalHistory.Count",
+    "after": "if (true)\n        {\n            if (_signalHistory.Count",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-reset-leg",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_sum = _squares = _change = _travel = default;",
+    "after": "_sum = _squares = _change = default;",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-reset-line",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_previousLine = 0; _started = false;",
+    "after": "_started = false;",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "spread.Sign > 0 && spread > _previousSpread",
+    "after": "spread.Sign > 0 && spread < _previousSpread",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "_previousSpread = spread; _started = true;",
+    "after": "_previousSpread = 0; _started = true;",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-custom-first",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "ratios[0].Add(point.Ratio1)",
+    "after": "ratios[0].Add(point.Ratio2)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.SelectedInputAndThreeCustomMeansPreserveComponentOrder"
+  },
+  {
+    "id": "chande-composite-wide-custom-third",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeCompositeWindow.cs",
+    "scope": "internal sealed class ChandeCompositeWindow",
+    "before": "ratios[2].Add(point.Ratio3)",
+    "after": "ratios[2].Add(point.Ratio1)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.SelectedInputAndThreeCustomMeansPreserveComponentOrder"
+  },
+  {
+    "id": "chande-composite-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeCompositeMomentumIndexFast",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "point.Line",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
+  },
+  {
+    "id": "chande-composite-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeCompositeMomentumIndexState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.EveryRouteMatchesIndependentWeightedMomentum"
+  },
+  {
+    "id": "chande-kroll-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_length = Math.Max(1, length); if (!external)",
+    "after": "_length = 2; if (!external)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-smoothing-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "new(kind, Math.Max(1, smoothLength))",
+    "after": "new(kind, 1)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_sum + current - old",
+    "after": "_sum + current + old",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_squares + current * current - old * old",
+    "after": "_squares + current * current + old * old",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-time-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_weighted - _sum + old",
+    "after": "_weighted + _sum + old",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-time-current",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "(_length - 1L) * current",
+    "after": "_length * current",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-partial-time",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_weighted + _history.Count * current",
+    "after": "_weighted + (_history.Count + 1L) * current",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.HandPartialWindowsPearsonRoundingAndConstantExpiryArePreserved"
+  },
+  {
+    "id": "chande-kroll-wide-center",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "n * squares - sum * sum",
+    "after": "n * squares + sum * sum",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "2 * weighted - (n - 1) * sum",
+    "after": "2 * weighted + (n - 1) * sum",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-two-points",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "count < 2 || centered.IsZero",
+    "after": "count < 3 || centered.IsZero",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.HandPartialWindowsPearsonRoundingAndConstantExpiryArePreserved"
+  },
+  {
+    "id": "chande-kroll-wide-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "(3 * covariance * covariance) << 2148",
+    "after": "(covariance * covariance) << 2148",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.HandPartialWindowsPearsonRoundingAndConstantExpiryArePreserved"
+  },
+  {
+    "id": "chande-kroll-wide-square-stage",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "var raw = correlation * correlation;",
+    "after": "var raw = correlation;",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.HandPartialWindowsPearsonRoundingAndConstantExpiryArePreserved"
+  },
+  {
+    "id": "chande-kroll-wide-rounded-pearson",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "var raw = correlation * correlation;",
+    "after": "var raw = count < 2 || centered.IsZero ? 0 : ExactMeanAccumulator.UnitRatio((3 * covariance * covariance) << 1074, (n * n - 1) * centered);",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.HandPartialWindowsPearsonRoundingAndConstantExpiryArePreserved"
+  },
+  {
+    "id": "chande-kroll-wide-preview-average",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_average!.Next(raw, final)",
+    "after": "_average!.Next(raw, true)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-preview-price",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "slope.Sign > 0 && slope > _previousSlope",
+    "after": "slope.Sign > 0 && slope < _previousSlope",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = 0;",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-reset-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_sum = _squares = _weighted = _previousSlope = default",
+    "after": "_sum = _squares = _previousSlope = default",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-reset-price",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_previous = 0; _average?.Reset();",
+    "after": "_average?.Reset();",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_previous = 0; _average?.Reset();",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "sum.Add(_history.Peek(), -1)",
+    "after": "sum.Add(_history.Peek(), 1)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "weighted.Subtract(sum); weighted.Add(value, _length)",
+    "after": "weighted.Add(value, _length)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "_history.Count < _length - 1 ? 0 : sum.Mean(_length)",
+    "after": "_history.Count < _length ? 0 : sum.Mean(_length)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-custom-raw",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "window.Next(p, true, 0).Raw",
+    "after": "window.Next(p, true, 0).Value",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.SelectedInputAndSingleCustomAveragePreserveRawCorrelation"
+  },
+  {
+    "id": "chande-kroll-wide-custom-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeKrollWindow.cs",
+    "scope": "internal sealed class ChandeKrollWindow",
+    "before": "var period = Math.Max(1, smoothLength)",
+    "after": "var period = Math.Max(1, length)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.SelectedInputAndSingleCustomAveragePreserveRawCorrelation"
+  },
+  {
+    "id": "chande-kroll-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeKrollRSquaredIndexFast",
+    "before": "window.Next(input[i], true, component?[i]).Value",
+    "after": "window.Next(input[i], true, component?[i]).Raw",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.WideCorrelationSquareAndMeansMatchIndependentCenteredScans"
+  },
+  {
+    "id": "chande-kroll-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeKrollRSquaredIndexState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~ChandeKrollNumericalTests.EveryRouteMatchesIndependentCorrelation"
+  },
+  {
+    "id": "chande-disparity-wide-first-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_first = new(kind, Math.Max(1, length1))",
+    "after": "_first = new(kind, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-second-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_second = new(kind, Math.Max(1, length2))",
+    "after": "_second = new(kind, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-third-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_third = new(kind, Math.Max(1, length3))",
+    "after": "_third = new(kind, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-price-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "numerator.Add(price, 300)",
+    "after": "numerator.Add(price, 200)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.HandZeroPriceAndThreeMeanSeedsArePreserved"
+  },
+  {
+    "id": "chande-disparity-wide-first-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "first.AddTo(ref numerator, -100)",
+    "after": "first.AddTo(ref numerator, -10)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-second-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "second.AddTo(ref numerator, -100)",
+    "after": "second.AddTo(ref numerator, -10)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-third-weight",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "third.AddTo(ref numerator, -100)",
+    "after": "third.AddTo(ref numerator, -10)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-denominator-sign",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "RocBankValue.Round(numerator, price, 3)",
+    "after": "RocBankValue.Round(numerator, Math.Abs(price), 3)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.HandZeroPriceAndThreeMeanSeedsArePreserved"
+  },
+  {
+    "id": "chande-disparity-wide-denominator-count",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "RocBankValue.Round(numerator, price, 3)",
+    "after": "RocBankValue.Round(numerator, price, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.HandZeroPriceAndThreeMeanSeedsArePreserved"
+  },
+  {
+    "id": "chande-disparity-wide-zero-price",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "price == 0 ? default :",
+    "after": "price == 0 ? new RocBankValue(1) :",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.HandZeroPriceAndThreeMeanSeedsArePreserved"
+  },
+  {
+    "id": "chande-disparity-wide-early-publication",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "RocBankValue.Round(numerator, price, 3)",
+    "after": "new RocBankValue(numerator.Mean(1) / (3 * price))",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-separate-legs",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "RocBankValue.Round(numerator, price, 3)",
+    "after": "new RocBankValue((100 * (price - first.Publish()) / price + 100 * (price - second.Publish()) / price + 100 * (price - third.Publish()) / price) / 3)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-external-first",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "new RocBankValue(external1.Value)",
+    "after": "new RocBankValue(external2!.Value)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-external-third",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "new RocBankValue(external3.Value)",
+    "after": "new RocBankValue(external2!.Value)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-first-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_first!.Next(new(price), final)",
+    "after": "_first!.Next(new(price), true)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-second-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_second!.Next(new(price), final)",
+    "after": "_second!.Next(new(price), true)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-third-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_third!.Next(new(price), final)",
+    "after": "_third!.Next(new(price), true)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "level.Sign > 0 && change.Sign > 0",
+    "after": "level.Sign > 0 && change.Sign < 0",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "if (final) _previous = value;",
+    "after": "_previous = value;",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_third?.Reset(); _previous = default;",
+    "after": "_third?.Reset();",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-reset-first",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_first?.Reset(); _second?.Reset();",
+    "after": "_second?.Reset();",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "weighted.Subtract(sum); value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, _length)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_history.Count + 1L < _length ? default",
+    "after": "_history.Count + 1L <= _length ? default",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-recursive-kind",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "_recursive = new(kind, length, 1)",
+    "after": "_recursive = new(MovingAvgType.ExponentialMovingAverage, length, 1)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.WideMeansDisparitiesAndSignalsMatchIndependentFractions"
+  },
+  {
+    "id": "chande-disparity-wide-custom-period",
+    "module": "numerical",
+    "file": "src/Helpers/ChandeDisparityWindow.cs",
+    "scope": "internal sealed class ChandeDisparityWindow",
+    "before": "Math.Max(1, periods[i])",
+    "after": "Math.Max(1, periods[0])",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.OpposingWideCustomMeansRetainCommonTinyPriceTerm"
+  },
+  {
+    "id": "chande-disparity-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeChandeMomentumOscillatorAverageDisparityIndexFast",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.SelectedInputsAndLegacyMeansPreserveAllRoutes"
+  },
+  {
+    "id": "chande-disparity-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeMomentumOscillatorAverageDisparityIndexState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~ChandeDisparityNumericalTests.EveryRouteMatchesIndependentDisparities"
+  },
+  {
+    "id": "volatility-index-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_length = Math.Max(1, length); if (!external)",
+    "after": "_length = 1; if (!external)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_mean = new(kind, _length)",
+    "after": "_mean = new(kind, 1)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_sum + current - old",
+    "after": "_sum + current + old",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_squares + current * current - old * old",
+    "after": "_squares + current * current + old * old",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-deviation-ready",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_history.Count < _length - 1 ? 0",
+    "after": "_history.Count < _length ? 0",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-deviation-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "(BigInteger)_length * _length",
+    "after": "(BigInteger)_length",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-mean-input",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_mean!.Next(new(deviation), final)",
+    "after": "_mean!.Next(new(price), final)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-first-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "sigma, mean, _alpha1)",
+    "after": "sigma, mean, _alpha2)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-second-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "sigma, mean, _alpha2)",
+    "after": "sigma, mean, _alpha1)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-first-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_started ? _first : current",
+    "after": "_started ? _first : BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-second-seed",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_started ? _second : current",
+    "after": "_started ? _second : BigInteger.Zero",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-zero-mean",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "if (mean.IsZero) return previous;",
+    "after": "if (mean.IsZero) return price;",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-old-term",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "previous * denominator + alpha",
+    "after": "-previous * denominator + alpha",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-delta",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "alpha * deviation * (price - previous)",
+    "after": "alpha * deviation * price",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-rounded-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "alpha * deviation * (price - previous)",
+    "after": "ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(alpha * deviation * mean.Sign, BigInteger.Abs(mean))) * mean * (price - previous)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.TinyGainRetainsHugePriceContributionAndExtendedStateCanRecover"
+  },
+  {
+    "id": "volatility-index-wide-clamped-gain",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "alpha * deviation * (price - previous)",
+    "after": "BigInteger.Min(alpha * deviation, BigInteger.Abs(mean) * Unit) * (price - previous)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.HandSeedsZeroGainsAndUnclampedExtrapolationArePreserved"
+  },
+  {
+    "id": "volatility-index-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_mean!.Next(new(deviation), final)",
+    "after": "_mean!.Next(new(deviation), true)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "if (final) { if (full) _history.Dequeue();",
+    "after": "if (true) { if (full) _history.Dequeue();",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-signal-upper",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "current - BigInteger.Max(first, second)",
+    "after": "current - BigInteger.Min(first, second)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-signal-lower",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "current - BigInteger.Min(first, second)",
+    "after": "current - BigInteger.Max(first, second)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_bullish = bullish; _bearish = bearish;",
+    "after": "_bullish = 0; _bearish = 0;",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-reset-start",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_started = false; _mean?.Reset();",
+    "after": "_mean?.Reset();",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_started = false; _mean?.Reset();",
+    "after": "_started = false;",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "weighted.Subtract(sum); value.AddTo(ref weighted, _length)",
+    "after": "value.AddTo(ref weighted, _length)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-negative-alpha1",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "if (alpha1 < 0)",
+    "after": "if (alpha1 > 0)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.InvalidAlphasFollowTypedContractsBeforeCallbacks"
+  },
+  {
+    "id": "volatility-index-wide-negative-alpha2",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "if (alpha2 < 0)",
+    "after": "if (alpha2 > 0)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.InvalidAlphasFollowTypedContractsBeforeCallbacks"
+  },
+  {
+    "id": "volatility-index-wide-simple-ready",
+    "module": "numerical",
+    "file": "src/Helpers/VolatilityIndexWindow.cs",
+    "scope": "internal sealed class VolatilityIndexWindow",
+    "before": "_history.Count + 1L < _length ? default",
+    "after": "_history.Count + 1L <= _length ? default",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-chande-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.EveryRouteMatchesIndependentVolatilityNormalization"
+  },
+  {
+    "id": "volatility-index-wide-chande-second",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ChandeVolatilityIndexDynamicAverageIndicatorState",
+    "before": "{ \"Cvida2\", point.Second }",
+    "after": "{ \"Cvida2\", point.First }",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-alias-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VolatilityIndexDynamicAverageIndicatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.EveryRouteMatchesIndependentVolatilityNormalization"
+  },
+  {
+    "id": "volatility-index-wide-alias-second",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch26.cs",
+    "scope": "public sealed class VolatilityIndexDynamicAverageIndicatorState",
+    "before": "{ \"Vida2\", point.Second }",
+    "after": "{ \"Vida2\", point.First }",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolatilityIndexDynamicAverageFast",
+    "before": "var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ClosePrices;",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.SelectedPricesAndDeviationCallbackKeepOriginalCandleFields"
+  },
+  {
+    "id": "volatility-index-wide-fast-second",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeVolatilityIndexDynamicAverageFast",
+    "before": "second ? point.Second : point.First",
+    "after": "point.First",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.WideDeviationNormalizationAndBothRecursionsMatchRationalScans"
+  },
+  {
+    "id": "volatility-index-wide-chande-alpha-option",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer? ComputeArm",
+    "before": "cvida.Alpha1, cvida.Alpha2",
+    "after": "cvida.Alpha2, cvida.Alpha2",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.EveryRouteMatchesIndependentVolatilityNormalization"
+  },
+  {
+    "id": "volatility-index-wide-alias-alpha-option",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer? ComputeArm",
+    "before": "vida.Alpha1, vida.Alpha2",
+    "after": "vida.Alpha1, vida.Alpha1",
+    "filter": "FullyQualifiedName~VolatilityIndexNumericalTests.EveryRouteMatchesIndependentVolatilityNormalization"
+  },
+  {
+    "id": "closed-distance-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_average = new(kind, _length)",
+    "after": "_average = new(kind, 1)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-high-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_high + h - old.High",
+    "after": "_high + h + old.High",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-low-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_low + l - old.Low",
+    "after": "_low + l + old.Low",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-high-input",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "var h = ExactVarianceWindow.Units(high)",
+    "after": "var h = ExactVarianceWindow.Units(low)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-low-input",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "var l = ExactVarianceWindow.Units(low)",
+    "after": "var l = ExactVarianceWindow.Units(high)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-equal-range",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "if (high == low) return 0;",
+    "after": "if (high == low) return 1;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-zero-bound",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "if (high.IsZero || low.IsZero) return 1;",
+    "after": "if (high.IsZero || low.IsZero) return 0;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-rounding-repair",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "return BitConverter.Int64BitsToDouble(bits);",
+    "after": "return estimate;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-volatility-scale",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "var value = Distance(sumHigh, sumLow);",
+    "after": "var value = Distance(sumHigh, sumLow) / 2;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-history-order",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_history.Enqueue((h, l))",
+    "after": "_history.Enqueue((l, h))",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_history.Clear(); _high = _low = _previousResidual = default;",
+    "after": "_history.Clear(); _previousResidual = default;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-volatility-gate",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "value < _previousVolatility ? Signal.None",
+    "after": "value < double.NegativeInfinity ? Signal.None",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-volatility-equality",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "value < _previousVolatility ? Signal.None",
+    "after": "value <= _previousVolatility ? Signal.None",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_previousResidual = residual",
+    "after": "_previousResidual = BigInteger.Zero",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-volatility-memory",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_previousVolatility = value",
+    "after": "_previousVolatility = 0",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-signal-strong",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "Signal.StrongBuy\n",
+    "after": "Signal.Buy\n",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-custom-mean",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "new RocBankValue(externalMean.Value)",
+    "after": "new RocBankValue(0)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.SelectedRangesAndCustomMeanKeepCallbackAndSignals"
+  },
+  {
+    "id": "closed-distance-wide-mean-input",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "_average!.Next(new(price), final)",
+    "after": "_average!.Next(new(high), final)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-high-domain",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "if (high < 0) throw",
+    "after": "if (high < -1) throw",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.NegativeRangesRejectBeforeCallbacksAndCannotAdvanceState"
+  },
+  {
+    "id": "closed-distance-wide-low-domain",
+    "module": "numerical",
+    "file": "src/Helpers/ClosedFormDistanceWindow.cs",
+    "scope": "internal sealed class ClosedFormDistanceWindow",
+    "before": "if (low < 0) throw",
+    "after": "if (low < -1) throw",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.NegativeRangesRejectBeforeCallbacksAndCannotAdvanceState"
+  },
+  {
+    "id": "closed-distance-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeClosedFormDistanceVolatilityFast",
+    "before": "window.Next(high[i], low[i], input[i], true, means?[i])",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], input[i], true, means?[i])",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.SelectedRangesAndCustomMeanKeepCallbackAndSignals"
+  },
+  {
+    "id": "closed-distance-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeClosedFormDistanceVolatilityFast",
+    "before": "true, means?[i]).Value",
+    "after": "true, means?[i]).Value * 2",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-callback-input",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityAtoD.cs",
+    "scope": "public static StockData CalculateClosedFormDistanceVolatility",
+    "before": "AsReadOnlySpan(input), Math.Max(1, length)",
+    "after": "AsReadOnlySpan(high), Math.Max(1, length)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.SelectedRangesAndCustomMeanKeepCallbackAndSignals"
+  },
+  {
+    "id": "closed-distance-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityAtoD.cs",
+    "scope": "public static StockData CalculateClosedFormDistanceVolatility",
+    "before": "AsReadOnlySpan(input), Math.Max(1, length)",
+    "after": "AsReadOnlySpan(input), 1",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.SelectedRangesAndCustomMeanKeepCallbackAndSignals"
+  },
+  {
+    "id": "closed-distance-wide-batch-signal",
+    "module": "numerical",
+    "file": "src/Calculations/Volatility/VolatilityAtoD.cs",
+    "scope": "public static StockData CalculateClosedFormDistanceVolatility",
+    "before": "signals?.Add(point.Signal)",
+    "after": "signals?.Add(Signal.None)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.HandZerosScaleSymmetryExpiryAndVolatilityGateArePreserved"
+  },
+  {
+    "id": "closed-distance-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ClosedFormDistanceVolatilityState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.InvalidCandleFieldsCannotAdvanceNativeState"
+  },
+  {
+    "id": "closed-distance-wide-native-high",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ClosedFormDistanceVolatilityState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Low, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ClosedFormDistanceVolatilityState",
+    "before": "bar.Close, isFinal)",
+    "after": "bar.Close, true)",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ClosedFormDistanceVolatilityState",
+    "before": "{ \"Cfdv\", point.Value }",
+    "after": "{ \"Cfdv\", 0 }",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.WideSumsNearlyEqualBoundsAndTinyRatiosMatchExactRoots"
+  },
+  {
+    "id": "closed-distance-wide-typed-domain",
+    "module": "numerical",
+    "file": "src/Validation/IndicatorInputDomain.cs",
+    "scope": "public static IndicatorInputDomain For",
+    "before": "return new IndicatorInputDomain(nonnegativeFields: IndicatorInputFields.High | IndicatorInputFields.Low);",
+    "after": "return Finite;",
+    "filter": "FullyQualifiedName~ClosedDistanceNumericalTests.NumericalClassesAreEnrolled"
+  },
+  {
+    "id": "commodity-selection-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-means-period",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "new Average(kind, _length)",
+    "after": "new Average(kind, 1)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_started ? _close : close",
+    "after": "_started ? _close : 0",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-previous-high",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_high = high",
+    "after": "_high = low",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-previous-low",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_low = low",
+    "after": "_low = high",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "BigInteger.Abs(h - c)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "BigInteger.Abs(l - c)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-plus-tie",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "up.Sign > 0 && up > down",
+    "after": "up.Sign > 0 && up >= down",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-minus-tie",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "down.Sign > 0 && down > up",
+    "after": "down.Sign > 0 && down >= up",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-atr-input",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_averages![0].Next(raw.Range, final)",
+    "after": "_averages![0].Next(raw.Plus, final)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-minus-input",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_averages[2].Next(raw.Minus, final)",
+    "after": "_averages[2].Next(raw.Plus, final)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-range-input",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_averages[3].Next(raw.Range, final)",
+    "after": "_averages[3].Next(raw.Plus, final)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-plus-output",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "var positive = Percent(plus, range);",
+    "after": "var positive = Percent(minus, range);",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-dx-scale",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "Math.Abs(numerator.Ratio(denominator)) * 100",
+    "after": "Math.Abs(numerator.Ratio(denominator)) * 10",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-margin-root",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "Units(Math.Sqrt(margin))",
+    "after": "Units(margin)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-fee-base",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "ExactVarianceWindow.Units(150)",
+    "after": "ExactVarianceWindow.Units(151)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-line-scale",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "100 * _point * Units(atr) * Units(adx)",
+    "after": "_point * Units(atr) * Units(adx)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-atr-projection",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "100 * _point * Units(atr) * Units(adx)",
+    "after": "100 * _point * ExactVarianceWindow.Units(atr.UpperShift == 0 ? atr.Mantissa : 0) * Units(adx)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-partial-mean",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "new BigInteger(Math.Min(_length, _history.Count + 1L))",
+    "after": "new BigInteger(_length)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-signal-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_sum + value - (full ? _history.Peek() : BigInteger.Zero)",
+    "after": "_sum + value + (full ? _history.Peek() : BigInteger.Zero)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "spread.Sign < 0 && spread < _previousSpread",
+    "after": "spread.Sign > 0 && spread > _previousSpread",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-signal-strength",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "? Signal.StrongSell : spread.Sign",
+    "after": "? Signal.Sell : spread.Sign",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.HandSeedPartialMeanDirectionalTiesAndReversedSignalsArePreserved"
+  },
+  {
+    "id": "commodity-selection-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_previousSpread = spread",
+    "after": "_previousSpread = BigInteger.Zero",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "if (final) { if (full)",
+    "after": "if (true) { if (full)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_recursive.Next(value, final)",
+    "after": "_recursive.Next(value, true)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "_sum = _previousSpread = default;",
+    "after": "_previousSpread = default;",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-margin-domain",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "if (margin <= 0) throw",
+    "after": "if (margin < 0) throw",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.InvalidScaleParametersRejectBeforeCallbacks"
+  },
+  {
+    "id": "commodity-selection-wide-fee-domain",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "if (commission == -150) throw",
+    "after": "if (commission == -151) throw",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.InvalidScaleParametersRejectBeforeCallbacks"
+  },
+  {
+    "id": "commodity-selection-wide-custom-atr",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "var atr = Mean(ranges);",
+    "after": "var atr = Mean(plus);",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.FiveCustomComponentsPreserveOrderSelectedRangesAndBothOutputs"
+  },
+  {
+    "id": "commodity-selection-wide-custom-plus",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "var positive = Mean(plus);",
+    "after": "var positive = Mean(minus);",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.FiveCustomComponentsPreserveOrderSelectedRangesAndBothOutputs"
+  },
+  {
+    "id": "commodity-selection-wide-custom-period",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "AsReadOnlySpan(values), length)",
+    "after": "AsReadOnlySpan(values), 1)",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.FiveCustomComponentsPreserveOrderSelectedRangesAndBothOutputs"
+  },
+  {
+    "id": "commodity-selection-wide-custom-adx",
+    "module": "numerical",
+    "file": "src/Helpers/CommoditySelectionWindow.cs",
+    "scope": "internal sealed class CommoditySelectionWindow",
+    "before": "var adx = Mean(dx);",
+    "after": "var adx = Mean(ranges);",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.FiveCustomComponentsPreserveOrderSelectedRangesAndBothOutputs"
+  },
+  {
+    "id": "commodity-selection-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCommoditySelectionIndexFast",
+    "before": "window.Next(high[i], low[i], input[i]",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i]",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.FiveCustomComponentsPreserveOrderSelectedRangesAndBothOutputs"
+  },
+  {
+    "id": "commodity-selection-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCommoditySelectionIndexFast",
+    "before": "signal ? point.Signal : point.Value",
+    "after": "point.Value",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "commodity-selection-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CommoditySelectionIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "commodity-selection-wide-native-signal",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CommoditySelectionIndexState",
+    "before": "{ \"Signal\", point.Signal }",
+    "after": "{ \"Signal\", point.Value }",
+    "filter": "FullyQualifiedName~CommoditySelectionNumericalTests.WideRangesDirectionalMeansAndPartialSignalMatchRationalStages"
+  },
+  {
+    "id": "brown-composite-wide-lag",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_lag = Math.Max(1, lag)",
+    "after": "_lag = 1",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-first-rsi-period",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "Math.Max(1, length))",
+    "after": "1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-second-rsi-period",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "WildersSmoothingMethod, smooth)",
+    "after": "WildersSmoothingMethod, 1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-level-period",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_level = new(kind, smooth)",
+    "after": "_level = new(kind, 1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_fast = new(kind, Math.Max(1, fast))",
+    "after": "_fast = new(kind, 1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_slow = new(kind, Math.Max(1, slow))",
+    "after": "_slow = new(kind, 1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-level-source",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_level.Next(second, final)",
+    "after": "_level.Next(first, final)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-lag-difference",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "first - _history.Peek()",
+    "after": "_history.Peek()",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-lag-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "if (_history.Count == _lag) _history.Dequeue();",
+    "after": "if (_history.Count > _lag) _history.Dequeue();",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-history-source",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_history.Enqueue(first)",
+    "after": "_history.Enqueue(second)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-line-sign",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "var line = momentum + level",
+    "after": "var line = momentum - level",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-fast-source",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_fast.Next(line, final)",
+    "after": "_fast.Next(level, final)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-slow-source",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_slow.Next(line, final)",
+    "after": "_slow.Next(level, final)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-bull-bound",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "Math.Max(fast, slow)",
+    "after": "Math.Min(fast, slow)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-bear-bound",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "Math.Min(fast, slow)",
+    "after": "Math.Max(fast, slow)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-bull-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_bull = bull",
+    "after": "_bull = default",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-bear-memory",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_bear = bear",
+    "after": "_bear = default",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "if (final) { if (_history.Count == _lag)",
+    "after": "if (true) { if (_history.Count == _lag)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-rsi-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_first.Next(price, final)",
+    "after": "_first.Next(price, true)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_recursive.Next(new(value), final)",
+    "after": "_recursive.Next(new(value), true)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-reset-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_first.Reset();",
+    "after": "_second.Reset();",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_history.Clear(); _bull",
+    "after": "_bull",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "sum.Add(_history.Peek(), -1)",
+    "after": "sum.Add(_history.Peek(), 1)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Add(0)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-partial-mean",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "_history.Count + 1L < _length ? 0",
+    "after": "_history.Count + 1L < 0 ? 0",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.AllFiveExtremePeriodsGrowOnlyWithObservedBars"
+  },
+  {
+    "id": "brown-composite-wide-weighted-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/BrownCompositeWindow.cs",
+    "scope": "internal sealed class BrownCompositeWindow",
+    "before": "(_length + 1L) / 2",
+    "after": "(_length + 1L)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-batch-custom-order",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateConstanceBrownCompositeIndex",
+    "before": "Mean(lines, fastLength), Mean(lines, slowLength)",
+    "after": "Mean(lines, slowLength), Mean(lines, fastLength)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.BatchCustomMeansKeepLevelFastSlowOrder"
+  },
+  {
+    "id": "brown-composite-wide-batch-custom-source",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateConstanceBrownCompositeIndex",
+    "before": "Mean(rawLevel, smoothLength)",
+    "after": "Mean(input, smoothLength)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.BatchCustomMeansKeepLevelFastSlowOrder"
+  },
+  {
+    "id": "brown-composite-wide-fast-custom-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeConstanceBrownCompositeIndexFast",
+    "before": "input, length1, MovingAvgType.WildersSmoothingMethod",
+    "after": "input, smoothLength, MovingAvgType.WildersSmoothingMethod",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.FastCustomMeansRetainRsiStagesAndRequestedSignal"
+  },
+  {
+    "id": "brown-composite-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeConstanceBrownCompositeIndexFast",
+    "before": "window.Next(prices[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.SelectedPricesAndLegacyMeansAgreeAcrossAllOutputs"
+  },
+  {
+    "id": "brown-composite-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeConstanceBrownCompositeIndexFast",
+    "before": "outputKey == \"FastSignal\" ? point.Fast",
+    "after": "outputKey == \"FastSignal\" ? point.Line",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ConstanceBrownCompositeIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.InvalidCandlesCannotAdvanceEitherRsiLagOrMeans"
+  },
+  {
+    "id": "brown-composite-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class ConstanceBrownCompositeIndexState",
+    "before": "{ \"SlowSignal\", point.Slow }",
+    "after": "{ \"SlowSignal\", point.Fast }",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.WidePricesAndAllCoreMeansRetainBoundedMomentum"
+  },
+  {
+    "id": "brown-composite-wide-batch-custom-level",
+    "module": "numerical",
+    "file": "src/Calculations/Oscillators/OscillatorsAtoD.cs",
+    "scope": "public static StockData CalculateConstanceBrownCompositeIndex",
+    "before": "components?[0][i], components?[1][i]",
+    "after": "components?[1][i], components?[0][i]",
+    "filter": "FullyQualifiedName~BrownCompositeNumericalTests.BatchCustomMeansKeepLevelFastSlowOrder"
+  },
+  {
+    "id": "coral-trend-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "4d / (Math.Max(1, length) + 3d)",
+    "after": "2d / (Math.Max(1, length) + 3d)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "Math.Max(1, length) + 3d",
+    "after": "Math.Max(1, length) + 4d",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-carry",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "ExactVarianceWindow.Units(1 - gain)",
+    "after": "ExactVarianceWindow.Units(gain)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "_coefficient = ExactVarianceWindow.Units(cd)",
+    "after": "_coefficient = ExactVarianceWindow.Units(.4)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-six-stages",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "i < next.Length",
+    "after": "i < next.Length - 1",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-cascade",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "i == 0 ? input : next[i - 1]",
+    "after": "input",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-prior-stage",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "_stages[i] * _carry",
+    "after": "_stages[0] * _carry",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-incoming",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "RocBankValue.RoundUnits(current * _gain, Unit)",
+    "after": "RocBankValue.RoundUnits(current * _gain, 2 * Unit)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-retained",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "RocBankValue.RoundUnits(_stages[i] * _carry, Unit)",
+    "after": "RocBankValue.RoundUnits(_stages[i] * _carry, 2 * Unit)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-stage-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "incoming + retained",
+    "after": "incoming - retained",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-first-difference",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "next[2] - next[3]",
+    "after": "next[2] + next[3]",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-second-difference",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "next[2] - 2 * next[3] + next[4]",
+    "after": "next[2] - next[3] + next[4]",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-third-difference",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "next[2] - 3 * next[3] + 3 * next[4] - next[5]",
+    "after": "next[2] - 3 * next[3] + 2 * next[4] - next[5]",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-base-stage",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "var blend = next[2] * unitCube",
+    "after": "var blend = next[3] * unitCube",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "coral-trend-wide-linear-weight",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "3 * _coefficient * firstDifference",
+    "after": "2 * _coefficient * firstDifference",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-quadratic-weight",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "3 * square * secondDifference",
+    "after": "2 * square * secondDifference",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-cubic-weight",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "square * _coefficient * thirdDifference",
+    "after": "square * Unit * thirdDifference",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.OverflowingCoefficientCubeStillProducesFiniteScaledOutput"
+  },
+  {
+    "id": "coral-trend-wide-coefficient-square",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "var square = _coefficient * _coefficient",
+    "after": "var square = _coefficient * Unit",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.OverflowingCoefficientCubeStillProducesFiniteScaledOutput"
+  },
+  {
+    "id": "coral-trend-wide-blend-scale",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "RoundUnits(blend, unitCube)",
+    "after": "RoundUnits(blend, unitSquare)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-spread",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "var spread = input - line",
+    "after": "var spread = line - input",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "? Signal.StrongBuy : spread.Sign",
+    "after": "? Signal.Buy : spread.Sign",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "? Signal.StrongSell\n",
+    "after": "? Signal.Sell\n",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "_previousSpread = spread",
+    "after": "_previousSpread = default",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "if (final) { Array.Copy",
+    "after": "if (true) { Array.Copy",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-commit-last-stage",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "Array.Copy(next, _stages, next.Length)",
+    "after": "Array.Copy(next, _stages, next.Length - 1)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-reset-stages",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "Array.Clear(_stages, 0, _stages.Length)",
+    "after": "Array.Clear(_scratch, 0, _scratch.Length)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/CoralTrendWindow.cs",
+    "scope": "internal sealed class CoralTrendWindow",
+    "before": "_previousSpread = default; }",
+    "after": "}",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCoralTrendIndicatorFast",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.SelectedPricesReachTheKernelWithoutAverageCallbacks"
+  },
+  {
+    "id": "coral-trend-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class CoralTrendIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.InvalidCandlesCannotAdvanceAnySmoothingStage"
+  },
+  {
+    "id": "coral-trend-wide-native-selected",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class CoralTrendIndicatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "coral-trend-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch5.cs",
+    "scope": "public sealed class CoralTrendIndicatorState",
+    "before": "{ \"Cti\", value }",
+    "after": "{ \"Cti\", bar.Close }",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.WidePricesAndSignedCoefficientsMatchExactPolynomial"
+  },
+  {
+    "id": "coral-trend-wide-core-coefficient",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void CoralTrendIndicator",
+    "before": "CoralTrendWindow.Compute(input, output, length, cd)",
+    "after": "CoralTrendWindow.Compute(input, output, length, .4)",
+    "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
   }
 ]

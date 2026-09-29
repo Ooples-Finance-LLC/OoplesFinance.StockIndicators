@@ -69,6 +69,8 @@ public sealed class IndicatorInputDomain
         if (indicator is null) throw new ArgumentNullException(nameof(indicator));
         if (indicator is IIndicatorInputDomainContract contract)
             return contract.InputDomain ?? throw new InvalidOperationException("An input domain cannot be null.");
+        if (indicator is IBuiltInIndicator distance && distance.BatchName == IndicatorName.ClosedFormDistanceVolatility)
+            return new IndicatorInputDomain(nonnegativeFields: IndicatorInputFields.High | IndicatorInputFields.Low);
         // ASI accumulates relative-price gains/losses into nonnegative probability masses.
         // Signed prices make those masses negative and can create a singular denominator.
         return indicator is IBuiltInIndicator builtIn && builtIn.BatchName == IndicatorName.AbsoluteStrengthIndex

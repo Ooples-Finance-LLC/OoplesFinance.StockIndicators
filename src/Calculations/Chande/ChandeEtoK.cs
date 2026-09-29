@@ -15,46 +15,11 @@ public static partial class Calculations
     public static StockData CalculateChandeKrollRSquaredIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 14, int smoothLength = 3)
     {
-        List<double> r2RawList = new(stockData.Count);
-        List<double> tempValueList = new(stockData.Count);
-        List<double> indexList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            double index = i;
-            indexList.Add(index);
-
-            var currentValue = inputList[i];
-            tempValueList.Add(currentValue);
-
-            corrWindow.Add(index, currentValue);
-            var r2 = corrWindow.RSquared(length);
-            r2 = IsValueNullOrInfinity(r2) ? 0 : r2;
-            r2RawList.Add((double)r2);
-        }
-
-        var r2SmoothedList = GetMovingAverageList(stockData, maType, smoothLength, r2RawList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var r2Sma = r2SmoothedList[i];
-            var prevR2Sma1 = i >= 1 ? r2SmoothedList[i - 1] : 0;
-            var prevR2Sma2 = i >= 2 ? r2SmoothedList[i - 2] : 0;
-
-            var signal = GetCompareSignal(r2Sma - prevR2Sma1, prevR2Sma1 - prevR2Sma2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ckrsi", r2SmoothedList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(r2SmoothedList);
-        stockData.IndicatorName = IndicatorName.ChandeKrollRSquaredIndex;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var component = external ? ChandeKrollWindow.Component(stockData, input, maType, length, smoothLength) : null; using var window = new ChandeKrollWindow(maType, length, smoothLength, external);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, component?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ckrsi", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.ChandeKrollRSquaredIndex; return stockData;
     }
 
 

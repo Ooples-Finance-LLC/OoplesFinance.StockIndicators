@@ -348,25 +348,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.AdaptiveLeastSquares:
                 return new("Als", new[] { "Als" }, bars => AdaptiveFitValues(bars, length).Outputs);
             case IndicatorName.AutonomousRecursiveMovingAverage:
-                return new("Arma", new[] { "Arma" }, bars =>
-                {
-                    var deviations = new double[bars.Count];
-                    var candidates = new double[bars.Count];
-                    var firstMean = new double[bars.Count];
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var previous = i == 0 ? bars[i].Close : result[i - 1];
-                        var lagged = i < 7 ? 0 : bars[i - 7].Close;
-                        deviations[i] = Math.Abs(lagged - previous);
-                        var radius = i == 0 ? 0 : 3 * deviations.Take(i + 1).Sum() / i;
-                        var displacement = bars[i].Close - previous;
-                        candidates[i] = Math.Abs(displacement) > radius ? bars[i].Close + Math.Sign(displacement) * radius : previous;
-                        firstMean[i] = Window(candidates, i, length).Average();
-                        result[i] = Window(firstMean, i, length).Average();
-                    }
-                    return Outputs(("Arma", result));
-                });
+                return new("Arma", new[] { "Arma" }, bars => AutonomousRecursiveOutputs(bars, indicator));
             case IndicatorName.FareySequenceWeightedMovingAverage:
                 return new("Fswma", new[] { "Fswma" }, bars => Outputs(("Fswma", RoundedFareyMean(bars, length))));
             case IndicatorName.FallingRisingFilter:
@@ -385,22 +367,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Frf", result));
                 });
             case IndicatorName.CoralTrendIndicator:
-                var coralGain = 4d / (length + 3d);
-                return new("Cti", new[] { "Cti" }, bars =>
-                {
-                    // Three generalized DEMA stages expand to Coral's six-pole polynomial.
-                    // Each elementary smoother has zero initial state and fractional period.
-                    double[] Smooth(double[] values) => values.Select((_, i) => Enumerable.Range(0, i + 1)
-                        .Sum(j => coralGain * Math.Pow(1 - coralGain, i - j) * values[j])).ToArray();
-                    var result = Closes(bars);
-                    for (var stage = 0; stage < 3; stage++)
-                    {
-                        var first = Smooth(result);
-                        var second = Smooth(first);
-                        result = first.Select((v, i) => 1.4 * v - .4 * second[i]).ToArray();
-                    }
-                    return Outputs(("Cti", result));
-                });
+                return new("Cti", new[] { "Cti" }, bars => CoralTrendOutputs(bars, indicator));
             case IndicatorName.CorrectedMovingAverage:
                 var correctedKind = AverageKind(options, 1);
                 if (correctedKind == 0) return null;
@@ -421,22 +388,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Cma", result));
                 });
             case IndicatorName.BryantAdaptiveMovingAverage:
-                var maximumLength = Integer(options, "MaxLength", 100);
-                var trendParameter = Number(options, -1, "Trend");
-                return new("Bama", new[] { "Bama" }, bars =>
-                {
-                    var efficiency = EfficiencyRatios(bars, length);
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var variableEfficiency = Math.Pow(1 + trendParameter * (efficiency[i] - .5), 2);
-                        // Invert effective length + 1 directly, with the configured maximum length.
-                        var gain = variableEfficiency == 0 ? 1 : Math.Min(1, Math.Max(2d / (maximumLength + 1), 2 * variableEfficiency / (length + 1)));
-                        var previous = i == 0 ? 0 : result[i - 1];
-                        result[i] = previous + gain * (bars[i].Close - previous);
-                    }
-                    return Outputs(("Bama", result));
-                });
+                return new("Bama", new[] { "Bama" }, bars => BryantOutputs(bars, indicator));
             case IndicatorName.AtrFilteredExponentialMovingAverage:
                 return new("Afp", new[] { "Afp" }, bars => AtrFilterValues(bars, length, Integer(options, "AtrLength", 20), Integer(options, "StdDevLength", 10), Integer(options, "LbLength", 20), Number(options, 5, "Min")).Outputs);
             case IndicatorName.AdaptiveMovingAverage:

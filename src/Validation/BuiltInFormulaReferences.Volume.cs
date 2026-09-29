@@ -220,16 +220,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Up", Level(1)), ("Dn", Level(-1)));
                 });
             case IndicatorName.BetterVolumeIndicator:
-                return Single("Bvi", bars => bars.Select((b, i) =>
-                {
-                    var previousClose = i == 0 ? b.Close : bars[i - 1].Close;
-                    var span = Math.Max(b.High, previousClose) - Math.Min(b.Low, previousClose);
-                    var body = b.Close - b.Open;
-                    // Up/down allocation adds to the full volume; a doji divides volume equally.
-                    if (body == 0) return b.Volume / 2;
-                    var directionalShare = span / (2 * span - Math.Abs(body));
-                    return b.Volume * (body > 0 ? directionalShare : 1 - directionalShare);
-                }).ToArray());
+                return Single("Bvi", bars => BetterVolumeOutputs(bars, indicator)["Bvi"]);
             case IndicatorName.EarningSupportResistanceLevels:
                 return Single("Esr", bars => bars.Select((b, i) => .5 * b.High + (i < 2 ? 0 : .5 * bars[i - 2].Low)).ToArray());
             case IndicatorName.VolumePositiveNegativeIndicator:
@@ -384,23 +375,7 @@ internal static partial class BuiltInFormulaReferences
                         ("SlowSignal", Average(rank, Integer(options, "SlowLength", 10), kind)));
                 });
             case IndicatorName.AverageMoneyFlowOscillator:
-                kind = AverageKind(options, 2);
-                if (kind == 0) return null;
-                return Single("Amfo", bars =>
-                {
-                    var volume = Average(bars.Select(b => (double)b.Volume).ToArray(), length, kind);
-                    var movement = Average(bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray(), length, kind);
-                    var flow = movement.Select((v, i) => v == 0 || volume[i] == 0 ? 0
-                        : Math.Sign(v) * (Math.Log(Math.Abs(v)) + Math.Log(Math.Abs(volume[i])))).ToArray();
-                    var position = flow.Select((v, i) =>
-                    {
-                        var window = Window(flow, i, length).ToArray();
-                        var low = window.Min();
-                        var high = window.Max();
-                        return high == low ? -100 : 200 * (v - low) / (high - low) - 100; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                    }).ToArray();
-                    return Average(position, Integer(options, "SmoothLength", 3), kind);
-                });
+                return Single("Amfo", bars => AverageMoneyFlowOutputs(bars, indicator)["Amfo"]);
             case IndicatorName.CumulativeVolumeIndex:
                 return Single("Cvi", bars =>
                 {

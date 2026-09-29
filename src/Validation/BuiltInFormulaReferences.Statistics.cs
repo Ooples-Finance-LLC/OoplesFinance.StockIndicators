@@ -185,21 +185,7 @@ internal static partial class BuiltInFormulaReferences
                 });
             case IndicatorName.ChandeKrollRSquaredIndex:
                 if (kind == 0) return null;
-                return new("Ckrsi", new[] { "Ckrsi" }, bars =>
-                {
-                    var raw = bars.Select((_, i) =>
-                    {
-                        var prices = Window(bars, i, length).Select(b => b.Close).ToArray();
-                        if (prices.Length < 2) return 0d;
-                        var mean = prices[0] + prices.Average(v => v - prices[0]);
-                        var center = (prices.Length - 1) / 2d;
-                        var covariance = prices.Select((v, j) => (v - mean) * (j - center)).Sum();
-                        var priceVariance = prices.Sum(v => (v - mean) * (v - mean));
-                        var timeVariance = prices.Length * (prices.Length * (double)prices.Length - 1) / 12;
-                        return priceVariance == 0 ? 0 : Clamp(covariance * covariance / (priceVariance * timeVariance), 0, 1);
-                    }).ToArray();
-                    return Outputs(("Ckrsi", Average(raw, 3, kind)));
-                });
+                return new("Ckrsi", new[] { "Ckrsi" }, bars => ChandeKrollOutputs(bars, indicator));
             case IndicatorName.AutoFilter:
                 return new("Af", new[] { "Af" }, bars => AutoFilterOutputs(bars, indicator));
             case IndicatorName.AutoLine:

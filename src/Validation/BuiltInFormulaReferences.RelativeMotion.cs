@@ -574,15 +574,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator:
             case IndicatorName.VolatilityIndexDynamicAverageIndicator:
                 var prefix = name == IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator ? "Cvida" : "Vida";
-                return new(prefix + "1", new[] { prefix + "1", prefix + "2" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var deviation = PopulationVariance(prices, length).Select(v => Math.Sqrt(v)).ToArray();
-                    var average = Average(deviation, length, kind);
-                    var ratio = deviation.Select((v, i) => average[i] == 0 ? 0 : v / average[i]).ToArray();
-                    return Outputs((prefix + "1", ExpandedGainTrajectory(prices, ratio.Select(v => v * Number(options, .2, "Alpha1")).ToArray())),
-                        (prefix + "2", ExpandedGainTrajectory(prices, ratio.Select(v => v * Number(options, .04, "Alpha2")).ToArray())));
-                });
+                return new(prefix + "1", new[] { prefix + "1", prefix + "2" }, bars => VolatilityIndexOutputs(bars, indicator));
             case IndicatorName.UhlMaCrossoverSystem:
                 return new("Cts", new[] { "Cts", "Cma" }, bars =>
                 {
@@ -951,6 +943,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dti", signed.Select((v, i) => absolute[i] == 0 ? 0 : Clamp(100 * v / absolute[i], -100, 100)).ToArray()));
                 });
             case IndicatorName.CommoditySelectionIndex:
+                return new("Csi", new[] { "Csi", "Signal" }, bars => CommoditySelectionOutputs(bars, indicator));
             case IndicatorName.ErgodicCommoditySelectionIndex:
             case IndicatorName.DMIStochastic:
                 if (name == IndicatorName.DMIStochastic && kind is 1 or 2 or 3 or 6)

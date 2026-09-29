@@ -265,51 +265,14 @@ public static partial class Calculations
     public static StockData CalculateClosedFormDistanceVolatility(this StockData stockData,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 14)
     {
-        List<double> tempHighList = new(stockData.Count);
-        List<double> tempLowList = new(stockData.Count);
-        List<double> hvList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum highSumWindow = new();
-        RollingSum lowSumWindow = new();
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        ClosedFormDistanceWindow.ValidateRanges(stockData.HighPrices, stockData.LowPrices); ClosedFormDistanceWindow.ValidateRanges(high, low);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToArray() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), input).ToArray() : null;
+        using var window = new ClosedFormDistanceWindow(maType, length, external); var line = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, means?[i]); line.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cfdv", line } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.ClosedFormDistanceVolatility; return stockData;
 
-        var emaList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var ema = emaList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevEma = i >= 1 ? emaList[i - 1] : 0;
-
-            var currentHigh = highList[i];
-            tempHighList.Add(currentHigh);
-            highSumWindow.Add(currentHigh);
-
-            var currentLow = lowList[i];
-            tempLowList.Add(currentLow);
-            lowSumWindow.Add(currentLow);
-
-            var a = highSumWindow.Sum(length);
-            var b = lowSumWindow.Sum(length);
-            var abAvg = (a + b) / 2;
-
-            var prevHv = GetLastOrDefault(hvList);
-            var hv = abAvg != 0 && a != b ? Sqrt(1 - (Pow(a, 0.25) * Pow(b, 0.25) / Pow(abAvg, 0.5))) : 0;
-            hvList.Add(hv);
-
-            var signal = GetVolatilitySignal(currentValue - ema, prevValue - prevEma, hv, prevHv);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cfdv", hvList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(hvList);
-        stockData.IndicatorName = IndicatorName.ClosedFormDistanceVolatility;
-
-        return stockData;
     }
 
 

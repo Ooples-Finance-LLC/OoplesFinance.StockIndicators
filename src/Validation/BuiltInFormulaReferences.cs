@@ -22,6 +22,65 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.CoralTrendIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => CoralTrendOutputs(bars, builtIn)["Cti"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ConstanceBrownCompositeIndex && AverageKind(builtIn.CreateOptions(), 1) is 1 or 2 or 3 or 6)
+        {
+            var brownKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < brownKeys.Length; slot++) { var key = brownKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BrownCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.CommoditySelectionIndex)
+        {
+            var commodityKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < commodityKeys.Length; slot++) { var key = commodityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => CommoditySelectionOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ClosedFormDistanceVolatility)
+        { yield return IndicatorValidationRule.Reference(0, bars => ClosedDistanceOutputs(bars, builtIn)["Cfdv"], IndicatorErrorBudget.Exact); yield break; }
+        if (builtIn.BatchName is IndicatorName.ChandeVolatilityIndexDynamicAverageIndicator or IndicatorName.VolatilityIndexDynamicAverageIndicator)
+        {
+            var volatilityKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < volatilityKeys.Length; slot++) { var key = volatilityKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => VolatilityIndexOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeMomentumOscillatorAverageDisparityIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChandeDisparityOutputs(bars, builtIn)["Cmoadi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeKrollRSquaredIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ChandeKrollOutputs(bars, builtIn)["Ckrsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.ChandeCompositeMomentumIndex)
+        {
+            var chandeCompositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < chandeCompositeKeys.Length; slot++) { var key = chandeCompositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ChandeCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BryantAdaptiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BryantOutputs(bars, builtIn)["Bama"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BreakoutRelativeStrengthIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BreakoutRsiOutputs(bars, builtIn, indicator.Source is not null)["Brsi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BetterVolumeIndicator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => BetterVolumeOutputs(bars, builtIn)["Bvi"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.BayesianOscillator)
+        {
+            var bayesianKeys = new[] { "SigmaProbsDown", "SigmaProbsUp", "ProbPrime" };
+            for (var slot = 0; slot < bayesianKeys.Length; slot++) { var key = bayesianKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => BayesianOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AverageMoneyFlowOscillator)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AverageMoneyFlowOutputs(bars, builtIn)["Amfo"], IndicatorErrorBudget.Exact); yield break;
+        }
+        if (builtIn.BatchName == IndicatorName.AutonomousRecursiveMovingAverage)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutonomousRecursiveOutputs(bars, builtIn)["Arma"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AutoFilter)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutoFilterOutputs(bars, builtIn)["Af"], IndicatorErrorBudget.Exact); yield break;

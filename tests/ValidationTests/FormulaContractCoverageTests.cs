@@ -3146,7 +3146,9 @@ public sealed class FormulaContractCoverageTests
     {
         var prices = new[] { 1d, 2, 1, 2 };
         var bars = prices.Select((v, i) => new Bar(new DateTime(2021, 1, 4).AddDays(i), v, v, v, v, 1)).ToArray();
-        var expected = new[] { new[] { 0d, 100, 0, 1900d / 21 }, new[] { 0d, 50, 50, 950d / 21 }, new[] { 0d, 0, 100d / 3, 4000d / 63 } };
+        // Independently rounded binary64 RSI, lag subtraction, level mean, and signal means.
+        // At bar 2, (100/3 - 100) + mean(100, 100/3) retains a 2^-46 residual.
+        var expected = new[] { new[] { 0d, 100, 1.4210854715202004e-14, 90.47619047619048 }, new[] { 0d, 50, 50.00000000000001, 45.23809523809525 }, new[] { 0d, 0, 33.333333333333336, 63.4920634920635 } };
         var indicator = new ConstanceBrownCompositeIndex(2, 3, 2, 1, 2);
         foreach (var rule in BuiltInFormulaReferences.For(indicator))
             rule.Check(new IndicatorValidationContext("rsi-momentum-reversal", bars, expected, 0));
@@ -3165,8 +3167,8 @@ public sealed class FormulaContractCoverageTests
                 var final = state.Update(bar, true, true);
                 for (var slot = 0; slot < keys.Length; slot++)
                 {
-                    Assert.InRange(Math.Abs(preview.Outputs![keys[slot]] - expected[slot][i]), 0, 1e-10);
-                    Assert.InRange(Math.Abs(final.Outputs![keys[slot]] - expected[slot][i]), 0, 1e-10);
+                    Assert.Equal(expected[slot][i], preview.Outputs![keys[slot]]);
+                    Assert.Equal(expected[slot][i], final.Outputs![keys[slot]]);
                 }
             }
         }

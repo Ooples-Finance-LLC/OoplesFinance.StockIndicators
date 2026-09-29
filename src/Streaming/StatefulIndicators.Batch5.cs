@@ -9,78 +9,13 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Cti")]
 public sealed class CoralTrendIndicatorState : IStreamingIndicatorState
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly double _c4;
-    private readonly double _c5;
-    private readonly double _cdCube;
-    private double _i1;
-    private double _i2;
-    private double _i3;
-    private double _i4;
-    private double _i5;
-    private double _i6;
-    private readonly StreamingInputResolver _input;
-
-    public CoralTrendIndicatorState(int length = 21, double cd = 0.4)
-    {
-        var resolved = Math.Max(1, length);
-        var di = ((double)(resolved - 1) / 2) + 1;
-        _c1 = 2 / (di + 1);
-        _c2 = 1 - _c1;
-        var cdSquared = cd * cd;
-        _cdCube = cdSquared * cd;
-        _c3 = 3 * (cdSquared + _cdCube);
-        _c4 = -3 * ((2 * cdSquared) + cd + _cdCube);
-        _c5 = (3 * cd) + 1 + _cdCube + (3 * cdSquared);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly CoralTrendWindow _window;
+    public CoralTrendIndicatorState(int length = 21, double cd = 0.4) => _window = new(length, cd);
     public IndicatorName Name => IndicatorName.CoralTrendIndicator;
-
-    public void Reset()
-    {
-        _i1 = 0;
-        _i2 = 0;
-        _i3 = 0;
-        _i4 = 0;
-        _i5 = 0;
-        _i6 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var i1 = (_c1 * value) + (_c2 * _i1);
-        var i2 = (_c1 * i1) + (_c2 * _i2);
-        var i3 = (_c1 * i2) + (_c2 * _i3);
-        var i4 = (_c1 * i3) + (_c2 * _i4);
-        var i5 = (_c1 * i4) + (_c2 * _i5);
-        var i6 = (_c1 * i5) + (_c2 * _i6);
-        var bfr = (-_cdCube * i6) + (_c3 * i5) + (_c4 * i4) + (_c5 * i3);
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value; return new(value, includeOutputs ? new Dictionary<string, double> { { "Cti", value } } : null); }
 
-        if (isFinal)
-        {
-            _i1 = i1;
-            _i2 = i2;
-            _i3 = i3;
-            _i4 = i4;
-            _i5 = i5;
-            _i6 = i6;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cti", bfr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(bfr, outputs);
-    }
 }
 
 [PrimaryOutput("Dppmo")]

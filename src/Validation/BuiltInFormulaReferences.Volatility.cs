@@ -9,18 +9,7 @@ internal static partial class BuiltInFormulaReferences
         var name = indicator.BatchName;
         if (name == IndicatorName.ClosedFormDistanceVolatility)
         {
-            var period = Integer(indicator.CreateOptions(), "Length", 14);
-            return new("Cfdv", new[] { "Cfdv" }, bars => Outputs(("Cfdv", bars.Select((_, i) =>
-            {
-                var window = Window(bars, i, period).ToArray();
-                var high = window.Sum(b => b.High);
-                var low = window.Sum(b => b.Low);
-                if (high == low || high + low == 0) return 0d; // NOSONAR: S1244 - Equal bounds define an exactly zero range; a nonzero range must still be evaluated.
-                if (low == 0 && high > 0) return 1d;
-                // Ratio form of 1 - fourth-root(H*L) / sqrt((H+L)/2).
-                var ratio = low / high;
-                return Math.Sqrt(Math.Max(0, 1 - Math.Sqrt(2 * Math.Sqrt(ratio) / (1 + ratio))));
-            }).ToArray())));
+            return new("Cfdv", new[] { "Cfdv" }, bars => ClosedDistanceOutputs(bars, indicator));
         }
         if (name == IndicatorName.MotionSmoothnessIndex)
         {

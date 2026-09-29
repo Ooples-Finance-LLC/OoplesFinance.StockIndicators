@@ -3530,3 +3530,35 @@ The plan's unchecked work remains required: complete formula provenance/variant 
 - **48/48 focused tests passed** (`auto-filter-608.trx`). Five configurations exercise an independent rational prefix-sum reference across five routes and every numerical class. Focused checks cover hand regression, flat variance and startup, wide/subnormal moments and eviction, all extreme periods and core means, callback inputs/order, overflow recovery, selected/legacy routes, native preview/reset and invalid candles. Twenty-eight compiled behavioral faults must be caught from passing baselines in two isolated matching snapshots.
 - Campaign608: **28/28 faults caught** from passing baselines; **5,912 retained mutation sites**. Source/archive SHA256: `6bd85c252a8be98934fe79d80e99eb8c815f69527e4a9a71436d42868fc74968` / `713e1cdd975e866e672559633a681d21e4cc15cf3d1eefc47cf4b90f23fc3719`. Second archive: `713e1cdd975e866e672559633a681d21e4cc15cf3d1eefc47cf4b90f23fc3719`; source snapshots compared byte-for-byte.
 - Inventory: **5,987/7,131** enrollments; **1,144 omissions across170 types**. 373 grouped batches cover **3,161 configurations/575 types**. DLL SHA256 `942F16A53A6D55BC76D2E3714EBEE9748D4559BC15EEB91EEE04187840BEEC33`. Full coverage and release/performance gates remain incomplete.
+
+
+### Work-in-progress checkpoint: batches 609–622
+
+All implementation, reference, regression-test and mutation-manifest changes through batch 622 are published together at the user’s request. This checkpoint is not mutation-qualified or release-ready. Previously completed mutation evidence remains valid through batch 608.
+
+| Batch | Focused test artifact | Passed |
+|---|---|---:|
+| 609 | `autonomous-recursive-609.trx` | 41 |
+| 610 | `average-money-flow-610.trx` | 49 |
+| 611 | `bayesian-611.trx` | 48 |
+| 612 | `better-volume-612.trx` | 72 |
+| 613 | `breakout-rsi-613.trx` | 40 |
+| 614 | `bryant-614.trx` | 40 |
+| 615 | `chande-composite-615.trx` | 70 |
+| 616 | `chande-kroll-616.trx` | 46 |
+| 617 | `chande-disparity-617.trx` | 39 |
+| 618 | `volatility-index-618.trx` | 88 |
+| 619 | `closed-distance-619.trx` | 47 |
+| 620 | `commodity-selection-620.trx` | 50 |
+| 621 | `brown-composite-621.trx` | 128 |
+| 622 | `coral-trend-622.trx` | 41 |
+
+Focused results were checked against the retained TRX counters; the 74 pending source/test/manifest files match the frozen batch-622 SHA256 inventory. These are per-batch focused results, not a newly executed combined suite.
+
+Corrected batch-609 mutation campaigns are still running; batches 610–622 have not completed mutation verification. The original batch-609 run had 27 compiled kills and one inconclusive compile failure and is not passing evidence.
+
+Known outstanding failure: `FoundationReferencesMatchIndependentSmallExamples` reaches the batch-617 Chande Disparity hand expectation before Coral and fails: the staged rounded formula yields `-33.33333333333333`, while the existing `-100d/3` expectation yields `-33.333333333333336`. This test is not counted among the focused Coral passes.
+
+Prepared inventory: 6,073/7,131 numerical enrollments, 1,058 omissions across 155 types; 387 grouped batches, 3,247 configurations, 590 types and 6,346 mutation sites. Remaining numerical coverage, hosted checks, package/release assurance and competitor-performance evidence are incomplete. PR #246 remains draft.
+
+Resume publication with evidence-only updates for already-published batches. Do not run the old batch-609–622 snapshot publishers: staging their older source snapshots could revert subsequent work.
