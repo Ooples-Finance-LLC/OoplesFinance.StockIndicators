@@ -452,79 +452,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAutoCorrelationPeriodogram(this StockData stockData, int length1 = 48, int length2 = 10, int length3 = 3)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 0);
-        List<double> domCycList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var rArray = new double[length1 + 1];
-
-        var corrList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationIndicator(data, length1, length2));
-
-        // The DFT basis cos/sin(2π·k/j) depends only on (j,k) — not the bar i — yet was recomputed every bar
-        // (Count × ~39 periods × ~46 lags trig calls). Precompute it once; bit-identical (same values + order).
-        var cosTable = new double[length1 + 1, length1 + 1];
-        var sinTable = new double[length1 + 1, length1 + 1];
-        for (var j = length2; j <= length1; j++)
-        {
-            for (var k = length3; k <= length1; k++)
-            {
-                var angle = 2 * Math.PI * ((double)k / j);
-                cosTable[j, k] = Math.Cos(angle);
-                sinTable[j, k] = Math.Sin(angle);
-            }
-        }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var corr = corrList[i];
-            var prevCorr1 = i >= 1 ? corrList[i - 1] : 0;
-            var prevCorr2 = i >= 2 ? corrList[i - 2] : 0;
-
-            double maxPwr = 0;
-            for (var j = length2; j <= length1; j++)
-            {
-                double cosPart = 0, sinPart = 0;
-                for (var k = length3; k <= length1; k++)
-                {
-                    var prevCorr = i >= k ? corrList[i - k] : 0;
-                    cosPart += prevCorr * cosTable[j, k];
-                    sinPart += prevCorr * sinTable[j, k];
-                }
-
-                var sqSum = (cosPart * cosPart) + (sinPart * sinPart);
-                var r = (0.2 * (sqSum * sqSum)) + (0.8 * rArray[j]);
-                rArray[j] = r;
-                maxPwr = Math.Max(r, maxPwr);
-            }
-
-            double spx = 0, sp = 0;
-            for (var j = length2; j <= length1; j++)
-            {
-                var pwr = maxPwr != 0 ? rArray[j] / maxPwr : 0;
-                if (pwr >= 0.5)
-                {
-                    spx += j * pwr;
-                    sp += pwr;
-                }
-            }
-
-            var domCyc = sp != 0 ? spx / sp : 0;
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(corr - prevCorr1, prevCorr1 - prevCorr2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacp", domCycList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(domCycList);
-        stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationPeriodogram;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new AutocorrelationSpectrumWindow(length1, length2, length3); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacp", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationPeriodogram; return stockData;
     }
 
 

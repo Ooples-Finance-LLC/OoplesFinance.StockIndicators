@@ -43331,5 +43331,149 @@
     "before": "output.Length < close.Length",
     "after": "output.Length + 1 < close.Length",
     "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.CoreRejectsShortOutputBeforeChangingIt"
+  },
+  {
+    "id": "autocorrelation-spectrum-real",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "real.AddProduct(value, Math.Cos(angle))",
+    "after": "real.AddProduct(value, Math.Sin(angle))",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-imaginary",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "imaginary.AddProduct(value, Math.Sin(angle))",
+    "after": "imaginary.AddProduct(value, Math.Cos(angle))",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-frequency",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "((double)lag / period)",
+    "after": "((double)lag / _upper)",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-lag",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "_lag = Math.Max(0, firstLag)",
+    "after": "_lag = Math.Max(1, firstLag)",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-quartic",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "square * square, .2",
+    "after": "square, .2",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-retention",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "power.AddProduct(previous, .8)",
+    "after": "power.AddProduct(previous, .5)",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-selection",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "power >= .5",
+    "after": "power >= .9",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-peak",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "Math.Max(peak, valueNow)",
+    "after": "Math.Min(peak, valueNow)",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-period-weight",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "_lower + (double)index, power",
+    "after": "_lower + (double)index + 1, power",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.WideAndSubnormalPricesRetainSpectraAndSignals"
+  },
+  {
+    "id": "autocorrelation-spectrum-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.DelayedActivationAndPreviewNormalizeCurrentPowers"
+  },
+  {
+    "id": "autocorrelation-spectrum-reset-powers",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "_powers.Clear();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.DelayedActivationAndPreviewNormalizeCurrentPowers"
+  },
+  {
+    "id": "autocorrelation-spectrum-reset-correlation",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "_correlation.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.DelayedActivationAndPreviewNormalizeCurrentPowers"
+  },
+  {
+    "id": "autocorrelation-spectrum-current-powers",
+    "module": "numerical",
+    "file": "src/Helpers/AutocorrelationSpectrumWindow.cs",
+    "scope": "internal sealed class AutocorrelationSpectrumWindow",
+    "before": "next[index] / peak",
+    "after": "(_powers.TryGetValue(_lower + index, out var oldPower) ? oldPower : 0) / peak",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.DelayedActivationAndPreviewNormalizeCurrentPowers"
+  },
+  {
+    "id": "autocorrelation-spectrum-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAutoCorrelationPeriodogramFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.SelectedPricesReachBatchAndFast"
+  },
+  {
+    "id": "autocorrelation-spectrum-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAutoCorrelationPeriodogramState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.InvalidCandlesCannotAdvanceCorrelationOrSpectrum"
+  },
+  {
+    "id": "autocorrelation-spectrum-core-output",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersAutoCorrelationPeriodogram(",
+    "before": "output.Length < close.Length",
+    "after": "output.Length + 1 < close.Length",
+    "filter": "FullyQualifiedName~AutocorrelationSpectrumNumericalTests.CoreRejectsShortOutputBeforeChangingIt"
   }
 ]

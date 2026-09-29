@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationPeriodogram)
+        {
+            var spectrumOptions = builtIn.CreateOptions(); var spectrumUpper = Integer(spectrumOptions, "Length1", 48); var spectrumLower = Integer(spectrumOptions, "Length2", 10); var spectrumLag = Integer(spectrumOptions, "Length3", 3);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AutocorrelationSpectrumValues(bars, spectrumUpper, spectrumLower, spectrumLag).Outputs["Eacp"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationIndicator)
         {
             var correlationOptions = builtIn.CreateOptions(); var correlationLength = Integer(correlationOptions, "Length1", 48); var correlationSmoothing = Integer(correlationOptions, "Length2", 10);

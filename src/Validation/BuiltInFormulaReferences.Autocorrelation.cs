@@ -14,6 +14,7 @@ internal static partial class BuiltInFormulaReferences
         var lower = Integer(options, "Length2", 10);
         if (name == IndicatorName.EhlersAutoCorrelationIndicator) return new("Eaci", new[] { "Eaci" }, bars => RoofAutocorrelationValues(bars, upper, lower).Outputs);
         var firstLag = Integer(options, "Length3", 3);
+        if (name == IndicatorName.EhlersAutoCorrelationPeriodogram) return new("Eacp", new[] { "Eacp" }, bars => AutocorrelationSpectrumValues(bars, upper, lower, firstLag).Outputs);
         var key = name == IndicatorName.EhlersAutoCorrelationIndicator ? "Eaci" : name == IndicatorName.EhlersAutoCorrelationReversals ? "Eacr" : "Eacp";
         return new(key, new[] { key }, bars =>
         {

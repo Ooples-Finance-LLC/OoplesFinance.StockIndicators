@@ -9048,62 +9048,7 @@ internal static class OscillatorCore
     internal static void EhlersAutoCorrelationPeriodogram(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10, int length3 = 3)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-        length3 = Math.Max(0, length3);
-
-        var pool = ArrayPool<double>.Shared;
-        var corrArray = pool.Rent(close.Length);
-        var rArray = pool.Rent(length1 + 1);
-
-        try
-        {
-            var corr = corrArray.AsSpan(0, close.Length);
-            var r = rArray.AsSpan(0, length1 + 1);
-            r.Clear();
-
-            EhlersAutoCorrelationIndicator(close, corr, length1, length2);
-
-            for (int i = 0; i < close.Length; i++)
-            {
-                double maxPwr = 0;
-
-                for (int j = length2; j <= length1; j++)
-                {
-                    double cosPart = 0, sinPart = 0;
-                    for (int k = length3; k <= length1; k++)
-                    {
-                        double prevCorr = i >= k ? corr[i - k] : 0;
-                        double angle = 2 * Math.PI * ((double)k / j);
-                        cosPart += prevCorr * Math.Cos(angle);
-                        sinPart += prevCorr * Math.Sin(angle);
-                    }
-
-                    double sqSum = (cosPart * cosPart) + (sinPart * sinPart);
-                    double newR = (0.2 * sqSum * sqSum) + (0.8 * r[j]);
-                    r[j] = newR;
-                    maxPwr = Math.Max(newR, maxPwr);
-                }
-
-                double spx = 0, sp = 0;
-                for (int j = length2; j <= length1; j++)
-                {
-                    double pwr = maxPwr > 0 ? r[j] / maxPwr : 0;
-                    if (pwr >= 0.5)
-                    {
-                        spx += j * pwr;
-                        sp += pwr;
-                    }
-                }
-
-                output[i] = sp > 0 ? spx / sp : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(corrArray);
-            pool.Return(rArray);
-        }
+        var window = new AutocorrelationSpectrumWindow(length1, length2, length3); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>

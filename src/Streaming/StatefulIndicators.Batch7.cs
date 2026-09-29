@@ -422,96 +422,16 @@ public sealed class EhlersAutoCorrelationIndicatorState : IStreamingIndicatorSta
 [PrimaryOutput("Eacp")]
 public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly int _length3;
-    private readonly EhlersAutoCorrelationIndicatorState _corrState;
-    private readonly PooledRingBuffer<double> _corrValues;
-    private readonly double[] _rArray;
-    private readonly double[] _rNext;
-
-    public EhlersAutoCorrelationPeriodogramState(int length1 = 48, int length2 = 10, int length3 = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _length3 = Math.Max(0, length3);
-        _corrState = new EhlersAutoCorrelationIndicatorState(_length1, _length2);
-        _corrValues = new PooledRingBuffer<double>(_length1);
-        _rArray = new double[_length1 + 1];
-        _rNext = new double[_length1 + 1];
-    }
-
+    private readonly AutocorrelationSpectrumWindow _window;
+    public EhlersAutoCorrelationPeriodogramState(int length1 = 48, int length2 = 10, int length3 = 3) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.EhlersAutoCorrelationPeriodogram;
-
-    public void Reset()
-    {
-        _corrState.Reset();
-        _corrValues.Clear();
-        Array.Clear(_rArray, 0, _rArray.Length);
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var corr = _corrState.Update(bar, isFinal, includeOutputs: false).Value;
-
-        double maxPwr = 0;
-        for (var j = _length2; j <= _length1; j++)
-        {
-            double cosPart = 0;
-            double sinPart = 0;
-            for (var k = _length3; k <= _length1; k++)
-            {
-                var prevCorr = EhlersStreamingWindow.GetOffsetValue(_corrValues, corr, k);
-                cosPart += prevCorr * Math.Cos(2 * Math.PI * ((double)k / j));
-                sinPart += prevCorr * Math.Sin(2 * Math.PI * ((double)k / j));
-            }
-
-            var sqSum = MathHelper.Pow(cosPart, 2) + MathHelper.Pow(sinPart, 2);
-            var r = (0.2 * MathHelper.Pow(sqSum, 2)) + (0.8 * _rArray[j]);
-            _rNext[j] = r;
-            maxPwr = Math.Max(r, maxPwr);
-        }
-
-        // The powers are normalised by this bar's maximum, so they must be this bar's powers too. Reading
-        // _rArray here made a preview divide the previous bar's powers by the current bar's maximum.
-        double spx = 0;
-        double sp = 0;
-        for (var j = _length2; j <= _length1; j++)
-        {
-            var pwr = maxPwr != 0 ? _rNext[j] / maxPwr : 0;
-            if (pwr >= 0.5)
-            {
-                spx += j * pwr;
-                sp += pwr;
-            }
-        }
-
-        var domCyc = sp != 0 ? spx / sp : 0;
-
-        if (isFinal)
-        {
-            _corrValues.TryAdd(corr, out _);
-            Array.Copy(_rNext, _rArray, _rArray.Length);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eacp", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eacp", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _corrState.Dispose();
-        _corrValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Earsi")]
