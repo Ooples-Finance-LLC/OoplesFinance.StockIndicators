@@ -312,68 +312,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateAutoFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500)
     {
-        List<double> regList = new(stockData.Count);
-        List<double> corrList = new(stockData.Count);
-        List<double> interList = new(stockData.Count);
-        List<double> slopeList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> xList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingCorrelation corrWindow = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var yMaList = GetMovingAverageList(stockData, maType, length, inputList);
-        var devList = GetStandardDeviationList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var dev = devList[i];
-
-            var currentValue = inputList[i];
-            tempList.Add(currentValue);
-
-            var prevX = i >= 1 ? xList[i - 1] : currentValue;
-            var x = currentValue > prevX + dev ? currentValue : currentValue < prevX - dev ? currentValue : prevX;
-            xList.Add(x);
-
-            corrWindow.Add(currentValue, x);
-            var corr = corrWindow.R(length);
-            corr = IsValueNullOrInfinity(corr) ? 0 : corr;
-            corrList.Add((double)corr);
-        }
-
-        var xMaList = GetMovingAverageList(stockData, maType, length, xList);
-        stockData.SetCustomValues(xList);
-        var mxList = GetStandardDeviationList(xList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var my = devList[i];
-            var mx = mxList[i];
-            var corr = corrList[i];
-            var yMa = yMaList[i];
-            var xMa = xMaList[i];
-            var x = xList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var slope = mx != 0 ? corr * (my / mx) : 0;
-            var inter = yMa - (slope * xMa);
-
-            var prevReg = GetLastOrDefault(regList);
-            var reg = (x * slope) + inter;
-            regList.Add(reg);
-
-            var signal = GetCompareSignal(currentValue - reg, prevValue - prevReg);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Af", regList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(regList);
-        stockData.IndicatorName = IndicatorName.AutoFilter;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? AutoFilterWindow.Components(stockData, input, maType, length) : null; using var window = new AutoFilterWindow(maType, length, external);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, components?[0][i], components?[1][i]); values.Add(point.Line); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Af", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AutoFilter; return stockData;
     }
 
 

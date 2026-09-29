@@ -200,9 +200,10 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray();
                     return Outputs(("Ckrsi", Average(raw, 3, kind)));
                 });
+            case IndicatorName.AutoFilter:
+                return new("Af", new[] { "Af" }, bars => AutoFilterOutputs(bars, indicator));
             case IndicatorName.AutoLine:
             case IndicatorName.AutoLineWithDrift:
-            case IndicatorName.AutoFilter:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
                 var drift = name == IndicatorName.AutoLineWithDrift;

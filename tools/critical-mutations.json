@@ -50063,5 +50063,257 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": ";",
     "filter": "FullyQualifiedName~AdaptiveStochasticNumericalTests.InvalidCandlesCannotAdvanceRegressionOrRanges"
+  },
+  {
+    "id": "auto-filter-wide-price-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_sumY + y - old.Price",
+    "after": "_sumY + y + old.Price",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_yy + y * y - old.Price * old.Price",
+    "after": "_yy + y * y + old.Price * old.Price",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-variance-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "(BigInteger)_length * _length",
+    "after": "(BigInteger)_length",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_history.Count >= _length - 1",
+    "after": "_history.Count >= _length",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.HandRegressionAndFlatVariancePreserveWarmup"
+  },
+  {
+    "id": "auto-filter-wide-held-step",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "? price : previous",
+    "after": "? previous : price",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-upper-gate",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "price > previous + deviation",
+    "after": "price > previous - deviation",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-lower-gate",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "price < previous - deviation",
+    "after": "price < previous + deviation",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-step-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_sumX + x - old.Step",
+    "after": "_sumX + x + old.Step",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-cross-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_xy + x * y - old.Step * old.Price",
+    "after": "_xy + x * y + old.Step * old.Price",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-held-variance",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_length * xx - sumX * sumX",
+    "after": "_length * xx + sumX * sumX",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_length * xy - sumX * sumY",
+    "after": "_length * xy + sumX * sumY",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-price-mean",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_priceMean!.Next(new(price), commit)",
+    "after": "_priceMean!.Next(new(step), commit)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-step-mean",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_stepMean!.Next(new(step), commit)",
+    "after": "_stepMean!.Next(new(price), commit)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-center",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "covariance * (x - meanX)",
+    "after": "covariance * (x + meanX)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-uncentered",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "meanY * variance + covariance",
+    "after": "meanY + covariance",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-variance-zero",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "!ready || variance.IsZero ? meanY",
+    "after": "!ready || !variance.IsZero ? meanY",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.HandRegressionAndFlatVariancePreserveWarmup"
+  },
+  {
+    "id": "auto-filter-wide-line-projection",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "var spread = y - line",
+    "after": "line = ExactVarianceWindow.Units(ExactMeanAccumulator.UnitRatio(line, BigInteger.One)); var spread = y - line",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.ExtendedCenteredOutputsRecoverWithoutPoisoningSignals"
+  },
+  {
+    "id": "auto-filter-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "var spread = y - line",
+    "after": "var spread = line - y",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "var change = spread - _spread",
+    "after": "var change = spread",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "if (commit)\n        {\n            if (full)",
+    "after": "if (true)\n        {\n            if (full)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_history.Clear(); _sumY",
+    "after": "_previousStep = 0; _sumY",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "if (commit) { _sum = sum;",
+    "after": "if (true) { _sum = sum;",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.WideDeviationCovarianceAndSelectedMeansMatchRationalStages"
+  },
+  {
+    "id": "auto-filter-wide-callback-step",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "var stepMean = Mean(steps)",
+    "after": "var stepMean = Mean(input)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.CustomMeansKeepPriceThenHeldStepOrder"
+  },
+  {
+    "id": "auto-filter-wide-callback-price",
+    "module": "numerical",
+    "file": "src/Helpers/AutoFilterWindow.cs",
+    "scope": "internal sealed class AutoFilterWindow",
+    "before": "return new[] { priceMean, stepMean }",
+    "after": "return new[] { stepMean, priceMean }",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.CustomMeansKeepPriceThenHeldStepOrder"
+  },
+  {
+    "id": "auto-filter-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAutoFilterFast",
+    "before": "CalculationsHelper.GetInputValuesList(data)",
+    "after": "(data.ClosePrices, data.HighPrices, data.LowPrices, data.OpenPrices, data.Volumes)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.SelectedPricesAndLegacyMeansAgreeAcrossRoutes"
+  },
+  {
+    "id": "auto-filter-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AutoFilterState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "auto-filter-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AutoFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": ";",
+    "filter": "FullyQualifiedName~AutoFilterNumericalTests.InvalidCandlesCannotAdvanceMomentsMeansOrStep"
   }
 ]

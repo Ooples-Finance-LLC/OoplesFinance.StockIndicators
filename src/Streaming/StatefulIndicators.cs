@@ -6304,83 +6304,14 @@ public sealed class AutoDispersionBandsState : IStreamingIndicatorState, IDispos
 [PrimaryOutput("Af")]
 public sealed class AutoFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _yMa;
-    private readonly IMovingAverageSmoother _xMa;
-    private readonly RollingStandardDeviation _dev;
-    private readonly RollingStandardDeviation _xDev;
-    private readonly RollingWindowCorrelation _correlation;
-    private readonly StreamingInputResolver _input;
-    private double _prevX;
-    private double _xValue;
-    private bool _hasPrev;
-
-    public AutoFilterState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500)
-    {
-        var resolved = Math.Max(1, length);
-        _yMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _xMa = MovingAverageSmootherFactory.Create(maType, resolved);
-        _dev = new RollingStandardDeviation(resolved);
-        _xDev = new RollingStandardDeviation(resolved);
-        _correlation = new RollingWindowCorrelation(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AutoFilterWindow _window;
+    public AutoFilterState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 500) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.AutoFilter;
-
-    public void Reset()
-    {
-        _yMa.Reset();
-        _xMa.Reset();
-        _dev.Reset();
-        _xDev.Reset();
-        _correlation.Reset();
-        _prevX = 0;
-        _xValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var dev = _dev.Next(value, isFinal);
-        var prevX = _hasPrev ? _prevX : value;
-        var x = value > prevX + dev ? value : value < prevX - dev ? value : prevX;
-        _xValue = x;
-        var corr = isFinal ? _correlation.Add(value, x, out _) : _correlation.Preview(value, x, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-        var yMa = _yMa.Next(value, isFinal);
-        var xMa = _xMa.Next(x, isFinal);
-        var mx = _xDev.Next(_xValue, isFinal);
-        var slope = mx != 0 ? corr * (dev / mx) : 0;
-        var inter = yMa - (slope * xMa);
-        var reg = (x * slope) + inter;
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Line; return new(value, includeOutputs ? new Dictionary<string, double> { { "Af", value } } : null); }
+    public void Dispose() => _window.Dispose();
 
-        if (isFinal)
-        {
-            _prevX = x;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Af", reg }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(reg, outputs);
-    }
-
-    public void Dispose()
-    {
-        _yMa.Dispose();
-        _xMa.Dispose();
-        _dev.Dispose();
-        _xDev.Dispose();
-        _correlation.Dispose();
-    }
 }
 
 [PrimaryOutput("Al")]

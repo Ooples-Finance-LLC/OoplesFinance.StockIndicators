@@ -6647,63 +6647,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Auto Filter using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeAutoFilterFast(StockData data, ComputeContext context, int length = 500,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeAutoFilterFast(StockData data, ComputeContext context, int length = 500, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateAutoFilter regresses the price on a stepped copy of itself that only moves when the price
-        // leaves a standard deviation band around the last step, and both of its averages take whichever type
-        // it was given.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var window = Math.Max(1, length);
-
-        using var deviationBuffer = context.Rent(count);
-        var deviation = deviationBuffer.WritableSpan;
-        VolatilityCore.StandardDeviation(input, deviation, window);
-
-        using var stepBuffer = context.Rent(count);
-        using var correlationBuffer = context.Rent(count);
-        var step = stepBuffer.WritableSpan;
-        var correlations = correlationBuffer.WritableSpan;
-        var correlation = new RollingCorrelation();
-
-        for (var i = 0; i < count; i++)
-        {
-            var currentValue = input[i];
-
-            // The step starts on the price itself and then holds until the price leaves the band.
-            var previousStep = i >= 1 ? step[i - 1] : currentValue;
-            step[i] = currentValue > previousStep + deviation[i] || currentValue < previousStep - deviation[i]
-                ? currentValue
-                : previousStep;
-
-            correlation.Add(currentValue, step[i]);
-            var r = correlation.R(length);
-            correlations[i] = MathHelper.IsValueNullOrInfinity(r) ? 0 : r;
-        }
-
-        using var priceAverageBuffer = context.Rent(count);
-        using var stepAverageBuffer = context.Rent(count);
-        using var stepDeviationBuffer = context.Rent(count);
-        var priceAverage = priceAverageBuffer.WritableSpan;
-        var stepAverage = stepAverageBuffer.WritableSpan;
-        var stepDeviation = stepDeviationBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, priceAverage);
-        MovingAverage(data, maType, length, step, stepAverage);
-        VolatilityCore.StandardDeviation(step, stepDeviation, window);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var slope = stepDeviation[i] != 0 ? correlations[i] * (deviation[i] / stepDeviation[i]) : 0;
-            var intercept = priceAverage[i] - (slope * stepAverage[i]);
-            output[i] = (step[i] * slope) + intercept;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var components = external ? AutoFilterWindow.Components(data, input, maType, length) : null; using var window = new AutoFilterWindow(maType, length, external);
+        var output = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, components?[0][i], components?[1][i]).Line; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
