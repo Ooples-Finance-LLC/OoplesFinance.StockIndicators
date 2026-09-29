@@ -437,110 +437,15 @@ public sealed class EhlersAutoCorrelationPeriodogramState : IStreamingIndicatorS
 [PrimaryOutput("Earsi")]
 public sealed class EhlersAdaptiveRelativeStrengthIndexV2State : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersAutoCorrelationPeriodogramState _periodogram;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _roofingValues;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private double _prevUpChg;
-    private double _prevDenom;
-    private double _prevArsi1;
-    private double _prevArsi2;
-
-    public EhlersAdaptiveRelativeStrengthIndexV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length1 = 48, int length2 = 10, int length3 = 3)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        var resolved3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / _length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / _length2, 0.99));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _periodogram = new EhlersAutoCorrelationPeriodogramState(_length1, _length2, resolved3);
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, _length2);
-        _roofingValues = new PooledRingBuffer<double>(_length1);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, _length2);
-    }
-
+    private readonly AdaptiveRsiV2Window _window;
+    public EhlersAdaptiveRelativeStrengthIndexV2State(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 48, int length2 = 10, int length3 = 3) => _window = new(length1, length2, length3, maType);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2;
-
-    public void Reset()
-    {
-        _periodogram.Reset();
-        _roofingFilter.Reset();
-        _roofingValues.Clear();
-        _signalSmoother.Reset();
-        _prevUpChg = 0;
-        _prevDenom = 0;
-        _prevArsi1 = 0;
-        _prevArsi2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var domCyc = _periodogram.Update(bar, isFinal, includeOutputs: false).Value;
-        domCyc = MathHelper.MinOrMax(domCyc, _length1, _length2);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-
-        var length = MathHelper.CeilingCycle(domCyc / 2);
-        double upChg = 0;
-        double dnChg = 0;
-        for (var j = 0; j < length; j++)
-        {
-            var filt = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, j);
-            var prevFilt = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, j + 1);
-            if (filt > prevFilt)
-            {
-                upChg += filt - prevFilt;
-            }
-            else if (filt < prevFilt)
-            {
-                dnChg += prevFilt - filt;
-            }
-        }
-
-        var denom = upChg + dnChg;
-        var arsi = denom != 0 && _prevDenom != 0
-            ? (_c1 * ((upChg / denom) + (_prevUpChg / _prevDenom)) / 2) + (_c2 * _prevArsi1) + (_c3 * _prevArsi2)
-            : 0;
-        var signal = _signalSmoother.Next(arsi, isFinal);
-
-        if (isFinal)
-        {
-            _roofingValues.TryAdd(roofingFilter, out _);
-            _prevUpChg = upChg;
-            _prevDenom = denom;
-            _prevArsi2 = _prevArsi1;
-            _prevArsi1 = arsi;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Earsi", arsi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(arsi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Earsi", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _periodogram.Dispose();
-        _roofingFilter.Dispose();
-        _roofingValues.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Earsift")]

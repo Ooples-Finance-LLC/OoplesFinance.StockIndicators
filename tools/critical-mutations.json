@@ -43619,5 +43619,185 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~AutocorrelationReversalNumericalTests.InvalidCandlesCannotAdvanceCrossingsOrCorrelation"
+  },
+  {
+    "id": "adaptive-rsi-v2-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "var cycle = _spectrum.Next(price, commit).Value",
+    "after": "_spectrum.Next(price, commit); var cycle = 0d",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-half-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_upper, _lower) / 2",
+    "after": "_upper, _lower) / 3",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-previous-roof",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "At(lag + 1).AddTo(ref change, -1)",
+    "after": "At(lag + 1).AddTo(ref change, 1)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-falling-total",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "else total.Subtract(change);",
+    "after": "else { }",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "rises.Ratio(total)",
+    "after": "1 - rises.Ratio(total)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-opening-gate",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "if (valid && _valid)",
+    "after": "if (valid)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-prior-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "sum.AddProduct(_ratio, _gain / 2)",
+    "after": "sum.AddProduct(ratio, _gain / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "sum.AddProduct(_previous, _feedback)",
+    "after": "sum.AddProduct(_older, _feedback)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-decay",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "sum.AddProduct(_older, _decay)",
+    "after": "sum.AddProduct(_older, -_decay)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-dc-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_gain = gain.Mean(1)",
+    "after": "_gain = 1 - _feedback - _decay",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.LongSmoothingRetainsNonzeroDcDrive"
+  },
+  {
+    "id": "adaptive-rsi-v2-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "if (commit) { if (_history.Count",
+    "after": "if (true) { if (_history.Count",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-history",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_history.Add(current);",
+    "after": "_history.Add(default);",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-reset-spectrum",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_spectrum.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-reset-roof",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_roof.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRsiV2Window.cs",
+    "scope": "internal sealed class AdaptiveRsiV2Window",
+    "before": "_average?.Reset();",
+    "after": "_history.Clear();",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
+  },
+  {
+    "id": "adaptive-rsi-v2-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-rsi-v2-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(",
+    "before": "outputKey == \"Signal\" ? point.Average : point.Value",
+    "after": "outputKey == \"Signal\" ? point.Value : point.Average",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-rsi-v2-custom-average",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveRelativeStrengthIndexV2Fast(",
+    "before": "ComponentAverage.Take(raw, length2)",
+    "after": "ComponentAverage.Take(raw, length2 + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.CustomerAverageIsConsumedOnceAndControlsOnlySignalLine"
+  },
+  {
+    "id": "adaptive-rsi-v2-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveRelativeStrengthIndexV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.InvalidCandlesCannotAdvanceCyclesRoofingOrAverages"
+  },
+  {
+    "id": "adaptive-rsi-v2-fisher-amplification",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAdaptiveRsiFisherTransformV2Fast(",
+    "before": "1.5 * transformed",
+    "after": "1.25 * transformed",
+    "filter": "FullyQualifiedName~AdaptiveRsiV2NumericalTests.WideAndSubnormalRoofingPreservesRsiAndFisher"
   }
 ]

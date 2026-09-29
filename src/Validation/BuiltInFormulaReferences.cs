@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2 or IndicatorName.EhlersAdaptiveRsiFisherTransformV2)
+        {
+            var rsiOptions = builtIn.CreateOptions(); var rsiUpper = Integer(rsiOptions, "Length1", 48); var rsiLower = Integer(rsiOptions, "Length2", 10); var rsiLag = Integer(rsiOptions, "Length3", 3); var rsiKind = AverageKind(rsiOptions, 3); var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV2; var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };
+            for (var slot = 0; slot < rsiKeys.Length; slot++) { var key = rsiKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRsiV2Values(bars, rsiUpper, rsiLower, rsiLag, rsiKind, rsiFisher).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationReversals)
         {
             var reversalOptions = builtIn.CreateOptions(); var reversalLength = Integer(reversalOptions, "Length1", 48); var reversalSmoothing = Integer(reversalOptions, "Length2", 10); var reversalLag = Integer(reversalOptions, "Length3", 3); var reversalKind = AverageKind(reversalOptions, 3);

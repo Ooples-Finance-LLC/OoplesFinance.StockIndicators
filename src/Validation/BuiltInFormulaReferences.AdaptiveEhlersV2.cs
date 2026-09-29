@@ -22,6 +22,7 @@ internal static partial class BuiltInFormulaReferences
         var rsi = fisher || name == IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2;
         var stochastic = inverse || name == IndicatorName.EhlersAdaptiveStochasticIndicatorV2;
         var key = fisher ? "Earsift" : inverse ? "Easift" : rsi ? "Earsi" : stochastic ? "Easi" : "Eacci";
+        if (rsi) return new(key, fisher ? new[] { key } : new[] { key, "Signal" }, bars => AdaptiveRsiV2Values(bars, upper, lower, lag, kind, fisher).Outputs);
         return new(key, fisher ? new[] { key } : new[] { key, "Signal" }, bars =>
         {
             var roof = HilbertRoofingTrajectory(Closes(bars), upper, lower);

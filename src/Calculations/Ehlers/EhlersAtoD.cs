@@ -471,74 +471,13 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveRelativeStrengthIndexV2(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length1 = 48, int length2 = 10, int length3 = 3)
     {
-        var callerSeries = stockData.CaptureInputSeries();
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> upChgList = new(stockData.Count);
-        List<double> denomList = new(stockData.Count);
-        List<double> arsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(1.414 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var domCycList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersAutoCorrelationPeriodogram(data, length1, length2, length3));
-        // The next component reads the caller's series, not the previous component's output.
-        stockData.RestoreInputSeries(callerSeries);
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var domCyc = MinOrMax(domCycList[i], length1, length2);
-            var prevArsi1 = i >= 1 ? arsiList[i - 1] : 0;
-            var prevArsi2 = i >= 2 ? arsiList[i - 2] : 0;
-
-            var prevUpChg = GetLastOrDefault(upChgList);
-            double upChg = 0, dnChg = 0;
-            for (var j = 0; j < MathHelper.CeilingCycle(domCyc / 2); j++)
-            {
-                var filt = i >= j ? roofingFilterList[i - j] : 0;
-                var prevFilt = i >= j + 1 ? roofingFilterList[i - (j + 1)] : 0;
-                upChg += filt > prevFilt ? filt - prevFilt : 0;
-                dnChg += filt < prevFilt ? prevFilt - filt : 0;
-            }
-            upChgList.Add(upChg);
-
-            var prevDenom = GetLastOrDefault(denomList);
-            var denom = upChg + dnChg;
-            denomList.Add(denom);
-
-            var arsi = denom != 0 && prevDenom != 0 ? (c1 * ((upChg / denom) + (prevUpChg / prevDenom)) / 2) + (c2 * prevArsi1) + (c3 * prevArsi2) : 0;
-            arsiList.Add(arsi);
-        }
-
-        var arsiEmaList = GetMovingAverageList(stockData, maType, length2, arsiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var arsi = arsiList[i];
-            var arsiEma = arsiEmaList[i];
-            var prevArsi = i >= 1 ? arsiList[i - 1] : 0;
-            var prevArsiEma = i >= 1 ? arsiEmaList[i - 1] : 0;
-
-            var signal = GetRsiSignal(arsi - arsiEma, prevArsi - prevArsiEma, arsi, prevArsi, 0.7, 0.3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Earsi", arsiList },
-            { "Signal", arsiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(arsiList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2;
-
-        return stockData;
+        length2 = Math.Max(1, length2); var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new AdaptiveRsiV2Window(length1, length2, length3, maType, external); var values = new List<double>(input.Count); var averages = new List<double>(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); values.Add(point.Value); averages.Add(point.Average); }
+        if (external) averages = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), length2)?.ToList() ?? GetMovingAverageList(stockData, maType, length2, values);
+        var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < values.Count; i++) signals?.Add(GetRsiSignal(values[i] - averages[i], i == 0 ? 0 : values[i - 1] - averages[i - 1], values[i], i == 0 ? 0 : values[i - 1], .7, .3));
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Earsi", values }, { "Signal", averages } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAdaptiveRelativeStrengthIndexV2; return stockData;
     }
 
 
