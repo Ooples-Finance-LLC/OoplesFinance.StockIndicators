@@ -943,6 +943,7 @@ internal static partial class StatefulIndicatorFactory
             TopsAndBottomsFinderSpecOptions topsBottoms => new TopsAndBottomsFinderState(topsBottoms.MaType, topsBottoms.Length),
             TTMScalperIndicatorSpecOptions => new TTMScalperIndicatorState(),
             HybridConvolutionFilterSpecOptions hybrid => new HybridConvolutionFilterState(hybrid.Length),
+            _1LCLeastSquaresMovingAverageSpecOptions aliasOneLc => new _1LCLeastSquaresMovingAverageState(aliasOneLc.MaType, aliasOneLc.Length),
             OneLCLeastSquaresMovingAverageSpecOptions oneLc => new _1LCLeastSquaresMovingAverageState(oneLc.MaType, oneLc.Length),
             JmaRsxCloneSpecOptions rsx => new JmaRsxCloneState(rsx.Length),
             JmaSpecOptions jma => new JurikMovingAverageState(length: jma.Length),

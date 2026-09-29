@@ -311,18 +311,7 @@ internal static partial class BuiltInFormulaReferences
                         + Enumerable.Range(0, i + 1).Sum(j => Math.Pow(pole, i - j) * drive[j])).ToArray()));
                 });
             case IndicatorName._1LCLeastSquaresMovingAverage:
-                return new("1lsma", new[] { "1lsma" }, bars =>
-                {
-                    var prices = Closes(bars); var means = Average(prices, length, kind);
-                    return Outputs(("1lsma", prices.Select((_, i) =>
-                    {
-                        if (length == 1 || i + 1 < length) return means[i];
-                        var sample = Window(prices, i, length).ToArray(); var mean = sample.Average();
-                        var center = (length - 1) / 2d;
-                        var covariance = sample.Select((v, j) => (j - center) * (v - mean)).Average();
-                        return means[i] + 1.7 * covariance / Math.Sqrt((length * (double)length - 1) / 12);
-                    }).ToArray()));
-                });
+                return new("1lsma", new[] { "1lsma" }, bars => OneLcValues(bars, length, kind).Outputs);
             case IndicatorName.JmaRsxClone:
                 return new("Rsx", new[] { "Rsx" }, bars =>
                 {

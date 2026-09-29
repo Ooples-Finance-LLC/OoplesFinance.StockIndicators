@@ -13426,56 +13426,16 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(StockData data, ComputeContext context,
         int length = 14, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // Calculate1LCLeastSquaresMovingAverage offsets a moving average by the correlation between bar index
-        // and price, scaled by the price's own standard deviation and a fixed 1.7. It is a one-pass stand-in
-        // for a least squares line, not the regression MovingAverageCore.OneLCLeastSquaresMovingAverage ran,
-        // and it takes its average from the spec's MaType, which the dispatch was not passing.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(1, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length, input, output);
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(input, deviation.WritableSpan, length);
-        var stdDev = deviation.Span;
-
-        var pool = ArrayPool<double>.Shared;
-        var indexArray = pool.Rent(length);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var input = SpanCompat.AsReadOnlySpan(inputList); length = Math.Max(1, length);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); var result = context.Rent(input.Length);
         try
         {
-            for (var i = 0; i < count; i++)
-            {
-                var n = Math.Min(length, i + 1);
-                double correlation = 0;
-                if (length > 1 && n > 1)
-                {
-                    var start = i + 1 - n;
-                    for (var j = 0; j < n; j++)
-                    {
-                        indexArray[j] = start + j;
-                    }
-
-                    correlation = WindowCorrelation.Pearson(new ReadOnlySpan<double>(indexArray, 0, n), input.Slice(start, n));
-                }
-
-                if (MathHelper.IsValueNullOrInfinity(correlation))
-                {
-                    correlation = 0;
-                }
-
-                output[i] += correlation * stdDev[i] * 1.7;
-            }
+            if (external) MovingAverage(data, maType, length, input, result.WritableSpan);
+            using var window = new OneLcWindow(maType, length, external);
+            for (var i = 0; i < input.Length; i++) result.WritableSpan[i] = window.Next(input[i], true, external ? result.Span[i] : null).Value;
+            return result;
         }
-        finally
-        {
-            pool.Return(indexArray);
-        }
-
-        return buffer;
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

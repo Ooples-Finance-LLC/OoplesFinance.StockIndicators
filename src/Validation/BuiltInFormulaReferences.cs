@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName._1LCLeastSquaresMovingAverage)
+        {
+            var oneLcOptions = builtIn.CreateOptions(); var oneLcLength = Integer(oneLcOptions, "Length", 14); var oneLcKind = AverageKind(oneLcOptions, 1);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OneLcValues(bars, oneLcLength, oneLcKind).Outputs["1lsma"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.AdaptiveLeastSquares)
         {
             var adaptiveFitLength = Integer(builtIn.CreateOptions(), "Length", 500);

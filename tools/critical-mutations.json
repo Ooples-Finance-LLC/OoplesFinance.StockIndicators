@@ -44861,5 +44861,185 @@
     "before": "input[i], input[i], input[i]",
     "after": "input[i], 0, 0",
     "filter": "FullyQualifiedName~AdaptiveFitNumericalTests.CenteredMomentsRetainWideAndSubnormalCancellation"
+  },
+  {
+    "id": "one-lc-weighted-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "_weighted - _sum + _length * current",
+    "after": "_weighted + _length * current",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "sum -= ExactVarianceWindow.Units(_prices.Peek());",
+    "after": "sum -= 0;",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-startup",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "_prices.Count >= _length - 1",
+    "after": "_prices.Count >= _length",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.TwoPointHandExamplesKeepPopulationScalingAndStartup"
+  },
+  {
+    "id": "one-lc-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "(BigInteger)_length * (_length + 1L) / 2",
+    "after": "(BigInteger)_length * _length",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-mean-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "UnitRatio(sum, _length)",
+    "after": "UnitRatio(sum, _length + 1L)",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-centered-weight",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "2 * weighted - (_length + 1L) * sum",
+    "after": "weighted - (_length + 1L) * sum",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-centered-location",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "(_length + 1L) * sum",
+    "after": "(_length - 1L) * sum",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-gain",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "ExactVarianceWindow.Units(1.7)",
+    "after": "ExactVarianceWindow.Units(1.6)",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.TwoPointHandExamplesKeepPopulationScalingAndStartup"
+  },
+  {
+    "id": "one-lc-population-time",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "(n * n - 1)",
+    "after": "(n * n + 1)",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-covariance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "n * n * (n * n - 1)",
+    "after": "n * (n * n - 1)",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-correction-sign",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "centered.Sign * magnitude",
+    "after": "magnitude",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.TwoPointHandExamplesKeepPopulationScalingAndStartup"
+  },
+  {
+    "id": "one-lc-correction-addition",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "correction.AddTo(ref total);",
+    "after": "correction.AddTo(ref total, -1);",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "_sum = _weighted = _difference = default;",
+    "after": "_weighted = _difference = default;",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.WideAndSubnormalCenteredPricesRetainCorrection"
+  },
+  {
+    "id": "one-lc-signal",
+    "module": "numerical",
+    "file": "src/Helpers/OneLcWindow.cs",
+    "scope": "internal sealed class OneLcWindow",
+    "before": "difference > _difference",
+    "after": "difference < _difference",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.SelectedPricesReachBothFastAliasesAndSignals"
+  },
+  {
+    "id": "one-lc-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOneLCLeastSquaresMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.SelectedPricesReachBothFastAliasesAndSignals"
+  },
+  {
+    "id": "one-lc-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class _1LCLeastSquaresMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.InvalidCandlesCannotAdvanceMomentsOrAverage"
+  },
+  {
+    "id": "one-lc-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "scope": "public static StockData Calculate1LCLeastSquaresMovingAverage(",
+    "before": "var (input, _, _, _, _) = GetInputValuesList(stockData);",
+    "after": "var input = stockData.ClosePrices;",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.SelectedPricesReachBothFastAliasesAndSignals"
+  },
+  {
+    "id": "one-lc-custom-average",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "scope": "public static StockData Calculate1LCLeastSquaresMovingAverage(",
+    "before": "Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType)",
+    "after": "!StrengthWindow.Supports(maType)",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.CustomAverageIsConsumedOnceWithoutChangingCovariance"
+  },
+  {
+    "id": "one-lc-output-slot",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class _1LCLeastSquaresMovingAverageState",
+    "before": "{ \"1lsma\", point.Value }",
+    "after": "{ \"wrong\", point.Value }",
+    "filter": "FullyQualifiedName~OneLcNumericalTests.TwoPointHandExamplesKeepPopulationScalingAndStartup"
   }
 ]

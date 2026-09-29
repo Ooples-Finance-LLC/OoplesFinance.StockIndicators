@@ -5620,66 +5620,16 @@ public sealed class TrixState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("1lsma")]
 public sealed class _1LCLeastSquaresMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _sma;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly RollingWindowCorrelation _correlation;
-    private readonly StreamingInputResolver _input;
-    private int _index;
-
-    public _1LCLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14)
-    {
-        _length = Math.Max(1, length);
-        _sma = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new RollingStandardDeviation(_length);
-        _correlation = new RollingWindowCorrelation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly OneLcWindow _window;
+    public _1LCLeastSquaresMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName._1LCLeastSquaresMovingAverage;
-
-    public void Reset()
-    {
-        _sma.Reset();
-        _stdDev.Reset();
-        _correlation.Reset();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var x = (double)_index;
-        var corr = isFinal ? _correlation.Add(x, value, out _) : _correlation.Preview(x, value, out _);
-        corr = MathHelper.IsValueNullOrInfinity(corr) ? 0 : corr;
-
-        var sma = _sma.Next(value, isFinal);
-        var stdDev = _stdDev.Next(value, isFinal);
-        var lsma = sma + (corr * stdDev * 1.7);
-
-        if (isFinal)
-        {
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "1lsma", lsma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(lsma, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "1lsma", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _sma.Dispose();
-        _stdDev.Dispose();
-        _correlation.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("3hma")]
