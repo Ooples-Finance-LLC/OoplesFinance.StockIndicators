@@ -234,91 +234,18 @@ public static partial class Calculations
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, 
         double min = 5)
     {
-        List<double> trValList = new(stockData.Count);
-        List<double> atrValPowList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<double> stdDevList = new(stockData.Count);
-        List<double> emaAFPList = new(stockData.Count);
-        List<double> emaCTPList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum atrValSumWindow = new();
-        RollingMinMax stdDevWindow = new(lbLength);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AtrFilterWindow(maType, length, atrLength, stdDevLength, lbLength, min, external);
+        var (input, high, low, _, _) = GetInputValuesList(stockData); List<double>? averages = null, squares = null; var customSquares = false;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-
-            var trVal = currentValue != 0 ? tr / currentValue : tr;
-            trValList.Add(trVal);
+            var normalized = input.Select((p, i) => AtrFilterWindow.Publish(AtrFilterWindow.RelativeRange(p, high[i], low[i], i == 0 ? p : input[i - 1]))).ToList();
+            averages = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(normalized), Math.Max(1, atrLength))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, atrLength), normalized);
+            var powered = averages.Select(v => AtrFilterWindow.Publish(AtrFilterWindow.Square(ExactVarianceWindow.Units(v)))).ToList(); var substitutions = Builder.Compute.ComponentAverage.Substitutions;
+            squares = Builder.Compute.ComponentAverage.Take(SpanCompat.AsReadOnlySpan(powered), Math.Max(1, stdDevLength))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, stdDevLength), powered); customSquares = Builder.Compute.ComponentAverage.Substitutions != substitutions;
         }
-
-        var atrValList = GetMovingAverageList(stockData, maType, atrLength, trValList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var atrVal = atrValList[i];
-
-            var atrValPow = Pow(atrVal, 2);
-            atrValPowList.Add(atrValPow);
-        }
-
-        var stdDevAList = GetMovingAverageList(stockData, maType, stdDevLength, atrValPowList);
-        var stableDeviation = maType == MovingAvgType.SimpleMovingAverage
-            ? GetStandardDeviationList(atrValList, stdDevLength) : null;
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var stdDevA = stdDevAList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var atrVal = atrValList[i];
-            tempList.Add(atrVal);
-            atrValSumWindow.Add(atrVal);
-
-            var atrValSum = atrValSumWindow.Sum(stdDevLength);
-            var stdDevB = Pow(atrValSum, 2) / Pow(stdDevLength, 2);
-
-            var stdDev = stableDeviation is not null ? stableDeviation[i]
-                : stdDevA - stdDevB >= 0 ? Sqrt(stdDevA - stdDevB) : 0;
-            stdDevList.Add(stdDev);
-            stdDevWindow.Add(stdDev);
-
-            var stdDevLow = stdDevWindow.Min;
-            // stdDevLow is the lowest stdDev in the window, so a stdDev of zero makes both zero and both
-            // ratios 0/0 - two equal deviations, which is 1. Reading them as 0 kills the smoothing factor.
-            var stdDevFactorAFP = stdDev != 0 ? stdDevLow / stdDev : 1;
-            var stdDevFactorCTP = stdDevLow != 0 ? stdDev / stdDevLow : 1;
-            var stdDevFactorAFPLow = Math.Min(stdDevFactorAFP, min);
-            var stdDevFactorCTPLow = Math.Min(stdDevFactorCTP, min);
-            var alphaAfp = (2 * stdDevFactorAFPLow) / (length + 1);
-            var alphaCtp = (2 * stdDevFactorCTPLow) / (length + 1);
-
-            // An exponential average starts at a price, not at zero.
-            var prevEmaAfp = i >= 1 ? emaAFPList[i - 1] : currentValue;
-            var emaAfp = (alphaAfp * currentValue) + ((1 - alphaAfp) * prevEmaAfp);
-            emaAFPList.Add(emaAfp);
-
-            var prevEmaCtp = i >= 1 ? emaCTPList[i - 1] : currentValue;
-            var emaCtp = (alphaCtp * currentValue) + ((1 - alphaCtp) * prevEmaCtp);
-            emaCTPList.Add(emaCtp);
-
-            var signal = GetCompareSignal(currentValue - emaAfp, prevValue - prevEmaAfp);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Afp", emaAFPList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(emaAFPList);
-        stockData.IndicatorName = IndicatorName.AtrFilteredExponentialMovingAverage;
-
-        return stockData;
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], high[i], low[i], true, averages?[i], squares?[i], customSquares); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Afp", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.AtrFilteredExponentialMovingAverage; return stockData;
     }
 
 

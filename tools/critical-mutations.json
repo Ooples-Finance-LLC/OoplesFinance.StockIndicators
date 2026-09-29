@@ -45041,5 +45041,221 @@
     "before": "{ \"1lsma\", point.Value }",
     "after": "{ \"wrong\", point.Value }",
     "filter": "FullyQualifiedName~OneLcNumericalTests.TwoPointHandExamplesKeepPopulationScalingAndStartup"
+  },
+  {
+    "id": "atr-filter-range-high",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - before), BigInteger.Abs(l - before)))",
+    "after": "BigInteger.Abs(p - before)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.UnpublishedNormalizedRangesAndSquaresExceedDoubleMaximum"
+  },
+  {
+    "id": "atr-filter-range-zero",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "p.IsZero ? RocBankValue.RoundUnits(range, BigInteger.One)",
+    "after": "p.IsZero ? BigInteger.Zero",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-range-sign",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "(range * p.Sign) << 1074",
+    "after": "range << 1074",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-range-first-seed",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_seeded ? Publish(_previousPrice) : price",
+    "after": "_seeded ? Publish(_previousPrice) : 0",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.HandExampleSeedsAtPriceAndRecoversAfterZeroDeviation"
+  },
+  {
+    "id": "atr-filter-range-average",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_rangeAverage!.Next(relative, commit)",
+    "after": "_rangeAverage!.Next(p, commit)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-square-scale",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "RocBankValue.RoundUnits(value * value, Unit)",
+    "after": "RocBankValue.RoundUnits(value * value, 2 * Unit)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-population-startup",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_ranges.Count < _deviationLength - 1",
+    "after": "_ranges.Count < _deviationLength",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.HandExampleSeedsAtPriceAndRecoversAfterZeroDeviation"
+  },
+  {
+    "id": "atr-filter-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "squares -= expired * expired;",
+    "after": "squares -= 0;",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-variance-center",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "Root(n * squares - sum * sum, n * n)",
+    "after": "Root(n * squares, n * n)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-floor",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "BigInteger.Min(lowest, retained)",
+    "after": "BigInteger.Max(lowest, retained)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-floor-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "var skip = _deviations.Count == _lookback;",
+    "after": "var skip = false;",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-equal-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "deviation.IsZero ? 1 :",
+    "after": "deviation.IsZero ? 0 :",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.HandExampleSeedsAtPriceAndRecoversAfterZeroDeviation"
+  },
+  {
+    "id": "atr-filter-gain-period",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_length + 1L);",
+    "after": "_length);",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.GainCapsRetainLongPeriodDriveAndNegativeExtrapolation"
+  },
+  {
+    "id": "atr-filter-cap-domain",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "if (double.IsNaN(cap) || double.IsInfinity(cap)) throw new ArgumentOutOfRangeException(nameof(cap));",
+    "after": "",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.InvalidCapPreservesCallerDataAndCoreOutput"
+  },
+  {
+    "id": "atr-filter-price-seed",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_seeded ? _previousAverage : p",
+    "after": "_seeded ? _previousAverage : BigInteger.Zero",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.HandExampleSeedsAtPriceAndRecoversAfterZeroDeviation"
+  },
+  {
+    "id": "atr-filter-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "if (commit) { if (_ranges.Count",
+    "after": "if (true) { if (_ranges.Count",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_seeded = false;",
+    "after": "",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.WideAndSubnormalRangesRetainAdaptiveDeviation"
+  },
+  {
+    "id": "atr-filter-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "difference > _difference",
+    "after": "difference < _difference",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.SelectedPricesPreserveOriginalOrSyntheticRangesAndSignals"
+  },
+  {
+    "id": "atr-filter-custom-second-moment",
+    "module": "numerical",
+    "file": "src/Helpers/AtrFilterWindow.cs",
+    "scope": "internal sealed class AtrFilterWindow",
+    "before": "_population && !customSquares",
+    "after": "_population",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.BothCustomAveragesAreConsumedInOrderIncludingSecondMoment"
+  },
+  {
+    "id": "atr-filter-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.SelectedPricesPreserveOriginalOrSyntheticRangesAndSignals"
+  },
+  {
+    "id": "atr-filter-fast-ranges",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAtrFilteredExponentialMovingAverageFast(",
+    "before": "highs.Span[i], lows.Span[i], true",
+    "after": "input[i], input[i], true",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.UnpublishedNormalizedRangesAndSquaresExceedDoubleMaximum"
+  },
+  {
+    "id": "atr-filter-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class AtrFilteredExponentialMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.InvalidCandlesCannotAdvanceRangesMomentsOrFloor"
+  },
+  {
+    "id": "atr-filter-core-ranges",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void AtrFilteredExponentialMovingAverage(",
+    "before": "window.Next(price[i], high[i], low[i], true)",
+    "after": "window.Next(price[i], price[i], price[i], true)",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.UnpublishedNormalizedRangesAndSquaresExceedDoubleMaximum"
+  },
+  {
+    "id": "atr-filter-custom-stage-order",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/MovingAveragesAtoD.cs",
+    "scope": "public static StockData CalculateAtrFilteredExponentialMovingAverage(",
+    "before": "var powered = averages.Select",
+    "after": "var powered = normalized.Select",
+    "filter": "FullyQualifiedName~AtrFilterNumericalTests.BothCustomAveragesAreConsumedInOrderIncludingSecondMoment"
   }
 ]

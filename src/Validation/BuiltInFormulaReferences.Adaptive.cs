@@ -438,27 +438,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Bama", result));
                 });
             case IndicatorName.AtrFilteredExponentialMovingAverage:
-                var atrPeriod = Integer(options, "AtrLength", 20);
-                var deviationPeriod = Integer(options, "StdDevLength", 10);
-                var floorPeriod = Integer(options, "LbLength", 20);
-                var gainCap = Number(options, 5, "Min");
-                return new("Afp", new[] { "Afp" }, bars =>
-                {
-                    var ranges = TrueRanges(bars);
-                    var normalized = ranges.Select((v, i) => bars[i].Close == 0 ? v : v / bars[i].Close).ToArray();
-                    var atr = Average(normalized, atrPeriod, 1);
-                    // Centered second moments avoid subtraction of nearly equal raw moments.
-                    var deviation = PopulationVariance(atr, deviationPeriod).Select(Math.Sqrt).ToArray();
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        var ratio = deviation[i] == 0 ? 1 : Window(deviation, i, floorPeriod).Min() / deviation[i];
-                        var gain = 2 * Math.Min(ratio, gainCap) / (length + 1d);
-                        var previous = i == 0 ? bars[i].Close : result[i - 1];
-                        result[i] = previous + gain * (bars[i].Close - previous);
-                    }
-                    return Outputs(("Afp", result));
-                });
+                return new("Afp", new[] { "Afp" }, bars => AtrFilterValues(bars, length, Integer(options, "AtrLength", 20), Integer(options, "StdDevLength", 10), Integer(options, "LbLength", 20), Number(options, 5, "Min")).Outputs);
             case IndicatorName.AdaptiveMovingAverage:
                 var adaptiveFastGain = 2d / (Integer(options, "FastLength", 2) + 1d);
                 var adaptiveSlowGain = 2d / (Integer(options, "SlowLength", 14) + 1d);

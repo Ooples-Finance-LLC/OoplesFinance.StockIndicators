@@ -6338,108 +6338,16 @@ public sealed class AsymmetricalRelativeStrengthIndexState : IStreamingIndicator
 [PrimaryOutput("Afp")]
 public sealed class AtrFilteredExponentialMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingStandardDeviation? _stableDeviation;
-    private readonly int _length;
-    private readonly int _stdDevLength;
-    private readonly IMovingAverageSmoother _atrSmoother;
-    private readonly IMovingAverageSmoother _stdDevASmoother;
-    private readonly RollingCumulativeSum _atrValSum;
-    private readonly RollingWindowMin _stdDevMin;
-    private readonly StreamingInputResolver _input;
-    private readonly double _min;
-    private double _prevValue;
-    private double _prevEmaAfp;
-    private bool _hasPrev;
-
-    public AtrFilteredExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5)
-    {
-        _length = Math.Max(1, length);
-        _stdDevLength = Math.Max(1, stdDevLength);
-        if (maType == MovingAvgType.SimpleMovingAverage)
-        {
-            _stableDeviation = new RollingStandardDeviation(_stdDevLength);
-            _atrSmoother = new ExactSimpleMovingAverageSmoother(Math.Max(1, atrLength));
-            _stdDevASmoother = new ExactSimpleMovingAverageSmoother(_stdDevLength);
-        }
-        else
-        {
-            _atrSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, atrLength));
-            _stdDevASmoother = MovingAverageSmootherFactory.Create(maType, _stdDevLength);
-        }
-        _atrValSum = new RollingCumulativeSum();
-        _stdDevMin = new RollingWindowMin(Math.Max(1, lbLength));
-        _min = min;
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly AtrFilterWindow _window;
+    public AtrFilteredExponentialMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5) => _window = new(maType, length, atrLength, stdDevLength, lbLength, min);
     public IndicatorName Name => IndicatorName.AtrFilteredExponentialMovingAverage;
-
-    public void Reset()
-    {
-        _stableDeviation?.Reset();
-        _atrSmoother.Reset();
-        _stdDevASmoother.Reset();
-        _atrValSum.Reset();
-        _stdDevMin.Reset();
-        _prevValue = 0;
-        _prevEmaAfp = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // The first bar has no previous value, so it stands in for itself, as the batch does to avoid an
-        // inflated first true range.
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var trVal = value != 0 ? tr / value : tr;
-        var atrVal = _atrSmoother.Next(trVal, isFinal);
-        var atrValPow = MathHelper.Pow(atrVal, 2);
-        var stdDevA = _stdDevASmoother.Next(atrValPow, isFinal);
-        var atrValSum = isFinal ? _atrValSum.Add(atrVal, _stdDevLength) : _atrValSum.Preview(atrVal, _stdDevLength);
-        var stdDevB = _stdDevLength != 0
-            ? MathHelper.Pow(atrValSum, 2) / MathHelper.Pow(_stdDevLength, 2)
-            : 0;
-        var diff = stdDevA - stdDevB;
-        var stdDev = _stableDeviation?.Next(atrVal, isFinal) ?? (diff >= 0 ? MathHelper.Sqrt(diff) : 0);
-        var stdDevLow = isFinal ? _stdDevMin.Add(stdDev, out _) : _stdDevMin.Preview(stdDev, out _);
-        // stdDevLow is the lowest stdDev in the window, so a stdDev of zero makes both zero and the ratio
-        // 0/0 - two equal deviations, which is 1. Reading it as 0 kills the smoothing factor entirely.
-        var stdDevFactorAfp = stdDev != 0 ? stdDevLow / stdDev : 1;
-        var stdDevFactorAfpLow = Math.Min(stdDevFactorAfp, _min);
-        var alphaAfp = (2 * stdDevFactorAfpLow) / (_length + 1);
-        // An exponential average starts at a price, not at zero, as the batch does.
-        var prevEmaAfp = _hasPrev ? _prevEmaAfp : value;
-        var emaAfp = (alphaAfp * value) + ((1 - alphaAfp) * prevEmaAfp);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevEmaAfp = emaAfp;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Afp", emaAfp }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(emaAfp, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.High, bar.Low, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Afp", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _stableDeviation?.Dispose();
-        _atrSmoother.Dispose();
-        _stdDevASmoother.Dispose();
-        _stdDevMin.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("MiddleBand")]

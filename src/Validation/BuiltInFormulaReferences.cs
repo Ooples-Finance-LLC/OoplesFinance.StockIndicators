@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.AtrFilteredExponentialMovingAverage)
+        {
+            var atrOptions = builtIn.CreateOptions(); var atrPriceLength = Integer(atrOptions, "Length", 45); var atrRangeLength = Integer(atrOptions, "AtrLength", 20); var atrDeviationLength = Integer(atrOptions, "StdDevLength", 10); var atrFloorLength = Integer(atrOptions, "LbLength", 20); var atrGainCap = Number(atrOptions, 5, "Min");
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => AtrFilterValues(bars, atrPriceLength, atrRangeLength, atrDeviationLength, atrFloorLength, atrGainCap).Outputs["Afp"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName._1LCLeastSquaresMovingAverage)
         {
             var oneLcOptions = builtIn.CreateOptions(); var oneLcLength = Integer(oneLcOptions, "Length", 14); var oneLcKind = AverageKind(oneLcOptions, 1);

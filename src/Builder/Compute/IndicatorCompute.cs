@@ -15172,79 +15172,23 @@ internal static partial class IndicatorCompute
         int length = 45, int atrLength = 20, int stdDevLength = 10, int lbLength = 20, double min = 5,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateAtrFilteredExponentialMovingAverage filters an exponential average by the standard
-        // deviation of the true range taken relative to price: the smoothing factor is scaled by the ratio of
-        // the lowest recent deviation to the current one, capped at min. The published Afp is that average.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        atrLength = Math.Max(atrLength, 1);
-        stdDevLength = Math.Max(stdDevLength, 1);
-        lbLength = Math.Max(lbLength, 1);
-
-        using var highBuffer = context.Rent(count);
-        using var lowBuffer = context.Rent(count);
-        CustomRange(data, input, highBuffer.WritableSpan, lowBuffer.WritableSpan);
-        var highs = highBuffer.Span;
-        var lows = lowBuffer.Span;
-
-        using var trueRanges = context.Rent(count);
-        var trueRange = trueRanges.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new AtrFilterWindow(maType, length, atrLength, stdDevLength, lbLength, min, external);
+        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var input = SpanCompat.AsReadOnlySpan(inputList);
+        using var highs = context.Rent(input.Length); using var lows = context.Rent(input.Length);
+        if (input.SequenceEqual(SpanCompat.AsReadOnlySpan(data.ClosePrices))) { SpanCompat.AsReadOnlySpan(data.HighPrices).CopyTo(highs.WritableSpan); SpanCompat.AsReadOnlySpan(data.LowPrices).CopyTo(lows.WritableSpan); }
+        else CustomRange(data, input, highs.WritableSpan, lows.WritableSpan);
+        using var averages = context.Rent(input.Length); using var squares = context.Rent(input.Length); var customSquares = false;
+        if (external)
         {
-            var value = input[i];
-            var range = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], i >= 1 ? input[i - 1] : value);
-            trueRange[i] = value != 0 ? range / value : range;
+            using var normalized = context.Rent(input.Length); using var powered = context.Rent(input.Length);
+            for (var i = 0; i < input.Length; i++) normalized.WritableSpan[i] = AtrFilterWindow.Publish(AtrFilterWindow.RelativeRange(input[i], highs.Span[i], lows.Span[i], i == 0 ? input[i] : input[i - 1]));
+            MovingAverage(data, maType, Math.Max(1, atrLength), normalized.Span, averages.WritableSpan);
+            for (var i = 0; i < input.Length; i++) powered.WritableSpan[i] = AtrFilterWindow.Publish(AtrFilterWindow.Square(ExactVarianceWindow.Units(averages.Span[i])));
+            var substitutions = ComponentAverage.Substitutions; MovingAverage(data, maType, Math.Max(1, stdDevLength), powered.Span, squares.WritableSpan); customSquares = ComponentAverage.Substitutions != substitutions;
         }
-
-        using var averageRanges = context.Rent(count);
-        MovingAverage(data, maType, atrLength, trueRanges.Span, averageRanges.WritableSpan);
-        var atr = averageRanges.Span;
-
-        using var squares = context.Rent(count);
-        var square = squares.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            square[i] = MathHelper.Pow(atr[i], 2);
-        }
-
-        using var meanSquares = context.Rent(count);
-        var substitutions = ComponentAverage.Substitutions;
-        MovingAverage(data, maType, stdDevLength, squares.Span, meanSquares.WritableSpan);
-        var stableVariance = maType == MovingAvgType.SimpleMovingAverage && ComponentAverage.Substitutions == substitutions;
-        using var deviations = context.Rent(count);
-        if (stableVariance) VolatilityCore.StandardDeviation(atr, deviations.WritableSpan, stdDevLength);
-        var meanSquare = meanSquares.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var rangeTotal = new RollingSum();
-        var deviationWindow = new RollingMinMax(lbLength);
-        // An exponential average starts at a price. Seeded at zero it spends hundreds of bars climbing out of
-        // a value the series never held, and on a series with no volatility it never leaves it at all.
-        var previousAverage = count > 0 ? input[0] : 0;
-        for (var i = 0; i < count; i++)
-        {
-            rangeTotal.Add(atr[i]);
-            var rangeSum = rangeTotal.Sum(stdDevLength);
-            var squaredMean = MathHelper.Pow(rangeSum, 2) / MathHelper.Pow(stdDevLength, 2);
-
-            var variance = meanSquare[i] - squaredMean;
-            var deviation = stableVariance ? deviations.Span[i] : variance >= 0 ? MathHelper.Sqrt(variance) : 0;
-            deviationWindow.Add(deviation);
-
-            var lowestDeviation = deviationWindow.Min;
-            // A deviation of zero makes lowestDeviation zero too, so the ratio is 0/0 - two equal deviations,
-            // which is 1. Reading it as 0 kills the smoothing factor entirely.
-            var factor = deviation != 0 ? lowestDeviation / deviation : 1;
-            var alpha = 2 * Math.Min(factor, min) / (length + 1);
-
-            output[i] = (alpha * input[i]) + ((1 - alpha) * previousAverage);
-            previousAverage = output[i];
-        }
-
-        return buffer;
+        var result = context.Rent(input.Length);
+        try { for (var i = 0; i < input.Length; i++) result.WritableSpan[i] = window.Next(input[i], highs.Span[i], lows.Span[i], true, external ? averages.Span[i] : null, external ? squares.Span[i] : null, customSquares).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>
