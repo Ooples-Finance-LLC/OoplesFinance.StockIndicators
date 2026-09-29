@@ -6034,89 +6034,12 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeHalfTrendFast(StockData data, ComputeContext context, int length = 2,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // Track each trend until a confirmed reversal; retain extrema across its bars.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var highRange = context.Rent(count);
-        using var lowRange = context.Rent(count);
-        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
-        var highs = highRange.Span;
-        var lows = lowRange.Span;
-
-        // ATR is the first configured average stage, even though it only controls batch signals.
-        using var unusedAtr = ComputeAtrFast(data, context, 100, maType);
-        using var highAverage = context.Rent(count);
-        using var lowAverage = context.Rent(count);
-        MovingAverage(data, maType, length, highs, highAverage.WritableSpan);
-        MovingAverage(data, maType, length, lows, lowAverage.WritableSpan);
-        var highMas = highAverage.Span;
-        var lowMas = lowAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        var previousTrend = 0d;
-        var previousNextTrend = 0d;
-        var previousUp = 0d;
-        var previousDown = 0d;
-        double maxLow = 0, minHigh = 0;
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-            var highest = highWindow.Max;
-            var lowest = lowWindow.Min;
-            var previousHigh = i >= 1 ? highs[i - 1] : 0;
-            var previousLow = i >= 1 ? lows[i - 1] : 0;
-            if (i == 0) { maxLow = lowest; minHigh = highest; previousUp = lowest; previousDown = highest; }
-
-            var trend = previousTrend;
-            var nextTrend = previousNextTrend;
-            if (previousNextTrend == 1)
-            {
-                maxLow = Math.Max(lowest, maxLow);
-                if (highMas[i] < maxLow && input[i] < (i > 0 ? previousLow : lowest))
-                {
-                    trend = 1;
-                    nextTrend = 0;
-                    minHigh = highest;
-                }
-            }
-            else
-            {
-                minHigh = Math.Min(highest, minHigh);
-                if (lowMas[i] > minHigh && input[i] > (i > 0 ? previousHigh : highest))
-                {
-                    trend = 0;
-                    nextTrend = 1;
-                    maxLow = lowest;
-                }
-            }
-
-            var up = 0d;
-            var down = 0d;
-            if (trend == 0)
-            {
-                up = previousTrend != 0 ? previousDown : Math.Max(maxLow, previousUp);
-            }
-            else
-            {
-                down = previousTrend != 1 ? previousUp : Math.Min(minHigh, previousDown);
-            }
-
-            output[i] = trend == 0 ? up : down;
-            previousTrend = trend;
-            previousNextTrend = nextTrend;
-            previousUp = up;
-            previousDown = down;
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new HalfTrendWindow(maType, length, 100, external); using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, 100, maType) : null;
+        using ComputeBuffer? highMean = external ? context.Rent(input.Count) : null; using ComputeBuffer? lowMean = external ? context.Rent(input.Count) : null;
+        if (external) { MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(high), highMean!.Value.WritableSpan); MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(low), lowMean!.Value.WritableSpan); }
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? atr!.Value.Span[i] : null, external ? highMean!.Value.Span[i] : null, external ? lowMean!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

@@ -356,11 +356,6 @@ OoplesFinance.StockIndicators.Indicators.GroverLlorensCycleOscillator/longer-per
 OoplesFinance.StockIndicators.Indicators.GroverLlorensCycleOscillator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.GroverLlorensCycleOscillator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.GroverLlorensCycleOscillator/weighted-average
-OoplesFinance.StockIndicators.Indicators.HalfTrend/default
-OoplesFinance.StockIndicators.Indicators.HalfTrend/longer-periods
-OoplesFinance.StockIndicators.Indicators.HalfTrend/minimum-periods
-OoplesFinance.StockIndicators.Indicators.HalfTrend/shorter-periods
-OoplesFinance.StockIndicators.Indicators.HalfTrend/weighted-average
 OoplesFinance.StockIndicators.Indicators.HampelFilter/default
 OoplesFinance.StockIndicators.Indicators.HampelFilter/longer-periods
 OoplesFinance.StockIndicators.Indicators.HampelFilter/minimum-periods

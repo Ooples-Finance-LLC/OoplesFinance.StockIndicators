@@ -87,31 +87,7 @@ internal static partial class BuiltInFormulaReferences
         switch (name)
         {
             case IndicatorName.HalfTrend:
-                return new("Ht", new[] { "Ht" }, bars =>
-                {
-                    var highs = bars.Select(b => b.High).ToArray(); var lows = bars.Select(b => b.Low).ToArray();
-                    var highMeans = Average(highs, length, kind); var lowMeans = Average(lows, length, kind);
-                    var ceilings = bars.Select((_, i) => Window(highs, i, length).Max()).ToArray();
-                    var floors = bars.Select((_, i) => Window(lows, i, length).Min()).ToArray();
-                    var result = new double[bars.Count];
-                    var seekingFall = false; var bullish = true; var segment = 0;
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var ceiling = ceilings.Skip(segment).Take(i - segment + 1).Min();
-                        var floor = floors.Skip(segment).Take(i - segment + 1).Max();
-                        var wasBullish = bullish;
-                        // A rising confirmation on an earlier bar must precede seekingFall.
-                        if (seekingFall && highMeans[i] < floor && bars[i].Close < lows[i - 1])
-                        { bullish = false; seekingFall = false; segment = i; ceiling = ceilings[i]; }
-                        else if (!seekingFall && lowMeans[i] > ceiling && bars[i].Close > (i == 0 ? highs[i] : highs[i - 1]))
-                        { bullish = true; seekingFall = true; segment = i; floor = floors[i]; }
-                        // Before the first rising confirmation, the initial floor remains the support.
-                        if (bullish && !seekingFall) floor = floors[0];
-                        var previous = i == 0 ? floors[i] : result[i - 1];
-                        result[i] = bullish != wasBullish ? previous : bullish ? Math.Max(previous, floor) : Math.Min(previous, ceiling);
-                    }
-                    return Outputs(("Ht", result));
-                });
+                return new("Ht", new[] { "Ht" }, bars => HalfTrendOutputs(bars, indicator));
             case IndicatorName.Trender:
                 return new("Trender", new[] { "TrendUp", "TrendDn", "Trender" }, bars =>
                 {

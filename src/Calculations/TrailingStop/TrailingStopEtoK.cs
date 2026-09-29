@@ -15,106 +15,17 @@ public static partial class Calculations
     public static StockData CalculateHalfTrend(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 2,
         int atrLength = 100)
     {
-        List<double> trendList = new(stockData.Count);
-        List<double> nextTrendList = new(stockData.Count);
-        List<double> upList = new(stockData.Count);
-        List<double> downList = new(stockData.Count);
-        List<double> htList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length);
-
-        var atrList = CalculateAverageTrueRange(stockData, maType, atrLength).ChainedValues;
-        var highMaList = GetMovingAverageList(stockData, maType, length, highList);
-        var lowMaList = GetMovingAverageList(stockData, maType, length, lowList);
-
-        double maxLow = 0, minHigh = 0;
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        using var window = new HalfTrendWindow(maType, length, atrLength, external); List<double>? atr = null, highMean = null, lowMean = null;
+        if (external)
         {
-            var currentValue = inputList[i];
-            var currentAvgTrueRange = atrList[i];
-            var high = highestList[i];
-            var low = lowestList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var highMa = highMaList[i];
-            var lowMa = lowMaList[i];
-            if (i == 0) { maxLow = low; minHigh = high; }
-            var prevNextTrend = GetLastOrDefault(nextTrendList);
-            var prevTrend = GetLastOrDefault(trendList);
-            var prevUp = i == 0 ? low : upList[i - 1];
-            var prevDown = i == 0 ? high : downList[i - 1];
-            var atr = currentAvgTrueRange / 2;
-            var dev = length * atr;
-
-            var trend = prevTrend;
-            var nextTrend = prevNextTrend;
-            if (prevNextTrend == 1)
-            {
-                maxLow = Math.Max(low, maxLow);
-                if (highMa < maxLow && currentValue < (i > 0 ? prevLow : low))
-                {
-                    trend = 1;
-                    nextTrend = 0;
-                    minHigh = high;
-                }
-            }
-            else
-            {
-                minHigh = Math.Min(high, minHigh);
-                if (lowMa > minHigh && currentValue > (i > 0 ? prevHigh : high))
-                {
-                    trend = 0;
-                    nextTrend = 1;
-                    maxLow = low;
-                }
-            }
-            trendList.Add(trend);
-            nextTrendList.Add(nextTrend);
-
-            double up = 0, down = 0, arrowUp = 0, arrowDown = 0;
-            if (trend == 0)
-            {
-                if (prevTrend != 0)
-                {
-                    up = prevDown;
-                    arrowUp = up - atr;
-                }
-                else
-                {
-                    up = Math.Max(maxLow, prevUp);
-                }
-            }
-            else
-            {
-                if (prevTrend != 1)
-                {
-                    down = prevUp;
-                    arrowDown = down + atr;
-                }
-                else
-                {
-                    down = Math.Min(minHigh, prevDown);
-                }
-            }
-            upList.Add(up);
-            downList.Add(down);
-
-            var ht = trend == 0 ? up : down;
-            htList.Add(ht);
-
-            var signal = GetConditionSignal(arrowUp != 0 && trend == 0 && prevTrend == 1, arrowDown != 0 && trend == 1 && prevTrend == 0);
-            signalsList?.Add(signal);
+            var caller = stockData.CaptureInputSeries(); atr = CalculateAverageTrueRange(stockData, maType, Math.Max(1, atrLength)).CustomValuesList.ToList();
+            List<double> Average(List<double> values) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), values);
+            highMean = Average(high); lowMean = Average(low); stockData.RestoreInputSeries(caller);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ht", htList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(htList);
-        stockData.IndicatorName = IndicatorName.HalfTrend;
-
-        return stockData;
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, atr?[i], highMean?[i], lowMean?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ht", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.HalfTrend; return stockData;
     }
 
 

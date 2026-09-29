@@ -47687,5 +47687,221 @@
     "before": "if (double.IsNaN(maximum) || double.IsInfinity(maximum) || maximum < start)",
     "after": "if (false)",
     "filter": "FullyQualifiedName~ParabolicSarNumericalTests.InvalidParametersRejectBeforeMutatingSelectedInput"
+  },
+  {
+    "id": "halftrend-wide-high-period",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_highMean = new(kind, _length)",
+    "after": "_highMean = new(kind, _length == 1 ? 2 : _length - 1)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-low-period",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_lowMean = new(kind, _length)",
+    "after": "_lowMean = new(kind, _length == 1 ? 2 : _length - 1)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_count - _length + 1L",
+    "after": "_count - _length",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-high-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Extreme(_highs, high, true, commit)",
+    "after": "Extreme(_highs, high, false, commit)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-low-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Extreme(_lows, low, false, commit)",
+    "after": "Extreme(_lows, low, true, commit)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-initial-floor",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_seeded ? _maxLow : lowest",
+    "after": "_seeded ? _maxLow : highest",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.HandStopsPreserveInitialSupportAndConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-initial-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_seeded ? _minHigh : highest",
+    "after": "_seeded ? _minHigh : lowest",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.HandStopsPreserveInitialSupportAndConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-fall-mean-equality",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Compare(highMean, maxLow) < 0",
+    "after": "Compare(highMean, maxLow) <= 0",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.HandStopsPreserveInitialSupportAndConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-rise-mean-equality",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Compare(lowMean, minHigh) > 0",
+    "after": "Compare(lowMean, minHigh) >= 0",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.HandStopsPreserveInitialSupportAndConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-fall-price",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "close < _previousLow",
+    "after": "close > _previousLow",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-rise-price",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "close > (_seeded ? _previousHigh : highest)",
+    "after": "close < (_seeded ? _previousHigh : highest)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-fall-confirmation",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "falling = true; seekFall = false;",
+    "after": "falling = true; seekFall = true;",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-rise-confirmation",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "falling = false; seekFall = true;",
+    "after": "falling = false; seekFall = false;",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-support-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Math.Max(lowest, maxLow)",
+    "after": "Math.Min(lowest, maxLow)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-ceiling-retention",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "Math.Min(highest, minHigh)",
+    "after": "Math.Max(highest, minHigh)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-up-transfer",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_falling ? priorDown : Math.Max(maxLow, priorUp)",
+    "after": "_falling ? priorUp : Math.Max(maxLow, priorUp)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-down-transfer",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "!_falling ? priorUp : Math.Min(minHigh, priorDown)",
+    "after": "!_falling ? priorDown : Math.Min(minHigh, priorDown)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "if (commit) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "_seeded = _falling = _seekFall = false;",
+    "after": "_seeded = _falling = _seekFall = true;",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
+  },
+  {
+    "id": "halftrend-wide-arrow-half",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "atr.Multiply(.5)",
+    "after": "atr.Multiply(1)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.ExtendedAtrKeepsArrowEqualityAndDirectionExact"
+  },
+  {
+    "id": "halftrend-wide-arrow-zero",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "&& !arrow.IsExactlyZero",
+    "after": "&& arrow.IsExactlyZero",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.ExtendedAtrKeepsArrowEqualityAndDirectionExact"
+  },
+  {
+    "id": "halftrend-wide-custom-high",
+    "module": "numerical",
+    "file": "src/Helpers/HalfTrendWindow.cs",
+    "scope": "internal sealed class HalfTrendWindow",
+    "before": "new RocBankValue(externalHigh.Value)",
+    "after": "new RocBankValue(externalLow!.Value)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.CustomAveragesKeepAtrHighLowOrderAndPeriods"
+  },
+  {
+    "id": "halftrend-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHalfTrendFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(data.HighPrices[i], data.LowPrices[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.SelectedPricesPreserveEffectiveHighLowRangesAndSignals"
+  },
+  {
+    "id": "halftrend-wide-native-close",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch14.cs",
+    "scope": "public sealed class HalfTrendState",
+    "before": "_window.Next(bar.High, bar.Low, bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~HalfTrendNumericalTests.WideMeansAndRetainedExtremesPreserveConfirmedReversals"
   }
 ]
