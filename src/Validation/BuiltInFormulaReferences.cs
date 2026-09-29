@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.UtBotAlerts)
+        {
+            var utKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < utKeys.Length; slot++) { var key = utKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => UtBotOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.VolatilityStop)
         {
             var stopOptions = builtIn.CreateOptions(); var stopLength = Integer(stopOptions, "Length", 14); var stopMultiplier = Number(stopOptions, 2, "Multiplier");

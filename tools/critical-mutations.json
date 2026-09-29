@@ -46085,5 +46085,221 @@
     "before": "{ \"Vs\", point.Value }",
     "after": "{ \"wrong\", point.Value }",
     "filter": "FullyQualifiedName~VolatilityStopNumericalTests.HandCrossingsEqualityAndFirstPriceSeedRemainExplicit"
+  },
+  {
+    "id": "ut-bot-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p)))",
+    "after": "BigInteger.Max(BigInteger.Abs(h - p), BigInteger.Abs(l - p))",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-range-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "BigInteger.Abs(h - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-range-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "BigInteger.Abs(l - p)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-first-close",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? _previous : 0",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-previous-close",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "_seeded ? _previous : close",
+    "after": "_seeded ? (_previous + close) / 2 : close",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.ExtendedRangesCancelBeforePublicationAndZeroFactorsStayFinite"
+  },
+  {
+    "id": "ut-bot-wide-distance-shift",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "sum.ScaleByPowerOfTwo(atr.UpperShift);",
+    "after": "",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.ExtendedRangesCancelBeforePublicationAndZeroFactorsStayFinite"
+  },
+  {
+    "id": "ut-bot-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "sum.AddProduct(atr.Mantissa, _factor, currentSide.Sign > 0 ? -1 : 1);",
+    "after": "sum.AddProduct(atr.Mantissa, _factor / 2, currentSide.Sign > 0 ? -1 : 1);",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-up-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "movement.Sign > 0 ? candidate : _stop",
+    "after": "movement.Sign < 0 ? candidate : _stop",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-down-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "movement.Sign < 0 ? candidate : _stop",
+    "after": "movement.Sign > 0 ? candidate : _stop",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-position-equality",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "previousSide.Sign < 0 && currentSide.Sign > 0 ? 1",
+    "after": "previousSide.Sign <= 0 && currentSide.Sign > 0 ? 1",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-position-down",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "previousSide.Sign > 0 && currentSide.Sign < 0 ? -1",
+    "after": "previousSide.Sign > 0 && currentSide.Sign < 0 ? 1",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-buy-equality",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "previousSide.Sign <= 0 && difference.Sign > 0",
+    "after": "previousSide.Sign < 0 && difference.Sign > 0",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-sell-equality",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "previousSide.Sign >= 0 && difference.Sign < 0",
+    "after": "previousSide.Sign > 0 && difference.Sign < 0",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-buy-seed",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "var buy = _seeded &&",
+    "after": "var buy =",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-sell-seed",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "var sell = _seeded &&",
+    "after": "var sell =",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "_range!.Next(TrueRange(high, low, previous), commit)",
+    "after": "_range!.Next(TrueRange(high, low, previous), true)",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "_stop = default;",
+    "after": "_stop = new RocBankValue(1);",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.WideRangesAndBothGapDirectionsPreserveEveryOutput"
+  },
+  {
+    "id": "ut-bot-wide-signal-seed",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "change.Subtract(previousSide);",
+    "after": "if (_seeded) change.Subtract(previousSide);",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.HandCrossingsKeepPositionStrictButAlertEqualityInclusive"
+  },
+  {
+    "id": "ut-bot-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/UtBotWindow.cs",
+    "scope": "internal sealed class UtBotWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.NonfiniteFactorsRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "ut-bot-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUtBotAlertsFast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.SelectedPricesPreserveEffectiveRangesAndAllFourFastSlots"
+  },
+  {
+    "id": "ut-bot-wide-fast-slots",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeUtBotAlertsFast(",
+    "before": "slot == 2 ? point.Buy : slot == 3 ? point.Sell",
+    "after": "slot == 2 ? point.Sell : slot == 3 ? point.Buy",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.SelectedPricesPreserveEffectiveRangesAndAllFourFastSlots"
+  },
+  {
+    "id": "ut-bot-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch29.cs",
+    "scope": "public sealed class UtBotAlertsState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~UtBotNumericalTests.InvalidCandlesCannotAdvanceAverageStopOrPosition"
   }
 ]

@@ -680,6 +680,7 @@ internal static partial class IndicatorCompute
             LogisticCorrelationSpecOptions lc => ComputeLogisticCorrelation(data, context, lc.Length, lc.K),
             EfficientPriceSpecOptions ep => ComputeEfficientPrice(data, context, ep.Length),
             EfficientAutoLineSpecOptions eal => ComputeEfficientAutoLine(data, context, eal.Length, eal.FastAlpha, eal.SlowAlpha),
+            UtBotAlertsSpecOptions bot => spec.OutputKey switch { null or "TrailingStop" => ComputeUtBotAlertsFast(data, context, bot.MaType, bot.Length, bot.KeyValue, 0), "Position" => ComputeUtBotAlertsFast(data, context, bot.MaType, bot.Length, bot.KeyValue, 1), "Buy" => ComputeUtBotAlertsFast(data, context, bot.MaType, bot.Length, bot.KeyValue, 2), "Sell" => ComputeUtBotAlertsFast(data, context, bot.MaType, bot.Length, bot.KeyValue, 3), _ => null },
             WellesWilderVolatilitySystemSpecOptions wilder => ComputeWellesWilderVolatilitySystemFast(data, context, wilder.MaType, wilder.Length1, wilder.Length2, wilder.Factor),
             CalmarRatioSpecOptions cr => ComputeCalmarRatioFast(data, context, cr.Length),
             CommoditySelectionIndexSpecOptions csi => ComputeCommoditySelectionIndexFast(data, context, csi.Length,
@@ -7041,6 +7042,14 @@ internal static partial class IndicatorCompute
         var buffer = context.Rent(data.Count);
         VolatilityCore.YangZhangVolatility(open, high, low, close, buffer.WritableSpan, length);
         return buffer;
+    }
+
+    internal static ComputeBuffer ComputeUtBotAlertsFast(StockData data, ComputeContext context, MovingAvgType kind = MovingAvgType.WildersSmoothingMethod, int length = 10, double factor = 1, int slot = 0)
+    {
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(kind); using var window = new UtBotWindow(kind, length, factor, external);
+        using ComputeBuffer? atr = external ? ComputeAtrFast(data, context, length, kind) : null; var result = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? atr!.Value.Span[i] : null); result.WritableSpan[i] = slot == 1 ? point.Position : slot == 2 ? point.Buy : slot == 3 ? point.Sell : point.Stop; } return result; }
+        catch { result.Dispose(); throw; }
     }
 
     internal static ComputeBuffer ComputeWellesWilderVolatilitySystemFast(StockData data, ComputeContext context, MovingAvgType kind = MovingAvgType.ExponentialMovingAverage, int trendLength = 63, int rangeLength = 21, double factor = 3)

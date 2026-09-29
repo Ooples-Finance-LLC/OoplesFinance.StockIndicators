@@ -60,30 +60,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Wwvs", new[] { "Wwvs" }, bars => WilderVolatilityOutputs(bars, indicator));
             case IndicatorName.UtBotAlerts:
                 if (kind == 0) return null;
-                return new("TrailingStop", new[] { "TrailingStop", "Position", "Buy", "Sell" }, bars =>
-                {
-                    var distance = Average(TrueRanges(bars), Integer(options, "Length", 10), kind)
-                        .Select(v => v * Number(options, 1, "KeyValue")).ToArray();
-                    var stops = new double[bars.Count];
-                    var positions = new double[bars.Count];
-                    var buy = new double[bars.Count];
-                    var sell = new double[bars.Count];
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var price = bars[i].Close;
-                        var previous = i == 0 ? price : bars[i - 1].Close;
-                        var priorStop = i == 0 ? 0 : stops[i - 1];
-                        var side = Math.Sign(price - priorStop);
-                        var priorSide = Math.Sign(previous - priorStop);
-                        var candidate = price + (side > 0 ? -distance[i] : distance[i]);
-                        stops[i] = side == priorSide && side != 0
-                            ? side > 0 ? Math.Max(priorStop, candidate) : Math.Min(priorStop, candidate) : candidate;
-                        positions[i] = side * priorSide < 0 ? side : i == 0 ? 0 : positions[i - 1];
-                        buy[i] = i > 0 && priorSide <= 0 && price > stops[i] ? 1 : 0;
-                        sell[i] = i > 0 && priorSide >= 0 && price < stops[i] ? 1 : 0;
-                    }
-                    return Outputs(("TrailingStop", stops), ("Position", positions), ("Buy", buy), ("Sell", sell));
-                });
+                return new("TrailingStop", new[] { "TrailingStop", "Position", "Buy", "Sell" }, bars => UtBotOutputs(bars, indicator));
             default: return null;
         }
     }
