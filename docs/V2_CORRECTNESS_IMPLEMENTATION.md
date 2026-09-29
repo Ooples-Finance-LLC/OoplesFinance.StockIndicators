@@ -3562,3 +3562,19 @@ Known outstanding failure: `FoundationReferencesMatchIndependentSmallExamples` r
 Prepared inventory: 6,073/7,131 numerical enrollments, 1,058 omissions across 155 types; 387 grouped batches, 3,247 configurations, 590 types and 6,346 mutation sites. Remaining numerical coverage, hosted checks, package/release assurance and competitor-performance evidence are incomplete. PR #246 remains draft.
 
 Resume publication with evidence-only updates for already-published batches. Do not run the old batch-609–622 snapshot publishers: staging their older source snapshots could revert subsequent work.
+
+
+### Batch 609: Autonomous Recursive mutation qualification
+
+The corrected isolated campaigns `609ra` and `609rb` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **41/41 focused tests**. Both archives were compared byte-for-byte with the retained batch-609 snapshot; individual mutation TRX files contain failing tests, not compilation failures. The original inconclusive campaign is retained and is not credited.
+
+Source snapshot SHA256: `64befa06ce2a7fdc7451767469ab8dc21917849d98aac6d93eb5feebc165ccb7`. Archive SHA256: `41d0427429e3cb21f4f20107737850693d7d235b0c680e4d2cf85eee1949faa8` and `41d0427429e3cb21f4f20107737850693d7d235b0c680e4d2cf85eee1949faa8`.
+
+This is evidence for the isolated batch-609 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 610–622 and the remaining final gates is still incomplete.
+
+
+### Chande Disparity rounded hand expectation follow-up
+
+The hand example now accounts for the startup mean rounding `4/3` to binary64 before exact disparity scaling: `100 * (1 - roundedMean)` rounds to `-33.33333333333333`. The existing dedicated hand regression now checks this sequence across batch, fast, native and direct-window paths, including preview/reset. Its periods match the public alias fixed defaults (200/50/20).
+
+Validation: 39/39 Chande Disparity cases passed in the first focused run. The strengthened dedicated regression subsequently passed 1/1 (`chande-disparity-617-rounded-hand-final.trx`), reusing unchanged production binaries. Its first supplemental run used period 2 rather than the alias defaults and was corrected; no production changes were needed. The broad `FoundationReferencesMatchIndependentSmallExamples` test passes the Chande assertion but now fails later on AutoFilter (reference `3.6999999999999997`, hand expectation `3.7`). That separate finding awaits a scope decision and is not reported as passing.

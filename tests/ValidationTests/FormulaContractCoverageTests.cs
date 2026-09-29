@@ -2374,7 +2374,8 @@ public sealed class FormulaContractCoverageTests
         var compositeTrend = Enumerable.Range(1, 6).Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
         Check(new ChandeCompositeMomentumIndex(), compositeTrend, new[] { 0d, 0, 0, 0, 50, 75 }, new[] { 0d, 0, 0, 0, 20, 40 });
         Check(new ConditionalAccumulator(2), reversal, new[] { 0d, 1, 0 }, new[] { 0d, .5, 1d / 6 });
-        Check(new ChandeMomentumOscillatorAverageDisparityIndex(2), reversal, new[] { 0d, 25, -100d / 3 });
+        // The startup mean rounds 4/3 before exact disparity scaling.
+        Check(new ChandeMomentumOscillatorAverageDisparityIndex(2), reversal, new[] { 0d, 25, -33.33333333333333 });
         Check(new ChopZone(2), reversal, new[] { 0d, 81, -77 });
         Check(new ContractHigh(), reversal, new[] { 1d, 2, 2 });
         Check(new ContractLow(), reversal, new[] { 1d, 1, 1 });

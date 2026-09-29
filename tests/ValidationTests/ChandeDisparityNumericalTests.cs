@@ -52,6 +52,8 @@ public sealed class ChandeDisparityNumericalTests
     public void HandZeroPriceAndThreeMeanSeedsArePreserved()
     {
         Assert.Equal(new[] { 0d, 25 }, Check(Bars(new[] { 2d, 4 }), 2, 2, 2).Outputs["Cmoadi"]);
+        // The third startup mean is binary64 4/3; scale its exact residual.
+        Assert.Equal(new[] { 0d, 25, -33.33333333333333 }, Check(Bars(new[] { 1d, 2, 1 }), 200, 50, 20).Outputs["Cmoadi"]);
         Assert.Equal(new[] { 0d, 25 }, Check(Bars(new[] { -2d, -4 }), 2, 2, 2).Outputs["Cmoadi"]);
         var result = Check(Bars(new[] { 1d, 0, 2, 0, -3, 0 })); Assert.Equal(0, result.Outputs["Cmoadi"][1]); Assert.Equal(0, result.Outputs["Cmoadi"][3]); Assert.Equal(0, result.Outputs["Cmoadi"][5]);
         result = Check(Bars(new[] { 1d, -2, 3, 0 }), 1, 1, 1); Assert.All(result.Outputs["Cmoadi"], v => Assert.Equal(0, v));
