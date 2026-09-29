@@ -56,7 +56,7 @@ internal sealed class RocketRsiWindow : IDisposable
     internal double Finish(double smoothed, bool commit) => Finish(new Scaled(smoothed, 0), false, commit);
     private static double LogOnePlus(double value)
     {
-        var rounded = 1 + value; return rounded == 1 ? value : Math.Log(rounded) * (value / (rounded - 1));
+        var rounded = 1 + value; return rounded == 1 ? value : Math.Log(rounded) * (value / (rounded - 1)); // NOSONAR: S1244 - Exact equality detects when 1 + value rounds to 1; a tolerance would discard representable logarithmic corrections.
     }
     private double Finish(Scaled value, bool isChange, bool commit)
     {
