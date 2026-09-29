@@ -387,39 +387,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersSuperSmootherFilter(this StockData stockData, int length = 10)
     {
-        List<double> filtList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var a1 = Exp(MinOrMax(-MathHelper.Sqrt2 * Math.PI / length, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MinOrMax(MathHelper.Sqrt2 * Math.PI / length, 0.99, 0.01));
-        var coeff2 = b1;
-        var coeff3 = -1 * a1 * a1;
-        var coeff1 = 1 - coeff2 - coeff3;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var prevFilter1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilter2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var prevFilt = GetLastOrDefault(filtList);
-            var filt = (coeff1 * ((currentValue + prevValue) / 2)) + (coeff2 * prevFilter1) + (coeff3 * prevFilter2);
-            filtList.Add(filt);
-
-            var signal = GetCompareSignal(currentValue - filt, prevValue - prevFilt);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Essf", filtList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersSuperSmootherFilter;
-
-        return stockData;
+        var engine = new Streaming.EhlersSuperSmootherFilterEngine(length); var (input, _, _, _, _) = GetInputValuesList(stockData); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = engine.Step(input[i], true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Essf", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersSuperSmootherFilter; return stockData;
     }
 
     /// <summary>

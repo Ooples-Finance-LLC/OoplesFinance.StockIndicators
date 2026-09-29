@@ -660,6 +660,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Ebema", line));
                 });
             case IndicatorName.EhlersSuperSmootherFilter:
+                return new("Essf", new[] { "Essf" }, bars => SuperSmootherValues(bars, length).Outputs);
             case IndicatorName.EhlersAverageErrorFilter:
                 var errorFilter = indicator.BatchName == IndicatorName.EhlersAverageErrorFilter;
                 var key = errorFilter ? "Eaef" : "Essf";

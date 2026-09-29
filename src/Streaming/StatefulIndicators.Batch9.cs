@@ -946,49 +946,27 @@ internal sealed class Ehlers2PoleSuperSmootherFilterV2Smoother : IMovingAverageS
 
 internal sealed class EhlersSuperSmootherFilterEngine
 {
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private double _prevValue;
-    private double _prevFilter1;
-    private double _prevFilter2;
-    private int _index;
-
+    private readonly System.Numerics.BigInteger _gain, _feedback, _decay;
+    private System.Numerics.BigInteger _input, _previous, _older, _difference;
     public EhlersSuperSmootherFilterEngine(int length)
     {
-        var resolved = Math.Max(1, length);
-        var a1 = MathHelper.Exp(MathHelper.MinOrMax(-MathHelper.Sqrt2 * Math.PI / resolved, -0.01, -0.99));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.MinOrMax(MathHelper.Sqrt2 * Math.PI / resolved, 0.99, 0.01));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
+        var angle = Math.Max(.01, Math.Min(.99, MathHelper.Sqrt2 * Math.PI / Math.Max(1, length)));
+        var radius = ExactVarianceWindow.Units(Math.Exp(-angle)); var cosine = ExactVarianceWindow.Units(Math.Cos(angle));
+        _feedback = 2 * radius * cosine; _decay = -radius * radius;
+        _gain = (System.Numerics.BigInteger.One << 2148) - _feedback - _decay;
     }
-
-    public double Next(double value, bool isFinal)
+    public double Next(double value, bool isFinal) => Step(value, isFinal).Value;
+    internal (double Value, Signal Signal) Step(double value, bool commit)
     {
-        var prevValue = _index >= 1 ? _prevValue : 0;
-        var prevFilter1 = _index >= 1 ? _prevFilter1 : 0;
-        var prevFilter2 = _index >= 2 ? _prevFilter2 : 0;
-        var filt = (_c1 * ((value + prevValue) / 2)) + (_c2 * prevFilter1) + (_c3 * prevFilter2);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevFilter2 = _prevFilter1;
-            _prevFilter1 = filt;
-            _index++;
-        }
-
-        return filt;
+        if (double.IsNaN(value) || double.IsInfinity(value)) throw new ArgumentOutOfRangeException(nameof(value));
+        var input = ExactVarianceWindow.Units(value);
+        var result = RocBankValue.RoundUnits(_gain * (input + _input) + 2 * _feedback * _previous + 2 * _decay * _older, System.Numerics.BigInteger.One << 2149);
+        var difference = input - result;
+        var signal = difference.Sign > 0 && difference > _difference ? Signal.StrongBuy : difference.Sign < 0 && difference < _difference ? Signal.StrongSell : difference.Sign > 0 ? Signal.Buy : difference.Sign < 0 ? Signal.Sell : Signal.None;
+        if (commit) { _input = input; _older = _previous; _previous = result; _difference = difference; }
+        return (ExactMeanAccumulator.UnitRatio(result, System.Numerics.BigInteger.One), signal);
     }
-
-    public void Reset()
-    {
-        _prevValue = 0;
-        _prevFilter1 = 0;
-        _prevFilter2 = 0;
-        _index = 0;
-    }
+    public void Reset() { _input = _previous = _older = _difference = default; }
 }
 
 internal sealed class StandardDeviationVolatilityEngine : IDisposable

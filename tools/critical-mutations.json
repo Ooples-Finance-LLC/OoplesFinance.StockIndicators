@@ -44357,5 +44357,113 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~ZeroLagCycleNumericalTests.InvalidCandlesCannotAdvanceAnyRegressionStage"
+  },
+  {
+    "id": "super-smoother-angle-floor",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "Math.Max(.01, Math.Min(.99,",
+    "after": "Math.Max(.02, Math.Min(.99,",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.CoefficientClampsPreserveTheLegacyVariantAndOpeningDrive"
+  },
+  {
+    "id": "super-smoother-angle-ceiling",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "Math.Min(.99, MathHelper.Sqrt2",
+    "after": "Math.Min(.8, MathHelper.Sqrt2",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-gain",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "- _feedback - _decay",
+    "after": "- _feedback + _decay",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-forcing-lag",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "(input + _input)",
+    "after": "(input + input)",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-forcing-half",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "System.Numerics.BigInteger.One << 2149",
+    "after": "System.Numerics.BigInteger.One << 2148",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-feedback",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "_feedback * _previous",
+    "after": "_feedback * _older",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-decay",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "+ 2 * _decay * _older",
+    "after": "- 2 * _decay * _older",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "if (commit) {",
+    "after": "if (true) {",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-reset",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "_input = _previous = _older = _difference = default;",
+    "after": "_input = _previous = _difference = default;",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.FeedbackRetainsWideAndSubnormalCancellation"
+  },
+  {
+    "id": "super-smoother-signals",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "internal sealed class EhlersSuperSmootherFilterEngine",
+    "before": "difference > _difference",
+    "after": "difference < _difference",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.SelectedPricesReachPublishedOutputAndSignals"
+  },
+  {
+    "id": "super-smoother-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeSuperSmootherFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.SelectedPricesReachPublishedOutputAndSignals"
+  },
+  {
+    "id": "super-smoother-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSuperSmootherFilterState",
+    "before": "var value = _input.GetValue(bar);",
+    "after": "var value = _input.GetValue(new OhlcvBar(bar.Symbol, bar.Timeframe, bar.StartTime, bar.EndTime, bar.Close, bar.Close, bar.Close, bar.Close, 1, bar.IsFinal));",
+    "filter": "FullyQualifiedName~SuperSmootherNumericalTests.InvalidCandlesCannotAdvanceRecursiveHistory"
   }
 ]

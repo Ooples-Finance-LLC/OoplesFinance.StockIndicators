@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersSuperSmootherFilter)
+        {
+            var superLength = Integer(builtIn.CreateOptions(), "Length", 10);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => SuperSmootherValues(bars, superLength).Outputs["Essf"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ZeroLagSmoothedCycle)
         {
             var zeroCycleLength = Integer(builtIn.CreateOptions(), "Length", 100); var zeroCycleKeys = new[] { "Lco", "Filter" };
