@@ -1470,85 +1470,16 @@ public sealed class EhlersSmoothedAdaptiveMomentumIndicatorState : IStreamingInd
 [PrimaryOutput("Erf")]
 public sealed class EhlersSnakeUniversalTradingFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length2;
-    private readonly double _l1;
-    private readonly double _s1;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _bpValues;
-    private readonly RollingWindowSum _powerSum;
-    private int _index;
-
-    public EhlersSnakeUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
-        int length1 = 23, int length2 = 50, double bw = 1.4)
-    {
-        _length1 = Math.Max(1, length1);
-        _length2 = Math.Max(1, length2);
-        _l1 = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / (2 * _length1), 0.99, 0.01));
-        var g1 = Math.Cos(MathHelper.MinOrMax(bw * 2 * Math.PI / (2 * _length1), 0.99, 0.01));
-        _s1 = (1 / g1) - MathHelper.Sqrt(1 / MathHelper.Pow(g1, 2) - 1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, _length1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(2);
-        _bpValues = new PooledRingBuffer<double>(2);
-        _powerSum = new RollingWindowSum(_length2);
-    }
-
+    private readonly UniversalTradingWindow _window;
+    public EhlersSnakeUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length1 = 23, int length2 = 50, double bw = 1.4) => _window = new(maType, length1, length2, bw, true);
     public IndicatorName Name => IndicatorName.EhlersSnakeUniversalTradingFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _bpValues.Clear();
-        _powerSum.Reset();
-        _smoother.Reset();
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = EhlersStreamingWindow.GetOffsetValue(_values, value, 2);
-        var prevBp1 = EhlersStreamingWindow.GetOffsetValue(_bpValues, 1);
-        var prevBp2 = EhlersStreamingWindow.GetOffsetValue(_bpValues, 2);
-
-        var bp = _index < 3 ? 0 : (0.5 * (1 - _s1) * (value - prevValue)) + (_l1 * (1 + _s1) * prevBp1) - (_s1 * prevBp2);
-        var filt = _smoother.Next(bp, isFinal);
-        var filtPow = MathHelper.Pow(filt, 2);
-        var sum = isFinal ? _powerSum.Add(filtPow, out var count) : _powerSum.Preview(filtPow, out count);
-        var rms = count > 0 ? MathHelper.Sqrt(sum / count) : 0;
-        var negRms = -rms;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _bpValues.TryAdd(bp, out _);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "UpperBand", rms },
-                { "Erf", filt },
-                { "LowerBand", negRms }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "Erf", point.Line }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _bpValues.Dispose();
-        _powerSum.Dispose();
-        _smoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Esri")]
@@ -1816,69 +1747,16 @@ public sealed class EhlersTrendExtractionState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Eutf")]
 public sealed class EhlersUniversalTradingFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _hannLength;
-    private readonly IMovingAverageSmoother _smoother;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly RollingWindowSum _powerSum;
-
-    public EhlersUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
-        int length1 = 16, int length2 = 50, double mult = 2)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _hannLength = (int)Math.Ceiling(mult * resolvedLength1);
-        _smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(_hannLength);
-        _powerSum = new RollingWindowSum(resolvedLength2);
-    }
-
+    private readonly UniversalTradingWindow _window;
+    public EhlersUniversalTradingFilterState(MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, int length1 = 16, int length2 = 50, double mult = 2) => _window = new(maType, length1, length2, mult, false);
     public IndicatorName Name => IndicatorName.EhlersUniversalTradingFilter;
-
-    public void Reset()
-    {
-        _smoother.Reset();
-        _values.Clear();
-        _powerSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var priorValue = EhlersStreamingWindow.GetOffsetValue(_values, value, _hannLength);
-        var mom = value - priorValue;
-        var filt = _smoother.Next(mom, isFinal);
-        var filtPow = filt * filt;
-        var sum = isFinal ? _powerSum.Add(filtPow, out var count) : _powerSum.Preview(filtPow, out count);
-        var rms = count > 0 ? MathHelper.Sqrt(sum / count) : 0;
-        var negRms = -rms;
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Eutf", filt },
-                { "UpperBand", rms },
-                { "LowerBand", negRms }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filt, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Line, includeOutputs ? new Dictionary<string, double> { { "Eutf", point.Line }, { "UpperBand", point.Upper }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _smoother.Dispose();
-        _values.Dispose();
-        _powerSum.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Espf")]

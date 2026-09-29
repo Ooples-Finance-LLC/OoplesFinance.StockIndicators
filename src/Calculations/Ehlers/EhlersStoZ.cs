@@ -225,63 +225,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersSnakeUniversalTradingFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 23, int length2 = 50, double bw = 1.4)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> bpList = new(stockData.Count);
-        List<double> negRmsList = new(stockData.Count);
-        List<double> filtPowList = new(stockData.Count);
-        List<double> rmsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum filtPowSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var l1 = Math.Cos(MinOrMax(2 * Math.PI / (2 * length1), 0.99, 0.01));
-        var g1 = Math.Cos(MinOrMax(bw * 2 * Math.PI / (2 * length1), 0.99, 0.01));
-        var s1 = (1 / g1) - Sqrt(1 / Pow(g1, 2) - 1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !UniversalTradingWindow.Supports(maType);
+        using var window = new UniversalTradingWindow(maType, length1, length2, bw, true, external); var values = new List<double>(input.Count); var uppers = new List<double>(input.Count); var lowers = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 2 ? inputList[i - 2] : 0;
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-
-            var bp = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
-            bpList.Add(bp);
+            var raw = input.Select(price => window.Prepare(price, true)).ToList(); var filtered = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length1), raw);
+            foreach (var value in filtered) { var point = window.Finish(value, true); values.Add(point.Line); uppers.Add(point.Upper); lowers.Add(point.Lower); }
         }
-
-        var filtList = GetMovingAverageList(stockData, maType, length1, bpList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var filt = filtList[i];
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var filtPow = Pow(filt, 2);
-            filtPowList.Add(filtPow);
-            filtPowSum.Add(filtPow);
-
-            var filtPowMa = filtPowSum.Average(length2);
-            var rms = Sqrt(filtPowMa);
-            rmsList.Add(rms);
-
-            var negRms = -rms;
-            negRmsList.Add(negRms);
-
-            var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", rmsList },
-            { "Erf", filtList },
-            { "LowerBand", negRmsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersSnakeUniversalTradingFilter;
-
-        return stockData;
+        else foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Line); uppers.Add(point.Upper); lowers.Add(point.Lower); }
+        for (var i = 0; i < values.Count; i++) { var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetCompareSignal(values[i] - previous, previous - older)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", uppers }, { "Erf", values }, { "LowerBand", lowers } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersSnakeUniversalTradingFilter; return stockData;
     }
 
 
@@ -298,59 +251,16 @@ public static partial class Calculations
     public static StockData CalculateEhlersUniversalTradingFilter(this StockData stockData, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage,
         int length1 = 16, int length2 = 50, double mult = 2)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> momList = new(stockData.Count);
-        List<double> negRmsList = new(stockData.Count);
-        List<double> filtPowList = new(stockData.Count);
-        List<double> rmsList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingSum filtPowSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var hannLength = (int)Math.Ceiling(mult * length1);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !UniversalTradingWindow.Supports(maType);
+        using var window = new UniversalTradingWindow(maType, length1, length2, mult, false, external); var values = new List<double>(input.Count); var uppers = new List<double>(input.Count); var lowers = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var currentValue = inputList[i];
-            var priorValue = i >= hannLength ? inputList[i - hannLength] : 0;
-
-            var mom = currentValue - priorValue;
-            momList.Add(mom);
+            var raw = input.Select(price => window.Prepare(price, true)).ToList(); var filtered = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(raw), Math.Max(1, length1))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length1), raw);
+            foreach (var value in filtered) { var point = window.Finish(value, true); values.Add(point.Line); uppers.Add(point.Upper); lowers.Add(point.Lower); }
         }
-
-        var filtList = GetMovingAverageList(stockData, maType, length1, momList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var filt = filtList[i];
-            var prevFilt1 = i >= 1 ? filtList[i - 1] : 0;
-            var prevFilt2 = i >= 2 ? filtList[i - 2] : 0;
-
-            var filtPow = Pow(filt, 2);
-            filtPowList.Add(filtPow);
-            filtPowSum.Add(filtPow);
-
-            var filtPowMa = filtPowSum.Average(length2);
-            var rms = filtPowMa > 0 ? Sqrt(filtPowMa) : 0;
-            rmsList.Add(rms);
-
-            var negRms = -rms;
-            negRmsList.Add(negRms);
-
-            var signal = GetCompareSignal(filt - prevFilt1, prevFilt1 - prevFilt2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eutf", filtList },
-            { "UpperBand", rmsList },
-            { "LowerBand", negRmsList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filtList);
-        stockData.IndicatorName = IndicatorName.EhlersUniversalTradingFilter;
-
-        return stockData;
+        else foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Line); uppers.Add(point.Upper); lowers.Add(point.Lower); }
+        for (var i = 0; i < values.Count; i++) { var previous = i == 0 ? 0 : values[i - 1]; var older = i < 2 ? 0 : values[i - 2]; signals?.Add(GetCompareSignal(values[i] - previous, previous - older)); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eutf", values }, { "UpperBand", uppers }, { "LowerBand", lowers } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersUniversalTradingFilter; return stockData;
     }
 
 

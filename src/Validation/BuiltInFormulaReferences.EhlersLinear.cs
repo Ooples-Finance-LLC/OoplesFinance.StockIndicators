@@ -14,6 +14,11 @@ internal static partial class BuiltInFormulaReferences
             return new("Trend", new[] { "Trend", "Bp" }, bars => TrendExtractionValues(bars, trendExtraction.Length, trendExtraction.Delta, trendExtraction.MaType));
         if (indicator.BatchName == IndicatorName.EhlersEmpiricalModeDecomposition && options is EhlersEmpiricalModeDecompositionSpecOptions empirical && empirical.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
             return new("Trend", new[] { "Trend", "Peak", "Valley" }, bars => EmpiricalDecompositionValues(bars, empirical.Length1, empirical.Length2, empirical.Delta, empirical.Fraction, empirical.MaType));
+        if (indicator.BatchName is IndicatorName.EhlersUniversalTradingFilter or IndicatorName.EhlersSnakeUniversalTradingFilter && options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType tradingKind && tradingKind is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            var tradingSnake = indicator.BatchName == IndicatorName.EhlersSnakeUniversalTradingFilter; var tradingLength = Integer(options, "Length1", tradingSnake ? 23 : 16); var tradingRms = Integer(options, "Length2", 50); var tradingParameter = Number(options, tradingSnake ? 1.4 : 2, tradingSnake ? "Bw" : "Mult");
+            return new(tradingSnake ? "Erf" : "Eutf", tradingSnake ? new[] { "UpperBand", "Erf", "LowerBand" } : new[] { "Eutf", "UpperBand", "LowerBand" }, bars => UniversalTradingValues(bars, tradingLength, tradingRms, tradingParameter, tradingKind, tradingSnake));
+        }
         switch (indicator.BatchName)
         {
             case IndicatorName.EhlersConvolutionIndicator:

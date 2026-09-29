@@ -22564,64 +22564,16 @@ internal static partial class IndicatorCompute
         int length1 = 23, int length2 = 50, double bw = 1.4,
         MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, SnakeFilterSeries band = SnakeFilterSeries.Erf)
     {
-        // V1 Algorithm: Bandpass filter with MA smoothing
-        // 1. Calculate bandpass coefficients from length1 and bw
-        // 2. Calculate recursive bandpass: bp = 0.5*(1-s1)*(value-prevValue2) + l1*(1+s1)*prevBp1 - s1*prevBp2
-        // 3. Apply MA to bp
-        // Primary output is the filtered bandpass
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var close = SpanCompat.AsReadOnlySpan(inputList);
-        int count = inputList.Count;
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        // Calculate bandpass filter coefficients
-        double l1 = Math.Cos(Math.Min(Math.Max(2 * Math.PI / (2 * length1), 0.01), 0.99));
-        double g1 = Math.Cos(Math.Min(Math.Max(bw * 2 * Math.PI / (2 * length1), 0.01), 0.99));
-        double s1 = (1 / g1) - Math.Sqrt((1 / (g1 * g1)) - 1);
-
-        // Calculate bandpass filter
-        var bpBuffer = context.Rent(count);
-        var bpSpan = bpBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !UniversalTradingWindow.Supports(maType);
+        using var window = new UniversalTradingWindow(maType, length1, length2, bw, true, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            double currentValue = close[i];
-            double prevValue = i >= 2 ? close[i - 2] : 0;
-            double prevBp1 = i >= 1 ? bpSpan[i - 1] : 0;
-            double prevBp2 = i >= 2 ? bpSpan[i - 2] : 0;
-
-            // Early bars (i < 3) return 0 per v1 logic
-            bpSpan[i] = i < 3 ? 0 : (0.5 * (1 - s1) * (currentValue - prevValue)) + (l1 * (1 + s1) * prevBp1) - (s1 * prevBp2);
+            using var raw = context.Rent(input.Count); using var filtered = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Prepare(input[i], true); MovingAverage(data, maType, Math.Max(1, length1), raw.Span, filtered.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var point = window.Finish(filtered.Span[i], true); result.WritableSpan[i] = band == SnakeFilterSeries.UpperBand ? point.Upper : band == SnakeFilterSeries.LowerBand ? point.Lower : point.Line; }
         }
-
-        // Apply MA to bandpass
-        var result = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(bpBuffer.Span, result.WritableSpan, length1);
-        bpBuffer.Dispose();
-
-        if (band == SnakeFilterSeries.Erf)
-        {
-            return result;
-        }
-
-        // The bands are the root mean square of the filter over length2, one either side of zero. Only the
-        // filter was produced, so both band keys carried it - and since the lower band is the upper one
-        // negated, the pair could not both have been right.
-        using var filter = result;
-        var filt = filter.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        var power = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            power.Add(filt[i] * filt[i]);
-            var rms = Math.Sqrt(power.Average(length2));
-            output[i] = band == SnakeFilterSeries.LowerBand ? -rms : rms;
-        }
-
-        return buffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = band == SnakeFilterSeries.UpperBand ? point.Upper : band == SnakeFilterSeries.LowerBand ? point.Lower : point.Line; }
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersTrendExtractionFast(StockData data, ComputeContext context, int length = 20, double delta = 0.1,
@@ -22661,46 +22613,16 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(StockData data, ComputeContext context, int length1 = 16, int length2 = 50, double mult = 2, MovingAvgType maType = MovingAvgType.EhlersHannMovingAverage, string? outputKey = null)
     {
-        // V1 Algorithm: Momentum with MA smoothing and RMS calculation
-        // 1. Calculate momentum: mom = close - close[hannLength]
-        // 2. Apply MA to momentum
-        // 3. Calculate rolling RMS of filtered^2 over length2
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var close = SpanCompat.AsReadOnlySpan(inputList);
-        int count = data.Count;
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-        int hannLength = (int)Math.Ceiling(mult * length1);
-
-        // Step 1: Calculate momentum
-        var momBuffer = context.Rent(count);
-        var momSpan = momBuffer.WritableSpan;
-        for (int i = 0; i < count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !UniversalTradingWindow.Supports(maType);
+        using var window = new UniversalTradingWindow(maType, length1, length2, mult, false, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            double currentValue = close[i];
-            double priorValue = i >= hannLength ? close[i - hannLength] : 0;
-            momSpan[i] = currentValue - priorValue;
+            using var raw = context.Rent(input.Count); using var filtered = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) raw.WritableSpan[i] = window.Prepare(input[i], true); MovingAverage(data, maType, Math.Max(1, length1), raw.Span, filtered.WritableSpan);
+            for (var i = 0; i < input.Count; i++) { var point = window.Finish(filtered.Span[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Line; }
         }
-
-        // Step 2: Apply MA to momentum
-        var filtBuffer = context.Rent(count);
-        var maCore = Core.Registry.MovingAverageRegistry.GetRequired(maType);
-        maCore.Compute(momBuffer.Span, filtBuffer.WritableSpan, length1);
-        momBuffer.Dispose();
-
-        // Primary output is the filtered momentum (filt)
-        if (outputKey is "UpperBand" or "LowerBand")
-        {
-            var power = new RollingSum();
-            var output = filtBuffer.WritableSpan;
-            for (var i = 0; i < count; i++)
-            {
-                power.Add(output[i] * output[i]);
-                output[i] = (outputKey == "UpperBand" ? 1 : -1) * Math.Sqrt(Math.Max(0, power.Average(length2)));
-            }
-        }
-        else if (outputKey is not (null or "Eutf")) throw new ArgumentOutOfRangeException(nameof(outputKey));
-        return filtBuffer;
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "UpperBand" ? point.Upper : outputKey == "LowerBand" ? point.Lower : point.Line; }
+        return result;
     }
 
     internal static ComputeBuffer ComputeEhlersAdaptiveCommodityChannelIndexV2Fast(StockData data, ComputeContext context,

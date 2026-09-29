@@ -17,6 +17,17 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersUniversalTradingFilter or IndicatorName.EhlersSnakeUniversalTradingFilter)
+        {
+            var tradingOptions = builtIn.CreateOptions(); var tradingSnake = tradingOptions is EhlersSnakeUniversalTradingFilterSpecOptions;
+            var tradingKind = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).MaType : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).MaType;
+            if (tradingKind is MovingAvgType.EhlersHannMovingAverage or MovingAvgType.WeightedMovingAverage)
+            {
+                var tradingLength = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Length1 : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Length1; var tradingRms = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Length2 : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Length2; var tradingParameter = tradingSnake ? ((EhlersSnakeUniversalTradingFilterSpecOptions)tradingOptions).Bw : ((EhlersUniversalTradingFilterSpecOptions)tradingOptions).Mult;
+                var tradingKeys = tradingSnake ? new[] { "UpperBand", "Erf", "LowerBand" } : new[] { "Eutf", "UpperBand", "LowerBand" }; for (var slot = 0; slot < tradingKeys.Length; slot++) { var key = tradingKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => UniversalTradingValues(bars, tradingLength, tradingRms, tradingParameter, tradingKind, tradingSnake)[key], IndicatorErrorBudget.Exact); }
+                yield break;
+            }
+        }
         if (builtIn.BatchName == IndicatorName.EhlersEmpiricalModeDecomposition && builtIn.CreateOptions() is EhlersEmpiricalModeDecompositionSpecOptions decomposition && decomposition.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
         {
             var decompositionKeys = new[] { "Trend", "Peak", "Valley" }; for (var slot = 0; slot < decompositionKeys.Length; slot++) { var key = decompositionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EmpiricalDecompositionValues(bars, decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction, decomposition.MaType)[key], IndicatorErrorBudget.Exact); }

@@ -40865,5 +40865,167 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation omitted\n",
     "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrAverages"
+  },
+  {
+    "id": "universal-trading-lag",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "internal UniversalTradingWindow(",
+    "before": "_lag = Math.Ceiling(parameter * _length)",
+    "after": "_lag = Math.Floor(parameter * _length)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.ZeroAndFractionalMomentumLagsHaveDefinedStartup"
+  },
+  {
+    "id": "universal-trading-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Raw(",
+    "before": "_band2.Add(ref sum, -_decay)",
+    "after": "_band2.Add(ref sum, 0d)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-startup",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Raw(",
+    "before": "if (_count >= 3)",
+    "after": "if (_count >= 2)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.SnakeStartsAfterThreeSamplesAndClampsBandwidth"
+  },
+  {
+    "id": "universal-trading-hann-weight",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Smooth(",
+    "before": "return 2 * sine * sine",
+    "after": "return .5 * sine * sine",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.HannMassAndLongPeriodGainRemainDefined"
+  },
+  {
+    "id": "universal-trading-hann-mass",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Smooth(",
+    "before": "Scaled.Round(total, _length + 1L)",
+    "after": "Scaled.Round(total, _length)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.HannMassAndLongPeriodGainRemainDefined"
+  },
+  {
+    "id": "universal-trading-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Smooth(",
+    "before": "weighted.Subtract(sum);",
+    "after": "// weighted shift omitted\n",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-energy-expiration",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private (double Line, double Upper, double Lower) Finish(Scaled value",
+    "before": "if (_energy.Count == _rmsLength) Square(ref squares, _energy.Peek(), -1);",
+    "after": "// expired energy retained\n",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.RmsUsesAvailableSamplesAndExpiresOldEnergy"
+  },
+  {
+    "id": "universal-trading-energy-count",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private (double Line, double Upper, double Lower) Finish(Scaled value",
+    "before": "Math.Min(_rmsLength, _energy.Count + 1L)",
+    "after": "_rmsLength",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.RmsUsesAvailableSamplesAndExpiresOldEnergy"
+  },
+  {
+    "id": "universal-trading-energy-scale",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "internal sealed class UniversalTradingWindow",
+    "before": "term.ScaleByPowerOfTwo(2 * value.Shift)",
+    "after": "term.ScaleByPowerOfTwo(value.Shift)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-lower-sign",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private (double Line, double Upper, double Lower) Finish(Scaled value",
+    "before": "return (Publish(value), rms, -rms)",
+    "after": "return (Publish(value), rms, rms)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-preview",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "private Scaled Raw(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-reset",
+    "module": "numerical",
+    "file": "src/Helpers/UniversalTradingWindow.cs",
+    "scope": "internal sealed class UniversalTradingWindow",
+    "before": "_sum = _weighted = _squares = default",
+    "after": "_sum = _weighted = default",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.WideAndSubnormalValuesRetainFilterAndRms"
+  },
+  {
+    "id": "universal-trading-ordinary-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersUniversalTradingFilter(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.SelectedPricesReachEveryBatchAndFastOutput"
+  },
+  {
+    "id": "universal-trading-snake-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersStoZ.cs",
+    "scope": "public static StockData CalculateEhlersSnakeUniversalTradingFilter(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.SelectedPricesReachEveryBatchAndFastOutput"
+  },
+  {
+    "id": "universal-trading-ordinary-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersUniversalTradingFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.SelectedPricesReachEveryBatchAndFastOutput"
+  },
+  {
+    "id": "universal-trading-snake-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersSnakeUniversalTradingFilterFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.SelectedPricesReachEveryBatchAndFastOutput"
+  },
+  {
+    "id": "universal-trading-ordinary-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersUniversalTradingFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.InvalidFieldsDoNotAdvanceFilterOrEnergy"
+  },
+  {
+    "id": "universal-trading-snake-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersSnakeUniversalTradingFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~UniversalTradingNumericalTests.InvalidFieldsDoNotAdvanceFilterOrEnergy"
   }
 ]
