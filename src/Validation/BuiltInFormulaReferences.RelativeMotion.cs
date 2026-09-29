@@ -1274,8 +1274,9 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray();
                     return Outputs(("KaseUp", Side(true)), ("KaseDn", Side(false)));
                 });
-            case IndicatorName.KaseDevStopV1:
             case IndicatorName.KaseDevStopV2:
+                return new("Dev1", new[] { "Dev1", "Dev2", "Dev3", "Dev4" }, bars => KaseStopV2Outputs(bars, indicator));
+            case IndicatorName.KaseDevStopV1:
                 var firstVariant = name == IndicatorName.KaseDevStopV1;
                 var keys = firstVariant ? new[] { "Dev1", "Dev2", "Dev3", "WarningLine" } : new[] { "Dev1", "Dev2", "Dev3", "Dev4" };
                 return new("Dev1", keys, bars =>

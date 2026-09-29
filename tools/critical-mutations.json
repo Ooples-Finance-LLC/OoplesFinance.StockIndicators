@@ -46949,5 +46949,257 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "",
     "filter": "FullyQualifiedName~ElderSafeZoneNumericalTests.InvalidCandlesCannotAdvanceMovesExtremaOrTrend"
+  },
+  {
+    "id": "kase-stop-v2-wide-range-high",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "Math.Max(Math.Max(high, previousHigh), olderClose)",
+    "after": "Math.Max(high, olderClose)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-range-low",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "Math.Min(Math.Min(low, previousLow), olderClose)",
+    "after": "Math.Min(low, olderClose)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-older-close",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_previousHigh, _previousLow, _olderClose",
+    "after": "_previousHigh, _previousLow, (_olderClose + _previousClose) / 2",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-extended-range",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal static RocBankValue Range(",
+    "before": "return RocBankValue.Round(sum);",
+    "after": "return new RocBankValue(sum.Mean(1));",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.ExtendedRangesCancelAndZeroMultiplesRecoverAfterOverflow"
+  },
+  {
+    "id": "kase-stop-v2-wide-units-shift",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "ExactVarianceWindow.Units(range.Mantissa) << range.UpperShift",
+    "after": "ExactVarianceWindow.Units(range.Mantissa)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.ExtendedRangesCancelAndZeroMultiplesRecoverAfterOverflow"
+  },
+  {
+    "id": "kase-stop-v2-wide-moment-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_squares + units * units - expired * expired",
+    "after": "_squares + units * units + expired * expired",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-population",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "(n * n) << (2 * shift)",
+    "after": "(n * (n + 1)) << (2 * shift)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_ranges.Count + 1L >= _length",
+    "after": "_ranges.Count + 1L > _length",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_fast = new(kind, Math.Max(1, fast))",
+    "after": "_fast = new(kind, Math.Max(1, slow))",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_slow = new(kind, Math.Max(1, slow))",
+    "after": "_slow = new(kind, Math.Max(1, fast))",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_mean = new(kind, _length)",
+    "after": "_mean = new(kind, 1)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-equality",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var up = spread.Sign > 0",
+    "after": "var up = spread.Sign >= 0",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-price-side",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var price = up ? high : low",
+    "after": "var price = up ? low : high",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-distance-sign",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "mean.AddTo(ref sum, up ? -1 : 1)",
+    "after": "mean.AddTo(ref sum, up ? 1 : -1)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-deviation-factor",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_multiples[slot], up ? -1 : 1",
+    "after": "_multiples[slot] / 2, up ? -1 : 1",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-level1",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var first = Stop(0);",
+    "after": "var first = Stop(1);",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-level2",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var second = Stop(1);",
+    "after": "var second = Stop(2);",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-level3",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var third = Stop(2);",
+    "after": "var third = Stop(3);",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-level4",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "var fourth = Stop(3);",
+    "after": "var fourth = Stop(0);",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.HandExamplesPreserveTwoBarLagPopulationDivisorAndEqualitySide"
+  },
+  {
+    "id": "kase-stop-v2-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "Deviation(range, commit)",
+    "after": "Deviation(range, true)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "_previousHigh = _previousLow = _previousClose = _olderClose = 0;",
+    "after": "_previousHigh = _previousLow = _previousClose = _olderClose = 1;",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-signal-level",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "fourth.AddTo(ref difference, -1)",
+    "after": "first.AddTo(ref difference, -1)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.WideRangesPopulationDeviationAndEveryProjectionRemainExact"
+  },
+  {
+    "id": "kase-stop-v2-wide-factor-domain",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "if (_multiples.Any(v => double.IsNaN(v) || double.IsInfinity(v)))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.NonfiniteMultiplesRejectBeforeMutatingSelectedPrices"
+  },
+  {
+    "id": "kase-stop-v2-wide-custom-order",
+    "module": "numerical",
+    "file": "src/Helpers/KaseStopV2Window.cs",
+    "scope": "internal sealed class KaseStopV2Window",
+    "before": "externalFast.HasValue ? new RocBankValue(externalFast.Value)",
+    "after": "externalFast.HasValue ? new RocBankValue(externalSlow!.Value)",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.CustomAndLegacyAveragesKeepFastSlowRangeOrder"
+  },
+  {
+    "id": "kase-stop-v2-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeKaseDevStopV2Fast(",
+    "before": "window.Next(high[i], low[i], input[i], true,",
+    "after": "window.Next(high[i], low[i], data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.SelectedPricesPreserveEffectiveRangesAndAllOutputLevels"
+  },
+  {
+    "id": "kase-stop-v2-wide-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch15.cs",
+    "scope": "public sealed class KaseDevStopV2State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~KaseStopV2NumericalTests.InvalidCandlesCannotAdvanceRangesMomentsOrAverages"
   }
 ]

@@ -20806,55 +20806,11 @@ internal static partial class IndicatorCompute
         int slowLength = 21, int length = 20, double stdDev = 0,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // Each stop is a price offset by a signed range distance. Multiplying the two
-        // would produce squared price units and fail a change of price denomination.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var highRange = context.Rent(count);
-        using var lowRange = context.Rent(count);
-        CustomRange(data, input, highRange.WritableSpan, lowRange.WritableSpan);
-        var highs = highRange.Span;
-        var lows = lowRange.Span;
-
-        using var fast = context.Rent(count);
-        using var slow = context.Rent(count);
-        MovingAverage(data, maType, fastLength, input, fast.WritableSpan);
-        MovingAverage(data, maType, slowLength, input, slow.WritableSpan);
-        var fastAverage = fast.Span;
-        var slowAverage = slow.Span;
-
-        using var ranges = context.Rent(count);
-        var rangeValues = ranges.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            var previousHigh = i >= 1 ? highs[i - 1] : 0;
-            var previousLow = i >= 1 ? lows[i - 1] : 0;
-            var previousValue = i >= 2 ? input[i - 2] : 0;
-            rangeValues[i] = Math.Max(Math.Max(highs[i], previousHigh), previousValue)
-                - Math.Min(Math.Min(lows[i], previousLow), previousValue);
-        }
-
-        using var rangeAverage = context.Rent(count);
-        MovingAverage(data, maType, length, ranges.Span, rangeAverage.WritableSpan);
-        var averages = rangeAverage.Span;
-
-        using var rangeDeviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(ranges.Span, rangeDeviation.WritableSpan, length);
-        var deviations = rangeDeviation.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
-        {
-            double trend = fastAverage[i] > slowAverage[i] ? 1 : -1;
-            var price = trend == 1 ? highs[i] : lows[i];
-            output[i] = price - trend * (averages[i] + (stdDev * deviations[i]));
-        }
-
-        return buffer;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new KaseStopV2Window(maType, fastLength, slowLength, length, stdDev, stdDev, stdDev, stdDev, external);
+        using ComputeBuffer? fast = external ? context.Rent(input.Count) : null; using ComputeBuffer? slow = external ? context.Rent(input.Count) : null; using ComputeBuffer? mean = external ? context.Rent(input.Count) : null;
+        if (external) { MovingAverage(data, maType, Math.Max(1, fastLength), SpanCompat.AsReadOnlySpan(input), fast!.Value.WritableSpan); MovingAverage(data, maType, Math.Max(1, slowLength), SpanCompat.AsReadOnlySpan(input), slow!.Value.WritableSpan); MovingAverage(data, maType, Math.Max(1, length), KaseStopV2Window.PublishedRanges(high, low, input), mean!.Value.WritableSpan); }
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(high[i], low[i], input[i], true, external ? fast!.Value.Span[i] : null, external ? slow!.Value.Span[i] : null, external ? mean!.Value.Span[i] : null).Dev1; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

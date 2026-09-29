@@ -221,81 +221,12 @@ public static partial class Calculations
         int fastLength = 10, int slowLength = 21, int length = 20, double stdDev1 = 0, double stdDev2 = 1, double stdDev3 = 2.2,
         double stdDev4 = 3.6)
     {
-        List<double> valList = new(stockData.Count);
-        List<double> val1List = new(stockData.Count);
-        List<double> val2List = new(stockData.Count);
-        List<double> val3List = new(stockData.Count);
-        List<double> rrangeList = new(stockData.Count);
-        List<double> priceList = new(stockData.Count);
-        List<double> trendList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var smaFastList = GetMovingAverageList(stockData, maType, fastLength, inputList);
-        var smaSlowList = GetMovingAverageList(stockData, maType, slowLength, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var maFast = smaFastList[i];
-            var maSlow = smaSlowList[i];
-            var prevHigh = i >= 1 ? highList[i - 1] : 0;
-            var prevLow = i >= 1 ? lowList[i - 1] : 0;
-            var prevClose = i >= 2 ? inputList[i - 2] : 0;
-
-            double trend = maFast > maSlow ? 1 : -1;
-            trendList.Add(trend);
-
-            var price = trend == 1 ? currentHigh : currentLow;
-            price = trend > 0 ? Math.Max(price, currentHigh) : Math.Min(price, currentLow);
-            priceList.Add(price);
-
-            var mmax = Math.Max(Math.Max(currentHigh, prevHigh), prevClose);
-            var mmin = Math.Min(Math.Min(currentLow, prevLow), prevClose);
-            var rrange = mmax - mmin;
-            rrangeList.Add(rrange);
-        }
-
-        var rangeAvgList = GetMovingAverageList(stockData, maType, length, rrangeList);
-        // The deviation of the range window about its own mean; the stops below are avg + k * dev. See #190.
-        var rangeStdDevList = GetStandardDeviationList(rrangeList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var price = priceList[i];
-            var trend = trendList[i];
-            var avg = rangeAvgList[i];
-            var dev = rangeStdDevList[i];
-            var prevPrice = i >= 1 ? priceList[i - 1] : 0;
-
-            var val = price - trend * (avg + (stdDev1 * dev));
-            valList.Add(val);
-
-            var val1 = price - trend * (avg + (stdDev2 * dev));
-            val1List.Add(val1);
-
-            var val2 = price - trend * (avg + (stdDev3 * dev));
-            val2List.Add(val2);
-
-            var prevVal3 = GetLastOrDefault(val3List);
-            var val3 = price - trend * (avg + (stdDev4 * dev));
-            val3List.Add(val3);
-
-            var signal = GetCompareSignal(price - val3, prevPrice - prevVal3);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dev1", valList },
-            { "Dev2", val1List },
-            { "Dev3", val2List },
-            { "Dev4", val3List }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.KaseDevStopV2;
-
-        return stockData;
+        var (input, high, low, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); using var window = new KaseStopV2Window(maType, fastLength, slowLength, length, stdDev1, stdDev2, stdDev3, stdDev4, external);
+        List<double>? fast = null, slow = null, mean = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); List<double> Average(List<double> values, int period) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), Math.Max(1, period))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, period), values); fast = Average(input, fastLength); slow = Average(input, slowLength); mean = Average(KaseStopV2Window.PublishedRanges(high, low, input).ToList(), length); stockData.RestoreInputSeries(caller); }
+        var first = new List<double>(input.Count); var second = new List<double>(input.Count); var third = new List<double>(input.Count); var fourth = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true, external ? fast![i] : null, external ? slow![i] : null, external ? mean![i] : null); first.Add(point.Dev1); second.Add(point.Dev2); third.Add(point.Dev3); fourth.Add(point.Dev4); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dev1", first }, { "Dev2", second }, { "Dev3", third }, { "Dev4", fourth } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.KaseDevStopV2; return stockData;
     }
 
 

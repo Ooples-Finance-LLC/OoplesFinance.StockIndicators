@@ -471,17 +471,6 @@ OoplesFinance.StockIndicators.Indicators.KaseDevStopV1/minimum-periods
 OoplesFinance.StockIndicators.Indicators.KaseDevStopV1/minimum-slowLength
 OoplesFinance.StockIndicators.Indicators.KaseDevStopV1/shorter-periods
 OoplesFinance.StockIndicators.Indicators.KaseDevStopV1/weighted-average
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/default
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/longer-fastLength
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/longer-length
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/longer-periods
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/longer-slowLength
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/minimum-fastLength
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/minimum-length
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/minimum-periods
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/minimum-slowLength
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/shorter-periods
-OoplesFinance.StockIndicators.Indicators.KaseDevStopV2/weighted-average
 OoplesFinance.StockIndicators.Indicators.KaseIndicator/default
 OoplesFinance.StockIndicators.Indicators.KaseIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.KaseIndicator/minimum-periods

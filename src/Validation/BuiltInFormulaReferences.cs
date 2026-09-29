@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.KaseDevStopV2)
+        {
+            var kaseKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
+            for (var slot = 0; slot < kaseKeys.Length; slot++) { var key = kaseKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => KaseStopV2Outputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName == IndicatorName.ElderSafeZoneStops)
         {
             yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => ElderSafeZoneOutputs(bars, builtIn), IndicatorErrorBudget.Exact); yield break;
