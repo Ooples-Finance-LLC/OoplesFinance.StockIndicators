@@ -42413,5 +42413,167 @@
     "before": "foreach (var price in input)",
     "after": "foreach (var price in stockData.ClosePrices)",
     "filter": "FullyQualifiedName~AdaptiveRsiV1NumericalTests.SelectedPricesReachBatchAndEveryFastOutput"
+  },
+  {
+    "id": "adaptive-range-v1-cycle",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "Length(_fraction * period)",
+    "after": "Length(_fraction * period / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-cci-residual",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "n * current - total",
+    "after": "n * current + total",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-cci-padding",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "(length - count) * BigInteger.Abs(total)",
+    "after": "0 * BigInteger.Abs(total)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.HugeFractionsAndStartupPaddingUseLazyHistory"
+  },
+  {
+    "id": "adaptive-range-v1-cci-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "numerator.Add(1d, n * residual)",
+    "after": "numerator.Add(1d, residual)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-range-high",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "_history[_history.Count - lag].High",
+    "after": "_history[_history.Count - lag].Price",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-range-low",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "_history[_history.Count - lag].Low",
+    "after": "_history[_history.Count - lag].Price",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-range-padding",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "if (length > _history.Count + 1)",
+    "after": "if (length < _history.Count + 1)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.HugeFractionsAndStartupPaddingUseLazyHistory"
+  },
+  {
+    "id": "adaptive-range-v1-range-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "numerator.Add(price, 100)",
+    "after": "numerator.Add(price, 90)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-ema-gain",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "2d / ((_commodity",
+    "after": "1d / ((_commodity",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-ema-retention",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "_average.Add(ref sum, 1 - alpha)",
+    "after": "_average.Add(ref sum, 1 - alpha / 2)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-signal",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-preview",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-reset",
+    "module": "numerical",
+    "file": "src/Helpers/AdaptiveRangeV1Window.cs",
+    "scope": "internal sealed class AdaptiveRangeV1Window",
+    "before": "_mama.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeAdaptiveRangeV1Fast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.SelectedPricesPreserveHighLowAndOverrideTypicalPrice"
+  },
+  {
+    "id": "adaptive-range-v1-validation-EhlersAdaptiveStochasticIndicatorV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveStochasticIndicatorV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.InvalidCandlesAndParametersCannotCorruptHistory"
+  },
+  {
+    "id": "adaptive-range-v1-validation-EhlersAdaptiveCommodityChannelIndexV1",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveCommodityChannelIndexV1State",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.InvalidCandlesAndParametersCannotCorruptHistory"
+  },
+  {
+    "id": "adaptive-range-v1-typical-price",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveCommodityChannelIndexV1State",
+    "before": "CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close)",
+    "after": "bar.Close",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.WideAndSubnormalRangesPreserveEveryOutputAndSignal"
+  },
+  {
+    "id": "adaptive-range-v1-selected-typical",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAdaptiveCommodityChannelIndexV1State",
+    "before": "_selected ? bar.Close :",
+    "after": "!_selected ? bar.Close :",
+    "filter": "FullyQualifiedName~AdaptiveRangeV1NumericalTests.SelectedPricesPreserveHighLowAndOverrideTypicalPrice"
   }
 ]

@@ -1633,53 +1633,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAdaptiveStochasticIndicatorV1(this StockData stockData, double cycPart = 0.5)
     {
-        List<double> astocList = new(stockData.Count);
-        List<double> astocEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var spList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sp = spList[i];
-            var high = highList[i];
-            var low = lowList[i];
-            var close = inputList[i];
-            var prevAstoc1 = i >= 1 ? astocEmaList[i - 1] : 0;
-            var prevAstoc2 = i >= 2 ? astocEmaList[i - 2] : 0;
-
-            var length = (int)Math.Ceiling(cycPart * sp);
-            double hh = high, ll = low;
-            for (var j = 0; j < length; j++)
-            {
-                var h = i >= j ? highList[i - j] : 0;
-                var l = i >= j ? lowList[i - j] : 0;
-
-                hh = h > hh ? h : hh;
-                ll = l < ll ? l : ll;
-            }
-
-            var astoc = hh - ll != 0 ? 100 * (close - ll) / (hh - ll) : 0;
-            astocList.Add(astoc);
-
-            var astocEma = CalculateEMA(astoc, prevAstoc1, length);
-            astocEmaList.Add(astocEma);
-
-            var signal = GetRsiSignal(astocEma - prevAstoc1, prevAstoc1 - prevAstoc2, astocEma, prevAstoc1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Easi", astocList },
-            { "Signal", astocEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(astocList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveStochasticIndicatorV1;
-
-        return stockData;
+        var cycle = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues; var input = cycle; var window = new AdaptiveRangeV1Window(cycPart, false, .015); var values = new List<double>(input.Count); var average = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], stockData.HighPrices[i], stockData.LowPrices[i], cycle[i], true); values.Add(point.Value); average.Add(point.Average); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Easi", values }, { "Signal", average } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersAdaptiveStochasticIndicatorV1; return stockData;
     }
 
 
@@ -1694,57 +1650,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersAdaptiveCommodityChannelIndexV1(this StockData stockData, double cycPart = 1,
         double constant = 0.015)
     {
-        List<double> acciList = new(stockData.Count);
-        List<double> acciEmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _, _) = GetInputValuesList(InputName.TypicalPrice, stockData);
-
-        var spList = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersMotherOfAdaptiveMovingAverages(data))["SmoothPeriod"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var sp = spList[i];
-            var prevAcci1 = i >= 1 ? acciEmaList[i - 1] : 0;
-            var prevAcci2 = i >= 2 ? acciEmaList[i - 2] : 0;
-            var tp = inputList[i];
-
-            var length = (int)Math.Ceiling(cycPart * sp);
-            double avg = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevMp = i >= j ? inputList[i - j] : 0;
-                avg += prevMp;
-            }
-            avg /= length;
-
-            double md = 0;
-            for (var j = 0; j < length; j++)
-            {
-                var prevMp = i >= j ? inputList[i - j] : 0;
-                md += Math.Abs(prevMp - avg);
-            }
-            md /= length;
-
-            var acci = md != 0 ? (tp - avg) / (constant * md) : 0;
-            acciList.Add(acci);
-
-            var acciEma = CalculateEMA(acci, prevAcci1, (int)Math.Ceiling(sp));
-            acciEmaList.Add(acciEma);
-
-            var signal = GetRsiSignal(acciEma - prevAcci1, prevAcci1 - prevAcci2, acciEma, prevAcci1, 100, -100);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eacci", acciList },
-            { "Signal", acciEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(acciList);
-        stockData.IndicatorName = IndicatorName.EhlersAdaptiveCommodityChannelIndexV1;
-
-        return stockData;
+        var cycle = stockData.ChainedValues.Count > 0 ? stockData.ChainedValues : stockData.InputValues; var input = CommodityIndexWindow.Prices(stockData); var window = new AdaptiveRangeV1Window(cycPart, true, constant); var values = new List<double>(input.Count); var average = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], stockData.HighPrices[i], stockData.LowPrices[i], cycle[i], true); values.Add(point.Value); average.Add(point.Average); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eacci", values }, { "Signal", average } }); stockData.SetCustomValues(values); stockData.SetSignals(signals); stockData.IndicatorName = IndicatorName.EhlersAdaptiveCommodityChannelIndexV1; return stockData;
     }
 
 

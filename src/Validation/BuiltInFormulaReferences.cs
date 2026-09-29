@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersAdaptiveStochasticIndicatorV1 or IndicatorName.EhlersAdaptiveCommodityChannelIndexV1)
+        {
+            var commodity = builtIn.BatchName == IndicatorName.EhlersAdaptiveCommodityChannelIndexV1; var rangeOptions = builtIn.CreateOptions(); var fraction = Number(rangeOptions, commodity ? 1 : .5, "CycPart"); var constant = Number(rangeOptions, .015, "Constant"); var rangeKeys = new[] { commodity ? "Eacci" : "Easi", "Signal" };
+            for (var slot = 0; slot < rangeKeys.Length; slot++) { var key = rangeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => AdaptiveRangeV1Values(bars, fraction, commodity, constant, indicator.Source is not null).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersAdaptiveRelativeStrengthIndexV1 or IndicatorName.EhlersAdaptiveRsiFisherTransformV1)
         {
             var rsiFisher = builtIn.BatchName == IndicatorName.EhlersAdaptiveRsiFisherTransformV1; var fraction = Number(builtIn.CreateOptions(), .5, "CycPart"); var rsiKeys = rsiFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" };

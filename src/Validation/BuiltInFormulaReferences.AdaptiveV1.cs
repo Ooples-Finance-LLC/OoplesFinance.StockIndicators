@@ -14,6 +14,11 @@ internal static partial class BuiltInFormulaReferences
             var isFisher = name == IndicatorName.EhlersAdaptiveRsiFisherTransformV1; var cycleFraction = Number(indicator.CreateOptions(), .5, "CycPart");
             return new(isFisher ? "Earsift" : "Earsi", isFisher ? new[] { "Earsift" } : new[] { "Earsi", "Signal" }, bars => AdaptiveRsiV1Values(bars, cycleFraction, isFisher).Outputs);
         }
+        if (name is IndicatorName.EhlersAdaptiveStochasticIndicatorV1 or IndicatorName.EhlersAdaptiveCommodityChannelIndexV1)
+        {
+            var isCommodity = name == IndicatorName.EhlersAdaptiveCommodityChannelIndexV1; var settings = indicator.CreateOptions(); var cycleFraction = Number(settings, isCommodity ? 1 : .5, "CycPart"); var coefficient = Number(settings, .015, "Constant"); var output = isCommodity ? "Eacci" : "Easi";
+            return new(output, new[] { output, "Signal" }, bars => AdaptiveRangeV1Values(bars, cycleFraction, isCommodity, coefficient, indicator is IIndicator { Source: not null }).Outputs);
+        }
         var stochastic = name == IndicatorName.EhlersAdaptiveStochasticIndicatorV1;
         var commodity = name == IndicatorName.EhlersAdaptiveCommodityChannelIndexV1;
         var fisher = name == IndicatorName.EhlersAdaptiveRsiFisherTransformV1;

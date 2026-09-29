@@ -198,168 +198,34 @@ public sealed class EhlersAdaptiveRsiFisherTransformV1State : IStreamingIndicato
 [PrimaryOutput("Easi")]
 public sealed class EhlersAdaptiveStochasticIndicatorV1State : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _cycPart;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly PooledRingBuffer<double> _highValues;
-    private readonly PooledRingBuffer<double> _lowValues;
-    private double _prevAstocEma1;
+    private readonly AdaptiveRangeV1Window _window;
 
-    public EhlersAdaptiveStochasticIndicatorV1State(double cycPart = 0.5)
-    {
-        _cycPart = cycPart;
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _highValues = new PooledRingBuffer<double>(Math.Max(64, checked((int)Math.Ceiling(50 * Math.Max(0, cycPart)) + 1)));
-        _lowValues = new PooledRingBuffer<double>(Math.Max(64, checked((int)Math.Ceiling(50 * Math.Max(0, cycPart)) + 1)));
-    }
-
+    public EhlersAdaptiveStochasticIndicatorV1State(double cycPart = .5) => _window = new AdaptiveRangeV1Window(cycPart, false, .015);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveStochasticIndicatorV1;
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _highValues.Clear();
-        _lowValues.Clear();
-        _prevAstocEma1 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var close = bar.Close;
-        var high = bar.High;
-        var low = bar.Low;
-        var sp = _mama.Next(close, isFinal).SmoothPeriod;
-        var length = (int)Math.Ceiling(_cycPart * sp);
-
-        double hh = high;
-        double ll = low;
-        for (var j = 0; j < length; j++)
-        {
-            var h = EhlersStreamingWindow.GetOffsetValue(_highValues, high, j);
-            var l = EhlersStreamingWindow.GetOffsetValue(_lowValues, low, j);
-            if (h > hh)
-            {
-                hh = h;
-            }
-            if (l < ll)
-            {
-                ll = l;
-            }
-        }
-
-        var astoc = hh - ll != 0 ? 100 * (close - ll) / (hh - ll) : 0;
-        var astocEma = CalculationsHelper.CalculateEMA(astoc, _prevAstocEma1, length);
-
-        if (isFinal)
-        {
-            _highValues.TryAdd(high, out _);
-            _lowValues.TryAdd(low, out _);
-            _prevAstocEma1 = astocEma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Easi", astoc },
-                { "Signal", astocEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(astoc, outputs);
+        StreamingInputValidation.Validate(bar); var price = bar.Close; var point = _window.Next(price, bar.High, bar.Low, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Easi", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _highValues.Dispose();
-        _lowValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eacci")]
 public sealed class EhlersAdaptiveCommodityChannelIndexV1State : IStreamingIndicatorState, IDisposable, ICustomInputConsumer
 {
-    private readonly double _cycPart;
-    private readonly double _constant;
-    private StreamingInputResolver _input;
-    private readonly EhlersMotherOfAdaptiveMovingAveragesEngine _mama;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevAcciEma1;
-
-    public EhlersAdaptiveCommodityChannelIndexV1State(double cycPart = 1,
-        double constant = 0.015)
-    {
-        _cycPart = cycPart;
-        _constant = constant;
-        _input = new StreamingInputResolver(InputName.TypicalPrice, null);
-        _mama = new EhlersMotherOfAdaptiveMovingAveragesEngine(0.5, 0.05);
-        _values = new PooledRingBuffer<double>(Math.Max(64, checked((int)Math.Ceiling(50 * Math.Max(0, cycPart)) + 1)));
-    }
-
+    private readonly AdaptiveRangeV1Window _window;
+    private bool _selected;
+    void ICustomInputConsumer.ReadCloseAsInput() => _selected = true;
+    public EhlersAdaptiveCommodityChannelIndexV1State(double cycPart = 1, double constant = .015) => _window = new AdaptiveRangeV1Window(cycPart, true, constant);
     public IndicatorName Name => IndicatorName.EhlersAdaptiveCommodityChannelIndexV1;
-
-    void ICustomInputConsumer.ReadCloseAsInput() =>
-        _input = new StreamingInputResolver(InputName.Close, null);
-
-    public void Reset()
-    {
-        _mama.Reset();
-        _values.Clear();
-        _prevAcciEma1 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var tp = _input.GetValue(bar);
-        var sp = _mama.Next(bar.Close, isFinal).SmoothPeriod;
-        var length = (int)Math.Ceiling(_cycPart * sp);
-
-        double avg = 0;
-        for (var j = 0; j < length; j++)
-        {
-            var prevMp = EhlersStreamingWindow.GetOffsetValue(_values, tp, j);
-            avg += prevMp;
-        }
-        avg /= length;
-
-        double md = 0;
-        for (var j = 0; j < length; j++)
-        {
-            var prevMp = EhlersStreamingWindow.GetOffsetValue(_values, tp, j);
-            md += Math.Abs(prevMp - avg);
-        }
-        md /= length;
-
-        var acci = md != 0 ? (tp - avg) / (_constant * md) : 0;
-        var emaLength = (int)Math.Ceiling(sp);
-        var acciEma = CalculationsHelper.CalculateEMA(acci, _prevAcciEma1, emaLength);
-
-        if (isFinal)
-        {
-            _values.TryAdd(tp, out _);
-            _prevAcciEma1 = acciEma;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eacci", acci },
-                { "Signal", acciEma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(acci, outputs);
+        StreamingInputValidation.Validate(bar); var price = _selected ? bar.Close : CommodityIndexWindow.TypicalPrice(bar.High, bar.Low, bar.Close); var point = _window.Next(price, bar.High, bar.Low, bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eacci", point.Value }, { "Signal", point.Average } } : null);
     }
-
-    public void Dispose()
-    {
-        _mama.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Esnr")]

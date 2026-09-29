@@ -953,6 +953,8 @@ internal static partial class IndicatorCompute
                 _ => null
             },
             EhlersDecyclerOscillatorV2SpecOptions edov2 => ComputeEhlersDecyclerOscillatorV2Fast(data, context, edov2.FastLength, edov2.MaType, edov2.SlowLength),
+            EhlersAdaptiveStochasticIndicatorV1SpecOptions astoch => ComputeAdaptiveRangeV1Fast(data, context, astoch.CycPart, false, .015, spec.OutputKey),
+            EhlersAdaptiveCommodityChannelIndexV1SpecOptions acci => ComputeAdaptiveRangeV1Fast(data, context, acci.CycPart, true, acci.Constant, spec.OutputKey),
             EhlersAdaptiveRelativeStrengthIndexV1SpecOptions arsi => ComputeAdaptiveRsiV1Fast(data, context, arsi.CycPart, false, spec.OutputKey),
             EhlersAdaptiveRsiFisherTransformV1SpecOptions => ComputeAdaptiveRsiV1Fast(data, context, .5, true, spec.OutputKey),
             EhlersHilbertOscillatorSpecOptions => ComputeMamaDerivedFast(data, context, 1, spec.OutputKey),
@@ -16525,6 +16527,12 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeAdaptiveRangeV1Fast(StockData data, ComputeContext context, double fraction, bool commodity, double constant, string? outputKey)
+    {
+        var cycle = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var input = commodity ? CommodityIndexWindow.Prices(data) : cycle; var window = new AdaptiveRangeV1Window(fraction, commodity, constant); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], data.HighPrices[i], data.LowPrices[i], cycle[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.Average : point.Value; } return result;
+    }
+
     internal static ComputeBuffer ComputeAdaptiveRsiV1Fast(StockData data, ComputeContext context, double fraction, bool fisher, string? outputKey)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new AdaptiveRsiV1Window(fraction, fisher); var result = context.Rent(input.Count);
