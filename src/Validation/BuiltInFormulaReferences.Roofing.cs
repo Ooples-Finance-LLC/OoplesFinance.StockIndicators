@@ -2,7 +2,7 @@ using OoplesFinance.StockIndicators.Indicators;
 namespace OoplesFinance.StockIndicators.Validation;
 internal static partial class BuiltInFormulaReferences
 {
-    internal static double[] RoofingValues(IReadOnlyList<Bar> bars, int upper, int lower, bool original)
+    internal static double[] RoofingValues(IReadOnlyList<Bar> bars, int upper, int lower, bool original, ReferenceFraction[]? exact = null)
     {
         ReferenceFraction R(double v) => ReferenceFraction.FromDouble(v);
         ReferenceFraction Round(ReferenceFraction v) => RoundRocBankStage(v);
@@ -22,6 +22,7 @@ internal static partial class BuiltInFormulaReferences
             second[i] = Round(first[i] + R(pole) * At(second, i - 1));
             output[i] = Round(gain * second[i] + feedback * At(output, i - 1) + decay * At(output, i - 2));
         }
+        if (exact is not null) Array.Copy(output, exact, output.Length);
         return output.Select(v => v.ToDouble()).ToArray();
     }
 }

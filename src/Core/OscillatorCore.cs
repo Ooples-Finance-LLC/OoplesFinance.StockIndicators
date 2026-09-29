@@ -9039,23 +9039,7 @@ internal static class OscillatorCore
     internal static void EhlersAutoCorrelationIndicator(ReadOnlySpan<double> close, Span<double> output, int length1 = 48, int length2 = 10)
     {
         if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.");
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-
-        var pool = ArrayPool<double>.Shared;
-        var rfArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rf = rfArray.AsSpan(0, close.Length);
-            EhlersRoofingFilterV2(close, rf, length1, length2);
-
-            EhlersAutocorrelation.Compute(rf, output, length1);
-        }
-        finally
-        {
-            pool.Return(rfArray);
-        }
+        var window = new RoofAutocorrelationWindow(length1, length2); for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Value;
     }
 
     /// <summary>

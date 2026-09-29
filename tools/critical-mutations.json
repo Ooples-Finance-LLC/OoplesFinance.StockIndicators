@@ -43187,5 +43187,149 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~ZeroCrossingCycleNumericalTests.InvalidCandlesCannotAdvanceCrossingsOrBandPass"
+  },
+  {
+    "id": "roof-autocorrelation-source",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "ExactVarianceWindow.Units(value.Mantissa)",
+    "after": "ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-smoothing",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "_roof = new(_length, Math.Max(1, smoothing))",
+    "after": "_roof = new(_length, Math.Max(1, smoothing + 1))",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-lag",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "(long)lag + _length",
+    "after": "(long)lag + Math.Max(1, _length - 1)",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-x-mean",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "sx += x;",
+    "after": "sx += 2 * x;",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-y-variance",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "count * yy - sy * sy",
+    "after": "count * yy",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "count * xy - sx * sy",
+    "after": "count * xy",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-root-grid",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "<< 2148",
+    "after": "<< 2146",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-normalization",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "vx * vy",
+    "after": "vx * vx",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-degenerate",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "vx.IsZero || vy.IsZero ? 0",
+    "after": "vx.IsZero || vy.IsZero ? .5",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.EmptyZeroAndExtremePeriodsPreserveLaggedStartup"
+  },
+  {
+    "id": "roof-autocorrelation-history",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "2L * _length - 1",
+    "after": "1L * _length - 1",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-preview",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-reset",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "_roof.Reset();",
+    "after": "_previous = 0;",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-signal",
+    "module": "numerical",
+    "file": "src/Helpers/RoofAutocorrelationWindow.cs",
+    "scope": "internal sealed class RoofAutocorrelationWindow",
+    "before": "Signal.StrongBuy",
+    "after": "Signal.Buy",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.WideAndSubnormalPricesRetainCenteredCovarianceAndSignals"
+  },
+  {
+    "id": "roof-autocorrelation-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersAutoCorrelationIndicatorFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.SelectedPricesReachBatchAndFast"
+  },
+  {
+    "id": "roof-autocorrelation-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch7.cs",
+    "scope": "public sealed class EhlersAutoCorrelationIndicatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.InvalidCandlesCannotAdvanceRoofOrLaggedHistory"
+  },
+  {
+    "id": "roof-autocorrelation-core-output",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void EhlersAutoCorrelationIndicator(",
+    "before": "output.Length < close.Length",
+    "after": "output.Length + 1 < close.Length",
+    "filter": "FullyQualifiedName~RoofAutocorrelationNumericalTests.CoreRejectsShortOutputBeforeChangingIt"
   }
 ]

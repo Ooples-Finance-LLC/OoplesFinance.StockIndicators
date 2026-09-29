@@ -6,6 +6,7 @@ internal sealed class EhlersRoofingFilterV2Kernel
     private readonly double _pole, _gain, _c1, _c2, _c3;
     private double _price1, _price2, _price3;
     private RocBankValue _first, _second, _output1, _output2;
+    internal RocBankValue ExactOutput { get; private set; }
     internal EhlersRoofingFilterV2Kernel(int upper, int lower, bool original = false)
     {
         var angle = Math.Min(Math.Sqrt(2) * Math.PI / Math.Max(1, upper), .99);
@@ -19,7 +20,7 @@ internal sealed class EhlersRoofingFilterV2Kernel
     }
     private static void Product(ref ExactMeanAccumulator total, RocBankValue value, double coefficient)
     { var negative = new ExactMeanAccumulator(); negative.AddProduct(value.Mantissa, -coefficient); negative.ScaleByPowerOfTwo(value.UpperShift); total.Subtract(negative); }
-    internal double Next(double value, bool isFinal)
+    internal double Next(double value, bool isFinal, bool includeExactOutput = false)
     {
         var numerator = new ExactMeanAccumulator(); numerator.Add(value); numerator.Add(_price1, -1); numerator.Add(_price2, -1); numerator.Add(_price3);
         var drive = RocBankValue.Round(numerator, count: 2);
@@ -27,7 +28,8 @@ internal sealed class EhlersRoofingFilterV2Kernel
         var secondSum = new ExactMeanAccumulator(); first.AddTo(ref secondSum); Product(ref secondSum, _second, _pole); var second = RocBankValue.Round(secondSum);
         var outputSum = new ExactMeanAccumulator(); Product(ref outputSum, second, _c1); Product(ref outputSum, _output1, _c2); Product(ref outputSum, _output2, _c3); var output = RocBankValue.Round(outputSum);
         if (isFinal) { _price3 = _price2; _price2 = _price1; _price1 = value; _first = first; _second = second; _output2 = _output1; _output1 = output; }
+        if (includeExactOutput) ExactOutput = output;
         return output.Publish();
     }
-    internal void Reset() { _price1 = _price2 = _price3 = 0; _first = _second = _output1 = _output2 = default; }
+    internal void Reset() { ExactOutput = default; _price1 = _price2 = _price3 = 0; _first = _second = _output1 = _output2 = default; }
 }

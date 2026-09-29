@@ -407,64 +407,16 @@ public sealed class EhlersRoofingFilterV2State : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Eaci")]
 public sealed class EhlersAutoCorrelationIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly double[] _xWindow;
-    private readonly double[] _yWindow;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _roofingValues;
-
-    public EhlersAutoCorrelationIndicatorState(int length1 = 48, int length2 = 10)
-    {
-        _length1 = Math.Max(1, length1);
-        _roofingFilter = new EhlersRoofingFilterV2State(length1, length2);
-        _roofingValues = new PooledRingBuffer<double>(2 * _length1);
-        _xWindow = new double[_length1];
-        _yWindow = new double[_length1];
-    }
-
+    private readonly RoofAutocorrelationWindow _window;
+    public EhlersAutoCorrelationIndicatorState(int length1 = 48, int length2 = 10) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersAutoCorrelationIndicator;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _roofingValues.Clear();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var count = Math.Min(_roofingValues.Count + 1, _length1);
-        for (var j = 0; j < count; j++)
-        {
-            var offset = count - 1 - j;
-            _xWindow[j] = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, offset);
-            _yWindow[j] = EhlersStreamingWindow.GetOffsetValue(_roofingValues, roofingFilter, offset + _length1);
-        }
-        var corr = EhlersAutocorrelation.Normalized(_xWindow.AsSpan(0, count), _yWindow.AsSpan(0, count));
-
-        if (isFinal)
-        {
-            _roofingValues.TryAdd(roofingFilter, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Eaci", corr }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(corr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eaci", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _roofingValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eacp")]

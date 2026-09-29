@@ -2206,6 +2206,7 @@ internal static partial class IndicatorCompute
 
             // Batch 25 - More Ehlers Indicators
             // MaType smooths the phase into the Signal line only; the bound series is the raw phase.
+            EhlersAutoCorrelationIndicatorSpecOptions eaci => ComputeEhlersAutoCorrelationIndicatorFast(data, context, eaci.Length1, eaci.Length2),
             EhlersZeroCrossingsDominantCycleSpecOptions ezcdc => ComputeEhlersZeroCrossingsDominantCycleFast(data, context, ezcdc.Length, ezcdc.Bw),
             EhlersPhaseCalculationSpecOptions epc => spec.OutputKey switch
             {
@@ -22433,6 +22434,11 @@ internal static partial class IndicatorCompute
     }
 
     // Batch 25 - More Ehlers Indicators
+
+    internal static ComputeBuffer ComputeEhlersAutoCorrelationIndicatorFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var result = context.Rent(input.Count); OscillatorCore.EhlersAutoCorrelationIndicator(SpanCompat.AsReadOnlySpan(input), result.WritableSpan, length1, length2); return result;
+    }
 
     internal static ComputeBuffer ComputeEhlersZeroCrossingsDominantCycleFast(StockData data, ComputeContext context, int length = 20, double bw = .7)
     {

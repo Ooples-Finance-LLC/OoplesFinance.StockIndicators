@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersAutoCorrelationIndicator)
+        {
+            var correlationOptions = builtIn.CreateOptions(); var correlationLength = Integer(correlationOptions, "Length1", 48); var correlationSmoothing = Integer(correlationOptions, "Length2", 10);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => RoofAutocorrelationValues(bars, correlationLength, correlationSmoothing).Outputs["Eaci"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersZeroCrossingsDominantCycle)
         {
             var crossingOptions = builtIn.CreateOptions(); var crossingLength = Integer(crossingOptions, "Length", 20); var bandwidth = Number(crossingOptions, .7, "Bw");

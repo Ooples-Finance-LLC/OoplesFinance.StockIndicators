@@ -435,29 +435,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersAutoCorrelationIndicator(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-        var correlation = new double[stockData.Count];
-        EhlersAutocorrelation.Compute(Compatibility.SpanCompat.AsReadOnlySpan(roofingFilterList), correlation, length1);
-        var corrList = correlation.ToList();
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevCorr1 = i >= 1 ? corrList[i - 1] : 0;
-            var prevCorr2 = i >= 2 ? corrList[i - 2] : 0;
-            signalsList?.Add(GetCompareSignal(corrList[i] - prevCorr1, prevCorr1 - prevCorr2));
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eaci", corrList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(corrList);
-        stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new RoofAutocorrelationWindow(length1, length2); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eaci", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersAutoCorrelationIndicator; return stockData;
     }
 
 
