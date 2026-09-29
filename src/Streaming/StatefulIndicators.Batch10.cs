@@ -8,103 +8,16 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Trend")]
 public sealed class EhlersEmpiricalModeDecompositionState : IStreamingIndicatorState, IDisposable
 {
-    private readonly double _alpha;
-    private readonly double _beta;
-    private readonly double _fraction;
-    private readonly StreamingInputResolver _input;
-    private readonly IMovingAverageSmoother _trendSmoother;
-    private readonly IMovingAverageSmoother _peakSmoother;
-    private readonly IMovingAverageSmoother _valleySmoother;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevBp1;
-    private double _prevBp2;
-    private double _prevPeak;
-    private double _prevValley;
-    private int _index;
-
-    public EhlersEmpiricalModeDecompositionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length1 = 20, int length2 = 50, double delta = 0.5, double fraction = 0.1)
-    {
-        var resolvedLength1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _fraction = fraction;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _trendSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength1 * 2);
-        _peakSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
-        _valleySmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength2);
-
-        _beta = Math.Cos(MathHelper.MinOrMax(2 * Math.PI / resolvedLength1, 0.99, 0.01));
-        var gamma = 1 / Math.Cos(MathHelper.MinOrMax(4 * Math.PI * delta / resolvedLength1, 0.99, 0.01));
-        _alpha = MathHelper.MinOrMax(gamma - MathHelper.Sqrt((gamma * gamma) - 1), 0.99, 0.01);
-    }
-
+    private readonly EmpiricalDecompositionWindow _window;
+    public EhlersEmpiricalModeDecompositionState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 20, int length2 = 50, double delta = .5, double fraction = .1) => _window = new(maType, length1, length2, delta, fraction);
     public IndicatorName Name => IndicatorName.EhlersEmpiricalModeDecomposition;
-
-    public void Reset()
-    {
-        _trendSmoother.Reset();
-        _peakSmoother.Reset();
-        _valleySmoother.Reset();
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevBp1 = 0;
-        _prevBp2 = 0;
-        _prevPeak = 0;
-        _prevValley = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevBp1 = _index >= 1 ? _prevBp1 : 0;
-        var prevBp2 = _index >= 2 ? _prevBp2 : 0;
-        var diff = _index >= 2 ? value - prevValue2 : 0;
-
-        var bp = (0.5 * (1 - _alpha) * diff) + (_beta * (1 + _alpha) * prevBp1) - (_alpha * prevBp2);
-        var trend = _trendSmoother.Next(bp, isFinal);
-
-        var peak = prevBp1 > bp && prevBp1 > prevBp2 ? prevBp1 : _prevPeak;
-        var valley = prevBp1 < bp && prevBp1 < prevBp2 ? prevBp1 : _prevValley;
-
-        var peakAvg = _peakSmoother.Next(peak, isFinal);
-        var valleyAvg = _valleySmoother.Next(valley, isFinal);
-        var peakAvgFrac = _fraction * peakAvg;
-        var valleyAvgFrac = _fraction * valleyAvg;
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevBp2 = _prevBp1;
-            _prevBp1 = bp;
-            _prevPeak = peak;
-            _prevValley = valley;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Trend", trend },
-                { "Peak", peakAvgFrac },
-                { "Valley", valleyAvgFrac }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(trend, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Trend, includeOutputs ? new Dictionary<string, double> { { "Trend", point.Trend }, { "Peak", point.Peak }, { "Valley", point.Valley } } : null);
     }
-
-    public void Dispose()
-    {
-        _trendSmoother.Dispose();
-        _peakSmoother.Dispose();
-        _valleySmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Ehwi")]

@@ -12,6 +12,8 @@ internal static partial class BuiltInFormulaReferences
         var length = Integer(options, "Length", 14);
         if (indicator.BatchName == IndicatorName.EhlersTrendExtraction && options is EhlersTrendExtractionSpecOptions trendExtraction && trendExtraction.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
             return new("Trend", new[] { "Trend", "Bp" }, bars => TrendExtractionValues(bars, trendExtraction.Length, trendExtraction.Delta, trendExtraction.MaType));
+        if (indicator.BatchName == IndicatorName.EhlersEmpiricalModeDecomposition && options is EhlersEmpiricalModeDecompositionSpecOptions empirical && empirical.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
+            return new("Trend", new[] { "Trend", "Peak", "Valley" }, bars => EmpiricalDecompositionValues(bars, empirical.Length1, empirical.Length2, empirical.Delta, empirical.Fraction, empirical.MaType));
         switch (indicator.BatchName)
         {
             case IndicatorName.EhlersConvolutionIndicator:

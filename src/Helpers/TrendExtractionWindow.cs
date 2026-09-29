@@ -49,6 +49,7 @@ internal sealed class TrendExtractionWindow : IDisposable
         return band;
     }
     internal double Prepare(double price, bool commit) => Publish(Band(price, commit));
+    internal (double Mantissa, int Shift) PrepareScaled(double price, bool commit) { var value = Band(price, commit); return (value.Mantissa, value.Shift); }
     internal (double Trend, double Band) Next(double price, bool commit)
     {
         var band = Band(price, commit); double trend;

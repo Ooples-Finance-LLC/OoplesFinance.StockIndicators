@@ -40739,5 +40739,131 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// validation omitted\n",
     "filter": "FullyQualifiedName~TrendExtractionNumericalTests.InvalidCandlesDoNotAdvanceBandOrMean"
+  },
+  {
+    "id": "empirical-decomposition-peak",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private (Scaled Band, Scaled Peak, Scaled Valley) Raw(",
+    "before": "Compare(_previous, band) > 0",
+    "after": "Compare(_previous, band) < 0",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-valley",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private (Scaled Band, Scaled Peak, Scaled Valley) Raw(",
+    "before": "Compare(_previous, band) < 0",
+    "after": "Compare(_previous, band) > 0",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-hold",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private (Scaled Band, Scaled Peak, Scaled Valley) Raw(",
+    "before": "? _previous : _peak",
+    "after": "? _previous : default",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-fraction-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "value.Shift - 1074",
+    "after": "-1074",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.FractionIsAppliedBeforePublishingTinyAndWideExtrema"
+  },
+  {
+    "id": "empirical-decomposition-zero-fraction",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "ExactVarianceWindow.Units(fraction)",
+    "after": "ExactVarianceWindow.Units(fraction == 0 ? 1 : fraction)",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.ZeroFractionDoesNotTurnLargeInternalExtremaIntoNan"
+  },
+  {
+    "id": "empirical-decomposition-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private sealed class Average",
+    "before": "weighted.Subtract(sum);",
+    "after": "// weighted shift omitted\n",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-trend-period",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "internal EmpiricalDecompositionWindow(",
+    "before": "new(kind, 2L * length, 1, external)",
+    "after": "new(kind, 1L * length, 1, external)",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "private (Scaled Band, Scaled Peak, Scaled Valley) Raw(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "internal sealed class EmpiricalDecompositionWindow",
+    "before": "_previous = _older = _peak = _valley = default",
+    "after": "_previous = _older = _valley = default",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-fraction-validation",
+    "module": "numerical",
+    "file": "src/Helpers/EmpiricalDecompositionWindow.cs",
+    "scope": "internal EmpiricalDecompositionWindow(",
+    "before": "HighLowBandsWindow.ValidateShift(fraction);",
+    "after": "if (double.IsNaN(fraction) || double.IsInfinity(fraction)) fraction = 0;",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.NonfiniteFractionAndWidthAreRejected"
+  },
+  {
+    "id": "empirical-decomposition-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersEmpiricalModeDecomposition(",
+    "before": "else foreach (var price in input)",
+    "after": "else foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.SelectedPricesReachEveryFastAndBatchOutput"
+  },
+  {
+    "id": "empirical-decomposition-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.SelectedPricesReachEveryFastAndBatchOutput"
+  },
+  {
+    "id": "empirical-decomposition-fast-valley",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(",
+    "before": "outputKey == \"Valley\" ? point.Valley",
+    "after": "outputKey == \"Valley\" ? point.Peak",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.WideAndSubnormalInputsPreserveAllThreeOutputs"
+  },
+  {
+    "id": "empirical-decomposition-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersEmpiricalModeDecompositionState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// validation omitted\n",
+    "filter": "FullyQualifiedName~EmpiricalDecompositionNumericalTests.InvalidFieldsDoNotAdvanceExtremaOrAverages"
   }
 ]

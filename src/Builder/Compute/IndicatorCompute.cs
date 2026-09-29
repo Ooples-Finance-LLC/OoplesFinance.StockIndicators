@@ -22400,32 +22400,17 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersEmpiricalModeDecompositionFast(StockData data, ComputeContext context, int length1 = 20, int length2 = 50,
         double delta = 0.5, double fraction = 0.1, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        using var band = ComputeEhlersTrendExtractionFast(data, context, length1, delta, maType, true);
-        using var trend = context.Rent(data.Count);
-        MovingAverage(data, maType, 2 * length1, band.Span, trend.WritableSpan);
-        using var peaks = context.Rent(data.Count);
-        using var valleys = context.Rent(data.Count);
-        double peak = 0, valley = 0;
-        for (var i = 0; i < data.Count; i++)
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var external = ComponentAverage.HasOverrides || !EmpiricalDecompositionWindow.Supports(maType);
+        using var window = new EmpiricalDecompositionWindow(maType, length1, length2, delta, fraction, external); var result = context.Rent(input.Count);
+        if (external)
         {
-            var prior = i < 1 ? 0 : band.Span[i - 1];
-            var older = i < 2 ? 0 : band.Span[i - 2];
-            if (prior > band.Span[i] && prior > older) peak = prior;
-            if (prior < band.Span[i] && prior < older) valley = prior;
-            peaks.WritableSpan[i] = peak;
-            valleys.WritableSpan[i] = valley;
+            using var bands = context.Rent(input.Count); using var peaks = context.Rent(input.Count); using var valleys = context.Rent(input.Count);
+            for (var i = 0; i < input.Count; i++) { var point = window.Prepare(input[i], true); bands.WritableSpan[i] = point.Band; peaks.WritableSpan[i] = point.Peak; valleys.WritableSpan[i] = point.Valley; }
+            using var trend = context.Rent(input.Count); using var peakAverage = context.Rent(input.Count); using var valleyAverage = context.Rent(input.Count);
+            MovingAverage(data, maType, TrendExtractionWindow.ExternalPeriod(length1), bands.Span, trend.WritableSpan); MovingAverage(data, maType, Math.Max(1, length2), peaks.Span, peakAverage.WritableSpan); MovingAverage(data, maType, Math.Max(1, length2), valleys.Span, valleyAverage.WritableSpan);
+            for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = outputKey == "Peak" ? fraction * peakAverage.Span[i] : outputKey == "Valley" ? fraction * valleyAverage.Span[i] : trend.Span[i];
         }
-        using var peakAverage = context.Rent(data.Count);
-        using var valleyAverage = context.Rent(data.Count);
-        MovingAverage(data, maType, length2, peaks.Span, peakAverage.WritableSpan);
-        MovingAverage(data, maType, length2, valleys.Span, valleyAverage.WritableSpan);
-        var result = context.Rent(data.Count);
-        for (var i = 0; i < data.Count; i++) result.WritableSpan[i] = outputKey switch
-        {
-            "Peak" => fraction * peakAverage.Span[i],
-            "Valley" => fraction * valleyAverage.Span[i],
-            _ => trend.Span[i]
-        };
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = outputKey == "Peak" ? point.Peak : outputKey == "Valley" ? point.Valley : point.Trend; }
         return result;
     }
 

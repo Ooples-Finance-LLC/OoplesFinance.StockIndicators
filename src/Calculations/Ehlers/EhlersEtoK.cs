@@ -194,65 +194,17 @@ public static partial class Calculations
     public static StockData CalculateEhlersEmpiricalModeDecomposition(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length1 = 20, int length2 = 50, double delta = 0.5, double fraction = 0.1)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> peakList = new(stockData.Count);
-        List<double> valleyList = new(stockData.Count);
-        List<double> peakAvgFracList = new(stockData.Count);
-        List<double> valleyAvgFracList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var eteList = CalculateEhlersTrendExtraction(stockData, maType, length1, delta);
-        var trendList = eteList.ChainedOutputs["Trend"];
-        var bpList = eteList.ChainedOutputs["Bp"];
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !EmpiricalDecompositionWindow.Supports(maType);
+        using var window = new EmpiricalDecompositionWindow(maType, length1, length2, delta, fraction, external); var trends = new List<double>(stockData.Count); var peaks = new List<double>(stockData.Count); var valleys = new List<double>(stockData.Count); var signals = CreateSignalsList(stockData);
+        if (external)
         {
-            var prevBp1 = i >= 1 ? bpList[i - 1] : 0;
-            var prevBp2 = i >= 2 ? bpList[i - 2] : 0;
-            var bp = bpList[i];
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = prevBp1 > bp && prevBp1 > prevBp2 ? prevBp1 : prevPeak;
-            peakList.Add(peak);
-
-            var prevValley = GetLastOrDefault(valleyList);
-            var valley = prevBp1 < bp && prevBp1 < prevBp2 ? prevBp1 : prevValley;
-            valleyList.Add(valley);
+            var bands = new List<double>(input.Count); foreach (var price in input) { var point = window.Prepare(price, true); bands.Add(point.Band); peaks.Add(point.Peak); valleys.Add(point.Valley); }
+            List<double> Smooth(List<double> values, int period) => Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(values), period)?.ToList() ?? GetMovingAverageList(stockData, maType, period, values);
+            trends = Smooth(bands, TrendExtractionWindow.ExternalPeriod(length1)); peaks = Smooth(peaks, Math.Max(1, length2)).Select(v => fraction * v).ToList(); valleys = Smooth(valleys, Math.Max(1, length2)).Select(v => fraction * v).ToList();
         }
-
-        var peakAvgList = GetMovingAverageList(stockData, maType, length2, peakList);
-        var valleyAvgList = GetMovingAverageList(stockData, maType, length2, valleyList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var peakAvg = peakAvgList[i];
-            var valleyAvg = valleyAvgList[i];
-            var trend = trendList[i];
-            var prevTrend = i >= 1 ? trendList[i - 1] : 0;
-
-            var prevPeakAvgFrac = GetLastOrDefault(peakAvgFracList);
-            var peakAvgFrac = fraction * peakAvg;
-            peakAvgFracList.Add(peakAvgFrac);
-
-            var prevValleyAvgFrac = GetLastOrDefault(valleyAvgFracList);
-            var valleyAvgFrac = fraction * valleyAvg;
-            valleyAvgFracList.Add(valleyAvgFrac);
-
-            var signal = GetBullishBearishSignal(trend - Math.Max(peakAvgFrac, valleyAvgFrac), prevTrend - Math.Max(prevPeakAvgFrac, prevValleyAvgFrac),
-                trend - Math.Min(peakAvgFrac, valleyAvgFrac), prevTrend - Math.Min(prevPeakAvgFrac, prevValleyAvgFrac));
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Trend", trendList },
-            { "Peak", peakAvgFracList },
-            { "Valley", valleyAvgFracList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersEmpiricalModeDecomposition;
-
-        return stockData;
+        else foreach (var price in input) { var point = window.Next(price, true); trends.Add(point.Trend); peaks.Add(point.Peak); valleys.Add(point.Valley); }
+        for (var i = 0; i < trends.Count; i++) { var previous = i == 0 ? 0 : trends[i - 1]; var priorPeak = i == 0 ? 0 : peaks[i - 1]; var priorValley = i == 0 ? 0 : valleys[i - 1]; signals?.Add(GetBullishBearishSignal(trends[i] - Math.Max(peaks[i], valleys[i]), previous - Math.Max(priorPeak, priorValley), trends[i] - Math.Min(peaks[i], valleys[i]), previous - Math.Min(priorPeak, priorValley))); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Trend", trends }, { "Peak", peaks }, { "Valley", valleys } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersEmpiricalModeDecomposition; return stockData;
     }
 
 

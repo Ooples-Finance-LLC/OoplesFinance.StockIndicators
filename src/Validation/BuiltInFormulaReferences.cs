@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersEmpiricalModeDecomposition && builtIn.CreateOptions() is EhlersEmpiricalModeDecompositionSpecOptions decomposition && decomposition.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
+        {
+            var decompositionKeys = new[] { "Trend", "Peak", "Valley" }; for (var slot = 0; slot < decompositionKeys.Length; slot++) { var key = decompositionKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => EmpiricalDecompositionValues(bars, decomposition.Length1, decomposition.Length2, decomposition.Delta, decomposition.Fraction, decomposition.MaType)[key], IndicatorErrorBudget.Exact); }
+            yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersTrendExtraction && builtIn.CreateOptions() is EhlersTrendExtractionSpecOptions trendExtraction && trendExtraction.MaType is MovingAvgType.SimpleMovingAverage or MovingAvgType.WeightedMovingAverage)
         {
             foreach (var slot in new[] { 0, 1 }) { var key = slot == 0 ? "Trend" : "Bp"; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => TrendExtractionValues(bars, trendExtraction.Length, trendExtraction.Delta, trendExtraction.MaType)[key], IndicatorErrorBudget.Exact); }
