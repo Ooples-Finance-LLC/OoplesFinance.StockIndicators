@@ -106,54 +106,13 @@ public sealed class OptimalWeightedMovingAverageState : IStreamingIndicatorState
 [PrimaryOutput("Ott")]
 public sealed class OptimizedTrendTrackerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _ma;
-    private readonly StreamingInputResolver _input;
-    private readonly double _percent;
-    private OptimizedTrendStops _stops;
-
-    public OptimizedTrendTrackerState(MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage, int length = 2,
-        double percent = 1.4)
-    {
-        var resolved = Math.Max(1, length);
-        _ma = maType == MovingAvgType.VariableIndexDynamicAverage
-            ? new VariableIndexDynamicAverageEngine(resolved)
-            : MovingAverageSmootherFactory.Create(maType, resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _percent = percent;
-    }
-
+    private readonly OptimizedTrendWindow _window;
+    public OptimizedTrendTrackerState(MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage, int length = 2, double percent = 1.4) => _window = new(maType, length, percent);
     public IndicatorName Name => IndicatorName.OptimizedTrendTracker;
-
-    public void Reset()
-    {
-        _ma.Reset();
-        _stops = default;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var ma = _ma.Next(value, isFinal);
-        var next = _stops;
-        var ott = next.Next(ma, _percent);
-        if (isFinal) _stops = next;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ott", ott }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ott, outputs);
-    }
-
-    public void Dispose()
-    {
-        _ma.Dispose();
-    }
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value; return new(value, includeOutputs ? new Dictionary<string, double> { { "Ott", value } } : null); }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Oscar")]

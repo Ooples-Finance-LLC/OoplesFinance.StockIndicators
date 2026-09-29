@@ -48155,5 +48155,257 @@
     "before": "return new(point.Trender,",
     "after": "return new(point.TrendUp,",
     "filter": "FullyQualifiedName~TrenderNumericalTests.WideStagesPreserveEveryStopCrossingAndMoment"
+  },
+  {
+    "id": "optimized-trend-wide-absolute-distance",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Math.Abs(average.Mantissa)",
+    "after": "average.Mantissa",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-distance-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "RocBankValue.Round(product, count: 100)",
+    "after": "RocBankValue.Round(product, count: 200)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-lower-candidate",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "var lower = Candidate(-1)",
+    "after": "var lower = Candidate(1)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-upper-candidate",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "var upper = Candidate(1)",
+    "after": "var upper = Candidate(-1)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-seed-direction",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "_initialized = true; _rising = true;",
+    "after": "_initialized = true; _rising = false;",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndRatchets"
+  },
+  {
+    "id": "optimized-trend-wide-fall-equality",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Compare(average, _longStop) < 0",
+    "after": "Compare(average, _longStop) <= 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndRatchets"
+  },
+  {
+    "id": "optimized-trend-wide-rise-equality",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Compare(average, _shortStop) > 0",
+    "after": "Compare(average, _shortStop) >= 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.HandStopsPreserveStrictCrossingsEqualityAndRatchets"
+  },
+  {
+    "id": "optimized-trend-wide-long-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Compare(lower, _longStop) < 0",
+    "after": "Compare(lower, _longStop) > 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-short-ratchet",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Compare(upper, _shortStop) > 0",
+    "after": "Compare(upper, _shortStop) < 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-projection-sign",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "Compare(average, stop) > 0 ? 1 : -1",
+    "after": "Compare(average, stop) > 0 ? -1 : 1",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-projection-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "RocBankValue.Round(output, count: 200)",
+    "after": "RocBankValue.Round(output, count: 100)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-projection-shift",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendStops.cs",
+    "scope": "internal struct OptimizedTrendStops",
+    "before": "output.ScaleByPowerOfTwo(stop.UpperShift)",
+    "after": "output.ScaleByPowerOfTwo(0)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "_mean = new(kind, Math.Max(1, length))",
+    "after": "_mean = new(kind, Math.Max(2, length))",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-vidya-period",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "_vidya = new(Math.Max(1, length))",
+    "after": "_vidya = new(Math.Max(2, length))",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-momentum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "old.From, old.To, -1",
+    "after": "old.From, old.To, 1",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.VidyaKeepsMomentumExpiryAndFirstPriceSeed"
+  },
+  {
+    "id": "optimized-trend-wide-momentum-scale",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "numerator.Add(to, 100 * sign)",
+    "after": "numerator.Add(to, 1 * sign)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.VidyaKeepsMomentumExpiryAndFirstPriceSeed"
+  },
+  {
+    "id": "optimized-trend-wide-momentum-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "Math.Abs(momentum / 100)",
+    "after": "momentum / 100",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-vidya-alpha",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "_alpha = 2d / (length + 1d)",
+    "after": "_alpha = 1d / (length + 1d)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.VidyaKeepsMomentumExpiryAndFirstPriceSeed"
+  },
+  {
+    "id": "optimized-trend-wide-vidya-seed",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "_seeded ? _mean : value",
+    "after": "_seeded ? _mean : 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.VidyaKeepsMomentumExpiryAndFirstPriceSeed"
+  },
+  {
+    "id": "optimized-trend-wide-vidya-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "private sealed class LazyVidya",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-stop-preview",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "if (commit) { _stops = stops;",
+    "after": "if (true) { _stops = stops;",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-stop-reset",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "_stops = default;",
+    "after": "_difference = default;",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-signal",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "difference.Sign > 0 && change.Sign > 0",
+    "after": "difference.Sign < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
+  },
+  {
+    "id": "optimized-trend-wide-percent-domain",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "if (double.IsNaN(percent) || double.IsInfinity(percent))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.NonfinitePercentagesRejectBeforeMutatingSelectedInput"
+  },
+  {
+    "id": "optimized-trend-wide-custom-average",
+    "module": "numerical",
+    "file": "src/Helpers/OptimizedTrendWindow.cs",
+    "scope": "internal sealed class OptimizedTrendWindow",
+    "before": "new RocBankValue(externalMean.Value)",
+    "after": "new RocBankValue(value)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.CustomAndLegacyAveragesReceiveSelectedPricesAndPeriod"
+  },
+  {
+    "id": "optimized-trend-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeOptimizedTrendTrackerFast(",
+    "before": "window.Next(input[i], true,",
+    "after": "window.Next(data.ClosePrices[i], true,",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.CustomAndLegacyAveragesReceiveSelectedPricesAndPeriod"
+  },
+  {
+    "id": "optimized-trend-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OptimizedTrendTrackerState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Open, isFinal)",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.SelectedSourcePreservesOriginalCandles"
+  },
+  {
+    "id": "optimized-trend-wide-native-primary",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch19.cs",
+    "scope": "public sealed class OptimizedTrendTrackerState",
+    "before": "return new(value,",
+    "after": "return new(value + 1,",
+    "filter": "FullyQualifiedName~OptimizedTrendNumericalTests.WideAveragesAndPercentagesKeepEveryStopAndDirection"
   }
 ]

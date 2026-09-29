@@ -18842,15 +18842,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeOptimizedTrendTrackerFast(StockData data, ComputeContext context, int length = 2,
         double percent = 1.4, MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage)
     {
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        using var average = context.Rent(input.Length);
-        MovingAverage(data, maType, length, input, average.WritableSpan);
-        var buffer = context.Rent(input.Length);
-        var stops = new OptimizedTrendStops();
-        for (var i = 0; i < input.Length; i++)
-            buffer.WritableSpan[i] = stops.Next(average.Span[i], percent);
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !OptimizedTrendWindow.Supports(maType);
+        using var window = new OptimizedTrendWindow(maType, length, percent, external); using ComputeBuffer? mean = external ? context.Rent(input.Count) : null;
+        if (external) MovingAverage(data, maType, Math.Max(1, length), SpanCompat.AsReadOnlySpan(input), mean!.Value.WritableSpan);
+        var result = context.Rent(input.Count); try { for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true, external ? mean!.Value.Span[i] : null).Value; return result; }
+        catch { result.Dispose(); throw; }
     }
 
     /// <summary>

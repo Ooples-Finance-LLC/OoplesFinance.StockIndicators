@@ -244,34 +244,12 @@ public static partial class Calculations
     public static StockData CalculateOptimizedTrendTracker(this StockData stockData, MovingAvgType maType = MovingAvgType.VariableIndexDynamicAverage,
         int length = 2, double percent = 1.4)
     {
-        List<double> ottList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var maList = GetMovingAverageList(stockData, maType, length, inputList);
-
-        var stops = new OptimizedTrendStops();
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var ma = maList[i];
-            var prevOtt = i >= 1 ? ottList[i - 1] : 0;
-            var ott = stops.Next(ma, percent);
-            ottList.Add(ott);
-
-            var signal = GetCompareSignal(currentValue - ott, prevValue - prevOtt);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ott", ottList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ottList);
-        stockData.IndicatorName = IndicatorName.OptimizedTrendTracker;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !OptimizedTrendWindow.Supports(maType);
+        using var window = new OptimizedTrendWindow(maType, length, percent, external); List<double>? mean = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); mean = Builder.Compute.ComponentAverage.Take(Compatibility.SpanCompat.AsReadOnlySpan(input), Math.Max(1, length))?.ToList() ?? GetMovingAverageList(stockData, maType, Math.Max(1, length), input); stockData.RestoreInputSeries(caller); }
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, mean?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ott", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.OptimizedTrendTracker; return stockData;
     }
 
 

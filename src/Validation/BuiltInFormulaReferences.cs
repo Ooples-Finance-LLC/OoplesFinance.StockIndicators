@@ -17,6 +17,10 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.OptimizedTrendTracker)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => OptimizedTrendOutputs(bars, builtIn)["Ott"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.Trender)
         {
             var trenderKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
