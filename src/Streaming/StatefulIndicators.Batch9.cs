@@ -410,104 +410,16 @@ public sealed class EhlersDominantCycleTunedBypassFilterState : IStreamingIndica
 [PrimaryOutput("Edddc")]
 public sealed class EhlersDualDifferentiatorDominantCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _realValues;
-    private readonly PooledRingBuffer<double> _imagValues;
-    private double _peak;
-    private double _qPeak;
-    private double _prevPeriod;
-    private double _prevDomCyc1;
-    private double _prevDomCyc2;
-    private int _index;
-
-    public EhlersDualDifferentiatorDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 8)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolvedLength2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / resolvedLength2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolvedLength2);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _roofingFilter = new EhlersRoofingFilterV2State(_length1, resolvedLength2);
-        _realValues = new PooledRingBuffer<double>(2);
-        _imagValues = new PooledRingBuffer<double>(2);
-    }
-
+    private readonly HilbertCycleWindow _window;
+    public EhlersDualDifferentiatorDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 8) => _window = new(length1, length2, length3, 1, 0);
     public IndicatorName Name => IndicatorName.EhlersDualDifferentiatorDominantCycle;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _realValues.Clear();
-        _imagValues.Clear();
-        _peak = 0;
-        _qPeak = 0;
-        _prevPeriod = 0;
-        _prevDomCyc1 = 0;
-        _prevDomCyc2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, false).Value;
-        var prevReal1 = EhlersStreamingWindow.GetOffsetValue(_realValues, 1);
-        var prevReal2 = EhlersStreamingWindow.GetOffsetValue(_realValues, 2);
-        var prevImag1 = EhlersStreamingWindow.GetOffsetValue(_imagValues, 1);
-
-        var peak = Math.Max(0.991 * _peak, Math.Abs(roofingFilter));
-        var real = peak != 0 ? roofingFilter / peak : 0;
-        var qFilt = real - prevReal1;
-        var qPeak = Math.Max(0.991 * _qPeak, Math.Abs(qFilt));
-        var imag = qPeak != 0 ? qFilt / qPeak : 0;
-
-        var iDot = real - prevReal1;
-        var qDot = imag - prevImag1;
-        var prevPeriod = _index >= 1 ? _prevPeriod : 0;
-        var determinant = real*prevImag1-imag*prevReal1;
-        var resolution = 1e-12*(Math.Abs(real*prevImag1)+Math.Abs(imag*prevReal1));
-        var period = Math.Abs(determinant) <= resolution ? 0 : 2*Math.PI*(real*real+imag*imag)/determinant;
-        period = MathHelper.MinOrMax(period, _length1, _length3);
-        var domCyc = (_c1 * ((period + prevPeriod) / 2)) + (_c2 * _prevDomCyc1) + (_c3 * _prevDomCyc2);
-
-        if (isFinal)
-        {
-            _realValues.TryAdd(real, out _);
-            _imagValues.TryAdd(imag, out _);
-            _peak = peak;
-            _qPeak = qPeak;
-            _prevPeriod = period;
-            _prevDomCyc2 = _prevDomCyc1;
-            _prevDomCyc1 = domCyc;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Edddc", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Edddc", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _realValues.Dispose();
-        _imagValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Eoti")]

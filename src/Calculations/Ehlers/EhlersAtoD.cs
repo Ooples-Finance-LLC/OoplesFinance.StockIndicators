@@ -1174,58 +1174,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersDualDifferentiatorDominantCycle(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 8)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> periodList = new(stockData.Count);
-        List<double> domCycList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length2);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var hilbertOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersHilbertTransformer(data, length1, length2));
-        var realList = hilbertOutputs["Real"];
-        var imagList = hilbertOutputs["Imag"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var real = realList[i];
-            var imag = imagList[i];
-            var prevReal1 = i >= 1 ? realList[i - 1] : 0;
-            var prevReal2 = i >= 2 ? realList[i - 2] : 0;
-            var prevImag1 = i >= 1 ? imagList[i - 1] : 0;
-            var iDot = real - prevReal1;
-            var prevDomCyc1 = i >= 1 ? domCycList[i - 1] : 0;
-            var prevDomCyc2 = i >= 2 ? domCycList[i - 2] : 0;
-            var qDot = imag - prevImag1;
-
-            var prevPeriod = GetLastOrDefault(periodList);
-            var determinant = real*prevImag1-imag*prevReal1;
-            var resolution = 1e-12*(Math.Abs(real*prevImag1)+Math.Abs(imag*prevReal1));
-            var period = Math.Abs(determinant) <= resolution ? 0 : 2*Math.PI*(real*real+imag*imag)/determinant;
-            period = MinOrMax(period, length1, length3);
-            periodList.Add(period);
-
-            var domCyc = (c1 * ((period + prevPeriod) / 2)) + (c2 * prevDomCyc1) + (c3 * prevDomCyc2);
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Edddc", domCycList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(domCycList);
-        stockData.IndicatorName = IndicatorName.EhlersDualDifferentiatorDominantCycle;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertCycleWindow(length1, length2, length3, 1, 0); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Edddc", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersDualDifferentiatorDominantCycle; return stockData;
     }
 
 

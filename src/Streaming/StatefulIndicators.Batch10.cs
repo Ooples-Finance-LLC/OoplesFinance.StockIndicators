@@ -283,85 +283,16 @@ public sealed class EhlersHilbertTransformerIndicatorState : IStreamingIndicator
 [PrimaryOutput("Ehdc")]
 public sealed class EhlersHomodyneDominantCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersHilbertTransformerEngine _engine;
-    private double _prevReal1;
-    private double _prevReal2;
-    private double _prevImag1;
-    private double _prevPeriod;
-    private double _prevDomCyc1;
-    private double _prevDomCyc2;
-
-    public EhlersHomodyneDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 10)
-    {
-        _length1 = Math.Max(1, length1);
-        _length3 = Math.Max(1, length3);
-        var resolvedLength2 = Math.Max(1, length2);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / resolvedLength2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolvedLength2);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _engine = new EhlersHilbertTransformerEngine(_length1, resolvedLength2, InputName.Close);
-    }
-
+    private readonly HilbertCycleWindow _window;
+    public EhlersHomodyneDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 10) => _window = new(length1, length2, length3, 1, 1);
     public IndicatorName Name => IndicatorName.EhlersHomodyneDominantCycle;
-
-    public void Reset()
-    {
-        _engine.Reset();
-        _prevReal1 = 0;
-        _prevReal2 = 0;
-        _prevImag1 = 0;
-        _prevPeriod = 0;
-        _prevDomCyc1 = 0;
-        _prevDomCyc2 = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        _engine.Next(bar, isFinal, out var real, out var imag);
-
-        var re = (real * _prevReal1) + (imag * _prevImag1);
-        var im = (_prevReal1 * imag) - (real * _prevImag1);
-
-        var advance = Math.Abs(Math.Atan2(im, re));
-        var period = advance != 0 ? 2 * Math.PI / advance : 0;
-        period = MathHelper.MinOrMax(period, _length1, _length3);
-
-        var domCyc = (_c1 * ((period + _prevPeriod) / 2)) + (_c2 * _prevDomCyc1) + (_c3 * _prevDomCyc2);
-
-        if (isFinal)
-        {
-            _prevReal2 = _prevReal1;
-            _prevReal1 = real;
-            _prevImag1 = imag;
-            _prevPeriod = period;
-            _prevDomCyc2 = _prevDomCyc1;
-            _prevDomCyc1 = domCyc;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ehdc", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Ehdc", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _engine.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 [PrimaryOutput("Ehplprf")]
 public sealed class EhlersHpLpRoofingFilterState : IStreamingIndicatorState

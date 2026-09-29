@@ -722,76 +722,9 @@ public static partial class Calculations
     public static StockData CalculateEhlersPhaseAccumulationDominantCycle(this StockData stockData, int length1 = 48, int length2 = 20, int length3 = 10, 
         int length4 = 40)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        length4 = Math.Max(length4, 1);
-        List<double> phaseList = new(stockData.Count);
-        List<double> dPhaseList = new(stockData.Count);
-        List<double> instPeriodList = new(stockData.Count);
-        List<double> domCycList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var a1 = Exp(-1.414 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / length2);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var hilbertOutputs = GetOutputValuesInternal(stockData,
-            data => CalculateEhlersHilbertTransformer(data, length1, length2));
-        var realList = hilbertOutputs["Real"];
-        var imagList = hilbertOutputs["Imag"];
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var real = realList[i];
-            var imag = imagList[i];
-            var prevReal1 = i >= 1 ? realList[i - 1] : 0;
-            var prevReal2 = i >= 2 ? realList[i - 2] : 0;
-            var prevDomCyc1 = i >= 1 ? domCycList[i - 1] : 0;
-            var prevDomCyc2 = i >= 2 ? domCycList[i - 2] : 0;
-
-            var prevPhase = GetLastOrDefault(phaseList);
-            var phase = Math.Atan2(imag, real).ToDegrees();
-            if (phase < 0) phase += 360;
-            phaseList.Add(phase);
-
-            var dPhase = prevPhase - phase;
-            dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
-            dPhase = MinOrMax(dPhase, length1, length3);
-            dPhaseList.Add(dPhase);
-
-            var prevInstPeriod = GetLastOrDefault(instPeriodList);
-            double instPeriod = 0, phaseSum = 0;
-            for (var j = 0; j < length4; j++)
-            {
-                var prevDPhase = i >= j ? dPhaseList[i - j] : 0;
-                phaseSum += prevDPhase;
-
-                if (phaseSum >= 360 - 3.6e-7 && instPeriod == 0)
-                {
-                    instPeriod = j + 1;
-                }
-            }
-            instPeriod = instPeriod == 0 ? prevInstPeriod : instPeriod;
-            instPeriodList.Add(instPeriod);
-
-            var domCyc = (c1 * ((instPeriod + prevInstPeriod) / 2)) + (c2 * prevDomCyc1) + (c3 * prevDomCyc2);
-            domCycList.Add(domCyc);
-
-            var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Epadc", domCycList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(domCycList);
-        stockData.IndicatorName = IndicatorName.EhlersPhaseAccumulationDominantCycle;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HilbertCycleWindow(length1, length2, length3, length4, 2); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Epadc", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersPhaseAccumulationDominantCycle; return stockData;
     }
 
 

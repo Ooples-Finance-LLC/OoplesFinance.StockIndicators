@@ -1453,6 +1453,9 @@ internal static partial class IndicatorCompute
                 "Dsp" => ComputeEhlersDetrendedLeadingIndicatorFast(data, context, edli.Length, detrendedPrice: true),
                 _ => null
             },
+            EhlersDualDifferentiatorDominantCycleSpecOptions hilbertCycle0 => ComputeHilbertCycleFast(data, context, hilbertCycle0.Length1, hilbertCycle0.Length2, hilbertCycle0.Length3, 1, 0),
+            EhlersHomodyneDominantCycleSpecOptions hilbertCycle1 => ComputeHilbertCycleFast(data, context, hilbertCycle1.Length1, hilbertCycle1.Length2, hilbertCycle1.Length3, 1, 1),
+            EhlersPhaseAccumulationDominantCycleSpecOptions hilbertCycle2 => ComputeHilbertCycleFast(data, context, hilbertCycle2.Length1, hilbertCycle2.Length2, hilbertCycle2.Length3, hilbertCycle2.Length4, 2),
             EhlersClassicHilbertTransformerSpecOptions echt => spec.OutputKey switch
             {
                 null or "Real" => ComputeEhlersClassicHilbertTransformerFast(data, context, echt.Length1, echt.Length2),
@@ -16570,6 +16573,13 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Ehlers Squelch Indicator using fast path.
     /// </summary>
+    internal static ComputeBuffer ComputeHilbertCycleFast(StockData data, ComputeContext context, int upper, int lower, int minimum, int horizon, int mode)
+    {
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new HilbertCycleWindow(upper, lower, minimum, horizon, mode); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) result.WritableSpan[i] = window.Next(input[i], true).Value;
+        return result;
+    }
+
     internal static ComputeBuffer ComputeHilbertTransformerFast(StockData data, ComputeContext context, int upper, int lower, int smoothing, bool smooth, string? outputKey)
     {
         var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new HilbertTransformerWindow(upper, lower, smoothing, smooth); var result = context.Rent(input.Count);

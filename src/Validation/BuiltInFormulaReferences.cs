@@ -17,6 +17,12 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName is IndicatorName.EhlersDualDifferentiatorDominantCycle or IndicatorName.EhlersHomodyneDominantCycle or IndicatorName.EhlersPhaseAccumulationDominantCycle)
+        {
+            var cycleOptions = builtIn.CreateOptions(); var cycleMode = builtIn.BatchName == IndicatorName.EhlersDualDifferentiatorDominantCycle ? 0 : builtIn.BatchName == IndicatorName.EhlersHomodyneDominantCycle ? 1 : 2;
+            var cycleUpper = Integer(cycleOptions, "Length1", 48); var cycleLower = Integer(cycleOptions, "Length2", 20); var cycleMinimum = Integer(cycleOptions, "Length3", 10); var cycleHorizon = Integer(cycleOptions, "Length4", 40);
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => HilbertCycleValues(bars, cycleUpper, cycleLower, cycleMinimum, cycleHorizon, cycleMode).Values, IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.EhlersClassicHilbertTransformer)
         {
             var classicOptions = (EhlersClassicHilbertTransformerSpecOptions)builtIn.CreateOptions(); var classicKeys = new[] { "Real", "Imag" };

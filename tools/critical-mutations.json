@@ -41567,5 +41567,203 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "// omitted validation\n",
     "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.InvalidFieldsCannotAdvanceRoofingOrFirHistory"
+  },
+  {
+    "id": "hilbert-cycle-determinant",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "determinant.AddProduct(-vector.Imaginary, _real)",
+    "after": "determinant.AddProduct(vector.Imaginary, _real)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-dot",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "dot.AddProduct(vector.Imaginary, _imaginary)",
+    "after": "dot.AddProduct(-vector.Imaginary, _imaginary)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "> 1e-12",
+    "after": "> 1d",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-energy",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "energy.AddProduct(vector.Imaginary, vector.Imaginary)",
+    "after": "energy.AddProduct(vector.Real, vector.Real)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-bound",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal sealed class HilbertCycleWindow",
+    "before": "Math.Min(_upper, Math.Max(_minimum, value))",
+    "after": "Math.Max(_upper, Math.Min(_minimum, value))",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-quadrant",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (phase < 0) phase += 360",
+    "after": "if (phase < 0) phase += 180",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-horizon",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal HilbertCycleWindow(",
+    "before": "Math.Min(360, Math.Max(1, horizon))",
+    "after": "Math.Min(359, Math.Max(1, horizon))",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.PhaseWindowIncludesTheFullThreeHundredSixtySampleCrossing"
+  },
+  {
+    "id": "hilbert-cycle-crossing",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (total >= 360 - 3.6e-7) period = lag + 1",
+    "after": "if (total > 360) period = lag + 1",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.PhaseWindowIncludesTheFullThreeHundredSixtySampleCrossing"
+  },
+  {
+    "id": "hilbert-cycle-count",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "period = lag + 1",
+    "after": "period = lag",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-smoothing-drive",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "sum.Add(_period, _gain)",
+    "after": "sum.Add(_period, -_gain)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-smoothing-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "_output2.Add(ref sum, 2 * _feedback2)",
+    "after": "_output1.Add(ref sum, 2 * _feedback2)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-preview-vector",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "_normalizer.Next(price, commit)",
+    "after": "_normalizer.Next(price, true)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-preview-state",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-reset",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal sealed class HilbertCycleWindow",
+    "before": "_output1 = _output2 = default",
+    "after": "_output2 = default",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-signal",
+    "module": "numerical",
+    "file": "src/Helpers/HilbertCycleWindow.cs",
+    "scope": "internal (double Value, Signal Signal) Next(",
+    "before": "vector.Signal);",
+    "after": "vector.Signal == Signal.StrongBuy ? Signal.Buy : vector.Signal);",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.WideAndSubnormalPricesRetainCycleMeasurements"
+  },
+  {
+    "id": "hilbert-cycle-EhlersDualDifferentiatorDominantCycle-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersDualDifferentiatorDominantCycle(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.SelectedPricesReachEachBatchAndFastRoute"
+  },
+  {
+    "id": "hilbert-cycle-EhlersDualDifferentiatorDominantCycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch9.cs",
+    "scope": "public sealed class EhlersDualDifferentiatorDominantCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.InvalidFieldsCannotAdvanceCycleHistory"
+  },
+  {
+    "id": "hilbert-cycle-EhlersHomodyneDominantCycle-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersEtoK.cs",
+    "scope": "public static StockData CalculateEhlersHomodyneDominantCycle(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.SelectedPricesReachEachBatchAndFastRoute"
+  },
+  {
+    "id": "hilbert-cycle-EhlersHomodyneDominantCycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHomodyneDominantCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.InvalidFieldsCannotAdvanceCycleHistory"
+  },
+  {
+    "id": "hilbert-cycle-EhlersPhaseAccumulationDominantCycle-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersLtoR.cs",
+    "scope": "public static StockData CalculateEhlersPhaseAccumulationDominantCycle(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.SelectedPricesReachEachBatchAndFastRoute"
+  },
+  {
+    "id": "hilbert-cycle-EhlersPhaseAccumulationDominantCycle-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersPhaseAccumulationDominantCycleState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.InvalidFieldsCannotAdvanceCycleHistory"
+  },
+  {
+    "id": "hilbert-cycle-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeHilbertCycleFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~HilbertCycleNumericalTests.SelectedPricesReachEachBatchAndFastRoute"
   }
 ]

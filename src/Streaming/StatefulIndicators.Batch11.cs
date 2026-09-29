@@ -998,107 +998,16 @@ public sealed class EhlersOptimumEllipticFilterState : IStreamingIndicatorState
 [PrimaryOutput("Epadc")]
 public sealed class EhlersPhaseAccumulationDominantCycleState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _length3;
-    private readonly int _length4;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly EhlersHilbertTransformerEngine _hilbert;
-    private readonly PooledRingBuffer<double> _dPhaseValues;
-    private double _prevPhase;
-    private double _prevInstPeriod;
-    private double _prevDomCyc1;
-    private double _prevDomCyc2;
-    private int _index;
-
-    public EhlersPhaseAccumulationDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 10,
-        int length4 = 40)
-    {
-        _length1 = Math.Max(1, length1);
-        var resolved2 = Math.Max(1, length2);
-        _length3 = Math.Max(1, length3);
-        _length4 = Math.Max(1, length4);
-        var a1 = MathHelper.Exp(-1.414 * Math.PI / resolved2);
-        var b1 = 2 * a1 * Math.Cos(1.414 * Math.PI / resolved2);
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _hilbert = new EhlersHilbertTransformerEngine(_length1, resolved2, InputName.Close);
-        _dPhaseValues = new PooledRingBuffer<double>(_length4);
-    }
-
+    private readonly HilbertCycleWindow _window;
+    public EhlersPhaseAccumulationDominantCycleState(int length1 = 48, int length2 = 20, int length3 = 10, int length4 = 40) => _window = new(length1, length2, length3, length4, 2);
     public IndicatorName Name => IndicatorName.EhlersPhaseAccumulationDominantCycle;
-
-    public void Reset()
-    {
-        _hilbert.Reset();
-        _dPhaseValues.Clear();
-        _prevPhase = 0;
-        _prevInstPeriod = 0;
-        _prevDomCyc1 = 0;
-        _prevDomCyc2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        _hilbert.Next(bar, isFinal, out var real, out var imag);
-
-        var prevPhase = _index >= 1 ? _prevPhase : 0;
-        var phase = Math.Atan2(imag, real).ToDegrees();
-        if (phase < 0) phase += 360;
-
-        var dPhase = prevPhase - phase;
-        dPhase = prevPhase < 90 && phase > 270 ? 360 + prevPhase - phase : dPhase;
-        dPhase = MathHelper.MinOrMax(dPhase, _length1, _length3);
-
-        var prevInstPeriod = _prevInstPeriod;
-        double instPeriod = 0;
-        double phaseSum = 0;
-        for (var j = 0; j < _length4; j++)
-        {
-            var prevDPhase = EhlersStreamingWindow.GetOffsetValue(_dPhaseValues, dPhase, j);
-            phaseSum += prevDPhase;
-            if (phaseSum >= 360 - 3.6e-7 && instPeriod == 0)
-            {
-                instPeriod = j + 1;
-            }
-        }
-
-        instPeriod = instPeriod == 0 ? prevInstPeriod : instPeriod;
-        var prevDomCyc1 = _index >= 1 ? _prevDomCyc1 : 0;
-        var prevDomCyc2 = _index >= 2 ? _prevDomCyc2 : 0;
-        var domCyc = (_c1 * ((instPeriod + prevInstPeriod) / 2)) + (_c2 * prevDomCyc1) + (_c3 * prevDomCyc2);
-
-        if (isFinal)
-        {
-            _dPhaseValues.TryAdd(dPhase, out _);
-            _prevPhase = phase;
-            _prevInstPeriod = instPeriod;
-            _prevDomCyc2 = _prevDomCyc1;
-            _prevDomCyc1 = domCyc;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Epadc", domCyc }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(domCyc, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Value, includeOutputs ? new Dictionary<string, double> { { "Epadc", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _hilbert.Dispose();
-        _dPhaseValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Phase")]
