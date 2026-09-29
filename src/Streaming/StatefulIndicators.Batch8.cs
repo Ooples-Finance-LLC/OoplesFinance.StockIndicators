@@ -358,73 +358,16 @@ public sealed class EhlersAutoCorrelationReversalsState : IStreamingIndicatorSta
 [PrimaryOutput("Real")]
 public sealed class EhlersClassicHilbertTransformerState : IStreamingIndicatorState, IDisposable
 {
-    private readonly EhlersRoofingFilterV2State _roofingFilter;
-    private readonly PooledRingBuffer<double> _realValues;
-    private double _prevPeak;
-
-    public EhlersClassicHilbertTransformerState(int length1 = 48, int length2 = 10)
-    {
-        _roofingFilter = new EhlersRoofingFilterV2State(Math.Max(1, length1), Math.Max(1, length2));
-        _realValues = new PooledRingBuffer<double>(23);
-    }
-
+    private readonly ClassicHilbertWindow _window;
+    public EhlersClassicHilbertTransformerState(int length1 = 48, int length2 = 10) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersClassicHilbertTransformer;
-
-    public void Reset()
-    {
-        _roofingFilter.Reset();
-        _realValues.Clear();
-        _prevPeak = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var roofingFilter = _roofingFilter.Update(bar, isFinal, includeOutputs: false).Value;
-        var peak = Math.Max(0.991 * _prevPeak, Math.Abs(roofingFilter));
-        var real = peak != 0 ? roofingFilter / peak : 0;
-
-        var prevReal2 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 2);
-        var prevReal4 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 4);
-        var prevReal6 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 6);
-        var prevReal8 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 8);
-        var prevReal10 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 10);
-        var prevReal12 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 12);
-        var prevReal14 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 14);
-        var prevReal16 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 16);
-        var prevReal18 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 18);
-        var prevReal20 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 20);
-        var prevReal22 = EhlersStreamingWindow.GetOffsetValue(_realValues, real, 22);
-
-        var imag = ((0.091 * real) + (0.111 * prevReal2) + (0.143 * prevReal4) + (0.2 * prevReal6) +
-                    (0.333 * prevReal8) + prevReal10 - prevReal12 - (0.333 * prevReal14) -
-                    (0.2 * prevReal16) - (0.143 * prevReal18) - (0.111 * prevReal20) -
-                    (0.091 * prevReal22)) / 1.865;
-
-        if (isFinal)
-        {
-            _prevPeak = peak;
-            _realValues.TryAdd(real, out _);
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Real", real },
-                { "Imag", imag }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(real, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new StreamingIndicatorStateResult(point.Real, includeOutputs ? new Dictionary<string, double> { { "Real", point.Real }, { "Imag", point.Imaginary } } : null);
     }
-
-    public void Dispose()
-    {
-        _roofingFilter.Dispose();
-        _realValues.Dispose();
-    }
+    public void Dispose() => _window.Reset();
 }
 
 [PrimaryOutput("Ebpf")]

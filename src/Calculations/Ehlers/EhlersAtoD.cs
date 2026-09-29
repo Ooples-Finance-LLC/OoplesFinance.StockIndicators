@@ -1157,56 +1157,9 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersClassicHilbertTransformer(this StockData stockData, int length1 = 48, int length2 = 10)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> peakList = new(stockData.Count);
-        List<double> realList = new(stockData.Count);
-        List<double> imagList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-
-        var roofingFilterList = GetCustomValuesListInternal(stockData,
-            data => CalculateEhlersRoofingFilterV2(data, length1, length2));
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var roofingFilter = roofingFilterList[i];
-            var prevReal1 = i >= 1 ? realList[i - 1] : 0;
-            var prevReal2 = i >= 2 ? realList[i - 2] : 0;
-            var prevReal4 = i >= 4 ? realList[i - 4] : 0;
-            var prevReal6 = i >= 6 ? realList[i - 6] : 0;
-            var prevReal8 = i >= 8 ? realList[i - 8] : 0;
-            var prevReal10 = i >= 10 ? realList[i - 10] : 0;
-            var prevReal12 = i >= 12 ? realList[i - 12] : 0;
-            var prevReal14 = i >= 14 ? realList[i - 14] : 0;
-            var prevReal16 = i >= 16 ? realList[i - 16] : 0;
-            var prevReal18 = i >= 18 ? realList[i - 18] : 0;
-            var prevReal20 = i >= 20 ? realList[i - 20] : 0;
-            var prevReal22 = i >= 22 ? realList[i - 22] : 0;
-
-            var prevPeak = GetLastOrDefault(peakList);
-            var peak = Math.Max(0.991 * prevPeak, Math.Abs(roofingFilter));
-            peakList.Add(peak);
-
-            var real = peak != 0 ? roofingFilter / peak : 0;
-            realList.Add(real);
-
-            var imag = ((0.091 * real) + (0.111 * prevReal2) + (0.143 * prevReal4) + (0.2 * prevReal6) + (0.333 * prevReal8) + prevReal10 -
-                        prevReal12 - (0.333 * prevReal14) - (0.2 * prevReal16) - (0.143 * prevReal18) - (0.111 * prevReal20) - (0.091 * prevReal22)) / 1.865;
-            imagList.Add(imag);
-
-            var signal = GetCompareSignal(real - prevReal1, prevReal1 - prevReal2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Real", realList },
-            { "Imag", imagList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.EhlersClassicHilbertTransformer;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new ClassicHilbertWindow(length1, length2); var real = new List<double>(input.Count); var imaginary = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); real.Add(point.Real); imaginary.Add(point.Imaginary); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Real", real }, { "Imag", imaginary } }); stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.EhlersClassicHilbertTransformer; return stockData;
     }
 
 

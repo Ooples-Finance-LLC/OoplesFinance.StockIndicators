@@ -41459,5 +41459,113 @@
     "before": "outputKey == \"Imag\" ? point.Imaginary : point.Real",
     "after": "outputKey == \"Imag\" ? point.Real : point.Imaginary",
     "filter": "FullyQualifiedName~HilbertTransformerNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "classic-hilbert-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal sealed class ClassicHilbertWindow",
+    "before": ".091, .111, .143",
+    "after": ".081, .111, .143",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-lag",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "var lag = 2 * tap",
+    "after": "var lag = tap",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-last-tap",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "tap < Weights.Length",
+    "after": "tap < Weights.Length - 1",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "divisor.Add(1.865)",
+    "after": "divisor.Add(1.8)",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-preview-roofing",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "_normalizer.Next(value, commit)",
+    "after": "_normalizer.Next(value, true)",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-preview-history",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "if (commit)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-reset",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal sealed class ClassicHilbertWindow",
+    "before": "_history.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-signal",
+    "module": "numerical",
+    "file": "src/Helpers/ClassicHilbertWindow.cs",
+    "scope": "internal (double Real, double Imaginary, Signal Signal) Next(",
+    "before": "point.Signal);",
+    "after": "point.Signal == Signal.StrongBuy ? Signal.Buy : point.Signal);",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.WideAndSubnormalPricesRetainEveryFirTap"
+  },
+  {
+    "id": "classic-hilbert-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/Ehlers/EhlersAtoD.cs",
+    "scope": "public static StockData CalculateEhlersClassicHilbertTransformer(",
+    "before": "foreach (var price in input)",
+    "after": "foreach (var price in stockData.ClosePrices)",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "classic-hilbert-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(",
+    "before": "data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues",
+    "after": "data.ClosePrices",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "classic-hilbert-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(",
+    "before": "imaginary ? point.Imaginary : point.Real",
+    "after": "imaginary ? point.Real : point.Imaginary",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.SelectedPricesReachBothBatchAndFastOutputs"
+  },
+  {
+    "id": "classic-hilbert-validation",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersClassicHilbertTransformerState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "// omitted validation\n",
+    "filter": "FullyQualifiedName~ClassicHilbertNumericalTests.InvalidFieldsCannotAdvanceRoofingOrFirHistory"
   }
 ]

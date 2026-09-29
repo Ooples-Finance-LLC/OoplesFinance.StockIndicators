@@ -17,6 +17,11 @@ internal static partial class BuiltInFormulaReferences
     internal static IEnumerable<IndicatorValidationRule> For(IIndicator indicator)
     {
         if (indicator is not IBuiltInIndicator builtIn || !UniformBuiltInComponents(indicator)) yield break;
+        if (builtIn.BatchName == IndicatorName.EhlersClassicHilbertTransformer)
+        {
+            var classicOptions = (EhlersClassicHilbertTransformerSpecOptions)builtIn.CreateOptions(); var classicKeys = new[] { "Real", "Imag" };
+            for (var slot = 0; slot < classicKeys.Length; slot++) { var key = classicKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => ClassicHilbertValues(bars, classicOptions.Length1, classicOptions.Length2).Outputs[key], IndicatorErrorBudget.Exact); } yield break;
+        }
         if (builtIn.BatchName is IndicatorName.EhlersHilbertTransformer or IndicatorName.EhlersHilbertTransformerIndicator)
         {
             var transformOptions = builtIn.CreateOptions(); var transformSmooth = transformOptions is EhlersHilbertTransformerIndicatorSpecOptions; var transformUpper = Integer(transformOptions, "Length1", 48); var transformLower = Integer(transformOptions, "Length2", 20); var transformSmoothing = Integer(transformOptions, "Length3", 10);

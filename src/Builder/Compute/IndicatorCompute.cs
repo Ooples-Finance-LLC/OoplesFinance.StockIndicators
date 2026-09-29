@@ -16501,34 +16501,9 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeEhlersClassicHilbertTransformerFast(StockData data, ComputeContext context, int length1 = 48, int length2 = 10, bool imaginary = false)
     {
-        // Normalize the roofing filter by its decaying peak before optionally applying the Hilbert kernel.
-        var count = data.Count;
-
-        using var roofing = ComputeEhlersRoofingFilterV2Fast(data, context, length1, length2);
-        var filter = roofing.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double peak = 0;
-        for (var i = 0; i < count; i++)
-        {
-            peak = Math.Max(0.991 * peak, Math.Abs(filter[i]));
-            output[i] = peak != 0 ? filter[i] / peak : 0;
-        }
-
-        if (imaginary)
-        {
-            // Traverse backwards so the finite Hilbert kernel reads unchanged real samples.
-            ReadOnlySpan<double> weights = [ .091, .111, .143, .2, .333, 1, -1, -.333, -.2, -.143, -.111, -.091 ];
-            for (var i = count - 1; i >= 0; i--)
-            {
-                double sum = 0;
-                for (var tap = 0; tap < weights.Length && 2 * tap <= i; tap++)
-                    sum += weights[tap] * output[i - 2 * tap];
-                output[i] = sum / 1.865;
-            }
-        }
-        return buffer;
+        var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var window = new ClassicHilbertWindow(length1, length2); var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); result.WritableSpan[i] = imaginary ? point.Imaginary : point.Real; }
+        return result;
     }
 
     /// <summary>
