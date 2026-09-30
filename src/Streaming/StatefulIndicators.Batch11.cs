@@ -457,133 +457,16 @@ public sealed class EhlersMarketStateIndicatorState : IStreamingIndicatorState, 
 [PrimaryOutput("Maaf")]
 public sealed class EhlersMedianAverageAdaptiveFilterState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _threshold;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _values;
-    private readonly PooledRingBuffer<double> _smthValues;
-    private readonly double[] _windowScratch;
-    private readonly double[] _medianScratch;
-    private double _prevValue;
-    private double _prevValue2;
-    private double _prevFilter;
-
-    public EhlersMedianAverageAdaptiveFilterState(int length = 39, double threshold = 0.002)
-    {
-        _length = Math.Max(1, length);
-        _threshold = threshold;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _values = new PooledRingBuffer<double>(3);
-        _smthValues = new PooledRingBuffer<double>(_length);
-        _windowScratch = new double[_length];
-        _medianScratch = new double[_length];
-    }
-
+    private readonly MedianAdaptiveWindow _window;
+    public EhlersMedianAverageAdaptiveFilterState(int length = 39, double threshold = 0.002) => _window = new(length, threshold);
     public IndicatorName Name => IndicatorName.EhlersMedianAverageAdaptiveFilter;
-
-    public void Reset()
-    {
-        _values.Clear();
-        _smthValues.Clear();
-        _prevValue = 0;
-        _prevValue2 = 0;
-        _prevFilter = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // Batch uses 0 when there isn't enough history (i >= 1, i >= 2, i >= 3 checks)
-        var prevP1 = _values.Count >= 1 ? _values[_values.Count - 1] : 0;
-        var prevP2 = _values.Count >= 2 ? _values[_values.Count - 2] : 0;
-        var prevP3 = _values.Count >= 3 ? _values[_values.Count - 3] : 0;
-
-        var smth = (value + (2 * prevP1) + (2 * prevP2) + prevP3) / 6;
-
-        var existingCount = _smthValues.Count;
-
-        var available = existingCount < _length ? existingCount + 1 : _length;
-
-        if (existingCount < _length)
-        {
-            for (var i = 0; i < existingCount; i++)
-            {
-                _windowScratch[i] = _smthValues[i];
-            }
-
-            _windowScratch[existingCount] = smth;
-        }
-        else
-        {
-            for (var i = 1; i < existingCount; i++)
-            {
-                _windowScratch[i - 1] = _smthValues[i];
-            }
-
-            _windowScratch[available - 1] = smth;
-        }
-
-        var len = _length;
-        double value3 = 0.2;
-        double value2 = 0;
-        var prevV2 = _prevValue2;
-        var removedOffset = 0;
-
-        while (value3 > _threshold && len > 0)
-        {
-            // Retain exactly the requested trailing observations, including partial startup windows.
-            var actualCount = available - removedOffset;
-            var alpha = (double)2 / (len + 1);
-            var median = GetMedian(_windowScratch, removedOffset, actualCount, _medianScratch);
-            value2 = (alpha * smth) + ((1 - alpha) * prevV2);
-            value3 = median != 0 ? Math.Abs(median - value2) / Math.Abs(median) : value3;
-            len -= 2;
-
-            // During startup the first shrink can expire one observation rather than two.
-            if (value3 > _threshold && len > 0 && len < available)
-            {
-                removedOffset = available - Math.Min(len, available);
-            }
-        }
-
-        len = len < 3 ? 3 : len;
-        var finalAlpha = (double)2 / (len + 1);
-        var filter = (finalAlpha * smth) + ((1 - finalAlpha) * _prevFilter);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _smthValues.TryAdd(smth, out _);
-            _prevValue = value;
-            _prevValue2 = value2;
-            _prevFilter = filter;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Maaf", filter }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(filter, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Maaf", point.Value } } : null);
     }
-
-    public void Dispose()
-    {
-        _values.Dispose();
-        _smthValues.Dispose();
-    }
-
-    private static double GetMedian(double[] values, int start, int count, double[] scratch)
-    {
-        if (count == 0) return 0;
-        Array.Copy(values, start, scratch, 0, count);
-        Array.Sort(scratch, 0, count);
-        return (scratch[(count - 1) / 2] + scratch[count / 2]) / 2;
-    }
+    public void Dispose() { }
 }
 [PrimaryOutput("Predict")]
 public sealed class EhlersMesaPredictIndicatorV1State : IStreamingIndicatorState, IDisposable

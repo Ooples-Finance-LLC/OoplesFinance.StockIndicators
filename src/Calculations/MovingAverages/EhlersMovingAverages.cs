@@ -63,98 +63,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersMedianAverageAdaptiveFilter(this StockData stockData, int length = 39, double threshold = 0.002)
     {
-        List<double> filterList = new(stockData.Count);
-        List<double> value2List = new(stockData.Count);
-        List<double> smthList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var windowTree = new OrderStatisticTree();
-        var removedValues = new List<double>();
-
-        static double GetMedian(OrderStatisticTree tree, int count)
-        {
-            if (count <= 0)
-            {
-                return 0;
-            }
-
-            if ((count & 1) == 1)
-            {
-                return tree.SelectByRank((count + 1) / 2);
-            }
-
-            var left = tree.SelectByRank(count / 2);
-            var right = tree.SelectByRank((count / 2) + 1);
-            return (left + right) / 2;
-        }
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentPrice = inputList[i];
-            var prevP1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevP2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevP3 = i >= 3 ? inputList[i - 3] : 0;
-
-            var smth = (currentPrice + (2 * prevP1) + (2 * prevP2) + prevP3) / 6;
-            smthList.Add(smth);
-            windowTree.Insert(smth);
-            if (smthList.Count > length)
-            {
-                windowTree.Remove(smthList[smthList.Count - length - 1]);
-            }
-
-            var len = length;
-            double value3 = 0.2, value2 = 0, prevV2 = GetLastOrDefault(value2List), alpha;
-            var available = Math.Min(length, smthList.Count);
-            var windowStart = smthList.Count - available;
-            var removedOffset = 0;
-            removedValues.Clear();
-            while (value3 > threshold && len > 0)
-            {
-                alpha = (double)2 / (len + 1);
-                var value1 = GetMedian(windowTree, Math.Min(len, available));
-                value2 = (alpha * smth) + ((1 - alpha) * prevV2);
-                value3 = value1 != 0 ? Math.Abs(value1 - value2) / Math.Abs(value1) : value3;
-                len -= 2;
-
-                if (value3 > threshold && len > 0)
-                {
-                    // Startup can cross from an even available count to an odd requested count.
-                    // Remove only the actual excess, so the median ranks describe the retained window.
-                    var excess = available - removedOffset - Math.Min(len, available);
-                    for (var drop = 0; drop < excess; drop++)
-                    {
-                        var expired = smthList[windowStart + removedOffset++];
-                        windowTree.Remove(expired);
-                        removedValues.Add(expired);
-                    }
-                }
-            }
-            foreach (var removedValue in removedValues)
-            {
-                windowTree.Insert(removedValue);
-            }
-            value2List.Add(value2);
-
-            len = len < 3 ? 3 : len;
-            alpha = (double)2 / (len + 1);
-
-            var prevFilter = GetLastOrDefault(filterList);
-            var filter = (alpha * smth) + ((1 - alpha) * prevFilter);
-            filterList.Add(filter);
-
-            var signal = GetCompareSignal(currentPrice - filter, prevP1 - prevFilter);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Maaf", filterList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(filterList);
-        stockData.IndicatorName = IndicatorName.EhlersMedianAverageAdaptiveFilter;
-
-        return stockData;
+        var window = new MedianAdaptiveWindow(length, threshold);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Maaf", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersMedianAverageAdaptiveFilter; return stockData;
     }
 
     /// <summary>

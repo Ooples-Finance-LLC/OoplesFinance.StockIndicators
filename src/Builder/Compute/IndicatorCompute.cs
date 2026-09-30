@@ -13944,73 +13944,10 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast(StockData data, ComputeContext context,
         int length = 39, double threshold = 0.002)
     {
-        // Sort the exact trailing window at each candidate length. Startup may remove just one
-        // observation when the available count and candidate length have different parity.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        using var smoothed = context.Rent(count);
-        var smth = smoothed.WritableSpan;
-
-        var pool = ArrayPool<double>.Shared;
-        var scratch = pool.Rent(length);
-        try
-        {
-            var previousValue2 = 0d;
-            var previousFilter = 0d;
-            for (var i = 0; i < count; i++)
-            {
-                var previousPrice1 = i >= 1 ? input[i - 1] : 0;
-                var previousPrice2 = i >= 2 ? input[i - 2] : 0;
-                var previousPrice3 = i >= 3 ? input[i - 3] : 0;
-                var currentSmth = (input[i] + (2 * previousPrice1) + (2 * previousPrice2) + previousPrice3) / 6;
-                smth[i] = currentSmth;
-
-                var available = Math.Min(length, i + 1);
-                var windowStart = i + 1 - available;
-                var removedOffset = 0;
-                var len = length;
-                var value3 = 0.2;
-                var value2 = 0d;
-                while (value3 > threshold && len > 0)
-                {
-                    var size = available - removedOffset;
-                    if (size > 0)
-                    {
-                        smoothed.Span.Slice(windowStart + removedOffset, size).CopyTo(scratch.AsSpan(0, size));
-                        Array.Sort(scratch, 0, size);
-                    }
-
-                    var alpha = (double)2 / (len + 1);
-                    var value1 = MedianOfSortedWindow(scratch, size, Math.Min(len, available));
-                    value2 = (alpha * currentSmth) + ((1 - alpha) * previousValue2);
-                    value3 = value1 != 0 ? Math.Abs(value1 - value2) / Math.Abs(value1) : value3;
-                    len -= 2;
-
-                    if (value3 > threshold && len > 0 && len < available)
-                    {
-                        removedOffset = available - Math.Min(len, available);
-                    }
-                }
-
-                previousValue2 = value2;
-                len = len < 3 ? 3 : len;
-                var finalAlpha = (double)2 / (len + 1);
-                previousFilter = (finalAlpha * currentSmth) + ((1 - finalAlpha) * previousFilter);
-                output[i] = previousFilter;
-            }
-        }
-        finally
-        {
-            pool.Return(scratch);
-        }
-
-        return buffer;
+        var window = new MedianAdaptiveWindow(length, threshold);
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value;
+        return output;
     }
 
     /// <summary>

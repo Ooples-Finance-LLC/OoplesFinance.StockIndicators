@@ -56939,5 +56939,293 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~ConvolutionNumericalTests.InvalidCandlesCannotAdvanceFiltersOrCorrelationMoments"
+  },
+  {
+    "id": "median-adaptive-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_length = Math.Max(1, length);",
+    "after": "_length = 1;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-fir-current",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "U(price) + 2 * U(_price)",
+    "after": "2 * U(price) + 2 * U(_price)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ConvexStagesRemainFiniteAcrossExtremeAndTinyInputs"
+  },
+  {
+    "id": "median-adaptive-wide-fir-first-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "2 * U(_price) + 2 * U(_olderPrice)",
+    "after": "U(_price) + 2 * U(_olderPrice)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-fir-second-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "2 * U(_olderPrice) + U(_oldestPrice)",
+    "after": "U(_olderPrice) + U(_oldestPrice)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-fir-third-lag",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "+ U(_oldestPrice), 6)",
+    "after": "- U(_oldestPrice), 6)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-fir-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "+ U(_oldestPrice), 6)",
+    "after": "+ U(_oldestPrice), 5)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-candidate-current",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "2 * U(smooth) + (length - 1L)",
+    "after": "3 * U(smooth) + (length - 1L)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ConvexStagesRemainFiniteAcrossExtremeAndTinyInputs"
+  },
+  {
+    "id": "median-adaptive-wide-candidate-previous",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "(length - 1L) * U(previous)",
+    "after": "length * U(previous)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-candidate-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "* U(previous), length + 1L)",
+    "after": "* U(previous), length + 2L)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-even-median",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "U(tree.SelectByRank(count / 2 + 1)), 2)",
+    "after": "U(tree.SelectByRank(count / 2 + 1)), 3)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-initial-error",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "if (.2 > _threshold)",
+    "after": "if (0 > _threshold)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-search-direction",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "var rising = smooth >= _candidate;",
+    "after": "var rising = smooth < _candidate;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-search-upper-bound",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "? period : 0;",
+    "after": "? period : period;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-search-parity",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_length - 2 * ((_length - available) / 2)",
+    "after": "_length - 2 * ((_length - available) / 2) + 1",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-shrink-step",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "length -= 2;",
+    "after": "length -= 1;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-available-window",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "Math.Min(_length, retained + 1L)",
+    "after": "Math.Min(1, retained + 1L)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-floor",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "Math.Max(3, length)",
+    "after": "Math.Max(4, length)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-filter-input",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "Candidate(smooth, _filter, period)",
+    "after": "Candidate(price, _filter, period)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-residual-current",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "U(price) - U(value)",
+    "after": "U(value) - U(price)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-residual-previous",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "U(_price) - U(_filter)",
+    "after": "U(_filter) - U(_price)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-signal-strength",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "? Signal.StrongBuy : residual.Sign",
+    "after": "? Signal.Buy : residual.Sign",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-candidate-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_candidate = candidate;",
+    "after": "_candidate = -candidate;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-filter-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_filter = value;",
+    "after": "_filter = 0;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_price = price;",
+    "after": "_price = -price;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-oldest-memory",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_oldestPrice = _olderPrice;",
+    "after": "_oldestPrice = _price;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HandFirAndFloorPeriodRetainZeroPrehistory"
+  },
+  {
+    "id": "median-adaptive-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "if (_history.Count - _start > _length) _start++;",
+    "after": "if (_history.Count - _start > _length) _start += 2;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.HistoryCompactionPreservesTrailingMedians"
+  },
+  {
+    "id": "median-adaptive-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "if (final)",
+    "after": "if (true)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/MedianAdaptiveWindow.cs",
+    "scope": "internal sealed class MedianAdaptiveWindow",
+    "before": "_history.Clear(); _start = 0;",
+    "after": "_start = 0;",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
+  },
+  {
+    "id": "median-adaptive-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersMedianAverageAdaptiveFilterFast",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.SelectedInputDoesNotConsumeComponentOverrides"
+  },
+  {
+    "id": "median-adaptive-wide-batch-selected",
+    "module": "numerical",
+    "file": "src/Calculations/MovingAverages/EhlersMovingAverages.cs",
+    "scope": "public static StockData CalculateEhlersMedianAverageAdaptiveFilter",
+    "before": "window.Next(price, true)",
+    "after": "window.Next(stockData.ClosePrices[values.Count], true)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.SelectedInputDoesNotConsumeComponentOverrides"
+  },
+  {
+    "id": "median-adaptive-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersMedianAverageAdaptiveFilterState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.InvalidParametersAndCandlesRejectBeforeStateMutation"
+  },
+  {
+    "id": "median-adaptive-wide-native-preview",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch11.cs",
+    "scope": "public sealed class EhlersMedianAverageAdaptiveFilterState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.Close, true)",
+    "filter": "FullyQualifiedName~MedianAdaptiveNumericalTests.ExhaustiveOracleCoversSearchDirectionParityAndThresholds"
   }
 ]

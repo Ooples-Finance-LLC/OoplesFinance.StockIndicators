@@ -357,35 +357,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.EhlersMedianAverageAdaptiveFilter:
-                return new("Maaf", new[] { "Maaf" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var smooth = prices.Select((_, i) => Enumerable.Range(0, Math.Min(4, i + 1))
-                        .Sum(lag => (lag is 0 or 3 ? 1 : 2) * prices[i - lag]) / 6).ToArray();
-                    var gains = new double[bars.Count]; double priorCandidate = 0;
-                    var threshold = Number(options, .002, "Threshold");
-                    for (var i = 0; i < gains.Length; i++)
-                    {
-                        int period = length; double error = .2, candidate = 0;
-                        while (period > 0 && error > threshold)
-                        {
-                            var sorted = Window(smooth, i, period).OrderBy(v => v).ToArray();
-                            var median = (sorted[(sorted.Length - 1) / 2] + sorted[sorted.Length / 2]) / 2;
-                            candidate = priorCandidate + 2d / (period + 1) * (smooth[i] - priorCandidate);
-                            if (median != 0) error = Math.Abs((median - candidate) / median);
-                            period -= 2;
-                        }
-                        priorCandidate = candidate;
-                        gains[i] = 2d / (Math.Max(3, period) + 1);
-                    }
-                    // Explicit product weights with a zero prehistory, independent of production's final EMA.
-                    return Outputs(("Maaf", smooth.Select((_, i) =>
-                    {
-                        double survival = 1, sum = 0;
-                        for (var j = i; j >= 0; j--) { sum += survival * gains[j] * smooth[j]; survival *= 1 - gains[j]; }
-                        return sum;
-                    }).ToArray()));
-                });
+                return new("Maaf", new[] { "Maaf" }, bars => MedianAdaptiveOutputs(bars, indicator));
             case IndicatorName.ElderSafeZoneStops:
                 return new("Eszs", new[] { "Eszs" }, bars => Outputs(("Eszs", ElderSafeZoneOutputs(bars, indicator))));
             case IndicatorName.LiquidRelativeStrengthIndex:
