@@ -25,7 +25,7 @@ internal static partial class BuiltInFormulaReferences
             }
             down[i] = Evidence(1); up[i] = Evidence(-1); var mass = R(down[i]) * R(up[i]); var opposite = (R(1) - R(down[i])) * (R(1) - R(up[i])); prime[i] = (mass + opposite).Sign == 0 ? 0 : (mass / (mass + opposite)).ToDouble();
             var pd = i == 0 ? 0 : down[i - 1]; var pu = i == 0 ? 0 : up[i - 1]; var pp = i == 0 ? 0 : prime[i - 1];
-            var buy = prime[i] > threshold / 100 && pp == 0 || up[i] < 1 && pu == 1; var sell = prime[i] == 0 && pp > threshold / 100 || down[i] < 1 && pd == 1;
+            var buy = prime[i] > threshold / 100 && pp == 0 || up[i] < 1 && pu == 1; var sell = prime[i] == 0 && pp > threshold / 100 || down[i] < 1 && pd == 1; // NOSONAR: S1244 - The reference preserves exact zero/one probability transitions, not a tolerance band.
             signals[i] = buy ? Signal.Buy : sell ? Signal.Sell : Signal.None;
         }
         return (new Dictionary<string, double[]> { ["SigmaProbsDown"] = down, ["SigmaProbsUp"] = up, ["ProbPrime"] = prime }, signals);

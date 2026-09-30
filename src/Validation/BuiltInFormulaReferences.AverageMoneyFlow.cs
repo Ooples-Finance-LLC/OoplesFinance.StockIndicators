@@ -14,7 +14,7 @@ internal static partial class BuiltInFormulaReferences
         var scaled = flows.Select((v, i) =>
         {
             var window = Window(flows, i, length).ToArray(); var low = window.Min(); var high = window.Max();
-            var percent = high == low ? 0 : (R(100) * (R(v) - R(low)) / (R(high) - R(low))).ToDouble(); return percent * 2 - 100;
+            var percent = high == low ? 0 : (R(100) * (R(v) - R(low)) / (R(high) - R(low))).ToDouble(); return percent * 2 - 100; // NOSONAR: S1244 - Exact equality identifies a flat range and the defined zero denominator.
         }).ToArray();
         var values = external is null ? SmoothRocBankStage(scaled.Select(R).ToArray(), smoothLength, kind) : external[2].Select(R).ToArray();
         var signals = new Signal[bars.Count]; var previous = R(0);

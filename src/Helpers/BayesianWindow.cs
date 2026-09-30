@@ -41,8 +41,8 @@ internal sealed class BayesianWindow : IDisposable
         var upperUp = _upperUp + (upper > 0 ? 1 : 0) - (old.Upper > 0 ? 1 : 0); var upperDown = _upperDown + (upper < 0 ? 1 : 0) - (old.Upper < 0 ? 1 : 0);
         var basisUp = _basisUp + (basis > 0 ? 1 : 0) - (old.Basis > 0 ? 1 : 0); var basisDown = _basisDown + (basis < 0 ? 1 : 0) - (old.Basis < 0 ? 1 : 0);
         var down = Evidence(upperUp, upperDown, basisUp, basisDown); var up = Evidence(upperDown, upperUp, basisDown, basisUp); var prime = Combine(down, up);
-        var buy = prime > _threshold && _previousPrime == 0 || up < 1 && _previousUp == 1;
-        var sell = prime == 0 && _previousPrime > _threshold || down < 1 && _previousDown == 1;
+        var buy = prime > _threshold && _previousPrime == 0 || up < 1 && _previousUp == 1; // NOSONAR: S1244 - Exact probability endpoints define these transitions; near-one evidence is distinct.
+        var sell = prime == 0 && _previousPrime > _threshold || down < 1 && _previousDown == 1; // NOSONAR: S1244 - Exact probability endpoints define these transitions; near-one evidence is distinct.
         var signal = buy ? Signal.Buy : sell ? Signal.Sell : Signal.None;
         if (commit)
         {

@@ -15,7 +15,7 @@ internal sealed class CommoditySelectionWindow : IDisposable
     {
         StreamingInputValidation.Finite(pointValue, nameof(pointValue)); StreamingInputValidation.Finite(margin, nameof(margin)); StreamingInputValidation.Finite(commission, nameof(commission));
         if (margin <= 0) throw new ArgumentOutOfRangeException(nameof(margin));
-        if (commission == -150) throw new ArgumentOutOfRangeException(nameof(commission));
+        if (commission == -150) throw new ArgumentOutOfRangeException(nameof(commission)); // NOSONAR: S1244 - Exactly -150 makes the cost denominator zero; nearby finite fees remain supported.
         _point = ExactVarianceWindow.Units(pointValue); _rootMargin = ExactVarianceWindow.Units(Math.Sqrt(margin)); _fee = ExactVarianceWindow.Units(150) + ExactVarianceWindow.Units(commission);
         _length = Math.Max(1, length); if (!external) _averages = Enumerable.Range(0, 5).Select(_ => new Average(kind, _length)).ToArray();
     }

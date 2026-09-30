@@ -29,7 +29,7 @@ internal sealed class AverageMoneyFlowWindow : IDisposable
         var averageVolume = externalVolume.HasValue ? new RocBankValue(externalVolume.Value) : _volumeMean!.Next(new(volume), commit);
         var averageChange = externalChange.HasValue ? new RocBankValue(externalChange.Value) : _changeMean!.Next(RocBankValue.Round(difference), commit);
         var flow = LogFlow(averageVolume, averageChange); var high = Extreme(_highs, flow, true, commit); var low = Extreme(_lows, flow, false, commit);
-        var position = high == low ? 0 : ClampedRangePosition.Percent(flow, low, high); var scaled = position * 2 - 100;
+        var position = high == low ? 0 : ClampedRangePosition.Percent(flow, low, high); var scaled = position * 2 - 100; // NOSONAR: S1244 - Exact equality identifies a flat range and the defined zero denominator.
         var output = externalSmooth.HasValue ? new RocBankValue(externalSmooth.Value) : _smooth!.Next(new(scaled), commit);
         var current = new ExactMeanAccumulator(); output.AddTo(ref current); var change = current; _previous.AddTo(ref change, -1);
         var signal = current.Sign > 0 && change.Sign > 0 ? Signal.StrongBuy : current.Sign < 0 && change.Sign < 0 ? Signal.StrongSell : current.Sign > 0 ? Signal.Buy : current.Sign < 0 ? Signal.Sell : Signal.None;
@@ -74,7 +74,7 @@ internal sealed class AverageMoneyFlowWindow : IDisposable
                 var mantissa = Bounds(product - power, product + power, precision); var logTwo = precision == 128 ? LogTwo128 : Bounds(BigInteger.One, new BigInteger(3), precision);
                 var low = mantissa.Low + exponent * (exponent < 0 ? logTwo.High : logTwo.Low); var high = mantissa.High + exponent * (exponent < 0 ? logTwo.Low : logTwo.High);
                 var lower = ExactMeanAccumulator.UnitRatio(low << 1074, BigInteger.One << precision); var upper = ExactMeanAccumulator.UnitRatio(high << 1074, BigInteger.One << precision);
-                if (lower == upper) return lower;
+                if (lower == upper) return lower; // NOSONAR: S1244 - Matching rounded bounds prove the correctly rounded logarithm; a tolerance would not.
             }
         }
     }
