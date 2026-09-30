@@ -3715,3 +3715,12 @@ The isolated campaigns `616a` and `616b` passed their baselines and caught **28/
 Source snapshot SHA256: `f0231969507372ca74b16fdd92dc4301bcdb167bd45dd7f102fc269c044390fe`. Archive SHA256: `c595fdba7e55c0032f047e39b27acdf0e93303dbbfa1fec280b3f89fd7807a18` and `c595fdba7e55c0032f047e39b27acdf0e93303dbbfa1fec280b3f89fd7807a18`.
 
 This is evidence for the isolated batch-616 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 617 through 629 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 630, Ehlers Hurst Coefficient
+
+Hurst Coefficient now cancels range divisors before logarithmic normalization, retains the exact two-pole coefficient polynomial, and allocates extrema/delay history only as observations arrive. Period-one windows agree across batch and native routes. A newly verified typed fast arm uses the same causal range formula. The independent reference scans the full/recent/older windows and evaluates the recursive filter with rational coefficients; startup zeros, odd periods and logarithm rounding are documented in `V2_FORMULA_VARIANTS.md`.
+
+**73/73 focused tests passed** (`hurst-coefficient-630.trx`): 72 new cases plus the existing independent opening-calculation test. Coverage includes eight configurations across five routes, subnormal and overflowing half ranges, negative prices, flat-tail dimension carry, period-one/two behavior, odd and extreme periods, the tiny DC gain at maximum smoothing length, selected inputs, no-override consumption, exact signals, preview/reset and invalid-candle guards. The opening expectation was independently re-derived to retain the coefficient polynomial. The first focused run passed without any subsequent source/test correction.
+
+**Mutation qualification remains pending** for 32 prepared faults; all **6,612 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,126 files. Prepared inventory is **6,118/7,131 enrollments**, with **1,013 omissions across 147 types**; 395 prepared batches cover 3,292 configurations across 598 types. Built DLL SHA256: `A23002A176AB828487097A5A00164FDFCF4A0B73AB6C8ABF2B2E4D0A0C257637`. Full coverage and final hosted/package/release/performance gates remain incomplete. Ehlers Anticipate is unchanged while its separate phase-definition question remains pending.

@@ -901,7 +901,11 @@ public sealed class FormulaContractCoverageTests
     {
         var bars = new[] { new Bar(DateTime.UnixEpoch, 2, 2, 2, 2, 1) };
         var radius = Math.Exp(-Math.Sqrt(2) * Math.PI / 20);
-        var gain = 1 - 2 * radius * Math.Cos(Math.Sqrt(2) * Math.PI / 20) + radius * radius;
+        var radiusFraction = ReferenceFraction.FromDouble(radius);
+        var cosineFraction = ReferenceFraction.FromDouble(Math.Cos(Math.Sqrt(2) * Math.PI / 20));
+        // The opening Hurst input is one; retain the coefficient polynomial before rounding.
+        var gain = ((new ReferenceFraction(1) - radiusFraction) * (new ReferenceFraction(1) - radiusFraction)
+            + new ReferenceFraction(2) * radiusFraction * (new ReferenceFraction(1) - cosineFraction)).ToDouble();
         Assert.Single(BuiltInFormulaReferences.For(new EhlersHurstCoefficient())).Check(
             new IndicatorValidationContext("hurst-hand", bars, [[gain]], 0));
         var p1 = Math.Cos(2 * Math.PI / 12) / (1 + Math.Sin(2 * Math.PI / 12));

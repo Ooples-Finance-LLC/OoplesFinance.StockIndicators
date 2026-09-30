@@ -269,27 +269,7 @@ internal static partial class BuiltInFormulaReferences
                         .Sum(j => changes[j] * (i - j + 1) * Math.Pow(pole2, i - j))).ToArray()));
                 });
             case IndicatorName.EhlersHurstCoefficient:
-                return new("Ehc", new[] { "Ehc" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var period = Integer(options, "Length1", 30);
-                    var half = (period + 1) / 2;
-                    double dimension = 0;
-                    var raw = new double[bars.Count];
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var full = Window(prices, i, Math.Max(2, period)).ToArray();
-                        var recent = Window(prices, i, Math.Max(2, half)).ToArray();
-                        var older = Enumerable.Range(half, period - half).Select(lag => i < lag ? 0 : prices[i - lag])
-                            .Append(i < half ? prices[i] : prices[i - half]).ToArray();
-                        var totalRange = (full.Max() - full.Min()) / period;
-                        var halves = (recent.Max() - recent.Min() + older.Max() - older.Min()) / half;
-                        if (halves > 0 && totalRange > 0) dimension = (Math.Log(halves / totalRange) / Math.Log(2) + dimension) / 2;
-                        raw[i] = 2 - dimension;
-                    }
-                    var angle = Math.Sqrt(2) * Math.PI / Integer(options, "Length2", 20);
-                    return Outputs(("Ehc", HilbertLowPass(raw, Math.Exp(-angle), Math.Min(angle, .99))));
-                });
+                return new("Ehc", new[] { "Ehc" }, bars => HurstCoefficientOutputs(bars, indicator));
             case IndicatorName.EhlersFMDemodulatorIndicator:
                 var demodulatorKind = AverageKind(options, 0);
                 var demodulatorSuper = options.GetType().GetProperty("MaType")?.GetValue(options) is MovingAvgType.Ehlers2PoleSuperSmootherFilterV2;

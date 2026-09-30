@@ -337,3 +337,12 @@ Before the first restart, the segment includes an extra copy of the initial pric
 Each segment output is its exact sum divided by its observation count, rounded once to binary64. With finite prices it stays within the segment's extrema, including its seed, even if the sum exceeds binary64 range. Offsets and regression endpoints retain binary64 precision with an extended upper exponent so overflow cannot corrupt edge detection. Windows allocate only observed history. Periods below one are clamped to one consistently across routes.
 
 The independent reference scans each window, computes centered covariance and variance for the fit, and reconstructs each segment explicitly. Production maintains rolling moments, a maximum deque and an exact running sum. Hand tests check the startup weight and peak entry/reset sequence separately from route parity.
+
+
+## Ehlers Hurst Coefficient
+
+Let `L` be the clamped range period and `h = ceil(L/2)`. The recent half uses the last `h` available prices, the full range uses the last `L`, and the older half uses lags `h` through `L-1`. Missing older-half samples are zero; until lag `h` exists, its initial anchor is the current price. These startup and odd-period rules describe the Ooples variant. They are not an assertion of a universal Hurst estimator, nor is its output constrained to `[0, 1]` during startup.
+
+For positive ranges, compute the exact rational ratio `(recentRange + olderRange) * L / (fullRange * h)` before logarithmic evaluation. This cancels divisors without erasing subnormal ranges. Normalize that ratio to `2^e * m`, with `1 <= m < 2`, round `m` to binary64, and evaluate `e + Math.Log(m)/Math.Log(2)`. Average this result with the preceding dimension, then compute raw Hurst as `2 - dimension`. A zero full range or zero sum of half ranges carries the prior dimension. In particular periods one and two have zero half ranges and raw Hurst two.
+
+Smooth raw Hurst with the existing two-pole form. For platform-rounded `r = exp(-sqrt(2)*pi/s)` and `c = cos(min(sqrt(2)*pi/s, .99))`, retain the exact coefficient polynomial `g = 1 - 2*r*c + r*r`, feedback `2*r*c` and `-r*r`. Round the complete recurrence once per observation, with zero initial Hurst/filter history. This prevents the small DC gain from cancelling at large smoothing periods. Signals compare consecutive output slopes. All three extrema windows and the delay queue grow only with observed history.

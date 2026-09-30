@@ -56327,5 +56327,293 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~EdgePreservingNumericalTests.InvalidCandlesCannotAdvanceAnyState"
+  },
+  {
+    "id": "hurst-coefficient-wide-half-ceiling",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_half = _length / 2 + _length % 2;",
+    "after": "_half = Math.Max(1, _length / 2);",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.WideAlternatingAndNarrowPedestalPricesRecover"
+  },
+  {
+    "id": "hurst-coefficient-wide-full-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_full = new(_length);",
+    "after": "_full = new(_half);",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.WideAlternatingAndNarrowPedestalPricesRecover"
+  },
+  {
+    "id": "hurst-coefficient-wide-recent-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_recent = new(_half);",
+    "after": "_recent = new(Math.Max(2, _half));",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.OneAndTwoPricePeriodsHaveZeroFractalRanges"
+  },
+  {
+    "id": "hurst-coefficient-wide-older-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "Math.Max(1, _length - _half)",
+    "after": "Math.Max(1, _length - _half + 1)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.WideAlternatingAndNarrowPedestalPricesRecover"
+  },
+  {
+    "id": "hurst-coefficient-wide-lag-ready",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "if (_lag.Count == _half) older",
+    "after": "if (_lag.Count < _half) older",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-older-source",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_older.Next(_lag.Peek(), final)",
+    "after": "_older.Next(price, final)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-older-anchor",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "else older = (price, price);",
+    "after": "else older = (0, 0);",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-older-zero",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_index < _length - 1L",
+    "after": "_index < _length - 2L",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-range-sum",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "U(recent.High) - U(recent.Low) + U(older.High) - U(older.Low)",
+    "after": "U(recent.High) - U(recent.Low) - U(older.High) + U(older.Low)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-ratio-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "halves * _length, fullRange * _half",
+    "after": "halves * _half, fullRange * _length",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-dimension-carry",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "var dimension = _dimension;",
+    "after": "var dimension = 0d;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.WideAlternatingAndNarrowPedestalPricesRecover"
+  },
+  {
+    "id": "hurst-coefficient-wide-dimension-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "U(log) + U(_dimension)",
+    "after": "U(log) - U(_dimension)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-dimension-half",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "new BigInteger(2));",
+    "after": "new BigInteger(3));",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-hurst-level",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "U(2) - U(dimension)",
+    "after": "U(1) - U(dimension)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-pole-period",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "Math.Max(1, smoothLength)",
+    "after": "Math.Max(2, smoothLength)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.ExtremePeriodsUseLazyHistoryAndRetainSmallDcGain"
+  },
+  {
+    "id": "hurst-coefficient-wide-pole-angle",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "Math.Cos(Math.Min(angle, .99))",
+    "after": "Math.Cos(angle)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.ExtremePeriodsUseLazyHistoryAndRetainSmallDcGain"
+  },
+  {
+    "id": "hurst-coefficient-wide-pole-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_feedback = 2 * radius * cosine;",
+    "after": "_feedback = radius * cosine;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.ExtremePeriodsUseLazyHistoryAndRetainSmallDcGain"
+  },
+  {
+    "id": "hurst-coefficient-wide-pole-decay",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_decay = -radius * radius;",
+    "after": "_decay = -radius;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.ExtremePeriodsUseLazyHistoryAndRetainSmallDcGain"
+  },
+  {
+    "id": "hurst-coefficient-wide-dc-gain",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_gain = (BigInteger.One << 2148) - _feedback - _decay;",
+    "after": "_gain = (U(1) - U(ExactMeanAccumulator.UnitRatio(_feedback, BigInteger.One << 1074)) - U(ExactMeanAccumulator.UnitRatio(_decay, BigInteger.One << 1074))) << 1074;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.ExtremePeriodsUseLazyHistoryAndRetainSmallDcGain"
+  },
+  {
+    "id": "hurst-coefficient-wide-drive-average",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "(U(hurst) + U(_hurst))",
+    "after": "(U(hurst) - U(_hurst))",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-second-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "2 * _decay * U(_previousValue)",
+    "after": "2 * _decay * U(_value)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-output-scale",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "BigInteger.One << 2149",
+    "after": "BigInteger.One << 2148",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-signal-history",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "U(_value) - U(_previousValue);",
+    "after": "U(_value) + U(_previousValue);",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.WideAlternatingAndNarrowPedestalPricesRecover"
+  },
+  {
+    "id": "hurst-coefficient-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "if (final)\n        {\n            if (_lag.Count",
+    "after": "if (!final)\n        {\n            if (_lag.Count",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-reset-lag",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_lag.Clear();",
+    "after": "_index = 0;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-reset-older",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_older.Reset();",
+    "after": "_hurst = 0;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-extrema-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "_index - _length + 1L",
+    "after": "_index - _length + 2L",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-log-exponent",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "return exponent + Math.Log(mantissa)",
+    "after": "return -exponent + Math.Log(mantissa)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.LogNormalizationHandlesBothExponentExtremes"
+  },
+  {
+    "id": "hurst-coefficient-wide-log-base",
+    "module": "numerical",
+    "file": "src/Helpers/HurstCoefficientWindow.cs",
+    "scope": "internal sealed class HurstCoefficientWindow",
+    "before": "Math.Log(mantissa) / Math.Log(2)",
+    "after": "Math.Log(mantissa) / Math.Log(10)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.LogNormalizationHandlesBothExponentExtremes"
+  },
+  {
+    "id": "hurst-coefficient-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersHurstCoefficientFast(",
+    "before": "window.Next(input[i], true).Value",
+    "after": "window.Next(data.ClosePrices[i], true).Value",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.SelectedInputsUseTheSameCausalRanges"
+  },
+  {
+    "id": "hurst-coefficient-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersHurstCoefficientFast(",
+    "before": "new HurstCoefficientWindow(length1, length2)",
+    "after": "new HurstCoefficientWindow(length2, length1)",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.HandRangesRetainSubnormalAndOverflowingHalfSums"
+  },
+  {
+    "id": "hurst-coefficient-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch10.cs",
+    "scope": "public sealed class EhlersHurstCoefficientState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.InvalidCandlesCannotAdvanceRangeOrRecursiveHistory"
   }
 ]

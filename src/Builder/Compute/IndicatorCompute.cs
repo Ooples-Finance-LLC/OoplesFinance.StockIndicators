@@ -1174,6 +1174,7 @@ internal static partial class IndicatorCompute
                 cma.MaType),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
+            EhlersHurstCoefficientSpecOptions hurst => ComputeEhlersHurstCoefficientFast(data, context, hurst.Length1, hurst.Length2),
             EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length, epf.MaType),
             EhlersAllPassPhaseShifterSpecOptions eapps => ComputeEhlersAllPassPhaseShifterFast(data, context, eapps.Length),
             EhlersAverageErrorFilterSpecOptions eaef => ComputeEhlersAverageErrorFilterFast(data, context, eaef.Length),
@@ -11912,8 +11913,16 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Edge Preserving Filter using zero-allocation fast path.
+    /// Computes Ehlers Hurst Coefficient with exact range normalization and lazy history.
     /// </summary>
+    internal static ComputeBuffer ComputeEhlersHurstCoefficientFast(StockData data, ComputeContext context, int length1 = 30, int length2 = 20)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new HurstCoefficientWindow(length1, length2); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true).Value;
+        return output;
+    }
+
+    /// <summary>Computes the edge-preserving segment mean.</summary>
     internal static ComputeBuffer ComputeEdgePreservingFilterFast(StockData data, ComputeContext context,
         int length = 200, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int smoothLength = 50)
     {

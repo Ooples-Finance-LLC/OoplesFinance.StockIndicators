@@ -171,6 +171,7 @@ internal static class BuilderVerifiedArms
         typeof(DynamicallyAdjustableMovingAverageSpecOptions),
         typeof(EaseOfMovementSpecOptions),
         typeof(EdgePreservingFilterSpecOptions),
+        typeof(EhlersHurstCoefficientSpecOptions),
         typeof(EhlersAdaptiveCenterOfGravityOscillatorSpecOptions),
         typeof(EhlersAdaptiveCommodityChannelIndexV2SpecOptions),
         typeof(EhlersAdaptiveLaguerreFilterSpecOptions),

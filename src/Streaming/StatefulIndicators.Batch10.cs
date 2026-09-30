@@ -244,118 +244,16 @@ public sealed class EhlersHpLpRoofingFilterState : IStreamingIndicatorState
 [PrimaryOutput("Ehc")]
 public sealed class EhlersHurstCoefficientState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length1;
-    private readonly int _halfLength;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly RollingWindowMax _maxWindow1;
-    private readonly RollingWindowMin _minWindow1;
-    private readonly RollingWindowMax _maxWindow2;
-    private readonly RollingWindowMin _minWindow2;
-    private readonly PooledRingBuffer<double> _values;
-    private double _prevDimen;
-    private double _prevHurst;
-    private double _prevSmoothHurst1;
-    private double _prevSmoothHurst2;
-    private int _index;
-
-    public EhlersHurstCoefficientState(int length1 = 30, int length2 = 20)
-    {
-        _length1 = Math.Max(1, length1);
-        _halfLength = (int)Math.Ceiling((double)_length1 / 2);
-        var resolvedLength2 = Math.Max(1, length2);
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / resolvedLength2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / resolvedLength2, 0.99));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _maxWindow1 = new RollingWindowMax(Math.Max(_length1, 2));
-        _minWindow1 = new RollingWindowMin(Math.Max(_length1, 2));
-        _maxWindow2 = new RollingWindowMax(Math.Max(_halfLength, 2));
-        _minWindow2 = new RollingWindowMin(Math.Max(_halfLength, 2));
-        _values = new PooledRingBuffer<double>(_length1);
-    }
-
+    private readonly HurstCoefficientWindow _window;
+    public EhlersHurstCoefficientState(int length1 = 30, int length2 = 20) => _window = new(length1, length2);
     public IndicatorName Name => IndicatorName.EhlersHurstCoefficient;
-
-    public void Reset()
-    {
-        _maxWindow1.Reset();
-        _minWindow1.Reset();
-        _maxWindow2.Reset();
-        _minWindow2.Reset();
-        _values.Clear();
-        _prevDimen = 0;
-        _prevHurst = 0;
-        _prevSmoothHurst1 = 0;
-        _prevSmoothHurst2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        int countAfter;
-        var hh3 = isFinal ? _maxWindow1.Add(value, out countAfter) : _maxWindow1.Preview(value, out countAfter);
-        var ll3 = isFinal ? _minWindow1.Add(value, out countAfter) : _minWindow1.Preview(value, out countAfter);
-        var hh1 = isFinal ? _maxWindow2.Add(value, out countAfter) : _maxWindow2.Preview(value, out countAfter);
-        var ll1 = isFinal ? _minWindow2.Add(value, out countAfter) : _minWindow2.Preview(value, out countAfter);
-
-        var n3 = (hh3 - ll3) / _length1;
-        var n1 = (hh1 - ll1) / _halfLength;
-        var priorValue = _index >= _halfLength ? EhlersStreamingWindow.GetOffsetValue(_values, value, _halfLength) : value;
-        var hh2 = _index >= _halfLength ? priorValue : value;
-        var ll2 = _index >= _halfLength ? priorValue : value;
-
-        for (var j = _halfLength; j < _length1; j++)
-        {
-            var price = EhlersStreamingWindow.GetOffsetValue(_values, value, j);
-            hh2 = price > hh2 ? price : hh2;
-            ll2 = price < ll2 ? price : ll2;
-        }
-
-        var n2 = (hh2 - ll2) / _halfLength;
-        // Protect against log of zero or negative values (when price has no variation)
-        var sumN = n1 + n2;
-        var dimen = (sumN > 0 && n3 > 0)
-            ? 0.5 * (((Math.Log(sumN) - Math.Log(n3)) / Math.Log(2)) + _prevDimen)
-            : _prevDimen;
-        var hurst = 2 - dimen;
-        var smoothHurst = (_c1 * ((hurst + _prevHurst) / 2)) + (_c2 * _prevSmoothHurst1) + (_c3 * _prevSmoothHurst2);
-
-        if (isFinal)
-        {
-            _values.TryAdd(value, out _);
-            _prevDimen = dimen;
-            _prevHurst = hurst;
-            _prevSmoothHurst2 = _prevSmoothHurst1;
-            _prevSmoothHurst1 = smoothHurst;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Ehc", smoothHurst }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(smoothHurst, outputs);
+        StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Ehc", value } } : null);
     }
-
-    public void Dispose()
-    {
-        _maxWindow1.Dispose();
-        _minWindow1.Dispose();
-        _maxWindow2.Dispose();
-        _minWindow2.Dispose();
-        _values.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Eir")]

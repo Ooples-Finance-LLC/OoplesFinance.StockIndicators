@@ -109,74 +109,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersHurstCoefficient(this StockData stockData, int length1 = 30, int length2 = 20)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        List<double> dimenList = new(stockData.Count);
-        List<double> hurstList = new(stockData.Count);
-        List<double> smoothHurstList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var hLength = (int)Math.Ceiling((double)length1 / 2);
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(Math.Min(MathHelper.Sqrt2 * Math.PI / length2, 0.99));
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var (hh3List, ll3List) = GetMaxAndMinValuesList(inputList, length1);
-        var (hh1List, ll1List) = GetMaxAndMinValuesList(inputList, hLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var hh3 = hh3List[i];
-            var ll3 = ll3List[i];
-            var hh1 = hh1List[i];
-            var ll1 = ll1List[i];
-            var currentValue = inputList[i];
-            var priorValue = i >= hLength ? inputList[i - hLength] : currentValue;
-            var prevSmoothHurst1 = i >= 1 ? smoothHurstList[i - 1] : 0;
-            var prevSmoothHurst2 = i >= 2 ? smoothHurstList[i - 2] : 0;
-            var n3 = (hh3 - ll3) / length1;
-            var n1 = (hh1 - ll1) / hLength;
-            var hh2 = i >= hLength ? priorValue : currentValue;
-            var ll2 = i >= hLength ? priorValue : currentValue;
-
-            for (var j = hLength; j < length1; j++)
-            {
-                var price = i >= j ? inputList[i - j] : 0;
-                hh2 = price > hh2 ? price : hh2;
-                ll2 = price < ll2 ? price : ll2;
-            }
-            var n2 = (hh2 - ll2) / hLength;
-
-            var prevDimen = GetLastOrDefault(dimenList);
-            // Protect against log of zero or negative values (when price has no variation)
-            var sumN = n1 + n2;
-            var dimen = (sumN > 0 && n3 > 0)
-                ? 0.5 * (((Math.Log(sumN) - Math.Log(n3)) / Math.Log(2)) + prevDimen)
-                : prevDimen;
-            dimenList.Add(dimen);
-
-            var prevHurst = GetLastOrDefault(hurstList);
-            var hurst = 2 - dimen;
-            hurstList.Add(hurst);
-
-            var smoothHurst = (c1 * ((hurst + prevHurst) / 2)) + (c2 * prevSmoothHurst1) + (c3 * prevSmoothHurst2);
-            smoothHurstList.Add(smoothHurst);
-
-            var signal = GetCompareSignal(smoothHurst - prevSmoothHurst1, prevSmoothHurst1 - prevSmoothHurst2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ehc", smoothHurstList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(smoothHurstList);
-        stockData.IndicatorName = IndicatorName.EhlersHurstCoefficient;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new HurstCoefficientWindow(length1, length2);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData, input.Count);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ehc", values } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersHurstCoefficient; return stockData;
     }
 
 
