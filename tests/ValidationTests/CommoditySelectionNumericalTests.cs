@@ -45,6 +45,11 @@ public sealed class CommoditySelectionNumericalTests
     [Fact]
     public void WideRangesDirectionalMeansAndPartialSignalMatchRationalStages()
     {
+        // A downward gap makes |low - previous close| uniquely determine TR:
+        // max(3-1, |3-10|, |1-10|) = 9. With period one, ADX=100 and
+        // pointValue=1.5, margin=1, commission=0, the final CSI is 900.
+        var gap = Check(Candles((11, 9, 10), (3, 1, 2)), 1, pointValue: 1.5, margin: 1, commission: 0);
+        Assert.Equal(new[] { 0d, 900 }, gap["Csi"]);
         foreach (var scale in new[] { double.Epsilon, 1d, double.MaxValue / 16 }) foreach (var kind in Kinds) foreach (var length in new[] { 1, 3, 7 })
             Check(Candles(Enumerable.Range(0, 17).Select(i => ((i % 9 + 3) * scale, (i % 7 - 4) * scale, (i % 5 - 1) * scale)).ToArray()), length, kind.Kind, kind.Reference);
         Check(Candles((double.MaxValue, -double.MaxValue, 0), (0, -double.MaxValue, -double.MaxValue), (double.MaxValue, 0, double.MaxValue), (0, 0, 0), (0, 0, 0), (1, -1, 0), (2, 0, 1)), 2);
