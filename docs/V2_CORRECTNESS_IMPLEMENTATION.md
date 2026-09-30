@@ -3796,3 +3796,12 @@ The isolated campaigns `620-corrected-a` and `620-corrected-b` passed their base
 Source snapshot SHA256: `37663b6cb9ae27dbd7d6bb582f86ce4f579304db48761d6dfa4fb5894844c09f`. Archive SHA256: `3b3f23f63ed58f8af246261018a238a6c987af067f8efa5783ea32c59f2202dc` and `3b3f23f63ed58f8af246261018a238a6c987af067f8efa5783ea32c59f2202dc`.
 
 This is evidence for the isolated batch-620 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 621 through 634 and the remaining final gates is still incomplete.
+
+
+### Batch 621: Constance Brown Composite mutation qualification
+
+The isolated campaigns `621a` and `621b` passed their baselines and caught **34/34 compiled behavioral faults**, alongside **128/128 focused tests**. Both archives were compared byte-for-byte with the retained batch-621 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `d72bb12b33d5925f11c937cdc0bf3505bb107379bdaddf6bf76aca3347a2f8cb`. Archive SHA256: `80e7794ae2c067e6fa9bdb41db99556bd510ec208325475a6a8e38123249cfb1` and `80e7794ae2c067e6fa9bdb41db99556bd510ec208325475a6a8e38123249cfb1`.
+
+This is evidence for the isolated batch-621 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 622 through 634 and the remaining final gates is still incomplete.
