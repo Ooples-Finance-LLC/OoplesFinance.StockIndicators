@@ -3646,3 +3646,14 @@ The isolated campaigns `613a` and `613b` passed their baselines and caught **28/
 Source snapshot SHA256: `13e49e2781896954a89adac985912074be26a1a579b6d3b8365dc529b7a88328`. Archive SHA256: `311730d1a423d01b34b6447c72f8ba64e7a369c7ab7374eef04b0712b76c6e24` and `311730d1a423d01b34b6447c72f8ba64e7a369c7ab7374eef04b0712b76c6e24`.
 
 This is evidence for the isolated batch-613 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 614 through 625 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 626, Demand Oscillator
+
+Demand Oscillator now uses lazy extrema and rounded extended pressure/smoothing stages across batch, fast, native and forced-streaming routes. Its independent rational reference retains every range, percent-change, price/range, reciprocal-volume and smoothing stage. Both `Do` and `Signal` outputs retain selected candle ranges; fast component overrides consume two slots for `Do` and three for `Signal`, while batch preserves its zero-override contract.
+
+**Intentional mathematical corrections:** trading signals compare consecutive slopes. For signal values `0, 4, 6, 7`, slopes `4, 2, 1` produce `StrongBuy, Buy, Buy`; the old duplicated previous index compared every later slope with zero and incorrectly reported continued acceleration. Falling-but-slowing values receive the corresponding `Sell` result. The internal core previously calculated an unrelated normalized demand/supply percentage; it now computes the public smoothed buying-minus-selling pressure, with its single length controlling output smoothing and public defaults for the range stages. These corrections intentionally change prior signal/core behavior.
+
+All **48 selected focused tests** have passing evidence: **47 passes** in `demand-oscillator-626.trx`, then **1 corrected callback test pass** in `demand-oscillator-626-callback-final.trx`. The original callback test incorrectly registered a single override delegate for multiple slots; the test-only correction registers each required slot. Production was unchanged after the initial run. The initial 48-test run was not fully passing. Coverage includes independent hand signals, five configurations across five routes, numerical classes, wide signed inputs, subnormal denominators, overflow recovery, extreme periods, callbacks, legacy means, native lifecycle/guards and core span bounds.
+
+**Mutation qualification is pending** for 36 prepared faults; all **6,478 mutation anchors** passed preflight. Candidate/frozen snapshots match on 2,114 files. Prepared inventory is **6,092/7,131 enrollments**, with **1,039 omissions across 151 types**. Full numerical coverage and hosted/package/release/performance gates remain incomplete.

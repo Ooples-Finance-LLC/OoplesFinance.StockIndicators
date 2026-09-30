@@ -3065,60 +3065,11 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DemandOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output, int length = 14)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var demandArray = pool.Rent(close.Length);
-        var supplyArray = pool.Rent(close.Length);
-
-        try
-        {
-            var demand = demandArray.AsSpan(0, close.Length);
-            var supply = supplyArray.AsSpan(0, close.Length);
-
-            // Calculate buying pressure (demand) and selling pressure (supply)
-            for (var i = 0; i < close.Length; i++)
-            {
-                var range = high[i] - low[i];
-                if (range > 0)
-                {
-                    var buyingPressure = (close[i] - low[i]) / range * volume[i];
-                    var sellingPressure = (high[i] - close[i]) / range * volume[i];
-                    demand[i] = buyingPressure;
-                    supply[i] = sellingPressure;
-                }
-                else
-                {
-                    demand[i] = 0;
-                    supply[i] = 0;
-                }
-            }
-
-            // Sum over period and calculate oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                // Before the window fills, the batch indicator averages what has arrived rather than returning
-                // nothing, so the run-in shortens the window instead of blanking it.
-
-                double sumDemand = 0, sumSupply = 0;
-                for (var j = Math.Max(0, i - length + 1); j <= i; j++)
-                {
-                    sumDemand += demand[j];
-                    sumSupply += supply[j];
-                }
-
-                var total = sumDemand + sumSupply;
-                output[i] = total != 0 ? (sumDemand - sumSupply) / total * 100 : 0;
-            }
-        }
-        finally
-        {
-            pool.Return(demandArray);
-            pool.Return(supplyArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length || volume.Length < close.Length) throw new ArgumentException("Candle spans must cover the close input.");
+        // The legacy single length selects output smoothing; the range stages retain public defaults.
+        using var window = new DemandOscillatorWindow(MovingAvgType.ExponentialMovingAverage, 10, 2, length);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Line;
     }
 
     /// <summary>

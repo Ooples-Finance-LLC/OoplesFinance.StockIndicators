@@ -116,25 +116,7 @@ internal static partial class BuiltInFormulaReferences
                 return new("Dsrsi", new[] { "Dsrsi", "Signal" }, bars => RangeGainLossOutputs(bars, indicator));
             case IndicatorName.DemandOscillator:
                 if (kind == 0) return null;
-                return new("Do", new[] { "Do", "Signal" }, bars =>
-                {
-                    var ranges = bars.Select((_, i) =>
-                    {
-                        var window = Window(bars, i, 2).ToArray();
-                        return window.Max(b => b.High) - window.Min(b => b.Low);
-                    }).ToArray();
-                    var typicalRange = Average(ranges, 10, kind);
-                    var imbalance = bars.Select((b, i) =>
-                    {
-                        var previous = i == 0 ? 0 : bars[i - 1].Close;
-                        var change = b.Close - previous;
-                        var reciprocal = previous == 0 || change == 0 || b.Close == 0 || typicalRange[i] == 0 ? 0
-                            : b.Volume * typicalRange[i] * Math.Abs(previous) / (300 * b.Close * change);
-                        return (b.Close > previous ? 1 : -1) * (b.Volume - reciprocal);
-                    }).ToArray();
-                    var line = Average(imbalance, 20, kind);
-                    return Outputs(("Do", line), ("Signal", Average(line, 10, kind)));
-                });
+                return new("Do", new[] { "Do", "Signal" }, bars => DemandOscillatorOutputs(bars, indicator));
             case IndicatorName.McClellanOscillator:
                 if (kind == 0) return null;
                 return new("Mo", new[] { "AdvSum", "DecSum", "Mo", "Signal", "Histogram" }, bars =>

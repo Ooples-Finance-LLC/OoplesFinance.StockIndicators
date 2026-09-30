@@ -782,6 +782,7 @@ internal static partial class StatefulIndicatorFactory
             SmoothedWilliamsRSpecOptions swr => new SmoothedWilliamsRState(length: swr.Length, smoothLength: swr.SmoothLength),
             NormalizedMacdSpecOptions nmacd => new NormalizedMacdState(fastLength: nmacd.FastLength, slowLength: nmacd.SlowLength),
             DemandIndexSpecOptions _ => new DemandIndexState(),
+            DemandOscillatorSpecOptions demand => new DemandOscillatorState(demand.MaType),
             ElderImpulseSystemSpecOptions eis => new ElderImpulseSystemState(length: eis.Length),
             SimplePriceZoneSpecOptions spz => new SimplePriceZoneState(length: spz.Length),
             SwingIndexSpecOptions swi => new SwingIndexState(limitMove: swi.LimitMove),

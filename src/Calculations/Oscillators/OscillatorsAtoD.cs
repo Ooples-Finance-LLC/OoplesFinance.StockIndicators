@@ -1087,59 +1087,18 @@ public static partial class Calculations
     public static StockData CalculateDemandOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, 
         int length1 = 10, int length2 = 2, int length3 = 20)
     {
-        List<double> rangeList = new(stockData.Count);
-        List<double> doList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length2);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, volume) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var trades = CreateSignalsList(stockData, input.Count);
+        var external = !StrengthWindow.Supports(maType);
+        var components = external ? DemandOscillatorWindow.Components(stockData, input, high, low, maType, length1, length2, length3, false, true) : default;
+        using var window = new DemandOscillatorWindow(maType, length1, length2, length3);
+        for (var i = 0; i < input.Count; i++)
         {
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-
-            var range = highest - lowest;
-            rangeList.Add(range);
+            var point = window.Next(high[i], low[i], input[i], volume[i], true, external ? components.Range[i] : null, external ? components.Line[i] : null, external ? components.Signal[i] : null);
+            line.Add(point.Line); signal.Add(point.SignalLine); trades?.Add(point.Trade);
         }
-
-        var vaList = GetMovingAverageList(stockData, maType, length1, rangeList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var va = vaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var pctChg = prevValue != 0 ? MinPastValues(i, 1, currentValue - prevValue) / Math.Abs(prevValue) * 100 : 0;
-            var currentVolume = stockData.Volumes[i];
-            var k = va != 0 ? (3 * currentValue) / va : 0;
-            var pctK = pctChg * k;
-            var volPctK = pctK != 0 ? currentVolume / pctK : 0;
-            var bp = currentValue > prevValue ? currentVolume : volPctK;
-            var sp = currentValue > prevValue ? volPctK : currentVolume;
-
-            var dosc = bp - sp;
-            doList.Add(dosc);
-        }
-
-        var doEmaList = GetMovingAverageList(stockData, maType, length3, doList);
-        var doSigList = GetMovingAverageList(stockData, maType, length1, doEmaList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var doSig = doSigList[i];
-            var prevSig1 = i >= 1 ? doSigList[i - 1] : 0;
-            var prevSig2 = i >= 2 ? doSigList[i - 1] : 0;
-
-            var signal = GetCompareSignal(doSig - prevSig1, prevSig1 - prevSig2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Do", doEmaList },
-            { "Signal", doSigList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(doEmaList);
-        stockData.IndicatorName = IndicatorName.DemandOscillator;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Do", line }, { "Signal", signal } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DemandOscillator;
         return stockData;
     }
 

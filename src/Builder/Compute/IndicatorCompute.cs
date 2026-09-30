@@ -802,9 +802,7 @@ internal static partial class IndicatorCompute
             // Batch 6 - Demand/Volume oscillators
             // Length is declared obsolete because CalculateDemandOscillator has no parameter it could
             // set, so this spec asks for the same series the defaults give.
-            DemandOscillatorSpecOptions demosc => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeDemandOscillatorFast(data, context, demosc.MaType), 10, demosc.MaType)
-                : ComputeDemandOscillatorFast(data, context, demosc.MaType),
+            DemandOscillatorSpecOptions demosc => ComputeDemandOscillatorFast(data, context, demosc.MaType, signal: spec.OutputKey == "Signal"),
             AverageMoneyFlowOscillatorSpecOptions amfo => ComputeAverageMoneyFlowOscillatorFast(data, context, amfo.Length,
                 amfo.MaType),
             VolumeAccumulationOscillatorSpecOptions vao => ComputeVolumeAccumulationOscillatorFast(data, context, vao.Length),
@@ -7458,54 +7456,20 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDemandOscillatorFast(StockData data, ComputeContext context,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 2,
-        int length3 = 20)
+        int length3 = 20, bool signal = false)
     {
-        // CalculateDemandOscillator splits each bar's volume into the part that bought and the part that
-        // sold, using how far the price moved against the average range, and then smooths the difference.
-        var (inputList, highList, lowList, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-
-        using var rangeBuffer = context.Rent(count);
-        var range = rangeBuffer.WritableSpan;
-        var highWindow = new RollingMinMax(length2);
-        var lowWindow = new RollingMinMax(length2);
-
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, volume) = CalculationsHelper.GetInputValuesList(data);
+        var buffer = context.Rent(input.Count);
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
         {
-            highWindow.Add(highList[i]);
-            lowWindow.Add(lowList[i]);
-            range[i] = highWindow.Max - lowWindow.Min;
+            var components = DemandOscillatorWindow.Components(data, input, high, low, maType, length1, length2, length3, true, signal);
+            (signal ? components.Signal : components.Line).AsSpan().CopyTo(buffer.WritableSpan);
         }
-
-        using var averageRangeBuffer = context.Rent(count);
-        var averageRange = averageRangeBuffer.WritableSpan;
-        MovingAverage(data, maType, length1, range, averageRange);
-
-        using var oscillatorBuffer = context.Rent(count);
-        var oscillator = oscillatorBuffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
+        else
         {
-            var currentValue = inputList[i];
-            var previousValue = i >= 1 ? inputList[i - 1] : 0;
-            var percentChange = previousValue != 0
-                ? CalculationsHelper.MinPastValues(i, 1, currentValue - previousValue) / Math.Abs(previousValue) * 100
-                : 0;
-
-            var volume = volumes[i];
-            var k = averageRange[i] != 0 ? 3 * currentValue / averageRange[i] : 0;
-            var percentK = percentChange * k;
-            var volumePerPercentK = percentK != 0 ? volume / percentK : 0;
-
-            var buyingPower = currentValue > previousValue ? volume : volumePerPercentK;
-            var sellingPower = currentValue > previousValue ? volumePerPercentK : volume;
-            oscillator[i] = buyingPower - sellingPower;
+            using var window = new DemandOscillatorWindow(maType, length1, length2, length3);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], volume[i], true); buffer.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
         }
-
-        var buffer = context.Rent(count);
-        MovingAverage(data, maType, length3, oscillator, buffer.WritableSpan);
-
         return buffer;
     }
 

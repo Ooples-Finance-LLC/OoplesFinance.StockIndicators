@@ -4795,87 +4795,18 @@ public sealed class DerivativeOscillatorState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Do")]
 public sealed class DemandOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _rangeSmoother;
-    private readonly IMovingAverageSmoother _doSmoother;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public DemandOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 2,
-        int length3 = 20)
-    {
-        var resolved2 = Math.Max(1, length2);
-        _highWindow = new RollingWindowMax(resolved2);
-        _lowWindow = new RollingWindowMin(resolved2);
-        _rangeSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _doSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length3));
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DemandOscillatorWindow _window;
+    public DemandOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 2, int length3 = 20)
+        => _window = new(maType, length1, length2, length3);
     public IndicatorName Name => IndicatorName.DemandOscillator;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _rangeSmoother.Reset();
-        _doSmoother.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        StreamingInputValidation.Validate(bar);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var range = highest - lowest;
-        var va = _rangeSmoother.Next(range, isFinal);
-        var currentValue = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var pctChg = prevValue != 0 ? (currentValue - prevValue) / Math.Abs(prevValue) * 100 : 0;
-        var k = va != 0 ? (3 * currentValue) / va : 0;
-        var pctK = pctChg * k;
-        var volPctK = pctK != 0 ? bar.Volume / pctK : 0;
-        var bp = currentValue > prevValue ? bar.Volume : volPctK;
-        var sp = currentValue > prevValue ? volPctK : bar.Volume;
-        var dosc = bp - sp;
-        var doEma = _doSmoother.Next(dosc, isFinal);
-        var doSignal = _signalSmoother.Next(doEma, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = currentValue;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Do", doEma },
-                { "Signal", doSignal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(doEma, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Do", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _rangeSmoother.Dispose();
-        _doSmoother.Dispose();
-        _signalSmoother.Dispose();
+    public void Dispose() => _window.Dispose();
     }
-}
 
 [PrimaryOutput("Dsm")]
 public sealed class DoubleSmoothedMomentaState : IStreamingIndicatorState, IDisposable
