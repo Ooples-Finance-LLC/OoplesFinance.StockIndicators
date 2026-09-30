@@ -3814,3 +3814,12 @@ The complete price-normalized quotient now retains subnormal scale factors and e
 **80/80 focused tests passed** in ergodic-selection-635-final.trx. The first test run passed 79/80 and exposed a one-ULP signal discrepancy in the batch custom-ADX path, which still used the generic published-double average. The correction retains extended values and exact signal averaging for supported kinds, including a fast custom-ADX path with no signal override. The complete focused set was rerun after the production correction. An earlier restore-only failure omitted the source generator's netstandard2.0 assets; unrestricted restore corrected that setup before compilation. Hand cases establish 5000/20000 line values, downward/upward gaps 22500/4500, finite recovery from an underflowing standalone coefficient, and a finite Signal from a line above double.MaxValue. Nine configurations cover five routes, both outputs, selected candles, signed/wide/subnormal fields, extreme periods, preview/reset, legacy means and input guards.
 
 **36 prepared mutation faults remain pending**; all **6,788 anchors** pass preflight. Candidate/frozen snapshots match on **2,141 files**. Prepared enrollment is **6,159/7,131**, with **972 omissions across 142 types**, and no construction failures. Built DLL SHA256: C8D5AAF3DE901617AA017917F7F48FDE43241E69C9702D6DC5E2B618CD61F64B. Mutation qualification is complete through 621; Coral Trend 622 campaigns are running. Batches 622–635 and remaining coverage, hosted/package/release/performance gates are incomplete.
+
+
+### Batch 622: Coral Trend mutation qualification
+
+The isolated campaigns `622a` and `622b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **41/41 focused tests**. Both archives were compared byte-for-byte with the retained batch-622 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `a94a60951cec48a97571d8f97481824b0e243cf20fcfb80a56df83abded8b870`. Archive SHA256: `cc04e5f638e8fa7a9fd9b1dff07d7ff3fb76ffcb97e8d30335236046d31d7e92` and `cc04e5f638e8fa7a9fd9b1dff07d7ff3fb76ffcb97e8d30335236046d31d7e92`.
+
+This is evidence for the isolated batch-622 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 623 through 635 and the remaining final gates is still incomplete.
