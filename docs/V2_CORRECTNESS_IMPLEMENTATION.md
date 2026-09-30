@@ -3877,3 +3877,12 @@ Fibonacci Retrace now evaluates each complete affine interpolation before roundi
 **82/82 selected tests passed** in fibonacci-retrace-639.trx: **81 new numerical cases** plus the existing one-period retracement/dynamic-level regression. Nine configurations cover five routes and numerical classes. Independent rational weighted-endpoint formulas verify production's expanded interpolation; explicit hand cases cover rolling expiry, endpoints/reflection, mean-independent bands, signal strength, opposite extreme prices, equal endpoints with extreme factors, subnormal rounding, legacy signal means and invalid-candle nonmutation.
 
 **36 prepared mutation faults remain pending**; all **6,940 mutation anchors** pass preflight. Candidate/frozen snapshots match on **2,153 files**. Prepared enrollment is **6,193/7,131**, with **938 omissions across 138 types** and no construction failures. Built DLL SHA256: 5E4C5C138BE0194BDF89DCFB0220DF3EF49DA8FE5E157E20FE5C7E1AB570E049. Mutation qualification and remaining coverage, formula-scope decisions, hosted/package/release/performance gates remain incomplete.
+
+
+### Batch 624: DT Oscillator mutation qualification
+
+The isolated campaigns `624-corrected-a` and `624-corrected-b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **50/50 focused tests**. Both archives were compared byte-for-byte with the retained batch-624 snapshot; individual mutation TRX files contain failing tests, not compilation failures. The original campaign retained a surviving full-period startup divisor fault. A four-bar/five-bar hand case now independently establishes startup line 50 and signal 25; corrected campaigns retain the original production source with that regression added.
+
+Source snapshot SHA256: `dcf6da28e8c356625cc7bfac965e7e3099c5013a45de6c7049eda54b8ca88489`. Archive SHA256: `98fac91f7327a5ad25e2ebd441f37c04681edf0c216e9d37d12f5b04eed00596` and `98fac91f7327a5ad25e2ebd441f37c04681edf0c216e9d37d12f5b04eed00596`.
+
+This is evidence for the isolated batch-624 source. Source was already published in the through-624 checkpoint; this update does not restore older source files. Mutation verification for batches 625 through 639 and the remaining final gates is still incomplete.
