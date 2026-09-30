@@ -3657,3 +3657,12 @@ Demand Oscillator now uses lazy extrema and rounded extended pressure/smoothing 
 All **48 selected focused tests** have passing evidence: **47 passes** in `demand-oscillator-626.trx`, then **1 corrected callback test pass** in `demand-oscillator-626-callback-final.trx`. The original callback test incorrectly registered a single override delegate for multiple slots; the test-only correction registers each required slot. Production was unchanged after the initial run. The initial 48-test run was not fully passing. Coverage includes independent hand signals, five configurations across five routes, numerical classes, wide signed inputs, subnormal denominators, overflow recovery, extreme periods, callbacks, legacy means, native lifecycle/guards and core span bounds.
 
 **Mutation qualification is pending** for 36 prepared faults; all **6,478 mutation anchors** passed preflight. Candidate/frozen snapshots match on 2,114 files. Prepared inventory is **6,092/7,131 enrollments**, with **1,039 omissions across 151 types**. Full numerical coverage and hosted/package/release/performance gates remain incomplete.
+
+
+### Batch 614: Bryant Adaptive Moving Average mutation qualification
+
+The isolated campaigns `614a` and `614b` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **40/40 focused tests**. Both archives were compared byte-for-byte with the retained batch-614 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `270b8d76ac0bb4274795cc402349acc4c9f5b5b75ca603019df64b53b2c958fa`. Archive SHA256: `7729e8a06c10d79f69da8948a7f57b5b1ae3ecb805f2d089a0541196bb4007a5` and `7729e8a06c10d79f69da8948a7f57b5b1ae3ecb805f2d089a0541196bb4007a5`.
+
+This is evidence for the isolated batch-614 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 615 through 626 and the remaining final gates is still incomplete.
