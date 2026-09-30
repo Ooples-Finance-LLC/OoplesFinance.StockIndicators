@@ -3841,3 +3841,12 @@ Fast/Slow Degree now cancels the common quadratic weights before rounding, compu
 **49/49 focused tests passed** in fast-slow-degree-637.trx: 48 numerical cases plus the existing polynomial-cancellation hand test. The existing histogram expectation now subtracts the already-rounded signal: 2-(2d/3), which differs from directly rounding 4/3. Hand cases establish exact period-one/equal-window zero, opposite outputs when fast/slow swap, integer phase symmetry and large-phase periodicity. An unrepresentable Fsdo can retain finite Signal and Histogram, including a custom signal override. Five configurations cover five routes, all outputs, wide/subnormal prices, window expiry, independently extreme periods, legacy averages, previews, reset and invalid-candle nonmutation.
 
 **38 prepared mutation faults remain pending**; all **6,864 anchors** pass preflight. Candidate/frozen snapshots match on **2,147 files**. Prepared enrollment is **6,173/7,131**, with **958 omissions across 140 types** and no construction failures. Built DLL SHA256: 5F430A93A00A80342D4C82BC487B9F8851F3CB88B189B346F20576AED705FA82. Mutation qualification and remaining coverage, formula-scope decisions, hosted/package/release/performance gates remain incomplete.
+
+
+### Batch 623: Corrected Moving Average mutation qualification
+
+The isolated campaigns `623a` and `623b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **48/48 focused tests**. Both archives were compared byte-for-byte with the retained batch-623 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `bd07952355dfb3281d04af4e46c0e5fb5407cbdf0c80baabaf85c4f48f5553b0`. Archive SHA256: `3bb2d707d3f892cd95990e5807bec7496d20f034812550db014198912c3fcda3` and `3bb2d707d3f892cd95990e5807bec7496d20f034812550db014198912c3fcda3`.
+
+This is evidence for the isolated batch-623 source. Source was already published in the through-624 checkpoint; this update does not restore older source files. Mutation verification for batches 624 through 637 and the remaining final gates is still incomplete.
