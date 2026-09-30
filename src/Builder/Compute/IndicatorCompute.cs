@@ -2318,9 +2318,7 @@ internal static partial class IndicatorCompute
             VostroIndicatorSpecOptions vi => ComputeVostroIndicatorFast(data, context, vi.Length1, vi.Length2, vi.Level, vi.MaType),
 
             // Batch 29 - Ergodic and Momentum Indicators
-            ErgodicCommoditySelectionIndexSpecOptions ecsi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType), ecsi.SmoothLength, ecsi.MaType)
-                : ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType),
+            ErgodicCommoditySelectionIndexSpecOptions ecsi => ComputeErgodicCommoditySelectionIndexFast(data, context, ecsi.Length, ecsi.SmoothLength, ecsi.PointValue, ecsi.MaType, spec.OutputKey == "Signal"),
             ErgodicMovingAverageConvergenceDivergenceSpecOptions emacd => spec.OutputKey switch
             {
                 null or "Macd" => ComputeErgodicMacdFast(data, context, emacd.Length1, emacd.Length2, emacd.Length3, emacd.MaType),
@@ -22210,38 +22208,18 @@ internal static partial class IndicatorCompute
 
     internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(StockData data, ComputeContext context,
         int length = 32, int smoothLength = 5, double pointValue = 1,
-        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod)
+        MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, bool signal = false)
     {
-        // CalculateErgodicCommoditySelectionIndex scales the average of the current and previous ADX by the
-        // true range and divides by the price, so the reading is comparable across instruments. Its Ecsi key
-        // is that raw series - the average over smoothLength is the Signal - and smoothLength enters only
-        // through k. The first bar takes the current close as its previous close, so its true range is the
-        // bar's own range rather than an inflated gap.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        length = Math.Max(length, 1);
-        smoothLength = Math.Max(smoothLength, 1);
-
-        var k = 100 * (pointValue / MathHelper.Sqrt(length) / (150 + smoothLength));
-
-        using var directional = ComputeAdxFast(data, context, length, maType);
-        var adx = directional.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var external = !StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides;
+        using var window = new ErgodicSelectionWindow(maType, length, smoothLength, pointValue, external);
+        var buffer = context.Rent(input.Count);
+        if (external)
         {
-            var prevAdx = i >= 1 ? adx[i - 1] : 0;
-            var adxR = (adx[i] + prevAdx) * 0.5;
-            var prevValue = i >= 1 ? input[i - 1] : input[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], prevValue);
-            var csi = length + trueRange > 0 ? k * adxR * trueRange / length : 0;
-            output[i] = input[i] > 0 ? csi / input[i] : 0;
+            var components = ErgodicSelectionWindow.Components(data, input, high, low, maType, length, smoothLength, pointValue, true, signal);
+            (signal ? components.Signal : components.Line).AsSpan().CopyTo(buffer.WritableSpan);
         }
-
+        else for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); buffer.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
         return buffer;
     }
 

@@ -917,6 +917,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.CommoditySelectionIndex:
                 return new("Csi", new[] { "Csi", "Signal" }, bars => CommoditySelectionOutputs(bars, indicator));
             case IndicatorName.ErgodicCommoditySelectionIndex:
+                return new("Ecsi", new[] { "Ecsi", "Signal" }, bars => ErgodicSelectionOutputs(bars, indicator));
             case IndicatorName.DMIStochastic:
                 if (name == IndicatorName.DMIStochastic && kind is 1 or 2 or 3 or 6)
                     return new("DmiStochastic", new[] { "DmiStochastic" }, bars => DmiStochasticOutputs(bars, length, kind));

@@ -57875,5 +57875,329 @@
     "before": "_window.Next(bar.Close, bar.Volume, isFinal)",
     "after": "_window.Next(bar.Close, bar.Close, isFinal)",
     "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "ergodic-selection-wide-period",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-smooth",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_smooth = Math.Max(1, smoothLength)",
+    "after": "_smooth = Math.Max(2, smoothLength)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-root",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "Math.Sqrt(_length)",
+    "after": "Math.Sqrt(_length + 1d)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-range",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max(BigInteger.Abs(h - c), BigInteger.Abs(l - c)))",
+    "after": "BigInteger.Max((h - l) * 2, BigInteger.Max(BigInteger.Abs(h - c), BigInteger.Abs(l - c)))",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-low-gap",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "BigInteger.Abs(l - c)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-high-gap",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "BigInteger.Abs(h - c)",
+    "after": "BigInteger.Zero",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-up-direction",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "up.Sign > 0 && up > down",
+    "after": "up.Sign > 0 && up < down",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-down-direction",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "down.Sign > 0 && down > up",
+    "after": "down.Sign > 0 && down < up",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-direction-scale",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "var positive = Percent(plus, range)",
+    "after": "var positive = Percent(plus, range) * 0.5",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-adx-scale",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "Math.Abs(numerator.Ratio(denominator)) * 100",
+    "after": "Math.Abs(numerator.Ratio(denominator)) * 50",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-adx-lag",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "currentAdx + _previousAdx",
+    "after": "currentAdx + currentAdx",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-line-scale",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "100 * _point *",
+    "after": "50 * _point *",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-adx-midpoint",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "var denominator = 2 * _root",
+    "after": "var denominator = 4 * _root",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-cost",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "150L + _smooth",
+    "after": "151L + _smooth",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-cost-overflow",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "150L + _smooth",
+    "after": "150 + _smooth",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.TinyScaleRecoversAndExtendedLineReachesFiniteSignal",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-length-divisor",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "* (150L + _smooth) * _length",
+    "after": "* (150L + _smooth)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-price-domain",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "var line = close > 0",
+    "after": "var line = close != 0",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-price-divisor",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "denominator * ExactVarianceWindow.Units(close)",
+    "after": "denominator * ExactVarianceWindow.Units(1)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-line-projection",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_signal!.Next(Rounded(line), final)",
+    "after": "_signal!.Next(new RocBankValue(ExactMeanAccumulator.UnitRatio(line, BigInteger.One)), final)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.TinyScaleRecoversAndExtendedLineReachesFiniteSignal",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-signal-period",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_signal = new(kind, _smooth)",
+    "after": "_signal = new(kind, _length)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-slope",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "var slope = current - _previousSignal",
+    "after": "var slope = current + _previousSignal",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-previous-slope",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "slope > _previousSlope",
+    "after": "slope > 0",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.HandDirectionGapsPriceDomainAndSuccessiveSlopes",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-preview",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "if (final) { _high = high",
+    "after": "if (true) { _high = high",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-adx-preview",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_direction![3].Next(new(Direction(\n            _direction[0].Next(raw.Plus, final), _direction[1].Next(raw.Minus, final), _direction[2].Next(raw.Range, final))), final)",
+    "after": "_direction![3].Next(new(Direction(\n            _direction[0].Next(raw.Plus, final), _direction[1].Next(raw.Minus, final), _direction[2].Next(raw.Range, final))), true)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-reset-start",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_started = false; _previousAdx",
+    "after": "_started = true; _previousAdx",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-reset-mean",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "foreach (var mean in _direction) mean.Reset()",
+    "after": "foreach (var mean in _direction) { }",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-reset-signal",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_signal?.Reset()",
+    "after": "_signal?.ToString()",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-mean-expiry",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-mean-start",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_history.Count < _length - 1",
+    "after": "_history.Count < _length - 2",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-weighted-shift",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-weighted-divisor",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-callback-plus",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "var p = Mean(plus, length)",
+    "after": "var p = Mean(minus, length)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.FourDirectionalOverridesAndOptionalSignalKeepTheirOrder",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-callback-signal",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "ComponentAverage.Take(line, smoothLength)",
+    "after": "ComponentAverage.Take(line, length)",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.FourDirectionalOverridesAndOptionalSignalKeepTheirOrder",
+    "module": "numerical"
+  },
+  {
+    "id": "ergodic-selection-wide-reset-adx",
+    "module": "numerical",
+    "file": "src/Helpers/ErgodicSelectionWindow.cs",
+    "scope": "internal sealed class ErgodicSelectionWindow",
+    "before": "_previousAdx = _previousSignal = _previousSlope = default",
+    "after": "_previousSignal = _previousSlope = default",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions"
+  },
+  {
+    "id": "ergodic-selection-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class ErgodicCommoditySelectionIndexState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle guard */",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "ergodic-selection-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeErgodicCommoditySelectionIndexFast(",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "point.Line",
+    "filter": "FullyQualifiedName~ErgodicSelectionNumericalTests.WideRangesAndDirectionalStagesMatchIndependentFractions"
   }
 ]

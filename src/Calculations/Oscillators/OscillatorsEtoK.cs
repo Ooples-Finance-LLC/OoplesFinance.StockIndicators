@@ -3063,51 +3063,26 @@ public static partial class Calculations
     public static StockData CalculateErgodicCommoditySelectionIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, 
         int length = 32, int smoothLength = 5, double pointValue = 1)
     {
-        List<double> ergodicCsiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        var k = 100 * (pointValue / Sqrt(length) / (150 + smoothLength));
-
-        var adxList = CalculateAverageDirectionalIndex(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = new List<double>(input.Count); var trades = CreateSignalsList(stockData);
+        var external = !StrengthWindow.Supports(maType) || Builder.Compute.ComponentAverage.HasOverrides;
+        var legacySignal = !StrengthWindow.Supports(maType);
+        using var window = new ErgodicSelectionWindow(maType, length, smoothLength, pointValue, external);
+        var components = external ? ErgodicSelectionWindow.Components(stockData, input, high, low, maType, length, smoothLength, pointValue, true, false) : default;
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentValue = inputList[i];
-            var adx = adxList[i];
-            var prevAdx = i >= 1 ? adxList[i - 1] : 0;
-            var adxR = (adx + prevAdx) * 0.5;
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-            var csi = length + tr > 0 ? k * adxR * tr / length : 0;
-
-            var ergodicCsi = currentValue > 0 ? csi / currentValue : 0;
-            ergodicCsiList.Add(ergodicCsi);
+            var point = window.Next(high[i], low[i], input[i], true, external ? components.Adx[i] : null, includeSignal: !legacySignal);
+            values.Add(point.Line); if (!legacySignal) { signals.Add(point.SignalLine); trades?.Add(point.Trade); }
         }
-
-        var ergodicCsiSmaList = GetMovingAverageList(stockData, maType, smoothLength, ergodicCsiList);
-        for (var i = 0; i < stockData.Count; i++)
+        if (legacySignal)
         {
-            var ergodicCsiSma = ergodicCsiSmaList[i];
-            var prevErgodicCsiSma1 = i >= 1 ? ergodicCsiSmaList[i - 1] : 0;
-            var prevErgodicCsiSma2 = i >= 2 ? ergodicCsiSmaList[i - 2] : 0;
-
-            var signal = GetCompareSignal(ergodicCsiSma - prevErgodicCsiSma1, prevErgodicCsiSma1 - prevErgodicCsiSma2);
-            signalsList?.Add(signal);
+            // The legacy batch path consumes the four ADX overrides, but not a fifth signal override.
+            signals = GetMovingAverageList(stockData, maType, Math.Max(1, smoothLength), values);
+            var previous = new System.Numerics.BigInteger(); var previousSlope = new System.Numerics.BigInteger();
+            foreach (var value in signals) { var current = ExactVarianceWindow.Units(value); var slope = current - previous; trades?.Add(slope.Sign > 0 && slope > previousSlope ? Signal.StrongBuy : slope.Sign < 0 && slope < previousSlope ? Signal.StrongSell : slope.Sign > 0 ? Signal.Buy : slope.Sign < 0 ? Signal.Sell : Signal.None); previous = current; previousSlope = slope; }
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ecsi", ergodicCsiList },
-            { "Signal", ergodicCsiSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ergodicCsiList);
-        stockData.IndicatorName = IndicatorName.ErgodicCommoditySelectionIndex;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ecsi", values }, { "Signal", signals } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.ErgodicCommoditySelectionIndex; return stockData;
     }
 
 

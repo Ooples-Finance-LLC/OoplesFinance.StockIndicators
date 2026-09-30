@@ -249,110 +249,16 @@ public sealed class ErgodicCandlestickOscillatorState : IStreamingIndicatorState
 [PrimaryOutput("Ecsi")]
 public sealed class ErgodicCommoditySelectionIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly double _k;
-    private readonly IMovingAverageSmoother _dmPlus;
-    private readonly IMovingAverageSmoother _dmMinus;
-    private readonly IMovingAverageSmoother _tr;
-    private readonly IMovingAverageSmoother _adx;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevHigh;
-    private double _prevLow;
-    private double _prevValue;
-    private double _prevAdx;
-    private bool _hasPrev;
-
-    public ErgodicCommoditySelectionIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod,
-        int length = 32, int smoothLength = 5, double pointValue = 1)
-    {
-        _length = Math.Max(1, length);
-        _k = 100 * (pointValue / MathHelper.Sqrt(_length) / (150 + smoothLength));
-        _dmPlus = MovingAverageSmootherFactory.Create(maType, _length);
-        _dmMinus = MovingAverageSmootherFactory.Create(maType, _length);
-        _tr = MovingAverageSmootherFactory.Create(maType, _length);
-        _adx = MovingAverageSmootherFactory.Create(maType, _length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly ErgodicSelectionWindow _window;
+    public ErgodicCommoditySelectionIndexState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length = 32, int smoothLength = 5, double pointValue = 1) => _window = new(maType, length, smoothLength, pointValue);
     public IndicatorName Name => IndicatorName.ErgodicCommoditySelectionIndex;
-
-    public void Reset()
-    {
-        _dmPlus.Reset();
-        _dmMinus.Reset();
-        _tr.Reset();
-        _adx.Reset();
-        _signalSmoother.Reset();
-        _prevHigh = 0;
-        _prevLow = 0;
-        _prevValue = 0;
-        _prevAdx = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // Use 0 for prevHigh/prevLow on first bar to match batch ADX behavior
-        var prevHigh = _hasPrev ? _prevHigh : bar.High;
-        var prevLow = _hasPrev ? _prevLow : bar.Low;
-        // For TrueRange, use current value on first bar to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-        var prevAdx = _hasPrev ? _prevAdx : 0;
-
-        var highDiff = bar.High - prevHigh;
-        var lowDiff = prevLow - bar.Low;
-        var dmPlus = highDiff > lowDiff ? Math.Max(highDiff, 0) : 0;
-        var dmMinus = highDiff < lowDiff ? Math.Max(lowDiff, 0) : 0;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-
-        var dmPlusMa = _dmPlus.Next(dmPlus, isFinal);
-        var dmMinusMa = _dmMinus.Next(dmMinus, isFinal);
-        var trMa = _tr.Next(tr, isFinal);
-        var diPlus = trMa != 0 ? MathHelper.MinOrMax(100 * dmPlusMa / trMa, 100, 0) : 0;
-        var diMinus = trMa != 0 ? MathHelper.MinOrMax(100 * dmMinusMa / trMa, 100, 0) : 0;
-        var diDiff = Math.Abs(diPlus - diMinus);
-        var diSum = diPlus + diMinus;
-        var dx = diSum != 0 ? MathHelper.MinOrMax(100 * diDiff / diSum, 100, 0) : 0;
-        var adx = _adx.Next(dx, isFinal);
-        var adxR = (adx + prevAdx) * 0.5;
-
-        var csi = _length + tr > 0 ? _k * adxR * tr / _length : 0;
-        var ergodicCsi = value > 0 ? csi / value : 0;
-        var signal = _signalSmoother.Next(ergodicCsi, isFinal);
-
-        if (isFinal)
-        {
-            _prevHigh = bar.High;
-            _prevLow = bar.Low;
-            _prevValue = value;
-            _prevAdx = adx;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ecsi", ergodicCsi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ergodicCsi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ecsi", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _dmPlus.Dispose();
-        _dmMinus.Dispose();
-        _tr.Dispose();
-        _adx.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Emdi")]
