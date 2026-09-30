@@ -392,116 +392,14 @@ public sealed class EhlersCyberCycleState : IStreamingIndicatorState
 [PrimaryOutput("Eci")]
 public sealed class EhlersConvolutionIndicatorState : IStreamingIndicatorState
 {
-    private readonly int _length3;
-    private readonly double[] _xWindow;
-    private readonly double[] _yWindow;
-    private readonly double _alpha;
-    private readonly double _c1;
-    private readonly double _c2;
-    private readonly double _c3;
-    private readonly StreamingInputResolver _input;
-    private readonly List<double> _roofingValues;
-    private double _prevValue1;
-    private double _prevValue2;
-    private double _prevHp1;
-    private double _prevHp2;
-    private double _prevRoofingFilter1;
-    private double _prevRoofingFilter2;
-    private int _index;
-
-    public EhlersConvolutionIndicatorState(int length1 = 80, int length2 = 40, int length3 = 48)
-    {
-        _length3 = Math.Max(1, length3);
-        _xWindow = new double[_length3]; _yWindow = new double[_length3];
-        var piPrd = Math.Min(.99, MathHelper.Sqrt2 * Math.PI / Math.Max(1, length1));
-        _alpha = 1-Math.Cos(piPrd)/(1+Math.Sin(piPrd));
-        var a1 = MathHelper.Exp(-MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / Math.Max(1, length2));
-        _c2 = b1;
-        _c3 = -a1 * a1;
-        _c1 = 1 - _c2 - _c3;
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _roofingValues = new List<double>(128);
-    }
-
+    private readonly EhlersConvolutionWindow _window;
+    public EhlersConvolutionIndicatorState(int length1 = 80, int length2 = 40, int length3 = 48) => _window = new(length1, length2, length3);
     public IndicatorName Name => IndicatorName.EhlersConvolutionIndicator;
-
-    public void Reset()
-    {
-        _roofingValues.Clear();
-        _prevValue1 = 0;
-        _prevValue2 = 0;
-        _prevHp1 = 0;
-        _prevHp2 = 0;
-        _prevRoofingFilter1 = 0;
-        _prevRoofingFilter2 = 0;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue1 = _index >= 1 ? _prevValue1 : 0;
-        var prevValue2 = _index >= 2 ? _prevValue2 : 0;
-        var prevHp1 = _index >= 1 ? _prevHp1 : 0;
-        var prevHp2 = _index >= 2 ? _prevHp2 : 0;
-        var prevRoofingFilter1 = _prevRoofingFilter1;
-        var prevRoofingFilter2 = _prevRoofingFilter2;
-        var pow1 = MathHelper.Pow(1 - (_alpha / 2), 2);
-        var pow2 = MathHelper.Pow(1 - _alpha, 2);
-
-        var highPass = (pow1 * (value - (2 * prevValue1) + prevValue2)) + (2 * (1 - _alpha) * prevHp1) -
-                       (pow2 * prevHp2);
-        var roofingFilter = (_c1 * ((highPass + prevHp1) / 2)) + (_c2 * prevRoofingFilter1) + (_c3 * prevRoofingFilter2);
-
-        var n = Math.Min(_index + 1, _length3);
-        for (var lag = 0; lag < n; lag++)
-        {
-            _xWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag);
-            _yWindow[lag] = GetRoofingOffsetValue(roofingFilter, lag+1);
-        }
-        var corr = WindowCorrelation.Pearson(_xWindow.AsSpan(0, n), _yWindow.AsSpan(0, n));
-        var expValue = MathHelper.Exp(3 * corr);
-        var conv = expValue / (expValue + 1) / 2;
-
-        var filtLength = (int)Math.Ceiling(0.5 * n);
-        var prevFilt = GetRoofingOffsetValue(roofingFilter, filtLength);
-        var slope = roofingFilter-prevFilt > 1e-12*Math.Max(1, Math.Max(Math.Abs(roofingFilter), Math.Abs(prevFilt))) ? -1 : 1;
-
-        if (isFinal)
-        {
-            _prevValue2 = _prevValue1;
-            _prevValue1 = value;
-            _prevHp2 = _prevHp1;
-            _prevHp1 = highPass;
-            _prevRoofingFilter2 = _prevRoofingFilter1;
-            _prevRoofingFilter1 = roofingFilter;
-            _roofingValues.Add(roofingFilter);
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Eci", conv },
-                { "Slope", slope }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(conv, outputs);
-    }
-
-    private double GetRoofingOffsetValue(double pendingValue, int offset)
-    {
-        if (offset <= 0)
-        {
-            return pendingValue;
-        }
-
-        var index = _roofingValues.Count - offset;
-        return index >= 0 ? _roofingValues[index] : 0;
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Value, includeOutputs ? new Dictionary<string, double> { { "Eci", point.Value }, { "Slope", point.Slope } } : null);
     }
 }
 

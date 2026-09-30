@@ -3733,3 +3733,12 @@ The isolated campaigns `617a` and `617b` passed their baselines and caught **28/
 Source snapshot SHA256: `fe7f5a0eff69818062715f68a8348f14eff948bf8fb6dbf576c6479a17b9b88b`. Archive SHA256: `5561d62855c9028bdf69b9349bbd95c08c605243a9fa7ef21d1c5adc7fb2c9ff` and `5561d62855c9028bdf69b9349bbd95c08c605243a9fa7ef21d1c5adc7fb2c9ff`.
 
 This is evidence for the isolated batch-617 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 618 through 630 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 631, Ehlers Convolution Indicator
+
+Convolution now retains extended rounded high-pass/roofing stages through exact rolling Pearson normalization. Its finite bounded `Eci` output survives filter intermediates outside binary64 range. The `Slope` output retains its documented absolute/relative tolerance, evaluated without overflowing the difference or threshold. History grows with observations and retains the active correlation window plus its expired predecessor, with amortized compaction. A verified typed fast arm and native/forced-streaming paths use the same formula; signals compare exact consecutive roofing slopes.
+
+The independent reference recomputes centered windows and rational filter recurrences. **93/93 focused tests passed** (`convolution-631.trx`): 88 new cases plus five existing Convolution regressions. Ten configurations exercise five routes and both outputs. Hand checks establish neutral and +/-1 two-point correlations. Additional checks cover wide/subnormal stages, exact power-of-two rescaling, slope tolerance boundaries, extreme periods, 2,111 observations crossing compaction, selected inputs, zero component-override consumption, native guards and preview/reset. The first focused run passed without a subsequent production/test correction.
+
+**Mutation qualification remains pending** for 36 prepared faults; all **6,648 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,129 files. Prepared inventory is **6,128/7,131 enrollments**, with **1,003 omissions across 146 types**; 396 prepared batches cover 3,302 configurations across 599 types. Built DLL SHA256: `AE965F16F78356BD8186E20A89E356D6E2326DA28414DDA45692C56BF947AC55`. Full coverage and final hosted/package/release/performance gates remain incomplete. Anticipate's separate phase-definition question remains pending; its implementation is unchanged.

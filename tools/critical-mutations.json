@@ -56615,5 +56615,329 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~HurstCoefficientNumericalTests.InvalidCandlesCannotAdvanceRangeOrRecursiveHistory"
+  },
+  {
+    "id": "convolution-wide-high-period",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "Math.Max(1, highLength)",
+    "after": "Math.Max(2, highLength)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.ExtremePeriodsAllocateOnlyObservedCorrelationHistory"
+  },
+  {
+    "id": "convolution-wide-low-period",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "Math.Max(1, lowLength)",
+    "after": "Math.Max(2, lowLength)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.ExtremePeriodsAllocateOnlyObservedCorrelationHistory"
+  },
+  {
+    "id": "convolution-wide-correlation-period",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "Math.Max(1, correlationLength)",
+    "after": "Math.Max(2, correlationLength)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-price-difference",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "U(price) - 2 * U(_price) + U(_olderPrice)",
+    "after": "U(price) - U(_price) + U(_olderPrice)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-high-pole",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "2 * pole * Unit",
+    "after": "pole * Unit",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-high-decay",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_highDecay = -pole * pole",
+    "after": "_highDecay = pole * pole",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-high-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "BigInteger.One << 2150",
+    "after": "BigInteger.One << 2149",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-low-feedback",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_feedback = 2 * radius * cosine",
+    "after": "_feedback = radius * cosine",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-low-decay",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_decay = -radius * radius",
+    "after": "_decay = -radius",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-low-drive",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_gain * (high + _high)",
+    "after": "_gain * (high - _high)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-low-older",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "2 * _decay * _olderRoof",
+    "after": "2 * _decay * _roof",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_sx + roof - xOld",
+    "after": "_sx + roof + xOld",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-delay-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_sy + _roof - yOld",
+    "after": "_sy + _roof + yOld",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-square-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_xx + roof * roof - xOld * xOld",
+    "after": "_xx + roof * roof + xOld * xOld",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-cross-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_xy + roof * _roof - xOld * yOld",
+    "after": "_xy + roof * _roof + xOld * yOld",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-delayed-predecessor",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "full ? _expiredPredecessor : BigInteger.Zero",
+    "after": "full ? -_expiredPredecessor : BigInteger.Zero",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-center-x",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "n * xx - sx * sx",
+    "after": "n * xx + sx * sx",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-center-y",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "n * yy - sy * sy",
+    "after": "n * yy + sy * sy",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-covariance",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "n * xy - sx * sy",
+    "after": "n * xy + sx * sy",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-correlation-sign",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "covariance.Sign * ExactPopulationDeviation",
+    "after": "-covariance.Sign * ExactPopulationDeviation",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-transform-gain",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "Math.Exp(3 * correlation)",
+    "after": "Math.Exp(2 * correlation)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-transform-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "exponential / (exponential + 1) / 2",
+    "after": "exponential / (exponential + 1)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-slope-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "var lag = n / 2 + n % 2",
+    "after": "var lag = Math.Max(1, n / 2)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-slope-floor",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "BigInteger.Max(Unit, BigInteger.Max",
+    "after": "BigInteger.Max(BigInteger.Zero, BigInteger.Max",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.SlopeToleranceRetainsItsAbsoluteFloorAndExtendedScale"
+  },
+  {
+    "id": "convolution-wide-slope-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "U(1e-12) * scale",
+    "after": "U(1e-13) * scale",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.SlopeToleranceRetainsItsAbsoluteFloorAndExtendedScale"
+  },
+  {
+    "id": "convolution-wide-trade-history",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "var changeBefore = _roof - _olderRoof",
+    "after": "var changeBefore = _roof + _olderRoof",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "if (final)\n        {\n            _sx",
+    "after": "if (!final)\n        {\n            _sx",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-price-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_olderPrice = _price;",
+    "after": "_olderPrice = 0;",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-roof-lag",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_olderRoof = _roof;",
+    "after": "_olderRoof = 0;",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-compaction",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_history.RemoveRange(0, _start);",
+    "after": "_history.RemoveRange(0, _start - 1);",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.CorrelationExpiryAndHistoryCompactionRetainThePredecessor"
+  },
+  {
+    "id": "convolution-wide-reset-history",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_history.Clear();",
+    "after": "_start = 0;",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-reset-xy",
+    "module": "numerical",
+    "file": "src/Helpers/EhlersConvolutionWindow.cs",
+    "scope": "internal sealed class EhlersConvolutionWindow",
+    "before": "_sx = _sy = _xx = _yy = _xy = default",
+    "after": "_sx = _sy = _xx = _yy = default",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.WideRoofingStagesRemainFiniteAfterNormalization"
+  },
+  {
+    "id": "convolution-wide-fast-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersConvolutionFast(",
+    "before": "slope ? point.Slope : point.Value",
+    "after": "slope ? point.Value : point.Value",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEhlersConvolutionFast(",
+    "before": "window.Next(input[i], true)",
+    "after": "window.Next(data.ClosePrices[i], true)",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.SelectedInputsAndNoMovingAverageCallbacksArePreserved"
+  },
+  {
+    "id": "convolution-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersConvolutionIndicatorState :",
+    "before": "{ \"Slope\", point.Slope }",
+    "after": "{ \"Slope\", point.Value }",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.HandNeutralAndTwoPointCorrelationHaveKnownValues"
+  },
+  {
+    "id": "convolution-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch8.cs",
+    "scope": "public sealed class EhlersConvolutionIndicatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~ConvolutionNumericalTests.InvalidCandlesCannotAdvanceFiltersOrCorrelationMoments"
   }
 ]

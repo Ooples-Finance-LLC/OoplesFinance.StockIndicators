@@ -22,31 +22,7 @@ internal static partial class BuiltInFormulaReferences
         switch (indicator.BatchName)
         {
             case IndicatorName.EhlersConvolutionIndicator:
-                return new("Eci", new[] { "Eci", "Slope" }, bars =>
-                {
-                    var prices = Closes(bars); var first = Integer(options, "Length1");
-                    var second = Integer(options, "Length2"); var windowLength = Integer(options, "Length3");
-                    var angle = Math.Min(.99, Math.Sqrt(2)*Math.PI/first);
-                    var pole = Math.Cos(angle)/(1+Math.Sin(angle));
-                    var forcing = prices.Select((v, i) => v-2*(i == 0 ? 0 : prices[i-1])+(i < 2 ? 0 : prices[i-2])).ToArray();
-                    var high = prices.Select((_, i) => Enumerable.Range(0, i+1).Sum(j => forcing[j]*(i-j+1)*Math.Pow(pole, i-j)*Math.Pow((1+pole)/2, 2))).ToArray();
-                    var lowAngle = Math.Sqrt(2)*Math.PI/second;
-                    var roof = HilbertLowPass(high, Math.Exp(-lowAngle), lowAngle);
-                    var values = new double[bars.Count]; var slope = new double[bars.Count];
-                    for (var i = 0; i < bars.Count; i++)
-                    {
-                        var n = Math.Min(i+1, windowLength);
-                        var x = Enumerable.Range(0, n).Select(j => roof[i-j]).ToArray();
-                        var y = Enumerable.Range(0, n).Select(j => i > j ? roof[i-j-1] : 0).ToArray();
-                        var mx = x.Average(); var my = y.Average();
-                        var energy = x.Sum(v => (v-mx)*(v-mx))*y.Sum(v => (v-my)*(v-my));
-                        var correlation = energy == 0 ? 0 : x.Select((v, j) => (v-mx)*(y[j]-my)).Sum()/Math.Sqrt(energy);
-                        values[i] = .25*(1+Math.Tanh(1.5*correlation));
-                        var lag = (n+1)/2; var previous = i < lag ? 0 : roof[i-lag];
-                        slope[i] = roof[i]-previous > 1e-12*Math.Max(1, Math.Max(Math.Abs(roof[i]), Math.Abs(previous))) ? -1 : 1;
-                    }
-                    return Outputs(("Eci", values), ("Slope", slope));
-                });
+                return new("Eci", new[] { "Eci", "Slope" }, bars => ConvolutionOutputs(bars, indicator));
 
             case IndicatorName.EhlersCombFilterSpectralEstimate:
                 return new("Ecfse", new[] { "Ecfse" }, bars =>

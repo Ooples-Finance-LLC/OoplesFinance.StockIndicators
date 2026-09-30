@@ -1174,6 +1174,7 @@ internal static partial class IndicatorCompute
                 cma.MaType),
             CubedWeightedMovingAverageSpecOptions cwma => ComputeCubedWeightedMovingAverageFast(data, context, cwma.Length),
             DynamicallyAdjustableFilterSpecOptions daf => ComputeDynamicallyAdjustableFilterFast(data, context, daf.Length),
+            EhlersConvolutionIndicatorSpecOptions convolution => ComputeEhlersConvolutionFast(data, context, convolution.Length1, convolution.Length2, convolution.Length3, spec.OutputKey == "Slope"),
             EhlersHurstCoefficientSpecOptions hurst => ComputeEhlersHurstCoefficientFast(data, context, hurst.Length1, hurst.Length2),
             EdgePreservingFilterSpecOptions epf => ComputeEdgePreservingFilterFast(data, context, epf.Length, epf.MaType),
             EhlersAllPassPhaseShifterSpecOptions eapps => ComputeEhlersAllPassPhaseShifterFast(data, context, eapps.Length),
@@ -11910,6 +11911,16 @@ internal static partial class IndicatorCompute
         var window = new DynamicFilterWindow(length); var buffer = context.Rent(input.Count);
         for (var i = 0; i < input.Count; i++) buffer.WritableSpan[i] = window.Next(input[i], true);
         return buffer;
+    }
+
+    /// <summary>
+    /// Computes the extended roofing filter followed by normalized lag-one correlation.
+    /// </summary>
+    internal static ComputeBuffer ComputeEhlersConvolutionFast(StockData data, ComputeContext context, int length1 = 80, int length2 = 40, int length3 = 48, bool slope = false)
+    {
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var window = new EhlersConvolutionWindow(length1, length2, length3); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true); output.WritableSpan[i] = slope ? point.Slope : point.Value; }
+        return output;
     }
 
     /// <summary>

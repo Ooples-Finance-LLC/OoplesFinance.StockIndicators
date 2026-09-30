@@ -1102,72 +1102,11 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateEhlersConvolutionIndicator(this StockData stockData, int length1 = 80, int length2 = 40, int length3 = 48)
     {
-        length1 = Math.Max(length1, 1);
-        length2 = Math.Max(length2, 1);
-        length3 = Math.Max(length3, 1);
-        List<double> convList = new(stockData.Count);
-        List<double> hpList = new(stockData.Count);
-        List<double> roofingFilterList = new(stockData.Count);
-        List<double> slopeList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var piPrd = Math.Min(.99, MathHelper.Sqrt2 * Math.PI / length1);
-        var alpha = 1-Math.Cos(piPrd)/(1+Math.Sin(piPrd));
-        var a1 = Exp(-MathHelper.Sqrt2 * Math.PI / length2);
-        var b1 = 2 * a1 * Math.Cos(MathHelper.Sqrt2 * Math.PI / length2);
-        var c2 = b1;
-        var c3 = -a1 * a1;
-        var c1 = 1 - c2 - c3;
-
-        var xWindow = new double[length3]; var yWindow = new double[length3];
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue1 = i >= 1 ? inputList[i - 1] : 0;
-            var prevValue2 = i >= 2 ? inputList[i - 2] : 0;
-            var prevHp1 = i >= 1 ? hpList[i - 1] : 0;
-            var prevHp2 = i >= 2 ? hpList[i - 2] : 0;
-            var prevRoofingFilter1 = i >= 1 ? roofingFilterList[i - 1] : 0;
-            var prevRoofingFilter2 = i >= 2 ? roofingFilterList[i - 2] : 0;
-
-            var highPass = (Pow(1 - (alpha / 2), 2) * (currentValue - (2 * prevValue1) + prevValue2)) + (2 * (1 - alpha) * prevHp1) -
-                           (Pow(1 - alpha, 2) * prevHp2);
-            hpList.Add(highPass);
-
-            var roofingFilter = (c1 * ((highPass + prevHp1) / 2)) + (c2 * prevRoofingFilter1) + (c3 * prevRoofingFilter2);
-            roofingFilterList.Add(roofingFilter);
-
-            var n = Math.Min(i + 1, length3);
-            for (var lag = 0; lag < n; lag++)
-            {
-                xWindow[lag] = roofingFilterList[i-lag];
-                yWindow[lag] = i > lag ? roofingFilterList[i-lag-1] : 0;
-            }
-            var corr = WindowCorrelation.Pearson(xWindow.AsSpan(0, n), yWindow.AsSpan(0, n));
-            var expCorr = Exp(3 * corr);
-            var denom = expCorr + 1;
-            var conv = denom != 0 ? expCorr / denom / 2 : 0;
-
-            var filtLength = (int)Math.Ceiling(0.5 * n);
-            var prevFilt = i >= filtLength ? roofingFilterList[i - filtLength] : 0;
-            var slope = roofingFilter-prevFilt > 1e-12*Math.Max(1, Math.Max(Math.Abs(roofingFilter), Math.Abs(prevFilt))) ? -1 : 1;
-            convList.Add(conv);
-            slopeList.Add(slope);
-
-            var signal = GetCompareSignal(roofingFilter - prevRoofingFilter1, prevRoofingFilter1 - prevRoofingFilter2);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Eci", convList },
-            { "Slope", slopeList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(convList);
-        stockData.IndicatorName = IndicatorName.EhlersConvolutionIndicator;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var window = new EhlersConvolutionWindow(length1, length2, length3);
+        var values = new List<double>(input.Count); var slopes = new List<double>(input.Count); var signals = CreateSignalsList(stockData, input.Count);
+        foreach (var price in input) { var point = window.Next(price, true); values.Add(point.Value); slopes.Add(point.Slope); signals?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Eci", values }, { "Slope", slopes } }); stockData.SetSignals(signals);
+        stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EhlersConvolutionIndicator; return stockData;
     }
 
 
