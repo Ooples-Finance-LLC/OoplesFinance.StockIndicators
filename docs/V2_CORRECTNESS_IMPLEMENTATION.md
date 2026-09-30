@@ -3724,3 +3724,12 @@ Hurst Coefficient now cancels range divisors before logarithmic normalization, r
 **73/73 focused tests passed** (`hurst-coefficient-630.trx`): 72 new cases plus the existing independent opening-calculation test. Coverage includes eight configurations across five routes, subnormal and overflowing half ranges, negative prices, flat-tail dimension carry, period-one/two behavior, odd and extreme periods, the tiny DC gain at maximum smoothing length, selected inputs, no-override consumption, exact signals, preview/reset and invalid-candle guards. The opening expectation was independently re-derived to retain the coefficient polynomial. The first focused run passed without any subsequent source/test correction.
 
 **Mutation qualification remains pending** for 32 prepared faults; all **6,612 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,126 files. Prepared inventory is **6,118/7,131 enrollments**, with **1,013 omissions across 147 types**; 395 prepared batches cover 3,292 configurations across 598 types. Built DLL SHA256: `A23002A176AB828487097A5A00164FDFCF4A0B73AB6C8ABF2B2E4D0A0C257637`. Full coverage and final hosted/package/release/performance gates remain incomplete. Ehlers Anticipate is unchanged while its separate phase-definition question remains pending.
+
+
+### Batch 617: Chande Average Disparity mutation qualification
+
+The isolated campaigns `617a` and `617b` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **39/39 focused tests**. Both archives were compared byte-for-byte with the retained batch-617 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fe7f5a0eff69818062715f68a8348f14eff948bf8fb6dbf576c6479a17b9b88b`. Archive SHA256: `5561d62855c9028bdf69b9349bbd95c08c605243a9fa7ef21d1c5adc7fb2c9ff` and `5561d62855c9028bdf69b9349bbd95c08c605243a9fa7ef21d1c5adc7fb2c9ff`.
+
+This is evidence for the isolated batch-617 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 618 through 630 and the remaining final gates is still incomplete.
