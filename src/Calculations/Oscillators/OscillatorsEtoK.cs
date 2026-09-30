@@ -1471,42 +1471,17 @@ public static partial class Calculations
     public static StockData CalculateFibonacciRetrace(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int length1 = 15, int length2 = 50, double factor = 0.382)
     {
-        List<double> hretList = new(stockData.Count);
-        List<double> lretList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = length2 <= 1 ? (highList, lowList) : GetMaxAndMinValuesList(highList, lowList, length2);
-
-        var wmaList = GetMovingAverageList(stockData, maType, length1, inputList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, highs, lows, _, _) = GetInputValuesList(stockData);
+        using var window = new FibonacciRetraceWindow(maType, length1, length2, factor);
+        var upper = new List<double>(input.Count); var lower = new List<double>(input.Count); var trades = CreateSignalsList(stockData, input.Count);
+        var external = !StrengthWindow.Supports(maType) ? GetMovingAverageList(stockData, maType, Math.Max(1, length1), input) : null;
+        for (var i = 0; i < input.Count; i++)
         {
-            var wma = wmaList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var prevWma = i >= 1 ? wmaList[i - 1] : 0;
-            var retrace = (highest - lowest) * factor;
-
-            var prevHret = GetLastOrDefault(hretList);
-            var hret = highest - retrace;
-            hretList.Add(hret);
-
-            var prevLret = GetLastOrDefault(lretList);
-            var lret = lowest + retrace;
-            lretList.Add(lret);
-
-            var signal = GetBullishBearishSignal(wma - hret, prevWma - prevHret, wma - lret, prevWma - prevLret);
-            signalsList?.Add(signal);
+            var point = window.Next(highs[i], lows[i], input[i], true, external?[i]);
+            upper.Add(point.Upper); lower.Add(point.Lower); trades?.Add(point.Trade);
         }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpperBand", hretList },
-            { "LowerBand", lretList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.FibonacciRetrace;
-
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpperBand", upper }, { "LowerBand", lower } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.FibonacciRetrace;
         return stockData;
     }
 

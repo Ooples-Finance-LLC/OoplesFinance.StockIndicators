@@ -59243,5 +59243,329 @@
     "before": "var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
     "after": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var highs = data.HighPrices; var lows = data.LowPrices;",
     "filter": "FullyQualifiedName~FearGreedNumericalTests.ComponentSlotsPreservePeriodsInputsAndSelectedPrices"
+  },
+  {
+    "id": "fibonacci-retrace-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_length = Math.Max(1, rangeLength)",
+    "after": "_length = Math.Max(1, meanLength)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_mean = new(kind, Math.Max(1, meanLength))",
+    "after": "_mean = new(kind, Math.Max(1, rangeLength))",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-factor",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_factor = factor",
+    "after": "_factor = factor / 2",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-domain",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "if (double.IsNaN(factor) || double.IsInfinity(factor))",
+    "after": "if (false)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.NonfiniteFactorsAreRejectedEvenOnEmptyInput"
+  },
+  {
+    "id": "fibonacci-retrace-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_index - _length + 1L",
+    "after": "_index - _length",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-preview-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "while (first is not null && first.Value.Index < expiry)",
+    "after": "while (first is not null && first.Value.Index < 0)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-prune-high",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "last.Value.Value <= value",
+    "after": "last.Value.Value >= value",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-prune-low",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "last.Value.Value >= value",
+    "after": "last.Value.Value <= value",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-base",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "sum.Add(from);",
+    "after": "sum.Add(to);",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-from-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "sum.AddProduct(from, _factor, -1)",
+    "after": "sum.AddProduct(from, _factor)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-to-weight",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "sum.AddProduct(to, _factor)",
+    "after": "sum.AddProduct(to, _factor, -1)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-premature-product",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "sum.AddProduct(to, _factor)",
+    "after": "sum.Add(to * _factor)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.CompleteInterpolationCancelsBeforeRounding"
+  },
+  {
+    "id": "fibonacci-retrace-wide-complement-rounding",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "sum.Add(from); sum.AddProduct(from, _factor, -1)",
+    "after": "sum.AddProduct(from, 1 - _factor)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.CompleteInterpolationCancelsBeforeRounding"
+  },
+  {
+    "id": "fibonacci-retrace-wide-upper-direction",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "Interpolate(highest, lowest)",
+    "after": "Interpolate(lowest, highest)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-lower-direction",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "var lower = Interpolate(lowest, highest)",
+    "after": "var lower = Interpolate(highest, lowest)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bullish-margin",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "upper.AddTo(ref bullish, -1)",
+    "after": "upper.AddTo(ref bullish)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bearish-margin",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "lower.AddTo(ref bearish, -1)",
+    "after": "lower.AddTo(ref bearish)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bullish-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "bullish.Sign > 0 && bullChange.Sign > 0",
+    "after": "bullish.Sign > 0 && bullChange.Sign < 0",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bearish-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "bearish.Sign < 0 && bearChange.Sign < 0",
+    "after": "bearish.Sign < 0 && bearChange.Sign > 0",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "if (final) { _index++",
+    "after": "if (true) { _index++",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bullish-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_previousBullish = bullish",
+    "after": "_previousBullish = default",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-bearish-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_previousBearish = bearish",
+    "after": "_previousBearish = default",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-reset-high",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_highs.Clear()",
+    "after": "_highs.ToString()",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-reset-low",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_lows.Clear()",
+    "after": "_lows.ToString()",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_mean?.Reset()",
+    "after": "_mean?.ToString()",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "if (commit) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-recursive-kind",
+    "module": "numerical",
+    "file": "src/Helpers/FibonacciRetraceWindow.cs",
+    "scope": "internal sealed class FibonacciRetraceWindow",
+    "before": "_recursive = new(kind, length, 1)",
+    "after": "_recursive = new(MovingAvgType.WildersSmoothingMethod, length, 1)",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.WideProductsMeansAndExpiryMatchFractions"
+  },
+  {
+    "id": "fibonacci-retrace-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FibonacciRetraceState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle guard */",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "fibonacci-retrace-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FibonacciRetraceState :",
+    "before": "{ \"LowerBand\", point.Lower }",
+    "after": "{ \"LowerBand\", point.Upper }",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFibonacciRetraceFast(",
+    "before": "band == ChannelBand.Lower ? point.Lower : point.Upper",
+    "after": "band == ChannelBand.Lower ? point.Upper : point.Lower",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.HandInterpolationExpiryAndSignalMargins"
+  },
+  {
+    "id": "fibonacci-retrace-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFibonacciRetraceFast(",
+    "before": "var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var highs = data.HighPrices; var lows = data.LowPrices;",
+    "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.SelectedPricesApplyPerBarRangesAndConsumeNoOverrides"
   }
 ]

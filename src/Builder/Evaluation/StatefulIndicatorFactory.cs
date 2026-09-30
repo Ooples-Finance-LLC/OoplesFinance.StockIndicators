@@ -370,6 +370,7 @@ internal static partial class StatefulIndicatorFactory
             LBRPaintBarsSpecOptions paint => new LBRPaintBarsState(paint.MaType, paint.Length, paint.LbLength, paint.AtrMult),
             PseudoPolynomialChannelSpecOptions pseudo => new PseudoPolynomialChannelState(pseudo.MaType, pseudo.Length, pseudo.Morph),
             VervoortVolatilityBandsSpecOptions vervoort => new VervoortVolatilityBandsState(vervoort.MaType, vervoort.Length1, vervoort.Length2, vervoort.DevMult, vervoort.LowBandMult),
+            FibonacciRetraceSpecOptions retrace => new FibonacciRetraceState(retrace.MaType, retrace.Length1, retrace.Length2, retrace.Factor),
             FearAndGreedIndicatorSpecOptions fear => new FearAndGreedIndicatorState(fear.MaType, fear.FastLength, fear.SlowLength, fear.SmoothLength),
             FastSlowDegreeOscillatorSpecOptions degree => new FastSlowDegreeOscillatorState(degree.MaType, degree.Length),
             FXSniperIndicatorSpecOptions sniper => new FXSniperIndicatorState(sniper.MaType, sniper.CciLength, sniper.T3Length, sniper.B),

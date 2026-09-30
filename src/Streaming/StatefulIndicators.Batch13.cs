@@ -89,62 +89,17 @@ public sealed class FibonacciPivotPointsState : IStreamingIndicatorState, ICusto
 [PrimaryOutput("UpperBand")]
 public sealed class FibonacciRetraceState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length2;
-    private readonly double _factor;
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly IMovingAverageSmoother _wma;
-    private readonly StreamingInputResolver _input;
-
-    public FibonacciRetraceState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int length1 = 15, int length2 = 50, double factor = 0.382)
-    {
-        _length2 = Math.Max(1, length2);
-        _factor = factor;
-        _highWindow = new RollingWindowMax(_length2);
-        _lowWindow = new RollingWindowMin(_length2);
-        _wma = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length1));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FibonacciRetraceWindow _window;
+    public FibonacciRetraceState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int length1 = 15, int length2 = 50, double factor = .382)
+        => _window = new(maType, length1, length2, factor);
     public IndicatorName Name => IndicatorName.FibonacciRetrace;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _wma.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        _ = _wma.Next(value, isFinal);
-        var highest = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowest = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var retrace = (highest - lowest) * _factor;
-        var hret = highest - retrace;
-        var lret = lowest + retrace;
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "UpperBand", hret },
-                { "LowerBand", lret }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(hret, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Upper, includeOutputs ? new Dictionary<string, double> { { "UpperBand", point.Upper }, { "LowerBand", point.Lower } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _wma.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fwma")]

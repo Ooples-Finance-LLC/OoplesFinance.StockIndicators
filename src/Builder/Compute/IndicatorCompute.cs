@@ -19091,34 +19091,15 @@ internal static partial class IndicatorCompute
     /// Computes Fibonacci Retrace using zero-allocation fast path.
     /// Returns the retrace level.
     /// </summary>
-    internal static ComputeBuffer ComputeFibonacciRetraceFast(StockData data, ComputeContext context, int length = 50, double factor = 0.382,
+    internal static ComputeBuffer ComputeFibonacciRetraceFast(StockData data, ComputeContext context, int length = 50, double factor = .382,
         ChannelBand band = ChannelBand.Upper)
     {
-        // CalculateFibonacciRetrace steps each band in from the extreme of the window by the retracement
-        // fraction of that window's range: the upper band down from the highest high, the lower band up from
-        // the lowest low. Its length1 and maType feed a moving average the indicator never publishes.
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = data.Count;
-        length = Math.Max(length, 1);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var highWindow = new RollingMinMax(length);
-        var lowWindow = new RollingMinMax(length);
-        for (var i = 0; i < count; i++)
-        {
-            highWindow.Add(highs[i]);
-            lowWindow.Add(lows[i]);
-
-            var highest = highWindow.Max;
-            var lowest = lowWindow.Min;
-            var retrace = (highest - lowest) * factor;
-            output[i] = band == ChannelBand.Lower ? lowest + retrace : highest - retrace;
-        }
-
-        return buffer;
+        var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);
+        using var window = new FibonacciRetraceWindow(MovingAvgType.SimpleMovingAverage, 1, length, factor, false);
+        var result = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++)
+        { var point = window.Next(highs[i], lows[i], input[i], true); result.WritableSpan[i] = band == ChannelBand.Lower ? point.Lower : point.Upper; }
+        return result;
     }
 
     /// <summary>
