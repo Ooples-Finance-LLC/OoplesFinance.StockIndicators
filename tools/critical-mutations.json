@@ -58541,5 +58541,347 @@
     "before": "CommodityIndexWindow.Prices(stockData)",
     "after": "stockData.ClosePrices",
     "filter": "FullyQualifiedName~FxSniperNumericalTests.SelectedInputAndComponentMeansKeepBatchAndFastContracts"
+  },
+  {
+    "id": "fast-slow-degree-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_length = Math.Max(1, length); _fast",
+    "after": "_length = Math.Max(2, length); _fast",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_fast = new(fastLength)",
+    "after": "_fast = new(slowLength)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_slow = new(slowLength)",
+    "after": "_slow = new(fastLength)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-weighted-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_weighted = new(_length)",
+    "after": "_weighted = new(1)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-phase-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "var period = 2L * length",
+    "after": "var period = 1L * length",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.IntegerPhaseReductionPreservesZerosQuadrantsAndSymmetry"
+  },
+  {
+    "id": "fast-slow-degree-wide-phase-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "return negative ? -value : value",
+    "after": "return value",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.IntegerPhaseReductionPreservesZerosQuadrantsAndSymmetry"
+  },
+  {
+    "id": "fast-slow-degree-wide-phase-quarter",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "2 * residue == length ? 1",
+    "after": "2 * residue == length ? 0.5",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.IntegerPhaseReductionPreservesZerosQuadrantsAndSymmetry"
+  },
+  {
+    "id": "fast-slow-degree-wide-phase-zero",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "residue == 0 ? 0",
+    "after": "residue == 0 ? 0.25",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.IntegerPhaseReductionPreservesZerosQuadrantsAndSymmetry"
+  },
+  {
+    "id": "fast-slow-degree-wide-phase-reflection",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "residue = length - residue",
+    "after": "residue = length - residue + 1",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-angle-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "sum.Add(Math.PI, new BigInteger(numerator))",
+    "after": "sum.Add(Math.PI / 2, new BigInteger(numerator))",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-first-phase",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "SinePhase(n * n, _length)",
+    "after": "SinePhase(n * (n + 1), _length)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-second-phase",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "SinePhase(n * (n - 1), _length)",
+    "after": "SinePhase(n * n, _length)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-coefficient-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "RoundUnits(first - second, n)",
+    "after": "RoundUnits(first + second, n)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-coefficient-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "RoundUnits(first - second, n)",
+    "after": "RoundUnits(first - second, n + 1)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-leg-difference",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_fast.Next(coefficient, final) - _slow.Next(coefficient, final)",
+    "after": "_fast.Next(coefficient, final) + _slow.Next(coefficient, final)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-price-lag",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_previousPrice * difference",
+    "after": "ExactVarianceWindow.Units(price) * difference",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-product-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "RoundUnits(_previousPrice * difference, Unit)",
+    "after": "RoundUnits(_previousPrice * difference, Unit * 2)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-line-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_signal!.Next(Value(line), final)",
+    "after": "_signal!.Next(new RocBankValue(ExactMeanAccumulator.UnitRatio(line, BigInteger.One)), final)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.ExtendedLineRetainsFiniteSignalAndHistogram"
+  },
+  {
+    "id": "fast-slow-degree-wide-histogram-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "var spread = line - Units(signal)",
+    "after": "var spread = line + Units(signal)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "new(kind, Math.Max(1, signalLength))",
+    "after": "new(kind, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-strong-buy",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "spread > _previousSpread",
+    "after": "spread > 0",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-strong-sell",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "spread < _previousSpread",
+    "after": "spread < 0",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-preview-count",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "if (final) { _count = n",
+    "after": "if (true) { _count = n",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-preview-fast",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_fast.Next(coefficient, final)",
+    "after": "_fast.Next(coefficient, true)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-preview-slow",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_slow.Next(coefficient, final)",
+    "after": "_slow.Next(coefficient, true)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-preview-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_weighted.Next(weighted, final)",
+    "after": "_weighted.Next(weighted, true)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-sum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_total + value - (full ? _history.Peek()",
+    "after": "_total + value + (full ? _history.Peek()",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-reset-fast",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_fast.Reset()",
+    "after": "_fast.ToString()",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-reset-slow",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_slow.Reset()",
+    "after": "_slow.ToString()",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-reset-weighted",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_weighted.Reset()",
+    "after": "_weighted.ToString()",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_count = _previousPrice = _previousSpread = default",
+    "after": "_previousPrice = _previousSpread = default",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "_signal?.Reset()",
+    "after": "_signal?.ToString()",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.WideProductsWindowExpiryAndSignalStagesMatchFractions"
+  },
+  {
+    "id": "fast-slow-degree-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "ComponentAverage.Take(line, Math.Max(1, signalLength))",
+    "after": "ComponentAverage.Take(line, Math.Max(1, length))",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.SelectedPricesAndSingleSignalOverridePreserveAllOutputs"
+  },
+  {
+    "id": "fast-slow-degree-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FastSlowDegreeOscillatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle guard */",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "fast-slow-degree-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FastSlowDegreeOscillatorState :",
+    "before": "{ \"Histogram\", point.Histogram }",
+    "after": "{ \"Histogram\", point.SignalLine }",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-fast-histogram",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFastSlowDegreeOscillatorFast(",
+    "before": "series == MacdSeries.Histogram ? point.Histogram",
+    "after": "series == MacdSeries.Histogram ? point.SignalLine",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
   }
 ]

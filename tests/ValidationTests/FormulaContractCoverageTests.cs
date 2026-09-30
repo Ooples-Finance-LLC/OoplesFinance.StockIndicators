@@ -1864,7 +1864,8 @@ public sealed class FormulaContractCoverageTests
     public void DegreeReferenceCancelsTheSharedPolynomialTerms()
     {
         var bars = new[] { 1d, 2, 3, 4 }.Select(v => new Bar(new DateTime(2021, 1, 4), v, v, v, v, 1)).ToArray();
-        var expected = new[] { new[] { 0d, 0, 2, 2 }, new[] { 0d, 0, 2d / 3, 1 }, new[] { 0d, 0, 4d / 3, 1 } };
+        // Signal is rounded before Histogram subtracts it from the exact line.
+        var expected = new[] { new[] { 0d, 0, 2, 2 }, new[] { 0d, 0, 2d / 3, 1 }, new[] { 0d, 0, 2 - 2d / 3, 1 } };
         var rules = BuiltInFormulaReferences.For(new FastSlowDegreeOscillator(2)).ToArray();
         Assert.Equal(3, rules.Length);
         foreach (var rule in rules)

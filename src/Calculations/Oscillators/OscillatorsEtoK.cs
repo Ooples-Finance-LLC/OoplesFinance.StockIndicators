@@ -1332,78 +1332,13 @@ public static partial class Calculations
     public static StockData CalculateFastSlowDegreeOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
         int length = 100, int fastLength = 3, int slowLength = 2, int signalLength = 14)
     {
-        List<double> osList = new(stockData.Count);
-        List<double> histList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var fastF1bSumWindow = new RollingSum();
-        var fastF2bSumWindow = new RollingSum();
-        var fastVWSumWindow = new RollingSum();
-        var slowF1bSumWindow = new RollingSum();
-        var slowF2bSumWindow = new RollingSum();
-        var slowVWSumWindow = new RollingSum();
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var fastF1x = (double)(i + 1) / length;
-            var fastF1b = (double)1 / (i + 1) * Math.Sin(fastF1x * (i + 1) * Math.PI);
-            fastF1bSumWindow.Add(fastF1b);
-            var fastF1bSum = fastF1bSumWindow.Sum(fastLength);
-            var fastF1pol = (fastF1x * fastF1x) + fastF1bSum;
-            var fastF2x = length != 0 ? (double)i / length : 0;
-            var fastF2b = (double)1 / (i + 1) * Math.Sin(fastF2x * (i + 1) * Math.PI);
-            fastF2bSumWindow.Add(fastF2b);
-            var fastF2bSum = fastF2bSumWindow.Sum(fastLength);
-            var fastF2pol = (fastF2x * fastF2x) + fastF2bSum;
-            var fastW = fastF1pol - fastF2pol;
-            var fastVW = prevValue * fastW;
-            fastVWSumWindow.Add(fastVW);
-            var fastVWSum = fastVWSumWindow.Sum(length);
-            var slowF1x = length != 0 ? (double)(i + 1) / length : 0;
-            var slowF1b = (double)1 / (i + 1) * Math.Sin(slowF1x * (i + 1) * Math.PI);
-            slowF1bSumWindow.Add(slowF1b);
-            var slowF1bSum = slowF1bSumWindow.Sum(slowLength);
-            var slowF1pol = (slowF1x * slowF1x) + slowF1bSum;
-            var slowF2x = length != 0 ? (double)i / length : 0;
-            var slowF2b = (double)1 / (i + 1) * Math.Sin(slowF2x * (i + 1) * Math.PI);
-            slowF2bSumWindow.Add(slowF2b);
-            var slowF2bSum = slowF2bSumWindow.Sum(slowLength);
-            var slowF2pol = (slowF2x * slowF2x) + slowF2bSum;
-            var slowW = slowF1pol - slowF2pol;
-            var slowVW = prevValue * slowW;
-            slowVWSumWindow.Add(slowVW);
-            var slowVWSum = slowVWSumWindow.Sum(length);
-
-            var os = fastVWSum - slowVWSum;
-            osList.Add(os);
-        }
-
-        var osSignalList = GetMovingAverageList(stockData, maType, signalLength, osList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var os = osList[i];
-            var osSignal = osSignalList[i];
-
-            var prevHist = GetLastOrDefault(histList);
-            var hist = os - osSignal;
-            histList.Add(hist);
-
-            var signal = GetCompareSignal(hist, prevHist);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fsdo", osList },
-            { "Signal", osSignalList },
-            { "Histogram", histList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(osList);
-        stockData.IndicatorName = IndicatorName.FastSlowDegreeOscillator;
-
-        return stockData;
+        var (prices, _, _, _, _) = GetInputValuesList(stockData); var external = !StrengthWindow.Supports(maType);
+        using var window = new FastSlowDegreeWindow(maType, length, fastLength, slowLength, signalLength, external);
+        var component = external ? FastSlowDegreeWindow.ComponentSignal(stockData, prices, maType, length, fastLength, slowLength, signalLength, false) : null;
+        var line = new List<double>(prices.Count); var signal = new List<double>(prices.Count); var histogram = new List<double>(prices.Count); var trades = CreateSignalsList(stockData);
+        for (var i = 0; i < prices.Count; i++) { var point = window.Next(prices[i], true, component?[i]); line.Add(point.Line); signal.Add(point.SignalLine); histogram.Add(point.Histogram); trades?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fsdo", line }, { "Signal", signal }, { "Histogram", histogram } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.FastSlowDegreeOscillator; return stockData;
     }
 
 

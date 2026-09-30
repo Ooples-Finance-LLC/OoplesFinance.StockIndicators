@@ -87,21 +87,7 @@ internal static partial class BuiltInFormulaReferences
                     }).ToArray()));
                 });
             case IndicatorName.FastSlowDegreeOscillator:
-                var degreeKind = AverageKind(options, 3);
-                if (degreeKind == 0) return null;
-                return new("Fsdo", new[] { "Fsdo", "Signal", "Histogram" }, bars =>
-                {
-                    var fastDegree = Integer(options, "FastLength", 3);
-                    var slowDegree = Integer(options, "SlowLength", 2);
-                    // The shared quadratic terms cancel; only different sine-window tails remain.
-                    var differences = bars.Select((_, i) => (Math.Sin(Math.PI * (i + 1d) * (i + 1d) / length)
-                        - Math.Sin(Math.PI * i * (i + 1d) / length)) / (i + 1d)).ToArray();
-                    var weighted = bars.Select((_, i) => i == 0 ? 0 : bars[i - 1].Close
-                        * (Window(differences, i, fastDegree).Sum() - Window(differences, i, slowDegree).Sum())).ToArray();
-                    var line = weighted.Select((_, i) => Window(weighted, i, length).Sum()).ToArray();
-                    var signal = Average(line, Integer(options, "SignalLength", 14), degreeKind);
-                    return Outputs(("Fsdo", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, avg) => v - avg).ToArray()));
-                });
+                return new("Fsdo", new[] { "Fsdo", "Signal", "Histogram" }, bars => FastSlowDegreeOutputs(bars, indicator));
             case IndicatorName.TrendDirectionForceIndex:
                 var forceKind = AverageKind(options, 3);
                 if (forceKind == 0) return null;

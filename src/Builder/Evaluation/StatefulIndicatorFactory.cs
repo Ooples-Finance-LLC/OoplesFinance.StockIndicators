@@ -370,6 +370,7 @@ internal static partial class StatefulIndicatorFactory
             LBRPaintBarsSpecOptions paint => new LBRPaintBarsState(paint.MaType, paint.Length, paint.LbLength, paint.AtrMult),
             PseudoPolynomialChannelSpecOptions pseudo => new PseudoPolynomialChannelState(pseudo.MaType, pseudo.Length, pseudo.Morph),
             VervoortVolatilityBandsSpecOptions vervoort => new VervoortVolatilityBandsState(vervoort.MaType, vervoort.Length1, vervoort.Length2, vervoort.DevMult, vervoort.LowBandMult),
+            FastSlowDegreeOscillatorSpecOptions degree => new FastSlowDegreeOscillatorState(degree.MaType, degree.Length),
             FXSniperIndicatorSpecOptions sniper => new FXSniperIndicatorState(sniper.MaType, sniper.CciLength, sniper.T3Length, sniper.B),
             EhlersZeroMeanRoofingFilterSpecOptions zeroRoof => new EhlersZeroMeanRoofingFilterState(zeroRoof.Length1, zeroRoof.Length2),
             EhlersRocketRelativeStrengthIndexSpecOptions rocket => new EhlersRocketRelativeStrengthIndexState(rocket.MaType, rocket.Length1, rocket.Length2, rocket.ObosLevel, rocket.Mult),

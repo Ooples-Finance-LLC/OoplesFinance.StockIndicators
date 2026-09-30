@@ -9171,60 +9171,12 @@ internal static partial class IndicatorCompute
         int length = 100, int fastLength = 3, int slowLength = 2, int signalLength = 14,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, MacdSeries series = MacdSeries.Line)
     {
-        // CalculateFastSlowDegreeOscillator weights the PREVIOUS bar's value by the difference between two
-        // polynomial-plus-sine terms, one evaluated at (i + 1) / length and one at i / length, and sums that
-        // weighted value over length. The fast and slow legs differ only in how many bars of the sine term are
-        // summed. It is a whole-history construction - every term depends on the absolute bar index, not on a
-        // window - so nothing here is a moving average of the close.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var fastF1bTotal = new RollingSum();
-        var fastF2bTotal = new RollingSum();
-        var fastWeightedTotal = new RollingSum();
-        var slowF1bTotal = new RollingSum();
-        var slowF2bTotal = new RollingSum();
-        var slowWeightedTotal = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-
-            var fastF1x = length != 0 ? (double)(i + 1) / length : 0;
-            fastF1bTotal.Add((double)1 / (i + 1) * Math.Sin(fastF1x * (i + 1) * Math.PI));
-            var fastF1pol = (fastF1x * fastF1x) + fastF1bTotal.Sum(fastLength);
-            var fastF2x = length != 0 ? (double)i / length : 0;
-            fastF2bTotal.Add((double)1 / (i + 1) * Math.Sin(fastF2x * (i + 1) * Math.PI));
-            var fastF2pol = (fastF2x * fastF2x) + fastF2bTotal.Sum(fastLength);
-            fastWeightedTotal.Add(previousValue * (fastF1pol - fastF2pol));
-
-            var slowF1x = length != 0 ? (double)(i + 1) / length : 0;
-            slowF1bTotal.Add((double)1 / (i + 1) * Math.Sin(slowF1x * (i + 1) * Math.PI));
-            var slowF1pol = (slowF1x * slowF1x) + slowF1bTotal.Sum(slowLength);
-            var slowF2x = length != 0 ? (double)i / length : 0;
-            slowF2bTotal.Add((double)1 / (i + 1) * Math.Sin(slowF2x * (i + 1) * Math.PI));
-            var slowF2pol = (slowF2x * slowF2x) + slowF2bTotal.Sum(slowLength);
-            slowWeightedTotal.Add(previousValue * (slowF1pol - slowF2pol));
-
-            output[i] = fastWeightedTotal.Sum(length) - slowWeightedTotal.Sum(length);
-        }
-
-        if (series == MacdSeries.Line)
-        {
-            return buffer;
-        }
-
-        using var signal = context.Rent(count);
-        MovingAverage(data, maType, signalLength, buffer.Span, signal.WritableSpan);
-        var signalLine = signal.Span;
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = series == MacdSeries.Signal ? signalLine[i] : output[i] - signalLine[i];
-        }
-
+        var (prices, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var external = !StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides;
+        using var window = new FastSlowDegreeWindow(maType, length, fastLength, slowLength, signalLength, external);
+        var component = series != MacdSeries.Line && external ? FastSlowDegreeWindow.ComponentSignal(data, prices, maType, length, fastLength, slowLength, signalLength, true) : null;
+        var buffer = context.Rent(prices.Count);
+        for (var i = 0; i < prices.Count; i++) { var point = window.Next(prices[i], true, component?[i], series != MacdSeries.Line); buffer.WritableSpan[i] = series == MacdSeries.Signal ? point.SignalLine : series == MacdSeries.Histogram ? point.Histogram : point.Line; }
         return buffer;
     }
 

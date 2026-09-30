@@ -33,117 +33,17 @@ public sealed class FastandSlowStochasticOscillatorState : IStreamingIndicatorSt
 [PrimaryOutput("Fsdo")]
 public sealed class FastSlowDegreeOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly RollingWindowSum _fastF1bSum;
-    private readonly RollingWindowSum _fastF2bSum;
-    private readonly RollingWindowSum _fastVWSum;
-    private readonly RollingWindowSum _slowF1bSum;
-    private readonly RollingWindowSum _slowF2bSum;
-    private readonly RollingWindowSum _slowVWSum;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-    private int _index;
-
-    public FastSlowDegreeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage,
-        int length = 100, int fastLength = 3, int slowLength = 2, int signalLength = 14)
-    {
-        _length = Math.Max(1, length);
-        var resolvedFast = Math.Max(1, fastLength);
-        var resolvedSlow = Math.Max(1, slowLength);
-        _fastF1bSum = new RollingWindowSum(resolvedFast);
-        _fastF2bSum = new RollingWindowSum(resolvedFast);
-        _fastVWSum = new RollingWindowSum(_length);
-        _slowF1bSum = new RollingWindowSum(resolvedSlow);
-        _slowF2bSum = new RollingWindowSum(resolvedSlow);
-        _slowVWSum = new RollingWindowSum(_length);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FastSlowDegreeWindow _window;
+    public FastSlowDegreeOscillatorState(MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length = 100, int fastLength = 3, int slowLength = 2, int signalLength = 14)
+        => _window = new(maType, length, fastLength, slowLength, signalLength);
     public IndicatorName Name => IndicatorName.FastSlowDegreeOscillator;
-
-    public void Reset()
-    {
-        _fastF1bSum.Reset();
-        _fastF2bSum.Reset();
-        _fastVWSum.Reset();
-        _slowF1bSum.Reset();
-        _slowF2bSum.Reset();
-        _slowVWSum.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-        _index = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var length = _length;
-        var index = _index;
-
-        var fastF1x = (double)(index + 1) / length;
-        var fastF1b = (double)1 / (index + 1) * Math.Sin(fastF1x * (index + 1) * Math.PI);
-        var fastF1bSum = isFinal ? _fastF1bSum.Add(fastF1b, out _) : _fastF1bSum.Preview(fastF1b, out _);
-        var fastF1pol = (fastF1x * fastF1x) + fastF1bSum;
-        var fastF2x = length != 0 ? (double)index / length : 0;
-        var fastF2b = (double)1 / (index + 1) * Math.Sin(fastF2x * (index + 1) * Math.PI);
-        var fastF2bSum = isFinal ? _fastF2bSum.Add(fastF2b, out _) : _fastF2bSum.Preview(fastF2b, out _);
-        var fastF2pol = (fastF2x * fastF2x) + fastF2bSum;
-        var fastW = fastF1pol - fastF2pol;
-        var fastVW = prevValue * fastW;
-        var fastVWSum = isFinal ? _fastVWSum.Add(fastVW, out _) : _fastVWSum.Preview(fastVW, out _);
-
-        var slowF1x = length != 0 ? (double)(index + 1) / length : 0;
-        var slowF1b = (double)1 / (index + 1) * Math.Sin(slowF1x * (index + 1) * Math.PI);
-        var slowF1bSum = isFinal ? _slowF1bSum.Add(slowF1b, out _) : _slowF1bSum.Preview(slowF1b, out _);
-        var slowF1pol = (slowF1x * slowF1x) + slowF1bSum;
-        var slowF2x = length != 0 ? (double)index / length : 0;
-        var slowF2b = (double)1 / (index + 1) * Math.Sin(slowF2x * (index + 1) * Math.PI);
-        var slowF2bSum = isFinal ? _slowF2bSum.Add(slowF2b, out _) : _slowF2bSum.Preview(slowF2b, out _);
-        var slowF2pol = (slowF2x * slowF2x) + slowF2bSum;
-        var slowW = slowF1pol - slowF2pol;
-        var slowVW = prevValue * slowW;
-        var slowVWSum = isFinal ? _slowVWSum.Add(slowVW, out _) : _slowVWSum.Preview(slowVW, out _);
-
-        var os = fastVWSum - slowVWSum;
-        var signal = _signalSmoother.Next(os, isFinal);
-        var histogram = os - signal;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-            _index++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Fsdo", os },
-                { "Signal", signal },
-                { "Histogram", histogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(os, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Fsdo", point.Line }, { "Signal", point.SignalLine }, { "Histogram", point.Histogram } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastF1bSum.Dispose();
-        _fastF2bSum.Dispose();
-        _fastVWSum.Dispose();
-        _slowF1bSum.Dispose();
-        _slowF2bSum.Dispose();
-        _slowVWSum.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Fgi")]
