@@ -42,14 +42,14 @@ internal sealed class FastSlowDegreeWindow : IDisposable
         if (final) { _count = n; _previousPrice = ExactVarianceWindow.Units(price); _previousSpread = spread; }
         return (ExactMeanAccumulator.UnitRatio(line, BigInteger.One), signal.Publish(), ExactMeanAccumulator.UnitRatio(spread, BigInteger.One), trade);
     }
-    internal static double[] ComponentSignal(StockData data, List<double> prices, MovingAvgType kind, int length, int fastLength, int slowLength, int signalLength, bool callbacks)
+    internal static double[]? ComponentSignal(StockData data, List<double> prices, MovingAvgType kind, int length, int fastLength, int slowLength, int signalLength, bool callbacks)
     {
         var supported = StrengthWindow.Supports(kind); using var window = new FastSlowDegreeWindow(kind, length, fastLength, slowLength, signalLength, true);
-        var line = new double[prices.Count]; var defaultSignal = new double[prices.Count];
-        for (var i = 0; i < prices.Count; i++) { var point = window.Next(prices[i], true, includeSignal: supported); line[i] = point.Line; defaultSignal[i] = point.SignalLine; }
+        var line = new double[prices.Count];
+        for (var i = 0; i < prices.Count; i++) line[i] = window.Next(prices[i], true, includeSignal: false).Line;
         var custom = callbacks ? ComponentAverage.Take(line, Math.Max(1, signalLength))?.ToArray() : null;
         if (custom is not null) return custom;
-        if (supported) return defaultSignal;
+        if (supported) return null; // Keep the caller's default signal inside its extended window.
         var caller = data.CaptureInputSeries(); var result = CalculationsHelper.GetMovingAverageList(data, kind, Math.Max(1, signalLength), line.ToList()).ToArray(); data.RestoreInputSeries(caller); return result;
     }
     internal void Reset() { _fast.Reset(); _slow.Reset(); _weighted.Reset(); _signal?.Reset(); _count = _previousPrice = _previousSpread = default; }

@@ -82,6 +82,20 @@ public sealed class FastSlowDegreeNumericalTests
         using var output = IndicatorCompute.ComputeFastSlowDegreeOscillatorFast(Data(bars), context, 4, 4, 1, 4, MovingAvgType.SimpleMovingAverage, IndicatorCompute.MacdSeries.Histogram); Assert.Equal(expected.Outputs["Histogram"], output.ToArray());
     }
     [Fact]
+    public void ExhaustedSignalOverrideKeepsExtendedDefaultMean()
+    {
+        var bars = Candles(Enumerable.Repeat((double.MaxValue, double.MaxValue, double.MaxValue), 4).ToArray());
+        foreach (var series in new[] { IndicatorCompute.MacdSeries.Signal, IndicatorCompute.MacdSeries.Histogram })
+        {
+            using var armed = ComponentAverage.Arm(new Func<IReadOnlyList<double>, int, IReadOnlyList<double>>[] { (v, _) => v });
+            Assert.NotNull(ComponentAverage.Take(new[] { 0d }, 1)); // Consume the only binding before this indicator asks.
+            using var context = new ComputeContext(); using var output = IndicatorCompute.ComputeFastSlowDegreeOscillatorFast(Data(bars), context, 4, 4, 1, 1, MovingAvgType.SimpleMovingAverage, series);
+            if (series == IndicatorCompute.MacdSeries.Histogram) Assert.All(output.ToArray(), value => Assert.Equal(0, value));
+            else Assert.True(double.IsPositiveInfinity(output.ToArray()[3]));
+            Assert.Equal(2, ComponentAverage.Requests); Assert.Equal(1, ComponentAverage.Substitutions);
+        }
+    }
+    [Fact]
     public void EveryExtremePeriodGrowsOnlyWithObservations()
     {
         foreach (var kind in Kinds) foreach (var p in new[] { 0, int.MaxValue }) foreach (var slot in Enumerable.Range(0, 4))

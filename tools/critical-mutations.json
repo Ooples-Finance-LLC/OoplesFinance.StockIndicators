@@ -58883,5 +58883,14 @@
     "before": "series == MacdSeries.Histogram ? point.Histogram",
     "after": "series == MacdSeries.Histogram ? point.SignalLine",
     "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.HandPhaseWeightsLagAndPolynomialCancellation"
+  },
+  {
+    "id": "fast-slow-degree-wide-default-signal",
+    "module": "numerical",
+    "file": "src/Helpers/FastSlowDegreeWindow.cs",
+    "scope": "internal sealed class FastSlowDegreeWindow",
+    "before": "if (supported) return null;",
+    "after": "if (supported) return new double[prices.Count];",
+    "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.ExhaustedSignalOverrideKeepsExtendedDefaultMean"
   }
 ]

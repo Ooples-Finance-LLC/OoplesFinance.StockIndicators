@@ -3850,3 +3850,10 @@ The isolated campaigns `623a` and `623b` passed their baselines and caught **36/
 Source snapshot SHA256: `bd07952355dfb3281d04af4e46c0e5fb5407cbdf0c80baabaf85c4f48f5553b0`. Archive SHA256: `3bb2d707d3f892cd95990e5807bec7496d20f034812550db014198912c3fcda3` and `3bb2d707d3f892cd95990e5807bec7496d20f034812550db014198912c3fcda3`.
 
 This is evidence for the isolated batch-623 source. Source was already published in the through-624 checkpoint; this update does not restore older source files. Mutation verification for batches 624 through 637 and the remaining final gates is still incomplete.
+
+
+### Batch 637 follow-up: exhausted signal override
+
+Review of the component fallback found that an exhausted callback list could publish the default signal before histogram subtraction, losing an extended intermediate. The supported fallback now returns control to the caller's exact signal window; actual supplied callbacks and legacy averages retain their interfaces. A regression consumes the only callback first, then establishes an infinite line/signal and an exactly zero period-one histogram. The complete focused set passes **50/50 tests** in fast-slow-degree-637-corrected.trx after this production correction.
+
+The original 49-pass frozen snapshot and recovery archive remain historical evidence. Future batch 637 mutation qualification must use si-fast-slow-degree637-corrected-frozen and campaigns 637-corrected-a/b, not the original snapshot. **39 faults are prepared**, with **6,865 anchors** passing preflight; no 637 campaign has started. Corrected candidate/frozen hashes agree on **2,147 files**. Enrollment remains 6173/7131 with 958 omissions. Updated DLL SHA256: D1E20465A7E3592D7A3CE6A38F85E358F66C54F8550CAA30A980C1DE62E2D863. Core alignment remains pending. Qualification is complete through 623; DT Oscillator 624 campaigns and all remaining final gates are incomplete.
