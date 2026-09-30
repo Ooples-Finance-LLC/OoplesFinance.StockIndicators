@@ -340,78 +340,9 @@ public static partial class Calculations
     public static StockData CalculateFreedomOfMovement(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
         int length = 60)
     {
-        List<double> aMoveList = new(stockData.Count);
-        List<double> vBymList = new(stockData.Count);
-        List<double> theFomList = new(stockData.Count);
-        List<double> avfList = new(stockData.Count);
-        List<double> dplList = new(stockData.Count);
-        List<double> tempList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        RollingMinMax aMoveWindow = new(length);
-        RollingMinMax relVolWindow = new(length);
-        RollingSum vBymSum = new();
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        var relVolList = CalculateRelativeVolumeIndicator(stockData, maType, length).ChainedValues;
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var currentRelVol = relVolList[i];
-            tempList.Add(currentRelVol);
-            relVolWindow.Add(currentRelVol);
-
-            var aMove = prevValue != 0 ? Math.Abs(MinPastValues(i, 1, currentValue - prevValue) / prevValue) : 0;
-            aMoveList.Add(aMove);
-            aMoveWindow.Add(aMove);
-
-            var aMoveMax = aMoveWindow.Max;
-            var aMoveMin = aMoveWindow.Min;
-            var theMove = aMoveMax - aMoveMin != 0 ? 1 + 9 * (aMove - aMoveMin) / (aMoveMax - aMoveMin) : 0;
-            var relVolMax = relVolWindow.Max;
-            var relVolMin = relVolWindow.Min;
-            var theVol = relVolMax - relVolMin != 0 ? 1 + 9 * (currentRelVol - relVolMin) / (relVolMax - relVolMin) : 0;
-
-            var vBym = theMove != 0 ? theVol / theMove : 0;
-            vBymList.Add(vBym);
-            vBymSum.Add(vBym);
-
-            var avf = vBymSum.Average(length);
-            avfList.Add(avf);
-        }
-
-        stockData.SetCustomValues(vBymList);
-        var sdfList = GetStandardDeviationList(vBymList, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var vBym = vBymList[i];
-            var avf = avfList[i];
-            var sdf = sdfList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var theFom = sdf != 0 ? (vBym - avf) / sdf : 0;
-            theFomList.Add(theFom);
-
-            var prevDpl = i >= 1 ? dplList[i - 1] : 0;
-            var dpl = theFom >= 2 ? prevValue : i >= 1 ? prevDpl : currentValue;
-            dplList.Add(dpl);
-
-            var signal = GetCompareSignal(currentValue - dpl, prevValue - prevDpl);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fom", theFomList },
-            { "Dpl", dplList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(theFomList);
-        stockData.IndicatorName = IndicatorName.FreedomOfMovement;
-
-        return stockData;
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var result = FreedomWindow.Calculate(stockData, input, maType, length, false);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fom", result.Score.ToList() }, { "Dpl", result.Demand.ToList() } });
+        stockData.SetSignals(result.Trades.ToList()); stockData.SetCustomValues(result.Score.ToList()); stockData.IndicatorName = IndicatorName.FreedomOfMovement; return stockData;
     }
 
 }

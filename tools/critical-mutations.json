@@ -60674,5 +60674,455 @@
     "before": "FisherTransformStochasticOscillatorSpecOptions or ",
     "after": "",
     "filter": "FullyQualifiedName~FisherStochasticNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "freedom-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "length = Math.Max(1, length); _simple",
+    "after": "length = 1; _simple",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-simple-center",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_simple && !externalMean.HasValue",
+    "after": "false",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.SubnormalPopulationVarianceAndExtendedVolumeScoresStayDefined"
+  },
+  {
+    "id": "freedom-wide-callback-center",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_simple && !externalMean.HasValue",
+    "after": "_simple",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.VolumeCallbackAndSelectedPriceContractCoversBothOutputs"
+  },
+  {
+    "id": "freedom-wide-volume-source",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_volumeScore.Next(volume, mean",
+    "after": "_volumeScore.Next(0, mean",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-movement-price",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "change.Add(price);",
+    "after": "change.Add(_previousPrice);",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-movement-previous",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "change.Add(_previousPrice, -1)",
+    "after": "change.Add(_previousPrice, 1)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-movement-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "RocBankValue.Round(change, _previousPrice)",
+    "after": "RocBankValue.Round(change, 1)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-movement-absolute",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "Math.Abs(signed.Mantissa)",
+    "after": "signed.Mantissa",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-movement-shift",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "Math.Abs(signed.Mantissa), signed.UpperShift",
+    "after": "Math.Abs(signed.Mantissa), 0",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-relative-shift",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "ExactVarianceWindow.Units(value.Mantissa) << value.UpperShift",
+    "after": "ExactVarianceWindow.Units(value.Mantissa)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-movement-rank",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_movementRank.Next(move, final)",
+    "after": "_movementRank.Next(relative, final)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-volume-rank",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_volumeRank.Next(relative, final)",
+    "after": "_volumeRank.Next(move, final)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-ratio-numerator",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "numerator.Add(normalizedVolume)",
+    "after": "numerator.Add(normalizedMove)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-ratio-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "denominator.Add(normalizedMove)",
+    "after": "denominator.Add(1)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-ratio-center",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_ratioScore.Next(ratio, default, true, final)",
+    "after": "_ratioScore.Next(ratio, default, false, final)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-demand-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "score >= 2",
+    "after": "score > 2",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-demand-previous",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "(_started ? _previousPrice : 0)",
+    "after": "(_started ? price : 0)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-demand-hold",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": ": _started ? _demand : price",
+    "after": ": _started ? price : price",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-demand-start",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": ": _started ? _demand : price",
+    "after": ": _started ? _demand : 0",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "Units(price) - ExactVarianceWindow.Units(demand)",
+    "after": "Units(demand) - ExactVarianceWindow.Units(price)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_previousMargin = margin;",
+    "after": "_previousMargin = default;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-demand-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_demand = demand;",
+    "after": "_demand = 0;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "if (final) { _started = true;",
+    "after": "if (!final) { _started = true;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-moments-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "sum -= old; squares -= old * old;",
+    "after": "sum += old; squares += old * old;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-moments-ready",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_values.Count < _length - 1",
+    "after": "_values.Count < _length",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-variance-center",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_length * squares - sum * sum",
+    "after": "_length * squares + sum * sum",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-score-center",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_length * current - sum",
+    "after": "_length * current + sum",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-score-root",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "RootRatio(squared, variance);",
+    "after": "RootRatio(squared, variance * 4);",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-score-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "numerator.Sign < 0 ? -root : root",
+    "after": "root",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-moments-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_sum = sum; _squares = squares;",
+    "after": "_sum = sum; _squares = default;",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_index - _length + 1",
+    "after": "_index - _length",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-rank-high",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "BigInteger.Max(value, high.Value.Value)",
+    "after": "BigInteger.Min(value, high.Value.Value)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-low",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "BigInteger.Min(value, low.Value.Value)",
+    "after": "BigInteger.Max(value, low.Value.Value)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-zero",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "range.IsZero ? 0",
+    "after": "range.IsZero ? 1",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-offset",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "(range + 9 * (value - minimum))",
+    "after": "(9 * (value - minimum))",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "(range + 9 * (value - minimum))",
+    "after": "(range + 8 * (value - minimum))",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-rank-high-tail",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "tailHigh.Value.Value <= value",
+    "after": "tailHigh.Value.Value >= value",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-rank-low-tail",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "tailLow.Value.Value >= value",
+    "after": "tailLow.Value.Value <= value",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-reset-score",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_volumeScore.Reset(); _ratioScore.Reset();",
+    "after": "_volumeScore.Reset();",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-reset-rank",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_movementRank.Reset(); _volumeRank.Reset();",
+    "after": "_movementRank.Reset();",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.ExpiryFlatRanksAndDemandMemoryUseIndependentWindows"
+  },
+  {
+    "id": "freedom-wide-reset-mean",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_volumeMean.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.WideMovesVolumeScoresAndRankRangesRecover"
+  },
+  {
+    "id": "freedom-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "ComponentAverage.Take(data.Volumes.ToArray(), length)",
+    "after": "ComponentAverage.Take(data.Volumes.ToArray(), length + 1)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.VolumeCallbackAndSelectedPriceContractCoversBothOutputs"
+  },
+  {
+    "id": "freedom-wide-callback-source",
+    "module": "numerical",
+    "file": "src/Helpers/FreedomWindow.cs",
+    "scope": "internal sealed class FreedomWindow",
+    "before": "ComponentAverage.Take(data.Volumes.ToArray(), length)",
+    "after": "ComponentAverage.Take(prices.ToArray(), length)",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.VolumeCallbackAndSelectedPriceContractCoversBothOutputs"
+  },
+  {
+    "id": "freedom-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FreedomOfMovementState",
+    "before": "{ \"Dpl\", point.Demand }",
+    "after": "{ \"Wrong\", point.Demand }",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.HandExactCenterAndInclusiveDemandThreshold"
+  },
+  {
+    "id": "freedom-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FreedomOfMovementState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "freedom-wide-live-factory",
+    "module": "numerical",
+    "file": "src/Builder/Evaluation/StreamingIndicatorFactory.cs",
+    "scope": "public static IStreamingIndicatorState? CreateState(",
+    "before": "FreedomOfMovementSpecOptions or ",
+    "after": "",
+    "filter": "FullyQualifiedName~FreedomNumericalTests.SelectedSourcePreservesCandles"
   }
 ]

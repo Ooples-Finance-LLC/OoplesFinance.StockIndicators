@@ -520,118 +520,16 @@ public sealed class FractalChaosOscillatorState : IStreamingIndicatorState, IDis
 [PrimaryOutput("Fom")]
 public sealed class FreedomOfMovementState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _volumeSmoother;
-    private readonly RollingStandardDeviation _volumeStdDev;
-    private readonly RollingWindowMax _aMoveMax;
-    private readonly RollingWindowMin _aMoveMin;
-    private readonly RollingWindowMax _relVolMax;
-    private readonly RollingWindowMin _relVolMin;
-    private readonly RollingWindowSum _vBymSum;
-    private readonly RollingStandardDeviation _vBymStdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private double _prevDpl;
-    private bool _hasPrev;
-    private bool _hasPrevDpl;
-    private double _vBymValue;
-
-    public FreedomOfMovementState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage,
-        int length = 60)
-    {
-        _length = Math.Max(1, length);
-        _volumeSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _volumeStdDev = new RollingStandardDeviation(_length);
-        _aMoveMax = new RollingWindowMax(_length);
-        _aMoveMin = new RollingWindowMin(_length);
-        _relVolMax = new RollingWindowMax(_length);
-        _relVolMin = new RollingWindowMin(_length);
-        _vBymSum = new RollingWindowSum(_length);
-        _vBymStdDev = new RollingStandardDeviation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FreedomWindow _window;
+    public FreedomOfMovementState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 60) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.FreedomOfMovement;
-
-    public void Reset()
-    {
-        _volumeSmoother.Reset();
-        _volumeStdDev.Reset();
-        _aMoveMax.Reset();
-        _aMoveMin.Reset();
-        _relVolMax.Reset();
-        _relVolMin.Reset();
-        _vBymSum.Reset();
-        _vBymStdDev.Reset();
-        _prevValue = 0;
-        _prevDpl = 0;
-        _hasPrev = false;
-        _hasPrevDpl = false;
-        _vBymValue = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var avgVolume = _volumeSmoother.Next(bar.Volume, isFinal);
-        var sdVolume = _volumeStdDev.Next(bar.Volume, isFinal);
-        var relVol = sdVolume != 0 ? (bar.Volume - avgVolume) / sdVolume : 0;
-
-        var priceChg = _hasPrev ? value - prevValue : 0;
-        var aMove = prevValue != 0 ? Math.Abs(priceChg / prevValue) : 0;
-        var aMoveMax = isFinal ? _aMoveMax.Add(aMove, out _) : _aMoveMax.Preview(aMove, out _);
-        var aMoveMin = isFinal ? _aMoveMin.Add(aMove, out _) : _aMoveMin.Preview(aMove, out _);
-        var theMove = aMoveMax - aMoveMin != 0
-            ? 1 + 9 * (aMove - aMoveMin) / (aMoveMax - aMoveMin)
-            : 0;
-        var relVolMax = isFinal ? _relVolMax.Add(relVol, out _) : _relVolMax.Preview(relVol, out _);
-        var relVolMin = isFinal ? _relVolMin.Add(relVol, out _) : _relVolMin.Preview(relVol, out _);
-        var theVol = relVolMax - relVolMin != 0
-            ? 1 + 9 * (relVol - relVolMin) / (relVolMax - relVolMin)
-            : 0;
-        var vBym = theMove != 0 ? theVol / theMove : 0;
-        var vBymSum = isFinal ? _vBymSum.Add(vBym, out var countAfter) : _vBymSum.Preview(vBym, out countAfter);
-        var avf = countAfter > 0 ? vBymSum / countAfter : 0;
-
-        _vBymValue = vBym;
-        var sdf = _vBymStdDev.Next(_vBymValue, isFinal);
-        var theFom = sdf != 0 ? (vBym - avf) / sdf : 0;
-        var prevDpl = _hasPrevDpl ? _prevDpl : 0;
-        var dpl = theFom >= 2 ? prevValue : _hasPrevDpl ? prevDpl : value;
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _prevDpl = dpl;
-            _hasPrev = true;
-            _hasPrevDpl = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fom", theFom },
-                { "Dpl", dpl }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(theFom, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new(point.Score, includeOutputs ? new Dictionary<string, double> { { "Fom", point.Score }, { "Dpl", point.Demand } } : null);
     }
-
-    public void Dispose()
-    {
-        _volumeSmoother.Dispose();
-        _volumeStdDev.Dispose();
-        _aMoveMax.Dispose();
-        _aMoveMin.Dispose();
-        _relVolMax.Dispose();
-        _relVolMin.Dispose();
-        _vBymSum.Dispose();
-        _vBymStdDev.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Close")]

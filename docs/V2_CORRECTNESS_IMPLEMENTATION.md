@@ -3943,3 +3943,12 @@ Changing the age-zero average gain, or retaining that average across reset, is u
 
 
 Focused validation passed **71/71 tests** in `drunkard-627-corrected-final.trx`, reusing unchanged production binaries for these test and mutation-manifest changes.
+
+
+### Prepared source checkpoint: batch 643, Freedom of Movement
+
+Freedom of Movement now retains relative-volume scores and absolute price moves through their complete ratios, including values beyond binary64. Exact rolling moments and range normalization avoid overflow poisoning and loss of subnormal variance. The final ratio score uses its exact population center, preserving the inclusive Fom>=2 demand-price trigger. SMA volume centering agrees with Relative Volume; other means and actual overrides retain their selected rounded center. Supported histories allocate only observed bars. Both Fom/Dpl outputs, exact signal margins, native validation, preview/reset, selected prices and the one volume-mean callback slot agree across public routes.
+
+**50/50 selected tests passed on the first run**, in freedom-643.trx: **48 numerical cases** plus existing hand-normalization and cross-route regressions. Five configurations cover five routes and numerical classes; explicit cases exercise four supported means, legacy fallback, extreme periods, signed/wide/subnormal inputs, exhausted callbacks and invalid-candle nonmutation. The independent rational reference uses centered samples and explicit extrema scans. At N=5, four zero ratios followed by one nonzero ratio produce exactly2; Dpl changes to the previous price, including with subnormal volume variance. Wide positive/negative signal margins distinguish ordinary Buy/Sell from StrongBuy/StrongSell.
+
+**50 prepared mutation faults remain pending**; all **7,113 anchors** pass preflight. Candidate/frozen snapshots match on 2165 files. Prepared enrollment is **6,212/7,131**, leaving **919 omissions across134types**, with no construction failures. Built DLL SHA256: BB4A6A186A8ABED01D4824F400E136E868C60B9675EDF1B6981572B054E90D42. Mutation qualification remains separate; corrected627 and remaining628-643 campaigns, numerical coverage, pending formula decisions and hosted/package/release/performance gates are incomplete.

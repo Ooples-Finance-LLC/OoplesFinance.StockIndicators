@@ -18967,60 +18967,8 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFreedomOfMovementFast(StockData data, ComputeContext context, int length = 60,
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, string? outputKey = null)
     {
-        // CalculateFreedomOfMovement rescales the bar's relative volume and its absolute relative price move
-        // onto a one to ten scale over the window, divides the one by the other, and publishes how many
-        // standard deviations that ratio sits from its own average. The switch this replaced published a
-        // moving average of the close, which is not this indicator at any setting.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-        length = Math.Max(length, 1);
-
-        using var relativeVolume = ComputeRelativeVolumeIndicatorFast(data, context, length, maType);
-        var relVol = relativeVolume.Span;
-
-        using var ratios = context.Rent(count);
-        using var averages = context.Rent(count);
-        var ratio = ratios.WritableSpan;
-        var ratioAverage = averages.WritableSpan;
-
-        var moveWindow = new RollingMinMax(length);
-        var volumeWindow = new RollingMinMax(length);
-        var ratioTotal = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var previousValue = i >= 1 ? input[i - 1] : 0;
-            var move = previousValue != 0
-                ? Math.Abs(CalculationsHelper.MinPastValues(i, 1, input[i] - previousValue) / previousValue)
-                : 0;
-
-            moveWindow.Add(move);
-            volumeWindow.Add(relVol[i]);
-
-            var moveRange = moveWindow.Max - moveWindow.Min;
-            var scaledMove = moveRange != 0 ? 1 + 9 * (move - moveWindow.Min) / moveRange : 0;
-            var volumeRange = volumeWindow.Max - volumeWindow.Min;
-            var scaledVolume = volumeRange != 0 ? 1 + 9 * (relVol[i] - volumeWindow.Min) / volumeRange : 0;
-
-            ratio[i] = scaledMove != 0 ? scaledVolume / scaledMove : 0;
-            ratioTotal.Add(ratio[i]);
-            ratioAverage[i] = ratioTotal.Average(length);
-        }
-
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(ratios.Span, deviation.WritableSpan, length);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        double line = count == 0 ? 0 : input[0];
-        for (var i = 0; i < count; i++)
-        {
-            var score = deviation.Span[i] != 0 ? (ratio[i] - ratioAverage[i]) / deviation.Span[i] : 0;
-            if (score >= 2) line = i == 0 ? 0 : input[i - 1];
-            output[i] = outputKey == "Dpl" ? line : score;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var result = FreedomWindow.Calculate(data, input, maType, length, true);
+        var buffer = context.Rent(input.Count); (outputKey == "Dpl" ? result.Demand : result.Score).AsSpan().CopyTo(buffer.WritableSpan); return buffer;
     }
 
     /// <summary>
