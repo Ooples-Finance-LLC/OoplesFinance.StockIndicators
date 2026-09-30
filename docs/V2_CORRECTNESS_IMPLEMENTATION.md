@@ -3906,3 +3906,12 @@ The isolated campaigns `625a` and `625b` passed their baselines and caught **24/
 Source snapshot SHA256: `9ad748b5825adf4ae38e0516842ccef8bdfc0254da06becdfcb244a4f7453540`. Archive SHA256: `fed486e22e517fc10eff15f8bbe4c9faf2f2430139f6bc9b881870f9ae9ac4bc` and `fed486e22e517fc10eff15f8bbe4c9faf2f2430139f6bc9b881870f9ae9ac4bc`.
 
 This is evidence for the isolated batch-625 source. Source was already published in the batch-625 checkpoint; this update does not restore older source files. Mutation verification for batches 626 through 640 and the remaining final gates is still incomplete.
+
+
+### Batch 626: Demand Oscillator mutation qualification
+
+The isolated campaigns `626a` and `626b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **48 focused test passes (47 initial passes and one separately corrected callback pass)**. Both archives were compared byte-for-byte with the retained batch-626 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `3cc89bdebcf426b2f5e576689239b155d85a12819e2d72e4839a9ba9ba3b3fab`. Archive SHA256: `e155def455e8f1f56980b0c82d0e93270f019d656070cabac6ee0b2beed94c39` and `e155def455e8f1f56980b0c82d0e93270f019d656070cabac6ee0b2beed94c39`.
+
+This is evidence for the isolated batch-626 source. Source was already published in the batch-626 checkpoint; this update does not restore older source files. Mutation verification for batches 627 through 640 and the remaining final gates is still incomplete.
