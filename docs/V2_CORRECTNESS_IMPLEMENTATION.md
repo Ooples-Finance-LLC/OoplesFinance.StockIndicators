@@ -3760,3 +3760,12 @@ Public batch, fast, native and forced-streaming routes now compute complete conv
 **41/41 focused tests passed** (`median-adaptive-632.trx`), including the two existing hand-value and signed-price regressions, with no post-run source/test correction. Four configurations exercise five routes. New checks cover parity and threshold boundaries, signed/wide/subnormal inputs, maximum periods, 2,100-observation compaction, selected input, zero callback consumption, full native candle guards, preview and reset. A separate arithmetic probe matched exhaustive startup selection in 12,000 cases and used at most 32 candidate evaluations in maximum-period hand cases.
 
 **Mutation qualification remains pending** for 32 prepared faults; all **6,680 anchors** passed preflight. Candidate/frozen snapshots match on **2,132 files**. Prepared inventory is **6,132/7,131 enrollments**, with **999 omissions across 145 types**; 397 prepared batches cover 3,306 configurations across 600 types. Built DLL SHA256: `6EDCA22A4B92E591355C6C9A393A7B53C1EA0D18583A7F94559B86A729FA6AA2`. Qualification remains through batch 618. Batches 619–632, the pending formula scope decisions and all final hosted/package/release/performance gates remain incomplete.
+
+
+### Batch 619: Closed Form Distance Volatility mutation qualification
+
+The isolated campaigns `619a` and `619b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **47/47 focused tests**. Both archives were compared byte-for-byte with the retained batch-619 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `15429d088b2d7f7e3d1827d39fee7628201729052148e1cc32441eb8aab4450e`. Archive SHA256: `03c0f704ea01cea27e4ebe848cd64c102d487c94ee0bcce52d37e9c4899df4ec` and `03c0f704ea01cea27e4ebe848cd64c102d487c94ee0bcce52d37e9c4899df4ec`.
+
+This is evidence for the isolated batch-619 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 620 through 632 and the remaining final gates is still incomplete.
