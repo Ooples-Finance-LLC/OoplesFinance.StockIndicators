@@ -3637,3 +3637,12 @@ The isolated campaigns `612a` and `612b` passed their baselines and caught **32/
 Source snapshot SHA256: `337fce7ad7ac1d0466d36b5720c4ebf4bc0ab41bb17eb57458ebda7974ec4a6b`. Archive SHA256: `5114c484280017ff3f0f53d0abdd979963fa02b820de5d12906321398e1cb955` and `5114c484280017ff3f0f53d0abdd979963fa02b820de5d12906321398e1cb955`.
 
 This is evidence for the isolated batch-612 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 613 through 625 and the remaining final gates is still incomplete.
+
+
+### Batch 613: Breakout RSI mutation qualification
+
+The isolated campaigns `613a` and `613b` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **40/40 focused tests**. Both archives were compared byte-for-byte with the retained batch-613 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `13e49e2781896954a89adac985912074be26a1a579b6d3b8365dc529b7a88328`. Archive SHA256: `311730d1a423d01b34b6447c72f8ba64e7a369c7ab7374eef04b0712b76c6e24` and `311730d1a423d01b34b6447c72f8ba64e7a369c7ab7374eef04b0712b76c6e24`.
+
+This is evidence for the isolated batch-613 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 614 through 625 and the remaining final gates is still incomplete.
