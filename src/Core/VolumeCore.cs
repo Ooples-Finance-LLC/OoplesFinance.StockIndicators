@@ -362,31 +362,11 @@ internal static class VolumeCore
     /// </summary>
     internal static void DemandIndex(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, ReadOnlySpan<double> volume, Span<double> output)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        if (close.Length == 0)
-        {
-            return;
-        }
-
-        output[0] = 0;
-        for (var i = 1; i < close.Length; i++)
-        {
-            var range = high[i] - low[i];
-            var bp = close[i] - low[i];
-            var sp = high[i] - close[i];
-
-            var bpPercent = range != 0 ? bp / range : 0;
-            var spPercent = range != 0 ? sp / range : 0;
-
-            var buyVolume = volume[i] * bpPercent;
-            var sellVolume = volume[i] * spPercent;
-
-            output[i] = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length || volume.Length < close.Length)
+            throw new ArgumentException("Candle spans must cover the close input.");
+        var window = new DemandIndexWindow();
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], volume[i], true).Value;
     }
 
     /// <summary>

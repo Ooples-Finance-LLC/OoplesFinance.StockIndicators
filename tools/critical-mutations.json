@@ -54869,5 +54869,221 @@
     "before": "rsiLength, stochLength, smaLength, 3",
     "after": "rsiLength, stochLength, 1, 3",
     "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "demand-index-wide-first",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "if (_seeded)",
+    "after": "if (!_seeded)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-buying",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(c - l, BigInteger.One)",
+    "after": "Round(h - c, BigInteger.One)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-selling",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(h - c, BigInteger.One)",
+    "after": "Round(c - l, BigInteger.One)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-range",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "var range = Round(h - l, BigInteger.One);",
+    "after": "var range = ExactVarianceWindow.Units(high - low);",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.WideRangesAndTrueOverflowRecoverWithoutNaN"
+  },
+  {
+    "id": "demand-index-wide-buy-share",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(buying * Unit, range)",
+    "after": "Round(buying * Unit, range + range)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-sell-share",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(selling * Unit, range)",
+    "after": "Round(selling * Unit, range + range)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-buy-volume",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(v * buyPercent, Unit)",
+    "after": "Round(Unit * buyPercent, Unit)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.SubnormalVolumesCannotBeCancelledFromTheFormula"
+  },
+  {
+    "id": "demand-index-wide-sell-volume",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(v * sellPercent, Unit)",
+    "after": "Round(Unit * sellPercent, Unit)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.SubnormalVolumesCannotBeCancelledFromTheFormula"
+  },
+  {
+    "id": "demand-index-wide-zero-sell",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "if (!sellVolume.IsZero)",
+    "after": "if (sellVolume.Sign > 0)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-ratio-order",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(buyVolume * Unit, sellVolume)",
+    "after": "Round(sellVolume * Unit, buyVolume.IsZero ? Unit : buyVolume)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-ratio-round",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "var ratio = Round(buyVolume * Unit, sellVolume);\n                line = Round(ratio - Unit, BigInteger.One);",
+    "after": "line = Round((buyVolume - sellVolume) * Unit, sellVolume);",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-center",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "Round(ratio - Unit, BigInteger.One)",
+    "after": "Round(ratio + Unit, BigInteger.One)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-previous",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "_previous = line;",
+    "after": "_previous = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-previous-slope",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-buy-priority",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "slope.Sign > 0 && slope > _previousSlope",
+    "after": "slope.Sign > 0 && slope < _previousSlope",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-sell-priority",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "slope.Sign < 0 && slope < _previousSlope",
+    "after": "slope.Sign < 0 && slope > _previousSlope",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "if (final) { _seeded = true;",
+    "after": "if (!final) { _seeded = true;",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-reset-seed",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "_seeded = false; _previous = _previousSlope = default;",
+    "after": "_seeded = true; _previous = _previousSlope = default;",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-buy-tie",
+    "module": "numerical",
+    "file": "src/Helpers/DemandIndexWindow.cs",
+    "scope": "internal sealed class DemandIndexWindow",
+    "before": "slope.Sign > 0 && slope > _previousSlope",
+    "after": "slope.Sign > 0 && slope >= _previousSlope",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-core",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void DemandIndex(",
+    "before": "volume[i], true).Value",
+    "after": "volume[i], false).Value",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDemandIndexFast(",
+    "before": "SpanCompat.AsReadOnlySpan(input), SpanCompat.AsReadOnlySpan(volume)",
+    "after": "SpanCompat.AsReadOnlySpan(data.ClosePrices), SpanCompat.AsReadOnlySpan(volume)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.SelectedInputAndObsoletePeriodPreserveTheCandleRule"
+  },
+  {
+    "id": "demand-index-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class DemandIndexState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.InvalidCandlesCannotSeedOrAdvanceNativeState"
+  },
+  {
+    "id": "demand-index-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch40.cs",
+    "scope": "public sealed class DemandIndexState",
+    "before": "{ \"Di\", value }",
+    "after": "{ \"Wrong\", value }",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.HandSeedsSlopePriorityAndDegenerateVolumeRemainExact"
+  },
+  {
+    "id": "demand-index-wide-short-span",
+    "module": "numerical",
+    "file": "src/Core/VolumeCore.cs",
+    "scope": "internal static void DemandIndex(",
+    "before": "if (high.Length < close.Length || low.Length < close.Length || volume.Length < close.Length)",
+    "after": "if (high.Length < close.Length || low.Length < close.Length)",
+    "filter": "FullyQualifiedName~DemandIndexNumericalTests.ShortSpansFailBeforeWritingAnyOutput"
   }
 ]

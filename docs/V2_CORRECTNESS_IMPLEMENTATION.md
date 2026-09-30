@@ -3619,3 +3619,12 @@ Corrected Moving Average preserves rounded deviation, gain and blend stages with
 DTOscillator preserves RSI, available-observation smoothing, both outputs and existing callback contracts, with lazy finite-window histories. All **50 selected tests** have passing evidence: 49 DTOscillator passes in `dt-oscillator-624-and-bayesian-followup.trx`, then the corrected callback regression passed in `dt-oscillator-624-callback-final.trx`. The initial combined run failed that callback test; it is not a passing combined-suite result. Production did not change for the test correction.
 
 This checkpoint publishes the prepared source at the user's request. **Mutation qualification remains pending for 623–624**, with 36 faults each; qualification is complete through 611. Prepared inventory is 6,083/7,131 numerical enrollments, with 1,048 omissions across 153 types. Full numerical coverage and hosted/package/release/performance gates remain incomplete.
+
+
+### Prepared source checkpoint: batch 625, Demand Index
+
+Demand Index preserves its rounded pressure, percentage, volume, ratio and final subtraction stages using extended intermediates. Subnormal sell volume still rounds to zero before the denominator guard; cancelling volume would change the formula. Batch, core, fast, native and forced-streaming routes share the calculation, with selected candle ranges, signed denominators, exact slope signals and native validation preserved.
+
+**39/39 focused tests passed** (`demand-index-625-final.trx`): four public configurations across five routes, selected sources, injected output faults, numerical classes, independent staged fractions, subnormal volumes, wide ranges, overflow recovery, preview/reset, native rejection and span bounds. The existing hand example now uses `-0.6666666666666667`, obtained by rounding one-third before subtracting one. The first compile lacked a reference namespace import; the initial test run exposed forced-streaming enrollment and signed-denominator gaps. Both were corrected before the final complete focused pass.
+
+**Mutation qualification is pending** for 24 prepared faults; all 6,442 retained mutation anchors passed preflight. Candidate and frozen snapshots agree on 2,111 files. Prepared inventory is **6,087/7,131 enrollments**, with **1,044 omissions across 152 types**. This is a source checkpoint, not completion of numerical coverage or hosted/package/release/performance gates.

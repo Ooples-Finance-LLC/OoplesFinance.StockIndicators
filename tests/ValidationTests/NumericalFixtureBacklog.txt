@@ -5,10 +5,6 @@ OoplesFinance.StockIndicators.Indicators.ConfluenceIndicator/longer-periods
 OoplesFinance.StockIndicators.Indicators.ConfluenceIndicator/minimum-periods
 OoplesFinance.StockIndicators.Indicators.ConfluenceIndicator/shorter-periods
 OoplesFinance.StockIndicators.Indicators.ConfluenceIndicator/weighted-average
-OoplesFinance.StockIndicators.Indicators.DemandIndex/default
-OoplesFinance.StockIndicators.Indicators.DemandIndex/longer-periods
-OoplesFinance.StockIndicators.Indicators.DemandIndex/minimum-periods
-OoplesFinance.StockIndicators.Indicators.DemandIndex/shorter-periods
 OoplesFinance.StockIndicators.Indicators.DemandOscillator/default
 OoplesFinance.StockIndicators.Indicators.DemandOscillator/longer-periods
 OoplesFinance.StockIndicators.Indicators.DemandOscillator/minimum-periods

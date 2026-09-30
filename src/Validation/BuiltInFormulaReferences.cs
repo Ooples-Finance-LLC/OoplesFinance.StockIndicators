@@ -22,6 +22,10 @@ internal static partial class BuiltInFormulaReferences
             var compositeKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();
             for (var slot = 0; slot < compositeKeys.Length; slot++) { var key = compositeKeys[slot]; yield return IndicatorValidationRule.ReferenceWithOverflowRejection(slot, bars => FastSlowCompositeOutputs(bars, builtIn)[key], IndicatorErrorBudget.Exact); } yield break;
         }
+        if (builtIn.BatchName == IndicatorName.DemandIndex)
+        {
+            yield return IndicatorValidationRule.ReferenceWithOverflowRejection(0, bars => DemandIndexValues(bars).Outputs["Di"], IndicatorErrorBudget.Exact); yield break;
+        }
         if (builtIn.BatchName == IndicatorName.DTOscillator && AverageKind(builtIn.CreateOptions(), 6) is 1 or 2 or 3 or 6)
         {
             var dtKeys = builtIn.BatchOutputKey is { } selected ? new[] { selected } : GeneratedIndicatorOutputs.KeysFor(builtIn.BatchName).ToArray();

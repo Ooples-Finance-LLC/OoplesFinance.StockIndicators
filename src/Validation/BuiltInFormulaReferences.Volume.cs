@@ -15,9 +15,7 @@ internal static partial class BuiltInFormulaReferences
         switch (name)
         {
             case IndicatorName.DemandIndex:
-                // This library's single-bar buying/selling-volume ratio, with the first bar defined as zero.
-                return Single("Di", bars => bars.Select((b, i) => i == 0 || b.Volume == 0 || b.High == b.Close || b.High == b.Low // NOSONAR: S1244 - Exact equalities identify zero denominators and the defined degenerate candle.
-                    ? 0 : (2 * b.Close - b.Low - b.High) / (b.High - b.Close)).ToArray());
+                return Single("Di", bars => DemandIndexValues(bars).Outputs["Di"]);
             case IndicatorName.KlingerVolumeOscillator:
                 if (kind == 0) return null;
                 return new("Kvo", new[] { "Kvo", "KvoSignal", "KvoHistogram" }, bars =>

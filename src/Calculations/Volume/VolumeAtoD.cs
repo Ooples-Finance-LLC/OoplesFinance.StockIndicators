@@ -22,27 +22,12 @@ public static partial class Calculations
         List<double> demandIndexList = new(count);
         List<Signal>? signalsList = CreateSignalsList(stockData, count);
 
+        var window = new DemandIndexWindow();
         for (var i = 0; i < count; i++)
         {
-            double demandIndex = 0;
-            if (i >= 1)
-            {
-                var range = highList[i] - lowList[i];
-                var buyingPressure = inputList[i] - lowList[i];
-                var sellingPressure = highList[i] - inputList[i];
-                var buyingPercent = range != 0 ? buyingPressure / range : 0;
-                var sellingPercent = range != 0 ? sellingPressure / range : 0;
-                var buyVolume = volumeList[i] * buyingPercent;
-                var sellVolume = volumeList[i] * sellingPercent;
-                demandIndex = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
-            }
-
-            demandIndexList.Add(demandIndex);
-
-            var prevDemand1 = i >= 1 ? demandIndexList[i - 1] : 0;
-            var prevDemand2 = i >= 2 ? demandIndexList[i - 2] : 0;
-            var signal = GetCompareSignal(demandIndex - prevDemand1, prevDemand1 - prevDemand2);
-            signalsList?.Add(signal);
+            var point = window.Next(highList[i], lowList[i], inputList[i], volumeList[i], true);
+            demandIndexList.Add(point.Value);
+            signalsList?.Add(point.Signal);
         }
 
         stockData.SetOutputValues(() => new Dictionary<string, List<double>>{

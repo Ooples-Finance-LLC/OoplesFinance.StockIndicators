@@ -74,7 +74,7 @@ public sealed class FormulaContractCoverageTests
             rule.Check(new IndicatorValidationContext("spearman-ties", bars, [[0, 0, 100, -50], [0, 0, 100, -50]], 0));
         bars = new[] { 2d, 3, 1, 2, 4 }.Select((v, i) => new Bar(DateTime.UnixEpoch.AddMinutes(i), 2, 4, 0, v, 1)).ToArray();
         Assert.Single(BuiltInFormulaReferences.For(new DemandIndex(1))).Check(
-            new IndicatorValidationContext("demand-split", bars, [[0, 2, -2d / 3, 0, 0]], 0));
+            new IndicatorValidationContext("demand-split", bars, [[0, 2, -0.6666666666666667, 0, 0]], 0));
     }
 
     [Fact]

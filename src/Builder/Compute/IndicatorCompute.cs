@@ -5192,13 +5192,11 @@ internal static partial class IndicatorCompute
     /// </summary>
     internal static ComputeBuffer ComputeDemandIndexFast(StockData data, ComputeContext context, int length = 14)
     {
-        _ = length; // Demand Index doesn't use length
-        var high = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var low = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var close = SpanCompat.AsReadOnlySpan(data.ClosePrices);
-        var volume = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var buffer = context.Rent(data.Count);
-        VolumeCore.DemandIndex(high, low, close, volume, buffer.WritableSpan);
+        _ = length; // The public period is obsolete; Demand Index is per bar.
+        var (input, high, low, _, volume) = CalculationsHelper.GetInputValuesList(data);
+        var buffer = context.Rent(input.Count);
+        VolumeCore.DemandIndex(SpanCompat.AsReadOnlySpan(high), SpanCompat.AsReadOnlySpan(low),
+            SpanCompat.AsReadOnlySpan(input), SpanCompat.AsReadOnlySpan(volume), buffer.WritableSpan);
         return buffer;
     }
 

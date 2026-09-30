@@ -14,50 +14,15 @@ namespace OoplesFinance.StockIndicators.Streaming;
 [PrimaryOutput("Di")]
 public sealed class DemandIndexState : IStreamingIndicatorState
 {
-    private readonly StreamingInputResolver _input;
-    private int _barIndex;
-
-    public DemandIndexState()
-    {
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DemandIndexWindow _window = new();
+    public DemandIndexState() { }
     public IndicatorName Name => IndicatorName.DemandIndex;
-
-    public void Reset()
-    {
-        _barIndex = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-
-        double demandIndex = 0;
-        if (_barIndex >= 1)
-        {
-            var range = bar.High - bar.Low;
-            var buyingPressure = value - bar.Low;
-            var sellingPressure = bar.High - value;
-            var buyingPercent = range != 0 ? buyingPressure / range : 0;
-            var sellingPercent = range != 0 ? sellingPressure / range : 0;
-            var buyVolume = bar.Volume * buyingPercent;
-            var sellVolume = bar.Volume * sellingPercent;
-            demandIndex = sellVolume != 0 ? (buyVolume / sellVolume) - 1 : 0;
-        }
-
-        if (isFinal)
-        {
-            _barIndex++;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1) { { "Di", demandIndex } };
-        }
-
-        return new StreamingIndicatorStateResult(demandIndex, outputs);
+        StreamingInputValidation.Validate(bar);
+        var value = _window.Next(bar.High, bar.Low, bar.Close, bar.Volume, isFinal).Value;
+        return new(value, includeOutputs ? new Dictionary<string, double> { { "Di", value } } : null);
     }
 }
 
