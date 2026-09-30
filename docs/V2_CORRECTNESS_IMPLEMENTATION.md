@@ -3706,3 +3706,12 @@ Edge Preserving Filter now retains rounded extended offsets and regression endpo
 The independent reference scans windows, derives the regression from centered covariance/scatter, and reconstructs each segment. **48/48 focused tests passed** (`edge-preserving-629.trx`), including five configurations across five routes, numerical enrollment, selected inputs, hand reset/seed cases, all four primary smoothing kinds, subnormal and overflowing intermediates, extreme periods, core in-place spans, callback slots, invalid candles, and preview/reset behavior. The first focused run passed without a production or test correction.
 
 **Mutation qualification remains pending** for 34 prepared behavioral faults; all **6,580 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,123 files. Prepared inventory is **6,110/7,131 enrollments**, with **1,021 omissions across 148 types**. This is the 394th prepared numerical batch, covering 3,284 configurations across 597 types. Built DLL SHA256: `CB2462ABE4FAA48BD6906B99D3BED9403790C10915DC3336BFCD240A34E9965A`. Full coverage and final hosted/package/release/performance gates remain incomplete.
+
+
+### Batch 616: Chande Kroll R-Squared Index mutation qualification
+
+The isolated campaigns `616a` and `616b` passed their baselines and caught **28/28 compiled behavioral faults**, alongside **46/46 focused tests**. Both archives were compared byte-for-byte with the retained batch-616 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `f0231969507372ca74b16fdd92dc4301bcdb167bd45dd7f102fc269c044390fe`. Archive SHA256: `c595fdba7e55c0032f047e39b27acdf0e93303dbbfa1fec280b3f89fd7807a18` and `c595fdba7e55c0032f047e39b27acdf0e93303dbbfa1fec280b3f89fd7807a18`.
+
+This is evidence for the isolated batch-616 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 617 through 629 and the remaining final gates is still incomplete.
