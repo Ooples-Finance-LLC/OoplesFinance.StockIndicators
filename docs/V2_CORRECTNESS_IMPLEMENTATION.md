@@ -3688,3 +3688,12 @@ Dynamic Momentum Index now uses lazy exact population moments, stable deviation 
 **Mutation qualification is pending** for 36 prepared faults; all **6,546 retained anchors** passed preflight. Candidate and frozen snapshots match on 2,120 files. Prepared inventory is **6,105/7,131 enrollments**, with **1,026 omissions across 149 types**. Full coverage and hosted/package/release/performance gates remain incomplete.
 
 Two supporting nonbehavioral changes keep verification accurate: an explanatory annotation identifies Drunkard Walk's exact extremum equality as deliberate, addressing two Sonar findings; correcting the preceding Dynamic Average class's closing-brace indentation keeps its existing mutation scope from unintentionally extending into Dynamic Momentum's newly validated state.
+
+
+### Batch 615: Chande Composite Momentum mutation qualification
+
+The corrected isolated campaigns `615ra` and `615rb` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **70/70 focused tests**. The original campaigns retained 31 kills and one inconclusive CS0414 compile error; they do not qualify this batch. Both corrected archives were compared byte-for-byte with the retained batch-615 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `3078d3dfe2a372eb8980f016c5f134eb3542136c45b68457d624e46ec7b00a51`. Archive SHA256: `cb0c1b7ec774df95f2726d0731b9dd1547e92662eb333bbcc24da33f4f24e9f1` and `cb0c1b7ec774df95f2726d0731b9dd1547e92662eb333bbcc24da33f4f24e9f1`.
+
+This is evidence for the isolated batch-615 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 616 through 628 and the remaining final gates is still incomplete.
