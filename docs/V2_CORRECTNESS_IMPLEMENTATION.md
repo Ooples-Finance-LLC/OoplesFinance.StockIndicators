@@ -3601,3 +3601,12 @@ This is evidence for the isolated batch-610 source. Source was already published
 Original isolated batch-611 campaigns completed with 27 compiled kills and five surviving faults: the population-deviation denominator and four strict vote comparisons. These runs are retained as failed qualification evidence. The strengthened regressions place a rising observation between the population and mutated bands at multiplier 1.1, and retain both positive and negative votes when a tied observation must abstain. Independent hand expectations check the resulting probabilities exactly.
 
 Both strengthened tests passed in `dt-oscillator-624-and-bayesian-followup.trx`; that combined run also contained one separate DTOscillator callback-test failure, later corrected and passed. Bayesian production is unchanged. Corrected campaigns `611ra` and `611rb` are now running against matching frozen source; batch 611 is not yet mutation-qualified.
+
+
+### Batch 611: Bayesian Oscillator mutation qualification
+
+The corrected isolated campaigns `611ra` and `611rb` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **48/48 original focused tests** and **2/2 strengthened population/tie regressions**. Original campaigns retained 27 kills and 5 survivors; only these corrected campaigns qualify the batch. Both archives were compared byte-for-byte with the retained batch-611 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `db7de6244ed9ccf8c36a9937d5d2dd7ba64ef0c7b76584e293aa82bc7606ff21`. Archive SHA256: `3e9fbe6da3a3dff1c502ff549acdabda078405375f379adc5677f2d842331f17` and `3e9fbe6da3a3dff1c502ff549acdabda078405375f379adc5677f2d842331f17`.
+
+This is evidence for the isolated batch-611 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 612–624 and the remaining final gates is still incomplete.
