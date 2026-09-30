@@ -51933,7 +51933,7 @@
     "file": "src/Helpers/ChandeCompositeWindow.cs",
     "scope": "internal sealed class ChandeCompositeWindow",
     "before": "_started ? current - _previousPrice : BigInteger.Zero",
-    "after": "current - _previousPrice",
+    "after": "_started ? current - _previousPrice : current",
     "filter": "FullyQualifiedName~ChandeCompositeNumericalTests.WideDifferencesWeightsAndRecursiveStagesMatchRationalScans"
   },
   {
@@ -55409,5 +55409,293 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DemandOscillatorNumericalTests.InvalidCandlesCannotAdvanceNativeHistory"
+  },
+  {
+    "id": "drunkard-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = 1",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "var expiry = _index - _length + 1L;",
+    "after": "var expiry = _index - _length;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.NewExtremeCarriesItsAverageAndRecentTiesResetTheAge"
+  },
+  {
+    "id": "drunkard-wide-age",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_index - best.Item1",
+    "after": "_index - best.Item1 + 1",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-high-tie",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "value >= first.Value.Value",
+    "after": "value > first.Value.Value",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-low-tie",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "value <= first.Value.Value",
+    "after": "value < first.Value.Value",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "1d / age",
+    "after": "1d / (age + 1)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-reset-gain",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "age == 0 ? 0 : 1d / age",
+    "after": "age == 0 ? 1 : 1d / age",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.NewExtremeCarriesItsAverageAndRecentTiesResetTheAge"
+  },
+  {
+    "id": "drunkard-wide-carry",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "previous * ExactVarianceWindow.Units(1 - gain)",
+    "after": "previous * ExactVarianceWindow.Units(gain)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-root",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "Math.Sqrt(age)",
+    "after": "(double)age",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-zero-age",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "if (age == 0) return BigInteger.Zero;",
+    "after": "if (age == 0) return Unit;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-average-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "average.Sign > 0 ? average : Unit",
+    "after": "average.Sign > 0 ? Unit : Unit",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-range-span",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "BigInteger.Max(h - l, BigInteger.Max",
+    "after": "BigInteger.Max(BigInteger.Zero, BigInteger.Max",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-high-gap",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "BigInteger.Abs(h - previous)",
+    "after": "BigInteger.Abs(h - c)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-low-gap",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "BigInteger.Abs(l - previous)",
+    "after": "BigInteger.Abs(l - c)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-up-age",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "Blend(range, _upAverage, lowest.Age)",
+    "after": "Blend(range, _upAverage, highest.Age)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-down-age",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "Blend(range, _downAverage, highest.Age)",
+    "after": "Blend(range, _downAverage, lowest.Age)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-up-distance",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "h - ExactVarianceWindow.Units(lowest.Value)",
+    "after": "c - ExactVarianceWindow.Units(lowest.Value)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-down-distance",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "ExactVarianceWindow.Units(highest.Value) - l",
+    "after": "ExactVarianceWindow.Units(highest.Value) - c",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-up-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_upAverage = upAverage;",
+    "after": "_upAverage = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-down-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_downAverage = downAverage;",
+    "after": "_downAverage = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_previousPrice = close;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.WidePricesRangesAndRoundedAveragesRecover"
+  },
+  {
+    "id": "drunkard-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "if (final) { _index++;",
+    "after": "if (!final) { _index++;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-signal-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "var spread = up - down;",
+    "after": "var spread = down - up;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_previousSpread = spread;",
+    "after": "_previousSpread = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.NewExtremeCarriesItsAverageAndRecentTiesResetTheAge"
+  },
+  {
+    "id": "drunkard-wide-signal-up",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "spread.Sign > 0 && spread > _previousSpread",
+    "after": "spread.Sign > 0 && spread < _previousSpread",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-signal-down",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "spread.Sign < 0 && spread < _previousSpread",
+    "after": "spread.Sign < 0 && spread > _previousSpread",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-reset-up",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_upAverage = _downAverage = _previousSpread = default;",
+    "after": "_downAverage = _previousSpread = default;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-reset-extrema",
+    "module": "numerical",
+    "file": "src/Helpers/DrunkardWalkWindow.cs",
+    "scope": "internal sealed class DrunkardWalkWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "_highs.Clear();",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDrunkardWalkFast(",
+    "before": "down ? point.Down : point.Up",
+    "after": "down ? point.Up : point.Up",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDrunkardWalkFast(",
+    "before": "input[i], true",
+    "after": "data.ClosePrices[i], true",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.SelectedCandleRangesAndNoCallbackContractArePreserved"
+  },
+  {
+    "id": "drunkard-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DrunkardWalkState :",
+    "before": "{ \"DnWalk\", point.Down }",
+    "after": "{ \"DnWalk\", point.Up }",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+  },
+  {
+    "id": "drunkard-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DrunkardWalkState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.InvalidCandlesCannotAdvanceEitherRangeAverage"
   }
 ]

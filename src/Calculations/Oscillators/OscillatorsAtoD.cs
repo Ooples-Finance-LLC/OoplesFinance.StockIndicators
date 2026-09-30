@@ -1402,67 +1402,13 @@ public static partial class Calculations
     [Obsolete("Use the v2.0 Builder API (StockIndicatorBuilder) instead. See MIGRATION.md for details.")]
     public static StockData CalculateDrunkardWalk(this StockData stockData, int length1 = 80, int length2 = 14)
     {
-        List<double> tempHighList = new(stockData.Count);
-        List<double> tempLowList = new(stockData.Count);
-        List<double> upAtrList = new(stockData.Count);
-        List<double> dnAtrList = new(stockData.Count);
-        List<double> upwalkList = new(stockData.Count);
-        List<double> dnwalkList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var (highestList, lowestList) = GetMaxAndMinValuesList(highList, lowList, length1);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var highestHigh = highestList[i];
-            var lowestLow = lowestList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-
-            var currentHigh = highList[i];
-            tempHighList.Add(currentHigh);
-
-            var currentLow = lowList[i];
-            tempLowList.Add(currentLow);
-
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-            var maxIndex = tempHighList.LastIndexOf(highestHigh);
-            var minIndex = tempLowList.LastIndexOf(lowestLow);
-            var dnRun = i - maxIndex;
-            var upRun = i - minIndex;
-
-            var prevAtrUp = GetLastOrDefault(upAtrList);
-            var upK = upRun != 0 ? (double)1 / upRun : 0;
-            var atrUp = (tr * upK) + (prevAtrUp * (1 - upK));
-            upAtrList.Add(atrUp);
-
-            var prevAtrDn = GetLastOrDefault(dnAtrList);
-            var dnK = dnRun != 0 ? (double)1 / dnRun : 0;
-            var atrDn = (tr * dnK) + (prevAtrDn * (1 - dnK));
-            dnAtrList.Add(atrDn);
-
-            var upDen = atrUp > 0 ? atrUp : 1;
-            var prevUpWalk = GetLastOrDefault(upwalkList);
-            var upWalk = upRun > 0 ? (currentHigh - lowestLow) / (Sqrt(upRun) * upDen) : 0;
-            upwalkList.Add(upWalk);
-
-            var dnDen = atrDn > 0 ? atrDn : 1;
-            var prevDnWalk = GetLastOrDefault(dnwalkList);
-            var dnWalk = dnRun > 0 ? (highestHigh - currentLow) / (Sqrt(dnRun) * dnDen) : 0;
-            dnwalkList.Add(dnWalk);
-
-            var signal = GetCompareSignal(upWalk - dnWalk, prevUpWalk - prevDnWalk);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "UpWalk", upwalkList },
-            { "DnWalk", dnwalkList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(new List<double>());
-        stockData.IndicatorName = IndicatorName.DrunkardWalk;
-
+        _ = length2; // Historical compatibility parameter; the formula uses extremum age.
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var up = new List<double>(input.Count); var down = new List<double>(input.Count); var signals = CreateSignalsList(stockData, input.Count);
+        var window = new DrunkardWalkWindow(length1);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); up.Add(point.Up); down.Add(point.Down); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "UpWalk", up }, { "DnWalk", down } });
+        stockData.SetSignals(signals); stockData.SetCustomValues(new List<double>()); stockData.IndicatorName = IndicatorName.DrunkardWalk;
         return stockData;
     }
 

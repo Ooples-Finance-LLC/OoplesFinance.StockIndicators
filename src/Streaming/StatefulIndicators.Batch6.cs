@@ -443,100 +443,16 @@ public sealed class DominantCycleTunedRelativeStrengthIndexState : IStreamingInd
 [PrimaryOutput("UpWalk")]
 public sealed class DrunkardWalkState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _highWindow;
-    private readonly RollingWindowMin _lowWindow;
-    private readonly PooledRingBuffer<double> _highs;
-    private readonly PooledRingBuffer<double> _lows;
-    private readonly StreamingInputResolver _input;
-    private readonly int _length2;
-    private double _prevValue;
-    private double _prevAtrUp;
-    private double _prevAtrDn;
-    private bool _hasPrev;
-
-    public DrunkardWalkState(int length1 = 80, int length2 = 14)
-    {
-        var resolved = Math.Max(1, length1);
-        _highWindow = new RollingWindowMax(resolved);
-        _lowWindow = new RollingWindowMin(resolved);
-        _highs = new PooledRingBuffer<double>(resolved);
-        _lows = new PooledRingBuffer<double>(resolved);
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _length2 = length2;
-    }
-
+    private readonly DrunkardWalkWindow _window;
+    public DrunkardWalkState(int length1 = 80, int length2 = 14) { _ = length2; _window = new(length1); }
     public IndicatorName Name => IndicatorName.DrunkardWalk;
-
-    public void Reset()
-    {
-        _highWindow.Reset();
-        _lowWindow.Reset();
-        _highs.Clear();
-        _lows.Clear();
-        _prevValue = 0;
-        _prevAtrUp = 0;
-        _prevAtrDn = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        // The batch takes the true-range previous value from the SELECTED input series, not from
-        // close: CalculateDrunkardWalk reads inputList out of GetInputValuesList and passes
-        // inputList[i - 1] - or inputList[i] on the first bar - to CalculateTrueRange, while the
-        // high and low come from highList/lowList. This state accepted an InputName and a selector,
-        // built a resolver from them, and then never read it, so anything but the default input
-        // silently disagreed with the batch. Highs and lows stay on the bar, as they do there.
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : value;
-        var highestHigh = isFinal ? _highWindow.Add(bar.High, out _) : _highWindow.Preview(bar.High, out _);
-        var lowestLow = isFinal ? _lowWindow.Add(bar.Low, out _) : _lowWindow.Preview(bar.Low, out _);
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-        var dnRun = StreamingWindowMath.LastOffset(_highs, bar.High, highestHigh);
-        var upRun = StreamingWindowMath.LastOffset(_lows, bar.Low, lowestLow);
-
-        var upK = upRun != 0 ? (double)1 / upRun : 0;
-        var atrUp = (tr * upK) + (_prevAtrUp * (1 - upK));
-
-        var dnK = dnRun != 0 ? (double)1 / dnRun : 0;
-        var atrDn = (tr * dnK) + (_prevAtrDn * (1 - dnK));
-
-        var upDen = atrUp > 0 ? atrUp : 1;
-        var upWalk = upRun > 0 ? (bar.High - lowestLow) / (MathHelper.Sqrt(upRun) * upDen) : 0;
-
-        var dnDen = atrDn > 0 ? atrDn : 1;
-        var dnWalk = dnRun > 0 ? (highestHigh - bar.Low) / (MathHelper.Sqrt(dnRun) * dnDen) : 0;
-
-        if (isFinal)
-        {
-            _highs.TryAdd(bar.High, out _);
-            _lows.TryAdd(bar.Low, out _);
-            _prevValue = value;
-            _prevAtrUp = atrUp;
-            _prevAtrDn = atrDn;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "UpWalk", upWalk },
-                { "DnWalk", dnWalk }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(upWalk, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Up, includeOutputs ? new Dictionary<string, double> { { "UpWalk", point.Up }, { "DnWalk", point.Down } } : null);
     }
-
-    public void Dispose()
-    {
-        _highWindow.Dispose();
-        _lowWindow.Dispose();
-        _highs.Dispose();
-        _lows.Dispose();
-    }
+    public void Dispose() { }
 }
 
 [PrimaryOutput("Daf")]

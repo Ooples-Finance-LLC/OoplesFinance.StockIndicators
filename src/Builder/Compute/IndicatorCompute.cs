@@ -802,6 +802,7 @@ internal static partial class IndicatorCompute
             // Batch 6 - Demand/Volume oscillators
             // Length is declared obsolete because CalculateDemandOscillator has no parameter it could
             // set, so this spec asks for the same series the defaults give.
+            DrunkardWalkSpecOptions walk => ComputeDrunkardWalkFast(data, context, walk.Length1, walk.Length2, spec.OutputKey == "DnWalk"),
             DemandOscillatorSpecOptions demosc => ComputeDemandOscillatorFast(data, context, demosc.MaType, signal: spec.OutputKey == "Signal"),
             AverageMoneyFlowOscillatorSpecOptions amfo => ComputeAverageMoneyFlowOscillatorFast(data, context, amfo.Length,
                 amfo.MaType),
@@ -7452,8 +7453,16 @@ internal static partial class IndicatorCompute
     }
 
     /// <summary>
-    /// Computes Demand Oscillator using zero-allocation fast path.
+    /// Computes Drunkard Walk from the selected candle ranges.
     /// </summary>
+    internal static ComputeBuffer ComputeDrunkardWalkFast(StockData data, ComputeContext context, int length1 = 80, int length2 = 14, bool down = false)
+    {
+        _ = length2;
+        var (input, high, low, _, _) = CalculationsHelper.GetInputValuesList(data); var buffer = context.Rent(input.Count); var window = new DrunkardWalkWindow(length1);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(high[i], low[i], input[i], true); buffer.WritableSpan[i] = down ? point.Down : point.Up; }
+        return buffer;
+    }
+
     internal static ComputeBuffer ComputeDemandOscillatorFast(StockData data, ComputeContext context,
         MovingAvgType maType = MovingAvgType.ExponentialMovingAverage, int length1 = 10, int length2 = 2,
         int length3 = 20, bool signal = false)

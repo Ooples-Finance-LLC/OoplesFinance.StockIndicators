@@ -138,6 +138,7 @@ internal static class BuilderVerifiedArms
         typeof(DeltaMovingAverageSpecOptions),
         typeof(Dema2LinesSpecOptions),
         typeof(DemandOscillatorSpecOptions),
+        typeof(DrunkardWalkSpecOptions),
         typeof(DemarkPivotPointSpecOptions),
         typeof(DemarkPressureRatioV1SpecOptions),
         typeof(DemarkPressureRatioV2SpecOptions),

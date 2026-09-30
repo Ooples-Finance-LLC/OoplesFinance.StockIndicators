@@ -3666,3 +3666,14 @@ The isolated campaigns `614a` and `614b` passed their baselines and caught **28/
 Source snapshot SHA256: `270b8d76ac0bb4274795cc402349acc4c9f5b5b75ca603019df64b53b2c958fa`. Archive SHA256: `7729e8a06c10d79f69da8948a7f57b5b1ae3ecb805f2d089a0541196bb4007a5` and `7729e8a06c10d79f69da8948a7f57b5b1ae3ecb805f2d089a0541196bb4007a5`.
 
 This is evidence for the isolated batch-614 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 615 through 626 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batch 627, Drunkard Walk
+
+Drunkard Walk now uses lazy extremum histories, latest-observation tie handling and separate rounded extended range averages for the up/down walks. New extrema reset the corresponding age to zero while carrying the existing range average. The true range uses the selected previous price, with the current selected price as the first-bar seed. Batch, typed fast, native and forced-streaming routes share both outputs and exact spread signals. The historically unused second length remains without formula effect.
+
+**71/71 focused tests passed** (`drunkard-627.trx`): eight configurations across five routes, selected candle ranges, injected output faults, numerical classes, independent rational stages and root rounding, latest ties and expiry, zero-age carry, wide signed prices, subnormals, extreme periods, preview/reset, native rejection and the existing broad event/distance hand example. For prices `1, 2, 4`, the third up-walk is `1.414213562373095`: range mean 1.5, rounded `sqrt(2) * 1.5`, then 3 divided by that denominator. The old hand expectation `sqrt(2)` skipped those rounding stages.
+
+**Mutation qualification is pending** for 32 prepared faults; all **6,510 retained anchors** passed preflight. Candidate and frozen snapshots match on 2,117 files. Prepared inventory is **6,100/7,131 enrollments**, with **1,031 omissions across 150 types**. Full coverage and hosted/package/release/performance gates remain incomplete.
+
+A pending Chande Composite fault seed was also corrected: removing its only `_started` read caused CS0414, so that original result is inconclusive, not a behavioral kill. The revised seed retains the conditional read but injects the current price on the first bar. Production is unchanged for that correction; original archives remain retained and corrected campaigns are required before qualification.

@@ -28,33 +28,7 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Zscore", residual.Select((v, i) => variance[i] == 0 ? 0 : v / Math.Sqrt(variance[i])).ToArray()));
                 });
             case IndicatorName.DrunkardWalk:
-                return new("UpWalk", new[] { "UpWalk", "DnWalk" }, bars =>
-                {
-                    var period = Integer(options, "Length1", 80);
-                    var ranges = TrueRanges(bars);
-                    double[] Walk(bool upward)
-                    {
-                        var extremes = bars.Select((_, i) => upward ? Window(bars, i, period).Min(b => b.Low)
-                            : Window(bars, i, period).Max(b => b.High)).ToArray();
-                        var ages = bars.Select((_, i) => i - Enumerable.Range(Math.Max(0, i - period + 1), Math.Min(i + 1, period))
-                            .Last(j => (upward ? bars[j].Low : bars[j].High) == extremes[i])).ToArray(); // NOSONAR: S1244 - Locate the actual extremum observation, including exact ties.
-                        return bars.Select((b, i) =>
-                        {
-                            if (ages[i] == 0) return 0;
-                            // Expand all observation weights of the variable-gain range average.
-                            double average = 0, survival = 1;
-                            for (var j = i; j >= 0; j--)
-                            {
-                                var gain = ages[j] == 0 ? 0 : 1d / ages[j];
-                                average += survival * gain * ranges[j];
-                                survival *= 1 - gain;
-                            }
-                            var distance = upward ? b.High - extremes[i] : extremes[i] - b.Low;
-                            return distance / (Math.Sqrt(ages[i]) * (average > 0 ? average : 1));
-                        }).ToArray();
-                    }
-                    return Outputs(("UpWalk", Walk(true)), ("DnWalk", Walk(false)));
-                });
+                return new("UpWalk", new[] { "UpWalk", "DnWalk" }, bars => DrunkardWalkOutputs(bars, indicator));
             case IndicatorName.WellesWilderVolatilitySystem:
                 if (kind == 0) return null;
                 return new("Wwvs", new[] { "Wwvs" }, bars => WilderVolatilityOutputs(bars, indicator));

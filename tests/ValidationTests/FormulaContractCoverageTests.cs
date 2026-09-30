@@ -1382,7 +1382,7 @@ public sealed class FormulaContractCoverageTests
     {
         var date = new DateTime(2021, 1, 4);
         var bars = new[] { 1d, 2, 4 }.Select(v => new Bar(date, v, v, v, v, 1)).ToArray();
-        Check(new DrunkardWalk(3), bars, [0, 1, Math.Sqrt(2)], [0, 0, 0]);
+        Check(new DrunkardWalk(3), bars, [0, 1, 1.414213562373095], [0, 0, 0]);
         Check(new ZDistanceFromVwap(2), bars, [0, Math.Sqrt(2), Math.Sqrt(8d / 5)]);
         var crossing = new[] { 80d, 100, 50, 120 }.Select(v => new Bar(date, v, v, v, v, 1)).ToArray();
         Check(new UtBotAlerts(1), crossing, [80, 80, 100, 50], [0, 0, -1, 1], [0, 1, 0, 1], [0, 0, 1, 0]);
