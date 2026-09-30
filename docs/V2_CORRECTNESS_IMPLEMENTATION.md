@@ -3677,3 +3677,14 @@ Drunkard Walk now uses lazy extremum histories, latest-observation tie handling 
 **Mutation qualification is pending** for 32 prepared faults; all **6,510 retained anchors** passed preflight. Candidate and frozen snapshots match on 2,117 files. Prepared inventory is **6,100/7,131 enrollments**, with **1,031 omissions across 150 types**. Full coverage and hosted/package/release/performance gates remain incomplete.
 
 A pending Chande Composite fault seed was also corrected: removing its only `_started` read caused CS0414, so that original result is inconclusive, not a behavioral kill. The revised seed retains the conditional read but injects the current price on the first bar. Production is unchanged for that correction; original archives remain retained and corrected campaigns are required before qualification.
+
+
+### Prepared source checkpoint: batch 628, Dynamic Momentum Index
+
+Dynamic Momentum Index now uses lazy exact population moments, stable deviation smoothing and bounded cumulative histories for changing RSI lookbacks. Gain/loss sums form the normalized ratio directly, avoiding underflow from dividing them into separate averages first: prices `0, epsilon, 0` correctly yield RSI 50 on the third bar, rather than the old spurious 100. Exact retained sums also handle overflowing signed price changes and later lookback expansion. All three outputs, RSI signals, selected inputs and native lifecycle are unified across batch, fast, native, forced-streaming and core routes. The existing discrete-period tolerance remains unchanged. Fast smoothing overrides consume one deviation-average slot; batch retains its zero-override contract.
+
+**50/50 focused tests passed** (`dynamic-momentum-628.trx`): five public configurations across five routes, independent centered rational deviation and scanned gain/loss windows, subnormal and overflowing changes, four averaging kinds, 2,110-bar adaptive expansion/compaction, period boundaries and extreme lengths, core/in-place bounds, callback inputs, legacy means, invalid native candles and both existing price-scale regressions.
+
+**Mutation qualification is pending** for 36 prepared faults; all **6,546 retained anchors** passed preflight. Candidate and frozen snapshots match on 2,120 files. Prepared inventory is **6,105/7,131 enrollments**, with **1,026 omissions across 149 types**. Full coverage and hosted/package/release/performance gates remain incomplete.
+
+Two supporting nonbehavioral changes keep verification accurate: an explanatory annotation identifies Drunkard Walk's exact extremum equality as deliberate, addressing two Sonar findings; correcting the preceding Dynamic Average class's closing-brace indentation keeps its existing mutation scope from unintentionally extending into Dynamic Momentum's newly validated state.

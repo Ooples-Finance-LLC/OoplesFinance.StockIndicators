@@ -15,7 +15,7 @@ internal static partial class BuiltInFormulaReferences
             var ranges = new[] { h - l, Abs(h - previous), Abs(l - previous) }; var range = ranges.Aggregate((a, v) => a.CompareTo(v) > 0 ? a : v).RoundExtendedBinary64();
             var start = (int)Math.Max(0L, i - (long)length + 1); var indexes = Enumerable.Range(start, i - start + 1).ToArray();
             var low = indexes.Min(j => bars[j].Low); var high = indexes.Max(j => bars[j].High);
-            var upAge = i - indexes.Last(j => bars[j].Low.Equals(low)); var downAge = i - indexes.Last(j => bars[j].High.Equals(high));
+            var upAge = i - indexes.Last(j => bars[j].Low.Equals(low)); var downAge = i - indexes.Last(j => bars[j].High.Equals(high)); // NOSONAR: S1244 - Exact equality locates the newest actual extremum observation; a tolerance would change its age.
             ReferenceFraction Mean(ReferenceFraction old, int age)
             {
                 var gain = age == 0 ? 0 : 1d / age;

@@ -484,112 +484,22 @@ public sealed class DynamicallyAdjustableMovingAverageState : IStreamingIndicato
         return new(value, includeOutputs ? new Dictionary<string, double> { { "Dama", value } } : null);
     }
     public void Dispose() { }
-    }
+}
 
 [PrimaryOutput("Dmi")]
 public sealed class DynamicMomentumIndexState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length3;
-    private readonly int _upLimit;
-    private readonly int _dnLimit;
-    // The deviation of the window about its own mean, matching the batch calculation; see #190.
-    private readonly RollingStandardDeviation _stdDevState;
-    private readonly IMovingAverageSmoother _stdDevSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly PooledRingBuffer<double> _gains;
-    private readonly PooledRingBuffer<double> _losses;
-    private readonly PooledRingBuffer<double> _dmiValues;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public DynamicMomentumIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5,
-        int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5)
-    {
-        _length3 = Math.Max(1, length3);
-        _upLimit = Math.Max(1, upLimit);
-        _dnLimit = Math.Max(1, dnLimit);
-        var capacity = Math.Max(1, Math.Max(_upLimit, _dnLimit));
-        // No moving-average type: a windowed deviation is taken about the window's own mean. maType still
-        // selects the average that smooths it, below.
-        _stdDevState = new RollingStandardDeviation(Math.Max(1, length1));
-        _stdDevSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, length2));
-        _input = new StreamingInputResolver(InputName.Close, null);
-        _gains = new PooledRingBuffer<double>(capacity);
-        _losses = new PooledRingBuffer<double>(capacity);
-        _dmiValues = new PooledRingBuffer<double>(capacity);
-    }
-
+    private readonly DynamicMomentumWindow _window;
+    public DynamicMomentumIndexState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5, int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5)
+        => _window = new(maType, length1, length2, length3, dnLimit, upLimit);
     public IndicatorName Name => IndicatorName.DynamicMomentumIndex;
-
-    public void Reset()
-    {
-        _stdDevState.Reset();
-        _stdDevSmoother.Reset();
-        _gains.Clear();
-        _losses.Clear();
-        _dmiValues.Clear();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var prevValue = _hasPrev ? _prevValue : 0;
-        var priceChg = _hasPrev ? value - prevValue : 0;
-
-        // Fed the resolved input rather than the bar, matching the batch calculation.
-        var stdDev = _stdDevState.Next(value, isFinal);
-        var asd = _stdDevSmoother.Next(stdDev, isFinal);
-
-        var dmiLength = DynamicMomentumPeriod.Calculate(stdDev, asd, _length3, _dnLimit, _upLimit);
-
-        var loss = _hasPrev && priceChg < 0 ? Math.Abs(priceChg) : 0;
-        var gain = _hasPrev && priceChg > 0 ? priceChg : 0;
-
-        var gainSum = StreamingWindowMath.SumRecent(_gains, gain, dmiLength, out var gainCount);
-        var lossSum = StreamingWindowMath.SumRecent(_losses, loss, dmiLength, out var lossCount);
-        var avgGain = gainCount > 0 ? gainSum / gainCount : 0;
-        var avgLoss = lossCount > 0 ? lossSum / lossCount : 0;
-        var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-
-        var dmi = avgLoss == 0 ? 100 : avgGain == 0 ? 0 : 100 - (100 / (1 + rs));
-
-        var dmiSum = StreamingWindowMath.SumRecent(_dmiValues, dmi, dmiLength, out var dmiCount);
-        var dmiSignal = dmiCount > 0 ? dmiSum / dmiCount : 0;
-        var histogram = dmi - dmiSignal;
-
-        if (isFinal)
-        {
-            _gains.TryAdd(gain, out _);
-            _losses.TryAdd(loss, out _);
-            _dmiValues.TryAdd(dmi, out _);
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(3)
-            {
-                { "Dmi", dmi },
-                { "Signal", dmiSignal },
-                { "Histogram", histogram }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(dmi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Dmi", point.Line }, { "Signal", point.SignalLine }, { "Histogram", point.Histogram } } : null);
     }
-
-    public void Dispose()
-    {
-        _stdDevState.Dispose();
-        _stdDevSmoother.Dispose();
-        _gains.Dispose();
-        _losses.Dispose();
-        _dmiValues.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Dmo")]

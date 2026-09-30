@@ -135,31 +135,7 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.DynamicMomentumIndex:
                 kind = AverageKind(options, 1);
                 if (kind == 0) return null;
-                return new("Dmi", new[] { "Dmi", "Signal", "Histogram" }, bars =>
-                {
-                    // Chande/Kroll relative-volatility period, also documented by Trady's DMI:
-                    // https://github.com/gpmnet/Trady/blob/c5885341359af17e04ad5b7854a11e3678d3a89f/Trady.Analysis/Indicator/DynamicMomentumIndex.cs
-                    var deviation = PopulationVariance(Closes(bars), 5).Select(Math.Sqrt).ToArray();
-                    var average = Average(deviation, 10, kind);
-                    var periods = deviation.Select((v, i) =>
-                    {
-                        if (average[i] <= 0) return 14;
-                        if (v <= 0) return 30;
-                        var raw = 14 / (v / average[i]);
-                        // The numerical contract includes a relative 1e-12 tolerance at integer boundaries.
-                        return (int)Math.Max(5, Math.Min(30, Math.Floor(raw + 1e-12 * Math.Max(1, raw))));
-                    }).ToArray();
-                    var gains = bars.Select((b, i) => i == 0 ? 0 : Math.Max(0, b.Close - bars[i - 1].Close)).ToArray();
-                    var losses = bars.Select((b, i) => i == 0 ? 0 : Math.Max(0, bars[i - 1].Close - b.Close)).ToArray();
-                    var line = bars.Select((_, i) =>
-                    {
-                        var up = Window(gains, i, periods[i]).Sum();
-                        var down = Window(losses, i, periods[i]).Sum();
-                        return down == 0 ? 100 : 100 * up / (up + down);
-                    }).ToArray();
-                    var signal = line.Select((_, i) => Window(line, i, periods[i]).Average()).ToArray();
-                    return Oscillator("Dmi", line, signal);
-                });
+                return new("Dmi", new[] { "Dmi", "Signal", "Histogram" }, bars => DynamicMomentumOutputs(bars, indicator));
             default: return null;
         }
     }

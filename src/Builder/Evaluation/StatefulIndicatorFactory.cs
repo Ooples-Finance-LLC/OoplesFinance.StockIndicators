@@ -226,6 +226,7 @@ internal static partial class StatefulIndicatorFactory
             DetrendedSyntheticPriceSpecOptions synthetic => new DetrendedSyntheticPriceState(synthetic.Length),
             TrendForceHistogramSpecOptions d => new TrendForceHistogramState(d.Length),
             DrunkardWalkSpecOptions d => new DrunkardWalkState(d.Length1, d.Length2),
+            DynamicMomentumIndexSpecOptions dynamicMomentum => new DynamicMomentumIndexState(dynamicMomentum.MaType),
             WellesWilderVolatilitySystemSpecOptions d => new WellesWilderVolatilitySystemState(d.MaType, d.Length1, d.Length2, d.Factor),
             UtBotAlertsSpecOptions d => new UtBotAlertsState(d.MaType, d.Length, d.KeyValue),
             ZDistanceFromVwapSpecOptions d => new ZDistanceFromVwapState(d.MaType, d.Length),

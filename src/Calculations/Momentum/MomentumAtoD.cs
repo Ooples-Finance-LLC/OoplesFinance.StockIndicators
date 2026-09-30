@@ -216,67 +216,13 @@ public static partial class Calculations
     public static StockData CalculateDynamicMomentumIndex(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5,
         int length2 = 10, int length3 = 14, int upLimit = 30, int dnLimit = 5)
     {
-        List<double> lossList = new(stockData.Count);
-        List<double> gainList = new(stockData.Count);
-        List<double> dmiSmaList = new(stockData.Count);
-        List<double> dmiSignalSmaList = new(stockData.Count);
-        List<double> dmiHistogramSmaList = new(stockData.Count);
-        var lossSumWindow = new RollingSum();
-        var gainSumWindow = new RollingSum();
-        var dmiSumWindow = new RollingSum();
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-
-        // Normalize the window deviation by its own smoothed value before choosing the RSI period.
-        var standardDeviationList = GetStandardDeviationList(inputList, length1);
-        var stdDeviationSmaList = GetMovingAverageList(stockData, maType, length2, standardDeviationList);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var asd = stdDeviationSmaList[i];
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-
-            var dmiLength = DynamicMomentumPeriod.Calculate(standardDeviationList[i], asd, length3, dnLimit, upLimit);
-            var priceChg = MinPastValues(i, 1, currentValue - prevValue);
-
-            var loss = i >= 1 && priceChg < 0 ? Math.Abs(priceChg) : 0;
-            lossList.Add(loss);
-            lossSumWindow.Add(loss);
-
-            var gain = i >= 1 && priceChg > 0 ? priceChg : 0;
-            gainList.Add(gain);
-            gainSumWindow.Add(gain);
-
-            var avgGainSma = gainSumWindow.Average(dmiLength);
-            var avgLossSma = lossSumWindow.Average(dmiLength);
-            var rsSma = avgLossSma != 0 ? avgGainSma / avgLossSma : 0;
-
-            var prevDmiSma = GetLastOrDefault(dmiSmaList);
-            var dmiSma = avgLossSma == 0 ? 100 : avgGainSma == 0 ? 0 : 100 - (100 / (1 + rsSma));
-            dmiSmaList.Add(dmiSma);
-            dmiSumWindow.Add(dmiSma);
-
-            var dmiSignalSma = dmiSumWindow.Average(dmiLength);
-            dmiSignalSmaList.Add(dmiSignalSma);
-
-            var prevDmiHistogram = GetLastOrDefault(dmiHistogramSmaList);
-            var dmiHistogramSma = dmiSma - dmiSignalSma;
-            dmiHistogramSmaList.Add(dmiHistogramSma);
-
-            var signal = GetRsiSignal(dmiHistogramSma, prevDmiHistogram, dmiSma, prevDmiSma, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dmi", dmiSmaList },
-            { "Signal", dmiSignalSmaList },
-            { "Histogram", dmiHistogramSmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(dmiSmaList);
-        stockData.IndicatorName = IndicatorName.DynamicMomentumIndex;
-
+        var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var line = new List<double>(input.Count); var signal = new List<double>(input.Count); var histogram = new List<double>(input.Count); var trades = CreateSignalsList(stockData, input.Count);
+        var means = StrengthWindow.Supports(maType) ? null : DynamicMomentumWindow.Components(stockData, input, maType, length1, length2, false);
+        using var window = new DynamicMomentumWindow(maType, length1, length2, length3, dnLimit, upLimit);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); line.Add(point.Line); signal.Add(point.SignalLine); histogram.Add(point.Histogram); trades?.Add(point.Trade); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dmi", line }, { "Signal", signal }, { "Histogram", histogram } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DynamicMomentumIndex;
         return stockData;
     }
 

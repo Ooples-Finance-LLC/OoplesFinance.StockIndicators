@@ -55697,5 +55697,329 @@
     "before": "StreamingInputValidation.Validate(bar);",
     "after": "_ = bar;",
     "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.InvalidCandlesCannotAdvanceEitherRangeAverage"
+  },
+  {
+    "id": "dynamic-momentum-wide-deviation-ready",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_prices.Count < _deviationLength - 1",
+    "after": "_prices.Count < _deviationLength",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.CallbackDeviationInputAndBatchZeroCallbackContractArePreserved"
+  },
+  {
+    "id": "dynamic-momentum-wide-deviation-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "var expired = full ? _prices.Peek() : BigInteger.Zero;",
+    "after": "var expired = full ? BigInteger.Zero : BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.CallbackDeviationInputAndBatchZeroCallbackContractArePreserved"
+  },
+  {
+    "id": "dynamic-momentum-wide-deviation-centered",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_deviationLength * squares - sum * sum",
+    "after": "_deviationLength * squares + sum * sum",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.CallbackDeviationInputAndBatchZeroCallbackContractArePreserved"
+  },
+  {
+    "id": "dynamic-momentum-wide-deviation-population",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "(BigInteger)_deviationLength * _deviationLength",
+    "after": "(BigInteger)_deviationLength * (_deviationLength + 1L)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.CallbackDeviationInputAndBatchZeroCallbackContractArePreserved"
+  },
+  {
+    "id": "dynamic-momentum-wide-mean-period",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "new(kind, Math.Max(1, averageLength))",
+    "after": "new(kind, Math.Max(1, deviationLength))",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-period-baseline",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "average, _baseline, _minimum, _maximum",
+    "after": "average, Math.Max(1, _baseline - 1), _minimum, _maximum",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-period-minimum",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "average, _baseline, _minimum, _maximum",
+    "after": "average, _baseline, _maximum, _maximum",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-period-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "average, _baseline, _minimum, _maximum",
+    "after": "average, _baseline, _minimum, _minimum",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": ": BigInteger.Zero;\n        var gain",
+    "after": ": ExactVarianceWindow.Units(price);\n        var gain",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "Units(price) - ExactVarianceWindow.Units(_previousPrice)",
+    "after": "Units(price) + ExactVarianceWindow.Units(_previousPrice)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-gain",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "BigInteger.Max(change, BigInteger.Zero)",
+    "after": "BigInteger.Max(-change, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-loss",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "BigInteger.Max(-change, BigInteger.Zero)",
+    "after": "BigInteger.Max(change, BigInteger.Zero)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-flat-seed",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "losses.IsZero ? 100",
+    "after": "losses.IsZero ? 0",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "100 * gains << 1074",
+    "after": "10 * gains << 1074",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-rsi-denominator",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "gains + losses);",
+    "after": "gains + losses + losses);",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-signal-count",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "Math.Min((long)period, _lines.Count + 1L)",
+    "after": "(long)period",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_lines.Sum(lineUnits, period)",
+    "after": "_lines.Sum(lineUnits, 1)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-histogram",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "lineUnits - ExactVarianceWindow.Units(signal)",
+    "after": "ExactVarianceWindow.Units(signal) - lineUnits",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_previousHistogram = histogram;",
+    "after": "_previousHistogram = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-signal-up",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "histogram.Sign > 0 && histogram > _previousHistogram",
+    "after": "histogram.Sign > 0 && histogram < _previousHistogram",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-signal-down",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "histogram.Sign < 0 && histogram < _previousHistogram",
+    "after": "histogram.Sign < 0 && histogram > _previousHistogram",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "if (final) { _gains.Add(gain);",
+    "after": "if (!final) { _gains.Add(gain);",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-previous-price",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = 0;",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-prefix-offset",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_prefix.Count - period)",
+    "after": "_prefix.Count - period + 1)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-prefix-capacity",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_capacity + 1L",
+    "after": "Math.Min(_capacity + 1L, 2L)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-prefix-compaction",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_prefix.RemoveRange(0, _start);",
+    "after": "_prefix.RemoveRange(0, _start - 1);",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.AdaptiveExpansionAndCompactionRetainOlderObservations"
+  },
+  {
+    "id": "dynamic-momentum-wide-reset-prices",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_prices.Clear();",
+    "after": "_priceSum = default;",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-reset-gains",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_gains.Reset(); _losses.Reset(); _lines.Reset();",
+    "after": "_gains.Reset(); _lines.Reset();",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "weighted.Add(0);",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 2L) / 2",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/DynamicMomentumWindow.cs",
+    "scope": "internal sealed class DynamicMomentumWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum, 1)",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.WidePopulationMomentsAndAllMeanKindsMatchFractions"
+  },
+  {
+    "id": "dynamic-momentum-wide-core",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DynamicMomentumIndex(",
+    "before": "window.Next(close[i], true).Line",
+    "after": "window.Next(close[i], false).Line",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.CoreUsesTheSameAdaptiveFormulaAndSupportsInPlace"
+  },
+  {
+    "id": "dynamic-momentum-wide-fast-key",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDynamicMomentumIndexFast(",
+    "before": "outputKey == \"Histogram\" ? point.Histogram : point.Line",
+    "after": "outputKey == \"Histogram\" ? point.Line : point.Line",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDynamicMomentumIndexFast(",
+    "before": "window.Next(input[i], true, means?[i])",
+    "after": "window.Next(data.ClosePrices[i], true, means?[i])",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.SelectedSourcesAndLegacyMeanKindsAgree"
+  },
+  {
+    "id": "dynamic-momentum-wide-native-key",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DynamicMomentumIndexState :",
+    "before": "{ \"Histogram\", point.Histogram }",
+    "after": "{ \"Histogram\", point.Line }",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.HandSubnormalLossesAndWideChangesCannotDisappear"
+  },
+  {
+    "id": "dynamic-momentum-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch6.cs",
+    "scope": "public sealed class DynamicMomentumIndexState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "_ = bar;",
+    "filter": "FullyQualifiedName~DynamicMomentumNumericalTests.InvalidCandlesCannotAdvanceDeviationOrAdaptiveHistory"
   }
 ]

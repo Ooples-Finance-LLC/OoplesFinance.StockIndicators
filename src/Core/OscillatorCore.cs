@@ -1515,49 +1515,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DynamicMomentumIndex(ReadOnlySpan<double> close, Span<double> output, int minLength = 5, int maxLength = 30)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var stdDevArray = pool.Rent(close.Length);
-        var stdDevSmaArray = pool.Rent(close.Length);
-
-        try
-        {
-            var stdDev = stdDevArray.AsSpan(0, close.Length);
-            var stdDevSma = stdDevSmaArray.AsSpan(0, close.Length);
-
-            VolatilityCore.StandardDeviation(close, stdDev, 5);
-            MovingAverageCore.SimpleMovingAverage(stdDev, stdDevSma, 10);
-
-            for (var i = 0; i < close.Length; i++)
-            {
-                var dynamicLength = DynamicMomentumPeriod.Calculate(stdDev[i], stdDevSma[i], 14, minLength, maxLength);
-
-                double gains = 0;
-                double losses = 0;
-                for (var j = Math.Max(1, i - dynamicLength + 1); j <= i; j++)
-                {
-                    var change = close[j] - close[j - 1];
-                    if (change > 0)
-                        gains += change;
-                    else
-                        losses -= change;
-                }
-
-                var avgGain = gains / dynamicLength;
-                var avgLoss = losses / dynamicLength;
-                var rs = avgLoss != 0 ? avgGain / avgLoss : 0;
-                output[i] = avgLoss == 0 ? 100 : 100 - (100 / (1 + rs));
-            }
-        }
-        finally
-        {
-            pool.Return(stdDevArray);
-            pool.Return(stdDevSmaArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DynamicMomentumWindow(MovingAvgType.SimpleMovingAverage, 5, 10, 14, minLength, maxLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>

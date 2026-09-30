@@ -5315,56 +5315,11 @@ internal static partial class IndicatorCompute
         MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length1 = 5, int length2 = 10,
         int length3 = 14, int upLimit = 30, int dnLimit = 5, string? outputKey = null)
     {
-        // The RSI lookback is inversely proportional to deviation relative to its smoothed baseline.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var count = inputList.Count;
-
-        using var deviationBuffer = context.Rent(count);
-        using var smoothedDeviationBuffer = context.Rent(count);
-        using var gainBuffer = context.Rent(count);
-        using var lossBuffer = context.Rent(count);
-
-        // The deviation of the window about its own mean, which is what GetStandardDeviationList computes
-        // for the batch, not the residual from a moving average.
-        VolatilityCore.StandardDeviation(input, deviationBuffer.WritableSpan, Math.Max(1, length1));
-        MovingAverage(data, maType, length2, deviationBuffer.Span, smoothedDeviationBuffer.WritableSpan);
-
-        var smoothedDeviation = smoothedDeviationBuffer.Span;
-        var gain = gainBuffer.WritableSpan;
-        var loss = lossBuffer.WritableSpan;
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var signalWindow = new RollingSum();
-        for (var i = 0; i < count; i++)
-        {
-            var lookback = DynamicMomentumPeriod.Calculate(deviationBuffer.Span[i], smoothedDeviation[i], length3, dnLimit, upLimit);
-
-            var change = CalculationsHelper.MinPastValues(i, 1, input[i] - (i >= 1 ? input[i - 1] : 0));
-            gain[i] = change > 0 ? change : 0;
-            loss[i] = change < 0 ? Math.Abs(change) : 0;
-
-            var window = Math.Min(lookback, i + 1);
-            double gainSum = 0;
-            double lossSum = 0;
-            for (var j = i - window + 1; j <= i; j++)
-            {
-                gainSum += gain[j];
-                lossSum += loss[j];
-            }
-
-            var averageGain = gainSum / window;
-            var averageLoss = lossSum / window;
-            var strength = averageLoss != 0 ? averageGain / averageLoss : 0;
-
-            var line = averageLoss == 0 ? 100 : averageGain == 0 ? 0 : 100 - (100 / (1 + strength));
-            signalWindow.Add(line);
-            var signal = signalWindow.Average(lookback);
-            output[i] = outputKey == "Signal" ? signal : outputKey == "Histogram" ? line - signal : line;
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var means = !StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides ? DynamicMomentumWindow.Components(data, input, maType, length1, length2, true) : null;
+        using var window = new DynamicMomentumWindow(maType, length1, length2, length3, dnLimit, upLimit); var output = context.Rent(input.Count);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); output.WritableSpan[i] = outputKey == "Signal" ? point.SignalLine : outputKey == "Histogram" ? point.Histogram : point.Line; }
+        return output;
     }
 
     /// <summary>
