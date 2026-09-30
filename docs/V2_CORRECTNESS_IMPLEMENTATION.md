@@ -3628,3 +3628,12 @@ Demand Index preserves its rounded pressure, percentage, volume, ratio and final
 **39/39 focused tests passed** (`demand-index-625-final.trx`): four public configurations across five routes, selected sources, injected output faults, numerical classes, independent staged fractions, subnormal volumes, wide ranges, overflow recovery, preview/reset, native rejection and span bounds. The existing hand example now uses `-0.6666666666666667`, obtained by rounding one-third before subtracting one. The first compile lacked a reference namespace import; the initial test run exposed forced-streaming enrollment and signed-denominator gaps. Both were corrected before the final complete focused pass.
 
 **Mutation qualification is pending** for 24 prepared faults; all 6,442 retained mutation anchors passed preflight. Candidate and frozen snapshots agree on 2,111 files. Prepared inventory is **6,087/7,131 enrollments**, with **1,044 omissions across 152 types**. This is a source checkpoint, not completion of numerical coverage or hosted/package/release/performance gates.
+
+
+### Batch 612: Better Volume mutation qualification
+
+The isolated campaigns `612a` and `612b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **72/72 focused tests**. Both archives were compared byte-for-byte with the retained batch-612 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `337fce7ad7ac1d0466d36b5720c4ebf4bc0ab41bb17eb57458ebda7974ec4a6b`. Archive SHA256: `5114c484280017ff3f0f53d0abdd979963fa02b820de5d12906321398e1cb955` and `5114c484280017ff3f0f53d0abdd979963fa02b820de5d12906321398e1cb955`.
+
+This is evidence for the isolated batch-612 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 613 through 625 and the remaining final gates is still incomplete.
