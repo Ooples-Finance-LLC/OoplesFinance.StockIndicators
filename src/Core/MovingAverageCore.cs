@@ -1752,66 +1752,13 @@ internal static class MovingAverageCore
 
     /// <summary>
     /// Computes Corrected Moving Average using span-based computation.
-    /// Uses SMA + variance with iterative k calculation.
+    /// Uses rounded population deviation and the exact attracting gain fixed point.
     /// </summary>
     internal static void CorrectedMovingAverage(ReadOnlySpan<double> input, Span<double> output, int length = 35)
     {
-        if (output.Length < input.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        // First compute SMA
-        var smaBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        var varianceBuffer = ArrayPool<double>.Shared.Rent(input.Length);
-        try
-        {
-            var sma = smaBuffer.AsSpan(0, input.Length);
-            var variance = varianceBuffer.AsSpan(0, input.Length);
-
-            SimpleMovingAverage(input, sma, length);
-
-            // Compute variance
-            double sum = 0, sqSum = 0;
-            for (var i = 0; i < input.Length; i++)
-            {
-                var currentValue = input[i];
-                var oldValue = i >= length ? input[i - length] : 0;
-                sum += currentValue - oldValue;
-                sqSum += (currentValue * currentValue) - (oldValue * oldValue);
-
-                var n = Math.Min(i + 1, length);
-                var mean = n > 0 ? sum / n : 0;
-                var meanSq = n > 0 ? sqSum / n : 0;
-                variance[i] = meanSq - (mean * mean);
-                variance[i] = Math.Max(0, variance[i]);
-            }
-
-            for (var i = 0; i < input.Length; i++)
-            {
-                var smaVal = sma[i];
-                var prevCma = i >= 1 ? output[i - 1] : smaVal;
-                var v1 = variance[i];
-                var v2 = Math.Pow(prevCma - smaVal, 2);
-                var v3 = v1 == 0 || v2 == 0 ? 1 : v2 / (v1 + v2);
-
-                // Iterative k calculation
-                double tolerance = Math.Pow(10, -5), err = 1, kPrev = 1, k = 1;
-                for (var j = 0; j <= 5000 && err > tolerance; j++)
-                {
-                    k = v3 * kPrev * (2 - kPrev);
-                    err = Math.Abs(kPrev - k);
-                    kPrev = k;
-                }
-
-                output[i] = prevCma + (k * (smaVal - prevCma));
-            }
-        }
-        finally
-        {
-            ArrayPool<double>.Shared.Return(smaBuffer);
-            ArrayPool<double>.Shared.Return(varianceBuffer);
-        }
+        if (output.Length < input.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new CorrectedAverageWindow(MovingAvgType.SimpleMovingAverage, length);
+        for (var i = 0; i < input.Length; i++) output[i] = window.Next(input[i], true).Value;
     }
 
     /// <summary>

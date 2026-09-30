@@ -496,42 +496,12 @@ public static partial class Calculations
     public static StockData CalculateCorrectedMovingAverage(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, 
         int length = 35)
     {
-        List<double> cmaList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
+        var (input, _, _, _, _) = GetInputValuesList(stockData); var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? CorrectedAverageWindow.Components(stockData, input, maType, length) : null; using var window = new CorrectedAverageWindow(maType, length, external);
+        var values = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, means?[i]); values.Add(point.Value); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Cma", values } }); stockData.SetSignals(signals); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.CorrectedMovingAverage; return stockData;
 
-        var smaList = GetMovingAverageList(stockData, maType, length, inputList);
-        // Uhl's v1 is the variance of the source over the window: a plain population variance of the prices.
-        var stdDevList = GetStandardDeviationList(inputList, length);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var sma = smaList[i];
-            var prevCma = i >= 1 ? cmaList[i - 1] : sma;
-            var v1 = stdDevList[i] * stdDevList[i];
-            var v2 = Pow(prevCma - sma, 2);
-            // Exact attracting fixed point; truncating the iteration leaves a spurious gain
-            // when the variance is at or above the squared displacement.
-            var k = v1 == 0 ? 1 : v2 <= v1 ? 0 : 1 - v1 / v2;
-
-            // Seeded at the average until the window is full, as the original's na(cma[1]) ? sma.
-            var cma = i < length ? sma : prevCma + (k * (sma - prevCma));
-            cmaList.Add(cma);
-
-            var signal = GetCompareSignal(currentValue - cma, prevValue - prevCma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Cma", cmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(cmaList);
-        stockData.IndicatorName = IndicatorName.CorrectedMovingAverage;
-
-        return stockData;
     }
 
 

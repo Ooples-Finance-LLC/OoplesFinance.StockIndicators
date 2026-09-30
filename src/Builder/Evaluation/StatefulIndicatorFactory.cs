@@ -828,6 +828,8 @@ internal static partial class StatefulIndicatorFactory
             FastSlowStochasticOscillatorSpecOptions => new FastandSlowStochasticOscillatorState(),
             ChandeMomentumOscillatorAverageDisparityIndexSpecOptions => new ChandeMomentumOscillatorAverageDisparityIndexState(),
             ChandeKrollRSquaredIndexSpecOptions kroll => new ChandeKrollRSquaredIndexState(kroll.MaType, kroll.Length),
+            DTOscillatorSpecOptions dt => new DTOscillatorState(dt.MaType, dt.Length),
+            CorrectedMovingAverageSpecOptions corrected => new CorrectedMovingAverageState(corrected.MaType, corrected.Length),
             CoralTrendIndicatorSpecOptions coral => new CoralTrendIndicatorState(coral.Length),
             ConstanceBrownCompositeIndexSpecOptions brown => new ConstanceBrownCompositeIndexState(brown.MaType, brown.FastLength, brown.SlowLength, brown.Length1, brown.Length2, brown.SmoothLength),
             ChandeCompositeMomentumIndexSpecOptions => new ChandeCompositeMomentumIndexState(),

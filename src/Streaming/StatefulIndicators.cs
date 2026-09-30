@@ -5180,68 +5180,14 @@ public sealed class DirectionalTrendIndexState : IStreamingIndicatorState, IDisp
 [PrimaryOutput("Dto")]
 public sealed class DTOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RsiState _rsi;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly RollingWindowMin _minWindow;
-    private readonly RollingWindowSum _stoSum;
-    private readonly RollingWindowSum _skSum;
-    private readonly StreamingInputResolver _input;
-
-    public DTOscillatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length1 = 13, int length2 = 8,
-        int length3 = 5, int length4 = 3)
-    {
-        _rsi = new RsiState(maType, Math.Max(1, length1));
-        _maxWindow = new RollingWindowMax(Math.Max(1, length2));
-        _minWindow = new RollingWindowMin(Math.Max(1, length2));
-        _stoSum = new RollingWindowSum(Math.Max(1, length3));
-        _skSum = new RollingWindowSum(Math.Max(1, length4));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly DtOscillatorWindow _window;
+    public DTOscillatorState(MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length1 = 13, int length2 = 8, int length3 = 5, int length4 = 3) => _window = new(maType, length1, length2, length3, length4);
     public IndicatorName Name => IndicatorName.DTOscillator;
-
-    public void Reset()
-    {
-        _rsi.Reset();
-        _maxWindow.Reset();
-        _minWindow.Reset();
-        _stoSum.Reset();
-        _skSum.Reset();
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var wima = _rsi.Next(value, isFinal);
-        var highest = isFinal ? _maxWindow.Add(wima, out _) : _maxWindow.Preview(wima, out _);
-        var lowest = isFinal ? _minWindow.Add(wima, out _) : _minWindow.Preview(wima, out _);
-        var stoRsi = highest - lowest != 0 ? MathHelper.MinOrMax(100 * (wima - lowest) / (highest - lowest), 100, 0) : 0;
-        var stoSum = isFinal ? _stoSum.Add(stoRsi, out var stoCount) : _stoSum.Preview(stoRsi, out stoCount);
-        var sk = stoCount > 0 ? stoSum / stoCount : 0;
-        var skSum = isFinal ? _skSum.Add(sk, out var skCount) : _skSum.Preview(sk, out skCount);
-        var sd = skCount > 0 ? skSum / skCount : 0;
+    { StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, isFinal); return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Dto", point.Line }, { "Signal", point.SignalLine } } : null); }
+    public void Dispose() => _window.Dispose();
 
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Dto", sk },
-                { "Signal", sd }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(sk, outputs);
-    }
-
-    public void Dispose()
-    {
-        _rsi.Dispose();
-        _maxWindow.Dispose();
-        _minWindow.Dispose();
-        _stoSum.Dispose();
-        _skSum.Dispose();
-    }
 }
 
 [PrimaryOutput("Roc")]
@@ -7102,82 +7048,14 @@ public sealed class ConstanceBrownCompositeIndexState : IStreamingIndicatorState
 [PrimaryOutput("Cma")]
 public sealed class CorrectedMovingAverageState : IStreamingIndicatorState, IDisposable
 {
-    private readonly int _length;
-    private readonly IMovingAverageSmoother _smaSmoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly StreamingInputResolver _input;
-    private double _prevCma;
-    private int _count;
-
-    public CorrectedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 35)
-    {
-        _length = Math.Max(1, length);
-        _smaSmoother = MovingAverageSmootherFactory.Create(maType, _length);
-        _stdDev = new RollingStandardDeviation(_length);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly CorrectedAverageWindow _window;
+    public CorrectedMovingAverageState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 35) => _window = new(maType, length);
     public IndicatorName Name => IndicatorName.CorrectedMovingAverage;
-
-    public void Reset()
-    {
-        _smaSmoother.Reset();
-        _stdDev.Reset();
-        _prevCma = 0;
-        _count = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
-    {
-        var value = _input.GetValue(bar);
-        var sma = _smaSmoother.Next(value, isFinal);
-        // Uhl's v1 is the variance of the source over the window. It was the variance of the SMA around an
-        // average of the SMA, copying a batch that read the SMA left on CustomValuesList as its source.
-        var stdDev = _stdDev.Next(value, isFinal);
-        var v1 = stdDev * stdDev;
+    { StreamingInputValidation.Validate(bar); var value = _window.Next(bar.Close, isFinal).Value; return new(value, includeOutputs ? new Dictionary<string, double> { { "Cma", value } } : null); }
+    public void Dispose() => _window.Dispose();
 
-        double cma;
-        if (_count < _length)
-        {
-            // Seeded at the average until the window is full, as the original's na(cma[1]) ? sma.
-            cma = sma;
-        }
-        else
-        {
-            var v2 = MathHelper.Pow(_prevCma - sma, 2);
-            // Exact attracting fixed point; truncating the iteration leaves a spurious gain
-            // when the variance is at or above the squared displacement.
-            var k = v1 == 0 ? 1 : v2 <= v1 ? 0 : 1 - v1 / v2;
-
-            cma = _prevCma + (k * (sma - _prevCma));
-        }
-
-        if (isFinal)
-        {
-            _prevCma = cma;
-            if (_count < _length)
-            {
-                _count++;
-            }
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(1)
-            {
-                { "Cma", cma }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(cma, outputs);
-    }
-
-    public void Dispose()
-    {
-        _smaSmoother.Dispose();
-        _stdDev.Dispose();
-    }
 }
 
 [PrimaryOutput("Cwma")]

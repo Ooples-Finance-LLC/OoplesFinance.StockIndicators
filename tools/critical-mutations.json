@@ -54221,5 +54221,653 @@
     "before": "CoralTrendWindow.Compute(input, output, length, cd)",
     "after": "CoralTrendWindow.Compute(input, output, length, .4)",
     "filter": "FullyQualifiedName~CoralTrendNumericalTests.HandOpeningPolynomialAndUnitPeriodCancellationArePreserved"
+  },
+  {
+    "id": "corrected-average-wide-period",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "var expired = full ? _history.Peek()",
+    "after": "var expired = !full ? _history.Peek()",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-sum",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_sum + current - expired",
+    "after": "_sum + current + expired",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-squares",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_squares + current * current - expired * expired",
+    "after": "_squares + current * current + expired * expired",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-ready",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_history.Count >= _length - 1",
+    "after": "_history.Count > _length",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-deviation",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "ExactPopulationDeviation.RootRatio(_length * squares - sum * sum, (BigInteger)_length * _length)",
+    "after": "ExactPopulationDeviation.RootRatio(_length * squares - sum * sum, (BigInteger)_length * _length * 4)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-variance-scale",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "RoundUnits(sigma * sigma, Unit)",
+    "after": "RoundUnits(sigma * sigma, 2 * Unit)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-variance-projection",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "var variance = RocBankValue.RoundUnits(sigma * sigma, Unit)",
+    "after": "var variance = ExactVarianceWindow.Units(deviation * deviation)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-history-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "if (full) _history.Dequeue();",
+    "after": "if (_history.Count > _length) _history.Dequeue();",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-seed",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_count == 0 ? mean : _previous",
+    "after": "_previous",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.CustomMeansPreserveInitialResidualAndWideCorrections"
+  },
+  {
+    "id": "corrected-average-wide-displacement",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "RoundUnits(mean - previous, BigInteger.One)",
+    "after": "RoundUnits(mean + previous, BigInteger.One)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-distance-scale",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "RoundUnits(displacement * displacement, Unit)",
+    "after": "RoundUnits(displacement * displacement, 2 * Unit)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-flat-gain",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "variance.IsZero ? 1",
+    "after": "variance.IsZero ? 0",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-gain-boundary",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "distance <= variance ? 0",
+    "after": "distance <= variance ? 1",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-gain-ratio",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "UnitRatio(variance * Unit, distance)",
+    "after": "UnitRatio(variance * Unit, distance * 2)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-gain-complement",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "1 - ExactMeanAccumulator.UnitRatio",
+    "after": "0.5 - ExactMeanAccumulator.UnitRatio",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-step",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "RoundUnits(displacement * ExactVarianceWindow.Units(gain), Unit)",
+    "after": "RoundUnits(displacement * ExactVarianceWindow.Units(gain), 2 * Unit)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_count < _length ? mean",
+    "after": "_count < _length - 1 ? mean",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-blend",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "RoundUnits(previous + step, BigInteger.One)",
+    "after": "RoundUnits(previous - step, BigInteger.One)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-spread",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "var spread = current - line",
+    "after": "var spread = line - current",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-prior-price",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "var priorSpread = _previousPrice - previous",
+    "after": "var priorSpread = -previous",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-prior-level",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "var priorSpread = _previousPrice - previous",
+    "after": "var priorSpread = _previousPrice - line",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "? Signal.StrongBuy : spread.Sign",
+    "after": "? Signal.Buy : spread.Sign",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "? Signal.StrongSell\n",
+    "after": "? Signal.Sell\n",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "if (commit)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-line-memory",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_previous = line;",
+    "after": "_previous = mean;",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_previousPrice = current;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-warmup-count",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "if (_count < _length) _count++;",
+    "after": "if (_count < _length - 1) _count++;",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "corrected-average-wide-reset-count",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_count = 0; _average?.Reset();",
+    "after": "_average?.Reset();",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-reset-average",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "_average?.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/CorrectedAverageWindow.cs",
+    "scope": "internal sealed class CorrectedAverageWindow",
+    "before": "if (_history.Count == _length) _history.Peek().AddTo(ref sum, -1);",
+    "after": "if (_history.Count > _length) _history.Peek().AddTo(ref sum, -1);",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.WideMomentsDisplacementsAndRoundedStagesMatchIndependentFractions"
+  },
+  {
+    "id": "corrected-average-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeCorrectedMovingAverageFast",
+    "before": "window.Next(input[i], true, means?[i])",
+    "after": "window.Next(data.ClosePrices[i], true, means?[i])",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.SelectedPricesAndLegacyMeansPreserveAllRoutes"
+  },
+  {
+    "id": "corrected-average-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CorrectedMovingAverageState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.InvalidCandlesCannotAdvanceMomentsOrCorrection"
+  },
+  {
+    "id": "corrected-average-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class CorrectedMovingAverageState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "corrected-average-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/MovingAverageCore.cs",
+    "scope": "internal static void CorrectedMovingAverage",
+    "before": "MovingAvgType.SimpleMovingAverage, length)",
+    "after": "MovingAvgType.SimpleMovingAverage, 1)",
+    "filter": "FullyQualifiedName~CorrectedAverageNumericalTests.HandWarmupFlatVarianceAndZeroGainStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-rsi-period",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_recursive = new(kind, rsi)",
+    "after": "_recursive = new(kind, 1)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-recursive-kind",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_recursive = new(kind, rsi)",
+    "after": "_recursive = new(MovingAvgType.WildersSmoothingMethod, rsi)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_rangeLength = Math.Max(1, range)",
+    "after": "_rangeLength = 1",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-line-period",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_line = new(first)",
+    "after": "_line = new(second)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_signal = new(second)",
+    "after": "_signal = new(first)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-range-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_count - _rangeLength + 1L",
+    "after": "_count - _rangeLength",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.TinyRangesExtremaExpiryAndPreviewAreIndependent"
+  },
+  {
+    "id": "dt-oscillator-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "if (final)\n        {\n            while (deque.First",
+    "after": "if (true)\n        {\n            while (deque.First",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.TinyRangesExtremaExpiryAndPreviewAreIndependent"
+  },
+  {
+    "id": "dt-oscillator-wide-range-prune",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "maximum ? last.Value.Value <= value : last.Value.Value >= value",
+    "after": "maximum ? last.Value.Value >= value : last.Value.Value <= value",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.TinyRangesExtremaExpiryAndPreviewAreIndependent"
+  },
+  {
+    "id": "dt-oscillator-wide-external-rsi",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "rsi = externalRsi.Value",
+    "after": "rsi = 50",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.CustomRsiCallbacksKeepBatchAndFastRequestTopology"
+  },
+  {
+    "id": "dt-oscillator-wide-first-change",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "if (_count > 0) { difference.Add(price);",
+    "after": "if (_count >= 0) { difference.Add(price);",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-change-sign",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "difference.Add(_previousPrice, -1)",
+    "after": "difference.Add(_previousPrice, 1)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-gain-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "change.Mantissa > 0 ? change : default",
+    "after": "change.Mantissa < 0 ? change : default",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-loss-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "change.Mantissa < 0 ? new RocBankValue",
+    "after": "change.Mantissa > 0 ? new RocBankValue",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-rsi-scale",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "up.AddTo(ref numerator, 100)",
+    "after": "up.AddTo(ref numerator, 50)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-rsi-loss",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "down.AddTo(ref total);",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-upper-window",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "Extreme(_highs, rsi, true, final)",
+    "after": "Extreme(_highs, rsi, false, final)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-lower-window",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "Extreme(_lows, rsi, false, final)",
+    "after": "Extreme(_lows, rsi, true, final)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-stochastic-direction",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "Percent(rsi, low, high)",
+    "after": "Percent(rsi, high, low)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.TinyRangesExtremaExpiryAndPreviewAreIndependent"
+  },
+  {
+    "id": "dt-oscillator-wide-signal-source",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_signal.Next(line, final)",
+    "after": "_signal.Next(stochastic, final)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-signal-slope",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "Units(signalLine) - ExactVarianceWindow.Units(_previousSignal)",
+    "after": "Units(line) - ExactVarianceWindow.Units(_previousSignal)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "? Signal.StrongBuy : slope.Sign",
+    "after": "? Signal.Buy : slope.Sign",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "? Signal.StrongSell\n",
+    "after": "? Signal.Sell\n",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-state-preview",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "if (final) { _count++;",
+    "after": "if (true) { _count++;",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_previousSignal = signalLine;",
+    "after": "_previousSignal = line;",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_previousSlope = slope;",
+    "after": "_previousSlope = default;",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = default;",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-reset-range",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_highs.Clear(); _lows.Clear();",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-reset-line",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_line.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "_signal.Reset();",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "if (_history.Count == _length) sum.Add(_history.Peek(), -1);",
+    "after": "if (_history.Count > _length) sum.Add(_history.Peek(), -1);",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-partial-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "sum.Mean(Math.Min(_length, _history.Count + 1L))",
+    "after": "sum.Mean(_length)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.HandFlatRangeAndAvailableObservationDivisorsStayExact"
+  },
+  {
+    "id": "dt-oscillator-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/DtOscillatorWindow.cs",
+    "scope": "internal sealed class DtOscillatorWindow",
+    "before": "weighted.Subtract(sum);",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeDTOscillatorFast",
+    "before": "outputKey == \"Signal\" ? point.SignalLine : point.Line",
+    "after": "outputKey == \"Signal\" ? point.Line : point.SignalLine",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
+  },
+  {
+    "id": "dt-oscillator-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DTOscillatorState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.InvalidCandlesCannotAdvanceRsiRangesOrMeans"
+  },
+  {
+    "id": "dt-oscillator-wide-native-source",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.cs",
+    "scope": "public sealed class DTOscillatorState",
+    "before": "_window.Next(bar.Close, isFinal)",
+    "after": "_window.Next(bar.High, isFinal)",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.SelectedSourcePreservesCandles"
+  },
+  {
+    "id": "dt-oscillator-wide-core-period",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void DTOscillator",
+    "before": "rsiLength, stochLength, smaLength, 3",
+    "after": "rsiLength, stochLength, 1, 3",
+    "filter": "FullyQualifiedName~DtOscillatorNumericalTests.WideDifferencesRangesAndBothPartialMeansMatchIndependentFractions"
   }
 ]

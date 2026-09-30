@@ -3610,3 +3610,12 @@ The corrected isolated campaigns `611ra` and `611rb` passed their baselines and 
 Source snapshot SHA256: `db7de6244ed9ccf8c36a9937d5d2dd7ba64ef0c7b76584e293aa82bc7606ff21`. Archive SHA256: `3e9fbe6da3a3dff1c502ff549acdabda078405375f379adc5677f2d842331f17` and `3e9fbe6da3a3dff1c502ff549acdabda078405375f379adc5677f2d842331f17`.
 
 This is evidence for the isolated batch-611 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 612–624 and the remaining final gates is still incomplete.
+
+
+### Prepared source checkpoint: batches 623–624
+
+Corrected Moving Average preserves rounded deviation, gain and blend stages with lazy histories across batch, fast, native and core routes. Its independent reference and focused checks passed **48/48** (`corrected-average-623.trx`).
+
+DTOscillator preserves RSI, available-observation smoothing, both outputs and existing callback contracts, with lazy finite-window histories. All **50 selected tests** have passing evidence: 49 DTOscillator passes in `dt-oscillator-624-and-bayesian-followup.trx`, then the corrected callback regression passed in `dt-oscillator-624-callback-final.trx`. The initial combined run failed that callback test; it is not a passing combined-suite result. Production did not change for the test correction.
+
+This checkpoint publishes the prepared source at the user's request. **Mutation qualification remains pending for 623–624**, with 36 faults each; qualification is complete through 611. Prepared inventory is 6,083/7,131 numerical enrollments, with 1,048 omissions across 153 types. Full numerical coverage and hosted/package/release/performance gates remain incomplete.

@@ -2977,42 +2977,9 @@ internal static class OscillatorCore
     /// </summary>
     internal static void DTOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int rsiLength = 13, int stochLength = 8, int smaLength = 5)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        rsiLength = Math.Max(1, rsiLength);
-        stochLength = Math.Max(1, stochLength);
-        smaLength = Math.Max(1, smaLength);
-        var pool = ArrayPool<double>.Shared;
-        var rsiArray = pool.Rent(close.Length);
-        var stochArray = pool.Rent(close.Length);
-
-        try
-        {
-            var rsi = rsiArray.AsSpan(0, close.Length);
-            var stoch = stochArray.AsSpan(0, close.Length);
-
-            // Calculate RSI
-            RelativeStrengthIndex(close, rsi, rsiLength);
-
-            // Apply stochastic to RSI
-            StochasticKOnValues(rsi, stoch, stochLength);
-
-            // Smooth with SMA
-            var sum = new RollingSum();
-            for (var i = 0; i < close.Length; i++)
-            {
-                sum.Add(stoch[i]);
-                output[i] = sum.Average(smaLength);
-            }
-        }
-        finally
-        {
-            pool.Return(rsiArray);
-            pool.Return(stochArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        using var window = new DtOscillatorWindow(MovingAvgType.WildersSmoothingMethod, rsiLength, stochLength, smaLength, 3);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(close[i], true).Line;
     }
 
     /// <summary>

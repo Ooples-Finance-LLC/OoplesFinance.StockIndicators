@@ -34,29 +34,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Dpso", line), ("Signal", Average(line, 3, 6)));
                 });
             case IndicatorName.DTOscillator:
-                kind = AverageKind(options, 6);
-                if (kind == 0) return null;
-                var dtLength = Integer(options, "Length", 13);
-                return new("Dto", new[] { "Dto", "Signal" }, bars =>
-                {
-                    var changes = bars.Select((b, i) => i == 0 ? 0 : b.Close - bars[i - 1].Close).ToArray();
-                    var gains = Average(changes.Select(change => Math.Max(0, change)).ToArray(), dtLength, kind);
-                    var losses = Average(changes.Select(change => Math.Max(0, -change)).ToArray(), dtLength, kind);
-                    var rsi = gains.Select((gain, i) => losses[i] == 0 ? 100 : 100 * gain / (gain + losses[i])).ToArray();
-                    if (dtLength > 1 && (kind == 3 || kind == 6))
-                        for (var i = 1; i < rsi.Length; i++)
-                            if (changes[i] == 0) rsi[i] = rsi[i - 1];
-                    var stochastic = rsi.Select((value, i) =>
-                    {
-                        var window = Window(rsi, i, 8).ToArray();
-                        var lower = window.Min();
-                        var range = window.Max() - lower;
-                        return range == 0 ? 0 : 100 * (value - lower) / range;
-                    }).ToArray();
-                    // DT uses arithmetic smoothing with available observations during startup.
-                    var line = stochastic.Select((_, i) => Window(stochastic, i, 5).Average()).ToArray();
-                    return Outputs(("Dto", line), ("Signal", line.Select((_, i) => Window(line, i, 3).Average()).ToArray()));
-                });
+                if (AverageKind(options, 6) == 0) return null;
+                return new("Dto", new[] { "Dto", "Signal" }, bars => DtOscillatorOutputs(bars, indicator));
             case IndicatorName.ConnorsRelativeStrengthIndex:
             case IndicatorName.StochasticConnorsRelativeStrengthIndex:
             case IndicatorName.QuasiWhiteNoise:

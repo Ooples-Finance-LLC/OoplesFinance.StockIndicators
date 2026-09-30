@@ -369,24 +369,8 @@ internal static partial class BuiltInFormulaReferences
             case IndicatorName.CoralTrendIndicator:
                 return new("Cti", new[] { "Cti" }, bars => CoralTrendOutputs(bars, indicator));
             case IndicatorName.CorrectedMovingAverage:
-                var correctedKind = AverageKind(options, 1);
-                if (correctedKind == 0) return null;
-                return new("Cma", new[] { "Cma" }, bars =>
-                {
-                    var mean = Average(Closes(bars), length, correctedKind);
-                    var variance = PopulationVariance(Closes(bars), length);
-                    var result = new double[bars.Count];
-                    for (var i = 0; i < result.Length; i++)
-                    {
-                        if (i < length) { result[i] = mean[i]; continue; }
-                        var difference = mean[i] - result[i - 1];
-                        // Nonnegative fixed point of k = v3*k*(2-k):
-                        // k=max(0,1-variance/difference^2), then cancel one difference.
-                        result[i] = variance[i] == 0 ? mean[i] : difference * difference <= variance[i]
-                            ? result[i - 1] : mean[i] - variance[i] / difference;
-                    }
-                    return Outputs(("Cma", result));
-                });
+                if (AverageKind(options, 1) == 0) return null;
+                return new("Cma", new[] { "Cma" }, bars => CorrectedAverageOutputs(bars, indicator));
             case IndicatorName.BryantAdaptiveMovingAverage:
                 return new("Bama", new[] { "Bama" }, bars => BryantOutputs(bars, indicator));
             case IndicatorName.AtrFilteredExponentialMovingAverage:

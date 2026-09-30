@@ -7410,47 +7410,11 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeDTOscillatorFast(StockData data, ComputeContext context, int length1 = 13,
         MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length2 = 8, int length3 = 5, int length4 = 3, string? outputKey = null)
     {
-        // DT ranges RSI, then applies two arithmetic smoothing passes.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-
-        using var smoothedBuffer = context.Rent(count);
-        var smoothed = smoothedBuffer.WritableSpan;
-        RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(inputList), length1, maType, smoothed);
-
-        var window = new RollingMinMax(Math.Max(length2, 1));
-        var stochasticSum = new RollingSum();
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var value = smoothed[i];
-            window.Add(value);
-
-            var range = window.Max - window.Min;
-            var stochastic = range != 0
-                ? MathHelper.MinOrMax(100 * (value - window.Min) / range, 100, 0)
-                : 0;
-
-            stochasticSum.Add(stochastic);
-            output[i] = stochasticSum.Average(length3);
-        }
-
-        if (outputKey == "Signal")
-        {
-            var signal = context.Rent(count);
-            var sum = new RollingSum();
-            for (var i = 0; i < count; i++)
-            {
-                sum.Add(output[i]);
-                signal.WritableSpan[i] = sum.Average(length4);
-            }
-            buffer.Dispose();
-            return signal;
-        }
-        return buffer;
+        length1 = Math.Max(1, length1); var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
+        var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); double[]? rsi = null;
+        if (external) { var caller = data.CaptureInputSeries(); rsi = new double[input.Count]; RelativeStrengthIndex(data, context, SpanCompat.AsReadOnlySpan(input), length1, maType, rsi); data.RestoreInputSeries(caller); }
+        using var window = new DtOscillatorWindow(maType, length1, length2, length3, length4, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, rsi?[i]); output.WritableSpan[i] = outputKey == "Signal" ? point.SignalLine : point.Line; } return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>
@@ -11991,43 +11955,11 @@ internal static partial class IndicatorCompute
     /// <summary>
     /// Computes Corrected Moving Average using zero-allocation fast path.
     /// </summary>
-    internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context,
-        int length = 35, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+    internal static ComputeBuffer ComputeCorrectedMovingAverageFast(StockData data, ComputeContext context, int length = 35, MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
     {
-        // CalculateCorrectedMovingAverage pulls an average towards the price only as far as the last
-        // correction was large compared with the variance of the window, so a quiet window barely moves it.
-        // The average underneath takes whichever type the indicator was given.
-        var (inputList, _, _, _, _) = CalculationsHelper.GetInputValuesList(data);
-        var count = inputList.Count;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-
-        using var averageBuffer = context.Rent(count);
-        var average = averageBuffer.WritableSpan;
-        MovingAverage(data, maType, length, input, average);
-
-        using var stdDevBuffer = context.Rent(count);
-        var stdDev = stdDevBuffer.WritableSpan;
-        VolatilityCore.StandardDeviation(input, stdDev, Math.Max(1, length));
-
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        for (var i = 0; i < count; i++)
-        {
-            var sma = average[i];
-            var previousCma = i >= 1 ? output[i - 1] : sma;
-            var v1 = stdDev[i] * stdDev[i];
-            var v2 = MathHelper.Pow(previousCma - sma, 2);
-            // Exact attracting fixed point; truncating the iteration leaves a spurious gain
-            // when the variance is at or above the squared displacement.
-            var k = v1 == 0 ? 1 : v2 <= v1 ? 0 : 1 - v1 / v2;
-
-            // Seeded at the average until the window is full, as the batch does.
-            output[i] = i < length ? sma : previousCma + (k * (sma - previousCma));
-        }
-
-        return buffer;
+        var (input, _, _, _, _) = CalculationsHelper.GetInputValuesList(data); var external = ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType);
+        var means = external ? CorrectedAverageWindow.Components(data, input, maType, length) : null; using var window = new CorrectedAverageWindow(maType, length, external); var output = context.Rent(input.Count);
+        try { for (var i = 0; i < input.Count; i++) output.WritableSpan[i] = window.Next(input[i], true, means?[i]).Value; return output; } catch { output.Dispose(); throw; }
     }
 
     /// <summary>

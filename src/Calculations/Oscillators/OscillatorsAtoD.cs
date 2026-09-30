@@ -1522,53 +1522,14 @@ public static partial class Calculations
     public static StockData CalculateDTOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.WildersSmoothingMethod, int length1 = 13, 
         int length2 = 8, int length3 = 5, int length4 = 3)
     {
-        length1 = Math.Max(1, length1);
-        length2 = Math.Max(1, length2);
-        length3 = Math.Max(1, length3);
-        length4 = Math.Max(1, length4);
-        List<double> stoRsiList = new(stockData.Count);
-        List<double> skList = new(stockData.Count);
-        List<double> sdList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, _) = GetInputValuesList(stockData);
-        var stoRsiSumWindow = new RollingSum();
-        var skSumWindow = new RollingSum();
+        length1 = Math.Max(1, length1); var (input, _, _, _, _) = GetInputValuesList(stockData);
+        var external = Builder.Compute.ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType); List<double>? rsi = null;
+        if (external) { var caller = stockData.CaptureInputSeries(); rsi = CalculateRelativeStrengthIndex(stockData, maType, length1).ChainedValues; stockData.RestoreInputSeries(caller); }
+        using var window = new DtOscillatorWindow(maType, length1, length2, length3, length4, external);
+        var line = new List<double>(input.Count); var signalLine = new List<double>(input.Count); var signals = CreateSignalsList(stockData);
+        for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], true, rsi?[i]); line.Add(point.Line); signalLine.Add(point.SignalLine); signals?.Add(point.Signal); }
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Dto", line }, { "Signal", signalLine } }); stockData.SetSignals(signals); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.DTOscillator; return stockData;
 
-        var wilderMovingAvgList = CalculateRelativeStrengthIndex(stockData, maType, length1).ChainedValues;
-        var (highestList, lowestList) = GetMaxAndMinValuesList(wilderMovingAvgList, length2);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var wima = wilderMovingAvgList[i];
-            var highest = highestList[i];
-            var lowest = lowestList[i];
-            var prevSd1 = i >= 1 ? sdList[i - 1] : 0;
-            var prevSd2 = i >= 2 ? sdList[i - 2] : 0;
-
-            var stoRsi = highest - lowest != 0 ? MinOrMax(100 * (wima - lowest) / (highest - lowest), 100, 0) : 0;
-            stoRsiList.Add(stoRsi);
-
-            stoRsiSumWindow.Add(stoRsi);
-            var sk = stoRsiSumWindow.Average(length3);
-            skList.Add(sk);
-
-            skSumWindow.Add(sk);
-            var sd = skSumWindow.Average(length4);
-            sdList.Add(sd);
-
-            var signal = GetRsiSignal(sd - prevSd1, prevSd1 - prevSd2, sd, prevSd1, 70, 30);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Dto", skList },
-            { "Signal", sdList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(skList);
-        stockData.IndicatorName = IndicatorName.DTOscillator;
-
-        return stockData;
     }
 
 }
