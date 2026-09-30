@@ -63,6 +63,15 @@ public sealed class DrunkardWalkNumericalTests
         var result = Check(bars, 5); Assert.Equal(0, result.Outputs["UpWalk"][3]); Assert.Equal(0, result.Outputs["UpWalk"][5]);
         Assert.True(result.Outputs["UpWalk"][6] > 0); Check(bars.Select(b => B(-b.Low, -b.High, -b.Close)).ToArray(), 5);
         Check(Enumerable.Range(0, 20).Select(i => B(30 - i, i, i)).ToArray(), 7);
+        // After 1,2,3,3 the up walk repeats 1/sqrt(.5): a positive
+        // unchanged spread is Buy, not StrongBuy. Mirror it for Sell.
+        var plateau = new[] { 1d, 2, 3, 3 }.Select(v => B(v, v, v)).ToArray();
+        var plateauResult = Check(plateau, 3);
+        Assert.Equal(plateauResult.Outputs["UpWalk"][2], plateauResult.Outputs["UpWalk"][3]);
+        Assert.Equal(new[] { Signal.None, Signal.StrongBuy, Signal.StrongBuy, Signal.Buy }, plateauResult.Signals);
+        var mirrored = Check(plateau.Select(b => B(-b.Low, -b.High, -b.Close)).ToArray(), 3);
+        Assert.Equal(new[] { Signal.None, Signal.StrongSell, Signal.StrongSell, Signal.Sell }, mirrored.Signals);
+
     }
     [Fact]
     public void ExtremePeriodsAllocateOnlyObservedHistoryAndIgnoreLengthTwo()
@@ -78,6 +87,21 @@ public sealed class DrunkardWalkNumericalTests
         var calls = 0; using var armed = ComponentAverage.Arm((v, _) => { calls++; return v; }); var batch = Data(bars); batch.SetCustomValues(selected.ToList()); batch.CalculateDrunkardWalk(4);
         using var context = new ComputeContext(); foreach (var down in new[] { false, true }) { var data = Data(bars); data.SetCustomValues(selected.ToList()); using var output = IndicatorCompute.ComputeDrunkardWalkFast(data, context, 4, down: down); Assert.Equal(batch.OutputValues[down ? "DnWalk" : "UpWalk"], output.ToArray()); Assert.Equal(selected, data.ChainedValues); Assert.Equal(bars.Select(b => b.High), data.HighPrices); }
         Assert.Equal(0, calls);
+        // The first selected close lies outside its candle; the next selected
+        // close lies inside a narrow candle. Its true range must retain the gap.
+        var gapBars = new[] { B(9, 1, 4), B(6, 2, 4), B(8, 3, 5), B(4, 0, 2) };
+        var gapPrices = new[] { 20d, 3, 5, 2 };
+        var projected = new[] { B(20, 20, 20), B(6, 2, 3), B(8, 3, 5), B(4, 0, 2) };
+        var expected = BuiltInFormulaReferences.DrunkardWalkValues(projected, 3);
+        Assert.Equal(1, expected.Outputs["DnWalk"][1]);
+        var gapBatch = Data(gapBars); gapBatch.SetCustomValues(gapPrices.ToList()); gapBatch.CalculateDrunkardWalk(3);
+        foreach (var down in new[] { false, true })
+        {
+            var data = Data(gapBars); data.SetCustomValues(gapPrices.ToList()); using var output = IndicatorCompute.ComputeDrunkardWalkFast(data, context, 3, down: down);
+            var key = down ? "DnWalk" : "UpWalk"; Assert.Equal(expected.Outputs[key], gapBatch.OutputValues[key]); Assert.Equal(expected.Outputs[key], output.ToArray()); Assert.Equal(gapPrices, data.ChainedValues);
+        }
+        Assert.Equal(0, calls);
+
     }
     [Fact]
     public void InvalidCandlesCannotAdvanceEitherRangeAverage()

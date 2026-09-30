@@ -55465,13 +55465,13 @@
     "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
   },
   {
-    "id": "drunkard-wide-reset-gain",
+    "id": "drunkard-wide-range-weight",
     "module": "numerical",
     "file": "src/Helpers/DrunkardWalkWindow.cs",
     "scope": "internal sealed class DrunkardWalkWindow",
-    "before": "age == 0 ? 0 : 1d / age",
-    "after": "age == 0 ? 1 : 1d / age",
-    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.NewExtremeCarriesItsAverageAndRecentTiesResetTheAge"
+    "before": "range * ExactVarianceWindow.Units(gain)",
+    "after": "range * ExactVarianceWindow.Units(0)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.|FullyQualifiedName~FormulaContractCoverageTests.EventAndDistanceReferencesHaveExplicitAgeResidualAndCrossingExamples"
   },
   {
     "id": "drunkard-wide-carry",
@@ -55645,13 +55645,13 @@
     "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
   },
   {
-    "id": "drunkard-wide-reset-up",
+    "id": "drunkard-wide-root-age",
     "module": "numerical",
     "file": "src/Helpers/DrunkardWalkWindow.cs",
     "scope": "internal sealed class DrunkardWalkWindow",
-    "before": "_upAverage = _downAverage = _previousSpread = default;",
-    "after": "_downAverage = _previousSpread = default;",
-    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.HandAgeRootsTiesAndFlatWindowsStayDefined"
+    "before": "Math.Sqrt(age)",
+    "after": "Math.Sqrt(age + 1)",
+    "filter": "FullyQualifiedName~DrunkardWalkNumericalTests.|FullyQualifiedName~FormulaContractCoverageTests.EventAndDistanceReferencesHaveExplicitAgeResidualAndCrossingExamples"
   },
   {
     "id": "drunkard-wide-reset-extrema",
