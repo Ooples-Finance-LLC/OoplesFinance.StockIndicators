@@ -3952,3 +3952,12 @@ Freedom of Movement now retains relative-volume scores and absolute price moves 
 **50/50 selected tests passed on the first run**, in freedom-643.trx: **48 numerical cases** plus existing hand-normalization and cross-route regressions. Five configurations cover five routes and numerical classes; explicit cases exercise four supported means, legacy fallback, extreme periods, signed/wide/subnormal inputs, exhausted callbacks and invalid-candle nonmutation. The independent rational reference uses centered samples and explicit extrema scans. At N=5, four zero ratios followed by one nonzero ratio produce exactly2; Dpl changes to the previous price, including with subnormal volume variance. Wide positive/negative signal margins distinguish ordinary Buy/Sell from StrongBuy/StrongSell.
 
 **50 prepared mutation faults remain pending**; all **7,113 anchors** pass preflight. Candidate/frozen snapshots match on 2165 files. Prepared enrollment is **6,212/7,131**, leaving **919 omissions across134types**, with no construction failures. Built DLL SHA256: BB4A6A186A8ABED01D4824F400E136E868C60B9675EDF1B6981572B054E90D42. Mutation qualification remains separate; corrected627 and remaining628-643 campaigns, numerical coverage, pending formula decisions and hosted/package/release/performance gates are incomplete.
+
+
+### Batch 627: Drunkard mutation qualification
+
+The isolated campaigns `627-corrected-a` and `627-corrected-b` passed their baselines and caught **32/32 compiled behavioral faults**, alongside **71/71 focused tests**. Both archives were compared byte-for-byte with the retained corrected batch-627 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `fd0626aa505297ee6d7a142508f8dcfa768c2a81087509658566ef120363a25d`. Archive SHA256: `9efa1d5b48db19f5d04b3e55e1e48658565dd75f1d3431b115ee7d528a32eb0f` and `9efa1d5b48db19f5d04b3e55e1e48658565dd75f1d3431b115ee7d528a32eb0f`.
+
+This is evidence for the isolated batch-627 source. Source was already published in the batch-627 checkpoint; this update does not restore older source files. Mutation verification for batches 628 through 643 and the remaining final gates is still incomplete.
