@@ -73,6 +73,8 @@ public sealed class DtOscillatorNumericalTests
     {
         var result = External(new[] { 0d, 100, 0, 100 }, 2, 2, 2); Assert.Equal(new[] { 0d, 50, 50, 50 }, result.Outputs["Dto"]); Assert.Equal(new[] { 0d, 25, 50, 50 }, result.Outputs["Signal"]);
         Assert.Equal(new[] { Signal.None, Signal.StrongBuy, Signal.Buy, Signal.None }, result.Signals);
+        var startup = External(new[] { 0d, 100, 0, 100 }, 2, 4, 5);
+        Assert.Equal(50d, startup.Outputs["Dto"][1]); Assert.Equal(25d, startup.Outputs["Signal"][1]);
         Assert.All(Check(Bars(new[] { 1d, 2, 3, 4, 5 })).Outputs.Values.SelectMany(v => v), v => Assert.Equal(0, v));
         Assert.All(Check(Bars(new[] { 1d, -2, 3, 0, 4 }), range: 1).Outputs.Values.SelectMany(v => v), v => Assert.Equal(0, v));
     }
