@@ -1547,63 +1547,12 @@ public static partial class Calculations
     public static StockData CalculateFearAndGreedIndicator(this StockData stockData, MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
         int fastLength = 10, int slowLength = 30, int smoothLength = 2)
     {
-        List<double> trUpList = new(stockData.Count);
-        List<double> trDnList = new(stockData.Count);
-        List<double> fgiList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentValue = inputList[i];
-            // For TrueRange on first bar, use current close to avoid inflated TR
-            var prevValue = i >= 1 ? inputList[i - 1] : inputList[i];
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var tr = CalculationsHelper.CalculateTrueRange(currentHigh, currentLow, prevValue);
-
-            var trUp = currentValue > prevValue ? tr : 0;
-            trUpList.Add(trUp);
-
-            var trDn = currentValue < prevValue ? tr : 0;
-            trDnList.Add(trDn);
-        }
-
-        var fastTrUpList = GetMovingAverageList(stockData, maType, fastLength, trUpList);
-        var fastTrDnList = GetMovingAverageList(stockData, maType, fastLength, trDnList);
-        var slowTrUpList = GetMovingAverageList(stockData, maType, slowLength, trUpList);
-        var slowTrDnList = GetMovingAverageList(stockData, maType, slowLength, trDnList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var fastTrUp = fastTrUpList[i];
-            var fastTrDn = fastTrDnList[i];
-            var slowTrUp = slowTrUpList[i];
-            var slowTrDn = slowTrDnList[i];
-            var fastDiff = fastTrUp - fastTrDn;
-            var slowDiff = slowTrUp - slowTrDn;
-
-            var fgi = fastDiff - slowDiff;
-            fgiList.Add(fgi);
-        }
-
-        var fgiEmaList = GetMovingAverageList(stockData, maType, smoothLength, fgiList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var fgiEma = fgiEmaList[i];
-            var prevFgiEma = i >= 1 ? fgiEmaList[i - 1] : 0;
-
-            var signal = GetCompareSignal(fgiEma, prevFgiEma);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fgi", fgiList },
-            { "Signal", fgiEmaList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(fgiList);
-        stockData.IndicatorName = IndicatorName.FearAndGreedIndicator;
-
+        var (input, high, low, _, _) = GetInputValuesList(stockData);
+        var result = FearGreedWindow.Calculate(stockData, input, high, low, maType, fastLength, slowLength, smoothLength, false, true);
+        var line = result.Line.ToList(); var signal = result.SignalLine.ToList(); var trades = CreateSignalsList(stockData, input.Count);
+        trades?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fgi", line }, { "Signal", signal } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.FearAndGreedIndicator;
         return stockData;
     }
 

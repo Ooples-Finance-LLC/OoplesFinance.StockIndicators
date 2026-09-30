@@ -49,83 +49,17 @@ public sealed class FastSlowDegreeOscillatorState : IStreamingIndicatorState, ID
 [PrimaryOutput("Fgi")]
 public sealed class FearAndGreedIndicatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _fastTrUp;
-    private readonly IMovingAverageSmoother _fastTrDn;
-    private readonly IMovingAverageSmoother _slowTrUp;
-    private readonly IMovingAverageSmoother _slowTrDn;
-    private readonly IMovingAverageSmoother _signal;
-    private readonly StreamingInputResolver _input;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public FearAndGreedIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage,
-        int fastLength = 10, int slowLength = 30, int smoothLength = 2)
-    {
-        _fastTrUp = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _fastTrDn = MovingAverageSmootherFactory.Create(maType, Math.Max(1, fastLength));
-        _slowTrUp = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _slowTrDn = MovingAverageSmootherFactory.Create(maType, Math.Max(1, slowLength));
-        _signal = MovingAverageSmootherFactory.Create(maType, Math.Max(1, smoothLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FearGreedWindow _window;
+    public FearAndGreedIndicatorState(MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int fastLength = 10, int slowLength = 30, int smoothLength = 2)
+        => _window = new(maType, fastLength, slowLength, smoothLength);
     public IndicatorName Name => IndicatorName.FearAndGreedIndicator;
-
-    public void Reset()
-    {
-        _fastTrUp.Reset();
-        _fastTrDn.Reset();
-        _slowTrUp.Reset();
-        _slowTrDn.Reset();
-        _signal.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        // For TrueRange on first bar, use current close to avoid inflated TR
-        var prevValue = _hasPrev ? _prevValue : value;
-        var tr = CalculationsHelper.CalculateTrueRange(bar.High, bar.Low, prevValue);
-
-        var trUp = value > prevValue ? tr : 0;
-        var trDn = value < prevValue ? tr : 0;
-
-        var fastTrUp = _fastTrUp.Next(trUp, isFinal);
-        var fastTrDn = _fastTrDn.Next(trDn, isFinal);
-        var slowTrUp = _slowTrUp.Next(trUp, isFinal);
-        var slowTrDn = _slowTrDn.Next(trDn, isFinal);
-        var fgi = (fastTrUp - fastTrDn) - (slowTrUp - slowTrDn);
-        var signal = _signal.Next(fgi, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fgi", fgi },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(fgi, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Fgi", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _fastTrUp.Dispose();
-        _fastTrDn.Dispose();
-        _slowTrUp.Dispose();
-        _slowTrDn.Dispose();
-        _signal.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Pivot")]

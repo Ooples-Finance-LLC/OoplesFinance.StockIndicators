@@ -58892,5 +58892,356 @@
     "before": "if (supported) return null;",
     "after": "if (supported) return new double[prices.Count];",
     "filter": "FullyQualifiedName~FastSlowDegreeNumericalTests.ExhaustedSignalOverrideKeepsExtendedDefaultMean"
+  },
+  {
+    "id": "fear-greed-wide-fast-period",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_fastUp = new(kind, Math.Max(1, fast))",
+    "after": "_fastUp = new(kind, Math.Max(1, slow))",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-slow-period",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_slowDown = new(kind, Math.Max(1, slow))",
+    "after": "_slowDown = new(kind, Math.Max(1, fast))",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_signal = new(kind, Math.Max(1, signal))",
+    "after": "_signal = new(kind, Math.Max(1, fast))",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-span",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "span.Add(low, -1)",
+    "after": "span.Add(low)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-upper-gap",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "upper.Add(previous, -1)",
+    "after": "upper.Add(previous)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-lower-gap",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "lower.Add(previous, -1)",
+    "after": "lower.Add(previous)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-upper-abs",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (upper.Sign < 0)",
+    "after": "if (upper.Sign > 0)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-lower-abs",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (lower.Sign < 0)",
+    "after": "if (lower.Sign > 0)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-upper-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (comparison.Sign > 0) span = upper",
+    "after": "if (comparison.Sign < 0) span = upper",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-lower-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (comparison.Sign > 0) span = lower",
+    "after": "if (comparison.Sign < 0) span = lower",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-range-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "return RocBankValue.Round(span)",
+    "after": "return new RocBankValue(RocBankValue.Round(span).Publish())",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.EqualPeriodsCancelUnrepresentableRanges"
+  },
+  {
+    "id": "fear-greed-wide-up-tie",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "price > previous ? range",
+    "after": "price >= previous ? range",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-down-tie",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "price < previous ? range",
+    "after": "price <= previous ? range",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-fast-difference",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "Difference(fastUp, fastDown)",
+    "after": "Difference(fastDown, fastUp)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-slow-difference",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "Difference(slowUp, slowDown)",
+    "after": "Difference(slowDown, slowUp)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-difference-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "second.AddTo(ref sum, -1)",
+    "after": "second.AddTo(ref sum)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "signal.Mantissa > 0 && change.Sign > 0",
+    "after": "signal.Mantissa > 0 && change.Sign < 0",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "signal.Mantissa < 0 && change.Sign < 0",
+    "after": "signal.Mantissa < 0 && change.Sign > 0",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-first-price",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_hasPrevious ? _previousPrice : price",
+    "after": "_hasPrevious ? _previousPrice : 0",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (final) { _previousPrice",
+    "after": "if (true) { _previousPrice",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_previousPrice = price",
+    "after": "_previousPrice = 0",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_previousSignal = signal",
+    "after": "_previousSignal = default",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-reset-up",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_fastUp.Reset()",
+    "after": "_fastUp.ToString()",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-reset-down",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_slowDown.Reset()",
+    "after": "_slowDown.ToString()",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-reset-signal",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_signal.Reset()",
+    "after": "_signal.ToString()",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "ComponentAverage.Take(published!, period)",
+    "after": "ComponentAverage.Take(published!, signalLength)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.ComponentSlotsPreservePeriodsInputsAndSelectedPrices"
+  },
+  {
+    "id": "fear-greed-wide-callback-line",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "Line(fastUp[i], fastDown[i], slowUp[i], slowDown[i])",
+    "after": "Line(fastDown[i], fastUp[i], slowUp[i], slowDown[i])",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.ComponentSlotsPreservePeriodsInputsAndSelectedPrices"
+  },
+  {
+    "id": "fear-greed-wide-exhausted-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "return source.Select(v => mean.Next(v, true)).ToArray()",
+    "after": "return source.Select(v => mean.Next(new RocBankValue(v.Publish()), true)).ToArray()",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.ExtendedLineKeepsFiniteSignalAndExhaustedOverrides"
+  },
+  {
+    "id": "fear-greed-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-weighted-shift",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_history.Count + 1L < _length",
+    "after": "_history.Count < _length",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "if (commit) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-recursive-kind",
+    "module": "numerical",
+    "file": "src/Helpers/FearGreedWindow.cs",
+    "scope": "internal sealed class FearGreedWindow",
+    "before": "_recursive = new(kind, length, 1)",
+    "after": "_recursive = new(MovingAvgType.WildersSmoothingMethod, length, 1)",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.WideRangesPreserveSeparateRoundedStagesAndRecover"
+  },
+  {
+    "id": "fear-greed-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FearAndGreedIndicatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle guard */",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "fear-greed-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FearAndGreedIndicatorState :",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", point.Line }",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-fast-signal",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFearAndGreedFast(",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "signal ? point.Line : point.SignalLine",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.HandDirectionGapsTiesAndSignalLevels"
+  },
+  {
+    "id": "fear-greed-wide-fast-custom",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFearAndGreedFast(",
+    "before": "signal ? values.SignalLine : values.Line",
+    "after": "signal ? values.Line : values.SignalLine",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.ComponentSlotsPreservePeriodsInputsAndSelectedPrices"
+  },
+  {
+    "id": "fear-greed-wide-selected-range",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFearAndGreedFast(",
+    "before": "var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var highs = data.HighPrices; var lows = data.LowPrices;",
+    "filter": "FullyQualifiedName~FearGreedNumericalTests.ComponentSlotsPreservePeriodsInputsAndSelectedPrices"
   }
 ]

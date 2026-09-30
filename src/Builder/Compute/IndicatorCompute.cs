@@ -2019,10 +2019,7 @@ internal static partial class IndicatorCompute
                 factor: eszs.Mult, maType: eszs.MaType),
             EnhancedIndexSpecOptions ei => ComputeEnhancedIndexFast(data, context, ei.Length, ei.MaType, ei.SignalLength, spec.OutputKey == "Signal"),
             FastandSlowKurtosisOscillatorSpecOptions fsko => ComputeFastAndSlowKurtosisFast(data, context, fsko.Length, fsko.Ratio, fsko.MaType, spec.OutputKey ?? "Fsk"),
-            FearAndGreedIndicatorSpecOptions fgi => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.MaType),
-                    fgi.SmoothLength, fgi.MaType)
-                : ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.MaType),
+            FearAndGreedIndicatorSpecOptions fgi => ComputeFearAndGreedFast(data, context, fgi.FastLength, fgi.SlowLength, fgi.MaType, fgi.SmoothLength, spec.OutputKey == "Signal"),
 
             // Batch 19 - Volume and Movement Indicators
             FiniteVolumeElementsSpecOptions fve => ComputeFiniteVolumeElementsFast(data, context, fve.Length, fve.Factor, fve.MaType),
@@ -19056,48 +19053,20 @@ internal static partial class IndicatorCompute
     /// Returns the smoothed fear/greed value.
     /// </summary>
     internal static ComputeBuffer ComputeFearAndGreedFast(StockData data, ComputeContext context, int fastLength = 10, int slowLength = 30,
-        MovingAvgType maType = MovingAvgType.WeightedMovingAverage)
+        MovingAvgType maType = MovingAvgType.WeightedMovingAverage, int smoothLength = 2, bool signal = false)
     {
-        // CalculateFearAndGreedIndicator splits the true range into the part earned on up bars and the part
-        // given back on down bars, averages each over a fast and a slow window, and reports how much more the
-        // fast net is than the slow one. smoothLength only smooths the Signal key, so it is not a parameter of
-        // this output. The batch measures the first bar's true range against its own close rather than zero, so
-        // the opening bar contributes nothing in either direction.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        using var upRange = context.Rent(count);
-        using var downRange = context.Rent(count);
-        var up = upRange.WritableSpan;
-        var down = downRange.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !StrengthWindow.Supports(maType))
         {
-            var previousValue = i >= 1 ? input[i - 1] : input[i];
-            var trueRange = CalculationsHelper.CalculateTrueRange(highs[i], lows[i], previousValue);
-            up[i] = input[i] > previousValue ? trueRange : 0;
-            down[i] = input[i] < previousValue ? trueRange : 0;
+            var values = FearGreedWindow.Calculate(data, input, highs, lows, maType, fastLength, slowLength, smoothLength, true, signal);
+            (signal ? values.SignalLine : values.Line).AsSpan().CopyTo(result.WritableSpan);
         }
-
-        using var fastUp = context.Rent(count);
-        using var fastDown = context.Rent(count);
-        using var slowUp = context.Rent(count);
-        using var slowDown = context.Rent(count);
-        MovingAverage(data, maType, fastLength, upRange.Span, fastUp.WritableSpan);
-        MovingAverage(data, maType, fastLength, downRange.Span, fastDown.WritableSpan);
-        MovingAverage(data, maType, slowLength, upRange.Span, slowUp.WritableSpan);
-        MovingAverage(data, maType, slowLength, downRange.Span, slowDown.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        for (var i = 0; i < count; i++)
+        else
         {
-            output[i] = (fastUp.Span[i] - fastDown.Span[i]) - (slowUp.Span[i] - slowDown.Span[i]);
+            using var window = new FearGreedWindow(maType, fastLength, slowLength, smoothLength);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(highs[i], lows[i], input[i], true); result.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
         }
-
-        return buffer;
+        return result;
     }
 
     /// <summary>
