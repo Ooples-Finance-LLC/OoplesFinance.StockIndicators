@@ -227,31 +227,8 @@ internal static partial class BuiltInFormulaReferences
                     return Outputs(("Rmacd", line), ("Signal", signal), ("Histogram", line.Zip(signal, (v, s) => v - s).ToArray()));
                 });
             case IndicatorName.EnhancedWilliamsR:
-                var enhancedKind = AverageKind(options, 1);
-                if (enhancedKind == 0) return null;
-                return new("Ewr", new[] { "Ewr", "Signal" }, bars =>
-                {
-                    var prices = Closes(bars);
-                    var volumes = bars.Select(b => b.Volume).ToArray();
-                    var smooth = Math.Max(2, Math.Min(530, (int)Math.Ceiling(length / 2d)));
-                    var priceMean = Average(prices, smooth, enhancedKind);
-                    var volumeMean = Average(volumes, smooth, enhancedKind);
-                    var acceleration = length < 10 ? .25 : length / 32d - .0625;
-                    var line = prices.Select((price, i) =>
-                    {
-                        var window = Window(bars, i, Math.Max(2, length)).ToArray();
-                        var priceRange = window.Max(b => b.Close) - window.Min(b => b.Close);
-                        var volumeRange = window.Max(b => b.Volume) - window.Min(b => b.Volume);
-                        var p = priceRange == 0 ? 0 : 2 * (price - priceMean[i]) / priceRange;
-                        var v = volumeRange == 0 ? 0 : 2 * (volumes[i] - volumeMean[i]) / volumeRange;
-                        var change = price - (i == 0 ? 0 : prices[i - 1]);
-                        var normalizedChange = i == 0 || priceRange == 0 ? 0 : 2 * change / priceRange;
-                        // On the aligned price/volume branch, the acceleration factor cancels.
-                        return v > 0 && p * change > 0 && normalizedChange + acceleration != 0
-                            ? 1 + 50 * p * v : 50 + 25 * p * (v + 1);
-                    }).ToArray();
-                    return Outputs(("Ewr", line), ("Signal", Average(line, Integer(options, "SignalLength", 5), enhancedKind)));
-                });
+                var enhancedKind = AverageKind(options, 1); if (enhancedKind == 0) return null;
+                return new("Ewr", new[] { "Ewr", "Signal" }, bars => EnhancedWilliamsOutputs(bars, indicator));
             case IndicatorName.EhlersAMDetector:
                 var envelopeKind = AverageKind(options, 1);
                 if (envelopeKind == 0) return null;

@@ -2615,59 +2615,18 @@ public static partial class Calculations
     public static StockData CalculateEnhancedWilliamsR(this StockData stockData, MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, 
         int signalLength = 5)
     {
-        List<double> ewrList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, _, _, _, volumeList) = GetInputValuesList(stockData);
-        var (highestList1, lowestList1) = GetMaxAndMinValuesList(inputList, length);
-        var (highestList2, lowestList2) = GetMaxAndMinValuesList(volumeList, length);
-
-        var af = length < 10 ? 0.25 : ((double)length / 32) - 0.0625;
-        var smaLength = MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        var srcSmaList = GetMovingAverageList(stockData, maType, smaLength, inputList);
-        var volSmaList = GetMovingAverageList(stockData, maType, smaLength, volumeList);
-
-        for (var i = 0; i < stockData.Count; i++)
+        var (input, _, _, _, volume) = GetInputValuesList(stockData);
+        var values = new List<double>(input.Count); var signals = new List<double>(input.Count); var trades = CreateSignalsList(stockData);
+        var external = !StrengthWindow.Supports(maType);
+        var components = external ? EnhancedWilliamsWindow.Components(stockData, input, volume, maType, length, signalLength, false, true) : default;
+        using var window = new EnhancedWilliamsWindow(maType, length, signalLength, external);
+        for (var i = 0; i < input.Count; i++)
         {
-            var currentValue = inputList[i];
-            var prevValue = i >= 1 ? inputList[i - 1] : 0;
-            var maxVol = highestList2[i];
-            var minVol = lowestList2[i];
-            var maxSrc = highestList1[i];
-            var minSrc = lowestList1[i];
-            var srcSma = srcSmaList[i];
-            var volSma = volSmaList[i];
-            var volume = volumeList[i];
-            var volWr = maxVol - minVol != 0 ? 2 * ((volume - volSma) / (maxVol - minVol)) : 0;
-            var srcWr = maxSrc - minSrc != 0 ? 2 * ((currentValue - srcSma) / (maxSrc - minSrc)) : 0;
-            var srcSwr = maxSrc - minSrc != 0 ? 2 * (MinPastValues(i, 1, currentValue - prevValue) / (maxSrc - minSrc)) : 0;
-
-            var ewr = ((volWr > 0 && srcWr > 0 && currentValue > prevValue) || (volWr > 0 && srcWr < 0 && currentValue < prevValue)) && srcSwr + af != 0 ?
-                ((50 * (srcWr * (srcSwr + af) * volWr)) + srcSwr + af) / (srcSwr + af) : 25 * ((srcWr * (volWr + 1)) + 2);
-            ewrList.Add(ewr);
+            var point = window.Next(input[i], volume[i], true, external ? components.PriceMean[i] : null, external ? components.VolumeMean[i] : null, external ? components.Signal[i] : null);
+            values.Add(point.Line); signals.Add(point.SignalLine); trades?.Add(point.Trade);
         }
-
-        var ewrSignalList = GetMovingAverageList(stockData, maType, signalLength, ewrList);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var ewr = ewrList[i];
-            var ewrSignal = ewrSignalList[i];
-            var prevEwr = i >= 1 ? ewrList[i - 1] : 0;
-            var prevEwrSignal = i >= 1 ? ewrSignalList[i - 1] : 0;
-
-            var signal = GetRsiSignal(ewr - ewrSignal, prevEwr - prevEwrSignal, ewr, prevEwr, 100, -100);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Ewr", ewrList },
-            { "Signal", ewrSignalList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(ewrList);
-        stockData.IndicatorName = IndicatorName.EnhancedWilliamsR;
-
-        return stockData;
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Ewr", values }, { "Signal", signals } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(values); stockData.IndicatorName = IndicatorName.EnhancedWilliamsR; return stockData;
     }
 
 

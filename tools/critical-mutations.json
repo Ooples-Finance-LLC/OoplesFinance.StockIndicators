@@ -57533,5 +57533,347 @@
     "before": "{ \"Signal\", point.SignalLine }",
     "after": "{ \"Signal\", point.Line }",
     "filter": "FullyQualifiedName~EnhancedIndexNumericalTests.HandSeedFlatRangeAndSignedRangeHaveKnownValues"
+  },
+  {
+    "id": "enhanced-williams-wide-range-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_length = Math.Max(2, length);",
+    "after": "_length = 2;",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-half-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "length / 2 + length % 2",
+    "after": "length / 2",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.ExtremePeriodsKeepLazyWindowsAndMeanClamp"
+  },
+  {
+    "id": "enhanced-williams-wide-mean-cap",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "Math.Min(530,",
+    "after": "Math.Min(529,",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.ExtremePeriodsKeepLazyWindowsAndMeanClamp"
+  },
+  {
+    "id": "enhanced-williams-wide-acceleration",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "length / 32d - .0625",
+    "after": "length / 32d + .0625",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_signal = new(kind, Math.Max(1, signalLength));",
+    "after": "_signal = new(kind, 1);",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_index - _length + 1L",
+    "after": "_index - _length",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-price-high",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "Extreme(_priceHigh, price, true, final)",
+    "after": "Extreme(_priceHigh, price, false, final)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-volume-low",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "Extreme(_volumeLow, volume, false, final)",
+    "after": "Extreme(_volumeLow, volume, true, final)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-price-mean-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_priceMean!.Next(new(price), final)",
+    "after": "_priceMean!.Next(new(volume), final)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-volume-mean-input",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_volumeMean!.Next(new(volume), final)",
+    "after": "_volumeMean!.Next(new(price), final)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-price-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "2 * (U(price) - Units(priceMean))",
+    "after": "(U(price) - Units(priceMean))",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-volume-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "2 * (U(volume) - Units(volumeMean))",
+    "after": "(U(volume) - Units(volumeMean))",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-price-ratio-published",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "2 * (U(price) - Units(priceMean))",
+    "after": "U(ExactMeanAccumulator.UnitRatio(2 * (U(price) - Units(priceMean)) * Unit, priceRange)) * priceRange / Unit",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.TinyPriceRatioTimesHugeVolumeRatioHasFiniteHandValues"
+  },
+  {
+    "id": "enhanced-williams-wide-volume-ratio-published",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "2 * (U(volume) - Units(volumeMean))",
+    "after": "U(ExactMeanAccumulator.UnitRatio(2 * (U(volume) - Units(volumeMean)) * Unit, volumeRange)) * volumeRange / Unit",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.TinyPriceRatioTimesHugeVolumeRatioHasFiniteHandValues"
+  },
+  {
+    "id": "enhanced-williams-wide-step-scale",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "2 * (U(price) - U(_previousPrice))",
+    "after": "(U(price) - U(_previousPrice))",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-zero-factor",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "!factor.IsZero",
+    "after": "factor.Sign >= 0",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-volume-branch",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "vn.Sign > 0 &&",
+    "after": "vn.Sign < 0 &&",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-price-direction",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "price > _previousPrice ||",
+    "after": "price < _previousPrice ||",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-aligned-offset",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "denominator + 50 * pn * vn",
+    "after": "50 * pn * vn",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-fallback-offset",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "50 * denominator + 25",
+    "after": "25 * denominator + 25",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-fallback-volume",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "pn * (vn + vd)",
+    "after": "pn * vn",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-signal-publication",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(new(line.Publish()), final)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.ExtendedLinesCanCancelInsideSignalBeforePublication"
+  },
+  {
+    "id": "enhanced-williams-wide-spread-direction",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "current - Units(signal)",
+    "after": "Units(signal) - current",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-strong-buy",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "? Signal.StrongBuy : spread.Sign",
+    "after": "? Signal.Buy : spread.Sign",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-buy-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_previousLine < -100 * Unit",
+    "after": "_previousLine < -200 * Unit",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandSignalsKeepStrictThresholdCrossings"
+  },
+  {
+    "id": "enhanced-williams-wide-sell-threshold",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_previousLine > 100 * Unit",
+    "after": "_previousLine > 200 * Unit",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandSignalsKeepStrictThresholdCrossings"
+  },
+  {
+    "id": "enhanced-williams-wide-price-memory",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_previousPrice = price;",
+    "after": "_previousPrice = -price;",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-signal-memory",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_previousSpread = spread;",
+    "after": "_previousSpread = BigInteger.Zero;",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-range-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_priceMean!.Next(new(price), final)",
+    "after": "_priceMean!.Next(new(price), true)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-signal-preview",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_signal!.Next(line, final)",
+    "after": "_signal!.Next(line, true)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
+  },
+  {
+    "id": "enhanced-williams-wide-reset",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "_volumeHigh.Clear(); _volumeLow.Clear();",
+    "after": "_volumeHigh.Clear();",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.ResetDropsOldVolumeMinimum"
+  },
+  {
+    "id": "enhanced-williams-wide-custom-volume",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "var volumeMean = Mean(volume, MeanLength(length));",
+    "after": "var volumeMean = Mean(input, MeanLength(length));",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.CustomMeansKeepThreeSlotsAndSelectedPricesWithOriginalVolume"
+  },
+  {
+    "id": "enhanced-williams-wide-custom-signal-period",
+    "module": "numerical",
+    "file": "src/Helpers/EnhancedWilliamsWindow.cs",
+    "scope": "internal sealed class EnhancedWilliamsWindow",
+    "before": "Mean(line.ToList(), Math.Max(1, signalLength))",
+    "after": "Mean(line.ToList(), 2)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.CustomMeansKeepThreeSlotsAndSelectedPricesWithOriginalVolume"
+  },
+  {
+    "id": "enhanced-williams-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEnhancedWilliamsRFast",
+    "before": "EnhancedWilliamsWindow.Components(data, input, volume",
+    "after": "EnhancedWilliamsWindow.Components(data, data.ClosePrices, volume",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.CustomMeansKeepThreeSlotsAndSelectedPricesWithOriginalVolume"
+  },
+  {
+    "id": "enhanced-williams-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeEnhancedWilliamsRFast",
+    "before": "signal ? point.SignalLine : point.Line",
+    "after": "signal ? point.Line : point.Line",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.HandBranchesPreserveNeutralAndExactZeroFactor"
+  },
+  {
+    "id": "enhanced-williams-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class EnhancedWilliamsRState",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.InvalidCandlesCannotAdvancePriceVolumeOrSignalState"
+  },
+  {
+    "id": "enhanced-williams-wide-native-volume",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch12.cs",
+    "scope": "public sealed class EnhancedWilliamsRState",
+    "before": "_window.Next(bar.Close, bar.Volume, isFinal)",
+    "after": "_window.Next(bar.Close, bar.Close, isFinal)",
+    "filter": "FullyQualifiedName~EnhancedWilliamsNumericalTests.WideSignedTinyAndExpiredRangesKeepBothFactors"
   }
 ]

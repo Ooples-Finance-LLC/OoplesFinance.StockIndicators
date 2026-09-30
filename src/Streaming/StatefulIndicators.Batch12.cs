@@ -201,101 +201,16 @@ public sealed class EnhancedIndexState : IStreamingIndicatorState, IDisposable
 [PrimaryOutput("Ewr")]
 public sealed class EnhancedWilliamsRState : IStreamingIndicatorState, IDisposable
 {
-    private readonly RollingWindowMax _srcMax;
-    private readonly RollingWindowMin _srcMin;
-    private readonly RollingWindowMax _volMax;
-    private readonly RollingWindowMin _volMin;
-    private readonly IMovingAverageSmoother _srcSma;
-    private readonly IMovingAverageSmoother _volSma;
-    private readonly IMovingAverageSmoother _signalSmoother;
-    private readonly StreamingInputResolver _input;
-    private readonly double _af;
-    private double _prevValue;
-    private bool _hasPrev;
-
-    public EnhancedWilliamsRState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14,
-        int signalLength = 5)
-    {
-        var resolved = Math.Max(2, length);
-        _srcMax = new RollingWindowMax(resolved);
-        _srcMin = new RollingWindowMin(resolved);
-        _volMax = new RollingWindowMax(resolved);
-        _volMin = new RollingWindowMin(resolved);
-        _af = length < 10 ? 0.25 : ((double)length / 32) - 0.0625;
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-        _srcSma = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _volSma = MovingAverageSmootherFactory.Create(maType, smaLength);
-        _signalSmoother = MovingAverageSmootherFactory.Create(maType, Math.Max(1, signalLength));
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly EnhancedWilliamsWindow _window;
+    public EnhancedWilliamsRState(MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int length = 14, int signalLength = 5) => _window = new(maType, length, signalLength);
     public IndicatorName Name => IndicatorName.EnhancedWilliamsR;
-
-    public void Reset()
-    {
-        _srcMax.Reset();
-        _srcMin.Reset();
-        _volMax.Reset();
-        _volMin.Reset();
-        _srcSma.Reset();
-        _volSma.Reset();
-        _signalSmoother.Reset();
-        _prevValue = 0;
-        _hasPrev = false;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var volume = bar.Volume;
-        var prevValue = _hasPrev ? _prevValue : 0;
-
-        var maxVol = isFinal ? _volMax.Add(volume, out _) : _volMax.Preview(volume, out _);
-        var minVol = isFinal ? _volMin.Add(volume, out _) : _volMin.Preview(volume, out _);
-        var maxSrc = isFinal ? _srcMax.Add(value, out _) : _srcMax.Preview(value, out _);
-        var minSrc = isFinal ? _srcMin.Add(value, out _) : _srcMin.Preview(value, out _);
-        var srcSma = _srcSma.Next(value, isFinal);
-        var volSma = _volSma.Next(volume, isFinal);
-        var volWr = maxVol - minVol != 0 ? 2 * ((volume - volSma) / (maxVol - minVol)) : 0;
-        var srcWr = maxSrc - minSrc != 0 ? 2 * ((value - srcSma) / (maxSrc - minSrc)) : 0;
-        var priceDiff = _hasPrev ? value - prevValue : 0;
-        var srcSwr = maxSrc - minSrc != 0 ? 2 * (priceDiff / (maxSrc - minSrc)) : 0;
-
-        var ewr = ((volWr > 0 && srcWr > 0 && value > prevValue) ||
-            ((volWr > 0 && srcWr < 0 && value < prevValue)) && srcSwr + _af != 0
-            ? ((50 * (srcWr * (srcSwr + _af) * volWr)) + srcSwr + _af) / (srcSwr + _af)
-            : 25 * ((srcWr * (volWr + 1)) + 2));
-        var signal = _signalSmoother.Next(ewr, isFinal);
-
-        if (isFinal)
-        {
-            _prevValue = value;
-            _hasPrev = true;
-        }
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Ewr", ewr },
-                { "Signal", signal }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ewr, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.Close, bar.Volume, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Ewr", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _srcMax.Dispose();
-        _srcMin.Dispose();
-        _volMax.Dispose();
-        _volMin.Dispose();
-        _srcSma.Dispose();
-        _volSma.Dispose();
-        _signalSmoother.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Eqma")]

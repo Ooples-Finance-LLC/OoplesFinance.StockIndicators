@@ -1705,9 +1705,7 @@ internal static partial class IndicatorCompute
             FoldedRelativeStrengthIndexSpecOptions frsi => spec.OutputKey == "Signal"
                 ? SmoothStrength(data, context, ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType), frsi.Length, frsi.MaType)
                 : ComputeFoldedRsiFast(data, context, frsi.Length, frsi.MaType),
-            EnhancedWilliamsRSpecOptions ewr => spec.OutputKey == "Signal"
-                ? SmoothPublished(data, context, ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType), ewr.SignalLength, ewr.MaType)
-                : ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType),
+            EnhancedWilliamsRSpecOptions ewr => ComputeEnhancedWilliamsRFast(data, context, ewr.Length, ewr.MaType, ewr.SignalLength, spec.OutputKey == "Signal"),
             ConnorsRelativeStrengthIndexSpecOptions crsi2 => spec.OutputKey switch
             {
                 null or "ConnorsRsi" => ComputeConnorsRsiFast(data, context, crsi2.Length1, crsi2.Length2,
@@ -16859,54 +16857,19 @@ internal static partial class IndicatorCompute
     /// Computes Enhanced Williams %R using zero-allocation fast path.
     /// </summary>
     internal static ComputeBuffer ComputeEnhancedWilliamsRFast(StockData data, ComputeContext context, int length = 14,
-        MovingAvgType maType = MovingAvgType.SimpleMovingAverage)
+        MovingAvgType maType = MovingAvgType.SimpleMovingAverage, int signalLength = 5, bool signal = false)
     {
-        // CalculateEnhancedWilliamsR weighs how far price and volume each sit from their own half-length
-        // average, scaled by their respective ranges, and combines them with an acceleration factor derived
-        // from the length. The arm this replaced called OscillatorCore.EnhancedWilliamsR on the raw high,
-        // low and close and never looked at volume at all. signalLength only feeds the Signal key.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var volumes = SpanCompat.AsReadOnlySpan(data.Volumes);
-        var count = inputList.Count;
-
-        var af = length < 10 ? 0.25 : ((double)length / 32) - 0.0625;
-        var smaLength = MathHelper.MinOrMax((int)Math.Ceiling((double)length / 2));
-
-        using var priceAverage = context.Rent(count);
-        using var volumeAverage = context.Rent(count);
-        MovingAverage(data, maType, smaLength, input, priceAverage.WritableSpan);
-        MovingAverage(data, maType, smaLength, volumes, volumeAverage.WritableSpan);
-        var srcSma = priceAverage.Span;
-        var volSma = volumeAverage.Span;
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-
-        var priceWindow = new RollingMinMax(Math.Max(length, 2));
-        var volumeWindow = new RollingMinMax(Math.Max(length, 2));
-        for (var i = 0; i < count; i++)
+        var (input, _, _, _, volume) = CalculationsHelper.GetInputValuesList(data); var buffer = context.Rent(input.Count);
+        if (!StrengthWindow.Supports(maType) || ComponentAverage.HasOverrides)
         {
-            priceWindow.Add(input[i]);
-            volumeWindow.Add(volumes[i]);
-
-            var currentValue = input[i];
-            var prevValue = i >= 1 ? input[i - 1] : 0;
-            var srcRange = priceWindow.Max - priceWindow.Min;
-            var volRange = volumeWindow.Max - volumeWindow.Min;
-
-            var volWr = volRange != 0 ? 2 * ((volumes[i] - volSma[i]) / volRange) : 0;
-            var srcWr = srcRange != 0 ? 2 * ((currentValue - srcSma[i]) / srcRange) : 0;
-            var srcSwr = srcRange != 0
-                ? 2 * (CalculationsHelper.MinPastValues(i, 1, currentValue - prevValue) / srcRange)
-                : 0;
-
-            output[i] = ((volWr > 0 && srcWr > 0 && currentValue > prevValue) ||
-                (volWr > 0 && srcWr < 0 && currentValue < prevValue)) && srcSwr + af != 0
-                ? ((50 * (srcWr * (srcSwr + af) * volWr)) + srcSwr + af) / (srcSwr + af)
-                : 25 * ((srcWr * (volWr + 1)) + 2);
+            var components = EnhancedWilliamsWindow.Components(data, input, volume, maType, length, signalLength, true, signal);
+            (signal ? components.Signal : components.Line).AsSpan().CopyTo(buffer.WritableSpan);
         }
-
+        else
+        {
+            using var window = new EnhancedWilliamsWindow(maType, length, signalLength);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(input[i], volume[i], true); buffer.WritableSpan[i] = signal ? point.SignalLine : point.Line; }
+        }
         return buffer;
     }
 

@@ -45,6 +45,7 @@ internal static partial class StatefulIndicatorFactory
     {
         return spec.Options switch
         {
+            EnhancedWilliamsRSpecOptions williams => new EnhancedWilliamsRState(williams.MaType, williams.Length, williams.SignalLength),
             EnhancedIndexSpecOptions enhanced => new EnhancedIndexState(enhanced.MaType, enhanced.Length, enhanced.SignalLength),
             EhlersAMDetectorSpecOptions detector => new EhlersAMDetectorState(detector.MaType, detector.Length1, detector.Length2),
             EhlersRecursiveMedianFilterSpecOptions median => new EhlersRecursiveMedianFilterState(median.Length),
