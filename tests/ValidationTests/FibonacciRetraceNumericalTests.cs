@@ -95,7 +95,7 @@ public sealed class FibonacciRetraceNumericalTests
     public void SelectedPricesApplyPerBarRangesAndConsumeNoOverrides()
     {
         var bars = Candles((9, 1, 4), (9, 1, 4), (9, 1, 4), (9, 1, 4)); var prices = new[] { 5d, 12, 6, 15 };
-        var selectedBars = bars.Select((b, i) => new Bar(b.Time, b.Open, prices[i] >= b.Low && prices[i] <= b.High ? b.High : prices[i], prices[i] >= b.Low && prices[i] <= b.High ? b.Low : prices[i], prices[i], b.Volume)).ToArray();
+        var selectedBars = bars.Select((b, i) => new Bar(b.Time, b.Open, prices[i] >= b.Low && prices[i] <= b.High ? b.High : Math.Max(i == 0 ? prices[i] : prices[i - 1], prices[i]), prices[i] >= b.Low && prices[i] <= b.High ? b.Low : Math.Min(i == 0 ? prices[i] : prices[i - 1], prices[i]), prices[i], b.Volume)).ToArray();
         var expected = BuiltInFormulaReferences.FibonacciRetraceValues(selectedBars, 3, 2, .25, 2); var calls = 0;
         using var armed = ComponentAverage.Arm((v, _) => { calls++; return v; });
         var batch = Data(bars); batch.SetCustomValues(prices.ToList()); batch.CalculateFibonacciRetrace(length1: 3, length2: 2, factor: .25);

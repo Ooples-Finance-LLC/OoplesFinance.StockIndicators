@@ -150,78 +150,17 @@ public sealed class FiniteVolumeElementsState : IStreamingIndicatorState, IDispo
 [PrimaryOutput("Fo")]
 public sealed class FireflyOscillatorState : IStreamingIndicatorState, IDisposable
 {
-    private readonly IMovingAverageSmoother _v3Smoother;
-    private readonly RollingStandardDeviation _stdDev;
-    private readonly IMovingAverageSmoother _v6Smoother;
-    private readonly IMovingAverageSmoother _v7Smoother;
-    private readonly IMovingAverageSmoother _wwSmoother;
-    private readonly RollingWindowMax _maxWindow;
-    private readonly StreamingInputResolver _input;
-    private double _v2Value;
-
-    public FireflyOscillatorState(MovingAvgType maType = MovingAvgType.ZeroLagExponentialMovingAverage,
-        int length = 10, int smoothLength = 3)
-    {
-        var resolvedLength = Math.Max(1, length);
-        var resolvedSmooth = Math.Max(1, smoothLength);
-        _v3Smoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _stdDev = new RollingStandardDeviation(resolvedLength);
-        _v6Smoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _v7Smoother = MovingAverageSmootherFactory.Create(maType, resolvedSmooth);
-        _wwSmoother = MovingAverageSmootherFactory.Create(maType, resolvedLength);
-        _maxWindow = new RollingWindowMax(resolvedSmooth);
-        _input = new StreamingInputResolver(InputName.Close, null);
-    }
-
+    private readonly FireflyWindow _window;
+    public FireflyOscillatorState(MovingAvgType maType = MovingAvgType.ZeroLagExponentialMovingAverage, int length = 10, int smoothLength = 3)
+        => _window = new(maType, length, smoothLength);
     public IndicatorName Name => IndicatorName.FireflyOscillator;
-
-    public void Reset()
-    {
-        _v3Smoother.Reset();
-        _stdDev.Reset();
-        _v6Smoother.Reset();
-        _v7Smoother.Reset();
-        _wwSmoother.Reset();
-        _maxWindow.Reset();
-        _v2Value = 0;
-    }
-
+    public void Reset() => _window.Reset();
     public StreamingIndicatorStateResult Update(OhlcvBar bar, bool isFinal, bool includeOutputs)
     {
-        var value = _input.GetValue(bar);
-        var v2 = (bar.High + bar.Low + (value * 2)) / 4;
-        _v2Value = v2;
-        var v3 = _v3Smoother.Next(v2, isFinal);
-        var v4 = _stdDev.Next(_v2Value, isFinal);
-        var v5 = v4 == 0 ? (v2 - v3) * 100 : (v2 - v3) * 100 / v4;
-        var v6 = _v6Smoother.Next(v5, isFinal);
-        var v7 = _v7Smoother.Next(v6, isFinal);
-        var wwZlagEma = _wwSmoother.Next(v7, isFinal);
-        var ww = ((wwZlagEma + 100) / 2) - 4;
-        var mm = isFinal ? _maxWindow.Add(ww, out _) : _maxWindow.Preview(ww, out _);
-
-        IReadOnlyDictionary<string, double>? outputs = null;
-        if (includeOutputs)
-        {
-            outputs = new Dictionary<string, double>(2)
-            {
-                { "Fo", ww },
-                { "Signal", mm }
-            };
-        }
-
-        return new StreamingIndicatorStateResult(ww, outputs);
+        StreamingInputValidation.Validate(bar); var point = _window.Next(bar.High, bar.Low, bar.Close, isFinal);
+        return new(point.Line, includeOutputs ? new Dictionary<string, double> { { "Fo", point.Line }, { "Signal", point.SignalLine } } : null);
     }
-
-    public void Dispose()
-    {
-        _v3Smoother.Dispose();
-        _stdDev.Dispose();
-        _v6Smoother.Dispose();
-        _v7Smoother.Dispose();
-        _wwSmoother.Dispose();
-        _maxWindow.Dispose();
-    }
+    public void Dispose() => _window.Dispose();
 }
 
 [PrimaryOutput("Flsma")]

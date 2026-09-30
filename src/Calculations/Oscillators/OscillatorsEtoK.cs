@@ -1395,65 +1395,11 @@ public static partial class Calculations
     public static StockData CalculateFireflyOscillator(this StockData stockData, MovingAvgType maType = MovingAvgType.ZeroLagExponentialMovingAverage,
         int length = 10, int smoothLength = 3)
     {
-        List<double> v2List = new(stockData.Count);
-        List<double> v5List = new(stockData.Count);
-        List<double> wwList = new(stockData.Count);
-        List<double> mmList = new(stockData.Count);
-        List<Signal>? signalsList = CreateSignalsList(stockData);
-        var (inputList, highList, lowList, _, _) = GetInputValuesList(stockData);
-        var wwWindow = new RollingMinMax(smoothLength);
-
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var currentHigh = highList[i];
-            var currentLow = lowList[i];
-            var currentClose = inputList[i];
-
-            var v2 = (currentHigh + currentLow + (currentClose * 2)) / 4;
-            v2List.Add(v2);
-        }
-
-        var v3List = GetMovingAverageList(stockData, maType, length, v2List);
-        stockData.SetCustomValues(v2List);
-        var v4List = GetStandardDeviationList(v2List, length);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var v2 = v2List[i];
-            var v3 = v3List[i];
-            var v4 = v4List[i];
-
-            var v5 = v4 == 0 ? (v2 - v3) * 100 : (v2 - v3) * 100 / v4;
-            v5List.Add(v5);
-        }
-
-        var v6List = GetMovingAverageList(stockData, maType, smoothLength, v5List);
-        var v7List = GetMovingAverageList(stockData, maType, smoothLength, v6List);
-        var wwZLagEmaList = GetMovingAverageList(stockData, maType, length, v7List);
-        for (var i = 0; i < stockData.Count; i++)
-        {
-            var wwZlagEma = wwZLagEmaList[i];
-            var prevWw1 = i >= 1 ? wwList[i - 1] : 0;
-            var prevWw2 = i >= 2 ? wwList[i - 2] : 0;
-
-            var ww = ((wwZlagEma + 100) / 2) - 4;
-            wwList.Add(ww);
-
-            wwWindow.Add(ww);
-            var mm = wwWindow.Max;
-            mmList.Add(mm);
-
-            var signal = GetRsiSignal(ww - prevWw1, prevWw1 - prevWw2, ww, prevWw1, 80, 20);
-            signalsList?.Add(signal);
-        }
-
-        stockData.SetOutputValues(() => new Dictionary<string, List<double>>{
-            { "Fo", wwList },
-            { "Signal", mmList }
-        });
-        stockData.SetSignals(signalsList);
-        stockData.SetCustomValues(wwList);
-        stockData.IndicatorName = IndicatorName.FireflyOscillator;
-
+        var (input, highs, lows, _, _) = GetInputValuesList(stockData);
+        var result = FireflyWindow.Calculate(stockData, input, highs, lows, maType, length, smoothLength, false);
+        var line = result.Line.ToList(); var signal = result.SignalLine.ToList(); var trades = CreateSignalsList(stockData, input.Count); trades?.AddRange(result.Trades);
+        stockData.SetOutputValues(() => new Dictionary<string, List<double>> { { "Fo", line }, { "Signal", signal } });
+        stockData.SetSignals(trades); stockData.SetCustomValues(line); stockData.IndicatorName = IndicatorName.FireflyOscillator;
         return stockData;
     }
 

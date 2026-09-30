@@ -91,7 +91,7 @@ public sealed class FearGreedNumericalTests
     public void ComponentSlotsPreservePeriodsInputsAndSelectedPrices()
     {
         var bars = Candles((9, 1, 4), (9, 1, 4), (9, 1, 4), (9, 1, 4)); var prices = new[] { 5d, 12, 6, 15 };
-        var selectedBars = bars.Select((b, i) => new Bar(b.Time, b.Open, prices[i] >= b.Low && prices[i] <= b.High ? b.High : prices[i], prices[i] >= b.Low && prices[i] <= b.High ? b.Low : prices[i], prices[i], b.Volume)).ToArray();
+        var selectedBars = bars.Select((b, i) => new Bar(b.Time, b.Open, prices[i] >= b.Low && prices[i] <= b.High ? b.High : Math.Max(i == 0 ? prices[i] : prices[i - 1], prices[i]), prices[i] >= b.Low && prices[i] <= b.High ? b.Low : Math.Min(i == 0 ? prices[i] : prices[i - 1], prices[i]), prices[i], b.Volume)).ToArray();
         var up = new[] { 0d, 7, 0, 9 }; var down = new[] { 0d, 0, 11, 0 };
         var selectedExpected = BuiltInFormulaReferences.FearGreedValues(selectedBars, 2, 4, 3, 2);
         foreach (var key in new[] { "Fgi", "Signal" })

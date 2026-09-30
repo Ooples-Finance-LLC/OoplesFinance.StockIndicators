@@ -59567,5 +59567,401 @@
     "before": "var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
     "after": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var highs = data.HighPrices; var lows = data.LowPrices;",
     "filter": "FullyQualifiedName~FibonacciRetraceNumericalTests.SelectedPricesApplyPerBarRangesAndConsumeNoOverrides"
+  },
+  {
+    "id": "firefly-wide-length",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_length = Math.Max(1, length)",
+    "after": "_length = Math.Max(2, length)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-smooth",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_smooth = Math.Max(1, smooth)",
+    "after": "_smooth = Math.Max(1, length)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-center-period",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_center = new(kind, _length)",
+    "after": "_center = new(kind, _smooth)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-last-period",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_last = new(kind, _length)",
+    "after": "_last = new(kind, _smooth)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-weighted-close",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "sum.Add(price, 2)",
+    "after": "sum.Add(price)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "return sum.Mean(4)",
+    "after": "return sum.Mean(3)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-variance-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "squares -= old * old",
+    "after": "squares += old * old",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-variance-centering",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_length * squares - sum * sum",
+    "after": "_length * squares + sum * sum",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.SubnormalDeviationDoesNotTakeTheZeroVarianceBranch"
+  },
+  {
+    "id": "firefly-wide-variance-warmup",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_prices.Count < _length - 1",
+    "after": "_prices.Count < _length",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.SubnormalDeviationDoesNotTakeTheZeroVarianceBranch"
+  },
+  {
+    "id": "firefly-wide-fallback-offset",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "difference.Add(price, 100)",
+    "after": "difference.Add(price, 50)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-fallback-center",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "mean.AddTo(ref difference, -100)",
+    "after": "mean.AddTo(ref difference, 100)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-normalization-scale",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "(current - Units(mean)) * 100 * _length",
+    "after": "(current - Units(mean)) * 50 * _length",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.SubnormalDeviationDoesNotTakeTheZeroVarianceBranch"
+  },
+  {
+    "id": "firefly-wide-population-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "(current - Units(mean)) * 100 * _length",
+    "after": "(current - Units(mean)) * 100",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.SubnormalDeviationDoesNotTakeTheZeroVarianceBranch"
+  },
+  {
+    "id": "firefly-wide-normalization-sign",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "numerator.Sign < 0 ? -magnitude : magnitude",
+    "after": "numerator.Sign < 0 ? magnitude : -magnitude",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-normalization-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "if (final) { if (_prices.Count",
+    "after": "if (true) { if (_prices.Count",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-offset",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "shifted.Add(92)",
+    "after": "shifted.Add(100)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-affine-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "RocBankValue.Round(shifted, count: 2)",
+    "after": "RocBankValue.Round(shifted, count: 1)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-maximum-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_index - _smooth + 1L",
+    "after": "_index - _smooth",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-maximum-direction",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "Units(first.Value.Value) > current",
+    "after": "Units(first.Value.Value) < current",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-maximum-prune",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "Units(tail.Value.Value) <= current",
+    "after": "Units(tail.Value.Value) >= current",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-finish-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "if (final)\n        {",
+    "after": "if (true)\n        {",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-buy-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "slope.Sign > 0 && slope > _previousSlope",
+    "after": "slope.Sign > 0 && slope < _previousSlope",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-sell-strength",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "slope.Sign < 0 && slope < _previousSlope",
+    "after": "slope.Sign < 0 && slope > _previousSlope",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-line-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_previousLine = current",
+    "after": "_previousLine = default",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-slope-memory",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_previousSlope = slope",
+    "after": "_previousSlope = default",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-second-source",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_second!.Next(first, final)",
+    "after": "_second!.Next(standardized, final)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-callback-period",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "ComponentAverage.Take(published!, period)",
+    "after": "ComponentAverage.Take(published!, length)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.FourComponentSlotsPreserveStageInputsAndPeriods"
+  },
+  {
+    "id": "firefly-wide-callback-last-source",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "var last = Mean(second, length)",
+    "after": "var last = Mean(first, length)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.FourComponentSlotsPreserveStageInputsAndPeriods"
+  },
+  {
+    "id": "firefly-wide-exhausted-projection",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "return source.Select(v => mean.Next(v, true)).ToArray()",
+    "after": "return source.Select(v => mean.Next(new RocBankValue(v.Publish()), true)).ToArray()",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.ExtendedStartupHistoryRecoversAndExhaustedOverridesStayExact"
+  },
+  {
+    "id": "firefly-wide-reset-moments",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_sum = _squares = _previousLine = _previousSlope = default",
+    "after": "_previousLine = _previousSlope = default",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-reset-maximum",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_maximum.Clear()",
+    "after": "_maximum.ToString()",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.RollingMaximumAndSlopeHistoryAreIndependent"
+  },
+  {
+    "id": "firefly-wide-mean-expiry",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_history.Peek().AddTo(ref sum, -1)",
+    "after": "_history.Peek().AddTo(ref sum)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-weighted-decay",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "weighted.Subtract(sum)",
+    "after": "weighted.Subtract(default)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-weighted-divisor",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "(long)_length * (_length + 1L) / 2",
+    "after": "(long)_length * (_length + 1L)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-zero-lag-coefficient",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "first.AddTo(ref extrapolated, 2)",
+    "after": "first.AddTo(ref extrapolated)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-zero-lag-second",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "second.AddTo(ref extrapolated, -1)",
+    "after": "second.AddTo(ref extrapolated)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.HandStandardizationMidpointAndSlopeSignals"
+  },
+  {
+    "id": "firefly-wide-recursive-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "_second.Next(first, commit)",
+    "after": "_second.Next(first, true)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-mean-preview",
+    "module": "numerical",
+    "file": "src/Helpers/FireflyWindow.cs",
+    "scope": "internal sealed class FireflyWindow",
+    "before": "if (commit) { _sum",
+    "after": "if (true) { _sum",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-native-guard",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FireflyOscillatorState :",
+    "before": "StreamingInputValidation.Validate(bar);",
+    "after": "/* omitted candle guard */",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.InvalidCandleCannotAdvanceDirectionalOrSignalState"
+  },
+  {
+    "id": "firefly-wide-native-output",
+    "module": "numerical",
+    "file": "src/Streaming/StatefulIndicators.Batch13.cs",
+    "scope": "public sealed class FireflyOscillatorState :",
+    "before": "{ \"Signal\", point.SignalLine }",
+    "after": "{ \"Signal\", point.Line }",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-fast-output",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFireflyOscillatorFast(",
+    "before": "outputKey == \"Signal\" ? point.SignalLine : point.Line",
+    "after": "outputKey == \"Signal\" ? point.Line : point.SignalLine",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.WideWeightedPricesVarianceAndFourMeansMatchFractions"
+  },
+  {
+    "id": "firefly-wide-fast-selected",
+    "module": "numerical",
+    "file": "src/Builder/Compute/IndicatorCompute.cs",
+    "scope": "internal static ComputeBuffer ComputeFireflyOscillatorFast(",
+    "before": "var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data);",
+    "after": "var input = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues; var highs = data.HighPrices; var lows = data.LowPrices;",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.SelectedPricesUsePerBarRanges"
+  },
+  {
+    "id": "firefly-wide-core-formula",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void FireflyOscillator(",
+    "before": "MovingAvgType.ZeroLagExponentialMovingAverage, length, smoothLength",
+    "after": "MovingAvgType.ExponentialMovingAverage, length, smoothLength",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.CoreUsesPublicWeightedPriceFormulaAndProtectsSpans"
+  },
+  {
+    "id": "firefly-wide-core-source",
+    "module": "numerical",
+    "file": "src/Core/OscillatorCore.cs",
+    "scope": "internal static void FireflyOscillator(",
+    "before": "window.Next(high[i], low[i], close[i], true)",
+    "after": "window.Next(close[i], close[i], close[i], true)",
+    "filter": "FullyQualifiedName~FireflyNumericalTests.CoreUsesPublicWeightedPriceFormulaAndProtectsSpans"
   }
 ]

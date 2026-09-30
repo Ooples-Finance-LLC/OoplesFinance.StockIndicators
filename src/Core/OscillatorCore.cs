@@ -3771,43 +3771,10 @@ internal static class OscillatorCore
     /// </summary>
     internal static void FireflyOscillator(ReadOnlySpan<double> high, ReadOnlySpan<double> low, ReadOnlySpan<double> close, Span<double> output, int length = 10, int smoothLength = 3)
     {
-        if (output.Length < close.Length)
-        {
-            throw new ArgumentException("Output span must be at least input length.", nameof(output));
-        }
-
-        var pool = ArrayPool<double>.Shared;
-        var zlemaArray = pool.Rent(close.Length);
-        var atrArray = pool.Rent(close.Length);
-        var rawArray = pool.Rent(close.Length);
-
-        try
-        {
-            var zlema = zlemaArray.AsSpan(0, close.Length);
-            var atr = atrArray.AsSpan(0, close.Length);
-            var raw = rawArray.AsSpan(0, close.Length);
-
-            // Calculate ZLEMA of close
-            MovingAverageCore.ZeroLagEma(close, zlema, length);
-
-            // Calculate ATR
-            VolatilityCore.AverageTrueRange(high, low, close, atr, length);
-
-            // Calculate raw oscillator
-            for (var i = 0; i < close.Length; i++)
-            {
-                raw[i] = atr[i] != 0 ? (close[i] - zlema[i]) / atr[i] : 0;
-            }
-
-            // Smooth the result
-            MovingAverageCore.SimpleMovingAverage(raw, output, smoothLength);
-        }
-        finally
-        {
-            pool.Return(zlemaArray);
-            pool.Return(atrArray);
-            pool.Return(rawArray);
-        }
+        if (output.Length < close.Length) throw new ArgumentException("Output span must be at least input length.", nameof(output));
+        if (high.Length < close.Length || low.Length < close.Length) throw new ArgumentException("Candle spans must cover the close input.");
+        using var window = new FireflyWindow(MovingAvgType.ZeroLagExponentialMovingAverage, length, smoothLength);
+        for (var i = 0; i < close.Length; i++) output[i] = window.Next(high[i], low[i], close[i], true).Line;
     }
 
     /// <summary>

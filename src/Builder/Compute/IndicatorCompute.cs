@@ -7885,59 +7885,18 @@ internal static partial class IndicatorCompute
     internal static ComputeBuffer ComputeFireflyOscillatorFast(StockData data, ComputeContext context, int length = 10, int smoothLength = 3,
         MovingAvgType maType = MovingAvgType.ZeroLagExponentialMovingAverage, string? outputKey = null)
     {
-        // CalculateFireflyOscillator standardises a close-weighted typical price against its own moving average
-        // and deviation, triple-smooths the result and rescales it to sit around a midpoint. The smoothing type
-        // matters here - the indicator is defined on a zero-lag exponential average - and the arm ignored it,
-        // along with the standardisation, by calling OscillatorCore.FireflyOscillator over the raw prices.
-        var inputList = data.ChainedValues.Count > 0 ? data.ChainedValues : data.InputValues;
-        var input = SpanCompat.AsReadOnlySpan(inputList);
-        var highs = SpanCompat.AsReadOnlySpan(data.HighPrices);
-        var lows = SpanCompat.AsReadOnlySpan(data.LowPrices);
-        var count = inputList.Count;
-
-        using var weightedPrice = context.Rent(count);
-        var v2 = weightedPrice.WritableSpan;
-        for (var i = 0; i < count; i++)
+        var (input, highs, lows, _, _) = CalculationsHelper.GetInputValuesList(data); var result = context.Rent(input.Count);
+        if (ComponentAverage.HasOverrides || !FireflyWindow.Supports(maType))
         {
-            v2[i] = (highs[i] + lows[i] + (input[i] * 2)) / 4;
+            var values = FireflyWindow.Calculate(data, input, highs, lows, maType, length, smoothLength, true);
+            (outputKey == "Signal" ? values.SignalLine : values.Line).AsSpan().CopyTo(result.WritableSpan);
         }
-
-        using var average = context.Rent(count);
-        MovingAverage(data, maType, length, weightedPrice.Span, average.WritableSpan);
-        using var deviation = context.Rent(count);
-        VolatilityCore.StandardDeviation(weightedPrice.Span, deviation.WritableSpan, Math.Max(length, 1));
-
-        using var standardised = context.Rent(count);
-        var v5 = standardised.WritableSpan;
-        for (var i = 0; i < count; i++)
+        else
         {
-            var offset = (v2[i] - average.Span[i]) * 100;
-            v5[i] = deviation.Span[i] == 0 ? offset : offset / deviation.Span[i];
+            using var window = new FireflyWindow(maType, length, smoothLength);
+            for (var i = 0; i < input.Count; i++) { var point = window.Next(highs[i], lows[i], input[i], true); result.WritableSpan[i] = outputKey == "Signal" ? point.SignalLine : point.Line; }
         }
-
-        using var firstPass = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, standardised.Span, firstPass.WritableSpan);
-        using var secondPass = context.Rent(count);
-        MovingAverage(data, maType, smoothLength, firstPass.Span, secondPass.WritableSpan);
-
-        var buffer = context.Rent(count);
-        var output = buffer.WritableSpan;
-        MovingAverage(data, maType, length, secondPass.Span, output);
-        for (var i = 0; i < count; i++)
-        {
-            output[i] = ((output[i] + 100) / 2) - 4;
-        }
-
-        if (outputKey == "Signal")
-        {
-            var window = new RollingMinMax(smoothLength);
-            for (var i = 0; i < count; i++)
-            {
-                window.Add(output[i]);
-                output[i] = window.Max;
-            }
-        }
-        return buffer;
+        return result;
     }
 
     /// <summary>
