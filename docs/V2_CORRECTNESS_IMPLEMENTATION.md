@@ -3742,3 +3742,12 @@ Convolution now retains extended rounded high-pass/roofing stages through exact 
 The independent reference recomputes centered windows and rational filter recurrences. **93/93 focused tests passed** (`convolution-631.trx`): 88 new cases plus five existing Convolution regressions. Ten configurations exercise five routes and both outputs. Hand checks establish neutral and +/-1 two-point correlations. Additional checks cover wide/subnormal stages, exact power-of-two rescaling, slope tolerance boundaries, extreme periods, 2,111 observations crossing compaction, selected inputs, zero component-override consumption, native guards and preview/reset. The first focused run passed without a subsequent production/test correction.
 
 **Mutation qualification remains pending** for 36 prepared faults; all **6,648 retained anchors** passed preflight. Candidate/frozen snapshots match on 2,129 files. Prepared inventory is **6,128/7,131 enrollments**, with **1,003 omissions across 146 types**; 396 prepared batches cover 3,302 configurations across 599 types. Built DLL SHA256: `AE965F16F78356BD8186E20A89E356D6E2326DA28414DDA45692C56BF947AC55`. Full coverage and final hosted/package/release/performance gates remain incomplete. Anticipate's separate phase-definition question remains pending; its implementation is unchanged.
+
+
+### Batch 618: Volatility Index Dynamic Average aliases mutation qualification
+
+The isolated campaigns `618a` and `618b` passed their baselines and caught **36/36 compiled behavioral faults**, alongside **88/88 focused tests**. Both archives were compared byte-for-byte with the retained batch-618 snapshot; individual mutation TRX files contain failing tests, not compilation failures.
+
+Source snapshot SHA256: `beff2f1c9bc07970cd685bb53a7aba98bf6d44bd24ad22b9115ae3d8e577688f`. Archive SHA256: `a45f07e2a043432548aec4bdc5403b3c1f43cb98b2fe65d27798bf7347012aa3` and `a45f07e2a043432548aec4bdc5403b3c1f43cb98b2fe65d27798bf7347012aa3`.
+
+This is evidence for the isolated batch-618 source. Source was already published in the through-622 checkpoint; this update does not restore older source files. Mutation verification for batches 619 through 631 and the remaining final gates is still incomplete.
